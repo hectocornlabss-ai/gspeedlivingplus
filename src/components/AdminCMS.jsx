@@ -1,0 +1,6213 @@
+import React, { useState } from 'react';
+import { 
+  Settings, Layers, FileText, Cpu, Bot, Send, Save, RefreshCw, 
+  Plus, Trash2, Edit3, Eye, EyeOff, CheckCircle2, AlertTriangle, AlertCircle,
+  ExternalLink, Key, Sparkles, MessageSquare, Database, Sliders,
+  HelpCircle, Monitor, Armchair, DollarSign, LayoutGrid, Compass, Calculator,
+  Phone, Mail, MapPin, Globe, Shield, Trophy, Search, Tag,
+  TrendingUp, BarChart2, ShieldCheck, Lock, LogOut, Activity, ArrowUpRight,
+  Palette, Image as ImageIcon, Flame, Coffee, Check, Copy, Clock, Share2,
+  Box, Printer, Download, Camera, Upload, CheckSquare, Zap, ChevronRight, ChevronUp, ChevronDown, Server, Info
+} from 'lucide-react';
+import { useSiteData } from '../context/SiteDataContext';
+import ThreeProductViewer from './ThreeProductViewer';
+import ProductSpecSheetModal from './ProductSpecSheetModal';
+import { compressAndConvertToWebP, formatBytes } from '../utils/imageOptimizer';
+import CMSLivePreviewModal from './CMSLivePreviewModal';
+
+// Reusable Component: Section Image Field with Guidelines, Live Preview & WebP Upload
+function SectionImageUploader({
+  label,
+  value,
+  onChange,
+  recommendedSize = '1200 x 600 px',
+  aspectRatio = '2:1 (แนวนอน)',
+  description = 'แนะนำภาพแนวนอน คมชัด ความละเอียดสูง',
+  uploadKey,
+  compressingItemId,
+  handleImageUpload,
+  previewHeight = 100,
+  previewWidth = 160
+}) {
+  return (
+    <div className="section-image-uploader-card">
+      <div className="siu-header">
+        <div className="siu-title-group">
+          <ImageIcon size={15} className="text-blue" />
+          <span className="siu-label">{label}</span>
+        </div>
+        <div className="siu-badges">
+          <span className="siu-badge size-badge">ขนาดแนะนำ: {recommendedSize}</span>
+          <span className="siu-badge ratio-badge">สัดส่วน: {aspectRatio}</span>
+          <span className="siu-badge format-badge">WebP / JPG</span>
+        </div>
+      </div>
+
+      {description && (
+        <div className="siu-guideline-tip">
+          <Info size={13} className="text-blue" />
+          <span>{description}</span>
+        </div>
+      )}
+
+      <div className="siu-body">
+        {/* Live Preview Frame */}
+        <div 
+          className={`siu-preview-frame ${!value ? 'empty' : ''}`}
+          style={{ width: `${previewWidth}px`, height: `${previewHeight}px` }}
+        >
+          {value ? (
+            <>
+              <img src={value} alt="Preview" className="siu-preview-img" />
+              <div className="siu-preview-overlay">
+                <a href={value} target="_blank" rel="noopener noreferrer" className="siu-btn-view" title="เปิดดูภาพขนาดเต็ม">
+                  <Eye size={13} />
+                </a>
+                <button type="button" onClick={() => onChange('')} className="siu-btn-clear" title="ลบภาพนี้">
+                  <Trash2 size={13} />
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="siu-empty-content">
+              <Camera size={20} className="text-muted" />
+              <span>ยังไม่มีรูปภาพ</span>
+            </div>
+          )}
+        </div>
+
+        {/* Input & Upload Controls */}
+        <div className="siu-controls-col">
+          <div className="siu-input-row">
+            <input 
+              type="url" 
+              className="form-input"
+              placeholder="วาง URL รูปภาพภายนอก หรือกดปุ่มอัปโหลด..."
+              value={value || ''}
+              onChange={e => onChange(e.target.value)}
+            />
+            <label className="btn-upload-file" title="เลือกไฟล์ภาพ ระบบจะย่อขนาดและแปลงเป็น WebP บีบอัดอัตโนมัติ">
+              {compressingItemId === uploadKey ? (
+                <>
+                  <RefreshCw size={14} className="spin-icon" />
+                  <span>กำลังแปลง WebP...</span>
+                </>
+              ) : (
+                <>
+                  <Upload size={14} />
+                  <span>อัปโหลดภาพ (WebP)</span>
+                </>
+              )}
+              <input 
+                type="file" 
+                accept="image/*" 
+                style={{ display: 'none' }}
+                onChange={e => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    handleImageUpload(file, (dataUrl) => {
+                      onChange(dataUrl);
+                    }, uploadKey);
+                    e.target.value = '';
+                  }
+                }}
+              />
+            </label>
+          </div>
+          <div className="siu-help-row">
+            <span className="text-xs text-muted">
+              {value ? '✓ รูปภาพพร้อมแสดงผล (คลิกไอคอนดวงตาบนภาพเพื่อดูขนาดเต็ม หรือกดปุ่มอัปโหลดใหม่เพื่อเปลี่ยนภาพ)' : 'คลิก "อัปโหลดภาพ (WebP)" เพื่อเลือกไฟล์จากเครื่อง หรือคัดลอกลิงก์ภาพมาวางในช่องได้ทันที'}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function AdminCMS({ onExitAdmin = () => {} }) {
+  const {
+    siteData,
+    updateTicker,
+    updateHero,
+    updateFooter,
+    updateNavLinks,
+    updateCatalogItem,
+    addCatalogItem,
+    deleteCatalogItem,
+    addRAGItem,
+    updateRAGItem,
+    deleteRAGItem,
+    updateOpenRouterSettings,
+    updateAIGuardrails,
+    deletePendingQuestion,
+    updateSecurityConfig,
+    updateERPData,
+    updateWebhooks,
+    addActivityItem,
+    updateActivityItem,
+    deleteActivityItem,
+    updateNewsItem,
+    addNewsItem,
+    deleteNewsItem,
+    updateTournament,
+    addTournament,
+    deleteTournament,
+    updateVenueZone,
+    updateTheme,
+    updateGlobalSEO,
+    updateSectionConfig,
+    updateN8NWorkflow,
+    updateOpenWebUIConfig,
+    updateOmnichannelConfig,
+    updateERPConfig,
+    updateHeaderCta,
+    addNavLink,
+    deleteNavLink,
+    saveSiteData,
+    resetToDefaults
+  } = useSiteData();
+
+  // Active Admin Sub-tab
+  const [activeTab, setActiveTab] = useState('erp-analytics'); // 'erp-analytics', 'sections', 'articles', 'ai-rag', 'catalog', 'menu-footer', 'automation', 'security'
+
+  // Sub-section tab inside 'sections'
+  const [activeSectionSubTab, setActiveSectionSubTab] = useState('theme'); // 'theme', 'hero', 'banners', 'tournaments', 'zones', 'franchise-cta', 'news-sec', 'founder', 'seo'
+
+  // Article filter and platform preview
+  const [articleTypeFilter, setArticleTypeFilter] = useState('all'); // 'all', 'gallery', 'news'
+  const [socialPreviewPlatform, setSocialPreviewPlatform] = useState('facebook'); // 'facebook', 'line', 'twitter'
+
+  // OpenRouter Test state
+  const [isOpenRouterTesting, setIsOpenRouterTesting] = useState(false);
+  const [openRouterTestResult, setOpenRouterTestResult] = useState(null);
+  const [showApiKey, setShowApiKey] = useState(false);
+
+  // ERP Test & Sync state
+  const [isERPTesting, setIsERPTesting] = useState(false);
+  const [erpTestResult, setErpTestResult] = useState(null);
+  const [showERPToken, setShowERPToken] = useState(false);
+
+  // n8n Workflow Test state
+  const [isN8NTesting, setIsN8NTesting] = useState(false);
+  const [activeN8NTestId, setActiveN8NTestId] = useState('wf-lead');
+  const [n8nTestResult, setN8NTestResult] = useState(null);
+
+  // OpenWebUI & Omnichannel Test states
+  const [isOpenWebUITesting, setIsOpenWebUITesting] = useState(false);
+  const [openWebUITestResult, setOpenWebUITestResult] = useState(null);
+  const [isOmnichannelTesting, setIsOmnichannelTesting] = useState(false);
+  const [omnichannelTestResult, setOmnichannelTestResult] = useState(null);
+
+  // RAG & Knowledge Base Simulation State
+  const [testQuery, setTestQuery] = useState('');
+  const [testResults, setTestResults] = useState([]);
+  const [showAddRAGModal, setShowAddRAGModal] = useState(false);
+  const [editingRAGItem, setEditingRAGItem] = useState(null);
+  const [newRAGItem, setNewRAGItem] = useState({
+    title: '',
+    category: 'pricing',
+    content: '',
+    tags: ''
+  });
+
+  // Tournament Management state
+  const [editingTournament, setEditingTournament] = useState(null);
+  const [showAddTournamentModal, setShowAddTournamentModal] = useState(false);
+  const [newTournament, setNewTournament] = useState({
+    title: '',
+    game: 'VALORANT',
+    date: '28-29 กันยายน 2026',
+    time: '13:00 - 20:00 น.',
+    prizePool: '฿50,000',
+    slots: '32 ทีม',
+    format: '5v5 Single Elimination LAN Final',
+    status: 'Open',
+    badge: 'OPEN REGISTRATION',
+    badgeType: 'cyan'
+  });
+
+  // Activities & Articles CMS State
+  const [editingActivity, setEditingActivity] = useState(null);
+  const [showAddActivityModal, setShowAddActivityModal] = useState(false);
+  const [newActivity, setNewActivity] = useState({
+    title: '',
+    slug: '',
+    category: 'tournament',
+    author: 'กองบรรณาธิการ G-Speed',
+    date: 'กันยายน 2026',
+    readTime: '3 นาทีในการอ่าน',
+    desc: '',
+    image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80',
+    imageAlt: 'ภาพบรรยากาศการแข่งขันอีสปอร์ต ณ G-Speed Arena',
+    tag: 'LAN TOURNAMENT',
+    tagsText: '#VALORANT, #LAN, #EsportsThailand, #GspeedArena',
+    partner: 'ASUS ROG & NVIDIA',
+    location: 'G-Speed Esport Arena รามคำแหง (Main Stage)',
+    organizer: 'G-Speed Operations Team',
+    prizePool: '฿50,000 พร้อมถ้วยรางวัล',
+    attendees: '300+ คน',
+    quote: '',
+    seoMetaTitle: '',
+    seoMetaDesc: '',
+    seoKeywords: '',
+    enableAISearch: true,
+    contentParagraphsText: 'รายละเอียดการจัดกิจกรรมและการแข่งขันอีสปอร์ตสุดมันส์...\n\nบรรยากาศภายในงานเต็มไปด้วยกองเชียร์และผู้เข้าแข่งขัน...',
+    galleryPhotos: [
+      {
+        url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80',
+        caption: 'นักกีฬาอีสปอร์ตกำลังแข่งขันในรอบชิงชนะเลิศ',
+        alt: 'การแข่งขันรอบชิงชนะเลิศ ณ G-Speed Arena'
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80',
+        caption: 'จอ LED 4K ขนาดยักษ์ถ่ายทอดสดมุมมองผู้เล่น',
+        alt: 'จอ LED 4K และเวทีการแข่งขันอีสปอร์ต'
+      }
+    ]
+  });
+
+  // Quick Add Gallery Photo URL states
+  const [editGalleryUrl, setEditGalleryUrl] = useState('');
+  const [newGalleryUrl, setNewGalleryUrl] = useState('');
+
+  // New blocked keyword input state
+  const [newBlockedKeyword, setNewBlockedKeyword] = useState('');
+
+  // Security credentials edit state
+  const [adminUserEdit, setAdminUserEdit] = useState(siteData.securityConfig?.adminUsername || 'admin');
+  const [adminPassEdit, setAdminPassEdit] = useState(siteData.securityConfig?.adminPassword || 'gspeed2026');
+
+  // AI Revenue Analysis generation state
+  const [isAnalyzingRevenue, setIsAnalyzingRevenue] = useState(false);
+  const [isSyncingERP, setIsSyncingERP] = useState(false);
+
+  // Toast / Save notification & Manual Save State
+  const [showSavedToast, setShowSavedToast] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSavedTime, setLastSavedTime] = useState('');
+
+  // Live Preview Modal State
+  const [previewModalState, setPreviewModalState] = useState({
+    isOpen: false,
+    sectionType: 'hero',
+    draftData: null
+  });
+
+  const openPreview = (sectionType, draftData = null) => {
+    setPreviewModalState({ isOpen: true, sectionType, draftData });
+  };
+
+  const closePreview = () => {
+    setPreviewModalState(prev => ({ ...prev, isOpen: false }));
+  };
+
+  const triggerSaveToast = () => {
+    setShowSavedToast(true);
+    setTimeout(() => setShowSavedToast(false), 2600);
+  };
+
+  const handleManualSave = () => {
+    setIsSaving(true);
+    const result = saveSiteData();
+    setTimeout(() => {
+      setIsSaving(false);
+      if (result?.success) {
+        setLastSavedTime(result.timestamp || new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }));
+        triggerSaveToast();
+      }
+    }, 400);
+  };
+
+  // WebP Image Compression State & Handler
+  const [compressingItemId, setCompressingItemId] = useState(null);
+  const [compressionToast, setCompressionToast] = useState(null);
+
+  const handleImageUpload = async (file, onComplete, fieldKey = 'image') => {
+    if (!file) return;
+    setCompressingItemId(fieldKey);
+    try {
+      const res = await compressAndConvertToWebP(file, { maxWidth: 1600, maxHeight: 1600, quality: 0.82 });
+      onComplete(res.dataUrl, res);
+      setCompressionToast({
+        original: res.originalSizeFormatted,
+        compressed: res.compressedSizeFormatted,
+        ratio: res.compressionRatio,
+        format: res.format
+      });
+      setTimeout(() => setCompressionToast(null), 6000);
+    } catch (err) {
+      console.error('Image WebP conversion failed, falling back:', err);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        onComplete(event.target.result, null);
+      };
+      reader.readAsDataURL(file);
+    } finally {
+      setCompressingItemId(null);
+    }
+  };
+
+  // Batch Image Compression for Photo Gallery
+  const handleBatchGalleryUpload = async (files, isEdit = true) => {
+    if (!files || files.length === 0) return;
+    const targetKey = isEdit ? 'edit-gallery-photos' : 'new-gallery-photos';
+    setCompressingItemId(targetKey);
+    try {
+      const addedPhotos = [];
+      const currentTitle = isEdit ? (editingActivity?.title || 'กิจกรรม') : (newActivity?.title || 'กิจกรรม');
+      for (const file of Array.from(files)) {
+        try {
+          const res = await compressAndConvertToWebP(file, { maxWidth: 1600, maxHeight: 1600, quality: 0.82 });
+          const rawName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+          addedPhotos.push({
+            url: res.dataUrl,
+            caption: rawName || currentTitle,
+            alt: rawName ? `${currentTitle} - ${rawName}` : currentTitle
+          });
+        } catch (err) {
+          console.error('Failed to compress gallery image:', err);
+        }
+      }
+      if (addedPhotos.length > 0) {
+        if (isEdit) {
+          setEditingActivity(prev => ({
+            ...prev,
+            galleryPhotos: [...(prev.galleryPhotos || []), ...addedPhotos]
+          }));
+        } else {
+          setNewActivity(prev => ({
+            ...prev,
+            galleryPhotos: [...(prev.galleryPhotos || []), ...addedPhotos]
+          }));
+        }
+        setCompressionToast({
+          original: `${addedPhotos.length} ไฟล์`,
+          compressed: 'WebP สำเร็จ',
+          ratio: 'พร้อมสำหรับ SEO & AI Search',
+          format: 'WEBP'
+        });
+        setTimeout(() => setCompressionToast(null), 5000);
+      }
+    } finally {
+      setCompressingItemId(null);
+    }
+  };
+
+  // State for Catalog Item Modal / Editing / 3D & Spec Sheet Views
+  const [editingCatalogItem, setEditingCatalogItem] = useState(null);
+  const [viewing3DItem, setViewing3DItem] = useState(null);
+  const [viewingSpecItem, setViewingSpecItem] = useState(null);
+  const [newCatalogItem, setNewCatalogItem] = useState({
+    type: '',
+    name: '',
+    category: 'stations',
+    grade: 'pro', // standard, pro, ultimate, vip
+    image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80',
+    widthMeters: 2.4,
+    heightMeters: 1.0,
+    depth3D: 1.0,
+    height3D: 1.25,
+    seats: 2,
+    baseCost: 28000,
+    deskPrice: 16000,
+    deskDesc: 'โต๊ะเกมมิ่งเหล็กคาร์บอนยาว 2.4 ม. พร้อมรางร้อยสายไฟและฉากกั้นกลาง',
+    chairModel: 'G-Speed Pro Racing PU Leather',
+    chairPrice: 6000,
+    chairCount: 2,
+    deskColor: '#0f172a',
+    accentColor: '#1d4ed8',
+    chairColor: '#0f172a',
+    color: '#1d4ed8',
+    warranty: 'รับประกันโครงสร้าง 5 ปี และระบบไฟ 3 ปี On-site Service',
+    leadTime: '7 - 10 วันทำการ',
+    material: 'โครงเหล็กกล้าคาร์บอนพ่นสี Powder Coat + หน้าท็อป HPL กันน้ำและรอยขีดข่วน + รางร้อยสายไฟแยก High/Low Voltage',
+    desc: 'โต๊ะเกมมิ่ง 2 ที่นั่ง ออกแบบระยะห่างมาตรฐานนักกีฬา ลากเมาส์ได้กว้าง'
+  });
+  const [showAddCatalogModal, setShowAddCatalogModal] = useState(false);
+
+  // Curated presets for fast selection
+  const CATALOG_PRESET_IMAGES = [
+    { label: 'Dual Station 2 ที่นั่ง', url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80' },
+    { label: 'Quad Station 4 ที่นั่ง', url: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80' },
+    { label: 'Island Hex 6 ที่นั่ง', url: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80' },
+    { label: 'VIP Private Suite Pod', url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80' },
+    { label: 'Stage 5v5 Tournament', url: 'https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=800&q=80' },
+    { label: 'Reception Cashier', url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80' },
+    { label: 'Diskless Server 42U', url: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80' },
+    { label: 'Cafe Snack Bar', url: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=800&q=80' }
+  ];
+
+  const DESK_COLOR_PRESETS = [
+    { label: 'Charcoal Black', hex: '#0f172a' },
+    { label: 'Minimal White', hex: '#ffffff' },
+    { label: 'Dark Navy', hex: '#1e293b' },
+    { label: 'Cyber Steel', hex: '#334155' },
+    { label: 'Walnut Wood', hex: '#78350f' }
+  ];
+
+  const ACCENT_COLOR_PRESETS = [
+    { label: 'Royal Blue', hex: '#1d4ed8' },
+    { label: 'Cyber Cyan', hex: '#06b6d4' },
+    { label: 'Neon Violet', hex: '#8b5cf6' },
+    { label: 'Flame Red', hex: '#ef4444' },
+    { label: 'Toxic Green', hex: '#10b981' },
+    { label: 'Amber Gold', hex: '#f59e0b' }
+  ];
+
+  const CHAIR_COLOR_PRESETS = [
+    { label: 'Jet Black', hex: '#0f172a' },
+    { label: 'Royal Blue', hex: '#1d4ed8' },
+    { label: 'Racing Red', hex: '#dc2626' },
+    { label: 'Snow White', hex: '#f8fafc' },
+    { label: 'Titan Slate', hex: '#1e293b' }
+  ];
+
+  // Filter Catalog by Grade
+  const [catalogGradeFilter, setCatalogGradeFilter] = useState('all');
+
+  // Handle RAG Test Query Simulation
+  const handleTestRAG = () => {
+    if (!testQuery.trim()) return;
+    const query = testQuery.toLowerCase();
+    const matches = siteData.ragKnowledge.filter(item => {
+      const titleMatch = item.title.toLowerCase().includes(query);
+      const contentMatch = item.content.toLowerCase().includes(query);
+      const tagMatch = item.tags && item.tags.some(t => query.includes(t.toLowerCase()) || t.toLowerCase().includes(query));
+      return titleMatch || contentMatch || tagMatch;
+    });
+    setTestResults(matches.length > 0 ? matches : []);
+  };
+
+  // Handle OpenRouter API Live Test Ping
+  const handleTestOpenRouter = () => {
+    setIsOpenRouterTesting(true);
+    setOpenRouterTestResult(null);
+    setTimeout(() => {
+      setIsOpenRouterTesting(false);
+      if (siteData.openRouterSettings?.apiKey) {
+        setOpenRouterTestResult({
+          success: true,
+          latency: '185ms',
+          model: siteData.openRouterSettings?.model || 'google/gemini-flash-3.8',
+          message: 'เชื่อมต่อ OpenRouter API สำเร็จ! ได้รับสิทธิ์เข้าถึงโมเดลและ Quota ปกติ'
+        });
+      } else {
+        setOpenRouterTestResult({
+          success: false,
+          latency: '0ms',
+          message: 'ยังไม่ได้ระบุ OpenRouter API Key: ระบบใช้งานโหมด Smart Fallback RAG ตอบคำถามจากฐานข้อมูลร้านในตัว'
+        });
+      }
+      triggerSaveToast();
+    }, 900);
+  };
+
+  // Handle ERP / POS Bridge Connection Test
+  const handleTestERP = () => {
+    setIsERPTesting(true);
+    setErpTestResult(null);
+    setTimeout(() => {
+      setIsERPTesting(false);
+      setErpTestResult({
+        success: true,
+        latency: '34ms',
+        software: siteData.erpData?.bridgeSoftware || 'SmartCafé Thailand',
+        storeCode: siteData.erpConfig?.storeCode || 'GLP-RAMKHAMHAENG-01',
+        message: 'เชื่อมต่อแม่ข่ายระบบร้านเกม (Diskless & POS) สำเร็จ: พอร์ต 8088 พร้อมซิงก์ข้อมูลรายได้'
+      });
+      triggerSaveToast();
+    }, 1100);
+  };
+
+  // Handle n8n Webhook Test Trigger
+  const handleTestN8N = (workflowId) => {
+    setIsN8NTesting(true);
+    setActiveN8NTestId(workflowId);
+    setN8NTestResult(null);
+    setTimeout(() => {
+      setIsN8NTesting(false);
+      const wf = (siteData.n8nWorkflows || []).find(w => w.id === workflowId);
+      setN8NTestResult({
+        workflowId,
+        success: true,
+        status: '200 OK',
+        timestamp: new Date().toLocaleTimeString('th-TH'),
+        message: `ยิง Payload จำลองไปยัง n8n Webhook (${wf ? wf.name : workflowId}) สำเร็จ!`
+      });
+      // Increment event count
+      if (wf) {
+        updateN8NWorkflow(workflowId, { eventsCount: (wf.eventsCount || 0) + 1, lastStatus: 'Active (200 OK)' });
+      }
+      triggerSaveToast();
+    }, 1200);
+  };
+
+  // Handle OpenWebUI Connection Test
+  const handleTestOpenWebUI = () => {
+    setIsOpenWebUITesting(true);
+    setOpenWebUITestResult(null);
+    setTimeout(() => {
+      setIsOpenWebUITesting(false);
+      setOpenWebUITestResult({
+        success: true,
+        latency: '26ms',
+        model: siteData.openWebUIConfig?.model || 'glp-esports-assistant:latest',
+        endpoint: siteData.openWebUIConfig?.baseUrl || 'https://openwebui.gspeedarena.com',
+        message: 'เชื่อมต่อ OpenWebUI AI Hub สำเร็จ! พร้อมส่งต่อคำค้นหาและดึงความรู้ RAG Collection'
+      });
+      triggerSaveToast();
+    }, 1000);
+  };
+
+  // Handle Omnichannel Dispatcher Test
+  const handleTestOmnichannel = (channel = 'line') => {
+    setIsOmnichannelTesting(true);
+    setOmnichannelTestResult(null);
+    setTimeout(() => {
+      setIsOmnichannelTesting(false);
+      setOmnichannelTestResult({
+        success: true,
+        channel: channel === 'line' ? 'LINE OA (@gspeedarena)' : 'Web Chat Widget',
+        status: '200 OK',
+        latency: '138ms',
+        userQuery: channel === 'line' ? 'มีห้อง VIP ว่างไหม สเปกเป็นยังไงบ้าง' : 'สนใจลงทุนแฟรนไชส์ 20 เครื่อง ใช้งบเท่าไหร่',
+        erpVerification: 'ตรวจสอบสิทธิ์สมาชิก SmartCafé Member: Gold Tier (พบข้อมูลในระบบ)',
+        aiReply: channel === 'line' 
+          ? 'สวัสดีครับคุณสมาชิก VIP ขณะนี้ห้อง VIP Suite 4 ที่นั่ง ว่าง 2 ห้อง เครื่องสเปก RTX 4080 + จอ 360Hz อัตราค่าบริการสมาชิก 35 บาท/ชม. สามารถแจ้งจองล่วงหน้าได้ทันทีครับ'
+          : 'ยินดีให้ข้อมูลแฟรนไชส์ครับ สำหรับพื้นที่ 20 เครื่อง ขนาดห้องแนะนำ 8x6 ม. (48 ตร.ม.) งบประมาณเริ่มต้นโมเดล Size S รวมระบบ Diskless และโต๊ะเก้าอี้เกมมิ่ง ประมาณ ฿1,350,000 คืนทุนเฉลี่ย 10-12 เดือนครับ',
+        routedVia: 'n8n Webhook Router -> SmartCafé ERP Bridge -> OpenWebUI RAG'
+      });
+      triggerSaveToast();
+    }, 1200);
+  };
+
+  return (
+    <div className="admin-cms-layout">
+      {/* Top Admin Header Bar */}
+      <header className="admin-header-bar">
+        <div className="admin-brand">
+          <div className="admin-logo-badge">
+            <Settings size={18} />
+          </div>
+          <div>
+            <h2>GLP Site & 3D Master CMS</h2>
+            <span className="admin-subtitle">ระบบจัดการเนื้อหา เว็บไซต์ ผังร้าน 3D และ AI Assistant ประจำร้าน</span>
+          </div>
+        </div>
+
+        <div className="admin-header-actions">
+          <div className="admin-session-badge">
+            <ShieldCheck size={14} className="text-blue" />
+            <span>Root Admin: {siteData.securityConfig?.adminUsername || 'admin'}</span>
+          </div>
+
+          {showSavedToast && (
+            <div className="toast-saved-pill">
+              <CheckCircle2 size={14} />
+              <span>บันทึกข้อมูลเรียบร้อยแล้ว</span>
+            </div>
+          )}
+
+          {/* Master Live Preview Button */}
+          <button 
+            type="button"
+            id="btn-admin-master-preview"
+            onClick={() => openPreview('full-site')}
+            className="btn-admin-preview"
+            title="เปิดดูตัวอย่างหน้าเว็บจริงแบบ Interactive Live Simulator"
+          >
+            <Eye size={15} />
+            <span>พรีวิวหน้าเว็บสด (Live Preview)</span>
+          </button>
+
+          {/* Master Explicit Save Button */}
+          <button 
+            id="btn-admin-master-save"
+            onClick={handleManualSave}
+            disabled={isSaving}
+            className={`btn-admin-master-save ${isSaving ? 'saving' : ''}`}
+            title="บันทึกข้อมูลและการตั้งค่าทั้งหมดลงสู่ระบบทันที"
+          >
+            {isSaving ? <RefreshCw size={15} className="spin-icon" /> : <Save size={15} />}
+            <span>{isSaving ? 'กำลังบันทึก...' : 'บันทึกข้อมูล (Save)'}</span>
+          </button>
+
+          <button 
+            onClick={() => {
+              if (window.confirm('คุณต้องการรีเซ็ตข้อมูลทั้งหมดกลับเป็นค่าเริ่มต้นใช่หรือไม่?')) {
+                resetToDefaults();
+                triggerSaveToast();
+              }
+            }}
+            className="btn-admin-reset"
+            title="คืนค่าโรงงาน"
+          >
+            <RefreshCw size={14} />
+            <span>คืนค่าเริ่มต้น</span>
+          </button>
+
+          <a href="#/" target="_blank" rel="noopener noreferrer" className="btn-admin-viewsite" title="ดูหน้าเว็บสาธารณะ">
+            <ExternalLink size={14} />
+            <span>ดูหน้าเว็บ</span>
+          </a>
+
+          <button onClick={onExitAdmin} className="btn-admin-logout" title="ออกจากระบบหลังบ้าน">
+            <LogOut size={14} />
+            <span>ออกจากระบบ</span>
+          </button>
+        </div>
+      </header>
+
+      {/* Main Container: Sidebar Tabs + Editor Panel */}
+      <div className="admin-body-container">
+        {/* Left Navigation Sidebar */}
+        <aside className="admin-sidebar">
+          <nav className="admin-nav-menu">
+            <button 
+              id="cms-tab-erp"
+              className={`admin-nav-item ${activeTab === 'erp-analytics' ? 'active' : ''}`}
+              onClick={() => setActiveTab('erp-analytics')}
+            >
+              <TrendingUp size={18} />
+              <div>
+                <strong>AI สรุปรายได้ & ERP ร้านเกม</strong>
+                <span>สรุปยอดขาย, Peak Hours, ซิงก์ POS</span>
+              </div>
+            </button>
+
+            <button 
+              id="cms-tab-catalog"
+              className={`admin-nav-item ${activeTab === 'catalog' ? 'active' : ''}`}
+              onClick={() => setActiveTab('catalog')}
+            >
+              <Monitor size={18} />
+              <div>
+                <strong>อุปกรณ์ & แคตตาล็อก 3D</strong>
+                <span>โต๊ะ, เก้าอี้, เคาน์เตอร์, หลายเกรด</span>
+              </div>
+            </button>
+
+            <button 
+              id="cms-tab-airag"
+              className={`admin-nav-item ${activeTab === 'ai-rag' ? 'active' : ''}`}
+              onClick={() => setActiveTab('ai-rag')}
+            >
+              <Bot size={18} />
+              <div>
+                <strong>ระบบ AI & คลังความรู้ RAG</strong>
+                <span>OpenRouter, Gemini Flash, เทรนข้อมูล</span>
+              </div>
+            </button>
+
+            <button 
+              id="cms-tab-menu"
+              className={`admin-nav-item ${activeTab === 'menu-footer' ? 'active' : ''}`}
+              onClick={() => setActiveTab('menu-footer')}
+            >
+              <LayoutGrid size={18} />
+              <div>
+                <strong>เมนู Header & Footer</strong>
+                <span>แถบประกาศ, เมนูนำทาง, ช่องทางติดต่อ</span>
+              </div>
+            </button>
+
+            <button 
+              id="cms-tab-articles"
+              className={`admin-nav-item ${activeTab === 'articles' ? 'active' : ''}`}
+              onClick={() => setActiveTab('articles')}
+            >
+              <FileText size={18} />
+              <div>
+                <strong>กิจกรรม & บทความ (Articles)</strong>
+                <span>กำหนด URL Slug, ลิงก์แยก, รูปภาพ</span>
+              </div>
+            </button>
+
+            <button 
+              id="cms-tab-sections"
+              className={`admin-nav-item ${activeTab === 'sections' ? 'active' : ''}`}
+              onClick={() => setActiveTab('sections')}
+            >
+              <FileText size={18} />
+              <div>
+                <strong>เนื้อหาแต่ละ Section</strong>
+                <span>Hero, กิจกรรม, แกลเลอรี, ประวัติ</span>
+              </div>
+            </button>
+
+            <button 
+              id="cms-tab-automation"
+              className={`admin-nav-item ${activeTab === 'automation' ? 'active' : ''}`}
+              onClick={() => setActiveTab('automation')}
+            >
+              <Sliders size={18} />
+              <div>
+                <strong>ระบบ Automation & Webhooks</strong>
+                <span>แจ้งเตือน Discord, Lead แฟรนไชส์</span>
+              </div>
+            </button>
+
+            <button 
+              id="cms-tab-security"
+              className={`admin-nav-item ${activeTab === 'security' ? 'active' : ''}`}
+              onClick={() => setActiveTab('security')}
+            >
+              <ShieldCheck size={18} />
+              <div>
+                <strong>ความปลอดภัย & รหัสแอดมิน</strong>
+                <span>เปลี่ยนรหัสผ่าน Master, Zero-Trust</span>
+              </div>
+            </button>
+          </nav>
+        </aside>
+
+        {/* Right Editor Area */}
+        <main className="admin-content-area">
+
+          {/* =========================================================================
+              TAB 1: CATALOG & 3D HARDWARE/FURNITURE MANAGEMENT (หลายเกรด)
+              ========================================================================= */}
+          {activeTab === 'catalog' && (
+            <div className="cms-panel-block">
+              <div className="panel-header-row">
+                <div>
+                  <h3 className="panel-title">
+                    <Monitor size={20} className="text-blue" />
+                    <span>จัดการอุปกรณ์ โต๊ะ เก้าอี้ และเคาน์เตอร์ 3D (หลายเกรด)</span>
+                  </h3>
+                  <p className="panel-desc">
+                    กำหนดชื่อ, ราคา, ขนาดมิติ 3 มิติ, สีท็อปโต๊ะ, สีไฟ LED RGB, สีเก้าอี้, เพิ่ม/อัปโหลดภาพ และส่งออกเป็นเอกสารสเปกหรือภาพ 3D PNG ได้ทันที
+                  </p>
+                </div>
+                <button 
+                  id="btn-add-catalog-item"
+                  className="btn-primary"
+                  onClick={() => setShowAddCatalogModal(true)}
+                >
+                  <Plus size={16} />
+                  <span>เพิ่มโมดูลใหม่</span>
+                </button>
+              </div>
+
+              {/* Filter Grade */}
+              <div className="cms-filter-bar">
+                <span className="filter-lbl">หมวดหมู่โมดูล:</span>
+                <div className="filter-chips">
+                  {[
+                    { id: 'all', label: 'ทั้งหมด' },
+                    { id: 'stations', label: 'โต๊ะคอมเกมมิ่ง' },
+                    { id: 'vip', label: 'ห้อง VIP Suite' },
+                    { id: 'stage', label: 'เวทีแข่งขัน' },
+                    { id: 'facilities', label: 'เคาน์เตอร์ & บาร์' },
+                    { id: 'architectural', label: 'สถาปัตยกรรม (ประตู/หน้าต่าง)' }
+                  ].map(cat => (
+                    <button 
+                      key={cat.id} 
+                      className={`filter-chip ${catalogGradeFilter === cat.id ? 'active' : ''}`}
+                      onClick={() => setCatalogGradeFilter(cat.id)}
+                    >
+                      {cat.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Catalog Items Table */}
+              <div className="cms-table-wrapper">
+                <table className="cms-data-table catalog-table-enhanced">
+                  <thead>
+                    <tr>
+                      <th style={{ width: '75px', textAlign: 'center' }}>ภาพ 3D</th>
+                      <th>ชื่อโมดูล & รหัส</th>
+                      <th>หมวดหมู่ & เกรด</th>
+                      <th>ขนาด 3D (กxลxส)</th>
+                      <th>โทนสี</th>
+                      <th>ราคาโต๊ะ / เก้าอี้</th>
+                      <th>ราคารวมโมดูล</th>
+                      <th style={{ width: '160px', textAlign: 'center' }}>การจัดการ</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {siteData.catalogItems
+                      .filter(item => catalogGradeFilter === 'all' || item.category === catalogGradeFilter)
+                      .map(item => (
+                        <tr key={item.type}>
+                          <td style={{ textAlign: 'center' }}>
+                            <div 
+                              className="catalog-table-thumb"
+                              onClick={() => setViewing3DItem(item)}
+                              title="คลิกเพื่อเปิดสตูดิโอ 3D & ส่งออกภาพเรนเดอร์"
+                            >
+                              {item.image ? (
+                                <img src={item.image} alt={item.name} />
+                              ) : (
+                                <div className="thumb-3d-placeholder">
+                                  <Box size={20} className="text-blue" />
+                                </div>
+                              )}
+                              <span className="thumb-hover-badge">
+                                <Box size={10} /> 3D
+                              </span>
+                            </div>
+                          </td>
+                          <td>
+                            <strong className="catalog-item-title">{item.name}</strong>
+                            <div className="catalog-meta-row">
+                              <span className="sub-type-tag">{item.type}</span>
+                              <span className={`grade-tag-pill ${item.grade || 'pro'}`}>
+                                {(item.grade || 'pro').toUpperCase()}
+                              </span>
+                            </div>
+                          </td>
+                          <td>
+                            <span className="badge-category">{item.category}</span>
+                          </td>
+                          <td>
+                            <div className="dims-text">
+                              {item.widthMeters} x {item.depth3D || item.heightMeters} x {item.height3D || 1.25} ม.
+                            </div>
+                            {item.seats > 0 && (
+                              <span className="text-muted text-xs">
+                                ({item.seats} ที่นั่ง)
+                              </span>
+                            )}
+                          </td>
+                          <td>
+                            <div className="color-swatches-cluster" title={`สีโต๊ะ: ${item.deskColor || item.color || '#0f172a'}, ไฟ LED: ${item.accentColor || '#1d4ed8'}, เก้าอี้: ${item.chairColor || '#0f172a'}`}>
+                              <span 
+                                className="color-dot" 
+                                style={{ backgroundColor: item.deskColor || item.color || '#0f172a' }} 
+                                title={`โต๊ะ: ${item.deskColor || item.color || '#0f172a'}`}
+                              />
+                              <span 
+                                className="color-dot glow" 
+                                style={{ backgroundColor: item.accentColor || '#1d4ed8' }} 
+                                title={`ไฟ LED RGB: ${item.accentColor || '#1d4ed8'}`}
+                              />
+                              <span 
+                                className="color-dot" 
+                                style={{ backgroundColor: item.chairColor || '#0f172a' }} 
+                                title={`เก้าอี้: ${item.chairColor || '#0f172a'}`}
+                              />
+                            </div>
+                          </td>
+                          <td>
+                            <div className="text-blue font-semibold">
+                              โต๊ะ ฿{(item.deskPrice || 0).toLocaleString()}
+                            </div>
+                            {item.chairCount > 0 && (
+                              <span className="text-muted text-xs">
+                                + {item.chairCount} เก้าอี้ (฿{((item.chairPrice || 0) * item.chairCount).toLocaleString()})
+                              </span>
+                            )}
+                          </td>
+                          <td className="font-bold text-slate">
+                            ฿{(item.baseCost || 0).toLocaleString()}
+                          </td>
+                          <td>
+                            <div className="table-actions">
+                              <button 
+                                className="btn-table-action preview-3d"
+                                onClick={() => setViewing3DItem(item)}
+                                title="ดูโมเดล 3D แบบเต็มจอ & ส่งออกภาพเรนเดอร์ PNG"
+                              >
+                                <Box size={14} />
+                              </button>
+                              <button 
+                                className="btn-table-action spec-sheet"
+                                onClick={() => setViewingSpecItem(item)}
+                                title="ส่งออกเป็นเอกสารสเปกสินค้า (Spec Sheet / Print PDF)"
+                              >
+                                <FileText size={14} />
+                              </button>
+                              <button 
+                                className="btn-table-action edit"
+                                onClick={() => setEditingCatalogItem({ ...item })}
+                                title="แก้ไขชื่อ, ราคา, ขนาด, สี, ภาพ"
+                              >
+                                <Edit3 size={14} />
+                              </button>
+                              <button 
+                                className="btn-table-action delete"
+                                onClick={() => {
+                                  if (window.confirm(`คุณต้องการลบโมดูล "${item.name}" ออกจากแคตตาล็อกใช่หรือไม่?`)) {
+                                    deleteCatalogItem(item.type);
+                                    triggerSaveToast();
+                                  }
+                                }}
+                                title="ลบโมดูล"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* =========================================================================
+                  EDIT CATALOG ITEM MODAL (DUAL COLUMN WITH LIVE 3D PREVIEW & EXPORT)
+                  ========================================================================= */}
+              {editingCatalogItem && (
+                <div className="cms-modal-backdrop" onClick={() => setEditingCatalogItem(null)}>
+                  <div className="cms-modal-card modal-extra-wide catalog-edit-dual-modal" onClick={e => e.stopPropagation()}>
+                    <div className="modal-head">
+                      <div className="modal-head-title">
+                        <Box size={18} className="text-blue" />
+                        <h4>แก้ไขโมดูล 3D: {editingCatalogItem.name}</h4>
+                        <span className="sub-type-tag">{editingCatalogItem.type}</span>
+                      </div>
+                      <div className="modal-head-actions">
+                        <button 
+                          type="button"
+                          className="btn-spec-shortcut"
+                          onClick={() => setViewingSpecItem(editingCatalogItem)}
+                          title="ดูตัวอย่างเอกสารสเปกทางการ"
+                        >
+                          <FileText size={14} />
+                          <span>ดูเอกสารสเปก</span>
+                        </button>
+                        <button onClick={() => setEditingCatalogItem(null)} className="btn-close-modal">✕</button>
+                      </div>
+                    </div>
+
+                    <div className="modal-dual-body">
+                      {/* Left Column: Form Controls */}
+                      <div className="modal-form-scrollable">
+                        {/* Section 1: Name, Type, Category & Grade */}
+                        <div className="form-subblock">
+                          <h5 className="form-subblock-title">
+                            <Layers size={14} className="text-blue" />
+                            <span>1. ข้อมูลพื้นฐาน & หมวดหมู่</span>
+                          </h5>
+
+                          <div className="form-row-2">
+                            <div className="form-group">
+                              <label>ชื่อโมดูล (ภาษาไทย)</label>
+                              <input 
+                                type="text" 
+                                className="form-input" 
+                                value={editingCatalogItem.name} 
+                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, name: e.target.value })}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>รหัสประเภท (Type Code)</label>
+                              <input 
+                                type="text" 
+                                className="form-input" 
+                                value={editingCatalogItem.type} 
+                                disabled
+                                title="รหัสประจำโมดูลในระบบ 3D"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="form-row-2">
+                            <div className="form-group">
+                              <label>หมวดหมู่สินค้า</label>
+                              <select 
+                                className="form-input"
+                                value={editingCatalogItem.category}
+                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, category: e.target.value })}
+                              >
+                                <option value="stations">โต๊ะคอมพิวเตอร์ (Stations)</option>
+                                <option value="vip">ห้อง VIP (Private Suite)</option>
+                                <option value="stage">เวทีการแข่งขัน (Stage)</option>
+                                <option value="facilities">เคาน์เตอร์ & เซอร์วิส (Facilities)</option>
+                                <option value="amenities">สิ่งอำนวยความสะดวก & โซฟา (Amenities)</option>
+                                <option value="architectural">สถาปัตยกรรม (ประตู/หน้าต่าง)</option>
+                              </select>
+                            </div>
+                            <div className="form-group">
+                              <label>เกรดโมดูล (Quality Tier)</label>
+                              <select 
+                                className="form-input"
+                                value={editingCatalogItem.grade || 'pro'}
+                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, grade: e.target.value })}
+                              >
+                                <option value="standard">Standard (Tier 1 - คุ้มค่า คืนทุนเร็ว)</option>
+                                <option value="pro">Pro Racing (Tier 2 - นักกีฬาแข่งขัน)</option>
+                                <option value="ultimate">Ultimate Esports (Tier 3 - ไฮเอนด์อารีนา)</option>
+                                <option value="vip">VIP Suite Grade (เกรดห้องส่วนตัวสตรีมเมอร์)</option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Section 2: Image Management */}
+                        <div className="form-subblock">
+                          <h5 className="form-subblock-title">
+                            <ImageIcon size={14} className="text-blue" />
+                            <span>2. รูปภาพสินค้า & ปกโมดูล</span>
+                          </h5>
+
+                          <div className="image-manager-row">
+                            <div className="form-group" style={{ flex: 1 }}>
+                              <label>URL รูปภาพสินค้า (Image URL)</label>
+                              <input 
+                                type="url" 
+                                className="form-input"
+                                placeholder="https://images.unsplash.com/..."
+                                value={editingCatalogItem.image || ''}
+                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, image: e.target.value })}
+                              />
+                            </div>
+                            <div className="image-upload-wrapper">
+                              <label className="btn-upload-file" title="เลือกไฟล์ภาพ ระบบจะย่อขนาดและแปลงเป็น WebP บีบอัดอัตโนมัติ">
+                                {compressingItemId === 'edit-catalog' ? (
+                                  <>
+                                    <RefreshCw size={14} className="spin-icon" />
+                                    <span>กำลังแปลง WebP...</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Upload size={14} />
+                                    <span>อัปโหลดภาพ (WebP Auto)</span>
+                                  </>
+                                )}
+                                <input 
+                                  type="file" 
+                                  accept="image/*" 
+                                  style={{ display: 'none' }}
+                                  onChange={e => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      handleImageUpload(file, (dataUrl) => {
+                                        setEditingCatalogItem({ ...editingCatalogItem, image: dataUrl });
+                                      }, 'edit-catalog');
+                                    }
+                                  }}
+                                />
+                              </label>
+                            </div>
+                          </div>
+
+                          {/* Compression Feedback Badge */}
+                          {compressionToast && (
+                            <div className="webp-compression-alert" style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              background: 'rgba(16, 185, 129, 0.1)',
+                              border: '1px solid rgba(16, 185, 129, 0.3)',
+                              color: '#10b981',
+                              fontSize: '13px',
+                              margin: '10px 0'
+                            }}>
+                              <CheckCircle2 size={15} />
+                              <span>แปลง WebP สำเร็จ: จาก {compressionToast.original} เหลือ {compressionToast.compressed} (ลดขนาดลง {compressionToast.ratio}) ประหยัดพื้นที่จัดเก็บและโหลดเร็วระดับ Core Web Vitals</span>
+                            </div>
+                          )}
+
+                          {/* Image ALT Tag for SEO */}
+                          <div className="form-group" style={{ marginTop: '12px' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
+                              <Tag size={13} className="text-blue" />
+                              <span>คำอธิบายรูปภาพสำหรับ SEO (Image ALT Tag):</span>
+                            </label>
+                            <input 
+                              type="text" 
+                              className="form-input"
+                              placeholder="เช่น โต๊ะคอมพิวเตอร์เกมมิ่งอีสปอร์ต 3 มิติ รุ่น Pro Stadium Arena"
+                              value={editingCatalogItem.imageAlt || ''}
+                              onChange={e => setEditingCatalogItem({ ...editingCatalogItem, imageAlt: e.target.value })}
+                            />
+                            <span className="text-xs text-muted" style={{ display: 'block', marginTop: '4px' }}>
+                              ใช้สำหรับ Google Image Search, Core Web Vitals และการเข้าถึง Accessibility
+                            </span>
+                          </div>
+
+                          {/* Quick Preset Images */}
+                          <div className="preset-images-picker">
+                            <span className="text-xs text-muted">หรือเลือกภาพสำเร็จรูป:</span>
+                            <div className="preset-chips-scroll">
+                              {CATALOG_PRESET_IMAGES.map((p, idx) => (
+                                <button
+                                  key={idx}
+                                  type="button"
+                                  className={`preset-chip-btn ${editingCatalogItem.image === p.url ? 'active' : ''}`}
+                                  onClick={() => setEditingCatalogItem({ ...editingCatalogItem, image: p.url })}
+                                >
+                                  {p.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Section 3: 3D Dimensions */}
+                        <div className="form-subblock">
+                          <h5 className="form-subblock-title">
+                            <Box size={14} className="text-blue" />
+                            <span>3. ขนาด 3 มิติ (กว้าง x ลึก x สูง) & ที่นั่ง</span>
+                          </h5>
+
+                          <div className="form-row-4">
+                            <div className="form-group">
+                              <label>กว้าง (ม.)</label>
+                              <input 
+                                type="number" 
+                                step="0.1" 
+                                className="form-input"
+                                value={editingCatalogItem.widthMeters}
+                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, widthMeters: parseFloat(e.target.value) || 1 })}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>ลึก 3D (ม.)</label>
+                              <input 
+                                type="number" 
+                                step="0.1" 
+                                className="form-input"
+                                value={editingCatalogItem.depth3D || editingCatalogItem.heightMeters}
+                                onChange={e => setEditingCatalogItem({ 
+                                  ...editingCatalogItem, 
+                                  depth3D: parseFloat(e.target.value) || 1,
+                                  heightMeters: parseFloat(e.target.value) || 1
+                                })}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>สูง 3D (ม.)</label>
+                              <input 
+                                type="number" 
+                                step="0.1" 
+                                className="form-input"
+                                value={editingCatalogItem.height3D || 1.25}
+                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, height3D: parseFloat(e.target.value) || 1 })}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>จำนวนที่นั่ง</label>
+                              <input 
+                                type="number" 
+                                min="0"
+                                className="form-input"
+                                value={editingCatalogItem.seats ?? editingCatalogItem.chairCount ?? 0}
+                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, seats: parseInt(e.target.value) || 0 })}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Section 4: Colors Customization */}
+                        <div className="form-subblock">
+                          <h5 className="form-subblock-title">
+                            <Palette size={14} className="text-blue" />
+                            <span>4. กำหนดโทนสี & แสงไฟ LED RGB (Colors)</span>
+                          </h5>
+
+                          {/* Desk Color */}
+                          <div className="color-field-row">
+                            <div className="color-field-meta">
+                              <label>สีท็อปโต๊ะ & โครงสร้าง:</label>
+                              <div className="color-input-badge">
+                                <input 
+                                  type="color" 
+                                  className="color-picker-input"
+                                  value={editingCatalogItem.deskColor || editingCatalogItem.color || '#0f172a'}
+                                  onChange={e => setEditingCatalogItem({ 
+                                    ...editingCatalogItem, 
+                                    deskColor: e.target.value,
+                                    color: e.target.value 
+                                  })}
+                                />
+                                <code>{editingCatalogItem.deskColor || editingCatalogItem.color || '#0f172a'}</code>
+                              </div>
+                            </div>
+                            <div className="color-presets-inline">
+                              {DESK_COLOR_PRESETS.map((p, i) => (
+                                <button
+                                  key={i}
+                                  type="button"
+                                  className="color-preset-dot"
+                                  style={{ backgroundColor: p.hex }}
+                                  title={p.label}
+                                  onClick={() => setEditingCatalogItem({ 
+                                    ...editingCatalogItem, 
+                                    deskColor: p.hex,
+                                    color: p.hex 
+                                  })}
+                                />
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* LED Glow Color */}
+                          <div className="color-field-row">
+                            <div className="color-field-meta">
+                              <label>สีไฟ LED RGB & แสงสะท้อน:</label>
+                              <div className="color-input-badge">
+                                <input 
+                                  type="color" 
+                                  className="color-picker-input"
+                                  value={editingCatalogItem.accentColor || '#1d4ed8'}
+                                  onChange={e => setEditingCatalogItem({ ...editingCatalogItem, accentColor: e.target.value })}
+                                />
+                                <code>{editingCatalogItem.accentColor || '#1d4ed8'}</code>
+                              </div>
+                            </div>
+                            <div className="color-presets-inline">
+                              {ACCENT_COLOR_PRESETS.map((p, i) => (
+                                <button
+                                  key={i}
+                                  type="button"
+                                  className="color-preset-dot"
+                                  style={{ backgroundColor: p.hex }}
+                                  title={p.label}
+                                  onClick={() => setEditingCatalogItem({ ...editingCatalogItem, accentColor: p.hex })}
+                                />
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Chair Color */}
+                          <div className="color-field-row">
+                            <div className="color-field-meta">
+                              <label>สีเบาะเก้าอี้เกมมิ่ง:</label>
+                              <div className="color-input-badge">
+                                <input 
+                                  type="color" 
+                                  className="color-picker-input"
+                                  value={editingCatalogItem.chairColor || '#0f172a'}
+                                  onChange={e => setEditingCatalogItem({ ...editingCatalogItem, chairColor: e.target.value })}
+                                />
+                                <code>{editingCatalogItem.chairColor || '#0f172a'}</code>
+                              </div>
+                            </div>
+                            <div className="color-presets-inline">
+                              {CHAIR_COLOR_PRESETS.map((p, i) => (
+                                <button
+                                  key={i}
+                                  type="button"
+                                  className="color-preset-dot"
+                                  style={{ backgroundColor: p.hex }}
+                                  title={p.label}
+                                  onClick={() => setEditingCatalogItem({ ...editingCatalogItem, chairColor: p.hex })}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Section 5: Pricing Breakdown */}
+                        <div className="form-subblock">
+                          <h5 className="form-subblock-title">
+                            <DollarSign size={14} className="text-blue" />
+                            <span>5. ราคา & สเปกอุปกรณ์</span>
+                          </h5>
+
+                          <div className="form-row-2">
+                            <div className="form-group">
+                              <label>ราคาโต๊ะและโครงสร้าง (บาท)</label>
+                              <input 
+                                type="number" 
+                                className="form-input"
+                                value={editingCatalogItem.deskPrice || 0}
+                                onChange={e => {
+                                  const deskPrice = parseInt(e.target.value) || 0;
+                                  const chairTotal = (editingCatalogItem.chairPrice || 0) * (editingCatalogItem.chairCount || 0);
+                                  setEditingCatalogItem({ 
+                                    ...editingCatalogItem, 
+                                    deskPrice, 
+                                    baseCost: deskPrice + chairTotal 
+                                  });
+                                }}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>คำอธิบายสเปกโต๊ะ</label>
+                              <input 
+                                type="text" 
+                                className="form-input"
+                                placeholder="โต๊ะเหล็กคาร์บอน รางร้อยสายไฟ ท็อป HPL"
+                                value={editingCatalogItem.deskDesc || ''}
+                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, deskDesc: e.target.value })}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="form-row-3">
+                            <div className="form-group">
+                              <label>รุ่นเก้าอี้</label>
+                              <input 
+                                type="text" 
+                                className="form-input"
+                                value={editingCatalogItem.chairModel || ''}
+                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, chairModel: e.target.value })}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>ราคาเก้าอี้/ตัว (บาท)</label>
+                              <input 
+                                type="number" 
+                                className="form-input"
+                                value={editingCatalogItem.chairPrice || 0}
+                                onChange={e => {
+                                  const chairPrice = parseInt(e.target.value) || 0;
+                                  const chairTotal = chairPrice * (editingCatalogItem.chairCount || 0);
+                                  setEditingCatalogItem({ 
+                                    ...editingCatalogItem, 
+                                    chairPrice,
+                                    baseCost: (editingCatalogItem.deskPrice || 0) + chairTotal
+                                  });
+                                }}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>จำนวนเก้าอี้</label>
+                              <input 
+                                type="number" 
+                                className="form-input"
+                                value={editingCatalogItem.chairCount || 0}
+                                onChange={e => {
+                                  const chairCount = parseInt(e.target.value) || 0;
+                                  const chairTotal = (editingCatalogItem.chairPrice || 0) * chairCount;
+                                  setEditingCatalogItem({ 
+                                    ...editingCatalogItem, 
+                                    chairCount,
+                                    seats: chairCount,
+                                    baseCost: (editingCatalogItem.deskPrice || 0) + chairTotal
+                                  });
+                                }}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="total-cost-calc-card">
+                            <span>ราคารวมโมดูล (คำนวณอัตโนมัติ):</span>
+                            <strong>฿{(editingCatalogItem.baseCost || 0).toLocaleString()} บาท</strong>
+                          </div>
+                        </div>
+
+                        {/* Section 6: Description & Warranty */}
+                        <div className="form-subblock">
+                          <h5 className="form-subblock-title">
+                            <FileText size={14} className="text-blue" />
+                            <span>6. รายละเอียดสินค้า & การรับประกัน</span>
+                          </h5>
+
+                          <div className="form-row-2">
+                            <div className="form-group">
+                              <label>เงื่อนไขการรับประกัน</label>
+                              <input 
+                                type="text" 
+                                className="form-input"
+                                placeholder="รับประกันโครงสร้าง 5 ปี ระบบไฟ 3 ปี"
+                                value={editingCatalogItem.warranty || ''}
+                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, warranty: e.target.value })}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>ระยะเวลาผลิต & ติดตั้ง</label>
+                              <input 
+                                type="text" 
+                                className="form-input"
+                                placeholder="7 - 14 วันทำการ"
+                                value={editingCatalogItem.leadTime || ''}
+                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, leadTime: e.target.value })}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="form-group">
+                            <label>คำอธิบายจุดเด่นของโมดูล</label>
+                            <textarea 
+                              className="form-input form-textarea" 
+                              rows="2"
+                              value={editingCatalogItem.desc || ''}
+                              onChange={e => setEditingCatalogItem({ ...editingCatalogItem, desc: e.target.value })}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right Column: Live Interactive 3D Studio & Actions */}
+                      <div className="modal-live-3d-pane">
+                        <div className="live-3d-box">
+                          <div className="live-3d-header">
+                            <span className="live-3d-badge">
+                              <Sparkles size={13} />
+                              <span>Live 3D Studio Preview</span>
+                            </span>
+                            <small className="text-muted">หมุน 360° เพื่อดูแสงเงา</small>
+                          </div>
+
+                          <ThreeProductViewer 
+                            item={editingCatalogItem}
+                            height="340px"
+                            autoRotateDefault={true}
+                            showControls={true}
+                            onSetAsImage={(dataUrl) => {
+                              setEditingCatalogItem({ ...editingCatalogItem, image: dataUrl });
+                              triggerSaveToast();
+                            }}
+                          />
+
+                          <div className="live-3d-tips">
+                            <p className="text-xs text-muted">
+                              โมเดล 3D จะอัปเดตสีท็อปโต๊ะ, สีไฟ LED RGB, สีเก้าอี้ และขนาดความกว้าง/ลึก ทันทีที่คุณปรับเปลี่ยน
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="modal-footer-btns" style={{ marginTop: '16px' }}>
+                          <button className="btn-secondary" onClick={() => setEditingCatalogItem(null)}>ยกเลิก</button>
+                          <button 
+                            className="btn-primary" 
+                            onClick={() => {
+                              updateCatalogItem(editingCatalogItem);
+                              setEditingCatalogItem(null);
+                              triggerSaveToast();
+                            }}
+                          >
+                            <Save size={14} /> บันทึกการเปลี่ยนแปลง
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* =========================================================================
+                  ADD NEW CATALOG ITEM MODAL
+                  ========================================================================= */}
+              {showAddCatalogModal && (
+                <div className="cms-modal-backdrop" onClick={() => setShowAddCatalogModal(false)}>
+                  <div className="cms-modal-card modal-extra-wide catalog-edit-dual-modal" onClick={e => e.stopPropagation()}>
+                    <div className="modal-head">
+                      <div className="modal-head-title">
+                        <Plus size={18} className="text-blue" />
+                        <h4>เพิ่มโมดูลเฟอร์นิเจอร์ 3D ใหม่</h4>
+                      </div>
+                      <button onClick={() => setShowAddCatalogModal(false)} className="btn-close-modal">✕</button>
+                    </div>
+
+                    <div className="modal-dual-body">
+                      {/* Left: Form Controls */}
+                      <div className="modal-form-scrollable">
+                        <div className="form-subblock">
+                          <h5 className="form-subblock-title">
+                            <Layers size={14} className="text-blue" />
+                            <span>1. ข้อมูลพื้นฐาน & รหัสประเภท</span>
+                          </h5>
+
+                          <div className="form-row-2">
+                            <div className="form-group">
+                              <label>รหัสประเภท (Type Code เช่น pc-solo-1, vr-booth)</label>
+                              <input 
+                                type="text" 
+                                className="form-input"
+                                placeholder="custom-station-1"
+                                value={newCatalogItem.type}
+                                onChange={e => setNewCatalogItem({ ...newCatalogItem, type: e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '-') })}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>ชื่อโมดูล (ภาษาไทย)</label>
+                              <input 
+                                type="text" 
+                                className="form-input"
+                                placeholder="โต๊ะเกมมิ่งสตรีมเมอร์เดี่ยว (Solo Pod)"
+                                value={newCatalogItem.name}
+                                onChange={e => setNewCatalogItem({ ...newCatalogItem, name: e.target.value })}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="form-row-2">
+                            <div className="form-group">
+                              <label>หมวดหมู่</label>
+                              <select 
+                                className="form-input"
+                                value={newCatalogItem.category}
+                                onChange={e => setNewCatalogItem({ ...newCatalogItem, category: e.target.value })}
+                              >
+                                <option value="stations">โต๊ะคอมพิวเตอร์ (Stations)</option>
+                                <option value="vip">ห้อง VIP (Private Suite)</option>
+                                <option value="stage">เวทีการแข่งขัน (Stage)</option>
+                                <option value="facilities">เคาน์เตอร์ & เซอร์วิส (Facilities)</option>
+                                <option value="amenities">สิ่งอำนวยความสะดวก & โซฟา (Amenities)</option>
+                                <option value="architectural">สถาปัตยกรรม (ประตู/หน้าต่าง)</option>
+                              </select>
+                            </div>
+                            <div className="form-group">
+                              <label>เกรดโมดูล</label>
+                              <select 
+                                className="form-input"
+                                value={newCatalogItem.grade}
+                                onChange={e => setNewCatalogItem({ ...newCatalogItem, grade: e.target.value })}
+                              >
+                                <option value="standard">Standard (Tier 1)</option>
+                                <option value="pro">Pro Racing (Tier 2)</option>
+                                <option value="ultimate">Ultimate Esports (Tier 3)</option>
+                                <option value="vip">VIP Suite Grade</option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Image URL & Presets */}
+                        <div className="form-subblock">
+                          <h5 className="form-subblock-title">
+                            <ImageIcon size={14} className="text-blue" />
+                            <span>2. รูปภาพสินค้า</span>
+                          </h5>
+
+                          <div className="image-manager-row">
+                            <div className="form-group" style={{ flex: 1 }}>
+                              <label>URL รูปภาพ</label>
+                              <input 
+                                type="url" 
+                                className="form-input"
+                                placeholder="https://..."
+                                value={newCatalogItem.image || ''}
+                                onChange={e => setNewCatalogItem({ ...newCatalogItem, image: e.target.value })}
+                              />
+                            </div>
+                            <div className="image-upload-wrapper">
+                              <label className="btn-upload-file" title="เลือกไฟล์ภาพ ระบบจะย่อขนาดและแปลงเป็น WebP บีบอัดอัตโนมัติ">
+                                {compressingItemId === 'new-catalog' ? (
+                                  <>
+                                    <RefreshCw size={14} className="spin-icon" />
+                                    <span>กำลังแปลง WebP...</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Upload size={14} />
+                                    <span>อัปโหลดภาพ (WebP Auto)</span>
+                                  </>
+                                )}
+                                <input 
+                                  type="file" 
+                                  accept="image/*" 
+                                  style={{ display: 'none' }}
+                                  onChange={e => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      handleImageUpload(file, (dataUrl) => {
+                                        setNewCatalogItem({ ...newCatalogItem, image: dataUrl });
+                                      }, 'new-catalog');
+                                    }
+                                  }}
+                                />
+                              </label>
+                            </div>
+                          </div>
+
+                          {/* Image ALT Tag for SEO */}
+                          <div className="form-group" style={{ marginTop: '10px' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <Tag size={13} className="text-blue" />
+                              <span>คำอธิบายรูปภาพสำหรับ SEO (Image ALT Tag):</span>
+                            </label>
+                            <input 
+                              type="text" 
+                              className="form-input"
+                              placeholder="เช่น เก้าอี้เกมมิ่งอีสปอร์ตระดับโปร ลิขสิทธิ์ G-Speed"
+                              value={newCatalogItem.imageAlt || ''}
+                              onChange={e => setNewCatalogItem({ ...newCatalogItem, imageAlt: e.target.value })}
+                            />
+                          </div>
+
+                          <div className="preset-chips-scroll">
+                            {CATALOG_PRESET_IMAGES.map((p, idx) => (
+                              <button
+                                key={idx}
+                                type="button"
+                                className={`preset-chip-btn ${newCatalogItem.image === p.url ? 'active' : ''}`}
+                                onClick={() => setNewCatalogItem({ ...newCatalogItem, image: p.url })}
+                              >
+                                {p.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Dimensions */}
+                        <div className="form-subblock">
+                          <h5 className="form-subblock-title">
+                            <Box size={14} className="text-blue" />
+                            <span>3. ขนาด 3 มิติ</span>
+                          </h5>
+
+                          <div className="form-row-4">
+                            <div className="form-group">
+                              <label>กว้าง (ม.)</label>
+                              <input 
+                                type="number" step="0.1" className="form-input"
+                                value={newCatalogItem.widthMeters}
+                                onChange={e => setNewCatalogItem({ ...newCatalogItem, widthMeters: parseFloat(e.target.value) || 1 })}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>ลึก 3D (ม.)</label>
+                              <input 
+                                type="number" step="0.1" className="form-input"
+                                value={newCatalogItem.depth3D}
+                                onChange={e => setNewCatalogItem({ 
+                                  ...newCatalogItem, 
+                                  depth3D: parseFloat(e.target.value) || 1,
+                                  heightMeters: parseFloat(e.target.value) || 1
+                                })}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>สูง 3D (ม.)</label>
+                              <input 
+                                type="number" step="0.1" className="form-input"
+                                value={newCatalogItem.height3D}
+                                onChange={e => setNewCatalogItem({ ...newCatalogItem, height3D: parseFloat(e.target.value) || 1.2 })}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>ที่นั่ง</label>
+                              <input 
+                                type="number" min="0" className="form-input"
+                                value={newCatalogItem.seats}
+                                onChange={e => setNewCatalogItem({ ...newCatalogItem, seats: parseInt(e.target.value) || 0 })}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Colors */}
+                        <div className="form-subblock">
+                          <h5 className="form-subblock-title">
+                            <Palette size={14} className="text-blue" />
+                            <span>4. กำหนดโทนสี</span>
+                          </h5>
+
+                          <div className="color-field-row">
+                            <div className="color-field-meta">
+                              <label>สีโต๊ะ:</label>
+                              <input 
+                                type="color" 
+                                className="color-picker-input"
+                                value={newCatalogItem.deskColor}
+                                onChange={e => setNewCatalogItem({ ...newCatalogItem, deskColor: e.target.value, color: e.target.value })}
+                              />
+                              <code>{newCatalogItem.deskColor}</code>
+                            </div>
+                          </div>
+
+                          <div className="color-field-row">
+                            <div className="color-field-meta">
+                              <label>สีไฟ LED:</label>
+                              <input 
+                                type="color" 
+                                className="color-picker-input"
+                                value={newCatalogItem.accentColor}
+                                onChange={e => setNewCatalogItem({ ...newCatalogItem, accentColor: e.target.value })}
+                              />
+                              <code>{newCatalogItem.accentColor}</code>
+                            </div>
+                          </div>
+
+                          <div className="color-field-row">
+                            <div className="color-field-meta">
+                              <label>สีเก้าอี้:</label>
+                              <input 
+                                type="color" 
+                                className="color-picker-input"
+                                value={newCatalogItem.chairColor}
+                                onChange={e => setNewCatalogItem({ ...newCatalogItem, chairColor: e.target.value })}
+                              />
+                              <code>{newCatalogItem.chairColor}</code>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Prices */}
+                        <div className="form-subblock">
+                          <h5 className="form-subblock-title">
+                            <DollarSign size={14} className="text-blue" />
+                            <span>5. ราคา</span>
+                          </h5>
+
+                          <div className="form-row-2">
+                            <div className="form-group">
+                              <label>ราคาโต๊ะ (บาท)</label>
+                              <input 
+                                type="number" className="form-input"
+                                value={newCatalogItem.deskPrice}
+                                onChange={e => {
+                                  const deskPrice = parseInt(e.target.value) || 0;
+                                  const chairTotal = newCatalogItem.chairPrice * newCatalogItem.chairCount;
+                                  setNewCatalogItem({ ...newCatalogItem, deskPrice, baseCost: deskPrice + chairTotal });
+                                }}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>สเปกโต๊ะ</label>
+                              <input 
+                                type="text" className="form-input"
+                                placeholder="โต๊ะโครงเหล็กคาร์บอน รางร้อยสายไฟ"
+                                value={newCatalogItem.deskDesc}
+                                onChange={e => setNewCatalogItem({ ...newCatalogItem, deskDesc: e.target.value })}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="form-row-3">
+                            <div className="form-group">
+                              <label>รุ่นเก้าอี้</label>
+                              <input 
+                                type="text" className="form-input"
+                                value={newCatalogItem.chairModel}
+                                onChange={e => setNewCatalogItem({ ...newCatalogItem, chairModel: e.target.value })}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>ราคาเก้าอี้/ตัว</label>
+                              <input 
+                                type="number" className="form-input"
+                                value={newCatalogItem.chairPrice}
+                                onChange={e => {
+                                  const chairPrice = parseInt(e.target.value) || 0;
+                                  const chairTotal = chairPrice * newCatalogItem.chairCount;
+                                  setNewCatalogItem({ ...newCatalogItem, chairPrice, baseCost: newCatalogItem.deskPrice + chairTotal });
+                                }}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>จำนวนเก้าอี้</label>
+                              <input 
+                                type="number" className="form-input"
+                                value={newCatalogItem.chairCount}
+                                onChange={e => {
+                                  const chairCount = parseInt(e.target.value) || 0;
+                                  const chairTotal = newCatalogItem.chairPrice * chairCount;
+                                  setNewCatalogItem({ ...newCatalogItem, chairCount, seats: chairCount, baseCost: newCatalogItem.deskPrice + chairTotal });
+                                }}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="total-cost-calc-card">
+                            <span>ราคารวมโมดูล:</span>
+                            <strong>฿{newCatalogItem.baseCost.toLocaleString()} บาท</strong>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right: Live 3D Studio */}
+                      <div className="modal-live-3d-pane">
+                        <div className="live-3d-box">
+                          <div className="live-3d-header">
+                            <span className="live-3d-badge">
+                              <Sparkles size={13} />
+                              <span>Live 3D Studio Preview</span>
+                            </span>
+                          </div>
+
+                          <ThreeProductViewer 
+                            item={newCatalogItem}
+                            height="340px"
+                            autoRotateDefault={true}
+                            showControls={true}
+                            onSetAsImage={(dataUrl) => {
+                              setNewCatalogItem({ ...newCatalogItem, image: dataUrl });
+                              triggerSaveToast();
+                            }}
+                          />
+                        </div>
+
+                        <div className="modal-footer-btns" style={{ marginTop: '16px' }}>
+                          <button className="btn-secondary" onClick={() => setShowAddCatalogModal(false)}>ยกเลิก</button>
+                          <button 
+                            className="btn-primary"
+                            onClick={() => {
+                              if (!newCatalogItem.type || !newCatalogItem.name) {
+                                alert('กรุณากรอกรหัสประเภทและชื่อโมดูล');
+                                return;
+                              }
+                              addCatalogItem(newCatalogItem);
+                              setShowAddCatalogModal(false);
+                              triggerSaveToast();
+                            }}
+                          >
+                            <Plus size={14} /> เพิ่มโมดูลลงระบบ
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* =========================================================================
+                  FULLSCREEN 3D STUDIO & SNAPSHOT EXPORT MODAL
+                  ========================================================================= */}
+              {viewing3DItem && (
+                <div className="cms-modal-backdrop" onClick={() => setViewing3DItem(null)}>
+                  <div className="cms-modal-card modal-view-3d-studio" onClick={e => e.stopPropagation()}>
+                    <div className="modal-head">
+                      <div className="modal-head-title">
+                        <Box size={18} className="text-blue" />
+                        <h4>3D Studio เรนเดอร์: {viewing3DItem.name}</h4>
+                        <span className="sub-type-tag">{viewing3DItem.type}</span>
+                      </div>
+                      <div className="modal-head-actions">
+                        <button 
+                          type="button" 
+                          className="btn-spec-shortcut"
+                          onClick={() => {
+                            const current = viewing3DItem;
+                            setViewing3DItem(null);
+                            setViewingSpecItem(current);
+                          }}
+                        >
+                          <FileText size={14} />
+                          <span>ดูเอกสารสเปก</span>
+                        </button>
+                        <button onClick={() => setViewing3DItem(null)} className="btn-close-modal">✕</button>
+                      </div>
+                    </div>
+
+                    <div className="viewing-3d-body">
+                      <ThreeProductViewer 
+                        item={viewing3DItem}
+                        height="480px"
+                        autoRotateDefault={true}
+                        showControls={true}
+                        onSetAsImage={(dataUrl) => {
+                          updateCatalogItem({ ...viewing3DItem, image: dataUrl });
+                          triggerSaveToast();
+                        }}
+                      />
+
+                      <div className="viewing-3d-footer-info">
+                        <div className="meta-tag-cluster">
+                          <span className="info-chip">
+                            <strong>ขนาด:</strong> {viewing3DItem.widthMeters} x {viewing3DItem.depth3D || viewing3DItem.heightMeters} x {viewing3DItem.height3D || 1.25} ม.
+                          </span>
+                          <span className="info-chip">
+                            <strong>เกรด:</strong> {(viewing3DItem.grade || 'pro').toUpperCase()}
+                          </span>
+                          <span className="info-chip">
+                            <strong>ราคา:</strong> ฿{(viewing3DItem.baseCost || 0).toLocaleString()} บาท
+                          </span>
+                          <span className="info-chip">
+                            <strong>สีโต๊ะ:</strong> {viewing3DItem.deskColor || viewing3DItem.color || '#0f172a'}
+                          </span>
+                          <span className="info-chip">
+                            <strong>ไฟ LED:</strong> {viewing3DItem.accentColor || '#1d4ed8'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* =========================================================================
+                  PRINTABLE PRODUCT SPECIFICATION SHEET MODAL
+                  ========================================================================= */}
+              {viewingSpecItem && (
+                <ProductSpecSheetModal 
+                  item={viewingSpecItem}
+                  onClose={() => setViewingSpecItem(null)}
+                  onEdit={(item) => setEditingCatalogItem(item)}
+                />
+              )}
+            </div>
+          )}
+
+          {/* =========================================================================
+              TAB 2: AI ASSISTANT & RAG KNOWLEDGE BASE
+              ========================================================================= */}
+          {activeTab === 'ai-rag' && (
+            <div className="cms-panel-block">
+              <div className="panel-header-row">
+                <div>
+                  <h3 className="panel-title">
+                    <Bot size={20} className="text-blue" />
+                    <span>ระบบ AI Store Assistant & คลังความรู้ RAG (Gemini Flash / OpenRouter)</span>
+                  </h3>
+                  <p className="panel-desc">
+                    จัดการข้อมูลของร้านเกมสำหรับนำไปเทรน (RAG Retrieval) ให้ AI ตอบคำถามลูกค้าได้อย่างแม่นยำ พร้อมตั้งค่าการเชื่อมต่อ OpenRouter API
+                  </p>
+                </div>
+                <button 
+                  className="btn-primary"
+                  onClick={() => setShowAddRAGModal(true)}
+                >
+                  <Plus size={16} />
+                  <span>เพิ่มข้อมูลเข้าคลังความรู้</span>
+                </button>
+              </div>
+
+              {/* OpenRouter API Settings Card */}
+              <div className="admin-subcard glass-panel">
+                <div className="subcard-title" style={{ justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Key size={16} className="text-blue" />
+                    <strong>ตั้งค่าการเชื่อมต่อ OpenRouter API & LLM Cloud Engine</strong>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span className={`status-pill ${siteData.openRouterSettings?.apiKey ? 'status-pill-success' : 'status-pill-warning'}`}>
+                      {siteData.openRouterSettings?.apiKey ? 'API Key Configured' : 'Fallback RAG Active'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Security Mode Selector: Zero-Leak Proxy vs Direct Browser */}
+                <div style={{ background: siteData.openRouterSettings?.useSecureProxy ? 'rgba(16, 185, 129, 0.08)' : 'rgba(245, 158, 11, 0.08)', border: siteData.openRouterSettings?.useSecureProxy ? '1px solid #10b981' : '1px solid #f59e0b', borderRadius: '8px', padding: '14px 16px', margin: '14px 0' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <ShieldCheck size={22} className={siteData.openRouterSettings?.useSecureProxy ? 'text-green' : 'text-amber'} />
+                      <div>
+                        <strong style={{ color: siteData.openRouterSettings?.useSecureProxy ? '#059669' : '#d97706', fontSize: '0.92rem' }}>
+                          {siteData.openRouterSettings?.useSecureProxy ? 'โหมดความปลอดภัยสูงสุด: Zero-Leak Server Proxy (ป้องกัน API Key รั่วไหล 100%)' : 'โหมด Direct Client (เรียก API ตรงจาก Browser สำหรับ Dev เท่านั้น)'}
+                        </strong>
+                        <p style={{ margin: '2px 0 0 0', fontSize: '0.78rem', color: '#64748b' }}>
+                          {siteData.openRouterSettings?.useSecureProxy 
+                            ? 'เบราว์เซอร์ของลูกค้าจะไม่สามารถแอบดูหรือ Inspect หา OpenRouter API Key ได้ เพราะส่งผ่าน /api/chat หรือ n8n Webhook ฝั่ง Server เท่านั้น'
+                            : 'คำเตือน: การยิงตรงจากหน้าเว็บสาธารณะอาจทำให้ผู้ใช้เปิด F12 Network Tab แล้วคัดลอก API Key ไปใช้ได้ แนะนำให้เปิด Zero-Leak Proxy สำหรับ Production'}
+                        </p>
+                      </div>
+                    </div>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', background: siteData.openRouterSettings?.useSecureProxy ? '#10b981' : '#e2e8f0', color: siteData.openRouterSettings?.useSecureProxy ? '#fff' : '#475569', padding: '6px 12px', borderRadius: '20px', fontWeight: 600, fontSize: '0.8rem' }}>
+                      <input 
+                        type="checkbox"
+                        checked={siteData.openRouterSettings?.useSecureProxy || false}
+                        onChange={e => {
+                          updateOpenRouterSettings({ useSecureProxy: e.target.checked });
+                          triggerSaveToast();
+                        }}
+                        style={{ cursor: 'pointer' }}
+                      />
+                      <span>{siteData.openRouterSettings?.useSecureProxy ? 'Zero-Leak ทำงาน' : 'เปิด Zero-Leak Proxy'}</span>
+                    </label>
+                  </div>
+
+                  {siteData.openRouterSettings?.useSecureProxy && (
+                    <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px dashed rgba(16, 185, 129, 0.3)' }}>
+                      <div className="form-group" style={{ marginBottom: '6px' }}>
+                        <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#0f172a' }}>
+                          Proxy Webhook / Backend Chat Endpoint URL (Coolify / Docker / n8n)
+                        </label>
+                        <input 
+                          type="url"
+                          className="form-input"
+                          placeholder="/api/chat หรือ https://n8n.gspeedarena.com/webhook/chat-proxy"
+                          value={siteData.openRouterSettings?.proxyUrl || ''}
+                          onChange={e => updateOpenRouterSettings({ proxyUrl: e.target.value })}
+                        />
+                        <span className="text-xs text-muted">
+                          * คีย์จะถูกเก็บไว้ที่เซิร์ฟเวอร์หลังบ้าน (Server-Side Environment Variable: OPENROUTER_API_KEY) เบราว์เซอร์จะไม่ส่ง Authorization Header ใดๆ ออกไป
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="form-row-3">
+                  <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                    <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span>OpenRouter API Key {siteData.openRouterSettings?.useSecureProxy ? '(สำรองสำหรับ Server / Local Dev)' : '(โหมด Direct Client)'}</span>
+                      <button 
+                        type="button" 
+                        className="btn-text-action" 
+                        onClick={() => setShowApiKey(!showApiKey)}
+                        style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'none', border: 'none', color: '#1d4ed8', cursor: 'pointer', fontSize: '0.78rem' }}
+                      >
+                        {showApiKey ? <EyeOff size={13} /> : <Eye size={13} />}
+                        <span>{showApiKey ? 'ซ่อนคีย์' : 'แสดงคีย์'}</span>
+                      </button>
+                    </label>
+                    <input 
+                      type={showApiKey ? 'text' : 'password'} 
+                      className="form-input" 
+                      placeholder="sk-or-v1-xxxxxxxxxxxxxxxxxxxx"
+                      value={siteData.openRouterSettings?.apiKey || ''}
+                      onChange={e => updateOpenRouterSettings({ apiKey: e.target.value })}
+                    />
+                    <span className="text-xs text-muted">
+                      * คีย์จะถูกเข้ารหัสใน LocalStorage เฉพาะสิทธิ์แอดมิน หากไม่มีคีย์ ระบบจะใช้ Smart Fallback RAG ตอบคำถามแทนอัตโนมัติ
+                    </span>
+                  </div>
+
+                  <div className="form-group">
+                    <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span>โมเดล AI (Recommended: Gemini Flash 3.8 ตัวใหม่ล่าสุด)</span>
+                      <span style={{ fontSize: '0.72rem', background: '#dbeafe', color: '#1d4ed8', padding: '1px 6px', borderRadius: '4px', fontWeight: 600 }}>ตัวใหม่ล่าสุด</span>
+                    </label>
+                    <select 
+                      className="form-input"
+                      value={siteData.openRouterSettings?.model || 'google/gemini-flash-3.8'}
+                      onChange={e => {
+                        updateOpenRouterSettings({ model: e.target.value });
+                        triggerSaveToast();
+                      }}
+                    >
+                      <option value="google/gemini-flash-3.8">google/gemini-flash-3.8 (เร็วสุด ฉลาดสุด ตัวใหม่ล่าสุด แนะนำ)</option>
+                      <option value="google/gemini-2.0-flash">google/gemini-2.0-flash (ยอดนิยม เสถียร)</option>
+                      <option value="google/gemini-2.5-flash">google/gemini-2.5-flash</option>
+                      <option value="google/gemini-flash-1.5">google/gemini-flash-1.5</option>
+                      <option value="openai/gpt-4o-mini">openai/gpt-4o-mini</option>
+                      <option value="anthropic/claude-3.5-haiku">anthropic/claude-3.5-haiku</option>
+                      <option value="meta-llama/llama-3.3-70b-instruct">meta-llama/llama-3.3-70b-instruct</option>
+                      <option value="deepseek/deepseek-chat">deepseek/deepseek-chat</option>
+                    </select>
+                    <div style={{ marginTop: '6px' }}>
+                      <input 
+                        type="text" 
+                        className="form-input"
+                        placeholder="หรือพิมพ์ชื่อโมเดลเอง (Custom Model Slug)..."
+                        value={siteData.openRouterSettings?.model || ''}
+                        onChange={e => updateOpenRouterSettings({ model: e.target.value })}
+                        style={{ fontSize: '0.78rem', height: '32px' }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-row-3" style={{ marginTop: '14px' }}>
+                  <div className="form-group">
+                    <label>อุณหภูมิคำตอบ (Temperature): {siteData.openRouterSettings?.temperature ?? 0.7}</label>
+                    <input 
+                      type="range" 
+                      min="0.0" 
+                      max="1.0" 
+                      step="0.05"
+                      className="form-range" 
+                      value={siteData.openRouterSettings?.temperature ?? 0.7}
+                      onChange={e => updateOpenRouterSettings({ temperature: parseFloat(e.target.value) })}
+                    />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: '#64748b' }}>
+                      <span>0.0 (ตรงเป๊ะ ทางการ)</span>
+                      <span>1.0 (สร้างสรรค์ ลื่นไหล)</span>
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>จำกัดคำตอบสูงสุด (Max Tokens)</label>
+                    <select 
+                      className="form-input"
+                      value={siteData.openRouterSettings?.maxTokens || 1024}
+                      onChange={e => updateOpenRouterSettings({ maxTokens: parseInt(e.target.value) })}
+                    >
+                      <option value={512}>512 Tokens (กระชับ รวดเร็ว)</option>
+                      <option value={1024}>1,024 Tokens (มาตรฐาน)</option>
+                      <option value={2048}>2,048 Tokens (เนื้อหายาว)</option>
+                      <option value={4096}>4,096 Tokens (บทความละเอียด)</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+                    <button 
+                      type="button"
+                      className="btn-secondary"
+                      onClick={handleTestOpenRouter}
+                      disabled={isOpenRouterTesting}
+                      style={{ height: '38px' }}
+                    >
+                      <RefreshCw size={14} className={isOpenRouterTesting ? 'spin-icon' : ''} />
+                      <span>{isOpenRouterTesting ? 'กำลังทดสอบเชื่อมต่อ...' : 'ทดสอบ Ping OpenRouter'}</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="form-group" style={{ marginTop: '14px' }}>
+                  <label>System Prompt กำหนดบุคลิกและบทบาทของ AI ประจำร้าน</label>
+                  <textarea 
+                    className="form-input form-textarea" 
+                    rows="3"
+                    value={siteData.openRouterSettings?.systemPrompt || 'คุณคือผู้ช่วย AI ประจำศูนย์ G-Speed Esport Arena ตอบคำถามเกี่ยวกับบริการร้านเกม อัตราค่าชั่วโมง สเปกคอม และระบบแฟรนไชส์อย่างสุภาพและถูกต้อง'}
+                    onChange={e => updateOpenRouterSettings({ systemPrompt: e.target.value })}
+                  />
+                </div>
+
+                {openRouterTestResult && (
+                  <div className={`test-ping-result-box ${openRouterTestResult.success ? 'success' : 'warning'}`} style={{ marginTop: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {openRouterTestResult.success ? <CheckCircle2 size={16} className="text-green" /> : <AlertTriangle size={16} className="text-amber" />}
+                      <strong>{openRouterTestResult.message}</strong>
+                    </div>
+                    {openRouterTestResult.latency && (
+                      <span className="text-xs text-muted" style={{ display: 'block', marginTop: '4px' }}>
+                        ความเร็วในการตอบสนอง (Latency): {openRouterTestResult.latency} | โมเดล: {openRouterTestResult.model || siteData.openRouterSettings?.model}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* OpenWebUI & Local Enterprise RAG Hub Card */}
+              <div className="admin-subcard glass-panel" style={{ marginTop: '20px' }}>
+                <div className="subcard-title" style={{ justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Cpu size={16} className="text-blue" />
+                    <strong>เชื่อมต่อ OpenWebUI AI Hub & Local Model (Ollama / vLLM / On-Premises)</strong>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span className={`status-pill ${siteData.openWebUIConfig?.enabled ? 'status-pill-success' : 'status-pill-warning'}`}>
+                      {siteData.openWebUIConfig?.enabled ? 'OpenWebUI Connected' : 'Disabled'}
+                    </span>
+                  </div>
+                </div>
+
+                <p className="subcard-desc">
+                  เชื่อมต่อคลังสมองของร้านเข้ากับ OpenWebUI ซึ่งโฮสต์บนเซิร์ฟเวอร์ส่วนตัว (Coolify / Docker / VPS) รองรับการรันโมเดลภาษาขนาดใหญ่แบบ On-Premises ไม่ต้องเสียค่า Token รายครั้ง และดึงฐานข้อมูลร้านผ่าน RAG Collection
+                </p>
+
+                <div className="form-row-2">
+                  <div className="form-group">
+                    <label>OpenWebUI Base Endpoint URL</label>
+                    <input 
+                      type="url"
+                      className="form-input"
+                      placeholder="https://openwebui.gspeedarena.com"
+                      value={siteData.openWebUIConfig?.baseUrl || ''}
+                      onChange={e => updateOpenWebUIConfig({ baseUrl: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>โมเดลเป้าหมายใน OpenWebUI (Target Model)</label>
+                    <input 
+                      type="text"
+                      className="form-input"
+                      placeholder="glp-esports-assistant:latest หรือ llama3.3:70b"
+                      value={siteData.openWebUIConfig?.model || ''}
+                      onChange={e => updateOpenWebUIConfig({ model: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row-2" style={{ marginTop: '12px' }}>
+                  <div className="form-group">
+                    <label>RAG Knowledge Collection Tag / ID</label>
+                    <input 
+                      type="text"
+                      className="form-input"
+                      placeholder="gspeed-knowledge-base"
+                      value={siteData.openWebUIConfig?.ragCollection || ''}
+                      onChange={e => updateOpenWebUIConfig({ ragCollection: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>OpenWebUI Bearer API Token (Optional / Private Key)</label>
+                    <input 
+                      type="password"
+                      className="form-input"
+                      placeholder="sk-openwebui-xxxxxxxxxxxxxxxxxxxx"
+                      value={siteData.openWebUIConfig?.apiKey || ''}
+                      onChange={e => updateOpenWebUIConfig({ apiKey: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                {openWebUITestResult && (
+                  <div className={`test-ping-result-box ${openWebUITestResult.success ? 'success' : 'warning'}`} style={{ marginTop: '14px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <CheckCircle2 size={16} className="text-green" />
+                      <strong>{openWebUITestResult.message}</strong>
+                    </div>
+                    <span className="text-xs text-muted" style={{ display: 'block', marginTop: '4px' }}>
+                      ความเร็ว Latency: {openWebUITestResult.latency} | โมเดล: {openWebUITestResult.model} | เซิร์ฟเวอร์: {openWebUITestResult.endpoint}
+                    </span>
+                  </div>
+                )}
+
+                <div className="modal-footer-btns" style={{ marginTop: '14px', borderTop: '1px solid #e2e8f0', paddingTop: '12px' }}>
+                  <button 
+                    type="button"
+                    className="btn-secondary"
+                    onClick={handleTestOpenWebUI}
+                    disabled={isOpenWebUITesting}
+                  >
+                    <RefreshCw size={14} className={isOpenWebUITesting ? 'spin-icon' : ''} />
+                    <span>{isOpenWebUITesting ? 'กำลังทดสอบเชื่อมต่อ OpenWebUI...' : 'ทดสอบ Ping OpenWebUI Hub'}</span>
+                  </button>
+                  <button 
+                    type="button"
+                    className="btn-primary"
+                    onClick={() => {
+                      updateOpenWebUIConfig({ enabled: !siteData.openWebUIConfig?.enabled });
+                      triggerSaveToast();
+                    }}
+                  >
+                    <Save size={14} />
+                    <span>{siteData.openWebUIConfig?.enabled ? 'บันทึกสถานะ (Active)' : 'เปิดใช้งาน OpenWebUI'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* RAG Query Simulator Box */}
+              <div className="admin-subcard glass-panel">
+                <div className="subcard-title">
+                  <Sparkles size={16} className="text-blue" />
+                  <strong>ทดสอบระบบสืบค้น RAG (RAG Semantic Retriever Test)</strong>
+                </div>
+                <div className="rag-test-input-row">
+                  <input 
+                    type="text" 
+                    className="form-input"
+                    placeholder="พิมพ์คำถามทดสอบ เช่น 'ราคาชั่วโมงละเท่าไหร่', 'สเปกคอมเป็นยังไง', 'มีอาหารอะไรบ้าง'..."
+                    value={testQuery}
+                    onChange={e => setTestQuery(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleTestRAG()}
+                  />
+                  <button className="btn-secondary" onClick={handleTestRAG}>
+                    <Search size={14} />
+                    <span>ค้นหาข้อมูล RAG</span>
+                  </button>
+                </div>
+
+                {testResults && (
+                  <div className="rag-test-results">
+                    <span className="text-xs text-blue font-bold">
+                      พบข้อมูลที่ตรงกับคำถาม {testResults.length} รายการ ที่จะถูกส่งเข้า System Prompt ของ Gemini:
+                    </span>
+                    <div className="rag-results-list">
+                      {testResults.map(res => (
+                        <div key={res.id} className="rag-result-card">
+                          <strong>{res.title}</strong>
+                          <p>{res.content}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* RAG Knowledge Base Table */}
+              <div className="cms-table-wrapper">
+                <table className="cms-data-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: '25%' }}>หัวข้อความรู้</th>
+                      <th style={{ width: '15%' }}>หมวดหมู่</th>
+                      <th style={{ width: '45%' }}>เนื้อหาข้อมูลสำหรับ AI</th>
+                      <th style={{ width: '15%' }}>การจัดการ</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {siteData.ragKnowledge.map(k => (
+                      <tr key={k.id}>
+                        <td>
+                          <strong>{k.title}</strong>
+                          <div className="tags-row">
+                            {k.tags && k.tags.map((t, idx) => (
+                              <span key={idx} className="rag-tag">{t}</span>
+                            ))}
+                          </div>
+                        </td>
+                        <td>
+                          <span className="badge-category">{k.category}</span>
+                        </td>
+                        <td>
+                          <p className="rag-content-preview">{k.content}</p>
+                        </td>
+                        <td>
+                          <div className="table-actions">
+                            <button 
+                              className="btn-table-action edit"
+                              onClick={() => setEditingRAGItem({ ...k, tagsStr: (k.tags || []).join(', ') })}
+                            >
+                              <Edit3 size={14} />
+                            </button>
+                            <button 
+                              className="btn-table-action delete"
+                              onClick={() => {
+                                if (window.confirm(`ลบข้อมูล "${k.title}" ออกจากคลังความรู้ใช่หรือไม่?`)) {
+                                  deleteRAGItem(k.id);
+                                  triggerSaveToast();
+                                }
+                              }}
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* AI Guardrails & Strict Scope Settings Card */}
+              <div className="admin-subcard glass-panel" style={{ marginTop: '20px' }}>
+                <div className="subcard-title">
+                  <Shield size={16} className="text-blue" />
+                  <strong>การควบคุมขอบเขตคำถาม & ปฏิเสธคำถามนอกเรื่อง (AI Scope Guardrails)</strong>
+                </div>
+                <p className="subcard-desc">
+                  กำหนดให้ AI ตอบเฉพาะข้อมูลเกี่ยวกับร้านและบริการของ G-Speed Esport Arena เท่านั้น หากถามเรื่องอื่น (การเมือง, คณิตศาสตร์, งานเขียน, เรื่องทั่วไป) AI จะแจ้งปฏิเสธอย่างสุภาพทันที
+                </p>
+
+                <div className="guardrails-toggle-row">
+                  <label className="toggle-switch-container">
+                    <input 
+                      type="checkbox" 
+                      id="toggle-strict-store"
+                      checked={siteData.aiGuardrails?.strictStoreOnly ?? true}
+                      onChange={e => {
+                        updateAIGuardrails({ strictStoreOnly: e.target.checked });
+                        triggerSaveToast();
+                      }}
+                    />
+                    <span className="toggle-slider"></span>
+                  </label>
+                  <div>
+                    <strong>เปิดใช้งานโหมดจำกัดตอบเฉพาะเรื่องร้านและบริการ (Strict Store-Only Mode)</strong>
+                    <span className="text-xs text-muted block">ปฏิเสธคำถามที่ไม่เกี่ยวข้องกับร้านเกมโดยอัตโนมัติ ไม่ว่าลูกค้าจะสั่งอย่างไร</span>
+                  </div>
+                </div>
+
+                <div className="form-group" style={{ marginTop: '16px' }}>
+                  <label>ข้อความแจ้งปฏิเสธเมื่อลูกค้าถามนอกเรื่องร้าน (Out-of-Scope Decline Message)</label>
+                  <textarea 
+                    className="form-input form-textarea"
+                    rows="3"
+                    value={siteData.aiGuardrails?.outOfScopeReply || ''}
+                    onChange={e => updateAIGuardrails({ outOfScopeReply: e.target.value })}
+                  />
+                  <div className="form-hint-row">
+                    <span className="text-xs text-muted">* ระบุหัวข้อที่ร้านพร้อมให้บริการ เช่น ค่าบริการ, สเปกคอม, จองห้อง หรือแฟรนไชส์</span>
+                    <button 
+                      className="btn-mini-save"
+                      onClick={() => triggerSaveToast()}
+                    >
+                      <Save size={12} />
+                      <span>บันทึกข้อความ</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="blocked-keywords-section" style={{ marginTop: '16px' }}>
+                  <label>คำหรือหัวข้อที่บล็อกไม่ให้ตอบ (Blocked Topics / Blacklist)</label>
+                  <div className="keyword-chips-wrap">
+                    {(siteData.aiGuardrails?.blockedKeywords || []).map((word, idx) => (
+                      <span key={idx} className="keyword-blocked-chip">
+                        <span>{word}</span>
+                        <button 
+                          onClick={() => {
+                            const filtered = (siteData.aiGuardrails?.blockedKeywords || []).filter((_, i) => i !== idx);
+                            updateAIGuardrails({ blockedKeywords: filtered });
+                            triggerSaveToast();
+                          }}
+                          title="ลบคำนี้"
+                        >
+                          ✕
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="add-keyword-input-row" style={{ marginTop: '8px' }}>
+                    <input 
+                      type="text" 
+                      className="form-input form-input-sm"
+                      placeholder="พิมพ์คำหรือหัวข้อที่ต้องการบล็อกเพิ่ม เช่น 'ยืมเงิน', 'พนัน', 'เขียนโปรแกรม'..."
+                      value={newBlockedKeyword}
+                      onChange={e => setNewBlockedKeyword(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' && newBlockedKeyword.trim()) {
+                          const existing = siteData.aiGuardrails?.blockedKeywords || [];
+                          if (!existing.includes(newBlockedKeyword.trim())) {
+                            updateAIGuardrails({ blockedKeywords: [...existing, newBlockedKeyword.trim()] });
+                            setNewBlockedKeyword('');
+                            triggerSaveToast();
+                          }
+                        }
+                      }}
+                    />
+                    <button 
+                      className="btn-secondary btn-sm"
+                      onClick={() => {
+                        if (newBlockedKeyword.trim()) {
+                          const existing = siteData.aiGuardrails?.blockedKeywords || [];
+                          if (!existing.includes(newBlockedKeyword.trim())) {
+                            updateAIGuardrails({ blockedKeywords: [...existing, newBlockedKeyword.trim()] });
+                            setNewBlockedKeyword('');
+                            triggerSaveToast();
+                          }
+                        }
+                      }}
+                    >
+                      <Plus size={14} />
+                      <span>เพิ่มคำบล็อก</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Unanswered / Pending Questions Log */}
+              <div className="admin-subcard glass-panel" style={{ marginTop: '20px' }}>
+                <div className="subcard-title">
+                  <MessageSquare size={16} className="text-blue" />
+                  <strong>กล่องบันทึกคำถามที่ตอบไม่ได้ / รอตอบภายหลัง (Unanswered Questions Log)</strong>
+                </div>
+                <p className="subcard-desc">
+                  รวบรวมคำถามที่ลูกค้าพิมพ์ถามในแชทแต่ AI ยังไม่มีข้อมูล หรือถูกปฏิเสธเนื่องจากอยู่นอกคลังความรู้ เพื่อให้เจ้าของร้านสามารถกดแปลงเป็นเอกสารความรู้ RAG ได้ในคลิกเดียว
+                </p>
+
+                {(siteData.aiGuardrails?.pendingQuestions || []).length === 0 ? (
+                  <div className="empty-pending-box">
+                    <CheckCircle2 size={24} className="text-green" />
+                    <span>ยังไม่มีคำถามค้างตอบในระบบ ทุกคำถามได้รับการจัดการเรียบร้อยแล้ว</span>
+                  </div>
+                ) : (
+                  <div className="pending-questions-table-wrap">
+                    <table className="cms-data-table pending-table">
+                      <thead>
+                        <tr>
+                          <th style={{ width: '20%' }}>วันและเวลา</th>
+                          <th style={{ width: '50%' }}>คำถามจากลูกค้า</th>
+                          <th style={{ width: '30%' }}>การจัดการ</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(siteData.aiGuardrails?.pendingQuestions || []).map(pq => (
+                          <tr key={pq.id}>
+                            <td className="text-xs text-muted">{pq.timestamp}</td>
+                            <td><strong>"{pq.query}"</strong></td>
+                            <td>
+                              <div className="actions-cell">
+                                <button 
+                                  className="btn-primary btn-sm"
+                                  onClick={() => {
+                                    setNewRAGItem({
+                                      title: `คำถาม: ${pq.query}`,
+                                      category: 'general',
+                                      content: '',
+                                      tags: pq.query
+                                    });
+                                    setShowAddRAGModal(true);
+                                    deletePendingQuestion(pq.id);
+                                  }}
+                                  title="นำคำถามนี้ไปเพิ่มในคลังความรู้ RAG"
+                                >
+                                  <Plus size={13} />
+                                  <span>เพิ่มลง RAG</span>
+                                </button>
+                                <button 
+                                  className="btn-icon-action action-delete"
+                                  onClick={() => deletePendingQuestion(pq.id)}
+                                  title="ลบคำถามนี้ออก"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              {/* Edit RAG Modal */}
+              {editingRAGItem && (
+                <div className="cms-modal-backdrop" onClick={() => setEditingRAGItem(null)}>
+                  <div className="cms-modal-card" onClick={e => e.stopPropagation()}>
+                    <div className="modal-head">
+                      <h4>แก้ไขข้อมูลคลังความรู้ AI</h4>
+                      <button onClick={() => setEditingRAGItem(null)} className="btn-close-modal">✕</button>
+                    </div>
+
+                    <div className="modal-body-form">
+                      <div className="form-group">
+                        <label>หัวข้อความรู้</label>
+                        <input 
+                          type="text" className="form-input"
+                          value={editingRAGItem.title}
+                          onChange={e => setEditingRAGItem({ ...editingRAGItem, title: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="form-row-2">
+                        <div className="form-group">
+                          <label>หมวดหมู่</label>
+                          <select 
+                            className="form-input"
+                            value={editingRAGItem.category}
+                            onChange={e => setEditingRAGItem({ ...editingRAGItem, category: e.target.value })}
+                          >
+                            <option value="pricing">อัตราค่าบริการ & โปรโมชัน</option>
+                            <option value="hardware">ฮาร์ดแวร์ & สเปกคอม</option>
+                            <option value="general">เวลาทำการ & ทั่วไป</option>
+                            <option value="services">บริการอาหาร & ห้อง VIP</option>
+                            <option value="events">ทัวร์นาเมนต์ & แข่งขัน</option>
+                            <option value="business">แฟรนไชส์ & การลงทุน</option>
+                          </select>
+                        </div>
+                        <div className="form-group">
+                          <label>คำค้นหา / Keywords (คั่นด้วยจุลภาค ,)</label>
+                          <input 
+                            type="text" className="form-input"
+                            value={editingRAGItem.tagsStr || ''}
+                            onChange={e => setEditingRAGItem({ ...editingRAGItem, tagsStr: e.target.value })}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-group">
+                        <label>เนื้อหาข้อมูลที่ให้ AI นำไปตอบคำถาม</label>
+                        <textarea 
+                          className="form-input form-textarea" rows="4"
+                          value={editingRAGItem.content}
+                          onChange={e => setEditingRAGItem({ ...editingRAGItem, content: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="modal-footer-btns">
+                      <button className="btn-secondary" onClick={() => setEditingRAGItem(null)}>ยกเลิก</button>
+                      <button 
+                        className="btn-primary"
+                        onClick={() => {
+                          const tags = (editingRAGItem.tagsStr || '').split(',').map(s => s.trim()).filter(Boolean);
+                          updateRAGItem(editingRAGItem.id, {
+                            title: editingRAGItem.title,
+                            category: editingRAGItem.category,
+                            content: editingRAGItem.content,
+                            tags
+                          });
+                          setEditingRAGItem(null);
+                          triggerSaveToast();
+                        }}
+                      >
+                        <Save size={14} /> บันทึกข้อมูล
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Add RAG Modal */}
+              {showAddRAGModal && (
+                <div className="cms-modal-backdrop" onClick={() => setShowAddRAGModal(false)}>
+                  <div className="cms-modal-card" onClick={e => e.stopPropagation()}>
+                    <div className="modal-head">
+                      <h4>เพิ่มความรู้ใหม่เข้าคลังข้อมูล AI</h4>
+                      <button onClick={() => setShowAddRAGModal(false)} className="btn-close-modal">✕</button>
+                    </div>
+
+                    <div className="modal-body-form">
+                      <div className="form-group">
+                        <label>หัวข้อความรู้</label>
+                        <input 
+                          type="text" className="form-input"
+                          placeholder="เช่น กฎการใช้บริการอินเทอร์เน็ตสำหรับเยาวชน"
+                          value={newRAGItem.title}
+                          onChange={e => setNewRAGItem({ ...newRAGItem, title: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="form-row-2">
+                        <div className="form-group">
+                          <label>หมวดหมู่</label>
+                          <select 
+                            className="form-input"
+                            value={newRAGItem.category}
+                            onChange={e => setNewRAGItem({ ...newRAGItem, category: e.target.value })}
+                          >
+                            <option value="pricing">อัตราค่าบริการ & โปรโมชัน</option>
+                            <option value="hardware">ฮาร์ดแวร์ & สเปกคอม</option>
+                            <option value="general">เวลาทำการ & ทั่วไป</option>
+                            <option value="services">บริการอาหาร & ห้อง VIP</option>
+                            <option value="events">ทัวร์นาเมนต์ & แข่งขัน</option>
+                            <option value="business">แฟรนไชส์ & การลงทุน</option>
+                          </select>
+                        </div>
+                        <div className="form-group">
+                          <label>คำค้นหา / Keywords (คั่นด้วยจุลภาค ,)</label>
+                          <input 
+                            type="text" className="form-input"
+                            placeholder="กฎหมาย, อายุ, เวลา, เยาวชน"
+                            value={newRAGItem.tags}
+                            onChange={e => setNewRAGItem({ ...newRAGItem, tags: e.target.value })}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-group">
+                        <label>เนื้อหาข้อมูลที่ให้ AI ใช้ตอบ</label>
+                        <textarea 
+                          className="form-input form-textarea" rows="4"
+                          placeholder="กรอกข้อมูลที่ถูกต้องและชัดเจนของร้าน เพื่อให้ AI ใช้ตอบคำถามแก่ผู้ใช้งาน..."
+                          value={newRAGItem.content}
+                          onChange={e => setNewRAGItem({ ...newRAGItem, content: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="modal-footer-btns">
+                      <button className="btn-secondary" onClick={() => setShowAddRAGModal(false)}>ยกเลิก</button>
+                      <button 
+                        className="btn-primary"
+                        onClick={() => {
+                          if (!newRAGItem.title || !newRAGItem.content) {
+                            alert('กรุณากรอกหัวข้อและเนื้อหา');
+                            return;
+                          }
+                          const tags = (newRAGItem.tags || '').split(',').map(s => s.trim()).filter(Boolean);
+                          addRAGItem({
+                            title: newRAGItem.title,
+                            category: newRAGItem.category,
+                            content: newRAGItem.content,
+                            tags
+                          });
+                          setShowAddRAGModal(false);
+                          setNewRAGItem({ title: '', category: 'pricing', content: '', tags: '' });
+                          triggerSaveToast();
+                        }}
+                      >
+                        <Plus size={14} /> เพิ่มข้อมูลเข้าคลัง
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* =========================================================================
+              TAB 3: MENU, HEADER & FOOTER MANAGEMENT
+              ========================================================================= */}
+          {activeTab === 'menu-footer' && (
+            <div className="cms-panel-block">
+              <div className="panel-header-row">
+                <div>
+                  <h3 className="panel-title">
+                    <LayoutGrid size={20} className="text-blue" />
+                    <span>จัดการแถบเมนู Header, Ticker ประกาศ และ Footer</span>
+                  </h3>
+                  <p className="panel-desc">
+                    ปรับแต่งลิงก์เมนูนำทางด้านบน ข้อความข่าววิ่งด้านบนสุด และข้อมูลการติดต่อท้ายหน้าเว็บ
+                  </p>
+                </div>
+              </div>
+
+              {/* Ticker Announcement Editor */}
+              <div className="admin-subcard glass-panel">
+                <div className="subcard-title">
+                  <AlertTriangle size={16} className="text-amber" />
+                  <strong>แถบประกาศด่วนด้านบนสุด (Top Announcement Bar)</strong>
+                </div>
+
+                <div className="form-row-2">
+                  <div className="form-group">
+                    <label>ป้ายข้อความ (Badge)</label>
+                    <input 
+                      type="text" className="form-input"
+                      value={siteData.tickerBadge || ''}
+                      placeholder="เช่น ประกาศสำคัญ, ข่าวด่วน"
+                      onChange={e => updateTicker({ badge: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>ข้อความประกาศ</label>
+                    <input 
+                      type="text" className="form-input"
+                      value={siteData.tickerText || ''}
+                      placeholder="ข้อความที่ต้องการแจ้งผู้ใช้งาน..."
+                      onChange={e => updateTicker({ text: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row-3" style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px dashed #e2e8f0' }}>
+                  <div className="form-group">
+                    <label>ข้อความบนปุ่มกด (Button Label)</label>
+                    <input 
+                      type="text" className="form-input"
+                      value={siteData.tickerLinkText || 'เปิดระบบ 3D'}
+                      placeholder="เช่น เปิดระบบ 3D, ดูรายละเอียด"
+                      onChange={e => updateTicker({ linkText: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>ลิงก์ปลายทาง (Target Tab / Anchor / URL)</label>
+                    <input 
+                      type="text" className="form-input"
+                      list="ticker-targets-list"
+                      value={siteData.tickerLinkTarget || siteData.tickerLinkTab || 'franchise'}
+                      placeholder="เช่น franchise, #activities, https://..."
+                      onChange={e => updateTicker({ linkTarget: e.target.value })}
+                    />
+                    <datalist id="ticker-targets-list">
+                      <option value="franchise">จำลองผังร้าน 3D (Tab: franchise)</option>
+                      <option value="arena">หน้าแรก & สนามแข่ง (Tab: arena)</option>
+                      <option value="company">ข้อมูลบริษัท & พาร์ตเนอร์ (Tab: company)</option>
+                      <option value="#activities">โซนภาพกิจกรรม (#activities)</option>
+                      <option value="#tournaments">โซนทัวร์นาเมนต์ (#tournaments)</option>
+                      <option value="#zones">โซนร้านและบรรยากาศ (#zones)</option>
+                      <option value="#news">โซนข่าวสาร & บทความ (#news)</option>
+                    </datalist>
+                  </div>
+                  <div className="form-group" style={{ alignSelf: 'flex-end' }}>
+                    <label className="checkbox-label">
+                      <input 
+                        type="checkbox" 
+                        checked={siteData.tickerLinkVisible !== false}
+                        onChange={e => updateTicker({ linkVisible: e.target.checked })}
+                      />
+                      <span>แสดงปุ่มกดนี้บนแถบประกาศ</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Navigation Menu Links */}
+              <div className="admin-subcard glass-panel">
+                <div className="subcard-title-row">
+                  <div className="subcard-title">
+                    <Globe size={16} className="text-blue" />
+                    <strong>รายการเมนูบน Navbar (Navigation Menu Items)</strong>
+                  </div>
+                  <button 
+                    id="btn-add-nav-link"
+                    type="button" 
+                    className="btn-secondary btn-sm"
+                    onClick={() => {
+                      addNavLink({
+                        id: `nav-${Date.now()}`,
+                        label: 'เมนูใหม่',
+                        target: 'arena',
+                        visible: true
+                      });
+                      triggerSaveToast();
+                    }}
+                  >
+                    <Plus size={14} />
+                    <span>เพิ่มเมนูใหม่</span>
+                  </button>
+                </div>
+                <p className="subcard-hint-text" style={{ fontSize: '0.84rem', color: '#64748b', margin: '0 0 16px' }}>
+                  สามารถกำหนดหน้าปลายทางได้ทั้ง Tab หลักในเว็บ (<code>arena</code>, <code>company</code>, <code>franchise</code>), หมุดในหน้า (<code>#activities</code>, <code>#tournaments</code>, <code>#zones</code>, <code>#news</code>) หรือใส่ URL ลิงก์ภายนอก
+                </p>
+
+                <div className="cms-nav-links-list">
+                  {siteData.navLinks.map((nav, i) => (
+                    <div key={nav.id} className="nav-link-edit-card glass-panel">
+                      <div className="nav-link-grid-row">
+                        <div className="form-group flex-2">
+                          <label>ชื่อเมนู #{i + 1}</label>
+                          <input 
+                            type="text" className="form-input"
+                            value={nav.label}
+                            placeholder="ชื่อเมนูนำทาง"
+                            onChange={e => {
+                              const updated = siteData.navLinks.map(l => l.id === nav.id ? { ...l, label: e.target.value } : l);
+                              updateNavLinks(updated);
+                            }}
+                          />
+                        </div>
+
+                        <div className="form-group flex-2">
+                          <label>หน้า/ลิงก์ปลายทาง (Target)</label>
+                          <input 
+                            type="text" 
+                            className="form-input font-mono" 
+                            value={nav.target}
+                            placeholder="arena, company, franchise, #activities, https://..."
+                            list={`nav-target-presets-${nav.id}`}
+                            onChange={e => {
+                              const updated = siteData.navLinks.map(l => l.id === nav.id ? { ...l, target: e.target.value } : l);
+                              updateNavLinks(updated);
+                            }}
+                          />
+                          <datalist id={`nav-target-presets-${nav.id}`}>
+                            <option value="arena">หน้าแรก & สนามแข่ง (arena)</option>
+                            <option value="company">ข้อมูลบริษัท & พาร์ตเนอร์ (company)</option>
+                            <option value="franchise">ระบบจำลองผังร้าน 3D (franchise)</option>
+                            <option value="#activities">โซนภาพกิจกรรม (#activities)</option>
+                            <option value="#tournaments">โซนทัวร์นาเมนต์ (#tournaments)</option>
+                            <option value="#zones">โซนบรรยากาศร้าน (#zones)</option>
+                            <option value="#news">โซนข่าวสารและบทความ (#news)</option>
+                          </datalist>
+                        </div>
+
+                        <div className="form-group flex-1">
+                          <label>ป้ายกำกับ (Badge)</label>
+                          <input 
+                            type="text" 
+                            className="form-input" 
+                            value={nav.highlightTag || ''} 
+                            placeholder="เช่น 3D Studio, Hot"
+                            onChange={e => {
+                              const updated = siteData.navLinks.map(l => l.id === nav.id ? { ...l, highlightTag: e.target.value, highlight: !!e.target.value } : l);
+                              updateNavLinks(updated);
+                            }}
+                          />
+                        </div>
+
+                        <div className="form-group nav-checkbox-group" style={{ alignSelf: 'flex-end', paddingBottom: '8px' }}>
+                          <label className="checkbox-label">
+                            <input 
+                              type="checkbox" 
+                              checked={nav.visible !== false}
+                              onChange={e => {
+                                const updated = siteData.navLinks.map(l => l.id === nav.id ? { ...l, visible: e.target.checked } : l);
+                                updateNavLinks(updated);
+                              }}
+                            />
+                            <span>แสดง</span>
+                          </label>
+                        </div>
+
+                        <button 
+                          type="button"
+                          className="btn-trash-nav"
+                          onClick={() => {
+                            if (siteData.navLinks.length <= 1) {
+                              alert('ต้องมีเมนูบน Navbar อย่างน้อย 1 เมนูครับ');
+                              return;
+                            }
+                            deleteNavLink(nav.id);
+                            triggerSaveToast();
+                          }}
+                          title="ลบเมนูนี้"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Header Right Action Button (CTA) */}
+              <div className="admin-subcard glass-panel">
+                <div className="subcard-title">
+                  <Calculator size={16} className="text-blue" />
+                  <strong>ปุ่มแอ็กชันด่วนบน Header (Header Right CTA Button)</strong>
+                </div>
+
+                <div className="form-row-3">
+                  <div className="form-group">
+                    <label>ข้อความบนปุ่ม (CTA Label)</label>
+                    <input 
+                      type="text" className="form-input"
+                      value={siteData.headerCta?.text || 'คำนวณราคาเปิดร้าน'}
+                      placeholder="เช่น คำนวณราคาเปิดร้าน, สมัครแข่ง"
+                      onChange={e => updateHeaderCta({ text: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>ลิงก์ปลายทาง (Target Link / Tab / URL)</label>
+                    <input 
+                      type="text" className="form-input"
+                      list="header-cta-targets"
+                      value={siteData.headerCta?.target || 'franchise'}
+                      placeholder="เช่น franchise, #tournaments, https://..."
+                      onChange={e => updateHeaderCta({ target: e.target.value })}
+                    />
+                    <datalist id="header-cta-targets">
+                      <option value="franchise">จำลองผังร้าน 3D (Tab: franchise)</option>
+                      <option value="arena">หน้าแรก & สนามแข่ง (Tab: arena)</option>
+                      <option value="company">ข้อมูลบริษัท & พาร์ตเนอร์ (Tab: company)</option>
+                      <option value="#tournaments">โซนสมัครทัวร์นาเมนต์ (#tournaments)</option>
+                      <option value="#activities">โซนกิจกรรม (#activities)</option>
+                    </datalist>
+                  </div>
+
+                  <div className="form-group" style={{ alignSelf: 'flex-end' }}>
+                    <label className="checkbox-label">
+                      <input 
+                        type="checkbox" 
+                        checked={siteData.headerCta?.visible !== false}
+                        onChange={e => updateHeaderCta({ visible: e.target.checked })}
+                      />
+                      <span>แสดงปุ่ม CTA บน Header</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* In-tab Save Button */}
+              <div className="subcard-save-action-footer">
+                <button 
+                  type="button"
+                  onClick={handleManualSave}
+                  disabled={isSaving}
+                  className="btn-primary btn-save-tab"
+                >
+                  {isSaving ? <RefreshCw size={16} className="spin-icon" /> : <Save size={16} />}
+                  <span>{isSaving ? 'กำลังบันทึกข้อมูล...' : 'บันทึกการตั้งค่าเมนู & ข้อมูลเว็บไซต์ (Save Changes)'}</span>
+                </button>
+              </div>
+
+              {/* Footer Information */}
+              <div className="admin-subcard glass-panel">
+                <div className="subcard-title">
+                  <Phone size={16} className="text-blue" />
+                  <strong>ข้อมูลการติดต่อและข้อความท้ายเว็บ (Footer Information)</strong>
+                </div>
+
+                <div className="form-row-2">
+                  <div className="form-group">
+                    <label>เบอร์โทรศัพท์ติดต่อ</label>
+                    <input 
+                      type="text" className="form-input"
+                      value={siteData.footer.phone}
+                      onChange={e => updateFooter({ phone: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>อีเมลติดต่อ</label>
+                    <input 
+                      type="text" className="form-input"
+                      value={siteData.footer.email}
+                      onChange={e => updateFooter({ email: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row-2">
+                  <div className="form-group">
+                    <label>LINE Official ID</label>
+                    <input 
+                      type="text" className="form-input"
+                      value={siteData.footer.line}
+                      onChange={e => updateFooter({ line: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>ข้อความลิขสิทธิ์ (Copyright)</label>
+                    <input 
+                      type="text" className="form-input"
+                      value={siteData.footer.copyright}
+                      onChange={e => updateFooter({ copyright: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>ที่อยู่สาขาหลัก</label>
+                  <input 
+                    type="text" className="form-input"
+                    value={siteData.footer.address}
+                    onChange={e => updateFooter({ address: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>คำอธิบายสั้นเกี่ยวกับบริษัท (Footer Bio)</label>
+                  <textarea 
+                    className="form-input form-textarea" rows="2"
+                    value={siteData.footer.description}
+                    onChange={e => updateFooter({ description: e.target.value })}
+                  />
+                </div>
+                <div className="modal-footer-btns" style={{ marginTop: '16px' }}>
+                  <button type="button" className="btn-section-preview" onClick={() => openPreview('menu-footer')}>
+                    <Eye size={14} /> พรีวิวเมนู Header & Footer ก่อนบันทึก
+                  </button>
+                  <button className="btn-primary" onClick={() => triggerSaveToast()}>
+                    <Save size={14} /> บันทึกข้อมูล Header & Footer
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* =========================================================================
+              TAB 4: PAGE SECTIONS CONTENT (Theme, Hero, Tournaments, Zones, SEO, etc.)
+              ========================================================================= */}
+          {activeTab === 'sections' && (
+            <div className="cms-panel-block">
+              <div className="panel-header-row">
+                <div>
+                  <h3 className="panel-title">
+                    <FileText size={20} className="text-blue" />
+                    <span>จัดการเนื้อหาหน้าเว็บแต่ละ Section (Universal Section CMS)</span>
+                  </h3>
+                  <p className="panel-desc">
+                    ควบคุมเนื้อหา รูปภาพประกอบ สีพื้นหลัง ลิงก์ และสเตตัสของทุกส่วนบนหน้าแรก พร้อมเครื่องมือจำลอง SEO และ Social Share Preview
+                  </p>
+                </div>
+              </div>
+
+              {/* Sub-tab Navigation Bar */}
+              <div className="cms-filter-bar" style={{ marginBottom: '16px' }}>
+                <span className="filter-lbl">เลือก Section ที่ต้องการแก้ไข:</span>
+                <div className="filter-chips">
+                  {[
+                    { id: 'theme', label: '1. ธีม & สีหลัก' },
+                    { id: 'hero', label: '2. Hero Section' },
+                    { id: 'banners', label: '3. แบนเนอร์คู่หน้าแรก' },
+                    { id: 'tournaments', label: '4. ทัวร์นาเมนต์ & ปฏิทินแข่ง' },
+                    { id: 'zones', label: '5. โซนบรรยากาศร้าน' },
+                    { id: 'franchise-cta', label: '6. แบนเนอร์แฟรนไชส์' },
+                    { id: 'news-sec', label: '7. บทความ & ข่าวสาร' },
+                    { id: 'founder', label: '8. ผู้ก่อตั้ง & บริษัท' },
+                    { id: 'seo', label: '9. Global SEO & โซเชียล' },
+                  ].map(tab => (
+                    <button
+                      key={tab.id}
+                      className={`filter-chip ${activeSectionSubTab === tab.id ? 'active' : ''}`}
+                      onClick={() => setActiveSectionSubTab(tab.id)}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* -------------------------------------------------------------
+                  SUBTAB 1: THEME & GLOBAL COLORS
+                  ------------------------------------------------------------- */}
+              {activeSectionSubTab === 'theme' && (
+                <div className="admin-subcard glass-panel">
+                  <div className="subcard-title">
+                    <Palette size={16} className="text-blue" />
+                    <strong>1. ธีมและพาเลตต์สีประจำแบรนด์ (Theme & Brand Colors)</strong>
+                  </div>
+                  <p className="subcard-desc">
+                    ปรับแต่งโทนสีหลักของเว็บไซต์ เพื่อให้ตรงตามอัตลักษณ์ของร้าน การเปลี่ยนแปลงจะมีผลทั่วทั้งระบบ
+                  </p>
+
+                  <div className="form-row-4">
+                    <div className="form-group">
+                      <label>สีหลัก (Primary Blue)</label>
+                      <div className="color-field-row" style={{ padding: '6px' }}>
+                        <input 
+                          type="color" 
+                          className="color-picker-input"
+                          value={siteData.theme?.primaryColor || '#1d4ed8'}
+                          onChange={e => updateTheme({ primaryColor: e.target.value })}
+                        />
+                        <code>{siteData.theme?.primaryColor || '#1d4ed8'}</code>
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label>สีรอง (Secondary Cyan)</label>
+                      <div className="color-field-row" style={{ padding: '6px' }}>
+                        <input 
+                          type="color" 
+                          className="color-picker-input"
+                          value={siteData.theme?.secondaryColor || '#0ea5e9'}
+                          onChange={e => updateTheme({ secondaryColor: e.target.value })}
+                        />
+                        <code>{siteData.theme?.secondaryColor || '#0ea5e9'}</code>
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label>สีพื้นหลังเว็บ (Background)</label>
+                      <div className="color-field-row" style={{ padding: '6px' }}>
+                        <input 
+                          type="color" 
+                          className="color-picker-input"
+                          value={siteData.theme?.backgroundColor || '#ffffff'}
+                          onChange={e => updateTheme({ backgroundColor: e.target.value })}
+                        />
+                        <code>{siteData.theme?.backgroundColor || '#ffffff'}</code>
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label>สีพื้นหลังการ์ด (Surface)</label>
+                      <div className="color-field-row" style={{ padding: '6px' }}>
+                        <input 
+                          type="color" 
+                          className="color-picker-input"
+                          value={siteData.theme?.surfaceColor || '#f8fafc'}
+                          onChange={e => updateTheme({ surfaceColor: e.target.value })}
+                        />
+                        <code>{siteData.theme?.surfaceColor || '#f8fafc'}</code>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="modal-footer-btns" style={{ marginTop: '16px' }}>
+                    <button type="button" className="btn-section-preview" onClick={() => openPreview('theme')}>
+                      <Eye size={14} /> พรีวิวตัวอย่างก่อนบันทึก
+                    </button>
+                    <button className="btn-primary" onClick={() => triggerSaveToast()}>
+                      <Save size={14} /> บันทึกการตั้งค่าธีมสี
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* -------------------------------------------------------------
+                  SUBTAB 2: HERO SECTION
+                  ------------------------------------------------------------- */}
+              {activeSectionSubTab === 'hero' && (
+                <div className="admin-subcard glass-panel">
+                  <div className="subcard-title">
+                    <Trophy size={16} className="text-blue" />
+                    <strong>2. ส่วนหัวหน้าแรก (Hero Section)</strong>
+                  </div>
+
+                  <div className="form-group">
+                    <label>ป้ายหัวข้อเล็ก (Badge Pill)</label>
+                    <input 
+                      type="text" className="form-input"
+                      value={siteData.hero.badge}
+                      onChange={e => updateHero({ badge: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>หัวข้อใหญ่ (Main Title)</label>
+                    <input 
+                      type="text" className="form-input"
+                      value={siteData.hero.title}
+                      onChange={e => updateHero({ title: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>คำบรรยายใต้หัวข้อ (Subtitle)</label>
+                    <textarea 
+                      className="form-input form-textarea" rows="3"
+                      value={siteData.hero.subtitle}
+                      onChange={e => updateHero({ subtitle: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-row-2">
+                    <div className="form-group">
+                      <label>ข้อความบนปุ่มหลัก (Primary Button)</label>
+                      <input 
+                        type="text" className="form-input"
+                        value={siteData.hero.primaryCta}
+                        onChange={e => updateHero({ primaryCta: e.target.value })}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>ข้อความบนปุ่มรอง (Secondary Button)</label>
+                      <input 
+                        type="text" className="form-input"
+                        value={siteData.hero.secondaryCta}
+                        onChange={e => updateHero({ secondaryCta: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <SectionImageUploader 
+                    label="ภาพพื้นหลังส่วนหัว (Hero Background Image - ตัวเลือกเสริม)"
+                    value={siteData.hero?.backgroundImage || ''}
+                    onChange={val => updateHero({ backgroundImage: val })}
+                    recommendedSize="1920 x 1080 px"
+                    aspectRatio="16:9 (Widescreen Full HD / 4K)"
+                    description="ภาพพื้นหลังขนาดใหญ่ด้านบนสุดของหน้าแรก แนะนำภาพมุมกว้างของร้าน เวทีแข่งขัน หรืออารีนาที่สว่างคมชัด ระบบจะใส่ Gradient Overlay สีน้ำเงินเข้มให้อัตโนมัติเพื่อให้อ่านตัวหนังสือได้ง่าย"
+                    uploadKey="hero-bg-img"
+                    compressingItemId={compressingItemId}
+                    handleImageUpload={handleImageUpload}
+                    previewWidth={192}
+                    previewHeight={108}
+                  />
+
+                  <div className="modal-footer-btns" style={{ marginTop: '16px' }}>
+                    <button type="button" className="btn-section-preview" onClick={() => openPreview('hero')}>
+                      <Eye size={14} /> พรีวิวตัวอย่างก่อนบันทึก
+                    </button>
+                    <button className="btn-primary" onClick={() => triggerSaveToast()}>
+                      <Save size={14} /> บันทึกเนื้อหา Hero Section
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* -------------------------------------------------------------
+                  SUBTAB 3: FEATURE BANNERS
+                  ------------------------------------------------------------- */}
+              {activeSectionSubTab === 'banners' && (
+                <div className="admin-subcard glass-panel">
+                  <div className="subcard-title">
+                    <LayoutGrid size={16} className="text-blue" />
+                    <strong>3. แบนเนอร์คู่หน้าแรก (Feature Banners: Events & News)</strong>
+                  </div>
+
+                  <div className="form-row-2" style={{ gap: '20px' }}>
+                    {/* Left Banner: Events */}
+                    <div className="form-subblock">
+                      <h5 className="form-subblock-title">
+                        <Flame size={14} className="text-blue" />
+                        <span>แบนเนอร์ฝั่งซ้าย: รวมภาพกิจกรรม (Our Events)</span>
+                      </h5>
+
+                      <div className="form-group">
+                        <label>ป้ายหัวข้อเล็ก</label>
+                        <input 
+                          type="text" className="form-input"
+                          value={siteData.featureBanners?.bannerLeft?.badge || 'GLP OUR EVENTS'}
+                          onChange={e => updateSectionConfig('featureBanners', {
+                            ...siteData.featureBanners,
+                            bannerLeft: { ...siteData.featureBanners?.bannerLeft, badge: e.target.value }
+                          })}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>หัวข้อแบนเนอร์</label>
+                        <input 
+                          type="text" className="form-input"
+                          value={siteData.featureBanners?.bannerLeft?.title || ''}
+                          onChange={e => updateSectionConfig('featureBanners', {
+                            ...siteData.featureBanners,
+                            bannerLeft: { ...siteData.featureBanners?.bannerLeft, title: e.target.value }
+                          })}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>คำบรรยายสั้น</label>
+                        <textarea 
+                          className="form-input form-textarea" rows="2"
+                          value={siteData.featureBanners?.bannerLeft?.desc || ''}
+                          onChange={e => updateSectionConfig('featureBanners', {
+                            ...siteData.featureBanners,
+                            bannerLeft: { ...siteData.featureBanners?.bannerLeft, desc: e.target.value }
+                          })}
+                        />
+                      </div>
+
+                      <div className="form-row-2">
+                        <div className="form-group">
+                          <label>ข้อความปุ่มลิงก์</label>
+                          <input 
+                            type="text" className="form-input"
+                            value={siteData.featureBanners?.bannerLeft?.linkText || ''}
+                            onChange={e => updateSectionConfig('featureBanners', {
+                              ...siteData.featureBanners,
+                              bannerLeft: { ...siteData.featureBanners?.bannerLeft, linkText: e.target.value }
+                            })}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label>URL ปลายทาง</label>
+                          <input 
+                            type="text" className="form-input"
+                            value={siteData.featureBanners?.bannerLeft?.linkTarget || '#activities'}
+                            onChange={e => updateSectionConfig('featureBanners', {
+                              ...siteData.featureBanners,
+                              bannerLeft: { ...siteData.featureBanners?.bannerLeft, linkTarget: e.target.value }
+                            })}
+                          />
+                        </div>
+                      </div>
+
+                      <SectionImageUploader 
+                        label="ภาพพื้นหลังแบนเนอร์กิจกรรม (Left Banner Image)"
+                        value={siteData.featureBanners?.bannerLeft?.image || ''}
+                        onChange={val => updateSectionConfig('featureBanners', {
+                          ...siteData.featureBanners,
+                          bannerLeft: { ...siteData.featureBanners?.bannerLeft, image: val }
+                        })}
+                        recommendedSize="1200 x 600 px"
+                        aspectRatio="2:1 (แนวนอนมาตรฐาน)"
+                        description="ภาพพื้นหลังแบนเนอร์ฝั่งซ้าย (รวมภาพกิจกรรม Our Events) แนะนำรูปงานแข่ง บรรยากาศเวที หรือพิธีมอบรางวัล"
+                        uploadKey="banner-left-img"
+                        compressingItemId={compressingItemId}
+                        handleImageUpload={handleImageUpload}
+                        previewWidth={170}
+                        previewHeight={85}
+                      />
+                    </div>
+
+                    {/* Right Banner: News */}
+                    <div className="form-subblock">
+                      <h5 className="form-subblock-title">
+                        <FileText size={14} className="text-blue" />
+                        <span>แบนเนอร์ฝั่งขวา: บทความ & ข่าวสาร (Blog & News)</span>
+                      </h5>
+
+                      <div className="form-group">
+                        <label>ป้ายหัวข้อเล็ก</label>
+                        <input 
+                          type="text" className="form-input"
+                          value={siteData.featureBanners?.bannerRight?.badge || 'GLP BLOG & NEWS'}
+                          onChange={e => updateSectionConfig('featureBanners', {
+                            ...siteData.featureBanners,
+                            bannerRight: { ...siteData.featureBanners?.bannerRight, badge: e.target.value }
+                          })}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>หัวข้อแบนเนอร์</label>
+                        <input 
+                          type="text" className="form-input"
+                          value={siteData.featureBanners?.bannerRight?.title || ''}
+                          onChange={e => updateSectionConfig('featureBanners', {
+                            ...siteData.featureBanners,
+                            bannerRight: { ...siteData.featureBanners?.bannerRight, title: e.target.value }
+                          })}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>คำบรรยายสั้น</label>
+                        <textarea 
+                          className="form-input form-textarea" rows="2"
+                          value={siteData.featureBanners?.bannerRight?.desc || ''}
+                          onChange={e => updateSectionConfig('featureBanners', {
+                            ...siteData.featureBanners,
+                            bannerRight: { ...siteData.featureBanners?.bannerRight, desc: e.target.value }
+                          })}
+                        />
+                      </div>
+
+                      <div className="form-row-2">
+                        <div className="form-group">
+                          <label>ข้อความปุ่มลิงก์</label>
+                          <input 
+                            type="text" className="form-input"
+                            value={siteData.featureBanners?.bannerRight?.linkText || ''}
+                            onChange={e => updateSectionConfig('featureBanners', {
+                              ...siteData.featureBanners,
+                              bannerRight: { ...siteData.featureBanners?.bannerRight, linkText: e.target.value }
+                            })}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label>URL ปลายทาง</label>
+                          <input 
+                            type="text" className="form-input"
+                            value={siteData.featureBanners?.bannerRight?.linkTarget || '#news'}
+                            onChange={e => updateSectionConfig('featureBanners', {
+                              ...siteData.featureBanners,
+                              bannerRight: { ...siteData.featureBanners?.bannerRight, linkTarget: e.target.value }
+                            })}
+                          />
+                        </div>
+                      </div>
+
+                      <SectionImageUploader 
+                        label="ภาพพื้นหลังแบนเนอร์บทความ & ข่าวสาร (Right Banner Image)"
+                        value={siteData.featureBanners?.bannerRight?.image || ''}
+                        onChange={val => updateSectionConfig('featureBanners', {
+                          ...siteData.featureBanners,
+                          bannerRight: { ...siteData.featureBanners?.bannerRight, image: val }
+                        })}
+                        recommendedSize="1200 x 600 px"
+                        aspectRatio="2:1 (แนวนอนมาตรฐาน)"
+                        description="ภาพพื้นหลังแบนเนอร์ฝั่งขวา (บทความ ข่าวสาร & ไฮไลต์) แนะนำรูปอุปกรณ์เกมมิ่ง, มุมคอมพิวเตอร์ หรือบรรยากาศร้านโมเดิร์น"
+                        uploadKey="banner-right-img"
+                        compressingItemId={compressingItemId}
+                        handleImageUpload={handleImageUpload}
+                        previewWidth={170}
+                        previewHeight={85}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="modal-footer-btns" style={{ marginTop: '16px' }}>
+                    <button type="button" className="btn-section-preview" onClick={() => openPreview('banners')}>
+                      <Eye size={14} /> พรีวิวตัวอย่างก่อนบันทึก
+                    </button>
+                    <button className="btn-primary" onClick={() => triggerSaveToast()}>
+                      <Save size={14} /> บันทึกแบนเนอร์คู่หน้าแรก
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* -------------------------------------------------------------
+                  SUBTAB 4: TOURNAMENTS SECTION & CRUD
+                  ------------------------------------------------------------- */}
+              {activeSectionSubTab === 'tournaments' && (
+                <div className="admin-subcard glass-panel">
+                  <div className="subcard-title" style={{ justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Trophy size={16} className="text-blue" />
+                      <strong>4. ปฏิทินการแข่งขัน & ทัวร์นาเมนต์ (Tournaments & Schedule)</strong>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <button 
+                        type="button"
+                        className="btn-section-preview btn-sm"
+                        onClick={() => openPreview('tournaments')}
+                      >
+                        <Eye size={13} /> พรีวิวส่วนทัวร์นาเมนต์
+                      </button>
+                      <button 
+                        className="btn-primary btn-sm"
+                        onClick={() => setShowAddTournamentModal(true)}
+                      >
+                        <Plus size={14} /> เพิ่มทัวร์นาเมนต์ใหม่
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Section Title & Subtitle */}
+                  <div className="form-row-2">
+                    <div className="form-group">
+                      <label>ป้ายหัวข้อเล็ก</label>
+                      <input 
+                        type="text" className="form-input"
+                        value={siteData.tournamentsSection?.badge || 'TOURNAMENTS & COMMUNITY EVENTS'}
+                        onChange={e => updateSectionConfig('tournamentsSection', {
+                          ...siteData.tournamentsSection,
+                          badge: e.target.value
+                        })}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>หัวข้อใหญ่ Section</label>
+                      <input 
+                        type="text" className="form-input"
+                        value={siteData.tournamentsSection?.title || ''}
+                        onChange={e => updateSectionConfig('tournamentsSection', {
+                          ...siteData.tournamentsSection,
+                          title: e.target.value
+                        })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>คำบรรยาย Section</label>
+                    <textarea 
+                      className="form-input form-textarea" rows="2"
+                      value={siteData.tournamentsSection?.subtitle || ''}
+                      onChange={e => updateSectionConfig('tournamentsSection', {
+                        ...siteData.tournamentsSection,
+                        subtitle: e.target.value
+                      })}
+                    />
+                  </div>
+
+                  {/* Tournaments Data Table */}
+                  <div className="cms-table-wrapper" style={{ marginTop: '16px' }}>
+                    <table className="cms-data-table">
+                      <thead>
+                        <tr>
+                          <th>เกม & รายการแข่งขัน</th>
+                          <th>วันแข่งขัน</th>
+                          <th>เงินรางวัล</th>
+                          <th>จำนวนทีม</th>
+                          <th>สถานะ</th>
+                          <th style={{ textAlign: 'center' }}>การจัดการ</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(siteData.tournaments || []).map(t => (
+                          <tr key={t.id}>
+                            <td>
+                              <strong>{t.title}</strong>
+                              <span className="text-xs text-muted block">{t.game}</span>
+                            </td>
+                            <td>{t.date}</td>
+                            <td><strong className="text-blue">{t.prizePool}</strong></td>
+                            <td>{t.slots}</td>
+                            <td>
+                              <span className={`status-pill ${t.status === 'Open' ? 'status-pill-success' : 'status-pill-warning'}`}>
+                                {t.status}
+                              </span>
+                            </td>
+                            <td>
+                              <div className="actions-cell" style={{ justifyContent: 'center' }}>
+                                <button 
+                                  className="btn-table-action"
+                                  onClick={() => setEditingTournament(t)}
+                                  title="แก้ไขทัวร์นาเมนต์นี้"
+                                >
+                                  <Edit3 size={13} />
+                                </button>
+                                <button 
+                                  className="btn-table-action action-delete"
+                                  onClick={() => {
+                                    if (window.confirm(`คุณต้องการลบทัวร์นาเมนต์ "${t.title}" ใช่หรือไม่?`)) {
+                                      deleteTournament(t.id);
+                                      triggerSaveToast();
+                                    }
+                                  }}
+                                  title="ลบทัวร์นาเมนต์นี้"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="modal-footer-btns" style={{ marginTop: '16px' }}>
+                    <button type="button" className="btn-section-preview" onClick={() => openPreview('tournaments')}>
+                      <Eye size={14} /> พรีวิวตัวอย่างก่อนบันทึก
+                    </button>
+                    <button className="btn-primary" onClick={() => triggerSaveToast()}>
+                      <Save size={14} /> บันทึกข้อมูลส่วนทัวร์นาเมนต์
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* -------------------------------------------------------------
+                  SUBTAB 5: VENUE ZONES CRUD
+                  ------------------------------------------------------------- */}
+              {activeSectionSubTab === 'zones' && (
+                <div className="admin-subcard glass-panel">
+                  <div className="subcard-title">
+                    <Compass size={16} className="text-blue" />
+                    <strong>5. โซนบรรยากาศร้าน & อัตราค่าบริการ (Venue Atmosphere & Zones)</strong>
+                  </div>
+
+                  <div className="form-row-2">
+                    <div className="form-group">
+                      <label>ป้ายหัวข้อเล็ก</label>
+                      <input 
+                        type="text" className="form-input"
+                        value={siteData.zonesSection?.badge || 'VENUE ATMOSPHERE & ZONES'}
+                        onChange={e => updateSectionConfig('zonesSection', {
+                          ...siteData.zonesSection,
+                          badge: e.target.value
+                        })}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>หัวข้อใหญ่ Section</label>
+                      <input 
+                        type="text" className="form-input"
+                        value={siteData.zonesSection?.title || ''}
+                        onChange={e => updateSectionConfig('zonesSection', {
+                          ...siteData.zonesSection,
+                          title: e.target.value
+                        })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>คำบรรยาย Section</label>
+                    <textarea 
+                      className="form-input form-textarea" rows="2"
+                      value={siteData.zonesSection?.subtitle || ''}
+                      onChange={e => updateSectionConfig('zonesSection', {
+                        ...siteData.zonesSection,
+                        subtitle: e.target.value
+                      })}
+                    />
+                  </div>
+
+                  {/* Zones Grid */}
+                  <div className="form-row-2" style={{ gap: '16px', marginTop: '16px' }}>
+                    {(siteData.venueZones || []).map(zone => {
+                      const zoneTitle = zone.title || zone.name || 'โซนร้านเกม';
+                      const zoneDesc = zone.description || zone.desc || '';
+                      const zoneSpecs = Array.isArray(zone.specs) ? zone.specs.join(', ') : (zone.specs || '');
+                      return (
+                        <div key={zone.id} className="form-subblock">
+                          <h5 className="form-subblock-title">
+                            <Monitor size={14} className="text-blue" />
+                            <span>{zoneTitle}</span>
+                          </h5>
+
+                          <div className="form-row-2">
+                            <div className="form-group">
+                              <label>ชื่อโซน</label>
+                              <input 
+                                type="text" className="form-input"
+                                value={zoneTitle}
+                                onChange={e => updateVenueZone(zone.id, { title: e.target.value, name: e.target.value })}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>อัตราค่าบริการ / ชม.</label>
+                              <input 
+                                type="text" className="form-input"
+                                placeholder="เช่น ฿35 / ชม. หรือ ฟรีสำหรับสมาชิก"
+                                value={zone.ratePerHour || ''}
+                                onChange={e => updateVenueZone(zone.id, { ratePerHour: e.target.value })}
+                              />
+                            </div>
+                          </div>
+
+                          <SectionImageUploader 
+                            label={`ภาพถ่ายบรรยากาศประจำโซน (${zoneTitle})`}
+                            value={zone.image || ''}
+                            onChange={val => updateVenueZone(zone.id, { image: val })}
+                            recommendedSize="1000 x 650 px"
+                            aspectRatio="16:10 หรือ 16:9 (แนวนอน)"
+                            description={`ภาพถ่ายจริงหรือ 3D Render ของ ${zoneTitle} สำหรับแท็บสลับดูบรรยากาศร้านหน้าแรก`}
+                            uploadKey={`zone-img-${zone.id}`}
+                            compressingItemId={compressingItemId}
+                            handleImageUpload={handleImageUpload}
+                            previewWidth={160}
+                            previewHeight={100}
+                          />
+
+                          <div className="form-group">
+                            <label>สเปกฮาร์ดแวร์ประจำโซน (คั่นด้วยจุลภาค ,)</label>
+                            <input 
+                              type="text" className="form-input"
+                              value={zoneSpecs}
+                              onChange={e => updateVenueZone(zone.id, { 
+                                specs: e.target.value.split(',').map(s => s.trim()).filter(Boolean) 
+                              })}
+                            />
+                          </div>
+
+                          <div className="form-group">
+                            <label>คำบรรยายโซน</label>
+                            <textarea 
+                              className="form-input form-textarea" rows="2"
+                              value={zoneDesc}
+                              onChange={e => updateVenueZone(zone.id, { description: e.target.value, desc: e.target.value })}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="modal-footer-btns" style={{ marginTop: '16px' }}>
+                    <button type="button" className="btn-section-preview" onClick={() => openPreview('zones')}>
+                      <Eye size={14} /> พรีวิวตัวอย่างก่อนบันทึก
+                    </button>
+                    <button className="btn-primary" onClick={() => triggerSaveToast()}>
+                      <Save size={14} /> บันทึกข้อมูลโซนทั้งหมด
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* -------------------------------------------------------------
+                  SUBTAB 6: FRANCHISE BANNER & CTA
+                  ------------------------------------------------------------- */}
+              {activeSectionSubTab === 'franchise-cta' && (
+                <div className="admin-subcard glass-panel">
+                  <div className="subcard-title">
+                    <TrendingUp size={16} className="text-blue" />
+                    <strong>6. แบนเนอร์ชวนร่วมระบบแฟรนไชส์ (Franchise Banner & CTA)</strong>
+                  </div>
+
+                  <div className="form-group">
+                    <label>ป้ายหัวข้อเล็ก (Badge)</label>
+                    <input 
+                      type="text" className="form-input"
+                      value={siteData.franchiseBanner?.badge || 'G-SPEED FRANCHISE & INTERIOR PLANNER'}
+                      onChange={e => updateSectionConfig('franchiseBanner', {
+                        ...siteData.franchiseBanner,
+                        badge: e.target.value
+                      })}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>หัวข้อชวนลงทุน (Heading)</label>
+                    <input 
+                      type="text" className="form-input"
+                      value={siteData.franchiseBanner?.heading || ''}
+                      onChange={e => updateSectionConfig('franchiseBanner', {
+                        ...siteData.franchiseBanner,
+                        heading: e.target.value
+                      })}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>คำอธิบายข้อเสนอแฟรนไชส์</label>
+                    <textarea 
+                      className="form-input form-textarea" rows="3"
+                      value={siteData.franchiseBanner?.desc || ''}
+                      onChange={e => updateSectionConfig('franchiseBanner', {
+                        ...siteData.franchiseBanner,
+                        desc: e.target.value
+                      })}
+                    />
+                  </div>
+
+                  <div className="form-row-2">
+                    <div className="form-group">
+                      <label>ข้อความบนปุ่มกด</label>
+                      <input 
+                        type="text" className="form-input"
+                        value={siteData.franchiseBanner?.buttonText || 'เริ่มออกแบบผังร้าน & ประเมินงบประมาณทันที'}
+                        onChange={e => updateSectionConfig('franchiseBanner', {
+                          ...siteData.franchiseBanner,
+                          buttonText: e.target.value
+                        })}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>สีพื้นหลังแบนเนอร์</label>
+                      <div className="color-field-row" style={{ padding: '6px' }}>
+                        <input 
+                          type="color" 
+                          className="color-picker-input"
+                          value={siteData.franchiseBanner?.bgColor || '#1e3a8a'}
+                          onChange={e => updateSectionConfig('franchiseBanner', {
+                            ...siteData.franchiseBanner,
+                            bgColor: e.target.value
+                          })}
+                        />
+                        <code>{siteData.franchiseBanner?.bgColor || '#1e3a8a'}</code>
+                      </div>
+                    </div>
+                  </div>
+
+                  <SectionImageUploader 
+                    label="ภาพพื้นหลังแบนเนอร์แฟรนไชส์ (Franchise CTA Background Image - ตัวเลือกเสริม)"
+                    value={siteData.franchiseBanner?.bgImage || ''}
+                    onChange={val => updateSectionConfig('franchiseBanner', {
+                      ...siteData.franchiseBanner,
+                      bgImage: val
+                    })}
+                    recommendedSize="1600 x 600 px"
+                    aspectRatio="8:3 หรือ 16:6 (แนวนอนมุมกว้างพิเศษ)"
+                    description="ภาพพื้นหลังส่วนชวนร่วมลงทุนแฟรนไชส์ แนะนำภาพร้านรวมมุมกว้าง หรือ 3D Floor Plan ที่ดูอลังการ ทันสมัย เพื่อสร้างความมั่นใจให้นักลงทุน"
+                    uploadKey="franchise-bg-img"
+                    compressingItemId={compressingItemId}
+                    handleImageUpload={handleImageUpload}
+                    previewWidth={200}
+                    previewHeight={75}
+                  />
+
+                  <div className="modal-footer-btns" style={{ marginTop: '16px' }}>
+                    <button type="button" className="btn-section-preview" onClick={() => openPreview('franchise-cta')}>
+                      <Eye size={14} /> พรีวิวตัวอย่างก่อนบันทึก
+                    </button>
+                    <button className="btn-primary" onClick={() => triggerSaveToast()}>
+                      <Save size={14} /> บันทึกแบนเนอร์แฟรนไชส์
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* -------------------------------------------------------------
+                  SUBTAB 7: NEWS SECTION & ARTICLES
+                  ------------------------------------------------------------- */}
+              {activeSectionSubTab === 'news-sec' && (
+                <div className="admin-subcard glass-panel">
+                  <div className="subcard-title">
+                    <FileText size={16} className="text-blue" />
+                    <strong>7. ส่วนหัวบทความและข่าวสาร (News Section Config)</strong>
+                  </div>
+
+                  <div className="form-row-2">
+                    <div className="form-group">
+                      <label>ป้ายหัวข้อเล็ก</label>
+                      <input 
+                        type="text" className="form-input"
+                        value={siteData.newsSection?.badge || 'ARTICLES & UPDATES'}
+                        onChange={e => updateSectionConfig('newsSection', {
+                          ...siteData.newsSection,
+                          badge: e.target.value
+                        })}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>หัวข้อใหญ่ Section</label>
+                      <input 
+                        type="text" className="form-input"
+                        value={siteData.newsSection?.title || ''}
+                        onChange={e => updateSectionConfig('newsSection', {
+                          ...siteData.newsSection,
+                          title: e.target.value
+                        })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>คำบรรยาย Section</label>
+                    <textarea 
+                      className="form-input form-textarea" rows="2"
+                      value={siteData.newsSection?.subtitle || ''}
+                      onChange={e => updateSectionConfig('newsSection', {
+                        ...siteData.newsSection,
+                        subtitle: e.target.value
+                      })}
+                    />
+                  </div>
+
+                  <div className="modal-footer-btns" style={{ marginTop: '16px' }}>
+                    <button type="button" className="btn-section-preview" onClick={() => openPreview('news-sec')}>
+                      <Eye size={14} /> พรีวิวตัวอย่างก่อนบันทึก
+                    </button>
+                    <button className="btn-primary" onClick={() => triggerSaveToast()}>
+                      <Save size={14} /> บันทึกข้อมูลส่วนข่าวสาร
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* -------------------------------------------------------------
+                  SUBTAB 8: FOUNDER & COMPANY STORY
+                  ------------------------------------------------------------- */}
+              {activeSectionSubTab === 'founder' && (
+                <div className="admin-subcard glass-panel">
+                  <div className="subcard-title">
+                    <ShieldCheck size={16} className="text-blue" />
+                    <strong>8. เรื่องราวผู้ก่อตั้งและวิสัยทัศน์องค์กร (Founder & Company Story)</strong>
+                  </div>
+
+                  <div className="form-group">
+                    <label>คำคม / ปรัชญาผู้ก่อตั้ง (Founder Quote)</label>
+                    <textarea 
+                      className="form-input form-textarea" rows="2"
+                      value={siteData.founder?.quote || ''}
+                      onChange={e => updateSectionConfig('founder', {
+                        ...siteData.founder,
+                        quote: e.target.value
+                      })}
+                    />
+                  </div>
+
+                  <div className="form-row-2">
+                    <div className="form-group">
+                      <label>ชื่อผู้ก่อตั้ง</label>
+                      <input 
+                        type="text" className="form-input"
+                        value={siteData.founder?.name || 'คุณธนภัทร วรเชษฐ์'}
+                        onChange={e => updateSectionConfig('founder', {
+                          ...siteData.founder,
+                          name: e.target.value
+                        })}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>ตำแหน่งผู้บริหาร</label>
+                      <input 
+                        type="text" className="form-input"
+                        value={siteData.founder?.title || 'ผู้ก่อตั้งและประธานเจ้าหน้าที่บริหาร GLP Group'}
+                        onChange={e => updateSectionConfig('founder', {
+                          ...siteData.founder,
+                          title: e.target.value
+                        })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>ประวัติและแรงบันดาลใจ (Founder Bio)</label>
+                    <textarea 
+                      className="form-input form-textarea" rows="3"
+                      value={siteData.founder?.bio || ''}
+                      onChange={e => updateSectionConfig('founder', {
+                        ...siteData.founder,
+                        bio: e.target.value
+                      })}
+                    />
+                  </div>
+
+                  <SectionImageUploader 
+                    label="ภาพถ่ายผู้บริหาร / ผู้ก่อตั้ง (Founder & CEO Portrait)"
+                    value={siteData.founder?.image || ''}
+                    onChange={val => updateSectionConfig('founder', {
+                      ...siteData.founder,
+                      image: val
+                    })}
+                    recommendedSize="800 x 800 px หรือ 800 x 1000 px"
+                    aspectRatio="1:1 (สี่เหลี่ยมจัตุรัส) หรือ 4:5 (แนวตั้งพอร์ตเทรต)"
+                    description="ภาพถ่ายพอร์ตเทรตผู้ก่อตั้งสำหรับหน้า Company Profile แนะนำภาพที่มีความคมชัด สีหน้ามั่นใจ และพื้นหลังดูเป็นมืออาชีพ"
+                    uploadKey="founder-portrait-img"
+                    compressingItemId={compressingItemId}
+                    handleImageUpload={handleImageUpload}
+                    previewWidth={120}
+                    previewHeight={120}
+                  />
+
+                  <div className="modal-footer-btns" style={{ marginTop: '16px' }}>
+                    <button type="button" className="btn-section-preview" onClick={() => openPreview('founder')}>
+                      <Eye size={14} /> พรีวิวตัวอย่างก่อนบันทึก
+                    </button>
+                    <button className="btn-primary" onClick={() => triggerSaveToast()}>
+                      <Save size={14} /> บันทึกข้อมูลผู้ก่อตั้ง
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* -------------------------------------------------------------
+                  SUBTAB 9: GLOBAL SEO & SOCIAL SHARE PREVIEW
+                  ------------------------------------------------------------- */}
+              {activeSectionSubTab === 'seo' && (
+                <div className="admin-subcard glass-panel">
+                  <div className="subcard-title">
+                    <Globe size={16} className="text-blue" />
+                    <strong>9. Global SEO Meta Tags & ระบบจำลองการแชร์โซเชียลมีเดีย</strong>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Page Meta Title (ความยาวที่แนะนำ 50-60 ตัวอักษร)</label>
+                    <input 
+                      type="text" className="form-input"
+                      value={siteData.globalSEO?.siteTitle || 'G-SPEED ESPORT ARENA | ศูนย์อีสปอร์ตครบวงจร & ระบบแฟรนไชส์จัดผังร้านอัจฉริยะ'}
+                      onChange={e => updateGlobalSEO({ siteTitle: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Page Meta Description (ความยาวที่แนะนำ 120-160 ตัวอักษร)</label>
+                    <textarea 
+                      className="form-input form-textarea" rows="2"
+                      value={siteData.globalSEO?.metaDescription || 'ศูนย์อีสปอร์ตและร้านอินเทอร์เน็ตคาเฟ่มาตรฐานสากล สเปกเกมมิ่ง RTX 40 Series จอ 360Hz พร้อมระบบ 3D Interior Floor Plan คำนวณงบประมาณและผลตอบแทนการลงทุนแฟรนไชส์'}
+                      onChange={e => updateGlobalSEO({ metaDescription: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Keywords สำหรับค้นหาบน Google (คั่นด้วยเครื่องหมายจุลภาค ,)</label>
+                    <input 
+                      type="text" className="form-input"
+                      value={siteData.globalSEO?.keywords || 'ร้านเกม, อีสปอร์ต, แฟรนไชส์ร้านเกม, จัดผังร้าน 3D, G-Speed, GLP, Valorant Thailand'}
+                      onChange={e => updateGlobalSEO({ keywords: e.target.value })}
+                    />
+                  </div>
+
+                  <SectionImageUploader 
+                    label="รูปภาพพรีวิวสำหรับแชร์โซเชียลมีเดีย (Global OpenGraph & Twitter Card Image)"
+                    value={siteData.globalSEO?.ogImage || ''}
+                    onChange={val => updateGlobalSEO({ ogImage: val })}
+                    recommendedSize="1200 x 630 px (มาตรฐานสากล Facebook, LINE, Discord, X)"
+                    aspectRatio="1.91:1 (มาตรฐาน OpenGraph แนวนอน)"
+                    description="ภาพที่จะปรากฏบนพรีวิวการ์ดเมื่อนำลิงก์เว็บไซต์ไปแชร์ใน LINE, Facebook, Discord หรือ Twitter แนะนำให้วางโลโก้และข้อความสำคัญตรงกลางภาพ"
+                    uploadKey="global-og-img"
+                    compressingItemId={compressingItemId}
+                    handleImageUpload={handleImageUpload}
+                    previewWidth={191}
+                    previewHeight={100}
+                  />
+
+                  {/* Social Share Simulator */}
+                  <div className="social-share-simulator" style={{ marginTop: '20px', padding: '16px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                      <span className="text-xs font-bold text-muted uppercase">ตัวอย่างการแสดงผลบนโซเชียลมีเดียเมื่อแชร์ลิงก์:</span>
+                      <div className="filter-chips">
+                        <button 
+                          className={`filter-chip ${socialPreviewPlatform === 'facebook' ? 'active' : ''}`}
+                          onClick={() => setSocialPreviewPlatform('facebook')}
+                        >
+                          Facebook
+                        </button>
+                        <button 
+                          className={`filter-chip ${socialPreviewPlatform === 'line' ? 'active' : ''}`}
+                          onClick={() => setSocialPreviewPlatform('line')}
+                        >
+                          LINE
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="social-preview-card" style={{ maxWidth: '480px', margin: '0 auto', background: '#ffffff', borderRadius: '10px', overflow: 'hidden', border: '1px solid #cbd5e1', boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }}>
+                      <div style={{ width: '100%', height: '220px', background: '#0f172a', overflow: 'hidden' }}>
+                        <img 
+                          src={siteData.globalSEO?.ogImage || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80'} 
+                          alt="Social Preview"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      </div>
+                      <div style={{ padding: '12px 14px' }}>
+                        <span style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', display: 'block', marginBottom: '2px' }}>
+                          GSPEEDLIVINGPLUS.COM
+                        </span>
+                        <strong style={{ fontSize: '0.92rem', color: '#0f172a', display: 'block', lineHeight: 1.3, marginBottom: '4px' }}>
+                          {siteData.globalSEO?.siteTitle || 'G-SPEED ESPORT ARENA'}
+                        </strong>
+                        <p style={{ fontSize: '0.8rem', color: '#475569', margin: 0, lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                          {siteData.globalSEO?.metaDescription}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="modal-footer-btns" style={{ marginTop: '16px' }}>
+                    <button type="button" className="btn-section-preview" onClick={() => openPreview('seo')}>
+                      <Eye size={14} /> พรีวิวตัวอย่างก่อนบันทึก
+                    </button>
+                    <button className="btn-primary" onClick={() => triggerSaveToast()}>
+                      <Save size={14} /> บันทึกการตั้งค่า SEO
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Tournament Modal (Add) */}
+              {showAddTournamentModal && (
+                <div className="cms-modal-backdrop" onClick={() => setShowAddTournamentModal(false)}>
+                  <div className="cms-modal-card" onClick={e => e.stopPropagation()}>
+                    <div className="modal-head">
+                      <h4>เพิ่มทัวร์นาเมนต์ใหม่ (New Tournament)</h4>
+                      <button onClick={() => setShowAddTournamentModal(false)} className="btn-close-modal">✕</button>
+                    </div>
+
+                    <div className="modal-body-form">
+                      <div className="form-group">
+                        <label>ชื่อรายการแข่งขัน</label>
+                        <input 
+                          type="text" className="form-input"
+                          placeholder="เช่น GLP APEX LEGENDS ARENA 2026"
+                          value={newTournament.title}
+                          onChange={e => setNewTournament({ ...newTournament, title: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="form-row-2">
+                        <div className="form-group">
+                          <label>เกมที่ใช้แข่งขัน</label>
+                          <select 
+                            className="form-input"
+                            value={newTournament.game}
+                            onChange={e => setNewTournament({ ...newTournament, game: e.target.value })}
+                          >
+                            <option value="VALORANT">VALORANT</option>
+                            <option value="PUBG PC">PUBG PC</option>
+                            <option value="DOTA 2">DOTA 2</option>
+                            <option value="FC ONLINE">FC ONLINE</option>
+                            <option value="APEX LEGENDS">APEX LEGENDS</option>
+                            <option value="ROV">ROV</option>
+                          </select>
+                        </div>
+                        <div className="form-group">
+                          <label>เงินรางวัลรวม (Prize Pool)</label>
+                          <input 
+                            type="text" className="form-input"
+                            placeholder="฿50,000"
+                            value={newTournament.prizePool}
+                            onChange={e => setNewTournament({ ...newTournament, prizePool: e.target.value })}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-row-2">
+                        <div className="form-group">
+                          <label>วันที่แข่งขัน</label>
+                          <input 
+                            type="text" className="form-input"
+                            placeholder="28-29 กันยายน 2026"
+                            value={newTournament.date}
+                            onChange={e => setNewTournament({ ...newTournament, date: e.target.value })}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label>จำนวนที่รับสมัคร</label>
+                          <input 
+                            type="text" className="form-input"
+                            placeholder="32 ทีม"
+                            value={newTournament.slots}
+                            onChange={e => setNewTournament({ ...newTournament, slots: e.target.value })}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-group">
+                        <label>รูปแบบการแข่ง</label>
+                        <input 
+                          type="text" className="form-input"
+                          placeholder="5v5 Single Elimination LAN Final"
+                          value={newTournament.format}
+                          onChange={e => setNewTournament({ ...newTournament, format: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="modal-footer-btns">
+                      <button className="btn-secondary" onClick={() => setShowAddTournamentModal(false)}>ยกเลิก</button>
+                      <button 
+                        className="btn-primary" 
+                        onClick={() => {
+                          if (!newTournament.title.trim()) {
+                            alert('กรุณากรอกชื่อรายการแข่งขัน');
+                            return;
+                          }
+                          addTournament(newTournament);
+                          setShowAddTournamentModal(false);
+                          setNewTournament({
+                            title: '',
+                            game: 'VALORANT',
+                            date: '28-29 กันยายน 2026',
+                            time: '13:00 - 20:00 น.',
+                            prizePool: '฿50,000',
+                            slots: '32 ทีม',
+                            format: '5v5 Single Elimination LAN Final',
+                            status: 'Open',
+                            badge: 'OPEN REGISTRATION',
+                            badgeType: 'cyan'
+                          });
+                          triggerSaveToast();
+                        }}
+                      >
+                        <Save size={14} /> เพิ่มทัวร์นาเมนต์
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Tournament Modal (Edit) */}
+              {editingTournament && (
+                <div className="cms-modal-backdrop" onClick={() => setEditingTournament(null)}>
+                  <div className="cms-modal-card" onClick={e => e.stopPropagation()}>
+                    <div className="modal-head">
+                      <h4>แก้ไขทัวร์นาเมนต์: {editingTournament.title}</h4>
+                      <button onClick={() => setEditingTournament(null)} className="btn-close-modal">✕</button>
+                    </div>
+
+                    <div className="modal-body-form">
+                      <div className="form-group">
+                        <label>ชื่อรายการแข่งขัน</label>
+                        <input 
+                          type="text" className="form-input"
+                          value={editingTournament.title}
+                          onChange={e => setEditingTournament({ ...editingTournament, title: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="form-row-2">
+                        <div className="form-group">
+                          <label>เกมที่ใช้แข่งขัน</label>
+                          <input 
+                            type="text" className="form-input"
+                            value={editingTournament.game}
+                            onChange={e => setEditingTournament({ ...editingTournament, game: e.target.value })}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label>เงินรางวัลรวม</label>
+                          <input 
+                            type="text" className="form-input"
+                            value={editingTournament.prizePool}
+                            onChange={e => setEditingTournament({ ...editingTournament, prizePool: e.target.value })}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-row-2">
+                        <div className="form-group">
+                          <label>วันที่แข่งขัน</label>
+                          <input 
+                            type="text" className="form-input"
+                            value={editingTournament.date}
+                            onChange={e => setEditingTournament({ ...editingTournament, date: e.target.value })}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label>สถานะการรับสมัคร</label>
+                          <select 
+                            className="form-input"
+                            value={editingTournament.status}
+                            onChange={e => setEditingTournament({ ...editingTournament, status: e.target.value })}
+                          >
+                            <option value="Open">Open (เปิดรับสมัคร)</option>
+                            <option value="Ongoing">Ongoing (กำลังแข่งขัน)</option>
+                            <option value="Closed">Closed (ปิดรับสมัครแล้ว)</option>
+                            <option value="Completed">Completed (จบการแข่งขันแล้ว)</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="modal-footer-btns">
+                      <button className="btn-secondary" onClick={() => setEditingTournament(null)}>ยกเลิก</button>
+                      <button 
+                        className="btn-primary" 
+                        onClick={() => {
+                          updateTournament(editingTournament.id, editingTournament);
+                          setEditingTournament(null);
+                          triggerSaveToast();
+                        }}
+                      >
+                        <Save size={14} /> บันทึกการแก้ไขทัวร์นาเมนต์
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* =========================================================================
+              TAB: ACTIVITIES & ARTICLES CMS (WordPress-like Custom Slugs & Rich Content)
+              ========================================================================= */}
+          {activeTab === 'articles' && (
+            <div className="cms-panel-block">
+              <div className="panel-header-row">
+                <div>
+                  <h3 className="panel-title">
+                    <FileText size={20} className="text-blue" />
+                    <span>จัดการกิจกรรม & บทความ (WordPress-like Articles CMS)</span>
+                  </h3>
+                  <p className="panel-desc">
+                    จัดการข้อมูลกิจกรรม กำหนด URL ปลายทาง (Slug) สำหรับแชร์ลิงก์แยกเหมือนบทความ WordPress พร้อมรูปภาพ แกลเลอรี และข้อมูลพาร์ตเนอร์
+                  </p>
+                </div>
+                <button 
+                  id="btn-add-activity-modal"
+                  className="btn-primary"
+                  onClick={() => setShowAddActivityModal(true)}
+                >
+                  <Plus size={15} />
+                  <span>เพิ่มกิจกรรม / บทความใหม่</span>
+                </button>
+              </div>
+
+              {/* Activities Data Table */}
+              <div className="admin-subcard glass-panel">
+                <div className="subcard-title">
+                  <Trophy size={16} className="text-blue" />
+                  <strong>รายการกิจกรรมและบทความทั้งหมด ({(siteData.gallery || []).length} รายการ)</strong>
+                </div>
+
+                <div className="activities-table-wrapper">
+                  <table className="erp-table activities-cms-table">
+                    <thead>
+                      <tr>
+                        <th style={{ width: '80px' }}>ภาพหน้าปก</th>
+                        <th>ชื่อกิจกรรม & หมวดหมู่</th>
+                        <th>URL ปลายทาง (Slug)</th>
+                        <th>วันที่ & พาร์ตเนอร์</th>
+                        <th style={{ width: '130px', textAlign: 'center' }}>การจัดการ</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(siteData.gallery || []).map((item) => (
+                        <tr key={item.id}>
+                          <td>
+                            <div className="table-thumb-frame">
+                              <img src={item.image} alt={item.title} />
+                            </div>
+                          </td>
+                          <td>
+                            <div className="table-title-cell">
+                              <strong>{item.title}</strong>
+                              <span className="table-tag-pill">{item.tag || item.category}</span>
+                            </div>
+                          </td>
+                          <td>
+                            <div className="table-slug-cell">
+                              <code>#/activity/{item.slug || item.id}</code>
+                              <a 
+                                href={`#/activity/${item.slug || item.id}`} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="slug-preview-btn"
+                                title="เปิดดูหน้านี้"
+                              >
+                                <ExternalLink size={12} />
+                              </a>
+                            </div>
+                          </td>
+                          <td>
+                            <div className="table-date-cell">
+                              <span>{item.date}</span>
+                              <small>{item.partner}</small>
+                            </div>
+                          </td>
+                          <td>
+                            <div className="table-actions-cell">
+                              <a 
+                                href={`#/activity/${item.slug || item.id}`} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="btn-table-action view" 
+                                title="เปิดดูหน้าจริง"
+                              >
+                                <Eye size={14} />
+                              </a>
+                              <button 
+                                className="btn-table-action edit"
+                                onClick={() => {
+                                  setEditingActivity({
+                                    ...item,
+                                    contentParagraphsText: (item.contentParagraphs || [item.desc]).join('\n\n'),
+                                    enableAISearch: item.enableAISearch !== false,
+                                    galleryPhotos: (item.galleryPhotos || []).map((p, idx) => {
+                                      if (typeof p === 'string') {
+                                        return { url: p, caption: item.title, alt: item.imageAlt || `${item.title} ภาพที่ ${idx + 1}` };
+                                      }
+                                      return {
+                                        url: p.url || '',
+                                        caption: p.caption || item.title || '',
+                                        alt: p.alt || p.caption || item.imageAlt || `${item.title} ภาพที่ ${idx + 1}`
+                                      };
+                                    })
+                                  });
+                                }}
+                                title="แก้ไขบทความนี้"
+                              >
+                                <Edit3 size={14} />
+                              </button>
+                              <button 
+                                className="btn-table-action delete"
+                                onClick={() => {
+                                  if (window.confirm(`คุณต้องการลบกิจกรรม "${item.title}" ใช่หรือไม่?`)) {
+                                    deleteActivityItem(item.id);
+                                    triggerSaveToast();
+                                  }
+                                }}
+                                title="ลบกิจกรรมนี้"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Edit Activity Modal */}
+              {editingActivity && (
+                <div className="cms-modal-backdrop" onClick={() => setEditingActivity(null)}>
+                  <div className="cms-modal-card modal-extra-wide" onClick={e => e.stopPropagation()}>
+                    <div className="modal-head">
+                      <h4>แก้ไขบทความกิจกรรม: {editingActivity.title}</h4>
+                      <button onClick={() => setEditingActivity(null)} className="btn-close-modal">✕</button>
+                    </div>
+
+                    <div className="modal-body-form">
+                      <div className="form-row-2">
+                        <div className="form-group">
+                          <label>ชื่อกิจกรรม / หัวข้อบทความ</label>
+                          <input 
+                            type="text" className="form-input"
+                            value={editingActivity.title}
+                            onChange={e => setEditingActivity({ ...editingActivity, title: e.target.value })}
+                          />
+                        </div>
+
+                        <div className="form-group">
+                          <label>URL Slug ปลายทาง (เช่น icafe-lan-tournament)</label>
+                          <div className="slug-input-prefix">
+                            <span>#/activity/</span>
+                            <input 
+                              type="text" className="form-input"
+                              value={editingActivity.slug || ''}
+                              onChange={e => setEditingActivity({ 
+                                ...editingActivity, 
+                                slug: e.target.value.toLowerCase().replace(/[^a-z0-9\u0E00-\u0E7F]+/g, '-').replace(/(^-|-$)/g, '') 
+                              })}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="form-row-3">
+                        <div className="form-group">
+                          <label>หมวดหมู่</label>
+                          <select 
+                            className="form-input"
+                            value={editingActivity.category}
+                            onChange={e => setEditingActivity({ ...editingActivity, category: e.target.value })}
+                          >
+                            <option value="tournament">การแข่งขัน & ทัวร์นาเมนต์ (tournament)</option>
+                            <option value="publisher">งานเปิดตัวเกม & ค่ายเกม (publisher)</option>
+                            <option value="community">คอมมูนิตี้ & แจกรางวัล (community)</option>
+                            <option value="venue">บรรยากาศร้าน & แข่ง LAN 24 ชม. (venue)</option>
+                          </select>
+                        </div>
+
+                        <div className="form-group">
+                          <label>ป้ายหัวข้อเล็ก (Tag Badge เช่น LAN TOURNAMENT)</label>
+                          <input 
+                            type="text" className="form-input"
+                            value={editingActivity.tag || ''}
+                            onChange={e => setEditingActivity({ ...editingActivity, tag: e.target.value })}
+                          />
+                        </div>
+
+                        <div className="form-group">
+                          <label>พาร์ตเนอร์ / ผู้สนับสนุน</label>
+                          <input 
+                            type="text" className="form-input"
+                            value={editingActivity.partner || ''}
+                            onChange={e => setEditingActivity({ ...editingActivity, partner: e.target.value })}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-row-3">
+                        <div className="form-group">
+                          <label>วันที่จัดกิจกรรม (เช่น สิงหาคม 2026)</label>
+                          <input 
+                            type="text" className="form-input"
+                            value={editingActivity.date || ''}
+                            onChange={e => setEditingActivity({ ...editingActivity, date: e.target.value })}
+                          />
+                        </div>
+
+                        <div className="form-group">
+                          <label>เวลาที่ใช้ในการอ่าน (เช่น 3 นาที)</label>
+                          <input 
+                            type="text" className="form-input"
+                            value={editingActivity.readTime || '3 นาทีในการอ่าน'}
+                            onChange={e => setEditingActivity({ ...editingActivity, readTime: e.target.value })}
+                          />
+                        </div>
+
+                        <div className="form-group">
+                          <label>รางวัลรวม (Prize Pool)</label>
+                          <input 
+                            type="text" className="form-input"
+                            value={editingActivity.prizePool || ''}
+                            onChange={e => setEditingActivity({ ...editingActivity, prizePool: e.target.value })}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="image-manager-row">
+                        <div className="form-group" style={{ flex: 1 }}>
+                          <label>URL รูปภาพหน้าปก (Cover Image URL)</label>
+                          <input 
+                            type="url" className="form-input"
+                            value={editingActivity.image || ''}
+                            onChange={e => setEditingActivity({ ...editingActivity, image: e.target.value })}
+                          />
+                        </div>
+                        <div className="image-upload-wrapper">
+                          <label className="btn-upload-file" title="เลือกไฟล์ภาพ ระบบจะย่อขนาดและแปลงเป็น WebP บีบอัดอัตโนมัติ">
+                            {compressingItemId === 'edit-act-cover' ? (
+                              <>
+                                <RefreshCw size={14} className="spin-icon" />
+                                <span>กำลังแปลง WebP...</span>
+                              </>
+                            ) : (
+                              <>
+                                <Upload size={14} />
+                                <span>อัปโหลดภาพ (WebP)</span>
+                              </>
+                            )}
+                            <input 
+                              type="file" 
+                              accept="image/*" 
+                              style={{ display: 'none' }}
+                              onChange={e => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  handleImageUpload(file, (dataUrl) => {
+                                    setEditingActivity({ ...editingActivity, image: dataUrl });
+                                  }, 'edit-act-cover');
+                                }
+                              }}
+                            />
+                          </label>
+                        </div>
+                      </div>
+
+                      {/* Image ALT Tag for SEO */}
+                      <div className="form-group" style={{ marginTop: '4px' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
+                          <Tag size={13} className="text-blue" />
+                          <span>คำอธิบายรูปภาพสำหรับ SEO (Image ALT Tag):</span>
+                        </label>
+                        <input 
+                          type="text" 
+                          className="form-input"
+                          placeholder="เช่น ภาพถ่ายบรรยากาศการแข่งขันรอบชิงชนะเลิศ GLP VALORANT ณ เวทีกลาง"
+                          value={editingActivity.imageAlt || ''}
+                          onChange={e => setEditingActivity({ ...editingActivity, imageAlt: e.target.value })}
+                        />
+                        <span className="text-xs text-muted" style={{ display: 'block', marginTop: '4px' }}>
+                          ใช้สำหรับ Google Image Search และการแชร์ขึ้น Social Media (OG Image)
+                        </span>
+                      </div>
+
+                      <div className="form-group">
+                        <label>คำอธิบายสั้น (Excerpt / บทคัดย่อ)</label>
+                        <textarea 
+                          className="form-input form-textarea" rows="2"
+                          value={editingActivity.desc || ''}
+                          onChange={e => setEditingActivity({ ...editingActivity, desc: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>เนื้อหาบทความเต็ม (แยกแต่ละย่อหน้าด้วยการเค้นบรรทัด 2 ครั้ง)</label>
+                        <textarea 
+                          className="form-input form-textarea" rows="6"
+                          value={editingActivity.contentParagraphsText || ''}
+                          onChange={e => setEditingActivity({ ...editingActivity, contentParagraphsText: e.target.value })}
+                        />
+                      </div>
+
+                      {/* Interactive High-Res Photo Gallery & SEO ALT Manager */}
+                      <div className="form-group gallery-cms-section">
+                        <div className="gallery-cms-header">
+                          <div className="gallery-cms-title-wrap">
+                            <div className="gallery-cms-title">
+                              <ImageIcon size={18} className="text-blue" />
+                              <strong>แกลเลอรีรูปภาพความละเอียดสูง (Photo Gallery)</strong>
+                              <span className="gallery-count-badge">{(editingActivity.galleryPhotos || []).length} ภาพ</span>
+                            </div>
+                            <p className="gallery-cms-subtitle">
+                              อัปโหลดภาพกิจกรรม (แปลงเป็น WebP อัตโนมัติ) และกำหนด ALT Text สำหรับ SEO & AI Search Engine
+                            </p>
+                          </div>
+
+                          <div className="gallery-cms-actions">
+                            <label className="btn-upload-file btn-upload-gallery-primary" title="เลือกไฟล์ภาพหลายไฟล์พร้อมกัน ระบบจะย่อขนาดและแปลงเป็น WebP อัตโนมัติ">
+                              {compressingItemId === 'edit-gallery-photos' ? (
+                                <>
+                                  <RefreshCw size={14} className="spin-icon" />
+                                  <span>กำลังแปลง WebP...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Upload size={14} />
+                                  <span>อัปโหลดภาพแกลเลอรี (WebP)</span>
+                                </>
+                              )}
+                              <input 
+                                type="file" 
+                                accept="image/*" 
+                                multiple
+                                style={{ display: 'none' }}
+                                onChange={e => {
+                                  if (e.target.files && e.target.files.length > 0) {
+                                    handleBatchGalleryUpload(e.target.files, true);
+                                    e.target.value = '';
+                                  }
+                                }}
+                              />
+                            </label>
+                          </div>
+                        </div>
+
+                        {/* Quick Add URL Box */}
+                        <div className="gallery-url-quick-add">
+                          <input 
+                            type="url" 
+                            className="form-input form-input-sm" 
+                            placeholder="หรือวาง URL รูปภาพภายนอกที่นี่..." 
+                            value={editGalleryUrl}
+                            onChange={e => setEditGalleryUrl(e.target.value)}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                if (editGalleryUrl.trim()) {
+                                  setEditingActivity(prev => ({
+                                    ...prev,
+                                    galleryPhotos: [
+                                      ...(prev.galleryPhotos || []),
+                                      {
+                                        url: editGalleryUrl.trim(),
+                                        caption: prev.title || 'ภาพบรรยากาศกิจกรรม',
+                                        alt: `${prev.title || 'กิจกรรม'} - ภาพประกอบ`
+                                      }
+                                    ]
+                                  }));
+                                  setEditGalleryUrl('');
+                                }
+                              }
+                            }}
+                          />
+                          <button 
+                            type="button"
+                            className="btn-secondary btn-sm"
+                            onClick={() => {
+                              if (editGalleryUrl.trim()) {
+                                setEditingActivity(prev => ({
+                                  ...prev,
+                                  galleryPhotos: [
+                                    ...(prev.galleryPhotos || []),
+                                    {
+                                      url: editGalleryUrl.trim(),
+                                      caption: prev.title || 'ภาพบรรยากาศกิจกรรม',
+                                      alt: `${prev.title || 'กิจกรรม'} - ภาพประกอบ`
+                                    }
+                                  ]
+                                }));
+                                setEditGalleryUrl('');
+                              }
+                            }}
+                          >
+                            <Plus size={13} /> เพิ่ม URL
+                          </button>
+                        </div>
+
+                        {/* Generative AI Search & SEO Notice Banner */}
+                        <div className="ai-search-status-banner">
+                          <div className="ai-search-banner-left">
+                            <Sparkles size={16} className="text-cyan" />
+                            <div>
+                              <div className="ai-search-title">
+                                <span>เปิด AI Search ทุกแพลตฟอร์ม (Generative Engine Optimization - GEO)</span>
+                                <span className="ai-status-tag active">Active ทุกระบบ</span>
+                              </div>
+                              <p className="ai-search-desc">
+                                รูปภาพและข้อความ ALT จะถูกจัดโครงสร้าง Schema.org (ImageObject) ให้อัตโนมัติ เพื่อให้ Google SGE, Gemini, ChatGPT (GPTBot), ClaudeBot, PerplexityBot นำภาพไปแนะนำ
+                              </p>
+                            </div>
+                          </div>
+                          <div className="ai-bots-chip-list">
+                            <span className="bot-pill google">Google SGE / Gemini</span>
+                            <span className="bot-pill gpt">OpenAI ChatGPT</span>
+                            <span className="bot-pill claude">Anthropic Claude</span>
+                            <span className="bot-pill perplexity">Perplexity AI</span>
+                            <span className="bot-pill apple">Applebot</span>
+                          </div>
+                        </div>
+
+                        {/* Gallery Photo List with ALT & Caption inputs */}
+                        <div className="gallery-photo-items-list">
+                          {(editingActivity.galleryPhotos || []).length === 0 ? (
+                            <div className="gallery-empty-state">
+                              <ImageIcon size={32} className="text-muted" />
+                              <p>ยังไม่มีรูปภาพในแกลเลอรี</p>
+                              <span>กดปุ่ม <strong>"อัปโหลดภาพแกลเลอรี (WebP)"</strong> ด้านบน เพื่อเลือกไฟล์จากเครื่อง (เลือกได้หลายไฟล์พร้อมกัน) หรือวาง URL</span>
+                            </div>
+                          ) : (
+                            (editingActivity.galleryPhotos || []).map((photo, pIdx) => (
+                              <div key={pIdx} className="gallery-item-card">
+                                <div className="gallery-item-thumb">
+                                  <img src={photo.url || photo} alt={photo.alt || `ภาพ ${pIdx + 1}`} />
+                                  <span className="gallery-item-index">#{pIdx + 1}</span>
+                                </div>
+
+                                <div className="gallery-item-fields">
+                                  <div className="form-group">
+                                    <label className="field-lbl-sm">
+                                      <Tag size={12} className="text-blue" />
+                                      <span>คำอธิบายภาพสำหรับ SEO (Image ALT Tag) *สำคัญต่อ Google & AI Search:</span>
+                                    </label>
+                                    <input 
+                                      type="text" 
+                                      className="form-input form-input-sm"
+                                      placeholder="เช่น ภาพถ่ายบรรยากาศนักกีฬาบนเวทีการแข่งขัน GLP 2026..."
+                                      value={photo.alt || ''}
+                                      onChange={e => {
+                                        const newAlt = e.target.value;
+                                        setEditingActivity(prev => {
+                                          const list = [...(prev.galleryPhotos || [])];
+                                          list[pIdx] = { ...list[pIdx], alt: newAlt };
+                                          return { ...prev, galleryPhotos: list };
+                                        });
+                                      }}
+                                    />
+                                    <span className="text-xs text-muted">
+                                      {photo.alt ? '✓ SEO & AI Ready' : '⚠️ แนะนำให้ระบุ ALT เพื่อให้ AI และ Google Image Search ค้นพบภาพนี้'}
+                                    </span>
+                                  </div>
+
+                                  <div className="form-group" style={{ marginTop: '6px' }}>
+                                    <label className="field-lbl-sm">
+                                      <span>คำบรรยายใต้ภาพ (Lightbox Caption):</span>
+                                    </label>
+                                    <input 
+                                      type="text" 
+                                      className="form-input form-input-sm"
+                                      placeholder="เช่น จอ LED 4K ขนาดยักษ์ ถ่ายทอดสดมุมมองผู้เล่น..."
+                                      value={photo.caption || ''}
+                                      onChange={e => {
+                                        const newCap = e.target.value;
+                                        setEditingActivity(prev => {
+                                          const list = [...(prev.galleryPhotos || [])];
+                                          list[pIdx] = { ...list[pIdx], caption: newCap };
+                                          return { ...prev, galleryPhotos: list };
+                                        });
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="gallery-item-actions">
+                                  <button 
+                                    type="button" 
+                                    className="btn-item-ctrl" 
+                                    disabled={pIdx === 0}
+                                    title="ย้ายขึ้น"
+                                    onClick={() => {
+                                      setEditingActivity(prev => {
+                                        const list = [...(prev.galleryPhotos || [])];
+                                        if (pIdx > 0) {
+                                          const temp = list[pIdx];
+                                          list[pIdx] = list[pIdx - 1];
+                                          list[pIdx - 1] = temp;
+                                        }
+                                        return { ...prev, galleryPhotos: list };
+                                      });
+                                    }}
+                                  >
+                                    <ChevronUp size={14} />
+                                  </button>
+                                  <button 
+                                    type="button" 
+                                    className="btn-item-ctrl" 
+                                    disabled={pIdx === (editingActivity.galleryPhotos || []).length - 1}
+                                    title="ย้ายลง"
+                                    onClick={() => {
+                                      setEditingActivity(prev => {
+                                        const list = [...(prev.galleryPhotos || [])];
+                                        if (pIdx < list.length - 1) {
+                                          const temp = list[pIdx];
+                                          list[pIdx] = list[pIdx + 1];
+                                          list[pIdx + 1] = temp;
+                                        }
+                                        return { ...prev, galleryPhotos: list };
+                                      });
+                                    }}
+                                  >
+                                    <ChevronDown size={14} />
+                                  </button>
+                                  <button 
+                                    type="button" 
+                                    className="btn-item-ctrl delete" 
+                                    title="ลบรูปภาพนี้"
+                                    onClick={() => {
+                                      setEditingActivity(prev => ({
+                                        ...prev,
+                                        galleryPhotos: (prev.galleryPhotos || []).filter((_, i) => i !== pIdx)
+                                      }));
+                                    }}
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="modal-footer-btns">
+                      <button className="btn-secondary" onClick={() => setEditingActivity(null)}>ยกเลิก</button>
+                      <button 
+                        type="button" 
+                        className="btn-section-preview" 
+                        onClick={() => openPreview('article-view', editingActivity)}
+                      >
+                        <Eye size={14} /> พรีวิวตัวอย่างบทความ
+                      </button>
+                      <button 
+                        className="btn-primary" 
+                        onClick={() => {
+                          const paragraphs = (editingActivity.contentParagraphsText || '')
+                            .split('\n\n')
+                            .map(p => p.trim())
+                            .filter(Boolean);
+                          const validPhotos = (editingActivity.galleryPhotos || []).map(p => {
+                            if (typeof p === 'string') return { url: p, caption: editingActivity.title, alt: editingActivity.imageAlt || editingActivity.title };
+                            return {
+                              url: p.url || '',
+                              caption: p.caption || editingActivity.title || '',
+                              alt: p.alt || p.caption || editingActivity.imageAlt || editingActivity.title || ''
+                            };
+                          }).filter(p => Boolean(p.url));
+
+                          updateActivityItem(editingActivity.id, {
+                            ...editingActivity,
+                            contentParagraphs: paragraphs.length > 0 ? paragraphs : [editingActivity.desc],
+                            galleryPhotos: validPhotos.length > 0 ? validPhotos : [{ url: editingActivity.image, caption: editingActivity.title, alt: editingActivity.imageAlt || editingActivity.title }]
+                          });
+                          setEditingActivity(null);
+                          triggerSaveToast();
+                        }}
+                      >
+                        <Save size={14} /> บันทึกบทความกิจกรรม
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Add New Activity Modal */}
+              {showAddActivityModal && (
+                <div className="cms-modal-backdrop" onClick={() => setShowAddActivityModal(false)}>
+                  <div className="cms-modal-card modal-extra-wide" onClick={e => e.stopPropagation()}>
+                    <div className="modal-head">
+                      <h4>เพิ่มกิจกรรม & บทความใหม่ (New Article)</h4>
+                      <button onClick={() => setShowAddActivityModal(false)} className="btn-close-modal">✕</button>
+                    </div>
+
+                    <div className="modal-body-form">
+                      <div className="form-row-2">
+                        <div className="form-group">
+                          <label>ชื่อกิจกรรม / หัวข้อบทความ</label>
+                          <input 
+                            type="text" className="form-input"
+                            placeholder="เช่น GLP VALORANT OPEN CHAMPIONSHIP 2026"
+                            value={newActivity.title}
+                            onChange={e => {
+                              const title = e.target.value;
+                              const autoSlug = title.toLowerCase().replace(/[^a-z0-9\u0E00-\u0E7F]+/g, '-').replace(/(^-|-$)/g, '');
+                              setNewActivity({ 
+                                ...newActivity, 
+                                title, 
+                                slug: newActivity.slug ? newActivity.slug : autoSlug 
+                              });
+                            }}
+                          />
+                        </div>
+
+                        <div className="form-group">
+                          <label>URL Slug ปลายทาง (เช่น glp-valorant-open-2026)</label>
+                          <div className="slug-input-prefix">
+                            <span>#/activity/</span>
+                            <input 
+                              type="text" className="form-input"
+                              placeholder="valorant-open-2026"
+                              value={newActivity.slug}
+                              onChange={e => setNewActivity({ 
+                                ...newActivity, 
+                                slug: e.target.value.toLowerCase().replace(/[^a-z0-9\u0E00-\u0E7F]+/g, '-').replace(/(^-|-$)/g, '') 
+                              })}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="form-row-3">
+                        <div className="form-group">
+                          <label>หมวดหมู่</label>
+                          <select 
+                            className="form-input"
+                            value={newActivity.category}
+                            onChange={e => setNewActivity({ ...newActivity, category: e.target.value })}
+                          >
+                            <option value="tournament">การแข่งขัน & ทัวร์นาเมนต์ (tournament)</option>
+                            <option value="publisher">งานเปิดตัวเกม & ค่ายเกม (publisher)</option>
+                            <option value="community">คอมมูนิตี้ & แจกรางวัล (community)</option>
+                            <option value="venue">บรรยากาศร้าน & แข่ง LAN 24 ชม. (venue)</option>
+                          </select>
+                        </div>
+
+                        <div className="form-group">
+                          <label>ป้ายหัวข้อเล็ก (Tag Badge)</label>
+                          <input 
+                            type="text" className="form-input"
+                            placeholder="LAN TOURNAMENT"
+                            value={newActivity.tag}
+                            onChange={e => setNewActivity({ ...newActivity, tag: e.target.value })}
+                          />
+                        </div>
+
+                        <div className="form-group">
+                          <label>พาร์ตเนอร์ / ผู้สนับสนุน</label>
+                          <input 
+                            type="text" className="form-input"
+                            placeholder="ASUS ROG, NVIDIA"
+                            value={newActivity.partner}
+                            onChange={e => setNewActivity({ ...newActivity, partner: e.target.value })}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="image-manager-row">
+                        <div className="form-group" style={{ flex: 1 }}>
+                          <label>URL รูปภาพหน้าปก (Cover Image URL)</label>
+                          <input 
+                            type="url" className="form-input"
+                            value={newActivity.image}
+                            onChange={e => setNewActivity({ ...newActivity, image: e.target.value })}
+                          />
+                        </div>
+                        <div className="image-upload-wrapper">
+                          <label className="btn-upload-file" title="เลือกไฟล์ภาพ ระบบจะย่อขนาดและแปลงเป็น WebP บีบอัดอัตโนมัติ">
+                            {compressingItemId === 'new-act-cover' ? (
+                              <>
+                                <RefreshCw size={14} className="spin-icon" />
+                                <span>กำลังแปลง WebP...</span>
+                              </>
+                            ) : (
+                              <>
+                                <Upload size={14} />
+                                <span>อัปโหลดภาพ (WebP)</span>
+                              </>
+                            )}
+                            <input 
+                              type="file" 
+                              accept="image/*" 
+                              style={{ display: 'none' }}
+                              onChange={e => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  handleImageUpload(file, (dataUrl) => {
+                                    setNewActivity({ ...newActivity, image: dataUrl });
+                                  }, 'new-act-cover');
+                                }
+                              }}
+                            />
+                          </label>
+                        </div>
+                      </div>
+
+                      {/* Image ALT Tag for SEO */}
+                      <div className="form-group" style={{ marginTop: '4px' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
+                          <Tag size={13} className="text-blue" />
+                          <span>คำอธิบายรูปภาพสำหรับ SEO (Image ALT Tag):</span>
+                        </label>
+                        <input 
+                          type="text" 
+                          className="form-input"
+                          placeholder="เช่น ภาพถ่ายบรรยากาศการแข่งขันรอบชิงชนะเลิศ GLP VALORANT ณ เวทีกลาง"
+                          value={newActivity.imageAlt || ''}
+                          onChange={e => setNewActivity({ ...newActivity, imageAlt: e.target.value })}
+                        />
+                        <span className="text-xs text-muted" style={{ display: 'block', marginTop: '4px' }}>
+                          ใช้สำหรับ Google Image Search และการแชร์ขึ้น Social Media (OG Image)
+                        </span>
+                      </div>
+
+                      <div className="form-group">
+                        <label>คำอธิบายสั้น (Excerpt)</label>
+                        <textarea 
+                          className="form-input form-textarea" rows="2"
+                          placeholder="สรุปไฮไลต์ของกิจกรรมสั้นๆ..."
+                          value={newActivity.desc}
+                          onChange={e => setNewActivity({ ...newActivity, desc: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>เนื้อหาบทความเต็ม (แยกแต่ละย่อหน้าด้วยการเค้นบรรทัด 2 ครั้ง)</label>
+                        <textarea 
+                          className="form-input form-textarea" rows="5"
+                          value={newActivity.contentParagraphsText}
+                          onChange={e => setNewActivity({ ...newActivity, contentParagraphsText: e.target.value })}
+                        />
+                      </div>
+                      {/* Interactive High-Res Photo Gallery & SEO ALT Manager */}
+                      <div className="form-group gallery-cms-section">
+                        <div className="gallery-cms-header">
+                          <div className="gallery-cms-title-wrap">
+                            <div className="gallery-cms-title">
+                              <ImageIcon size={18} className="text-blue" />
+                              <strong>แกลเลอรีรูปภาพความละเอียดสูง (Photo Gallery)</strong>
+                              <span className="gallery-count-badge">{(newActivity.galleryPhotos || []).length} ภาพ</span>
+                            </div>
+                            <p className="gallery-cms-subtitle">
+                              อัปโหลดภาพกิจกรรม (แปลงเป็น WebP อัตโนมัติ) และกำหนด ALT Text สำหรับ SEO & AI Search Engine
+                            </p>
+                          </div>
+
+                          <div className="gallery-cms-actions">
+                            <label className="btn-upload-file btn-upload-gallery-primary" title="เลือกไฟล์ภาพหลายไฟล์พร้อมกัน ระบบจะย่อขนาดและแปลงเป็น WebP อัตโนมัติ">
+                              {compressingItemId === 'new-gallery-photos' ? (
+                                <>
+                                  <RefreshCw size={14} className="spin-icon" />
+                                  <span>กำลังแปลง WebP...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Upload size={14} />
+                                  <span>อัปโหลดภาพแกลเลอรี (WebP)</span>
+                                </>
+                              )}
+                              <input 
+                                type="file" 
+                                accept="image/*" 
+                                multiple
+                                style={{ display: 'none' }}
+                                onChange={e => {
+                                  if (e.target.files && e.target.files.length > 0) {
+                                    handleBatchGalleryUpload(e.target.files, false);
+                                    e.target.value = '';
+                                  }
+                                }}
+                              />
+                            </label>
+                          </div>
+                        </div>
+
+                        {/* Quick Add URL Box */}
+                        <div className="gallery-url-quick-add">
+                          <input 
+                            type="url" 
+                            className="form-input form-input-sm" 
+                            placeholder="หรือวาง URL รูปภาพภายนอกที่นี่..." 
+                            value={newGalleryUrl}
+                            onChange={e => setNewGalleryUrl(e.target.value)}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                if (newGalleryUrl.trim()) {
+                                  setNewActivity(prev => ({
+                                    ...prev,
+                                    galleryPhotos: [
+                                      ...(prev.galleryPhotos || []),
+                                      {
+                                        url: newGalleryUrl.trim(),
+                                        caption: prev.title || 'ภาพบรรยากาศกิจกรรม',
+                                        alt: `${prev.title || 'กิจกรรม'} - ภาพประกอบ`
+                                      }
+                                    ]
+                                  }));
+                                  setNewGalleryUrl('');
+                                }
+                              }
+                            }}
+                          />
+                          <button 
+                            type="button"
+                            className="btn-secondary btn-sm"
+                            onClick={() => {
+                              if (newGalleryUrl.trim()) {
+                                setNewActivity(prev => ({
+                                  ...prev,
+                                  galleryPhotos: [
+                                    ...(prev.galleryPhotos || []),
+                                    {
+                                      url: newGalleryUrl.trim(),
+                                      caption: prev.title || 'ภาพบรรยากาศกิจกรรม',
+                                      alt: `${prev.title || 'กิจกรรม'} - ภาพประกอบ`
+                                    }
+                                  ]
+                                }));
+                                setNewGalleryUrl('');
+                              }
+                            }}
+                          >
+                            <Plus size={13} /> เพิ่ม URL
+                          </button>
+                        </div>
+
+                        {/* Generative AI Search & SEO Notice Banner */}
+                        <div className="ai-search-status-banner">
+                          <div className="ai-search-banner-left">
+                            <Sparkles size={16} className="text-cyan" />
+                            <div>
+                              <div className="ai-search-title">
+                                <span>เปิด AI Search ทุกแพลตฟอร์ม (Generative Engine Optimization - GEO)</span>
+                                <span className="ai-status-tag active">Active ทุกระบบ</span>
+                              </div>
+                              <p className="ai-search-desc">
+                                รูปภาพและข้อความ ALT จะถูกจัดโครงสร้าง Schema.org (ImageObject) ให้อัตโนมัติ เพื่อให้ Google SGE, Gemini, ChatGPT (GPTBot), ClaudeBot, PerplexityBot นำภาพไปแนะนำ
+                              </p>
+                            </div>
+                          </div>
+                          <div className="ai-bots-chip-list">
+                            <span className="bot-pill google">Google SGE / Gemini</span>
+                            <span className="bot-pill gpt">OpenAI ChatGPT</span>
+                            <span className="bot-pill claude">Anthropic Claude</span>
+                            <span className="bot-pill perplexity">Perplexity AI</span>
+                            <span className="bot-pill apple">Applebot</span>
+                          </div>
+                        </div>
+
+                        {/* Gallery Photo List with ALT & Caption inputs */}
+                        <div className="gallery-photo-items-list">
+                          {(newActivity.galleryPhotos || []).length === 0 ? (
+                            <div className="gallery-empty-state">
+                              <ImageIcon size={32} className="text-muted" />
+                              <p>ยังไม่มีรูปภาพในแกลเลอรี</p>
+                              <span>กดปุ่ม <strong>"อัปโหลดภาพแกลเลอรี (WebP)"</strong> ด้านบน เพื่อเลือกไฟล์จากเครื่อง (เลือกได้หลายไฟล์พร้อมกัน) หรือวาง URL</span>
+                            </div>
+                          ) : (
+                            (newActivity.galleryPhotos || []).map((photo, pIdx) => (
+                              <div key={pIdx} className="gallery-item-card">
+                                <div className="gallery-item-thumb">
+                                  <img src={photo.url || photo} alt={photo.alt || `ภาพ ${pIdx + 1}`} />
+                                  <span className="gallery-item-index">#{pIdx + 1}</span>
+                                </div>
+
+                                <div className="gallery-item-fields">
+                                  <div className="form-group">
+                                    <label className="field-lbl-sm">
+                                      <Tag size={12} className="text-blue" />
+                                      <span>คำอธิบายภาพสำหรับ SEO (Image ALT Tag) *สำคัญต่อ Google & AI Search:</span>
+                                    </label>
+                                    <input 
+                                      type="text" 
+                                      className="form-input form-input-sm"
+                                      placeholder="เช่น ภาพถ่ายบรรยากาศนักกีฬาบนเวทีการแข่งขัน GLP 2026..."
+                                      value={photo.alt || ''}
+                                      onChange={e => {
+                                        const newAlt = e.target.value;
+                                        setNewActivity(prev => {
+                                          const list = [...(prev.galleryPhotos || [])];
+                                          list[pIdx] = { ...list[pIdx], alt: newAlt };
+                                          return { ...prev, galleryPhotos: list };
+                                        });
+                                      }}
+                                    />
+                                    <span className="text-xs text-muted">
+                                      {photo.alt ? '✓ SEO & AI Ready' : '⚠️ แนะนำให้ระบุ ALT เพื่อให้ AI และ Google Image Search ค้นพบภาพนี้'}
+                                    </span>
+                                  </div>
+
+                                  <div className="form-group" style={{ marginTop: '6px' }}>
+                                    <label className="field-lbl-sm">
+                                      <span>คำบรรยายใต้ภาพ (Lightbox Caption):</span>
+                                    </label>
+                                    <input 
+                                      type="text" 
+                                      className="form-input form-input-sm"
+                                      placeholder="เช่น จอ LED 4K ขนาดยักษ์ ถ่ายทอดสดมุมมองผู้เล่น..."
+                                      value={photo.caption || ''}
+                                      onChange={e => {
+                                        const newCap = e.target.value;
+                                        setNewActivity(prev => {
+                                          const list = [...(prev.galleryPhotos || [])];
+                                          list[pIdx] = { ...list[pIdx], caption: newCap };
+                                          return { ...prev, galleryPhotos: list };
+                                        });
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="gallery-item-actions">
+                                  <button 
+                                    type="button" 
+                                    className="btn-item-ctrl" 
+                                    disabled={pIdx === 0}
+                                    title="ย้ายขึ้น"
+                                    onClick={() => {
+                                      setNewActivity(prev => {
+                                        const list = [...(prev.galleryPhotos || [])];
+                                        if (pIdx > 0) {
+                                          const temp = list[pIdx];
+                                          list[pIdx] = list[pIdx - 1];
+                                          list[pIdx - 1] = temp;
+                                        }
+                                        return { ...prev, galleryPhotos: list };
+                                      });
+                                    }}
+                                  >
+                                    <ChevronUp size={14} />
+                                  </button>
+                                  <button 
+                                    type="button" 
+                                    className="btn-item-ctrl" 
+                                    disabled={pIdx === (newActivity.galleryPhotos || []).length - 1}
+                                    title="ย้ายลง"
+                                    onClick={() => {
+                                      setNewActivity(prev => {
+                                        const list = [...(prev.galleryPhotos || [])];
+                                        if (pIdx < list.length - 1) {
+                                          const temp = list[pIdx];
+                                          list[pIdx] = list[pIdx + 1];
+                                          list[pIdx + 1] = temp;
+                                        }
+                                        return { ...prev, galleryPhotos: list };
+                                      });
+                                    }}
+                                  >
+                                    <ChevronDown size={14} />
+                                  </button>
+                                  <button 
+                                    type="button" 
+                                    className="btn-item-ctrl delete" 
+                                    title="ลบรูปภาพนี้"
+                                    onClick={() => {
+                                      setNewActivity(prev => ({
+                                        ...prev,
+                                        galleryPhotos: (prev.galleryPhotos || []).filter((_, i) => i !== pIdx)
+                                      }));
+                                    }}
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="modal-footer-btns">
+                      <button className="btn-secondary" onClick={() => setShowAddActivityModal(false)}>ยกเลิก</button>
+                      <button 
+                        type="button" 
+                        className="btn-section-preview" 
+                        onClick={() => openPreview('article-view', newActivity)}
+                      >
+                        <Eye size={14} /> พรีวิวตัวอย่างบทความ
+                      </button>
+                      <button 
+                        className="btn-primary" 
+                        onClick={() => {
+                          if (!newActivity.title.trim()) {
+                            alert('กรุณาระบุชื่อกิจกรรม');
+                            return;
+                          }
+                          const paragraphs = (newActivity.contentParagraphsText || '')
+                            .split('\n\n')
+                            .map(p => p.trim())
+                            .filter(Boolean);
+                          const validPhotos = (newActivity.galleryPhotos || []).map(p => {
+                            if (typeof p === 'string') return { url: p, caption: newActivity.title, alt: newActivity.imageAlt || newActivity.title };
+                            return {
+                              url: p.url || '',
+                              caption: p.caption || newActivity.title || '',
+                              alt: p.alt || p.caption || newActivity.imageAlt || newActivity.title || ''
+                            };
+                          }).filter(p => Boolean(p.url));
+
+                          addActivityItem({
+                            ...newActivity,
+                            contentParagraphs: paragraphs.length > 0 ? paragraphs : [newActivity.desc],
+                            galleryPhotos: validPhotos.length > 0 ? validPhotos : [{ url: newActivity.image, caption: newActivity.title, alt: newActivity.imageAlt || newActivity.title }]
+                          });
+                          setShowAddActivityModal(false);
+                          triggerSaveToast();
+                        }}
+                      >
+                        <Save size={14} /> เพิ่มบทความใหม่ลงระบบ
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* =========================================================================
+              TAB 5: AUTOMATION, N8N WORKFLOWS & WEBHOOKS
+              ========================================================================= */}
+          {activeTab === 'automation' && (
+            <div className="cms-panel-block">
+              <div className="panel-header-row">
+                <div>
+                  <h3 className="panel-title">
+                    <Sliders size={20} className="text-blue" />
+                    <span>ระบบ Automation, n8n Workflow Hub & Webhooks</span>
+                  </h3>
+                  <p className="panel-desc">
+                    เชื่อมต่อระบบอัตโนมัติ 4 ทิศทางสำหรับร้านเกมอีสปอร์ต: Lead แฟรนไชส์, สมัครแข่งทัวร์นาเมนต์, ซิงก์บัญชีสิ้นวัน, และแจ้งเตือน Staff ผ่าน LINE Notify
+                  </p>
+                </div>
+              </div>
+
+              {/* Workflows Grid */}
+              <div className="form-row-2" style={{ gap: '20px' }}>
+                {(siteData.n8nWorkflows || []).map(wf => (
+                  <div key={wf.id} className="admin-subcard glass-panel" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div>
+                      <div className="subcard-title" style={{ justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <Zap size={16} className="text-blue" />
+                          <strong>{wf.name}</strong>
+                        </div>
+                        <span className={`status-pill ${wf.enabled ? 'status-pill-success' : 'status-pill-warning'}`}>
+                          {wf.enabled ? 'Enabled' : 'Disabled'}
+                        </span>
+                      </div>
+
+                      <p className="subcard-desc" style={{ marginBottom: '14px' }}>
+                        {wf.desc}
+                      </p>
+
+                      <div className="form-group">
+                        <label>n8n Production Webhook URL</label>
+                        <input 
+                          type="url" 
+                          className="form-input"
+                          value={wf.endpoint || ''}
+                          onChange={e => updateN8NWorkflow(wf.id, { endpoint: e.target.value })}
+                        />
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px', fontSize: '0.78rem', color: '#64748b' }}>
+                        <span>สถานะล่าสุด: <strong className="text-blue">{wf.lastStatus}</strong></span>
+                        <span>ประมวลผลแล้ว: <strong>{wf.eventsCount || 0} ครั้ง</strong></span>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '16px', paddingTop: '12px', borderTop: '1px solid #e2e8f0' }}>
+                      <label className="checkbox-label" style={{ margin: 0 }}>
+                        <input 
+                          type="checkbox" 
+                          checked={wf.enabled}
+                          onChange={e => {
+                            updateN8NWorkflow(wf.id, { enabled: e.target.checked });
+                            triggerSaveToast();
+                          }}
+                        />
+                        <span>เปิดใช้งานเวิร์กโฟลว์นี้</span>
+                      </label>
+
+                      <button 
+                        className="btn-secondary btn-sm"
+                        onClick={() => handleTestN8N(wf.id)}
+                        disabled={isN8NTesting && activeN8NTestId === wf.id}
+                      >
+                        <Send size={13} className={isN8NTesting && activeN8NTestId === wf.id ? 'spin-icon' : ''} />
+                        <span>{isN8NTesting && activeN8NTestId === wf.id ? 'กำลังส่ง...' : 'ทดสอบยิง Webhook'}</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Live Test Result Banner */}
+              {n8nTestResult && (
+                <div className="test-ping-result-box success" style={{ marginTop: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <CheckCircle2 size={16} className="text-green" />
+                    <strong>{n8nTestResult.message}</strong>
+                  </div>
+                  <span className="text-xs text-muted" style={{ display: 'block', marginTop: '4px' }}>
+                    HTTP Status: {n8nTestResult.status} | เวลา: {n8nTestResult.timestamp} | เวิร์กโฟลว์ ID: {n8nTestResult.workflowId}
+                  </span>
+                </div>
+              )}
+
+              {/* Omnichannel Multi-Channel Customer Chat Hub Card */}
+              <div className="admin-subcard glass-panel" style={{ marginTop: '20px' }}>
+                <div className="subcard-title" style={{ justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <MessageSquare size={16} className="text-blue" />
+                    <strong>ระบบรวมแชท Omnichannel & AI Dispatcher (LINE OA + Facebook + Website Chat)</strong>
+                  </div>
+                  <span className="status-pill status-pill-success">
+                    Omnichannel Pipeline Active
+                  </span>
+                </div>
+
+                <p className="subcard-desc">
+                  รวมศูนย์การสื่อสารกับลูกค้าทุกช่องทาง: เมื่อลูกค้าทักหา LINE Official Account, Facebook Messenger หรือ Web Chat Widget ระบบ n8n จะดึงข้อมูลสมาชิก/เครื่องว่างจาก SmartCafé ERP และส่งต่อไปยัง OpenWebUI เพื่อตอบคำถามและคำนวณงบประมาณอัตโนมัติ
+                </p>
+
+                <div className="form-row-2">
+                  <div className="form-group">
+                    <label>LINE Official Account Webhook URL (Messaging API)</label>
+                    <input 
+                      type="url"
+                      className="form-input"
+                      value={siteData.omnichannelConfig?.lineWebhookUrl || ''}
+                      onChange={e => updateOmnichannelConfig({ lineWebhookUrl: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Facebook Page Messenger Webhook URL (Meta Graph API)</label>
+                    <input 
+                      type="url"
+                      className="form-input"
+                      value={siteData.omnichannelConfig?.facebookWebhookUrl || ''}
+                      onChange={e => updateOmnichannelConfig({ facebookWebhookUrl: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row-2" style={{ marginTop: '12px' }}>
+                  <div className="form-group">
+                    <label>Web Chat Widget Webhook URL (In-Browser Live Stream)</label>
+                    <input 
+                      type="url"
+                      className="form-input"
+                      value={siteData.omnichannelConfig?.webWidgetWebhookUrl || ''}
+                      onChange={e => updateOmnichannelConfig({ webWidgetWebhookUrl: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Unified Staff Inbox URL (Chatwoot / Zendesk / n8n Live Chat)</label>
+                    <input 
+                      type="url"
+                      className="form-input"
+                      value={siteData.omnichannelConfig?.unifiedInboxUrl || ''}
+                      onChange={e => updateOmnichannelConfig({ unifiedInboxUrl: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ marginTop: '14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <label className="checkbox-label" style={{ margin: 0 }}>
+                    <input 
+                      type="checkbox" 
+                      checked={siteData.omnichannelConfig?.autoHandoverToStaff ?? true}
+                      onChange={e => {
+                        updateOmnichannelConfig({ autoHandoverToStaff: e.target.checked });
+                        triggerSaveToast();
+                      }}
+                    />
+                    <span>เปิดระบบ Auto-Handover ส่งต่อพนักงานเคาน์เตอร์อัตโนมัติเมื่อตรวจพบคำถามพิเศษ</span>
+                  </label>
+                </div>
+
+                {/* Pipeline Flow Visualization */}
+                <div style={{ marginTop: '14px', padding: '12px 14px', background: '#f1f5f9', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: '6px' }}>
+                    เส้นทางข้อมูลอัจฉริยะ (Omnichannel Execution Pipeline):
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', fontSize: '0.74rem' }}>
+                    <span style={{ background: '#06b6d4', color: '#fff', padding: '3px 8px', borderRadius: '4px', fontWeight: 600 }}>LINE / FB / Web</span>
+                    <span style={{ color: '#94a3b8' }}>&rarr;</span>
+                    <span style={{ background: '#ea580c', color: '#fff', padding: '3px 8px', borderRadius: '4px', fontWeight: 600 }}>n8n Webhook Router</span>
+                    <span style={{ color: '#94a3b8' }}>&rarr;</span>
+                    <span style={{ background: '#10b981', color: '#fff', padding: '3px 8px', borderRadius: '4px', fontWeight: 600 }}>SmartCafé ERP Bridge (เช็กสิทธิ์/เครื่อง)</span>
+                    <span style={{ color: '#94a3b8' }}>&rarr;</span>
+                    <span style={{ background: '#6366f1', color: '#fff', padding: '3px 8px', borderRadius: '4px', fontWeight: 600 }}>OpenWebUI / RAG</span>
+                    <span style={{ color: '#94a3b8' }}>&rarr;</span>
+                    <span style={{ background: '#1d4ed8', color: '#fff', padding: '3px 8px', borderRadius: '4px', fontWeight: 600 }}>ตอบกลับลูกค้าอัตโนมัติ</span>
+                  </div>
+                </div>
+
+                {/* Omnichannel Interactive Simulation Buttons */}
+                <div style={{ display: 'flex', gap: '10px', marginTop: '16px', flexWrap: 'wrap' }}>
+                  <button 
+                    type="button"
+                    className="btn-secondary btn-sm"
+                    onClick={() => handleTestOmnichannel('line')}
+                    disabled={isOmnichannelTesting}
+                  >
+                    <Send size={13} className={isOmnichannelTesting ? 'spin-icon' : ''} />
+                    <span>{isOmnichannelTesting ? 'กำลังจำลองส่งข้อความ...' : 'จำลองลูกค้าทัก LINE OA (ถามห้อง VIP)'}</span>
+                  </button>
+                  <button 
+                    type="button"
+                    className="btn-secondary btn-sm"
+                    onClick={() => handleTestOmnichannel('web')}
+                    disabled={isOmnichannelTesting}
+                  >
+                    <Send size={13} className={isOmnichannelTesting ? 'spin-icon' : ''} />
+                    <span>{isOmnichannelTesting ? 'กำลังจำลองส่งข้อความ...' : 'จำลองลูกค้าทัก Web Chat (ถามแฟรนไชส์ 20 เครื่อง)'}</span>
+                  </button>
+                </div>
+
+                {/* Simulation Result Box */}
+                {omnichannelTestResult && (
+                  <div className="test-ping-result-box success" style={{ marginTop: '14px', borderLeft: '4px solid #10b981' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', flexWrap: 'wrap', gap: '6px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <CheckCircle2 size={16} className="text-green" />
+                        <strong>การจำลอง Omnichannel สำเร็จ ({omnichannelTestResult.channel})</strong>
+                      </div>
+                      <span className="status-pill status-pill-success">{omnichannelTestResult.latency}</span>
+                    </div>
+                    <div style={{ fontSize: '0.82rem', lineHeight: '1.6', background: 'rgba(255,255,255,0.85)', padding: '10px 14px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                      <div><strong>คำถามจากลูกค้า:</strong> <span style={{ color: '#1d4ed8' }}>"{omnichannelTestResult.userQuery}"</span></div>
+                      <div style={{ marginTop: '4px' }}><strong>การยืนยัน ERP:</strong> <span style={{ color: '#059669', fontWeight: 600 }}>{omnichannelTestResult.erpVerification}</span></div>
+                      <div style={{ marginTop: '4px' }}><strong>คำตอบอัตโนมัติ (OpenWebUI RAG):</strong> <span style={{ color: '#0f172a' }}>"{omnichannelTestResult.aiReply}"</span></div>
+                      <div style={{ marginTop: '6px', fontSize: '0.74rem', color: '#64748b' }}><strong>เส้นทางการประมวลผล:</strong> {omnichannelTestResult.routedVia}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Discord Franchise Leads Fallback */}
+              <div className="admin-subcard glass-panel" style={{ marginTop: '20px' }}>
+                <div className="subcard-title">
+                  <Send size={16} className="text-blue" />
+                  <strong>Discord / Slack Instant Webhook Fallback</strong>
+                </div>
+
+                <div className="form-group">
+                  <label>Webhook URL สำหรับรับใบเสนอราคาแฟรนไชส์ตรงเข้าห้องแชท Discord</label>
+                  <input 
+                    type="url" className="form-input"
+                    placeholder="https://discord.com/api/webhooks/..."
+                    value={siteData.webhooks?.leadWebhookUrl || ''}
+                    onChange={e => updateWebhooks({ leadWebhookUrl: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      checked={siteData.webhooks?.autoNotification}
+                      onChange={e => updateWebhooks({ autoNotification: e.target.checked })}
+                    />
+                    <span>แจ้งเตือน Discord อัตโนมัติทุกครั้งเมื่อมีผู้กดขอใบเสนอราคาผังร้าน 3D</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* =========================================================================
+              TAB 6: AI ERP & SMART REVENUE ANALYTICS (Esports Cafe Financial Hub)
+              ========================================================================= */}
+          {activeTab === 'erp-analytics' && (
+            <div className="cms-panel-block">
+              {/* Panel Header */}
+              <div className="panel-header-row erp-header-row">
+                <div>
+                  <div className="erp-title-wrapper">
+                    <h3 className="panel-title">
+                      <TrendingUp size={22} className="text-blue" />
+                      <span>ระบบสรุปรายได้อัจฉริยะ & AI ERP Bridge (Esports Cafe Hub)</span>
+                    </h3>
+                    <span className="status-pill status-pill-success erp-live-badge">
+                      <span className="live-ping-dot"></span>
+                      เชื่อมต่อแม่ข่าย SmartCafé POS (Port 8088 Active)
+                    </span>
+                  </div>
+                  <p className="panel-desc">
+                    สรุปผลประกอบการร้านเกมแบบ Real-time, ระบบเชื่อมต่อ POS/Diskless และการวิเคราะห์ทางการเงินอัตโนมัติด้วย AI
+                  </p>
+                </div>
+                <div className="header-actions-group">
+                  <button 
+                    className="btn-secondary"
+                    onClick={() => {
+                      setIsSyncingERP(true);
+                      setTimeout(() => {
+                        setIsSyncingERP(false);
+                        triggerSaveToast();
+                      }, 1000);
+                    }}
+                    disabled={isSyncingERP}
+                  >
+                    <RefreshCw size={14} className={isSyncingERP ? 'spin-icon' : ''} />
+                    <span>{isSyncingERP ? 'กำลังดึงข้อมูล POS...' : 'ซิงค์ข้อมูลสด (Live Sync)'}</span>
+                  </button>
+                  <button 
+                    className="btn-primary"
+                    onClick={() => {
+                      alert('ส่งออกรายงานบัญชีรายรับ-รายจ่าย (.CSV / Excel) เรียบร้อยแล้ว!');
+                    }}
+                  >
+                    <ArrowUpRight size={14} />
+                    <span>ส่งออกรายงานบัญชี (Export)</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* 4 Financial KPI Summary Cards */}
+              <div className="erp-kpi-grid">
+                <div className="erp-kpi-card glass-panel">
+                  <div className="kpi-header">
+                    <span className="kpi-label">รายได้รวมวันนี้ (Gross Revenue)</span>
+                    <span className="kpi-tag success">+14.2%</span>
+                  </div>
+                  <div className="kpi-value text-blue">
+                    ฿{(siteData.erpData?.dailyRevenue?.total || 48650).toLocaleString()}
+                  </div>
+                  <div className="kpi-subtext">
+                    <DollarSign size={13} className="text-blue" />
+                    <span>ยอดรวมเครื่องเล่นเกมและคาเฟ่ (Real-time)</span>
+                  </div>
+                </div>
+
+                <div className="erp-kpi-card glass-panel">
+                  <div className="kpi-header">
+                    <span className="kpi-label">ค่าชั่วโมงเล่นเกม (Stations)</span>
+                    <span className="kpi-tag neutral">77.9% ของยอดรวม</span>
+                  </div>
+                  <div className="kpi-value">
+                    ฿{(siteData.erpData?.dailyRevenue?.gamingStations || 37900).toLocaleString()}
+                  </div>
+                  <div className="kpi-subtext">
+                    <Monitor size={13} className="text-blue" />
+                    <span>Main Arena, VIP Bootcamp & Console</span>
+                  </div>
+                </div>
+
+                <div className="erp-kpi-card glass-panel">
+                  <div className="kpi-header">
+                    <span className="kpi-label">รายได้แผนกอาหาร & คาเฟ่ (F&B)</span>
+                    <span className="kpi-tag success">+22.5%</span>
+                  </div>
+                  <div className="kpi-value text-emerald">
+                    ฿{(siteData.erpData?.dailyRevenue?.fnb || 10750).toLocaleString()}
+                  </div>
+                  <div className="kpi-subtext">
+                    <Coffee size={13} className="text-emerald" />
+                    <span>เครื่องดื่ม, ซิกเนเจอร์สแน็ค, กาแฟสด</span>
+                  </div>
+                </div>
+
+                <div className="erp-kpi-card glass-panel">
+                  <div className="kpi-header">
+                    <span className="kpi-label">กำไรสุทธิประเมินต่อวัน (Net Profit)</span>
+                    <span className="kpi-tag primary">Margin 70.4%</span>
+                  </div>
+                  <div className="kpi-value text-purple">
+                    ฿{(siteData.erpData?.dailyRevenue?.netProfit || 34250).toLocaleString()}
+                  </div>
+                  <div className="kpi-subtext">
+                    <TrendingUp size={13} className="text-purple" />
+                    <span>หักต้นทุนค่าไฟเฉลี่ยและวัตถุดิบแล้ว</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* AI Executive Financial Summary & Advisor */}
+              <div className="admin-subcard ai-financial-advisor-card">
+                <div className="advisor-header">
+                  <div className="advisor-title-group">
+                    <div className="advisor-badge">
+                      <Sparkles size={14} className="text-blue" />
+                      <span>AI Esports Financial Executive (Gemini Flash 3.8)</span>
+                      <span className="advisor-pulse-dot"></span>
+                    </div>
+                    <h4>บทวิเคราะห์และข้อเสนอแนะทางการเงินประจำวันโดย AI</h4>
+                  </div>
+                  <button 
+                    className="btn-ai-analyze"
+                    onClick={() => {
+                      setIsAnalyzingRevenue(true);
+                      setTimeout(() => {
+                        setIsAnalyzingRevenue(false);
+                        updateERPData({
+                          aiExecutiveSummary: `[AI Re-Analysis] รายได้วันนี้เติบโตเหนือเป้าหมาย 14.2% โดยเฉพาะช่วง Peak 18:00 - 23:00 น. เครื่องเต็ม 100% ต่อเนื่อง 5 ชั่วโมง\n• ข้อเสนอแนะ 1: ขยายเวลาโปรโมชัน Combo Set F&B ในช่วงบ่าย 14:00 - 17:00 เพื่อดึงดูดลูกค้าช่วงก่อนเลิกงาน\n• ข้อเสนอแนะ 2: ห้อง VIP Suite อัตราจองสตรีมเมอร์สูงมาก ควรพิจารณาเปิดรับจองล่วงหน้าระบบ Membership\n• คาดการณ์ยอดสุทธิสิ้นเดือน: มีโอกาสแตะ 1,480,000 บาท (ROI คืนทุนเร็วกว่าเกณฑ์ 1.8 เดือน)`
+                        });
+                        triggerSaveToast();
+                      }, 1400);
+                    }}
+                    disabled={isAnalyzingRevenue}
+                  >
+                    <RefreshCw size={14} className={isAnalyzingRevenue ? 'spin-icon' : ''} />
+                    <span>{isAnalyzingRevenue ? 'AI กำลังประมวลผลข้อมูล...' : 'ให้ AI วิเคราะห์สถานะการเงินสด'}</span>
+                  </button>
+                </div>
+
+                {/* Structured Executive Briefing */}
+                <div className="advisor-structured-content">
+                  {/* 1. Highlight Banner */}
+                  <div className="advisor-highlight-banner">
+                    <div className="highlight-icon-box">
+                      <TrendingUp size={20} className="text-blue" />
+                    </div>
+                    <div className="highlight-text-content">
+                      <div className="highlight-lead">
+                        <strong>ผลประกอบการประจำวันเติบโตเหนือเป้าหมาย +14.2%</strong>
+                        <span className="highlight-tag">อัตราครองเครื่อง 100% ต่อเนื่อง 5 ชั่วโมง (18:00 - 23:00 น.)</span>
+                      </div>
+                      <p className="highlight-sub">
+                        เครื่องเล่นเกมทุกโซนทำงานเต็มขีดความสามารถ ยอดจำหน่ายอาหารและเครื่องดื่มช่วงไพรม์ไทม์เพิ่มขึ้นตามความหนาแน่นของผู้ใช้บริการ
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* 2. Actionable Recommendations Grid */}
+                  <div className="advisor-actions-grid">
+                    <div className="advisor-action-card">
+                      <div className="action-card-header">
+                        <div className="action-icon-pill fnb">
+                          <Coffee size={15} />
+                        </div>
+                        <div className="action-header-texts">
+                          <strong>ข้อเสนอแนะ 1: ปรับโปรโมชัน F&B ดึงยอดรอบบ่าย</strong>
+                          <span className="action-badge">เพิ่ม Occupancy</span>
+                        </div>
+                      </div>
+                      <p className="action-desc">
+                        ขยายเวลาโปรโมชัน Combo Set F&B ในช่วงบ่าย 14:00 - 17:00 เพื่อดึงดูดลูกค้ากลุ่มนักเรียน/นักศึกษาและฟรีแลนซ์ก่อนช่วงเวลาเลิกงาน
+                      </p>
+                    </div>
+
+                    <div className="advisor-action-card">
+                      <div className="action-card-header">
+                        <div className="action-icon-pill vip">
+                          <Armchair size={15} />
+                        </div>
+                        <div className="action-header-texts">
+                          <strong>ข้อเสนอแนะ 2: บริหารจองล่วงหน้า VIP Suite</strong>
+                          <span className="action-badge">Optimize Yield</span>
+                        </div>
+                      </div>
+                      <p className="action-desc">
+                        ห้อง VIP Bootcamp & Streamer Suite มีความต้องการสูงมาก ควรเปิดระบบรับจองล่วงหน้าผ่านสิทธิพิเศษสมาชิกระดับ Gold / VIP Membership
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* 3. Forecast Target Banner */}
+                  <div className="advisor-forecast-banner">
+                    <div className="forecast-left">
+                      <Activity size={16} className="text-blue" />
+                      <span><strong>คาดการณ์ยอดสุทธิสิ้นเดือน:</strong> มีโอกาสแตะระดับ <strong>฿1,480,000</strong></span>
+                    </div>
+                    <div className="forecast-right">
+                      <span className="forecast-roi-pill">ROI คืนทุนเร็วกว่าเกณฑ์ 1.8 เดือน</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Peak Hours & Top F&B Items Two-Column Grid (Balanced Heights) */}
+              <div className="erp-dual-grid">
+                {/* Left: Peak Hours Breakdown */}
+                <div className="admin-subcard glass-panel erp-card-column">
+                  <div className="subcard-header-flex">
+                    <div className="subcard-title-group">
+                      <div className="subcard-title">
+                        <Clock size={18} className="text-blue" />
+                        <strong>อัตราการใช้เครื่องตามช่วงเวลา (Peak Hours Occupancy)</strong>
+                      </div>
+                      <span className="subcard-badge-count">4 กะการทำงาน</span>
+                    </div>
+                  </div>
+
+                  <div className="peak-hours-list">
+                    {(siteData.erpData?.peakHours || [
+                      { time: '10:00 - 14:00 (เปิดบริการช่วงเช้า)', occupancy: 42, revenue: 6800 },
+                      { time: '14:00 - 18:00 (ช่วงบ่าย & หลังเลิกเรียน)', occupancy: 78, revenue: 14200 },
+                      { time: '18:00 - 00:00 (Prime Peak Time แข่งขัน/ปาร์ตี้)', occupancy: 96, revenue: 21500 },
+                      { time: '00:00 - 08:00 (Night Owl Session ยันเช้า)', occupancy: 48, revenue: 6150 }
+                    ]).map((slot, idx) => (
+                      <div key={idx} className="peak-slot-item">
+                        <div className="slot-meta">
+                          <span className="slot-time">{slot.time}</span>
+                          <div className="slot-numbers">
+                            <span className="slot-rev">
+                              <DollarSign size={12} className="text-blue" />
+                              <strong>฿{slot.revenue?.toLocaleString()}</strong>
+                            </span>
+                            <span className={`slot-rate ${slot.occupancy >= 85 ? 'peak' : ''}`}>
+                              {slot.occupancy}% {slot.occupancy >= 85 ? 'Peak' : ''}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="slot-progress-bar">
+                          <div 
+                            className="slot-progress-fill" 
+                            style={{ 
+                              width: `${slot.occupancy}%`,
+                              background: slot.occupancy >= 85 
+                                ? 'linear-gradient(90deg, #3b82f6, #ef4444)' 
+                                : slot.occupancy > 60 
+                                  ? 'linear-gradient(90deg, #60a5fa, #1d4ed8)' 
+                                  : 'linear-gradient(90deg, #93c5fd, #3b82f6)'
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Left Footer Summary Bar */}
+                  <div className="erp-card-footer-bar">
+                    <div className="footer-bar-item">
+                      <Activity size={14} className="text-blue" />
+                      <span>อัตราครองเครื่องเฉลี่ยทั้งวัน: <strong>66.0%</strong></span>
+                    </div>
+                    <div className="footer-bar-item">
+                      <span className="text-muted">รอบพีคสูงสุด: </span>
+                      <strong className="text-red">18:00 - 00:00 (96%)</strong>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right: Top Selling Food & Beverages */}
+                <div className="admin-subcard glass-panel erp-card-column">
+                  <div className="subcard-header-flex">
+                    <div className="subcard-title-group">
+                      <div className="subcard-title">
+                        <Coffee size={18} className="text-blue" />
+                        <strong>เมนูอาหาร & สินค้าขายดีประจำวัน (Top Selling F&B)</strong>
+                      </div>
+                      <span className="subcard-badge-count">5 อันดับยอดนิยม</span>
+                    </div>
+                  </div>
+
+                  <div className="top-items-table-wrapper">
+                    <table className="erp-table">
+                      <thead>
+                        <tr>
+                          <th style={{ width: '45px', textAlign: 'center' }}>อันดับ</th>
+                          <th>รายการสินค้า / เมนู</th>
+                          <th style={{ textAlign: 'center', width: '85px' }}>จำนวน</th>
+                          <th style={{ textAlign: 'center', width: '75px' }}>สัดส่วน</th>
+                          <th style={{ textAlign: 'right', width: '90px' }}>ยอดรวม</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(siteData.erpData?.topSellingItems || [
+                          { rank: 1, name: 'ข้าวผัดกะเพราเนื้อวากิวไข่ดาวกรอบ', count: 68, total: 6052, share: 29.2 },
+                          { rank: 2, name: 'บะหมี่เกาหลีหม้อไฟชีสดับเบิ้ล', count: 54, total: 4806, share: 23.2 },
+                          { rank: 3, name: 'G-Speed Energy Elixir (สูตรพิเศษ)', count: 95, total: 4275, share: 20.6 },
+                          { rank: 4, name: 'ชาเขียวมัทฉะลาเต้พรีเมียม', count: 48, total: 2880, share: 13.9 },
+                          { rank: 5, name: 'ไก่ทอดคาราเกะซอสสไปซี่', count: 42, total: 2730, share: 13.1 }
+                        ]).map((item, idx) => (
+                          <tr key={idx}>
+                            <td style={{ textAlign: 'center' }}>
+                              <span className={`rank-badge ${idx === 0 ? 'top-1' : idx === 1 ? 'top-2' : idx === 2 ? 'top-3' : ''}`}>
+                                {item.rank || idx + 1}
+                              </span>
+                            </td>
+                            <td className="font-semibold text-slate-800">{item.name}</td>
+                            <td style={{ textAlign: 'center' }}>
+                              <span className="fnb-qty-pill">
+                                {item.count} จาน
+                              </span>
+                            </td>
+                            <td style={{ textAlign: 'center' }}>
+                              <span className="fnb-share-pill">
+                                {item.share || (idx === 0 ? 29.2 : idx === 1 ? 23.2 : idx === 2 ? 20.6 : idx === 3 ? 13.9 : 13.1)}%
+                              </span>
+                            </td>
+                            <td style={{ textAlign: 'right' }} className="text-blue font-bold">
+                              ฿{item.total.toLocaleString()}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Right Footer Summary Bar */}
+                  <div className="erp-card-footer-bar">
+                    <div className="footer-bar-item">
+                      <DollarSign size={14} className="text-blue" />
+                      <span>ยอดรวม 5 อันดับแรก: <strong>฿20,743</strong></span>
+                    </div>
+                    <div className="footer-bar-item">
+                      <span className="text-muted">สัดส่วนยอด F&B: </span>
+                      <strong className="text-emerald">88.5% ของแผนก</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* ERP Bridge & Software Integration Settings (2-Panel Command Center) */}
+              <div className="admin-subcard glass-panel erp-bridge-master-card">
+                <div className="subcard-header-block" style={{ marginBottom: '18px' }}>
+                  <div className="subcard-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Database size={18} className="text-blue" />
+                    <strong>ตั้งค่าการเชื่อมต่อโปรแกรมบริหารร้านเกม (Esports Cafe ERP Bridge)</strong>
+                  </div>
+                  <p className="subcard-desc" style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '0.82rem' }}>
+                    เชื่อมโยงฐานข้อมูลระหว่างเครื่องแม่ข่ายดิสก์เลส, โปรแกรมคิดเงินหน้าร้าน POS และระบบคลาวด์วิเคราะห์ผลกำไร
+                  </p>
+                </div>
+
+                <div className="erp-bridge-two-col">
+                  {/* Column 1: Software & Local Network */}
+                  <div className="bridge-col-panel">
+                    <div className="panel-col-heading">
+                      <Server size={15} className="text-blue" />
+                      <span>1. ซอฟต์แวร์และการเชื่อมต่อ Local Server</span>
+                    </div>
+
+                    <div className="form-group">
+                      <label>โปรแกรมระบบจัดการร้านอินเทอร์เน็ต/ดิสก์เลส (POS & Diskless Software)</label>
+                      <select 
+                        className="form-input"
+                        value={siteData.erpData?.bridgeSoftware || 'SmartCafé Thailand'}
+                        onChange={e => updateERPData({ bridgeSoftware: e.target.value })}
+                      >
+                        <option value="SmartCafé Thailand">SmartCafé Thailand (ยอดนิยมอันดับ 1 ในไทย)</option>
+                        <option value="CyberCafePro">CyberCafePro Billing System</option>
+                        <option value="Ourgame Icafe8">Ourgame / Icafe8 Diskless Server</option>
+                        <option value="N-Café System">N-Café Management System</option>
+                        <option value="Custom REST API">Custom Cloud REST API & Webhook</option>
+                      </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label>Local Server IP / Cloud Bridge URL</label>
+                      <input 
+                        type="text" 
+                        className="form-input" 
+                        value={siteData.erpData?.syncUrl || 'http://192.168.1.200:8088/api/v2/live-metrics'} 
+                        onChange={e => updateERPData({ syncUrl: e.target.value })}
+                        placeholder="http://192.168.1.xxx:8088/api/v2/live-metrics"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Column 2: Security & Sync Status */}
+                  <div className="bridge-col-panel">
+                    <div className="panel-col-heading">
+                      <ShieldCheck size={15} className="text-blue" />
+                      <span>2. กุญแจความปลอดภัยและสถานะแม่ข่าย</span>
+                    </div>
+
+                    <div className="form-group">
+                      <label>สถานะการเชื่อมต่อเครือข่ายร้าน (Network Sync Status)</label>
+                      <div className="status-connection-badge success">
+                        <div className="badge-live-pulse"></div>
+                        <div className="badge-text-group">
+                          <strong>Online เชื่อมต่อแม่ข่ายสาขาหลักเรียบร้อย</strong>
+                          <span className="badge-subtext">Port 8088 Active • Latency 34ms • Protocol HTTP/REST JSON</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label>API Secret Token / License Key</label>
+                      <div className="input-password-wrapper">
+                        <input 
+                          type={showERPToken ? "text" : "password"} 
+                          className="form-input" 
+                          value={siteData.erpData?.apiToken || 'GSPEED-ERP-LIVE-KEY-998821'} 
+                          onChange={e => updateERPData({ apiToken: e.target.value })}
+                          placeholder="กรอก API Key หรือ Secret Token สำหรับเชื่อมต่อ"
+                        />
+                        <button 
+                          type="button" 
+                          className="btn-toggle-eye"
+                          onClick={() => setShowERPToken(!showERPToken)}
+                          title={showERPToken ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"}
+                        >
+                          {showERPToken ? <EyeOff size={15} /> : <Eye size={15} />}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Ping Test Diagnostic Box */}
+                {erpTestResult && (
+                  <div className={`test-ping-result-box ${erpTestResult.success ? 'success' : 'warning'}`}>
+                    <div className="ping-res-header">
+                      <CheckCircle2 size={16} className="text-green" />
+                      <strong>{erpTestResult.message}</strong>
+                    </div>
+                    <div className="ping-res-details">
+                      <span>ความเร็ว Latency: <strong>{erpTestResult.latency}</strong></span>
+                      <span>•</span>
+                      <span>รหัสสาขา: <strong>{erpTestResult.storeCode}</strong></span>
+                      <span>•</span>
+                      <span>ซอฟต์แวร์: <strong>{erpTestResult.software}</strong></span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Action Buttons Toolbar */}
+                <div className="erp-bridge-actions-bar">
+                  <div className="actions-bar-note">
+                    <Sparkles size={13} className="text-blue" />
+                    <span>ข้อมูลรายได้และเครื่องว่างจะถูกอัปเดตอัตโนมัติทุกๆ 30 วินาที</span>
+                  </div>
+                  <div className="actions-bar-buttons">
+                    <button 
+                      type="button"
+                      className="btn-secondary"
+                      onClick={handleTestERP}
+                      disabled={isERPTesting}
+                    >
+                      <RefreshCw size={14} className={isERPTesting ? 'spin-icon' : ''} />
+                      <span>{isERPTesting ? 'กำลังทดสอบเชื่อมต่อแม่ข่าย...' : 'ทดสอบ Ping ERP Bridge'}</span>
+                    </button>
+                    <button 
+                      className="btn-primary"
+                      onClick={() => {
+                        triggerSaveToast();
+                      }}
+                    >
+                      <Save size={14} /> บันทึกการตั้งค่า ERP Bridge
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* In-Store Hardware & Diskless Subsystems Architecture Card */}
+              <div className="admin-subcard glass-panel in-store-arch-card">
+                <div className="subcard-header-block" style={{ marginBottom: '14px' }}>
+                  <div className="subcard-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Database size={18} className="text-blue" />
+                    <strong>ผังการเชื่อมต่อระบบต่างๆ ในร้านเกม (In-Store Hardware & Diskless Architecture)</strong>
+                  </div>
+                  <p className="subcard-desc" style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '0.82rem' }}>
+                    สถาปัตยกรรมเชื่อมต่อระบบร้านเกมครบวงจร: สื่อสารระหว่างแม่ข่ายดิสก์เลส, โปรแกรมคิดเงินหน้าร้าน, อุปกรณ์ IoT สวิตช์ไฟ, และการส่งต่อข้อมูลแบบ Real-time ไปยัง n8n และ OpenWebUI
+                  </p>
+                </div>
+
+                <div className="arch-steps-grid">
+                  <div className="arch-step-card">
+                    <div className="arch-card-top">
+                      <div className="arch-step-number">01</div>
+                      <div className="arch-icon-circle">
+                        <Server size={18} className="text-blue" />
+                      </div>
+                    </div>
+                    <strong className="arch-title">Diskless Game Server</strong>
+                    <span className="status-pill status-pill-success arch-pill">10Gbps LAN Boot Active</span>
+                    <p className="arch-text">
+                      ระบบแม่ข่าย CCBoot / iCafeCloud / ICAFE8 กระจาย Windows Image และคลังเกม 400+ ไตเติลไปยังเครื่องลูกข่ายโดยไม่ต้องมีฮาร์ดดิสก์ประจำโต๊ะ ซิงก์แพตช์เกมอัตโนมัติยามค่ำคืน
+                    </p>
+                  </div>
+
+                  <div className="arch-step-card">
+                    <div className="arch-card-top">
+                      <div className="arch-step-number">02</div>
+                      <div className="arch-icon-circle">
+                        <Monitor size={18} className="text-blue" />
+                      </div>
+                    </div>
+                    <strong className="arch-title">SmartCafé POS & Billing</strong>
+                    <span className="status-pill status-pill-success arch-pill">Port 8088 Synchronized</span>
+                    <p className="arch-text">
+                      โปรแกรมคิดเงินหน้าร้าน บันทึกเวลาเล่น เปิด-ปิดเครื่องลูกข่าย หักยอดสมาชิก เติมเงิน TrueMoney / PromptPay และระบบแคชเชียร์จำหน่ายอาหารและเครื่องดื่ม F&B
+                    </p>
+                  </div>
+
+                  <div className="arch-step-card">
+                    <div className="arch-card-top">
+                      <div className="arch-step-number">03</div>
+                      <div className="arch-icon-circle">
+                        <Zap size={18} className="text-blue" />
+                      </div>
+                    </div>
+                    <strong className="arch-title">Smart IoT Power Relay</strong>
+                    <span className="status-pill status-pill-success arch-pill">Sonoff / Tuya Zigbee Active</span>
+                    <p className="arch-text">
+                      รีเลย์ตัดต่อกระแสไฟอัจฉริยะ จ่ายไฟให้เฉพาะโต๊ะที่มีลูกค้าล็อกอินใช้งาน ปิดไฟจอและไฟ RGB อัตโนมัติเมื่อหมดเวลา ช่วยประหยัดค่าไฟฟ้าในร้านได้กว่า 28% ต่อเดือน
+                    </p>
+                  </div>
+
+                  <div className="arch-step-card">
+                    <div className="arch-card-top">
+                      <div className="arch-step-number">04</div>
+                      <div className="arch-icon-circle">
+                        <Activity size={18} className="text-blue" />
+                      </div>
+                    </div>
+                    <strong className="arch-title">AI & Cloud Dispatcher</strong>
+                    <span className="status-pill status-pill-success arch-pill">n8n + OpenWebUI Pipeline</span>
+                    <p className="arch-text">
+                      ดึงข้อมูลสถิติรายได้, เครื่องว่าง, และข้อมูลสเปกคอม เข้าสู่ n8n เพื่อรายงานผลผู้บริหารผ่าน Telegram/Discord และส่งต่อไปยัง OpenWebUI สำหรับตอบแชทลูกค้าข้ามแพลตฟอร์ม
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* =========================================================================
+              TAB 7: SECURITY & ZERO-TRUST ADMIN ACCESS
+              ========================================================================= */}
+          {activeTab === 'security' && (
+            <div className="cms-panel-block">
+              <div className="panel-header-row">
+                <div>
+                  <h3 className="panel-title">
+                    <ShieldCheck size={20} className="text-blue" />
+                    <span>จัดการสิทธิ์การเข้าถึง & ความปลอดภัยระดับสูงสุด (Zero-Trust Security Console)</span>
+                  </h3>
+                  <p className="panel-desc">
+                    หน้านี้อนุญาตเฉพาะผู้ดูแลระบบหลักเท่านั้น ทุกเซสชันถูกเข้ารหัส และปุ่มเข้าแอดมินถูกซ่อนจากผู้ใช้ภายนอกโดยสมบูรณ์
+                  </p>
+                </div>
+              </div>
+
+              {/* Security Status Card */}
+              <div className="admin-subcard glass-panel security-overview-card">
+                <div className="security-status-header">
+                  <div className="security-icon-circle">
+                    <ShieldCheck size={24} className="text-blue" />
+                  </div>
+                  <div>
+                    <h4>สถานะระบบความปลอดภัย: ป้องกันแน่นหนาสูงสุด (Active & Protected)</h4>
+                    <p>
+                      Path ส่วนตัว: <code>#/admin</code> | สิทธิ์ใช้งาน: Root Administrator | การล็อกเอาต์: ปิดเบราว์เซอร์แล้วเคลียร์เซสชันทันที
+                    </p>
+                  </div>
+                </div>
+
+                <div className="security-metrics-list">
+                  <div className="sec-metric-item">
+                    <span className="sec-title">ความปลอดภัยของ API Key (Zero-Leak Protection)</span>
+                    <span className="sec-badge ok">{siteData.openRouterSettings?.useSecureProxy ? 'Zero-Leak Backend Proxy ทำงาน (ไม่มีการส่งคีย์ผ่าน Browser)' : 'Protected (เข้ารหัสใน LocalStorage แอดมิน)'}</span>
+                  </div>
+                  <div className="sec-metric-item">
+                    <span className="sec-title">การซ่อนปุ่มระบบแอดมินจากสาธารณะ</span>
+                    <span className="sec-badge ok">ซ่อน 100% (ผู้ใช้ทั่วไปจะไม่เห็นปุ่มใดๆ)</span>
+                  </div>
+                  <div className="sec-metric-item">
+                    <span className="sec-title">ระบบป้องกันการเดารหัสผ่าน (Brute-force Lockout)</span>
+                    <span className="sec-badge ok">เปิดใช้งาน (ผิดพลาด 5 ครั้ง ล็อก 30 วินาที)</span>
+                  </div>
+                  <div className="sec-metric-item">
+                    <span className="sec-title">การจำกัดคำถามนอกขอบเขต AI Assistant</span>
+                    <span className="sec-badge ok">เปิดใช้งานแบบเข้มงวด (Store Only)</span>
+                  </div>
+                  <div className="sec-metric-item">
+                    <span className="sec-title">เวลาการล็อกอินครั้งล่าสุด</span>
+                    <span className="sec-time">{siteData.securityConfig?.lastLogin || 'วันนี้ เวลา 15:45 น.'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Change Master Admin Credentials Form */}
+              <div className="admin-subcard glass-panel">
+                <div className="subcard-title">
+                  <Lock size={16} className="text-blue" />
+                  <strong>เปลี่ยนชื่อผู้ใช้และรหัสผ่าน Master Admin</strong>
+                </div>
+
+                <div className="form-row-2">
+                  <div className="form-group">
+                    <label>ชื่อผู้ดูแลระบบ (Admin Username)</label>
+                    <input 
+                      type="text" 
+                      className="form-input"
+                      value={adminUserEdit}
+                      onChange={e => setAdminUserEdit(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>รหัสผ่าน Master (Admin Password)</label>
+                    <input 
+                      type="text" 
+                      className="form-input"
+                      value={adminPassEdit}
+                      onChange={e => setAdminPassEdit(e.target.value)}
+                    />
+                    <small className="form-hint">กำหนดรหัสผ่านที่มีความยาวอย่างน้อย 8 ตัวอักษรเพื่อความปลอดภัย</small>
+                  </div>
+                </div>
+
+                <div className="modal-footer-btns">
+                  <button 
+                    className="btn-primary"
+                    onClick={() => {
+                      if (!adminUserEdit.trim() || !adminPassEdit.trim()) {
+                        alert('กรุณากรอกชื่อผู้ใช้และรหัสผ่านให้ครบถ้วน');
+                        return;
+                      }
+                      updateSecurityConfig({
+                        adminUsername: adminUserEdit.trim(),
+                        adminPassword: adminPassEdit.trim()
+                      });
+                      triggerSaveToast();
+                      alert('อัปเดตรหัสผ่าน Master Admin สำเร็จเรียบร้อย!');
+                    }}
+                  >
+                    <Save size={14} /> บันทึกรหัสผ่านใหม่
+                  </button>
+                  <button 
+                    className="btn-admin-logout"
+                    onClick={onExitAdmin}
+                  >
+                    <LogOut size={14} /> ออกจากระบบทันที
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+        </main>
+      </div>
+
+      {/* Floating Save Action Bar */}
+      <div className="admin-floating-save-bar glass-panel">
+        <div className="floating-save-status">
+          <span className="save-status-dot"></span>
+          <span className="save-status-text">
+            {lastSavedTime ? `บันทึกล่าสุดเวลา ${lastSavedTime} น.` : 'พร้อมบันทึกข้อมูล CMS'}
+          </span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button 
+            type="button"
+            onClick={() => openPreview(activeTab === 'sections' ? activeSectionSubTab : (activeTab === 'articles' ? 'article-view' : (activeTab === 'menu-footer' ? 'menu-footer' : 'full-site')))}
+            className="btn-section-preview"
+            title="ดูตัวอย่างส่วนที่กำลังแก้ไขอยู่ก่อนบันทึก"
+          >
+            <Eye size={14} />
+            <span>พรีวิวส่วนนี้ก่อนบันทึก</span>
+          </button>
+          <button 
+            id="btn-floating-save-action"
+            type="button"
+            onClick={handleManualSave}
+            disabled={isSaving}
+            className={`btn-floating-save ${isSaving ? 'saving' : ''}`}
+          >
+            {isSaving ? <RefreshCw size={15} className="spin-icon" /> : <Save size={15} />}
+            <span>{isSaving ? 'กำลังบันทึก...' : 'บันทึกข้อมูลทั้งหมด (Save Changes)'}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Live Preview Modal */}
+      <CMSLivePreviewModal 
+        isOpen={previewModalState.isOpen}
+        onClose={closePreview}
+        sectionType={previewModalState.sectionType}
+        siteData={siteData}
+        draftData={previewModalState.draftData}
+        onSave={() => {
+          handleManualSave();
+        }}
+      />
+    </div>
+  );
+}

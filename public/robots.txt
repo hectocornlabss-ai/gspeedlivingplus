@@ -1,0 +1,90 @@
+# ==============================================================================
+# G-SPEED ESPORT ARENA Robots.txt
+# Generative AI Search & Knowledge Agent Optimization (GEO)
+# ==============================================================================
+
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/login
+
+# ------------------------------------------------------------------------------
+# 1. OpenAI (ChatGPT, SearchGPT, GPTBot, Realtime Browsing)
+# ------------------------------------------------------------------------------
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+# ------------------------------------------------------------------------------
+# 2. Google (Googlebot, Google-Extended, Gemini AI, SGE AI Overview)
+# ------------------------------------------------------------------------------
+User-agent: Googlebot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
+# ------------------------------------------------------------------------------
+# 3. Anthropic (Claude, ClaudeBot, Claude Search)
+# ------------------------------------------------------------------------------
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+# ------------------------------------------------------------------------------
+# 4. Perplexity AI (PerplexityBot, Perplexity Search Engine)
+# ------------------------------------------------------------------------------
+User-agent: PerplexityBot
+Allow: /
+
+# ------------------------------------------------------------------------------
+# 5. Apple (Applebot, Applebot-Extended, Apple Intelligence, Siri)
+# ------------------------------------------------------------------------------
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+# ------------------------------------------------------------------------------
+# 6. Meta (Meta-ExternalAgent, Llama Search, FacebookBot)
+# ------------------------------------------------------------------------------
+User-agent: Meta-ExternalAgent
+Allow: /
+
+User-agent: FacebookBot
+Allow: /
+
+# ------------------------------------------------------------------------------
+# 7. Microsoft (Bing, Bingbot, Copilot AI Search)
+# ------------------------------------------------------------------------------
+User-agent: bingbot
+Allow: /
+
+# ------------------------------------------------------------------------------
+# 8. Other Specialized AI & Search Engines
+# ------------------------------------------------------------------------------
+User-agent: Cohere-ai
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: YouBot
+Allow: /
+
+User-agent: DuckAssistBot
+Allow: /
+
+# Sitemap Index
+Sitemap: https://gspeedesport.com/sitemap.xml

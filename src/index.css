@@ -1,0 +1,286 @@
+:root {
+  /* G-SPEED Brand CL: ขาว (White), น้ำเงิน (Royal Blue), ดำ/เทาเข้ม (Dark Slate) สไตล์ Modern Clean Esports */
+  --bg-main: #f8fafc;                /* พื้นหลังหลักสีขาวนวล สบายตา */
+  --bg-pure: #ffffff;                /* ขาวบริสุทธิ์ */
+  --bg-card: #ffffff;                /* การ์ดสีขาว */
+  --bg-card-hover: #f1f5f9;
+  --bg-subtle: #f1f5f9;              /* เทาอ่อน */
+  --bg-blue-light: #eff6ff;          /* ฟ้าอ่อนสบายตา */
+
+  --gspeed-blue: #1d4ed8;            /* Royal Blue แม่สีหลักแบรนด์ */
+  --gspeed-blue-hover: #1e40af;
+  --gspeed-blue-light: #2563eb;
+  --gspeed-blue-dark: #172554;
+  --gspeed-blue-glow: rgba(29, 78, 216, 0.15);
+
+  --ice-cyan: #0284c7;               /* ฟ้าสดใส */
+  
+  --text-pure: #0f172a;              /* ดำเข้มเกือบดำ คมชัด อ่านง่าย */
+  --text-main: #1e293b;              /* เทาดำเข้ม */
+  --text-muted: #475569;             /* เทากลาง */
+  --text-dim: #94a3b8;               /* เทาอ่อน */
+
+  --border-light: #e2e8f0;           /* เส้นขอบบางสบายตา */
+  --border-blue: #bfdbfe;            /* ขอบฟ้าอ่อน */
+  --border-blue-dark: #1d4ed8;
+
+  --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 4px 20px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.12);
+  --shadow-blue: 0 4px 20px rgba(29, 78, 216, 0.25);
+
+  --font-base: 'Kanit', sans-serif;
+  --font-heading: 'Outfit', 'Kanit', sans-serif;
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+
+  --transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: clip;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  font-family: var(--font-base);
+  line-height: 1.6;
+  overflow-x: clip;
+  min-height: 100vh;
+}
+
+/* พื้นหลังสไตล์ภาพที่ 2 & 3: เน้นพื้นหลังขาว/เทาอ่อน สบายตา พร้อมเส้นสายสปีดสีน้ำเงินโปร่งแสง */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: 
+    /* ลำแสงเฉียงสปีดสไตล์ภาพที่ 3 (Clean White with Soft Royal Blue Beams) */
+    linear-gradient(135deg, rgba(29, 78, 216, 0.04) 0%, transparent 40%),
+    linear-gradient(225deg, rgba(2, 132, 199, 0.04) 0%, transparent 45%),
+    linear-gradient(115deg, transparent 40%, rgba(29, 78, 216, 0.025) 45%, rgba(2, 132, 199, 0.035) 50%, transparent 60%),
+    /* เส้นตาราง Grid สีอ่อนบางเบา */
+    linear-gradient(rgba(15, 23, 42, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.02) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-pure);
+  line-height: 1.25;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: var(--font-base);
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+/* Glassmorphism Containers - Clean White Card */
+.glass-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+
+.glass-panel:hover {
+  border-color: #93c5fd;
+  box-shadow: var(--shadow-md);
+}
+
+/* Badges & Tags (Modern Professional Esports Identity) */
+.badge-neon, .badge-pill, .tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.badge-blue {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.badge-cyan {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.badge-white {
+  background: #ffffff;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.badge-amber {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+/* Buttons */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  color: #ffffff !important;
+  font-weight: 700;
+  font-size: 0.95rem;
+  box-shadow: var(--shadow-blue);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+  border: none;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  box-shadow: 0 6px 24px rgba(29, 78, 216, 0.4);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  background: #ffffff;
+  color: var(--text-pure) !important;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: 1.5px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+
+.btn-secondary:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  transform: translateY(-2px);
+}
+
+.btn-accent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  background: #0f172a;
+  color: #ffffff !important;
+  font-weight: 800;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.2);
+  transition: var(--transition);
+  border: none;
+}
+
+.btn-accent:hover {
+  transform: translateY(-2px);
+  background: #1e293b;
+  box-shadow: 0 6px 24px rgba(15, 23, 42, 0.35);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gspeed-blue);
+}
+
+/* Pulsing Indicator */
+.live-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #10b981;
+  position: relative;
+  display: inline-block;
+}
+.live-dot::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border-radius: 50%;
+  border: 2px solid #10b981;
+  animation: pulse 1.8s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.9); opacity: 1; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* Grid & Layout Helpers */
+.container {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+@media (max-width: 992px) {
+  .container {
+    padding: 0 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 16px;
+  }
+}
