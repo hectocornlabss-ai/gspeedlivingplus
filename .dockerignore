@@ -1,0 +1,14 @@
+# .dockerignore for Coolify & Docker Builds
+node_modules
+npm-debug.log
+yarn-error.log
+dist
+.git
+.gitignore
+.env*.local
+.DS_Store
+Thumbs.db
+*.md
+!COOLIFY_DEPLOYMENT_GUIDE.md
+brain
+.gemini

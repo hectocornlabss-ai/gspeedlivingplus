@@ -28,9 +28,16 @@ export const INITIAL_RAG_KNOWLEDGE = [
   {
     id: 'rag-hours',
     category: 'general',
-    title: 'เวลาเปิด-ปิด และระบบอำนวยความสะดวก',
-    tags: ['เวลาเปิด', '24ชั่วโมง', 'ที่จอดรถ', 'ห้องน้ำ', 'แอร์'],
-    content: 'G-Speed Esport Arena เปิดให้บริการ 24 ชั่วโมง ทุกวัน ตลอดทั้งปี ไม่มีวันหยุด แอร์เย็นฉ่ำ 24 ชม. ด้วยระบบกรองอากาศ PM2.5 มีระบบเน็ตเวิร์กความเร็วสูง 10Gbps Dual Fiber เส้นทางคู่ ค่า Ping ในประเทศต่ำกว่า 3ms และมีที่จอดรถรองรับทั้งมอเตอร์ไซค์และรถยนต์'
+    title: 'เวลาเปิด-ปิด และการเดินทาง พิกัดร้าน',
+    tags: ['เวลาเปิด', '24ชั่วโมง', 'เปิดกี่โมง', 'ที่อยู่', 'อยู่ที่ไหน', 'พิกัด', 'แผนที่', 'เบอร์โทร', 'รามคำแหง 53', 'วังทองหลาง'],
+    content: 'G-Speed Esport Arena เปิดให้บริการตลอด 24 ชั่วโมง ทุกวัน ตลอดทั้งปี ไม่มีวันหยุด (24/7) ที่ตั้ง: 79 ซ. รามคำแหง 53 แขวงพลับพลา เขตวังทองหลาง กรุงเทพมหานคร 10310 แผนที่ Google Maps: https://share.google/Fj1DmZjpx1cBNBVTf โทรศัพท์: 063 793 7704 มีที่จอดรถสะดวกสบายทั้งรถยนต์และมอเตอร์ไซค์ แอร์เย็นฉ่ำ 24 ชม. พร้อมระบบกรองอากาศ PM2.5 และระบบเน็ตเวิร์กความเร็วสูง 10Gbps Dual Fiber'
+  },
+  {
+    id: 'rag-services-overview',
+    category: 'services',
+    title: 'บริการหลักของศูนย์ G-Speed Esport Arena',
+    tags: ['บริการ', 'บริการของเรา', 'มีอะไรบ้าง', 'ร้านเกม', 'เช่าจัดแข่ง', 'ติดตั้งระบบ', 'บริการร้าน'],
+    content: 'บริการหลักของ G-Speed Esport Arena ได้แก่: 1. ร้านเกมคอมพิวเตอร์สเปกแข่งขันอีสปอร์ต 24 ชม. (RTX 40 Series, จอ 360Hz/240Hz, โซนทั่วไปและ VIP) 2. เปิดให้เช่าร้านจัดแข่งอีสปอร์ต (เวที 5v5 Stage, จอ LED Wall ขนาดยักษ์, ระบบ Live Streaming, โต๊ะพากย์) 3. รับติดตั้งและวางระบบร้านเกมครบวงจร (Diskless Server, เน็ต 10Gbps Multi-WAN, ระบบ POS บัญชีคลาวด์ และออกแบบผังร้าน 2D/3D) ที่ตั้ง 79 ซ. รามคำแหง 53 โทร 063 793 7704'
   },
   {
     id: 'rag-food',
@@ -49,9 +56,9 @@ export const INITIAL_RAG_KNOWLEDGE = [
   {
     id: 'rag-tournament',
     category: 'events',
-    title: 'การจัดแข่งขันทัวร์นาเมนต์และเช่าสถานที่',
-    tags: ['แข่งเกม', 'ทัวร์นาเมนต์', 'เวที', 'เช่าสถานที่', 'ถ่ายทอดสด'],
-    content: 'ร้านมีเวที 5v5 Tournament Stage พร้อมระบบถ่ายทอดสด Live Streaming จอ 4K LED Wall ขนาดยักษ์ และโต๊ะพากย์แคสเตอร์ รองรับการจัดแข่งทั้งเกม VALORANT, ROV, PUBG, CS2 สำหรับค่ายเกม สถาบันการศึกษา หรือองค์กรที่ต้องการเช่าจัดแข่งขัน ติดต่อทีมงานได้ที่อีเมล partner@gspeedarena.com หรือโทร 02-888-9999'
+    title: 'การจัดแข่งขันทัวร์นาเมนต์และเปิดให้เช่าสถานที่จัดแข่ง',
+    tags: ['แข่งเกม', 'ทัวร์นาเมนต์', 'เวที', 'เช่าสถานที่', 'จัดแข่ง', 'เงื่อนไขจัดแข่ง', 'ถ่ายทอดสด', 'เช่าร้าน'],
+    content: 'ร้านมีเวที 5v5 Tournament Stage พร้อมระบบถ่ายทอดสด Live Streaming จอ 4K LED Wall ขนาดยักษ์ และโต๊ะพากย์แคสเตอร์ รองรับการจัดแข่งทั้งเกม VALORANT, ROV, PUBG, CS2 สำหรับค่ายเกม สถาบันการศึกษา หรือองค์กรที่ต้องการเช่าจัดแข่งขัน เงื่อนไขและข้อมูลที่ต้องแจ้ง: 1. วันและเวลาที่ต้องการจัด 2. เกมที่ใช้แข่งขัน 3. ชื่องาน/กิจกรรม 4. ชื่อบริษัท/องค์กรผู้จัด 5. จำนวนคนและทีมโดยประมาณ 6. ข้อมูลติดต่อกลับ ติดต่อโทร 063 793 7704'
   },
   {
     id: 'rag-franchise',
@@ -86,7 +93,7 @@ export const INITIAL_RAG_KNOWLEDGE = [
     category: 'installation',
     title: 'ขั้นตอนการติดต่อขอใบเสนอราคา สำรวจพื้นที่ และประเมินราคาเบื้องต้น',
     tags: ['ติดต่อติดตั้ง', 'สนใจติดตั้ง', 'ขอใบเสนอราคา', 'สำรวจหน้างาน', 'เบอร์โทร', 'ไลน์', 'ราคา', 'งบประมาณ'],
-    content: 'สำหรับเจ้าของอาคารหรือผู้สนใจเปิดร้านเกม สามารถแจ้งขนาดพื้นที่และงบประมาณเพื่อให้แอดมินช่วยประเมินผังร้านและคำนวณงบเบื้องต้นได้ฟรี ทางเราพร้อมให้คำปรึกษา แนะนำสเปกเครื่อง และมีทีมวิศวกรพร้อมเข้าสำรวจหน้างานจริง ติดต่อสอบถามเพิ่มเติมได้ที่สายด่วน: 02-888-9999 หรือ LINE Official: @gspeedarena เปิดให้บริการตลอด 24 ชั่วโมง'
+    content: 'สำหรับเจ้าของอาคารหรือผู้สนใจเปิดร้านเกม สามารถแจ้งขนาดพื้นที่และงบประมาณเพื่อให้เจ้าหน้าที่ช่วยประเมินผังร้านและคำนวณงบเบื้องต้นได้ฟรี ทางเราพร้อมให้คำปรึกษา แนะนำสเปกเครื่อง และมีทีมวิศวกรพร้อมเข้าสำรวจหน้างานจริง ติดต่อสอบถามเพิ่มเติมได้ที่สายด่วน: 063 793 7704 หรือ LINE Official: @gspeedarena เปิดให้บริการตลอด 24 ชั่วโมง'
   }
 ];
 
@@ -109,11 +116,11 @@ export const DEFAULT_SITE_DATA = {
     fontHeading: "'Inter', sans-serif"
   },
   globalSEO: {
-    metaTitle: 'G-SPEED ESPORT ARENA | ศูนย์อีสปอร์ตครบวงจร & ระบบแฟรนไชส์จัดผังร้านอัจฉริยะ',
+    metaTitle: 'GLP : G Speed Living Plus | ศูนย์อีสปอร์ตครบวงจร & ระบบแฟรนไชส์จัดผังร้านอัจฉริยะ',
     metaDescription: 'ศูนย์รวมอีสปอร์ตครบวงจร สเปกคอมไฮเอนด์ RTX 40 Series จอ 360Hz เวทีแข่งมาตรฐานสากล พร้อมระบบจำลองผังร้านแฟรนไชส์ 3D',
-    keywords: 'ร้านเกม, อีสปอร์ต, แฟรนไชส์ร้านเกม, G-Speed Arena, GLP, จัดผังร้านเกม 3D, RTX 4090, BenQ 360Hz',
+    keywords: 'ร้านเกม, อีสปอร์ต, แฟรนไชส์ร้านเกม, GLP, G Speed Living Plus, จัดผังร้านเกม 3D, RTX 4090, BenQ 360Hz',
     ogImage: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
-    twitterHandle: '@GSpeedArena'
+    twitterHandle: '@GSpeedLivingPlus'
   },
   tickerText: 'เปิดรับสมัคร GLP VALORANT CHAMPIONSHIP 2026 ชิง 100,000 บาท | ระบบจำลองผังร้าน 3D Interior Planner พร้อมใช้งานแล้ว',
   tickerBadge: 'ประกาศสำคัญ',
@@ -128,15 +135,17 @@ export const DEFAULT_SITE_DATA = {
   },
   navLinks: INITIAL_NAV_LINKS,
   hero: {
-    badge: 'THE NEXT-GEN ESPORT ARENA & FRANCHISE HUB',
+    badge: 'THE NEXT-GEN ESPORT & FRANCHISE HUB',
     title: 'ศูนย์รวมอีสปอร์ตครบวงจร & พื้นที่ประลองเกมมาตรฐานสากล',
     subtitle: 'สัมผัสประสบการณ์เกมมิ่งระดับเวิลด์คลาสด้วยเครื่องสเปกไฮเอนด์ RTX 40 Series จอ 360Hz และเวทีแข่งขันมาตรฐาน Pro Circuit พร้อมระบบคำนวณและจำลองผังร้านแฟรนไชส์อัจฉริยะ',
     primaryCta: 'สำรวจกิจกรรม & ทัวร์นาเมนต์',
     primaryCtaLink: '#activities',
     secondaryCta: 'จำลองผังร้าน 3D แฟรนไชส์',
-    secondaryCtaLink: '#franchise',
     bgColor: '#ffffff',
+    backgroundImage: '',
     bgOverlayImage: '',
+    overlayOpacity: 0.82,
+    overlayType: 'dark',
     metrics: [
       { number: '750+', label: 'Battle Stations ทั่วประเทศ' },
       { number: '360Hz', label: 'Fast-IPS & OLED Displays' },
@@ -206,7 +215,7 @@ export const DEFAULT_SITE_DATA = {
     model: 'google/gemini-flash-3.8',
     temperature: 0.7,
     maxTokens: 1024,
-    systemPrompt: 'คุณคือผู้ช่วย AI ประจำศูนย์ G-Speed Esport Arena ตอบคำถามเกี่ยวกับบริการร้านเกม อัตราค่าชั่วโมง สเปกคอม และระบบแฟรนไชส์อย่างสุภาพและถูกต้อง',
+    systemPrompt: 'คุณคือผู้ช่วย AI ประจำศูนย์ GLP : G Speed Living Plus ตอบคำถามเกี่ยวกับบริการร้านเกม อัตราค่าชั่วโมง สเปกคอม และระบบแฟรนไชส์อย่างสุภาพและถูกต้อง',
     isEnabled: true
   },
   openWebUIConfig: {
@@ -226,7 +235,7 @@ export const DEFAULT_SITE_DATA = {
   },
   aiGuardrails: {
     strictStoreOnly: true,
-    outOfScopeReply: 'ขออภัยด้วยครับ ผมเป็นผู้ช่วย AI ประจำศูนย์ G-Speed Esport Arena จึงสามารถตอบได้เฉพาะข้อมูลและบริการของทางร้านเท่านั้นครับ เช่น อัตราค่าบริการ, สเปกคอมพิวเตอร์, การจองห้อง VIP, เมนูอาหาร หรือการลงทุนแฟรนไชส์ หากมีข้อสงสัยเกี่ยวกับร้าน สามารถสอบถามได้ทันทีครับ',
+    outOfScopeReply: 'ขออภัยด้วยครับ ผมเป็นผู้ช่วย AI ประจำศูนย์ GLP : G Speed Living Plus จึงสามารถตอบได้เฉพาะข้อมูลและบริการของทางร้านเท่านั้นครับ เช่น อัตราค่าบริการ, สเปกคอมพิวเตอร์, การจองห้อง VIP, เมนูอาหาร หรือการลงทุนแฟรนไชส์ หากมีข้อสงสัยเกี่ยวกับร้าน สามารถสอบถามได้ทันทีครับ',
     blockedKeywords: ['การเมือง', 'หวย', 'พนัน', 'เขียนโค้ด', 'แต่งกลอน', 'การบ้าน', 'คู่แข่ง', 'แฮก'],
     pendingQuestions: [
       { id: 'q-1', query: 'มีห้องสูบบุหรี่ในร้านไหม', timestamp: '13/09/2026 14:15', status: 'pending' },
@@ -336,11 +345,12 @@ export const DEFAULT_SITE_DATA = {
   },
   footer: {
     description: 'ศูนย์กีฬาอีสปอร์ตและร้านอินเทอร์เน็ตคาเฟ่มาตรฐานสากล บริหารงานโดย GLP Living Plus Group พร้อมระบบโซลูชันแฟรนไชส์อัจฉริยะสำหรับผู้ประกอบการรุ่นใหม่',
-    phone: '02-888-9999 / 089-777-6655',
+    phone: '063 793 7704',
     email: 'contact@gspeedarena.com',
     line: '@gspeedarena',
-    address: '99/1 ซอยรามคำแหง 24 แยก 14 แขวงหัวหมาก เขตบางกะปิ กรุงเทพมหานคร 10240',
-    copyright: '© 2026 G-Speed Esport Arena (GLP Living Plus). All Rights Reserved.',
+    address: '79 ซ. รามคำแหง 53 แขวงพลับพลา เขตวังทองหลาง กรุงเทพมหานคร 10310',
+    googleMapUrl: 'https://share.google/Fj1DmZjpx1cBNBVTf',
+    copyright: '© 2026 GLP : G Speed Living Plus. All Rights Reserved.',
     socialLinks: {
       facebook: 'https://facebook.com/gspeedesport',
       discord: 'https://discord.gg/gspeed',
@@ -378,21 +388,66 @@ export function SiteDataProvider({ children }) {
         // Deep merge saved data with defaults so NO missing keys exist
         const merged = deepMerge(DEFAULT_SITE_DATA, parsed);
 
+        // Update default address/phone if old placeholder address exists
+        if (merged.footer) {
+          if (!merged.footer.phone || merged.footer.phone.includes('02-888-9999')) {
+            merged.footer.phone = DEFAULT_SITE_DATA.footer.phone;
+          }
+          if (!merged.footer.address || merged.footer.address.includes('รามคำแหง 24')) {
+            merged.footer.address = DEFAULT_SITE_DATA.footer.address;
+          }
+          if (!merged.footer.googleMapUrl) {
+            merged.footer.googleMapUrl = DEFAULT_SITE_DATA.footer.googleMapUrl;
+          }
+        }
+
         // Ensure array types are intact
         if (!Array.isArray(merged.gallery)) merged.gallery = INITIAL_GALLERY;
         if (!Array.isArray(merged.news)) merged.news = INITIAL_NEWS;
         if (!Array.isArray(merged.catalogItems)) merged.catalogItems = INITIAL_CATALOG;
         if (!Array.isArray(merged.hardwareTiers)) merged.hardwareTiers = INITIAL_TIERS;
-        if (!Array.isArray(merged.tournaments)) merged.tournaments = INITIAL_TOURNAMENTS;
+        if (!Array.isArray(merged.tournaments)) {
+          merged.tournaments = INITIAL_TOURNAMENTS;
+        } else {
+          merged.tournaments = merged.tournaments.map(t => {
+            const def = INITIAL_TOURNAMENTS.find(it => it.id === t.id);
+            if (def) {
+              return {
+                ...def,
+                ...t,
+                teams: (t.teams && t.teams.length > 0) ? t.teams : def.teams,
+                galleryPhotos: (t.galleryPhotos && t.galleryPhotos.length > 0) ? t.galleryPhotos : def.galleryPhotos,
+                rules: (t.rules && t.rules.length > 0) ? t.rules : def.rules,
+                prizeDistribution: (t.prizeDistribution && t.prizeDistribution.length > 0) ? t.prizeDistribution : def.prizeDistribution,
+                scheduleTimetable: (t.scheduleTimetable && t.scheduleTimetable.length > 0) ? t.scheduleTimetable : def.scheduleTimetable,
+                seo: (t.seo && t.seo.metaTitle) ? t.seo : def.seo
+              };
+            }
+            return {
+              teams: [],
+              galleryPhotos: [],
+              rules: [],
+              prizeDistribution: [],
+              scheduleTimetable: [],
+              seo: {},
+              ...t
+            };
+          });
+        }
         if (!Array.isArray(merged.venueZones)) merged.venueZones = INITIAL_ZONES;
         if (!Array.isArray(merged.navLinks)) merged.navLinks = INITIAL_NAV_LINKS;
         if (!Array.isArray(merged.n8nWorkflows)) merged.n8nWorkflows = DEFAULT_SITE_DATA.n8nWorkflows;
         if (!Array.isArray(merged.ragKnowledge)) {
           merged.ragKnowledge = INITIAL_RAG_KNOWLEDGE;
         } else {
-          // Merge any newly introduced default RAG items if missing by id
+          // Merge any newly introduced default RAG items if missing by id, or update core hours/tournament
           INITIAL_RAG_KNOWLEDGE.forEach(defaultItem => {
-            if (!merged.ragKnowledge.some(k => k.id === defaultItem.id)) {
+            const existingIdx = merged.ragKnowledge.findIndex(k => k.id === defaultItem.id);
+            if (existingIdx >= 0) {
+              if (defaultItem.id === 'rag-hours' || defaultItem.id === 'rag-tournament' || defaultItem.id === 'rag-services-overview') {
+                merged.ragKnowledge[existingIdx] = defaultItem;
+              }
+            } else {
               merged.ragKnowledge.push(defaultItem);
             }
           });
@@ -489,10 +544,18 @@ export function SiteDataProvider({ children }) {
   };
 
   const updateHero = (heroUpdates) => {
-    setSiteData(prev => ({
-      ...prev,
-      hero: { ...prev.hero, ...heroUpdates }
-    }));
+    setSiteData(prev => {
+      const merged = { ...prev.hero, ...heroUpdates };
+      if (heroUpdates.backgroundImage !== undefined) {
+        merged.bgOverlayImage = heroUpdates.backgroundImage;
+      } else if (heroUpdates.bgOverlayImage !== undefined) {
+        merged.backgroundImage = heroUpdates.bgOverlayImage;
+      }
+      return {
+        ...prev,
+        hero: merged
+      };
+    });
   };
 
   const updateFooter = (footerUpdates) => {

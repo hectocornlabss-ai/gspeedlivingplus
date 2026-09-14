@@ -582,7 +582,7 @@ export default function SingleActivityView({ activity, onBack = () => {}, onSele
                 className="related-card glass-panel"
                 onClick={() => {
                   onSelectActivity(item);
-                  window.location.hash = `#/activity/${item.slug || item.id}`;
+                  window.history.pushState(null, '', `/activities/${item.slug || item.id}`);
                 }}
               >
                 <div className="related-thumb">

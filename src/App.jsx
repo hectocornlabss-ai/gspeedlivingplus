@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ArenaHub from './components/ArenaHub';
@@ -9,91 +9,135 @@ import SingleActivityView from './components/SingleActivityView';
 import AIChatWidget from './components/AIChatWidget';
 import ErrorBoundary from './components/ErrorBoundary';
 import { SiteDataProvider, useSiteData } from './context/SiteDataContext';
+import { getRouteMetadata } from './data/routesConfig';
+import { applySEOMetadata } from './utils/seoManager';
 import './App.css';
+
+/**
+ * แปลง Legacy Hash (#/admin, #tournaments) ให้เป็น Clean Semantic Path แบบไร้ # ทันที
+ */
+function normalizeLegacyHash() {
+  const hash = window.location.hash || '';
+  if (!hash) return null;
+
+  let cleanPath = '/';
+  if (hash === '#/admin' || hash === '#admin') {
+    cleanPath = '/admin';
+  } else if (hash.includes('tournament') || hash.includes('event')) {
+    cleanPath = '/events';
+  } else if (hash.includes('franchise') || hash.includes('planner')) {
+    cleanPath = '/franchise';
+  } else if (hash.includes('company') || hash.includes('about')) {
+    cleanPath = '/company';
+  } else if (hash.includes('activity') || hash.includes('gallery') || hash.includes('news')) {
+    const m = hash.match(/#(?:activity|activities|news)\/([^/?#]+)/i);
+    cleanPath = m ? `/activities/${m[1]}` : '/activities';
+  }
+
+  // ล้าง hash ออกจาก address bar ของเบราว์เซอร์ทันที
+  window.history.replaceState(null, '', cleanPath);
+  return cleanPath;
+}
 
 function AppContent() {
   const { siteData } = useSiteData();
 
-  // Route check for separate admin path (/admin or #/admin)
-  const getIsAdminPath = () => {
-    const hash = window.location.hash || '';
-    const path = window.location.pathname || '';
-    return hash === '#/admin' || hash === '#admin' || path === '/admin' || path.startsWith('/admin/');
-  };
+  // ตรวจจับสถานะเส้นทางจาก window.location.pathname
+  const parseCurrentLocation = useCallback(() => {
+    // 1. Auto cleanup hash if present
+    normalizeLegacyHash();
 
-  // Route check for single activity or article path (/activity/:slug or #/activity/:slug)
-  const getActivitySlug = () => {
-    const path = window.location.pathname || '';
-    const pathMatch = path.match(/^\/(?:activity|article|news)\/([^/?#]+)/i);
-    if (pathMatch) return decodeURIComponent(pathMatch[1]);
+    const path = window.location.pathname || '/';
 
-    const hash = window.location.hash || '';
-    const hashMatch = hash.match(/^#\/?(?:activity|article|news)\/([^/?#]+)/i);
-    if (hashMatch) return decodeURIComponent(hashMatch[1]);
+    // 1. Admin route
+    const isAdmin = path === '/admin' || path.startsWith('/admin/');
 
-    return null;
-  };
+    // 2. Tournament Single Route: /events/:slug หรือ /tournaments/:slug
+    const tourMatch = path.match(/^\/(?:events|tournaments)\/([^/?#]+)/i);
+    const eventSlug = tourMatch ? decodeURIComponent(tourMatch[1]) : null;
 
-  // Route check for tab routes (/franchise, /company, /about)
-  const getTabFromRoute = () => {
-    const path = (window.location.pathname || '').replace(/^\//, '').toLowerCase();
-    const hash = (window.location.hash || '').replace(/^#\/?/, '').toLowerCase();
-    
-    if (path === 'franchise' || hash === 'franchise') return 'franchise';
-    if (path === 'company' || path === 'about' || hash === 'company' || hash === 'about') return 'company';
-    return 'arena';
-  };
+    // 3. Activity Single Route: /activities/:slug หรือ /news/:slug
+    const actMatch = path.match(/^\/(?:activities|activity|news|article)\/([^/?#]+)/i);
+    const actSlug = actMatch ? decodeURIComponent(actMatch[1]) : null;
 
-  const [isAdminRoute, setIsAdminRoute] = useState(getIsAdminPath);
-  const [currentActivitySlug, setCurrentActivitySlug] = useState(getActivitySlug);
-  const [activeTab, setActiveTab] = useState(getTabFromRoute);
+    // 4. Tab selection
+    let tab = 'arena';
+    let sectionToScroll = null;
 
-  useEffect(() => {
-    const handleRouteChange = () => {
-      const isAdm = getIsAdminPath();
-      const slug = getActivitySlug();
-      setIsAdminRoute(isAdm);
-      setCurrentActivitySlug(slug);
-      if (!slug && !isAdm) {
-        setActiveTab(getTabFromRoute());
-      }
-    };
+    if (path === '/franchise' || path === '/planner') {
+      tab = 'franchise';
+    } else if (path === '/company' || path === '/about') {
+      tab = 'company';
+    } else if (path === '/events' || path === '/tournaments') {
+      tab = 'arena';
+      sectionToScroll = 'tournaments';
+    } else if (path === '/activities' || path === '/gallery') {
+      tab = 'arena';
+      sectionToScroll = 'activities';
+    } else {
+      tab = 'arena';
+    }
 
-    window.addEventListener('hashchange', handleRouteChange);
-    window.addEventListener('popstate', handleRouteChange);
-    return () => {
-      window.removeEventListener('hashchange', handleRouteChange);
-      window.removeEventListener('popstate', handleRouteChange);
+    return {
+      isAdmin,
+      eventSlug,
+      actSlug,
+      tab,
+      sectionToScroll,
+      pathname: path
     };
   }, []);
 
-  // Scroll to top or anchor when switching tabs or activity
+  const [routeState, setRouteState] = useState(parseCurrentLocation);
+
+  // ฟังการเปลี่ยนแปลงเส้นทาง (popstate เมื่อกด Back/Forward ในเบราว์เซอร์)
   useEffect(() => {
-    const hash = window.location.hash || '';
-    // If navigating to an anchor like #activities or #tournaments, scroll to it smoothly
-    if (hash && hash.startsWith('#') && !hash.startsWith('#/')) {
-      const targetId = hash.slice(1);
+    const handlePopState = () => {
+      setRouteState(parseCurrentLocation());
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [parseCurrentLocation]);
+
+  // อัปเดต SEO Metadata (Title, Meta Description, Keywords, OG Tags) ทุกครั้งที่เปลี่ยนหน้า
+  useEffect(() => {
+    const meta = getRouteMetadata(routeState.pathname, {
+      tournaments: siteData?.tournaments,
+      gallery: siteData?.gallery,
+      news: siteData?.news
+    });
+    applySEOMetadata(meta);
+  }, [routeState.pathname, routeState.eventSlug, routeState.actSlug, siteData]);
+
+  // จัดการ Scroll ไปยังส่วนที่ระบุเมื่อเข้าเส้นทางหมวดหมู่ (/events, /activities)
+  useEffect(() => {
+    if (routeState.sectionToScroll && !routeState.actSlug) {
       setTimeout(() => {
-        const el = document.getElementById(targetId);
+        const el = document.getElementById(routeState.sectionToScroll);
         if (el) {
           el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        } else {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       }, 100);
-    } else if (!hash.startsWith('#/')) {
+    } else if (!routeState.sectionToScroll && !routeState.actSlug && !routeState.eventSlug) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, [activeTab, currentActivitySlug]);
+  }, [routeState.sectionToScroll, routeState.tab, routeState.actSlug, routeState.eventSlug]);
 
-  // Match current activity or news article object
+  // ดึงข้อมูลบทความปัจจุบันที่ตรงกับ Slug
   const allArticles = [...(siteData?.gallery || []), ...(siteData?.news || [])];
-  const matchedActivity = currentActivitySlug
+  const matchedActivity = routeState.actSlug
     ? allArticles.find(item => 
-        (item.slug && item.slug.toLowerCase() === currentActivitySlug.toLowerCase()) || 
-        item.id === currentActivitySlug
+        (item.slug && item.slug.toLowerCase() === routeState.actSlug.toLowerCase()) || 
+        item.id === routeState.actSlug
       )
     : null;
+
+  // ฟังก์ชันนำทาง Clean Path กลาง
+  const navigateTo = (path) => {
+    window.history.pushState(null, '', path);
+    setRouteState(parseCurrentLocation());
+  };
 
   // Dynamic Theme Styling variables
   const themeStyles = {
@@ -102,16 +146,12 @@ function AppContent() {
     backgroundColor: siteData?.theme?.backgroundColor || '#ffffff'
   };
 
-  // If visiting the isolated admin path (#/admin), render secure AdminAuthGate
-  if (isAdminRoute) {
+  // 1. ถ้าเข้าเส้นทาง /admin แสดงหน้า AdminAuthGate แบบเต็มจอ
+  if (routeState.isAdmin) {
     return (
       <AdminAuthGate 
         onExitToPublic={() => {
-          window.location.hash = '';
-          if (window.location.pathname === '/admin') {
-            window.history.pushState(null, '', '/');
-          }
-          setIsAdminRoute(false);
+          navigateTo('/');
         }} 
       />
     );
@@ -130,22 +170,16 @@ function AppContent() {
             <button 
               onClick={() => {
                 const target = siteData.tickerLinkTarget || siteData.tickerLinkTab || 'franchise';
-                setCurrentActivitySlug(null);
                 if (target.startsWith('http://') || target.startsWith('https://')) {
                   window.open(target, '_blank', 'noopener,noreferrer');
-                } else if (target.startsWith('#')) {
-                  setActiveTab('arena');
-                  window.history.pushState(null, '', `/${target}`);
-                  setTimeout(() => {
-                    const el = document.getElementById(target.replace('#', ''));
-                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }, 120);
+                } else if (target === 'events' || target === 'tournaments') {
+                  navigateTo('/events');
+                } else if (target === 'activities' || target === 'gallery') {
+                  navigateTo('/activities');
+                } else if (target === 'company' || target === 'about') {
+                  navigateTo('/company');
                 } else {
-                  const validTabs = ['arena', 'company', 'franchise'];
-                  const dest = validTabs.includes(target.toLowerCase()) ? target.toLowerCase() : 'franchise';
-                  setActiveTab(dest);
-                  window.history.pushState(null, '', dest === 'arena' ? '/' : `/${dest}`);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  navigateTo('/franchise');
                 }
               }} 
               className="ticker-link"
@@ -156,75 +190,70 @@ function AppContent() {
         </div>
       </div>
 
-      {/* Main Header / Navigation */}
+      {/* Main Header / Navigation (Clean Path URLs) */}
       <Navbar 
-        activeTab={activeTab} 
-        setActiveTab={(tab) => {
-          setCurrentActivitySlug(null);
-          setActiveTab(tab);
-          const cleanPath = tab === 'arena' ? '/' : `/${tab}`;
-          window.history.pushState(null, '', cleanPath);
-        }} 
+        activeTab={routeState.tab} 
+        currentPath={routeState.pathname}
+        onNavigate={navigateTo}
       />
 
       {/* Main Content Areas */}
       <main className="main-content">
-        {currentActivitySlug ? (
+        {routeState.actSlug ? (
           <SingleActivityView 
             activity={matchedActivity}
             onBack={(target = 'activities') => {
-              const safeTarget = (typeof target === 'string' && target) ? target : 'activities';
-              setCurrentActivitySlug(null);
-              setActiveTab('arena');
-              if (safeTarget === 'home') {
-                window.history.pushState(null, '', '/');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+              if (target === 'home') {
+                navigateTo('/');
               } else {
-                const anchor = safeTarget.startsWith('#') ? safeTarget : `#${safeTarget}`;
-                window.history.pushState(null, '', `/${anchor}`);
-                setTimeout(() => {
-                  const targetElement = document.getElementById(anchor.replace('#', ''));
-                  if (targetElement) {
-                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  } else {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }
-                }, 120);
+                navigateTo('/activities');
               }
             }}
             onSelectActivity={(act) => {
               const slug = act.slug || act.id;
-              setCurrentActivitySlug(slug);
-              window.history.pushState(null, '', `/activity/${slug}`);
+              navigateTo(`/activities/${slug}`);
             }}
           />
         ) : (
           <>
-            {activeTab === 'arena' && (
-              <ArenaHub onNavigateFranchise={() => {
-                setCurrentActivitySlug(null);
-                setActiveTab('franchise');
-              }} />
+            {routeState.tab === 'arena' && (
+              <ArenaHub 
+                initialTournamentSlug={routeState.eventSlug}
+                onSelectTournamentSlug={(slug) => {
+                  if (slug) {
+                    navigateTo(`/events/${slug}`);
+                  } else {
+                    navigateTo('/events');
+                  }
+                }}
+                onSelectActivitySlug={(slug) => {
+                  navigateTo(`/activities/${slug}`);
+                }}
+                onNavigateFranchise={() => {
+                  navigateTo('/franchise');
+                }} 
+              />
             )}
 
-            {activeTab === 'company' && (
-              <CompanyProfile onNavigateFranchise={() => {
-                setCurrentActivitySlug(null);
-                setActiveTab('franchise');
-              }} />
+            {routeState.tab === 'company' && (
+              <CompanyProfile 
+                onNavigateFranchise={() => {
+                  navigateTo('/franchise');
+                }} 
+              />
             )}
 
-            {activeTab === 'franchise' && (
+            {routeState.tab === 'franchise' && (
               <FranchisePlanner />
             )}
           </>
         )}
       </main>
 
-      {/* Global Footer */}
-      <Footer setActiveTab={setActiveTab} />
+      {/* Global Footer (Clean Navigation) */}
+      <Footer onNavigate={navigateTo} />
 
-      {/* AI Store Concierge Chat Widget with RAG */}
+      {/* Customer Service Concierge Chat Widget with RAG */}
       <AIChatWidget />
     </div>
   );

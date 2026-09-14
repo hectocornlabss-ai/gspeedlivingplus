@@ -7,9 +7,11 @@ import {
   Phone, Mail, MapPin, Globe, Shield, Trophy, Search, Tag,
   TrendingUp, BarChart2, ShieldCheck, Lock, LogOut, Activity, ArrowUpRight,
   Palette, Image as ImageIcon, Flame, Coffee, Check, Copy, Clock, Share2,
-  Box, Printer, Download, Camera, Upload, CheckSquare, Zap, ChevronRight, ChevronUp, ChevronDown, Server, Info, Ruler, Scale, Wrench, FileUp, Wand2
+  Box, Printer, Download, Camera, Upload, CheckSquare, Zap, ChevronRight, ChevronUp, ChevronDown, Server, Info, Ruler, Scale, Wrench, FileUp, Wand2,
+  Users, Calendar, Award, Target, Gamepad2, X, List, Hash
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
+import { DEMO_TOURNAMENT_PHOTOS_50 } from '../data/mockData';
 import ThreeProductViewer from './ThreeProductViewer';
 import ProductSpecSheetModal from './ProductSpecSheetModal';
 import { compressAndConvertToWebP, formatBytes } from '../utils/imageOptimizer';
@@ -212,21 +214,212 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
     tags: ''
   });
 
-  // Tournament Management state
-  const [editingTournament, setEditingTournament] = useState(null);
-  const [showAddTournamentModal, setShowAddTournamentModal] = useState(false);
-  const [newTournament, setNewTournament] = useState({
-    title: '',
-    game: 'VALORANT',
-    date: '28-29 กันยายน 2026',
-    time: '13:00 - 20:00 น.',
-    prizePool: '฿50,000',
-    slots: '32 ทีม',
-    format: '5v5 Single Elimination LAN Final',
-    status: 'Open',
-    badge: 'OPEN REGISTRATION',
-    badgeType: 'cyan'
+  // Tournament Master CMS State & Actions
+  const [tournamentModalTab, setTournamentModalTab] = useState('general'); // 'general', 'rules', 'roster', 'gallery', 'seo'
+  const [isTournamentModalOpen, setIsTournamentModalOpen] = useState(false);
+  const [isEditingTournament, setIsEditingTournament] = useState(false);
+  const [activeTournamentDraft, setActiveTournamentDraft] = useState(null);
+  const [batchPhotoUrls, setBatchPhotoUrls] = useState('');
+  const [showBatchImporter, setShowBatchImporter] = useState(false);
+  const [galleryCategoryFilter, setGalleryCategoryFilter] = useState('all');
+  const [newSinglePhoto, setNewSinglePhoto] = useState({ url: '', caption: '', category: 'stage' });
+  const [showAddTeamForm, setShowAddTeamForm] = useState(false);
+  const [newTeamDraft, setNewTeamDraft] = useState({
+    name: '',
+    tag: '',
+    logo: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80',
+    seed: 1,
+    status: 'Confirmed',
+    captain: '',
+    captainPhone: '',
+    captainDiscord: '',
+    players: ['', '', '', '', ''],
+    substitutes: [''],
+    wins: 0,
+    losses: 0
   });
+
+  const openCreateTournamentModal = () => {
+    setActiveTournamentDraft({
+      id: `tour-${Date.now()}`,
+      title: 'G-SPEED VALORANT TOURNAMENT 2026',
+      game: 'VALORANT',
+      gameCategory: 'Tactical 5v5 FPS',
+      gameIcon: 'Crosshair',
+      bannerImage: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
+      date: '28-30 กันยายน 2026',
+      time: '11:00 - 20:00 น.',
+      regStartDate: '1 กันยายน 2026',
+      regEndDate: '25 กันยายน 2026',
+      tourneyStartDate: '2026-09-28',
+      tourneyEndDate: '2026-09-30',
+      prizePool: '100,000 บาท',
+      slots: '32 ทีม',
+      format: 'LAN Final @ Main Stage & Double Elimination',
+      badge: 'เปิดรับสมัคร',
+      badgeType: 'magenta',
+      status: 'Open',
+      venue: 'G-Speed Esport Arena รามคำแหง 53 (Main Stage & Battleground Zone)',
+      streamChannel: 'Twitch.tv/gspeed_esport & YouTube Live',
+      desc: 'การแข่งขันอีสปอร์ตระดับประเทศ ชิงเงินรางวัลรวมกว่า ฿100,000 รวบรวมยอดฝีมือทั่วประเทศมาดวลความแม่นยำบนเวที LAN Final ณ G-Speed Arena รามคำแหง 53',
+      rules: [
+        'ผู้เข้าแข่งขันทุกท่านต้องนำบัตรประชาชนหรือบัตรนักเรียน/นักศึกษามาแสดงตน ณ จุดลงทะเบียน',
+        'อนุญาตให้นำเมาส์ คีย์บอร์ด และหูฟังส่วนตัวมาใช้ได้ โดยต้องผ่านการตรวจจากเจ้าหน้าที่เทคนิคก่อนเริ่มแข่ง',
+        'เครื่องคอมพิวเตอร์ที่ใช้แข่งขับเคลื่อนด้วย Intel Core i9 + NVIDIA GeForce RTX 4080 และจอ BenQ ZOWIE 360Hz',
+        'ห้ามใช้โปรแกรมโกง สคริปต์ช่วยเล่น หรือฉวยโอกาสจากข้อผิดพลาดของเกม หากตรวจพบปรับแพ้ทันที',
+        'คำตัดสินของหัวหน้าผู้ตัดสิน (Head Referee) ถือเป็นที่สิ้นสุดในทุกกรณี'
+      ],
+      prizeDistribution: [
+        { rank: 'แชมป์อันดับ 1', reward: '฿50,000 + ถ้วยเกียรติยศ + เหรียญทอง + ROG Gaming Gear Set' },
+        { rank: 'รองชนะเลิศอันดับ 1', reward: '฿25,000 + เหรียญเงิน' },
+        { rank: 'รองชนะเลิศอันดับ 2 ร่วม', reward: '฿10,000 ต่อทีม + เหรียญทองแดง' },
+        { rank: 'MVP of Tournament', reward: '฿5,000 + หูฟังเกมมิ่ง ROG Delta S' }
+      ],
+      scheduleTimetable: [
+        { time: '10:00 - 11:00 น.', stage: 'ลงทะเบียนหน้างาน & ตรวจสอบอุปกรณ์นักกีฬา (Player Check-in)' },
+        { time: '11:15 - 14:00 น.', stage: 'รอบคัดเลือกแบ่งกลุ่ม Group Stage (Best of 1)' },
+        { time: '14:30 - 17:30 น.', stage: 'รอบ 8 ทีม และ 4 ทีมสุดท้าย (Quarter & Semi-Finals)' },
+        { time: '18:00 - 20:30 น.', stage: 'รอบชิงชนะเลิศ Grand Final บนเวที Main Stage (Best of 5)' }
+      ],
+      teams: [
+        {
+          id: 'team-demo-1',
+          name: 'G-Speed Slayer Squad',
+          tag: 'GLP',
+          logo: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=150&q=80',
+          seed: 1,
+          status: 'Confirmed',
+          captain: 'SpeedyKnight (กัปตันทีม)',
+          captainPhone: '063-793-7704',
+          captainDiscord: 'speedy#2026',
+          players: ['SpeedyKnight', 'CyberViper', 'NeonPulse', 'PhantomShot', 'Valkyrie99'],
+          substitutes: ['GhostAim'],
+          wins: 0,
+          losses: 0
+        }
+      ],
+      galleryPhotos: [...DEMO_TOURNAMENT_PHOTOS_50],
+      seo: {
+        metaTitle: 'G-SPEED VALORANT TOURNAMENT 2026 | ชิงเงินรางวัล ฿100,000',
+        metaDesc: 'การแข่งขัน VALORANT LAN Tournament สุดยิ่งใหญ่ ณ G-Speed Arena รามคำแหง 53 เงินรางวัลรวม 100,000 บาท สมัครด่วน 32 ทีมเท่านั้น',
+        keywords: 'VALORANT, GSpeed, ทัวร์นาเมนต์, แข่งเกม, อีสปอร์ต, รามคำแหง 53, LAN Final, 360Hz',
+        ogImage: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
+        slug: 'gspeed-valorant-tournament-2026'
+      }
+    });
+    setIsEditingTournament(false);
+    setTournamentModalTab('general');
+    setIsTournamentModalOpen(true);
+  };
+
+  const openEditTournamentModal = (t, defaultTab = 'general') => {
+    setActiveTournamentDraft({
+      ...t,
+      gameCategory: t.gameCategory || 'Esports Tournament',
+      bannerImage: t.bannerImage || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
+      venue: t.venue || 'G-Speed Esport Arena รามคำแหง 53 (Main Stage)',
+      streamChannel: t.streamChannel || 'Twitch & YouTube Live',
+      desc: t.desc || '',
+      teams: Array.isArray(t.teams) ? t.teams : [],
+      galleryPhotos: (Array.isArray(t.galleryPhotos) && t.galleryPhotos.length > 0) ? t.galleryPhotos : [...DEMO_TOURNAMENT_PHOTOS_50],
+      rules: Array.isArray(t.rules) && t.rules.length > 0 ? t.rules : [
+        'ผู้เข้าแข่งขันทุกท่านต้องนำบัตรประชาชนหรือบัตรนักเรียน/นักศึกษามาแสดงตน ณ จุดลงทะเบียน',
+        'อนุญาตให้นำเมาส์ คีย์บอร์ด และหูฟังส่วนตัวมาใช้ได้ โดยต้องผ่านการตรวจจากเจ้าหน้าที่เทคนิคก่อนเริ่มแข่ง',
+        'ห้ามใช้โปรแกรมโกง สคริปต์ช่วยเล่น หรือฉวยโอกาสจากข้อผิดพลาดของเกม หากตรวจพบปรับแพ้ทันที'
+      ],
+      prizeDistribution: Array.isArray(t.prizeDistribution) && t.prizeDistribution.length > 0 ? t.prizeDistribution : [
+        { rank: 'แชมป์อันดับ 1', reward: t.prizePool || '฿50,000 + ถ้วยเกียรติยศ' }
+      ],
+      scheduleTimetable: Array.isArray(t.scheduleTimetable) && t.scheduleTimetable.length > 0 ? t.scheduleTimetable : [
+        { time: t.time || '11:00 น.', stage: 'การแข่งขันรอบทัวร์นาเมนต์ LAN Final' }
+      ],
+      seo: t.seo && t.seo.metaTitle ? t.seo : {
+        metaTitle: `${t.title} | G-Speed Esport Arena`,
+        metaDesc: `ติดตามและสมัครแข่งขัน ${t.title} เกม ${t.game} ชิงเงินรางวัล ${t.prizePool} ณ G-Speed Arena รามคำแหง 53`,
+        keywords: `${t.game}, G-Speed, ทัวร์นาเมนต์, แข่งขันอีสปอร์ต, รามคำแหง 53, LAN Final`,
+        ogImage: t.bannerImage || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
+        slug: (t.title || 'tournament').toLowerCase().replace(/[^a-z0-9\u0E00-\u0E7F]+/g, '-').replace(/(^-|-$)/g, '')
+      }
+    });
+    setIsEditingTournament(true);
+    setTournamentModalTab(defaultTab);
+    setIsTournamentModalOpen(true);
+  };
+
+  const handleImportBatchPhotos = () => {
+    if (!batchPhotoUrls.trim()) return;
+    const lines = batchPhotoUrls.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    const prevCount = activeTournamentDraft?.galleryPhotos?.length || 0;
+    const newItems = lines.map((url, idx) => ({
+      id: `p-import-${Date.now()}-${idx}`,
+      url: url,
+      caption: `ภาพบรรยากาศการแข่งขันทัวร์นาเมนต์ G-Speed #${prevCount + idx + 1}`,
+      category: 'stage'
+    }));
+    setActiveTournamentDraft(prev => ({
+      ...prev,
+      galleryPhotos: [...(prev?.galleryPhotos || []), ...newItems]
+    }));
+    setBatchPhotoUrls('');
+    setShowBatchImporter(false);
+    alert(`นำเข้าภาพสำเร็จทั้งหมด ${newItems.length} ภาพ รวมมีภาพในแกลเลอรี ${prevCount + newItems.length} ภาพ!`);
+  };
+
+  const handleLoadDemo50Photos = () => {
+    setActiveTournamentDraft(prev => ({
+      ...prev,
+      galleryPhotos: [...DEMO_TOURNAMENT_PHOTOS_50]
+    }));
+    alert(`โหลดภาพกิจกรรมตัวอย่างครบ 52 ภาพเรียบร้อยแล้ว!`);
+  };
+
+  const handleAddTeam = () => {
+    if (!newTeamDraft.name.trim()) {
+      alert('กรุณากรอกชื่อทีม (Team Name)');
+      return;
+    }
+    const cleanPlayers = newTeamDraft.players.filter(p => p.trim().length > 0);
+    const newTeamObj = {
+      ...newTeamDraft,
+      id: `team-${Date.now()}`,
+      seed: (activeTournamentDraft?.teams?.length || 0) + 1,
+      players: cleanPlayers.length > 0 ? cleanPlayers : [newTeamDraft.captain || 'Player 1'],
+      substitutes: newTeamDraft.substitutes.filter(s => s.trim().length > 0)
+    };
+    setActiveTournamentDraft(prev => ({
+      ...prev,
+      teams: [...(prev?.teams || []), newTeamObj]
+    }));
+    setNewTeamDraft({
+      name: '',
+      tag: '',
+      logo: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80',
+      seed: (activeTournamentDraft?.teams?.length || 0) + 2,
+      status: 'Confirmed',
+      captain: '',
+      captainPhone: '',
+      captainDiscord: '',
+      players: ['', '', '', '', ''],
+      substitutes: [''],
+      wins: 0,
+      losses: 0
+    });
+    setShowAddTeamForm(false);
+  };
+
+  const handleSaveTournamentDraft = () => {
+    if (!activeTournamentDraft?.title?.trim()) {
+      alert('กรุณากรอกชื่อรายการแข่งขัน');
+      return;
+    }
+    if (isEditingTournament) {
+      updateTournament(activeTournamentDraft.id, activeTournamentDraft);
+    } else {
+      addTournament(activeTournamentDraft);
+    }
+    setIsTournamentModalOpen(false);
+    triggerSaveToast();
+  };
 
   // Activities & Articles CMS State
   const [editingActivity, setEditingActivity] = useState(null);
@@ -4216,7 +4409,7 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                       </button>
                       <button 
                         className="btn-primary btn-sm"
-                        onClick={() => setShowAddTournamentModal(true)}
+                        onClick={() => openCreateTournamentModal()}
                       >
                         <Plus size={14} /> เพิ่มทัวร์นาเมนต์ใหม่
                       </button>
@@ -4267,53 +4460,118 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                       <thead>
                         <tr>
                           <th>เกม & รายการแข่งขัน</th>
-                          <th>วันแข่งขัน</th>
+                          <th>วันแข่งขัน / เวลา</th>
                           <th>เงินรางวัล</th>
-                          <th>จำนวนทีม</th>
-                          <th>สถานะ</th>
+                          <th>ทีม & นักแข่ง</th>
+                          <th>คลังภาพกิจกรรม</th>
+                          <th>สถานะ & SEO</th>
                           <th style={{ textAlign: 'center' }}>การจัดการ</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {(siteData.tournaments || []).map(t => (
-                          <tr key={t.id}>
-                            <td>
-                              <strong>{t.title}</strong>
-                              <span className="text-xs text-muted block">{t.game}</span>
-                            </td>
-                            <td>{t.date}</td>
-                            <td><strong className="text-blue">{t.prizePool}</strong></td>
-                            <td>{t.slots}</td>
-                            <td>
-                              <span className={`status-pill ${t.status === 'Open' ? 'status-pill-success' : 'status-pill-warning'}`}>
-                                {t.status}
-                              </span>
-                            </td>
-                            <td>
-                              <div className="actions-cell" style={{ justifyContent: 'center' }}>
+                        {(siteData.tournaments || []).map(t => {
+                          const photoCount = (t.galleryPhotos || []).length;
+                          const teamCount = (t.teams || []).length;
+                          const hasSeo = Boolean(t.seo?.metaTitle);
+                          return (
+                            <tr key={t.id}>
+                              <td>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                  {t.bannerImage && (
+                                    <img 
+                                      src={t.bannerImage} 
+                                      alt={t.title}
+                                      style={{ width: '48px', height: '36px', objectFit: 'cover', borderRadius: '4px', border: '1px solid rgba(0,0,0,0.1)' }}
+                                    />
+                                  )}
+                                  <div>
+                                    <strong style={{ display: 'block' }}>{t.title}</strong>
+                                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginTop: '2px' }}>
+                                      <span className="text-xs text-muted" style={{ fontWeight: 600 }}>{t.game}</span>
+                                      {t.gameCategory && (
+                                        <span className="text-xs" style={{ background: '#f1f5f9', padding: '1px 6px', borderRadius: '4px', color: '#64748b' }}>
+                                          {t.gameCategory}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td>
+                                <div>{t.date}</div>
+                                <span className="text-xs text-muted block">{t.time}</span>
+                              </td>
+                              <td><strong className="text-blue">{t.prizePool}</strong></td>
+                              <td>
                                 <button 
+                                  type="button"
                                   className="btn-table-action"
-                                  onClick={() => setEditingTournament(t)}
-                                  title="แก้ไขทัวร์นาเมนต์นี้"
+                                  style={{ padding: '3px 8px', fontSize: '0.8rem', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe' }}
+                                  onClick={() => openEditTournamentModal(t, 'roster')}
+                                  title="คลิกเพื่อจัดการรายชื่อนักแข่ง & ทีม"
                                 >
-                                  <Edit3 size={13} />
+                                  <Users size={12} />
+                                  <span>{teamCount} ทีม</span>
                                 </button>
+                              </td>
+                              <td>
                                 <button 
-                                  className="btn-table-action action-delete"
-                                  onClick={() => {
-                                    if (window.confirm(`คุณต้องการลบทัวร์นาเมนต์ "${t.title}" ใช่หรือไม่?`)) {
-                                      deleteTournament(t.id);
-                                      triggerSaveToast();
-                                    }
+                                  type="button"
+                                  className="btn-table-action"
+                                  style={{ 
+                                    padding: '3px 8px', 
+                                    fontSize: '0.8rem', 
+                                    background: photoCount >= 50 ? '#ecfdf5' : '#f8fafc', 
+                                    color: photoCount >= 50 ? '#059669' : '#475569', 
+                                    border: photoCount >= 50 ? '1px solid #a7f3d0' : '1px solid #e2e8f0' 
                                   }}
-                                  title="ลบทัวร์นาเมนต์นี้"
+                                  onClick={() => openEditTournamentModal(t, 'gallery')}
+                                  title="คลิกเพื่อจัดการแกลเลอรีภาพกิจกรรม 50+ ภาพ"
                                 >
-                                  <Trash2 size={13} />
+                                  <Camera size={12} />
+                                  <span>{photoCount} ภาพ {photoCount >= 50 ? '✓ (50+)' : ''}</span>
                                 </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
+                              </td>
+                              <td>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                  <span className={`status-pill ${t.status === 'Open' ? 'status-pill-success' : 'status-pill-warning'}`}>
+                                    {t.status}
+                                  </span>
+                                  <span 
+                                    className="text-xs" 
+                                    style={{ color: hasSeo ? '#059669' : '#94a3b8', display: 'flex', alignItems: 'center', gap: '3px' }}
+                                    title={hasSeo ? `SEO: ${t.seo?.metaTitle}` : 'ยังไม่ได้ตั้งค่า SEO'}
+                                  >
+                                    <Globe size={11} /> {hasSeo ? 'SEO พร้อม' : 'รอตั้ง SEO'}
+                                  </span>
+                                </div>
+                              </td>
+                              <td>
+                                <div className="actions-cell" style={{ justifyContent: 'center', gap: '6px' }}>
+                                  <button 
+                                    className="btn-table-action"
+                                    onClick={() => openEditTournamentModal(t, 'general')}
+                                    title="แก้ไขข้อมูลทัวร์นาเมนต์ครบวงจร"
+                                  >
+                                    <Edit3 size={13} />
+                                  </button>
+                                  <button 
+                                    className="btn-table-action action-delete"
+                                    onClick={() => {
+                                      if (window.confirm(`คุณต้องการลบทัวร์นาเมนต์ "${t.title}" ใช่หรือไม่?`)) {
+                                        deleteTournament(t.id);
+                                        triggerSaveToast();
+                                      }
+                                    }}
+                                    title="ลบทัวร์นาเมนต์นี้"
+                                  >
+                                    <Trash2 size={13} />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
@@ -4810,194 +5068,1013 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                 </div>
               )}
 
-              {/* Tournament Modal (Add) */}
-              {showAddTournamentModal && (
-                <div className="cms-modal-backdrop" onClick={() => setShowAddTournamentModal(false)}>
-                  <div className="cms-modal-card" onClick={e => e.stopPropagation()}>
-                    <div className="modal-head">
-                      <h4>เพิ่มทัวร์นาเมนต์ใหม่ (New Tournament)</h4>
-                      <button onClick={() => setShowAddTournamentModal(false)} className="btn-close-modal">✕</button>
+              {/* =========================================================================
+                  MASTER TOURNAMENT CMS MODAL (UNIFIED 5-TAB SUITE)
+                  Game, Dates, Description & Rules, Roster, 50+ Photos Gallery, SEO Suite
+                  ========================================================================= */}
+              {isTournamentModalOpen && activeTournamentDraft && (
+                <div className="cms-modal-backdrop" onClick={() => setIsTournamentModalOpen(false)}>
+                  <div 
+                    className="cms-modal-card modal-extra-wide tournament-master-modal" 
+                    onClick={e => e.stopPropagation()}
+                    style={{ maxWidth: '1080px', width: '95vw', maxHeight: '92vh', display: 'flex', flexDirection: 'column' }}
+                  >
+                    {/* Modal Head */}
+                    <div className="modal-head" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '14px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ background: '#eff6ff', color: '#1d4ed8', width: '38px', height: '38px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Trophy size={20} />
+                        </div>
+                        <div>
+                          <h4 style={{ margin: 0, fontSize: '1.15rem' }}>
+                            {isEditingTournament ? `แก้ไขทัวร์นาเมนต์: ${activeTournamentDraft.title || ''}` : 'สร้างทัวร์นาเมนต์ใหม่ (New Tournament)'}
+                          </h4>
+                          <span className="text-xs text-muted">
+                            ระบบจัดการงานแข่งรวมศูนย์ (ชื่อเกม, รายชื่อนักแข่ง, ระบบวันที่, กติกา, SEO, ภาพกิจกรรม 50+ ภาพ)
+                          </span>
+                        </div>
+                      </div>
+                      <button onClick={() => setIsTournamentModalOpen(false)} className="btn-close-modal">✕</button>
                     </div>
 
-                    <div className="modal-body-form">
-                      <div className="form-group">
-                        <label>ชื่อรายการแข่งขัน</label>
-                        <input 
-                          type="text" className="form-input"
-                          placeholder="เช่น GLP APEX LEGENDS ARENA 2026"
-                          value={newTournament.title}
-                          onChange={e => setNewTournament({ ...newTournament, title: e.target.value })}
-                        />
-                      </div>
-
-                      <div className="form-row-2">
-                        <div className="form-group">
-                          <label>เกมที่ใช้แข่งขัน</label>
-                          <select 
-                            className="form-input"
-                            value={newTournament.game}
-                            onChange={e => setNewTournament({ ...newTournament, game: e.target.value })}
-                          >
-                            <option value="VALORANT">VALORANT</option>
-                            <option value="PUBG PC">PUBG PC</option>
-                            <option value="DOTA 2">DOTA 2</option>
-                            <option value="FC ONLINE">FC ONLINE</option>
-                            <option value="APEX LEGENDS">APEX LEGENDS</option>
-                            <option value="ROV">ROV</option>
-                          </select>
-                        </div>
-                        <div className="form-group">
-                          <label>เงินรางวัลรวม (Prize Pool)</label>
-                          <input 
-                            type="text" className="form-input"
-                            placeholder="฿50,000"
-                            value={newTournament.prizePool}
-                            onChange={e => setNewTournament({ ...newTournament, prizePool: e.target.value })}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="form-row-2">
-                        <div className="form-group">
-                          <label>วันที่แข่งขัน</label>
-                          <input 
-                            type="text" className="form-input"
-                            placeholder="28-29 กันยายน 2026"
-                            value={newTournament.date}
-                            onChange={e => setNewTournament({ ...newTournament, date: e.target.value })}
-                          />
-                        </div>
-                        <div className="form-group">
-                          <label>จำนวนที่รับสมัคร</label>
-                          <input 
-                            type="text" className="form-input"
-                            placeholder="32 ทีม"
-                            value={newTournament.slots}
-                            onChange={e => setNewTournament({ ...newTournament, slots: e.target.value })}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="form-group">
-                        <label>รูปแบบการแข่ง</label>
-                        <input 
-                          type="text" className="form-input"
-                          placeholder="5v5 Single Elimination LAN Final"
-                          value={newTournament.format}
-                          onChange={e => setNewTournament({ ...newTournament, format: e.target.value })}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="modal-footer-btns">
-                      <button className="btn-secondary" onClick={() => setShowAddTournamentModal(false)}>ยกเลิก</button>
+                    {/* Master Tabs Bar */}
+                    <div className="subtabs-bar" style={{ padding: '8px 16px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', gap: '8px', overflowX: 'auto' }}>
                       <button 
-                        className="btn-primary" 
-                        onClick={() => {
-                          if (!newTournament.title.trim()) {
-                            alert('กรุณากรอกชื่อรายการแข่งขัน');
-                            return;
-                          }
-                          addTournament(newTournament);
-                          setShowAddTournamentModal(false);
-                          setNewTournament({
-                            title: '',
-                            game: 'VALORANT',
-                            date: '28-29 กันยายน 2026',
-                            time: '13:00 - 20:00 น.',
-                            prizePool: '฿50,000',
-                            slots: '32 ทีม',
-                            format: '5v5 Single Elimination LAN Final',
-                            status: 'Open',
-                            badge: 'OPEN REGISTRATION',
-                            badgeType: 'cyan'
-                          });
-                          triggerSaveToast();
-                        }}
+                        type="button" 
+                        className={`subtab-btn ${tournamentModalTab === 'general' ? 'active' : ''}`}
+                        onClick={() => setTournamentModalTab('general')}
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                       >
-                        <Save size={14} /> เพิ่มทัวร์นาเมนต์
+                        <Gamepad2 size={14} />
+                        <span>1. ข้อมูลหลัก & เกม & วันที่</span>
+                      </button>
+                      <button 
+                        type="button" 
+                        className={`subtab-btn ${tournamentModalTab === 'rules' ? 'active' : ''}`}
+                        onClick={() => setTournamentModalTab('rules')}
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                      >
+                        <List size={14} />
+                        <span>2. คำอธิบาย & กติกา & รางวัล</span>
+                      </button>
+                      <button 
+                        type="button" 
+                        className={`subtab-btn ${tournamentModalTab === 'roster' ? 'active' : ''}`}
+                        onClick={() => setTournamentModalTab('roster')}
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                      >
+                        <Users size={14} />
+                        <span>3. รายชื่อนักแข่ง & ทีม ({(activeTournamentDraft.teams || []).length})</span>
+                      </button>
+                      <button 
+                        type="button" 
+                        className={`subtab-btn ${tournamentModalTab === 'gallery' ? 'active' : ''}`}
+                        onClick={() => setTournamentModalTab('gallery')}
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                      >
+                        <Camera size={14} />
+                        <span>4. คลังภาพกิจกรรม 50+ ภาพ ({(activeTournamentDraft.galleryPhotos || []).length})</span>
+                      </button>
+                      <button 
+                        type="button" 
+                        className={`subtab-btn ${tournamentModalTab === 'seo' ? 'active' : ''}`}
+                        onClick={() => setTournamentModalTab('seo')}
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                      >
+                        <Globe size={14} />
+                        <span>5. ระบบ SEO & โซเชียล</span>
                       </button>
                     </div>
-                  </div>
-                </div>
-              )}
 
-              {/* Tournament Modal (Edit) */}
-              {editingTournament && (
-                <div className="cms-modal-backdrop" onClick={() => setEditingTournament(null)}>
-                  <div className="cms-modal-card" onClick={e => e.stopPropagation()}>
-                    <div className="modal-head">
-                      <h4>แก้ไขทัวร์นาเมนต์: {editingTournament.title}</h4>
-                      <button onClick={() => setEditingTournament(null)} className="btn-close-modal">✕</button>
-                    </div>
+                    {/* Scrollable Modal Content */}
+                    <div className="modal-body-form" style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
+                      
+                      {/* ----------------- TAB 1: GENERAL & GAME & DATES ----------------- */}
+                      {tournamentModalTab === 'general' && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                          <div className="form-group">
+                            <label>ชื่อรายการแข่งขัน (Tournament Title) *</label>
+                            <input 
+                              type="text" className="form-input"
+                              placeholder="เช่น G-SPEED VALORANT CHAMPIONSHIP 2026"
+                              value={activeTournamentDraft.title || ''}
+                              onChange={e => setActiveTournamentDraft({ ...activeTournamentDraft, title: e.target.value })}
+                            />
+                          </div>
 
-                    <div className="modal-body-form">
-                      <div className="form-group">
-                        <label>ชื่อรายการแข่งขัน</label>
-                        <input 
-                          type="text" className="form-input"
-                          value={editingTournament.title}
-                          onChange={e => setEditingTournament({ ...editingTournament, title: e.target.value })}
-                        />
-                      </div>
+                          <div className="form-row-2">
+                            <div className="form-group">
+                              <label>ชื่อเกมที่ใช้แข่งขัน (Game Name) *</label>
+                              <div style={{ display: 'flex', gap: '8px' }}>
+                                <input 
+                                  type="text" className="form-input"
+                                  placeholder="เช่น VALORANT, RoV, CS2"
+                                  value={activeTournamentDraft.game || ''}
+                                  onChange={e => setActiveTournamentDraft({ ...activeTournamentDraft, game: e.target.value })}
+                                />
+                                <select 
+                                  className="form-input" 
+                                  style={{ width: '130px' }}
+                                  onChange={e => {
+                                    if (e.target.value) {
+                                      setActiveTournamentDraft({ ...activeTournamentDraft, game: e.target.value });
+                                    }
+                                  }}
+                                  value=""
+                                >
+                                  <option value="">เลือกด่วน...</option>
+                                  <option value="VALORANT">VALORANT</option>
+                                  <option value="Arena of Valor (RoV)">RoV</option>
+                                  <option value="Counter-Strike 2">CS2</option>
+                                  <option value="PUBG PC">PUBG PC</option>
+                                  <option value="EA Sports FC Online">FC Online</option>
+                                  <option value="Dota 2">Dota 2</option>
+                                  <option value="Apex Legends">Apex Legends</option>
+                                </select>
+                              </div>
+                            </div>
+                            <div className="form-group">
+                              <label>ประเภท / หมวดหมู่เกม (Game Category)</label>
+                              <input 
+                                type="text" className="form-input"
+                                placeholder="เช่น Tactical 5v5 FPS, 5v5 Mobile MOBA"
+                                value={activeTournamentDraft.gameCategory || ''}
+                                onChange={e => setActiveTournamentDraft({ ...activeTournamentDraft, gameCategory: e.target.value })}
+                              />
+                            </div>
+                          </div>
 
-                      <div className="form-row-2">
-                        <div className="form-group">
-                          <label>เกมที่ใช้แข่งขัน</label>
-                          <input 
-                            type="text" className="form-input"
-                            value={editingTournament.game}
-                            onChange={e => setEditingTournament({ ...editingTournament, game: e.target.value })}
-                          />
+                          <div className="form-row-2">
+                            <div className="form-group">
+                              <label>เงินรางวัลรวม (Total Prize Pool)</label>
+                              <input 
+                                type="text" className="form-input"
+                                placeholder="เช่น 100,000 บาท หรือ ฿50,000"
+                                value={activeTournamentDraft.prizePool || ''}
+                                onChange={e => setActiveTournamentDraft({ ...activeTournamentDraft, prizePool: e.target.value })}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>จำนวนทีม / สล็อตที่รับสมัคร (Slots)</label>
+                              <input 
+                                type="text" className="form-input"
+                                placeholder="เช่น 32 ทีม (เหลือ 6 ทีมสุดท้าย)"
+                                value={activeTournamentDraft.slots || ''}
+                                onChange={e => setActiveTournamentDraft({ ...activeTournamentDraft, slots: e.target.value })}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="form-row-2">
+                            <div className="form-group">
+                              <label>รูปแบบการแข่งขัน (Format)</label>
+                              <input 
+                                type="text" className="form-input"
+                                placeholder="เช่น LAN Final @ Main Stage & Double Elimination"
+                                value={activeTournamentDraft.format || ''}
+                                onChange={e => setActiveTournamentDraft({ ...activeTournamentDraft, format: e.target.value })}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>สถานะการเปิดรับสมัคร (Status)</label>
+                              <select 
+                                className="form-input"
+                                value={activeTournamentDraft.status || 'Open'}
+                                onChange={e => setActiveTournamentDraft({ ...activeTournamentDraft, status: e.target.value })}
+                              >
+                                <option value="Open">Open (เปิดรับสมัคร)</option>
+                                <option value="Full">Full (ที่นั่งเต็มแล้ว)</option>
+                                <option value="Ongoing">Ongoing (กำลังแข่งขัน)</option>
+                                <option value="Closed">Closed (ปิดรับสมัครแล้ว)</option>
+                                <option value="Completed">Completed (จบการแข่งขันแล้ว)</option>
+                                <option value="Upcoming">Upcoming (เร็วๆ นี้)</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          <div className="form-row-2">
+                            <div className="form-group">
+                              <label>ป้ายข้อความ (Badge Text)</label>
+                              <input 
+                                type="text" className="form-input"
+                                placeholder="เช่น รับสมัครด่วน, เต็มแล้ว, เร็วๆ นี้"
+                                value={activeTournamentDraft.badge || ''}
+                                onChange={e => setActiveTournamentDraft({ ...activeTournamentDraft, badge: e.target.value })}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>สีของป้าย Badge</label>
+                              <select 
+                                className="form-input"
+                                value={activeTournamentDraft.badgeType || 'magenta'}
+                                onChange={e => setActiveTournamentDraft({ ...activeTournamentDraft, badgeType: e.target.value })}
+                              >
+                                <option value="magenta">Magenta (ชมพูม่วง - รับสมัครด่วน)</option>
+                                <option value="cyan">Cyan (ฟ้าสว่าง - ทัวร์นาเมนต์หลัก)</option>
+                                <option value="amber">Amber (ส้มทอง - เต็มแล้ว / รางวัลใหญ่)</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          <div className="form-row-2">
+                            <div className="form-group">
+                              <label>สถานที่จัดแข่ง (Venue)</label>
+                              <input 
+                                type="text" className="form-input"
+                                placeholder="G-Speed Esport Arena รามคำแหง 53"
+                                value={activeTournamentDraft.venue || ''}
+                                onChange={e => setActiveTournamentDraft({ ...activeTournamentDraft, venue: e.target.value })}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>ช่องทางถ่ายทอดสด (Stream Channel)</label>
+                              <input 
+                                type="text" className="form-input"
+                                placeholder="Twitch.tv/gspeed_esport & YouTube Live"
+                                value={activeTournamentDraft.streamChannel || ''}
+                                onChange={e => setActiveTournamentDraft({ ...activeTournamentDraft, streamChannel: e.target.value })}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="form-group">
+                            <label>URL ภาพแบนเนอร์ปกทัวร์นาเมนต์ (Banner Image URL)</label>
+                            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                              <input 
+                                type="text" className="form-input" style={{ flex: 1 }}
+                                placeholder="https://images.unsplash.com/..."
+                                value={activeTournamentDraft.bannerImage || ''}
+                                onChange={e => setActiveTournamentDraft({ ...activeTournamentDraft, bannerImage: e.target.value })}
+                              />
+                              {activeTournamentDraft.bannerImage && (
+                                <img 
+                                  src={activeTournamentDraft.bannerImage} 
+                                  alt="Preview" 
+                                  style={{ width: '60px', height: '36px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #ccc' }}
+                                />
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Date System Box */}
+                          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px', marginTop: '10px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                              <Calendar size={16} className="text-blue" />
+                              <strong style={{ color: '#0f172a' }}>📅 ระบบวันที่ & กำหนดการแข่งขัน (Date & Time System)</strong>
+                            </div>
+
+                            <div className="form-row-2">
+                              <div className="form-group">
+                                <label>วันเปิดรับสมัคร (Registration Start)</label>
+                                <input 
+                                  type="text" className="form-input"
+                                  placeholder="1 กันยายน 2026"
+                                  value={activeTournamentDraft.regStartDate || ''}
+                                  onChange={e => setActiveTournamentDraft({ ...activeTournamentDraft, regStartDate: e.target.value })}
+                                />
+                              </div>
+                              <div className="form-group">
+                                <label>วันปิดรับสมัคร (Registration Deadline)</label>
+                                <input 
+                                  type="text" className="form-input"
+                                  placeholder="25 กันยายน 2026"
+                                  value={activeTournamentDraft.regEndDate || ''}
+                                  onChange={e => setActiveTournamentDraft({ ...activeTournamentDraft, regEndDate: e.target.value })}
+                                />
+                              </div>
+                            </div>
+
+                            <div className="form-row-2">
+                              <div className="form-group">
+                                <label>ช่วงวันที่แข่งขันจริง (Tournament Date)</label>
+                                <input 
+                                  type="text" className="form-input"
+                                  placeholder="28-30 กันยายน 2026"
+                                  value={activeTournamentDraft.date || ''}
+                                  onChange={e => setActiveTournamentDraft({ ...activeTournamentDraft, date: e.target.value })}
+                                />
+                              </div>
+                              <div className="form-group">
+                                <label>เวลาเริ่ม - สิ้นสุดในแต่ละวัน (Daily Time)</label>
+                                <input 
+                                  type="text" className="form-input"
+                                  placeholder="11:00 - 20:00 น."
+                                  value={activeTournamentDraft.time || ''}
+                                  onChange={e => setActiveTournamentDraft({ ...activeTournamentDraft, time: e.target.value })}
+                                />
+                              </div>
+                            </div>
+
+                            {/* Timetable / Schedule editor */}
+                            <div style={{ marginTop: '12px' }}>
+                              <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 600, fontSize: '0.85rem' }}>
+                                <span>กำหนดการแข่งขันรายรอบ (Match Timetable)</span>
+                                <button 
+                                  type="button" 
+                                  className="btn-table-action"
+                                  style={{ padding: '2px 8px', fontSize: '0.75rem', background: '#eff6ff', color: '#1d4ed8' }}
+                                  onClick={() => {
+                                    const current = activeTournamentDraft.scheduleTimetable || [];
+                                    setActiveTournamentDraft({
+                                      ...activeTournamentDraft,
+                                      scheduleTimetable: [...current, { time: '12:00 น.', stage: 'รอบการแข่งขันใหม่' }]
+                                    });
+                                  }}
+                                >
+                                  + เพิ่มรอบแข่ง
+                                </button>
+                              </label>
+
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '6px' }}>
+                                {(activeTournamentDraft.scheduleTimetable || []).map((st, sidx) => (
+                                  <div key={sidx} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                    <input 
+                                      type="text" className="form-input" style={{ width: '130px' }}
+                                      placeholder="เวลา เช่น 11:00 น."
+                                      value={st.time}
+                                      onChange={e => {
+                                        const updated = [...activeTournamentDraft.scheduleTimetable];
+                                        updated[sidx].time = e.target.value;
+                                        setActiveTournamentDraft({ ...activeTournamentDraft, scheduleTimetable: updated });
+                                      }}
+                                    />
+                                    <input 
+                                      type="text" className="form-input" style={{ flex: 1 }}
+                                      placeholder="รายละเอียดรอบ เช่น รอบ 8 ทีมสุดท้าย (Bo3)"
+                                      value={st.stage}
+                                      onChange={e => {
+                                        const updated = [...activeTournamentDraft.scheduleTimetable];
+                                        updated[sidx].stage = e.target.value;
+                                        setActiveTournamentDraft({ ...activeTournamentDraft, scheduleTimetable: updated });
+                                      }}
+                                    />
+                                    <button 
+                                      type="button"
+                                      className="btn-table-action action-delete"
+                                      onClick={() => {
+                                        const updated = activeTournamentDraft.scheduleTimetable.filter((_, i) => i !== sidx);
+                                        setActiveTournamentDraft({ ...activeTournamentDraft, scheduleTimetable: updated });
+                                      }}
+                                    >
+                                      <Trash2 size={13} />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                        <div className="form-group">
-                          <label>เงินรางวัลรวม</label>
-                          <input 
-                            type="text" className="form-input"
-                            value={editingTournament.prizePool}
-                            onChange={e => setEditingTournament({ ...editingTournament, prizePool: e.target.value })}
-                          />
-                        </div>
-                      </div>
+                      )}
 
-                      <div className="form-row-2">
-                        <div className="form-group">
-                          <label>วันที่แข่งขัน</label>
-                          <input 
-                            type="text" className="form-input"
-                            value={editingTournament.date}
-                            onChange={e => setEditingTournament({ ...editingTournament, date: e.target.value })}
-                          />
+                      {/* ----------------- TAB 2: DESC & RULES & PRIZES ----------------- */}
+                      {tournamentModalTab === 'rules' && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                          <div className="form-group">
+                            <label>คำอธิบายและเรื่องราวการแข่งขัน (Detailed Tournament Description)</label>
+                            <textarea 
+                              className="form-input form-textarea" rows="4"
+                              placeholder="อธิบายความเป็นมาของทัวร์นาเมนต์ ไฮไลต์ รางวัล และเวทีการแข่งขัน..."
+                              value={activeTournamentDraft.desc || ''}
+                              onChange={e => setActiveTournamentDraft({ ...activeTournamentDraft, desc: e.target.value })}
+                            />
+                          </div>
+
+                          {/* Prize Breakdown */}
+                          <div style={{ background: '#fefce8', border: '1px solid #fef08a', borderRadius: '8px', padding: '16px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <Award size={16} className="text-amber" />
+                                <strong style={{ color: '#854d0e' }}>การแบ่งเงินรางวัล (Prize Pool Distribution)</strong>
+                              </div>
+                              <button 
+                                type="button" 
+                                className="btn-table-action"
+                                style={{ padding: '3px 10px', fontSize: '0.8rem', background: '#fef08a', color: '#854d0e' }}
+                                onClick={() => {
+                                  const current = activeTournamentDraft.prizeDistribution || [];
+                                  setActiveTournamentDraft({
+                                    ...activeTournamentDraft,
+                                    prizeDistribution: [...current, { rank: `อันดับที่ ${current.length + 1}`, reward: '฿5,000' }]
+                                  });
+                                }}
+                              >
+                                + เพิ่มอันดับรางวัล
+                              </button>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                              {(activeTournamentDraft.prizeDistribution || []).map((pz, pidx) => (
+                                <div key={pidx} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                  <input 
+                                    type="text" className="form-input" style={{ width: '180px' }}
+                                    placeholder="เช่น แชมป์อันดับ 1"
+                                    value={pz.rank}
+                                    onChange={e => {
+                                      const updated = [...activeTournamentDraft.prizeDistribution];
+                                      updated[pidx].rank = e.target.value;
+                                      setActiveTournamentDraft({ ...activeTournamentDraft, prizeDistribution: updated });
+                                    }}
+                                  />
+                                  <input 
+                                    type="text" className="form-input" style={{ flex: 1 }}
+                                    placeholder="เช่น ฿50,000 + ถ้วยเกียรติยศ + เหรียญทอง"
+                                    value={pz.reward}
+                                    onChange={e => {
+                                      const updated = [...activeTournamentDraft.prizeDistribution];
+                                      updated[pidx].reward = e.target.value;
+                                      setActiveTournamentDraft({ ...activeTournamentDraft, prizeDistribution: updated });
+                                    }}
+                                  />
+                                  <button 
+                                    type="button" 
+                                    className="btn-table-action action-delete"
+                                    onClick={() => {
+                                      const updated = activeTournamentDraft.prizeDistribution.filter((_, i) => i !== pidx);
+                                      setActiveTournamentDraft({ ...activeTournamentDraft, prizeDistribution: updated });
+                                    }}
+                                  >
+                                    <Trash2 size={13} />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Rules Checklist */}
+                          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <Shield size={16} className="text-blue" />
+                                <strong style={{ color: '#0f172a' }}>กติกาและข้อบังคับการแข่งขัน (Official Rules)</strong>
+                              </div>
+                              <button 
+                                type="button" 
+                                className="btn-table-action"
+                                style={{ padding: '3px 10px', fontSize: '0.8rem', background: '#eff6ff', color: '#1d4ed8' }}
+                                onClick={() => {
+                                  const current = activeTournamentDraft.rules || [];
+                                  setActiveTournamentDraft({
+                                    ...activeTournamentDraft,
+                                    rules: [...current, 'กติกาการแข่งขันข้อใหม่']
+                                  });
+                                }}
+                              >
+                                + เพิ่มกติกา
+                              </button>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                              {(activeTournamentDraft.rules || []).map((rl, ridx) => (
+                                <div key={ridx} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#64748b', width: '24px' }}>
+                                    {ridx + 1}.
+                                  </span>
+                                  <input 
+                                    type="text" className="form-input" style={{ flex: 1 }}
+                                    value={rl}
+                                    onChange={e => {
+                                      const updated = [...activeTournamentDraft.rules];
+                                      updated[ridx] = e.target.value;
+                                      setActiveTournamentDraft({ ...activeTournamentDraft, rules: updated });
+                                    }}
+                                  />
+                                  <button 
+                                    type="button" 
+                                    className="btn-table-action action-delete"
+                                    onClick={() => {
+                                      const updated = activeTournamentDraft.rules.filter((_, i) => i !== ridx);
+                                      setActiveTournamentDraft({ ...activeTournamentDraft, rules: updated });
+                                    }}
+                                  >
+                                    <Trash2 size={13} />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
                         </div>
-                        <div className="form-group">
-                          <label>สถานะการรับสมัคร</label>
-                          <select 
-                            className="form-input"
-                            value={editingTournament.status}
-                            onChange={e => setEditingTournament({ ...editingTournament, status: e.target.value })}
+                      )}
+
+                      {/* ----------------- TAB 3: ROSTERS & TEAMS ----------------- */}
+                      {tournamentModalTab === 'roster' && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px', padding: '12px 16px' }}>
+                            <div>
+                              <strong style={{ color: '#1d4ed8' }}>รายชื่อนักแข่ง & ทีมที่สมัครเข้าร่วม ({(activeTournamentDraft.teams || []).length} ทีม)</strong>
+                              <span className="text-xs text-muted block">จัดการข้อมูลทีม กัปตัน รายชื่อผู้เล่น 5 คน ตัวสำรอง และสถานะการชำระเงิน/ยืนยัน</span>
+                            </div>
+                            <button 
+                              type="button" 
+                              className="btn-primary btn-sm"
+                              onClick={() => setShowAddTeamForm(!showAddTeamForm)}
+                            >
+                              <Plus size={14} /> {showAddTeamForm ? 'ปิดฟอร์ม' : 'เพิ่มทีมใหม่'}
+                            </button>
+                          </div>
+
+                          {/* Add Team Inline Form */}
+                          {showAddTeamForm && (
+                            <div style={{ background: '#ffffff', border: '2px solid #2563eb', borderRadius: '8px', padding: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+                              <h5 style={{ margin: '0 0 12px 0', color: '#1e3a8a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <Plus size={15} /> ฟอร์มเพิ่มทีมผู้เข้าแข่งขันใหม่
+                              </h5>
+
+                              <div className="form-row-2">
+                                <div className="form-group">
+                                  <label>ชื่อทีม (Team Name) *</label>
+                                  <input 
+                                    type="text" className="form-input" placeholder="เช่น Talon Academy"
+                                    value={newTeamDraft.name}
+                                    onChange={e => setNewTeamDraft({ ...newTeamDraft, name: e.target.value })}
+                                  />
+                                </div>
+                                <div className="form-group">
+                                  <label>แท็กทีม (Team Tag)</label>
+                                  <input 
+                                    type="text" className="form-input" placeholder="เช่น TLN"
+                                    value={newTeamDraft.tag}
+                                    onChange={e => setNewTeamDraft({ ...newTeamDraft, tag: e.target.value })}
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="form-row-2">
+                                <div className="form-group">
+                                  <label>ชื่อกัปตันทีม (Captain IGN & Full Name)</label>
+                                  <input 
+                                    type="text" className="form-input" placeholder="เช่น SScary (กัปตัน)"
+                                    value={newTeamDraft.captain}
+                                    onChange={e => setNewTeamDraft({ ...newTeamDraft, captain: e.target.value })}
+                                  />
+                                </div>
+                                <div className="form-group">
+                                  <label>เบอร์โทรศัพท์ติดต่อกัปตัน</label>
+                                  <input 
+                                    type="text" className="form-input" placeholder="08X-XXX-XXXX"
+                                    value={newTeamDraft.captainPhone}
+                                    onChange={e => setNewTeamDraft({ ...newTeamDraft, captainPhone: e.target.value })}
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="form-row-2">
+                                <div className="form-group">
+                                  <label>Discord Tag (สำหรับประสานงาน)</label>
+                                  <input 
+                                    type="text" className="form-input" placeholder="captain#1234"
+                                    value={newTeamDraft.captainDiscord}
+                                    onChange={e => setNewTeamDraft({ ...newTeamDraft, captainDiscord: e.target.value })}
+                                  />
+                                </div>
+                                <div className="form-group">
+                                  <label>สถานะทีม (Status)</label>
+                                  <select 
+                                    className="form-input"
+                                    value={newTeamDraft.status}
+                                    onChange={e => setNewTeamDraft({ ...newTeamDraft, status: e.target.value })}
+                                  >
+                                    <option value="Confirmed">Confirmed (ยืนยันสิทธิ์แล้ว)</option>
+                                    <option value="Pending">Pending (รอตรวจสอบ)</option>
+                                    <option value="Paid">Paid (ชำระค่าสมัครแล้ว)</option>
+                                  </select>
+                                </div>
+                              </div>
+
+                              <div className="form-group">
+                                <label>รายชื่อผู้เล่นตัวจริง 5 คน (Player 1 - 5 IGNs)</label>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px' }}>
+                                  {[0, 1, 2, 3, 4].map(idx => (
+                                    <input 
+                                      key={idx}
+                                      type="text" className="form-input" 
+                                      placeholder={`ผู้เล่นคนที่ ${idx + 1}`}
+                                      value={newTeamDraft.players[idx] || ''}
+                                      onChange={e => {
+                                        const p = [...newTeamDraft.players];
+                                        p[idx] = e.target.value;
+                                        setNewTeamDraft({ ...newTeamDraft, players: p });
+                                      }}
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+
+                              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '12px' }}>
+                                <button type="button" className="btn-secondary" onClick={() => setShowAddTeamForm(false)}>
+                                  ยกเลิก
+                                </button>
+                                <button type="button" className="btn-primary" onClick={handleAddTeam}>
+                                  <Check size={14} /> ยืนยันเพิ่มทีมนี้
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Teams Cards List */}
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '12px' }}>
+                            {(activeTournamentDraft.teams || []).map((tm, tidx) => (
+                              <div 
+                                key={tm.id || tidx}
+                                style={{ 
+                                  background: '#ffffff', 
+                                  border: '1px solid #e2e8f0', 
+                                  borderRadius: '8px', 
+                                  padding: '14px',
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  gap: '10px'
+                                }}
+                              >
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: '#1d4ed8' }}>
+                                      {tm.tag || tm.name?.slice(0, 3)?.toUpperCase() || 'TM'}
+                                    </div>
+                                    <div>
+                                      <strong style={{ fontSize: '0.95rem' }}>{tm.name}</strong>
+                                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginTop: '2px' }}>
+                                        <span className="text-xs" style={{ background: '#f1f5f9', padding: '1px 6px', borderRadius: '4px' }}>Seed #{tm.seed || (tidx + 1)}</span>
+                                        <span className="status-pill status-pill-success text-xs">{tm.status || 'Confirmed'}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <button 
+                                    type="button" 
+                                    className="btn-table-action action-delete"
+                                    onClick={() => {
+                                      const updated = activeTournamentDraft.teams.filter((_, i) => i !== tidx);
+                                      setActiveTournamentDraft({ ...activeTournamentDraft, teams: updated });
+                                    }}
+                                    title="ลบทีมนี้"
+                                  >
+                                    <Trash2 size={13} />
+                                  </button>
+                                </div>
+
+                                <div style={{ fontSize: '0.82rem', color: '#475569', background: '#f8fafc', padding: '8px', borderRadius: '6px' }}>
+                                  <div><strong>กัปตัน:</strong> {tm.captain || 'ไม่ระบุ'} {tm.captainPhone ? `(${tm.captainPhone})` : ''}</div>
+                                  {tm.captainDiscord && <div><strong>Discord:</strong> {tm.captainDiscord}</div>}
+                                </div>
+
+                                <div>
+                                  <div className="text-xs text-muted" style={{ fontWeight: 600, marginBottom: '4px' }}>ไลน์อัปผู้เล่น (Roster):</div>
+                                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                                    {(tm.players || []).map((pl, pidx) => (
+                                      <span key={pidx} style={{ fontSize: '0.78rem', background: '#e0f2fe', color: '#0369a1', padding: '2px 8px', borderRadius: '12px', fontWeight: 600 }}>
+                                        {pl}
+                                      </span>
+                                    ))}
+                                    {(tm.substitutes || []).filter(s => s).map((sub, sidx) => (
+                                      <span key={sidx} style={{ fontSize: '0.78rem', background: '#fef3c7', color: '#92400e', padding: '2px 8px', borderRadius: '12px', fontWeight: 600 }}>
+                                        Sub: {sub}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* ----------------- TAB 4: 50+ PHOTO GALLERY ----------------- */}
+                      {tournamentModalTab === 'gallery' && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                          {/* Banner Highlight for 50+ Photos */}
+                          <div 
+                            style={{ 
+                              background: (activeTournamentDraft.galleryPhotos || []).length >= 50 ? '#ecfdf5' : '#eff6ff', 
+                              border: (activeTournamentDraft.galleryPhotos || []).length >= 50 ? '1px solid #6ee7b7' : '1px solid #bfdbfe', 
+                              borderRadius: '8px', 
+                              padding: '14px 18px',
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              flexWrap: 'wrap',
+                              gap: '12px'
+                            }}
                           >
-                            <option value="Open">Open (เปิดรับสมัคร)</option>
-                            <option value="Ongoing">Ongoing (กำลังแข่งขัน)</option>
-                            <option value="Closed">Closed (ปิดรับสมัครแล้ว)</option>
-                            <option value="Completed">Completed (จบการแข่งขันแล้ว)</option>
-                          </select>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              <Camera size={22} color={(activeTournamentDraft.galleryPhotos || []).length >= 50 ? '#059669' : '#2563eb'} />
+                              <div>
+                                <strong style={{ color: (activeTournamentDraft.galleryPhotos || []).length >= 50 ? '#065f46' : '#1e3a8a', fontSize: '1rem' }}>
+                                  คลังภาพกิจกรรมทัวร์นาเมนต์: {(activeTournamentDraft.galleryPhotos || []).length} ภาพ
+                                </strong>
+                                <span className="text-xs block" style={{ color: (activeTournamentDraft.galleryPhotos || []).length >= 50 ? '#047857' : '#475569' }}>
+                                  {(activeTournamentDraft.galleryPhotos || []).length >= 50 
+                                    ? '✅ ครบถ้วนตามเป้าหมายมากกว่า 50 ภาพ รองรับการแสดงผลแกลเลอรีแบบ Lightbox คมชัดระดับ 4K'
+                                    : 'สามารถเพิ่มภาพแบบเดี่ยว หรือกดโหลดตัวอย่าง 50 รูป หรือนำเข้า URL แบบชุดได้ทันที'}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                              <button 
+                                type="button" 
+                                className="btn-primary btn-sm"
+                                style={{ background: '#059669', borderColor: '#059669' }}
+                                onClick={handleLoadDemo50Photos}
+                                title="โหลดภาพตัวอย่างบรรยากาศการแข่งขันอีสปอร์ต 52 ภาพทันที"
+                              >
+                                <Sparkles size={14} /> โหลดภาพตัวอย่าง 50 ภาพ (Demo 50 Photos)
+                              </button>
+                              <button 
+                                type="button" 
+                                className="btn-secondary btn-sm"
+                                onClick={() => setShowBatchImporter(!showBatchImporter)}
+                              >
+                                <Upload size={14} /> นำเข้า URL แบบชุด (Batch)
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Batch Importer Accordion */}
+                          {showBatchImporter && (
+                            <div style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '16px' }}>
+                              <strong style={{ fontSize: '0.9rem', color: '#0f172a', display: 'block', marginBottom: '6px' }}>
+                                📋 นำเข้า Image URLs แบบชุด (วาง 1 URL ต่อ 1 บรรทัด สามารถวางได้ 50+ บรรทัด)
+                              </strong>
+                              <textarea 
+                                className="form-input form-textarea" rows="4"
+                                placeholder="https://images.unsplash.com/photo-1...&#10;https://images.unsplash.com/photo-2...&#10;https://images.unsplash.com/photo-3..."
+                                value={batchPhotoUrls}
+                                onChange={e => setBatchPhotoUrls(e.target.value)}
+                              />
+                              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '8px' }}>
+                                <button type="button" className="btn-secondary btn-sm" onClick={() => setShowBatchImporter(false)}>
+                                  ยกเลิก
+                                </button>
+                                <button type="button" className="btn-primary btn-sm" onClick={handleImportBatchPhotos}>
+                                  <Plus size={14} /> เพิ่มภาพทั้งหมดที่ระบุ
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Quick Single Photo Adder */}
+                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', background: '#f8fafc', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                            <input 
+                              type="text" className="form-input" style={{ flex: 2 }}
+                              placeholder="URL ภาพใหม่ (https://...)"
+                              value={newSinglePhoto.url}
+                              onChange={e => setNewSinglePhoto({ ...newSinglePhoto, url: e.target.value })}
+                            />
+                            <input 
+                              type="text" className="form-input" style={{ flex: 2 }}
+                              placeholder="คำบรรยายภาพ (Caption)"
+                              value={newSinglePhoto.caption}
+                              onChange={e => setNewSinglePhoto({ ...newSinglePhoto, caption: e.target.value })}
+                            />
+                            <select 
+                              className="form-input" style={{ width: '130px' }}
+                              value={newSinglePhoto.category}
+                              onChange={e => setNewSinglePhoto({ ...newSinglePhoto, category: e.target.value })}
+                            >
+                              <option value="stage">เวที & แสงสี</option>
+                              <option value="players">นักกีฬา</option>
+                              <option value="gear">อุปกรณ์</option>
+                              <option value="crowd">กองเชียร์</option>
+                              <option value="trophy">มอบถ้วยรางวัล</option>
+                              <option value="caster">แคสเตอร์</option>
+                            </select>
+                            <button 
+                              type="button" 
+                              className="btn-primary btn-sm"
+                              onClick={() => {
+                                if (!newSinglePhoto.url.trim()) return;
+                                const current = activeTournamentDraft.galleryPhotos || [];
+                                setActiveTournamentDraft({
+                                  ...activeTournamentDraft,
+                                  galleryPhotos: [
+                                    ...current,
+                                    {
+                                      id: `p-${Date.now()}`,
+                                      url: newSinglePhoto.url.trim(),
+                                      caption: newSinglePhoto.caption.trim() || `ภาพกิจกรรม #${current.length + 1}`,
+                                      category: newSinglePhoto.category
+                                    }
+                                  ]
+                                });
+                                setNewSinglePhoto({ url: '', caption: '', category: 'stage' });
+                              }}
+                            >
+                              <Plus size={14} /> เพิ่มรูป
+                            </button>
+                          </div>
+
+                          {/* Category Filter Pills */}
+                          <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '4px' }}>
+                            {[
+                              { id: 'all', label: 'ทั้งหมด' },
+                              { id: 'stage', label: 'เวที & แสงสี' },
+                              { id: 'players', label: 'นักกีฬา' },
+                              { id: 'gear', label: 'อุปกรณ์ & สเปก' },
+                              { id: 'crowd', label: 'กองเชียร์ & บรรยากาศ' },
+                              { id: 'trophy', label: 'มอบรางวัล' },
+                              { id: 'caster', label: 'แคสเตอร์' }
+                            ].map(cat => (
+                              <button 
+                                key={cat.id}
+                                type="button"
+                                className={`subtab-btn ${galleryCategoryFilter === cat.id ? 'active' : ''}`}
+                                style={{ padding: '3px 10px', fontSize: '0.78rem' }}
+                                onClick={() => setGalleryCategoryFilter(cat.id)}
+                              >
+                                {cat.label}
+                              </button>
+                            ))}
+                          </div>
+
+                          {/* Photos Grid */}
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: '10px', maxHeight: '420px', overflowY: 'auto', padding: '4px' }}>
+                            {(activeTournamentDraft.galleryPhotos || [])
+                              .filter(p => galleryCategoryFilter === 'all' || p.category === galleryCategoryFilter)
+                              .map((photo, pidx) => (
+                                <div 
+                                  key={photo.id || pidx}
+                                  style={{ 
+                                    position: 'relative', 
+                                    border: '1px solid #e2e8f0', 
+                                    borderRadius: '6px', 
+                                    overflow: 'hidden',
+                                    background: '#ffffff',
+                                    boxShadow: '0 1px 3px rgba(0,0,0,0.06)'
+                                  }}
+                                >
+                                  <div style={{ position: 'relative', height: '110px', background: '#0f172a' }}>
+                                    <img 
+                                      src={photo.url} 
+                                      alt={photo.caption}
+                                      loading="lazy"
+                                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                    />
+                                    <span style={{ position: 'absolute', top: '4px', left: '4px', background: 'rgba(0,0,0,0.7)', color: '#fff', fontSize: '0.65rem', padding: '1px 5px', borderRadius: '4px', fontWeight: 700 }}>
+                                      #{pidx + 1}
+                                    </span>
+                                    <button 
+                                      type="button" 
+                                      onClick={() => {
+                                        const updated = activeTournamentDraft.galleryPhotos.filter((_, i) => i !== pidx);
+                                        setActiveTournamentDraft({ ...activeTournamentDraft, galleryPhotos: updated });
+                                      }}
+                                      style={{ position: 'absolute', top: '4px', right: '4px', background: 'rgba(239, 68, 68, 0.9)', color: '#fff', border: 'none', borderRadius: '4px', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                                      title="ลบรูปนี้"
+                                    >
+                                      <Trash2 size={11} />
+                                    </button>
+                                  </div>
+                                  <div style={{ padding: '6px' }}>
+                                    <input 
+                                      type="text" 
+                                      className="form-input" 
+                                      style={{ fontSize: '0.75rem', padding: '3px 6px', width: '100%' }}
+                                      value={photo.caption || ''}
+                                      onChange={e => {
+                                        const updated = [...activeTournamentDraft.galleryPhotos];
+                                        updated[pidx].caption = e.target.value;
+                                        setActiveTournamentDraft({ ...activeTournamentDraft, galleryPhotos: updated });
+                                      }}
+                                      placeholder="คำบรรยายภาพ"
+                                    />
+                                  </div>
+                                </div>
+                              ))}
+                          </div>
                         </div>
+                      )}
+
+                      {/* ----------------- TAB 5: SEO SUITE ----------------- */}
+                      {tournamentModalTab === 'seo' && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                          <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '14px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <Globe size={18} className="text-emerald-600" />
+                              <strong style={{ color: '#166534' }}>ระบบ SEO ทัวร์นาเมนต์ & พรีวิว Google Snippet</strong>
+                            </div>
+                            <span className="text-xs text-muted block" style={{ marginTop: '2px' }}>
+                              เพิ่มโอกาสติดหน้าแรก Google ในคีย์เวิร์ดชื่อเกม งานแข่งอีสปอร์ต และพรีวิวการแชร์บน Facebook / LINE / X
+                            </span>
+                          </div>
+
+                          <div className="form-group">
+                            <label style={{ display: 'flex', justifyContent: 'space-between' }}>
+                              <span>หัวข้อหน้าเว็บ (Meta Title) *</span>
+                              <span className="text-xs text-muted">แนะนำ 50-60 ตัวอักษร ({activeTournamentDraft.seo?.metaTitle?.length || 0}/60)</span>
+                            </label>
+                            <input 
+                              type="text" className="form-input"
+                              placeholder="เช่น G-SPEED VALORANT CHAMPIONSHIP 2026 | ชิงเงินรางวัล ฿100,000"
+                              value={activeTournamentDraft.seo?.metaTitle || ''}
+                              onChange={e => setActiveTournamentDraft({
+                                ...activeTournamentDraft,
+                                seo: { ...(activeTournamentDraft.seo || {}), metaTitle: e.target.value }
+                              })}
+                            />
+                          </div>
+
+                          <div className="form-group">
+                            <label style={{ display: 'flex', justifyContent: 'space-between' }}>
+                              <span>คำอธิบายผลการค้นหา (Meta Description) *</span>
+                              <span className="text-xs text-muted">แนะนำ 120-160 ตัวอักษร ({activeTournamentDraft.seo?.metaDesc?.length || 0}/160)</span>
+                            </label>
+                            <textarea 
+                              className="form-input form-textarea" rows="3"
+                              placeholder="สรุปเนื้อหาทัวร์นาเมนต์ รางวัล วันที่ และวิธีการสมัคร..."
+                              value={activeTournamentDraft.seo?.metaDesc || ''}
+                              onChange={e => setActiveTournamentDraft({
+                                ...activeTournamentDraft,
+                                seo: { ...(activeTournamentDraft.seo || {}), metaDesc: e.target.value }
+                              })}
+                            />
+                          </div>
+
+                          <div className="form-row-2">
+                            <div className="form-group">
+                              <label>คีย์เวิร์ดเป้าหมาย (SEO Keywords - คั่นด้วยจุลภาค)</label>
+                              <input 
+                                type="text" className="form-input"
+                                placeholder="เช่น VALORANT, แข่งเกม, G-Speed, รามคำแหง 53, อีสปอร์ต"
+                                value={activeTournamentDraft.seo?.keywords || ''}
+                                onChange={e => setActiveTournamentDraft({
+                                  ...activeTournamentDraft,
+                                  seo: { ...(activeTournamentDraft.seo || {}), keywords: e.target.value }
+                                })}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>URL Slug ถาวร (Canonical Slug)</label>
+                              <input 
+                                type="text" className="form-input"
+                                placeholder="เช่น gspeed-valorant-championship-2026"
+                                value={activeTournamentDraft.seo?.slug || ''}
+                                onChange={e => setActiveTournamentDraft({
+                                  ...activeTournamentDraft,
+                                  seo: { ...(activeTournamentDraft.seo || {}), slug: e.target.value }
+                                })}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="form-group">
+                            <label>Social Share Image URL (OG Image สำหรับแสดงในการแชร์ Facebook/LINE/Discord)</label>
+                            <input 
+                              type="text" className="form-input"
+                              placeholder="https://images.unsplash.com/..."
+                              value={activeTournamentDraft.seo?.ogImage || activeTournamentDraft.bannerImage || ''}
+                              onChange={e => setActiveTournamentDraft({
+                                ...activeTournamentDraft,
+                                seo: { ...(activeTournamentDraft.seo || {}), ogImage: e.target.value }
+                              })}
+                            />
+                          </div>
+
+                          {/* Live Google Snippet Preview */}
+                          <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px', marginTop: '6px' }}>
+                            <span className="text-xs text-muted" style={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                              พรีวิวบนหน้าผลการค้นหา Google (Google Search Preview)
+                            </span>
+                            <div style={{ marginTop: '8px', fontFamily: 'Arial, sans-serif' }}>
+                              <div style={{ fontSize: '0.8rem', color: '#202124', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{ color: '#5f6368' }}>https://gspeedesport.com › tournaments › {activeTournamentDraft.seo?.slug || 'gspeed-tournament'}</span>
+                              </div>
+                              <div style={{ fontSize: '1.15rem', color: '#1a0dab', cursor: 'pointer', fontWeight: 500, marginTop: '2px', lineHeight: 1.3 }}>
+                                {activeTournamentDraft.seo?.metaTitle || activeTournamentDraft.title || 'ชื่อรายการแข่งขัน - G-Speed Esport Arena'}
+                              </div>
+                              <div style={{ fontSize: '0.85rem', color: '#4d5156', marginTop: '4px', lineHeight: 1.4 }}>
+                                {activeTournamentDraft.seo?.metaDesc || activeTournamentDraft.desc?.slice(0, 150) || 'ติดตามรายละเอียดการแข่งขันอีสปอร์ต ชิงเงินรางวัลรวม ณ G-Speed Arena รามคำแหง 53'}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                    </div>
+
+                    {/* Modal Footer */}
+                    <div className="modal-footer-btns" style={{ borderTop: '1px solid #e2e8f0', padding: '14px 20px', background: '#f8fafc' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <button type="button" className="btn-secondary" onClick={() => setIsTournamentModalOpen(false)}>
+                          ยกเลิก
+                        </button>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <button 
+                          type="button" 
+                          className="btn-section-preview"
+                          onClick={() => openPreview('tournaments')}
+                        >
+                          <Eye size={14} /> พรีวิวหน้าเว็บ
+                        </button>
+                        <button 
+                          type="button" 
+                          className="btn-primary"
+                          onClick={handleSaveTournamentDraft}
+                        >
+                          <Save size={14} /> บันทึกทัวร์นาเมนต์ครบวงจร
+                        </button>
                       </div>
                     </div>
 
-                    <div className="modal-footer-btns">
-                      <button className="btn-secondary" onClick={() => setEditingTournament(null)}>ยกเลิก</button>
-                      <button 
-                        className="btn-primary" 
-                        onClick={() => {
-                          updateTournament(editingTournament.id, editingTournament);
-                          setEditingTournament(null);
-                          triggerSaveToast();
-                        }}
-                      >
-                        <Save size={14} /> บันทึกการแก้ไขทัวร์นาเมนต์
-                      </button>
-                    </div>
                   </div>
                 </div>
               )}
