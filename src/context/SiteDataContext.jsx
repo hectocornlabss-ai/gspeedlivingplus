@@ -57,8 +57,36 @@ export const INITIAL_RAG_KNOWLEDGE = [
     id: 'rag-franchise',
     category: 'business',
     title: 'ข้อมูลการลงทุนแฟรนไชส์ G-Speed Esport Arena',
-    tags: ['แฟรนไชส์', 'ลงทุน', 'เปิดร้านเกม', 'งบประมาณ', 'ROI', 'คืนทุน'],
+    tags: ['แฟรนไชส์', 'ลงทุน', 'เปิดร้านเกม', 'งบประมาณ', 'ROI', 'คืนทุน', 'ใบเสนอราคา'],
     content: 'แฟรนไชส์ G-Speed Esport Arena มีให้เลือก 3 โมเดล: Size S (30-40 เครื่อง งบ 1.8-2.5 ลบ.), Size M (50-70 เครื่อง งบ 3.2-4.5 ลบ.), และ Size L Mega Arena (80-120 เครื่อง งบ 5.5-8.0 ลบ.) พร้อมระบบ Diskless Server ไม่ต้องใช้ฮาร์ดดิสก์รายเครื่อง, ระบบ POS บัญชีคลาวด์, การตกแต่ง 3D ตามแบรนด์ และการอบรมบุคลากร ระยะเวลาคืนทุนเฉลี่ย 18-24 เดือน'
+  },
+  {
+    id: 'rag-installation-diskless',
+    category: 'installation',
+    title: 'การติดตั้งระบบร้านเกม Diskless Server & iCafeCloud',
+    tags: ['ติดตั้ง', 'ติดตั้งระบบ', 'diskless', 'ดิสเลส', 'เซิร์ฟเวอร์', 'icafecloud', 'ccboot', 'อัปเดตเกม'],
+    content: 'บริการติดตั้งระบบดิสเลส (Diskless Boot Server) มาตรฐานระดับอีสปอร์ต รองรับ CCBoot และ iCafeCloud ไม่ต้องมีฮาร์ดดิสก์ในเครื่องลูก อัปเดตเกมที่เซิร์ฟเวอร์แม่จุดเดียว ลูกค้าเล่นเกมได้ทันที รองรับ NVMe PCIe 4.0 RAID Array ความเร็วอ่านเขียน 14,000 MB/s บูตเครื่องเข้า Windows ภายใน 12 วินาที ทีมงานติดตั้งและเซ็ตระบบหน้างานภายใน 2-3 วัน พร้อมระบบ Auto-Failover มีเซิร์ฟเวอร์สำรองไม่ดับ'
+  },
+  {
+    id: 'rag-installation-network',
+    category: 'installation',
+    title: 'การเดินระบบเน็ตเวิร์ก 10Gbps Multi-WAN & Smart QoS',
+    tags: ['เดินสายแลน', 'เน็ตเวิร์ก', 'cat6a', 'fiber', '10gbps', 'สวิตช์', 'ping', 'qos', 'เราเตอร์', 'อินเทอร์เน็ต'],
+    content: 'บริการเดินระบบสายแลน CAT6A / Fiber Optic แกนหลัก 10Gbps พร้อม Switch Managed 10G SFP+ แยก VLAN ระหว่างเครื่องเล่นเกม, เครื่องคิดเงิน POS, สตรีมเมอร์ และ Wi-Fi ลูกค้า มีระบบ Multi-WAN Load Balance รวมเน็ต 2-3 ผู้ให้บริการ (AIS Fibre + True Gigatex) สลับสายอัตโนมัติหากสายใดสายหนึ่งขาด ค่า Ping ในประเทศ < 2-3ms หมดปัญหาแล็กหรือวาปในการแข่งขัน'
+  },
+  {
+    id: 'rag-installation-electrical',
+    category: 'installation',
+    title: 'งานระบบไฟฟ้า 3 เฟส รางร้อยสายไฟ และระบบความปลอดภัย',
+    tags: ['ระบบไฟ', 'ไฟ3เฟส', 'ตู้โหลด', 'เบรกเกอร์', 'ups', 'รางสายไฟ', 'สายดิน', 'ความปลอดภัย'],
+    content: 'บริการคำนวณโหลดไฟฟ้าและติดตั้งระบบไฟฟ้า 3 เฟส (3-Phase 380V) สำหรับร้านเกมโดยเฉพาะ พร้อมตู้โหลดเซ็นเตอร์แยกเฟสป้องกันไฟตก, ติดตั้งระบบสำรองไฟ UPS True Online สำหรับเครื่อง Diskless Server และเคาน์เตอร์แคชเชียร์ เดินรางสายไฟเหล็ก Wireway ซ่อนใต้โต๊ะเกมมิ่งเรียบร้อย และระบบกราวด์สายดินค่าความต้านทานต่ำกว่า 5 โอห์ม ป้องกันอุปกรณ์ช็อตหรือเสียหาย 100%'
+  },
+  {
+    id: 'rag-installation-lead-n8n',
+    category: 'installation',
+    title: 'ขั้นตอนการติดต่อขอใบเสนอราคา สำรวจพื้นที่ และประเมินราคาเบื้องต้น',
+    tags: ['ติดต่อติดตั้ง', 'สนใจติดตั้ง', 'ขอใบเสนอราคา', 'สำรวจหน้างาน', 'เบอร์โทร', 'ไลน์', 'ราคา', 'งบประมาณ'],
+    content: 'สำหรับเจ้าของอาคารหรือผู้สนใจเปิดร้านเกม สามารถแจ้งขนาดพื้นที่และงบประมาณเพื่อให้แอดมินช่วยประเมินผังร้านและคำนวณงบเบื้องต้นได้ฟรี ทางเราพร้อมให้คำปรึกษา แนะนำสเปกเครื่อง และมีทีมวิศวกรพร้อมเข้าสำรวจหน้างานจริง ติดต่อสอบถามเพิ่มเติมได้ที่สายด่วน: 02-888-9999 หรือ LINE Official: @gspeedarena เปิดให้บริการตลอด 24 ชั่วโมง'
   }
 ];
 
@@ -69,8 +97,274 @@ export const INITIAL_NAV_LINKS = [
   { id: 'nav-franchise', label: 'จำลองผังร้าน 3D', target: 'franchise', visible: true }
 ];
 
-// Initial Site Data
+// Initial Site Data Key
 const STORAGE_KEY = 'gspeed_site_cms_data_v2';
+
+export const DEFAULT_SITE_DATA = {
+  theme: {
+    primaryColor: '#1d4ed8',
+    secondaryColor: '#0ea5e9',
+    backgroundColor: '#ffffff',
+    surfaceColor: '#f8fafc',
+    fontHeading: "'Inter', sans-serif"
+  },
+  globalSEO: {
+    metaTitle: 'G-SPEED ESPORT ARENA | ศูนย์อีสปอร์ตครบวงจร & ระบบแฟรนไชส์จัดผังร้านอัจฉริยะ',
+    metaDescription: 'ศูนย์รวมอีสปอร์ตครบวงจร สเปกคอมไฮเอนด์ RTX 40 Series จอ 360Hz เวทีแข่งมาตรฐานสากล พร้อมระบบจำลองผังร้านแฟรนไชส์ 3D',
+    keywords: 'ร้านเกม, อีสปอร์ต, แฟรนไชส์ร้านเกม, G-Speed Arena, GLP, จัดผังร้านเกม 3D, RTX 4090, BenQ 360Hz',
+    ogImage: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
+    twitterHandle: '@GSpeedArena'
+  },
+  tickerText: 'เปิดรับสมัคร GLP VALORANT CHAMPIONSHIP 2026 ชิง 100,000 บาท | ระบบจำลองผังร้าน 3D Interior Planner พร้อมใช้งานแล้ว',
+  tickerBadge: 'ประกาศสำคัญ',
+  tickerLinkTab: 'franchise',
+  tickerLinkTarget: 'franchise',
+  tickerLinkText: 'เปิดระบบ 3D',
+  tickerLinkVisible: true,
+  headerCta: {
+    text: 'คำนวณราคาเปิดร้าน',
+    target: 'franchise',
+    visible: true
+  },
+  navLinks: INITIAL_NAV_LINKS,
+  hero: {
+    badge: 'THE NEXT-GEN ESPORT ARENA & FRANCHISE HUB',
+    title: 'ศูนย์รวมอีสปอร์ตครบวงจร & พื้นที่ประลองเกมมาตรฐานสากล',
+    subtitle: 'สัมผัสประสบการณ์เกมมิ่งระดับเวิลด์คลาสด้วยเครื่องสเปกไฮเอนด์ RTX 40 Series จอ 360Hz และเวทีแข่งขันมาตรฐาน Pro Circuit พร้อมระบบคำนวณและจำลองผังร้านแฟรนไชส์อัจฉริยะ',
+    primaryCta: 'สำรวจกิจกรรม & ทัวร์นาเมนต์',
+    primaryCtaLink: '#activities',
+    secondaryCta: 'จำลองผังร้าน 3D แฟรนไชส์',
+    secondaryCtaLink: '#franchise',
+    bgColor: '#ffffff',
+    bgOverlayImage: '',
+    metrics: [
+      { number: '750+', label: 'Battle Stations ทั่วประเทศ' },
+      { number: '360Hz', label: 'Fast-IPS & OLED Displays' },
+      { number: '10Gbps', label: 'Dedicated Multi-WAN Ping < 3ms' },
+      { number: '24/7', label: 'เปิดบริการตลอด 24 ชั่วโมง' }
+    ]
+  },
+  featureBanners: {
+    bannerLeft: {
+      badge: 'GLP OUR EVENTS',
+      title: 'รวมภาพกิจกรรม & บรรยากาศสด',
+      desc: 'ภาพงานแข่ง LAN, งานเปิดตัวเกม, มีตติ้ง และพิธีมอบรางวัลชนะเลิศตลอดทั้งปี',
+      linkText: 'สำรวจอัลบั้มภาพกิจกรรม',
+      linkTarget: '#activities',
+      bgGradient: 'linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%)',
+      image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80'
+    },
+    bannerRight: {
+      badge: 'GLP BLOG & NEWS',
+      title: 'บทความ ข่าวสาร & ไฮไลต์เกม',
+      desc: 'เกาะติดผลการแข่งขัน ทริกการเล่น สเปกอุปกรณ์ใหม่ และประกาศจากทางร้าน',
+      linkText: 'อ่านบทความล่าสุด',
+      linkTarget: '#news',
+      bgGradient: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+      image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80'
+    }
+  },
+  tournamentsSection: {
+    badge: 'TOURNAMENTS & COMMUNITY EVENTS',
+    title: 'ปฏิทินการแข่งขัน อีสปอร์ตประจำเดือน',
+    subtitle: 'ร่วมชิงเงินรางวัลรวมกว่าหลายแสนบาท พิสูจน์ฝีมือบนเวที LAN Final ถ่ายทอดสดสู่สายตาแฟนเกมทั่วประเทศ',
+    bgColor: '#ffffff'
+  },
+  zonesSection: {
+    badge: 'VENUE ATMOSPHERE & ZONES',
+    title: 'บรรยากาศและโซนการให้บริการ GLP ESPORTS',
+    subtitle: 'สัมผัสความพรีเมียมที่ออกแบบมาสำหรับเกมเมอร์ทุกสไตล์ ตั้งแต่ผู้เล่นทั่วไป สตรีมเมอร์ ไปจนถึงการประลองระดับแชมป์เปียนชิป',
+    bgColor: '#f8fafc'
+  },
+  newsSection: {
+    badge: 'ARTICLES & UPDATES',
+    title: 'บทความและข่าวสาร GLP ESPORTS',
+    subtitle: 'อัปเดตความเคลื่อนไหววงการอีสปอร์ต เทคโนโลยีใหม่ และสรุปผลการแข่งขันที่จัดขึ้นในร้าน',
+    bgColor: '#ffffff'
+  },
+  franchiseBanner: {
+    badge: 'G-SPEED FRANCHISE & INTERIOR PLANNER',
+    heading: 'อยากมีร้านเกมอีสปอร์ตสเปกเทพเป็นของตัวเอง?',
+    desc: 'เพียงแค่คุณมีพื้นที่หรืออาคาร เรามีระบบ Interior Floor Plan Configurator ช่วยจำลองผังร้าน 2D สเกลจริง จัดวางโต๊ะคอมพิวเตอร์ เวทีแข่งขัน เคาน์เตอร์ และคำนวณต้นทุน สเปกอุปกรณ์ ระยะเวลาคืนทุน (ROI) และเวลาติดตั้งให้ทันที!',
+    buttonText: 'เริ่มออกแบบผังร้าน & ประเมินงบประมาณทันที',
+    buttonLink: 'franchise',
+    bgColor: '#1e3a8a',
+    bgImage: ''
+  },
+  venueZones: INITIAL_ZONES,
+  tournaments: INITIAL_TOURNAMENTS,
+  gallery: INITIAL_GALLERY,
+  news: INITIAL_NEWS,
+  founder: INITIAL_FOUNDER,
+  catalogItems: INITIAL_CATALOG,
+  hardwareTiers: INITIAL_TIERS,
+  ragKnowledge: INITIAL_RAG_KNOWLEDGE,
+  openRouterSettings: {
+    apiKey: '',
+    proxyUrl: '',
+    useSecureProxy: false,
+    model: 'google/gemini-flash-3.8',
+    temperature: 0.7,
+    maxTokens: 1024,
+    systemPrompt: 'คุณคือผู้ช่วย AI ประจำศูนย์ G-Speed Esport Arena ตอบคำถามเกี่ยวกับบริการร้านเกม อัตราค่าชั่วโมง สเปกคอม และระบบแฟรนไชส์อย่างสุภาพและถูกต้อง',
+    isEnabled: true
+  },
+  openWebUIConfig: {
+    baseUrl: 'https://openwebui.gspeedarena.com',
+    apiKey: '',
+    model: 'glp-esports-assistant:latest',
+    ragCollection: 'gspeed-knowledge-base',
+    enabled: true,
+    lastPing: 'Online (Latency 28ms)'
+  },
+  omnichannelConfig: {
+    lineWebhookUrl: 'https://n8n.gspeedarena.com/webhook/line-inbound',
+    facebookWebhookUrl: 'https://n8n.gspeedarena.com/webhook/meta-inbound',
+    webWidgetWebhookUrl: 'https://n8n.gspeedarena.com/webhook/omnichannel-chat',
+    unifiedInboxUrl: 'https://chatwoot.gspeedarena.com',
+    autoHandoverToStaff: true
+  },
+  aiGuardrails: {
+    strictStoreOnly: true,
+    outOfScopeReply: 'ขออภัยด้วยครับ ผมเป็นผู้ช่วย AI ประจำศูนย์ G-Speed Esport Arena จึงสามารถตอบได้เฉพาะข้อมูลและบริการของทางร้านเท่านั้นครับ เช่น อัตราค่าบริการ, สเปกคอมพิวเตอร์, การจองห้อง VIP, เมนูอาหาร หรือการลงทุนแฟรนไชส์ หากมีข้อสงสัยเกี่ยวกับร้าน สามารถสอบถามได้ทันทีครับ',
+    blockedKeywords: ['การเมือง', 'หวย', 'พนัน', 'เขียนโค้ด', 'แต่งกลอน', 'การบ้าน', 'คู่แข่ง', 'แฮก'],
+    pendingQuestions: [
+      { id: 'q-1', query: 'มีห้องสูบบุหรี่ในร้านไหม', timestamp: '13/09/2026 14:15', status: 'pending' },
+      { id: 'q-2', query: 'รับจัดงานแข่งระดับมัธยมแบบเหมาวันไหม', timestamp: '13/09/2026 15:02', status: 'pending' }
+    ]
+  },
+  securityConfig: {
+    adminUsername: 'admin',
+    adminPassword: 'gspeed2026',
+    requirePin: false,
+    lastLogin: '13/09/2026 15:45'
+  },
+  erpConfig: {
+    posSoftware: 'SmartCafé Pro (Cloud Diskless Edition)',
+    apiUrl: 'https://api.smartcafe.in.th/v2/erp/bridge',
+    apiToken: 'sc_live_sec_89df7128a8d1',
+    storeCode: 'GLP-RAMKHAMHAENG-01',
+    autoSync: true,
+    syncIntervalMin: 15,
+    syncOptions: { syncGaming: true, syncFnb: true, syncMembers: true, syncPowerCost: true }
+  },
+  erpData: {
+    isConnected: true,
+    posSoftware: 'SmartCafé Pro (Cloud Diskless Edition)',
+    syncIntervalMin: 15,
+    lastSyncTime: '13/09/2026 15:50',
+    dailyRevenue: {
+      gaming: 37900,
+      fnb: 10750,
+      merchandise: 0,
+      total: 48650
+    },
+    monthlyRevenue: 1420000,
+    monthlyProfit: 910000,
+    costs: {
+      electricity: 7200,
+      fiberInternet: 1200,
+      staffSalary: 6000,
+      totalCost: 14400
+    },
+    peakHours: [
+      { time: '10:00 - 14:00 (เปิดบริการช่วงเช้า)', occupancy: 42, revenue: 6800 },
+      { time: '14:00 - 18:00 (ช่วงบ่าย & หลังเลิกเรียน)', occupancy: 78, revenue: 14200 },
+      { time: '18:00 - 00:00 (Prime Peak Time แข่งขัน/ปาร์ตี้)', occupancy: 96, revenue: 21500 },
+      { time: '00:00 - 08:00 (Night Owl Session ยันเช้า)', occupancy: 48, revenue: 6150 }
+    ],
+    topSellingItems: [
+      { rank: 1, name: 'ข้าวผัดกะเพราเนื้อวากิวไข่ดาวกรอบ', count: 68, total: 6052, share: 29.2 },
+      { rank: 2, name: 'บะหมี่เกาหลีหม้อไฟชีสดับเบิ้ล', count: 54, total: 4806, share: 23.2 },
+      { rank: 3, name: 'G-Speed Energy Elixir (สูตรพิเศษ)', count: 95, total: 4275, share: 20.6 },
+      { rank: 4, name: 'ชาเขียวมัทฉะลาเต้พรีเมียม', count: 48, total: 2880, share: 13.9 },
+      { rank: 5, name: 'ไก่ทอดคาราเกะซอสสไปซี่', count: 42, total: 2730, share: 13.1 }
+    ],
+    aiExecutiveSummary: 'วันนี้มีอัตราการใช้งานเฉลี่ย 78.4% โซน Stage 5v5 และห้อง VIP Suite มีคิวจองเต็ม 100% ยอดขายเครื่องดื่มและอาหารเติบโตขึ้น 28% จากการสั่งผ่านหน้าจอคอมพิวเตอร์โดยตรง ต้นทุนค่าไฟฟ้าอยู่ในเกณฑ์ปกติ (เฉลี่ย 18.2 หน่วย/เครื่อง/วัน) แนะนำให้โปรโมตแพ็กเกจเหมาค่ำคืน Night Owl สำหรับวันธรรมดาเพื่อดึงดูดลูกค้าช่วงหลังเที่ยงคืน'
+  },
+  n8nWorkflows: [
+    {
+      id: 'wf-omnichannel',
+      name: 'Omnichannel Customer Inquiries & OpenWebUI Router',
+      desc: 'รับข้อความจากทุกช่องทาง (Web Widget, LINE OA, Facebook Messenger) ตรวจสอบสิทธิ์สมาชิกใน ERP และส่งต่อไปยัง OpenWebUI/LLM ตอบกลับอัตโนมัติ',
+      endpoint: 'https://n8n.gspeedarena.com/webhook/omnichannel-chat',
+      enabled: true,
+      lastStatus: 'Active (200 OK)',
+      eventsCount: 320
+    },
+    {
+      id: 'wf-lead',
+      name: 'Franchise Lead & 3D Blueprint Automation',
+      desc: 'ส่งข้อมูลใบเสนอราคาและไฟล์แปลนอาคารไปยัง n8n เพื่อส่งต่อ LINE / Discord / Google Sheets',
+      endpoint: 'https://n8n.gspeedarena.com/webhook/franchise-lead',
+      enabled: true,
+      lastStatus: 'Active (200 OK)',
+      eventsCount: 42
+    },
+    {
+      id: 'wf-tournament',
+      name: 'Tournament Team Registration Automation',
+      desc: 'รับข้อมูลการสมัครแข่งขัน ตรวจสอบรายชื่อผู้เล่น และสร้าง Team ID อัตโนมัติ',
+      endpoint: 'https://n8n.gspeedarena.com/webhook/tournament-register',
+      enabled: true,
+      lastStatus: 'Active (200 OK)',
+      eventsCount: 18
+    },
+    {
+      id: 'wf-pos',
+      name: 'End-of-Day POS & Accounting Sync Automation',
+      desc: 'สรุปยอดขายประจำวัน ค่าชั่วโมง ยอด F&B และค่าไฟ ส่งไปยังระบบบัญชี FlowAccount / Xero',
+      endpoint: 'https://n8n.gspeedarena.com/webhook/pos-accounting-daily',
+      enabled: true,
+      lastStatus: 'Active (200 OK)',
+      eventsCount: 120
+    },
+    {
+      id: 'wf-escalation',
+      name: 'AI Chatbot Staff Escalation to LINE Notify',
+      desc: 'แจ้งเตือนพนักงานและผู้จัดการร้านทันทีเมื่อมีคำถามที่ AI ไม่สามารถตอบได้',
+      endpoint: 'https://n8n.gspeedarena.com/webhook/ai-escalation',
+      enabled: true,
+      lastStatus: 'Standby',
+      eventsCount: 5
+    }
+  ],
+  webhooks: {
+    leadWebhookUrl: '',
+    discordBookingUrl: '',
+    autoNotification: true
+  },
+  footer: {
+    description: 'ศูนย์กีฬาอีสปอร์ตและร้านอินเทอร์เน็ตคาเฟ่มาตรฐานสากล บริหารงานโดย GLP Living Plus Group พร้อมระบบโซลูชันแฟรนไชส์อัจฉริยะสำหรับผู้ประกอบการรุ่นใหม่',
+    phone: '02-888-9999 / 089-777-6655',
+    email: 'contact@gspeedarena.com',
+    line: '@gspeedarena',
+    address: '99/1 ซอยรามคำแหง 24 แยก 14 แขวงหัวหมาก เขตบางกะปิ กรุงเทพมหานคร 10240',
+    copyright: '© 2026 G-Speed Esport Arena (GLP Living Plus). All Rights Reserved.',
+    socialLinks: {
+      facebook: 'https://facebook.com/gspeedesport',
+      discord: 'https://discord.gg/gspeed',
+      youtube: 'https://youtube.com/@gspeedarena',
+      steam: 'https://steamcommunity.com/groups/gspeed'
+    }
+  }
+};
+
+// Deep merge helper ensuring every nested property in defaults is present
+function deepMerge(target, source) {
+  if (!source || typeof source !== 'object' || Array.isArray(source)) {
+    return source !== undefined ? source : target;
+  }
+  const result = { ...target };
+  for (const key of Object.keys(source)) {
+    if (source[key] !== null && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+      result[key] = deepMerge(target[key] || {}, source[key]);
+    } else if (source[key] !== undefined) {
+      result[key] = source[key];
+    }
+  }
+  return result;
+}
 
 const SiteDataContext = createContext(null);
 
@@ -81,482 +375,76 @@ export function SiteDataProvider({ children }) {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        // Hydrate gallery items with mockData slugs & rich content if missing
-        if (parsed.gallery && Array.isArray(parsed.gallery)) {
-          parsed.gallery = parsed.gallery.map(item => {
-            const initial = INITIAL_GALLERY.find(g => g.id === item.id);
-            return initial 
-              ? { ...initial, ...item, slug: item.slug || initial.slug, galleryPhotos: item.galleryPhotos || initial.galleryPhotos, contentParagraphs: item.contentParagraphs || initial.contentParagraphs }
-              : item;
-          });
-        }
-        // Hydrate news items with mockData slugs, tags & rich content if missing
-        if (parsed.news && Array.isArray(parsed.news)) {
-          parsed.news = parsed.news.map(item => {
-            const initial = INITIAL_NEWS.find(n => n.id === item.id);
-            return initial
-              ? { ...initial, ...item, slug: item.slug || initial.slug, tags: item.tags || initial.tags, contentParagraphs: item.contentParagraphs || initial.contentParagraphs, galleryPhotos: item.galleryPhotos || initial.galleryPhotos, seo: item.seo || initial.seo }
-              : item;
-          });
+        // Deep merge saved data with defaults so NO missing keys exist
+        const merged = deepMerge(DEFAULT_SITE_DATA, parsed);
+
+        // Ensure array types are intact
+        if (!Array.isArray(merged.gallery)) merged.gallery = INITIAL_GALLERY;
+        if (!Array.isArray(merged.news)) merged.news = INITIAL_NEWS;
+        if (!Array.isArray(merged.catalogItems)) merged.catalogItems = INITIAL_CATALOG;
+        if (!Array.isArray(merged.hardwareTiers)) merged.hardwareTiers = INITIAL_TIERS;
+        if (!Array.isArray(merged.tournaments)) merged.tournaments = INITIAL_TOURNAMENTS;
+        if (!Array.isArray(merged.venueZones)) merged.venueZones = INITIAL_ZONES;
+        if (!Array.isArray(merged.navLinks)) merged.navLinks = INITIAL_NAV_LINKS;
+        if (!Array.isArray(merged.n8nWorkflows)) merged.n8nWorkflows = DEFAULT_SITE_DATA.n8nWorkflows;
+        if (!Array.isArray(merged.ragKnowledge)) {
+          merged.ragKnowledge = INITIAL_RAG_KNOWLEDGE;
         } else {
-          parsed.news = INITIAL_NEWS;
+          // Merge any newly introduced default RAG items if missing by id
+          INITIAL_RAG_KNOWLEDGE.forEach(defaultItem => {
+            if (!merged.ragKnowledge.some(k => k.id === defaultItem.id)) {
+              merged.ragKnowledge.push(defaultItem);
+            }
+          });
         }
+
+        if (merged.erpData) {
+          if (!Array.isArray(merged.erpData.peakHours)) merged.erpData.peakHours = DEFAULT_SITE_DATA.erpData.peakHours;
+          if (!Array.isArray(merged.erpData.topSellingItems)) merged.erpData.topSellingItems = DEFAULT_SITE_DATA.erpData.topSellingItems;
+        }
+
+        // Hydrate gallery items with mockData slugs & rich content if missing
+        merged.gallery = merged.gallery.map(item => {
+          const initial = INITIAL_GALLERY.find(g => g.id === item.id);
+          return initial 
+            ? { ...initial, ...item, slug: item.slug || initial.slug, galleryPhotos: item.galleryPhotos || initial.galleryPhotos, contentParagraphs: item.contentParagraphs || initial.contentParagraphs }
+            : item;
+        });
+
+        // Hydrate news items with mockData slugs, tags & rich content if missing
+        merged.news = merged.news.map(item => {
+          const initial = INITIAL_NEWS.find(n => n.id === item.id);
+          return initial
+            ? { ...initial, ...item, slug: item.slug || initial.slug, tags: item.tags || initial.tags, contentParagraphs: item.contentParagraphs || initial.contentParagraphs, galleryPhotos: item.galleryPhotos || initial.galleryPhotos, seo: item.seo || initial.seo }
+            : item;
+        });
 
         // Hydrate catalog items with mockData images, colors, grade, and warranty if missing
-        if (parsed.catalogItems && Array.isArray(parsed.catalogItems)) {
-          parsed.catalogItems = parsed.catalogItems.map(item => {
-            const initial = INITIAL_CATALOG.find(c => c.type === item.type);
-            return initial
-              ? { 
-                  ...initial, 
-                  ...item, 
-                  image: item.image || initial.image,
-                  grade: item.grade || initial.grade || 'pro',
-                  deskColor: item.deskColor || initial.deskColor || item.color || '#0f172a',
-                  accentColor: item.accentColor || initial.accentColor || '#1d4ed8',
-                  chairColor: item.chairColor || initial.chairColor || '#0f172a',
-                  warranty: item.warranty || initial.warranty,
-                  leadTime: item.leadTime || initial.leadTime,
-                  material: item.material || initial.material
-                }
-              : item;
-          });
-        } else {
-          parsed.catalogItems = INITIAL_CATALOG;
-        }
+        merged.catalogItems = merged.catalogItems.map(item => {
+          const initial = INITIAL_CATALOG.find(c => c.type === item.type);
+          return initial
+            ? { 
+                ...initial, 
+                ...item, 
+                image: item.image || initial.image,
+                grade: item.grade || initial.grade || 'pro',
+                deskColor: item.deskColor || initial.deskColor || item.color || '#0f172a',
+                accentColor: item.accentColor || initial.accentColor || '#1d4ed8',
+                chairColor: item.chairColor || initial.chairColor || '#0f172a',
+                warranty: item.warranty || initial.warranty,
+                leadTime: item.leadTime || initial.leadTime,
+                material: item.material || initial.material
+              }
+            : item;
+        });
 
-        // Ensure new section configs exist in existing storage
-        if (!parsed.theme) {
-          parsed.theme = {
-            primaryColor: '#1d4ed8',
-            secondaryColor: '#0ea5e9',
-            backgroundColor: '#ffffff',
-            surfaceColor: '#f8fafc',
-            fontHeading: "'Inter', sans-serif"
-          };
-        }
-        if (!parsed.featureBanners) {
-          parsed.featureBanners = {
-            bannerLeft: {
-              badge: 'GLP OUR EVENTS',
-              title: 'รวมภาพกิจกรรม & บรรยากาศสด',
-              desc: 'ภาพงานแข่ง LAN, งานเปิดตัวเกม, มีตติ้ง และพิธีมอบรางวัลชนะเลิศตลอดทั้งปี',
-              linkText: 'สำรวจอัลบั้มภาพกิจกรรม',
-              linkTarget: '#activities',
-              bgGradient: 'linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%)',
-              image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80'
-            },
-            bannerRight: {
-              badge: 'GLP BLOG & NEWS',
-              title: 'บทความ ข่าวสาร & ไฮไลต์เกม',
-              desc: 'เกาะติดผลการแข่งขัน ทริกการเล่น สเปกอุปกรณ์ใหม่ และประกาศจากทางร้าน',
-              linkText: 'อ่านบทความล่าสุด',
-              linkTarget: '#news',
-              bgGradient: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
-              image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80'
-            }
-          };
-        }
-        if (!parsed.tournamentsSection) {
-          parsed.tournamentsSection = {
-            badge: 'TOURNAMENTS & COMMUNITY EVENTS',
-            title: 'ปฏิทินการแข่งขัน อีสปอร์ตประจำเดือน',
-            subtitle: 'ร่วมชิงเงินรางวัลรวมกว่าหลายแสนบาท พิสูจน์ฝีมือบนเวที LAN Final ถ่ายทอดสดสู่สายตาแฟนเกมทั่วประเทศ',
-            bgColor: '#ffffff'
-          };
-        }
-        if (!parsed.zonesSection) {
-          parsed.zonesSection = {
-            badge: 'VENUE ATMOSPHERE & ZONES',
-            title: 'บรรยากาศและโซนการให้บริการ GLP ESPORTS',
-            subtitle: 'สัมผัสความพรีเมียมที่ออกแบบมาสำหรับเกมเมอร์ทุกสไตล์ ตั้งแต่ผู้เล่นทั่วไป สตรีมเมอร์ ไปจนถึงการประลองระดับแชมป์เปียนชิป',
-            bgColor: '#f8fafc'
-          };
-        }
-        if (!parsed.newsSection) {
-          parsed.newsSection = {
-            badge: 'ARTICLES & UPDATES',
-            title: 'บทความและข่าวสาร GLP ESPORTS',
-            subtitle: 'อัปเดตความเคลื่อนไหววงการอีสปอร์ต เทคโนโลยีใหม่ และสรุปผลการแข่งขันที่จัดขึ้นในร้าน',
-            bgColor: '#ffffff'
-          };
-        }
-        if (!parsed.franchiseBanner) {
-          parsed.franchiseBanner = {
-            badge: 'G-SPEED FRANCHISE & INTERIOR PLANNER',
-            heading: 'อยากมีร้านเกมอีสปอร์ตสเปกเทพเป็นของตัวเอง?',
-            desc: 'เพียงแค่คุณมีพื้นที่หรืออาคาร เรามีระบบ Interior Floor Plan Configurator ช่วยจำลองผังร้าน 2D สเกลจริง จัดวางโต๊ะคอมพิวเตอร์ เวทีแข่งขัน เคาน์เตอร์ และคำนวณต้นทุน สเปกอุปกรณ์ ระยะเวลาคืนทุน (ROI) และเวลาติดตั้งให้ทันที!',
-            buttonText: 'เริ่มออกแบบผังร้าน & ประเมินงบประมาณทันที',
-            buttonLink: 'franchise',
-            bgColor: '#1e3a8a',
-            bgImage: ''
-          };
-        }
-        if (!parsed.venueZones) {
-          parsed.venueZones = INITIAL_ZONES;
-        }
-        if (!parsed.n8nWorkflows) {
-          parsed.n8nWorkflows = [
-            {
-              id: 'wf-lead',
-              name: 'Franchise Lead & 3D Blueprint Automation',
-              desc: 'ส่งข้อมูลใบเสนอราคาและไฟล์แปลนอาคารไปยัง n8n เพื่อส่งต่อ LINE / Discord / Google Sheets',
-              endpoint: 'https://n8n.gspeedarena.com/webhook/franchise-lead',
-              enabled: true,
-              lastStatus: 'Active (200 OK)',
-              eventsCount: 42
-            },
-            {
-              id: 'wf-tournament',
-              name: 'Tournament Team Registration Automation',
-              desc: 'รับข้อมูลการสมัครแข่งขัน ตรวจสอบรายชื่อผู้เล่น และสร้าง Team ID อัตโนมัติ',
-              endpoint: 'https://n8n.gspeedarena.com/webhook/tournament-register',
-              enabled: true,
-              lastStatus: 'Active (200 OK)',
-              eventsCount: 18
-            },
-            {
-              id: 'wf-pos',
-              name: 'End-of-Day POS & Accounting Sync Automation',
-              desc: 'สรุปยอดขายประจำวัน ค่าชั่วโมง ยอด F&B และค่าไฟ ส่งไปยังระบบบัญชี FlowAccount / Xero',
-              endpoint: 'https://n8n.gspeedarena.com/webhook/pos-accounting-daily',
-              enabled: true,
-              lastStatus: 'Active (200 OK)',
-              eventsCount: 120
-            },
-            {
-              id: 'wf-escalation',
-              name: 'AI Chatbot Staff Escalation to LINE Notify',
-              desc: 'แจ้งเตือนพนักงานและผู้จัดการร้านทันทีเมื่อมีคำถามที่ AI ไม่สามารถตอบได้',
-              endpoint: 'https://n8n.gspeedarena.com/webhook/ai-escalation',
-              enabled: true,
-              lastStatus: 'Standby',
-              eventsCount: 5
-            }
-          ];
-        }
-        if (!parsed.erpConfig) {
-          parsed.erpConfig = {
-            posSoftware: 'SmartCafé Pro (Cloud Diskless Edition)',
-            apiUrl: 'https://api.smartcafe.in.th/v2/erp/bridge',
-            apiToken: 'sc_live_sec_89df7128a8d1',
-            storeCode: 'GLP-RAMKHAMHAENG-01',
-            autoSync: true,
-            syncIntervalMin: 15,
-            syncOptions: { syncGaming: true, syncFnb: true, syncMembers: true, syncPowerCost: true }
-          };
-        }
-        if (!parsed.globalSEO) {
-          parsed.globalSEO = {
-            metaTitle: 'G-SPEED ESPORT ARENA | ศูนย์อีสปอร์ตครบวงจร & ระบบแฟรนไชส์จัดผังร้านอัจฉริยะ',
-            metaDescription: 'ศูนย์รวมอีสปอร์ตครบวงจร สเปกคอมไฮเอนด์ RTX 40 Series จอ 360Hz เวทีแข่งมาตรฐานสากล พร้อมระบบจำลองผังร้านแฟรนไชส์ 3D',
-            keywords: 'ร้านเกม, อีสปอร์ต, แฟรนไชส์ร้านเกม, G-Speed Arena, GLP, จัดผังร้านเกม 3D, RTX 4090, BenQ 360Hz',
-            ogImage: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
-            twitterHandle: '@GSpeedArena'
-          };
-        }
-        if (parsed.openRouterSettings) {
-          if (parsed.openRouterSettings.proxyUrl === undefined) parsed.openRouterSettings.proxyUrl = '';
-          if (parsed.openRouterSettings.useSecureProxy === undefined) parsed.openRouterSettings.useSecureProxy = false;
-          if (!parsed.openRouterSettings.model || parsed.openRouterSettings.model.includes('2.0-flash')) {
-            parsed.openRouterSettings.model = 'google/gemini-flash-3.8';
-          }
-        }
-        if (!parsed.openWebUIConfig) {
-          parsed.openWebUIConfig = {
-            baseUrl: 'https://openwebui.gspeedarena.com',
-            apiKey: '',
-            model: 'glp-esports-assistant:latest',
-            ragCollection: 'gspeed-knowledge-base',
-            enabled: true,
-            lastPing: 'Online (Latency 28ms)'
-          };
-        }
-        if (!parsed.omnichannelConfig) {
-          parsed.omnichannelConfig = {
-            lineWebhookUrl: 'https://n8n.gspeedarena.com/webhook/line-inbound',
-            facebookWebhookUrl: 'https://n8n.gspeedarena.com/webhook/meta-inbound',
-            webWidgetWebhookUrl: 'https://n8n.gspeedarena.com/webhook/omnichannel-chat',
-            unifiedInboxUrl: 'https://chatwoot.gspeedarena.com',
-            autoHandoverToStaff: true
-          };
-        }
-        if (parsed.n8nWorkflows && !parsed.n8nWorkflows.some(w => w.id === 'wf-omnichannel')) {
-          parsed.n8nWorkflows.push({
-            id: 'wf-omnichannel',
-            name: 'Omnichannel Customer Inquiries & OpenWebUI Router',
-            desc: 'รับข้อความจากทุกช่องทาง (Web Widget, LINE OA, Facebook Messenger) ตรวจสอบสิทธิ์สมาชิกใน ERP และส่งต่อไปยัง OpenWebUI/LLM ตอบกลับอัตโนมัติ',
-            endpoint: 'https://n8n.gspeedarena.com/webhook/omnichannel-chat',
-            enabled: true,
-            lastStatus: 'Active (200 OK)',
-            eventsCount: 320
-          });
-        }
-        if (!parsed.headerCta) {
-          parsed.headerCta = {
-            text: 'คำนวณราคาเปิดร้าน',
-            target: 'franchise',
-            visible: true
-          };
-        }
-        if (parsed.tickerLinkText === undefined) {
-          parsed.tickerLinkText = 'เปิดระบบ 3D';
-        }
-        if (parsed.tickerLinkTarget === undefined) {
-          parsed.tickerLinkTarget = parsed.tickerLinkTab || 'franchise';
-        }
-        if (parsed.tickerLinkVisible === undefined) {
-          parsed.tickerLinkVisible = true;
-        }
-        return parsed;
+        return merged;
       }
     } catch (e) {
       console.warn('Failed to load saved CMS data, fallback to defaults', e);
     }
 
-    return {
-      theme: {
-        primaryColor: '#1d4ed8',
-        secondaryColor: '#0ea5e9',
-        backgroundColor: '#ffffff',
-        surfaceColor: '#f8fafc',
-        fontHeading: "'Inter', sans-serif"
-      },
-      globalSEO: {
-        metaTitle: 'G-SPEED ESPORT ARENA | ศูนย์อีสปอร์ตครบวงจร & ระบบแฟรนไชส์จัดผังร้านอัจฉริยะ',
-        metaDescription: 'ศูนย์รวมอีสปอร์ตครบวงจร สเปกคอมไฮเอนด์ RTX 40 Series จอ 360Hz เวทีแข่งมาตรฐานสากล พร้อมระบบจำลองผังร้านแฟรนไชส์ 3D',
-        keywords: 'ร้านเกม, อีสปอร์ต, แฟรนไชส์ร้านเกม, G-Speed Arena, GLP, จัดผังร้านเกม 3D, RTX 4090, BenQ 360Hz',
-        ogImage: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
-        twitterHandle: '@GSpeedArena'
-      },
-      tickerText: 'เปิดรับสมัคร GLP VALORANT CHAMPIONSHIP 2026 ชิง 100,000 บาท | ระบบจำลองผังร้าน 3D Interior Planner พร้อมใช้งานแล้ว',
-      tickerBadge: 'ประกาศสำคัญ',
-      tickerLinkTab: 'franchise',
-      tickerLinkTarget: 'franchise',
-      tickerLinkText: 'เปิดระบบ 3D',
-      tickerLinkVisible: true,
-      headerCta: {
-        text: 'คำนวณราคาเปิดร้าน',
-        target: 'franchise',
-        visible: true
-      },
-      navLinks: INITIAL_NAV_LINKS,
-      hero: {
-        badge: 'THE NEXT-GEN ESPORT ARENA & FRANCHISE HUB',
-        title: 'ศูนย์รวมอีสปอร์ตครบวงจร & พื้นที่ประลองเกมมาตรฐานสากล',
-        subtitle: 'สัมผัสประสบการณ์เกมมิ่งระดับเวิลด์คลาสด้วยเครื่องสเปกไฮเอนด์ RTX 40 Series จอ 360Hz และเวทีแข่งขันมาตรฐาน Pro Circuit พร้อมระบบคำนวณและจำลองผังร้านแฟรนไชส์อัจฉริยะ',
-        primaryCta: 'สำรวจกิจกรรม & ทัวร์นาเมนต์',
-        primaryCtaLink: '#activities',
-        secondaryCta: 'จำลองผังร้าน 3D แฟรนไชส์',
-        secondaryCtaLink: '#franchise',
-        bgColor: '#ffffff',
-        bgOverlayImage: '',
-        metrics: [
-          { number: '750+', label: 'Battle Stations ทั่วประเทศ' },
-          { number: '360Hz', label: 'Fast-IPS & OLED Displays' },
-          { number: '10Gbps', label: 'Dedicated Multi-WAN Ping < 3ms' },
-          { number: '24/7', label: 'เปิดบริการตลอด 24 ชั่วโมง' }
-        ]
-      },
-      featureBanners: {
-        bannerLeft: {
-          badge: 'GLP OUR EVENTS',
-          title: 'รวมภาพกิจกรรม & บรรยากาศสด',
-          desc: 'ภาพงานแข่ง LAN, งานเปิดตัวเกม, มีตติ้ง และพิธีมอบรางวัลชนะเลิศตลอดทั้งปี',
-          linkText: 'สำรวจอัลบั้มภาพกิจกรรม',
-          linkTarget: '#activities',
-          bgGradient: 'linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%)',
-          image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80'
-        },
-        bannerRight: {
-          badge: 'GLP BLOG & NEWS',
-          title: 'บทความ ข่าวสาร & ไฮไลต์เกม',
-          desc: 'เกาะติดผลการแข่งขัน ทริกการเล่น สเปกอุปกรณ์ใหม่ และประกาศจากทางร้าน',
-          linkText: 'อ่านบทความล่าสุด',
-          linkTarget: '#news',
-          bgGradient: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
-          image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80'
-        }
-      },
-      tournamentsSection: {
-        badge: 'TOURNAMENTS & COMMUNITY EVENTS',
-        title: 'ปฏิทินการแข่งขัน อีสปอร์ตประจำเดือน',
-        subtitle: 'ร่วมชิงเงินรางวัลรวมกว่าหลายแสนบาท พิสูจน์ฝีมือบนเวที LAN Final ถ่ายทอดสดสู่สายตาแฟนเกมทั่วประเทศ',
-        bgColor: '#ffffff'
-      },
-      zonesSection: {
-        badge: 'VENUE ATMOSPHERE & ZONES',
-        title: 'บรรยากาศและโซนการให้บริการ GLP ESPORTS',
-        subtitle: 'สัมผัสความพรีเมียมที่ออกแบบมาสำหรับเกมเมอร์ทุกสไตล์ ตั้งแต่ผู้เล่นทั่วไป สตรีมเมอร์ ไปจนถึงการประลองระดับแชมป์เปียนชิป',
-        bgColor: '#f8fafc'
-      },
-      newsSection: {
-        badge: 'ARTICLES & UPDATES',
-        title: 'บทความและข่าวสาร GLP ESPORTS',
-        subtitle: 'อัปเดตความเคลื่อนไหววงการอีสปอร์ต เทคโนโลยีใหม่ และสรุปผลการแข่งขันที่จัดขึ้นในร้าน',
-        bgColor: '#ffffff'
-      },
-      franchiseBanner: {
-        badge: 'G-SPEED FRANCHISE & INTERIOR PLANNER',
-        heading: 'อยากมีร้านเกมอีสปอร์ตสเปกเทพเป็นของตัวเอง?',
-        desc: 'เพียงแค่คุณมีพื้นที่หรืออาคาร เรามีระบบ Interior Floor Plan Configurator ช่วยจำลองผังร้าน 2D สเกลจริง จัดวางโต๊ะคอมพิวเตอร์ เวทีแข่งขัน เคาน์เตอร์ และคำนวณต้นทุน สเปกอุปกรณ์ ระยะเวลาคืนทุน (ROI) และเวลาติดตั้งให้ทันที!',
-        buttonText: 'เริ่มออกแบบผังร้าน & ประเมินงบประมาณทันที',
-        buttonLink: 'franchise',
-        bgColor: '#1e3a8a',
-        bgImage: ''
-      },
-      venueZones: INITIAL_ZONES,
-      tournaments: INITIAL_TOURNAMENTS,
-      gallery: INITIAL_GALLERY,
-      news: INITIAL_NEWS,
-      founder: INITIAL_FOUNDER,
-      catalogItems: INITIAL_CATALOG,
-      hardwareTiers: INITIAL_TIERS,
-      ragKnowledge: INITIAL_RAG_KNOWLEDGE,
-      openRouterSettings: {
-        apiKey: '',
-        proxyUrl: '',
-        useSecureProxy: false,
-        model: 'google/gemini-flash-3.8',
-        temperature: 0.7,
-        maxTokens: 1024,
-        systemPrompt: 'คุณคือผู้ช่วย AI ประจำศูนย์ G-Speed Esport Arena ตอบคำถามเกี่ยวกับบริการร้านเกม อัตราค่าชั่วโมง สเปกคอม และระบบแฟรนไชส์อย่างสุภาพและถูกต้อง',
-        isEnabled: true
-      },
-      openWebUIConfig: {
-        baseUrl: 'https://openwebui.gspeedarena.com',
-        apiKey: '',
-        model: 'glp-esports-assistant:latest',
-        ragCollection: 'gspeed-knowledge-base',
-        enabled: true,
-        lastPing: 'Online (Latency 28ms)'
-      },
-      omnichannelConfig: {
-        lineWebhookUrl: 'https://n8n.gspeedarena.com/webhook/line-inbound',
-        facebookWebhookUrl: 'https://n8n.gspeedarena.com/webhook/meta-inbound',
-        webWidgetWebhookUrl: 'https://n8n.gspeedarena.com/webhook/omnichannel-chat',
-        unifiedInboxUrl: 'https://chatwoot.gspeedarena.com',
-        autoHandoverToStaff: true
-      },
-      aiGuardrails: {
-        strictStoreOnly: true,
-        outOfScopeReply: 'ขออภัยด้วยครับ ผมเป็นผู้ช่วย AI ประจำศูนย์ G-Speed Esport Arena จึงสามารถตอบได้เฉพาะข้อมูลและบริการของทางร้านเท่านั้นครับ เช่น อัตราค่าบริการ, สเปกคอมพิวเตอร์, การจองห้อง VIP, เมนูอาหาร หรือการลงทุนแฟรนไชส์ หากมีข้อสงสัยเกี่ยวกับร้าน สามารถสอบถามได้ทันทีครับ',
-        blockedKeywords: ['การเมือง', 'หวย', 'พนัน', 'เขียนโค้ด', 'แต่งกลอน', 'การบ้าน', 'คู่แข่ง', 'แฮก'],
-        pendingQuestions: [
-          { id: 'q-1', query: 'มีห้องสูบบุหรี่ในร้านไหม', timestamp: '13/09/2026 14:15', status: 'pending' },
-          { id: 'q-2', query: 'รับจัดงานแข่งระดับมัธยมแบบเหมาวันไหม', timestamp: '13/09/2026 15:02', status: 'pending' }
-        ]
-      },
-      securityConfig: {
-        adminUsername: 'admin',
-        adminPassword: 'gspeed2026',
-        requirePin: false,
-        lastLogin: '13/09/2026 15:45'
-      },
-      erpConfig: {
-        posSoftware: 'SmartCafé Pro (Cloud Diskless Edition)',
-        apiUrl: 'https://api.smartcafe.in.th/v2/erp/bridge',
-        apiToken: 'sc_live_sec_89df7128a8d1',
-        storeCode: 'GLP-RAMKHAMHAENG-01',
-        autoSync: true,
-        syncIntervalMin: 15,
-        syncOptions: { syncGaming: true, syncFnb: true, syncMembers: true, syncPowerCost: true }
-      },
-      erpData: {
-        isConnected: true,
-        posSoftware: 'SmartCafé Pro (Cloud Diskless Edition)',
-        syncIntervalMin: 15,
-        lastSyncTime: '13/09/2026 15:50',
-        dailyRevenue: {
-          gaming: 37900,
-          fnb: 10750,
-          merchandise: 0,
-          total: 48650
-        },
-        monthlyRevenue: 1420000,
-        monthlyProfit: 910000,
-        costs: {
-          electricity: 7200,
-          fiberInternet: 1200,
-          staffSalary: 6000,
-          totalCost: 14400
-        },
-        peakHours: '18:00 - 02:00 น. (อัตราใช้งาน 96%)',
-        topSellingItems: [
-          { name: 'ข้าวกะเพราหมูกรอบไข่ดาว', qty: 42, revenue: 3570 },
-          { name: 'กาแฟสดอาราบิก้าเย็น', qty: 38, revenue: 2280 },
-          { name: 'ไก่ป๊อปสไปซี่สูตรพิเศษ', qty: 31, revenue: 2015 },
-          { name: 'เครื่องดื่มชูกำลัง Red Bull Extra', qty: 55, revenue: 1650 }
-        ],
-        aiExecutiveSummary: 'วันนี้มีอัตราการใช้งานเฉลี่ย 78.4% โซน Stage 5v5 และห้อง VIP Suite มีคิวจองเต็ม 100% ยอดขายเครื่องดื่มและอาหารเติบโตขึ้น 28% จากการสั่งผ่านหน้าจอคอมพิวเตอร์โดยตรง ต้นทุนค่าไฟฟ้าอยู่ในเกณฑ์ปกติ (เฉลี่ย 18.2 หน่วย/เครื่อง/วัน) แนะนำให้โปรโมตแพ็กเกจเหมาค่ำคืน Night Owl สำหรับวันธรรมดาเพื่อดึงดูดลูกค้าช่วงหลังเที่ยงคืน'
-      },
-      n8nWorkflows: [
-        {
-          id: 'wf-omnichannel',
-          name: 'Omnichannel Customer Inquiries & OpenWebUI Router',
-          desc: 'รับข้อความจากทุกช่องทาง (Web Widget, LINE OA, Facebook Messenger) ตรวจสอบสิทธิ์สมาชิกใน ERP และส่งต่อไปยัง OpenWebUI/LLM ตอบกลับอัตโนมัติ',
-          endpoint: 'https://n8n.gspeedarena.com/webhook/omnichannel-chat',
-          enabled: true,
-          lastStatus: 'Active (200 OK)',
-          eventsCount: 320
-        },
-        {
-          id: 'wf-lead',
-          name: 'Franchise Lead & 3D Blueprint Automation',
-          desc: 'ส่งข้อมูลใบเสนอราคาและไฟล์แปลนอาคารไปยัง n8n เพื่อส่งต่อ LINE / Discord / Google Sheets',
-          endpoint: 'https://n8n.gspeedarena.com/webhook/franchise-lead',
-          enabled: true,
-          lastStatus: 'Active (200 OK)',
-          eventsCount: 42
-        },
-        {
-          id: 'wf-tournament',
-          name: 'Tournament Team Registration Automation',
-          desc: 'รับข้อมูลการสมัครแข่งขัน ตรวจสอบรายชื่อผู้เล่น และสร้าง Team ID อัตโนมัติ',
-          endpoint: 'https://n8n.gspeedarena.com/webhook/tournament-register',
-          enabled: true,
-          lastStatus: 'Active (200 OK)',
-          eventsCount: 18
-        },
-        {
-          id: 'wf-pos',
-          name: 'End-of-Day POS & Accounting Sync Automation',
-          desc: 'สรุปยอดขายประจำวัน ค่าชั่วโมง ยอด F&B และค่าไฟ ส่งไปยังระบบบัญชี FlowAccount / Xero',
-          endpoint: 'https://n8n.gspeedarena.com/webhook/pos-accounting-daily',
-          enabled: true,
-          lastStatus: 'Active (200 OK)',
-          eventsCount: 120
-        },
-        {
-          id: 'wf-escalation',
-          name: 'AI Chatbot Staff Escalation to LINE Notify',
-          desc: 'แจ้งเตือนพนักงานและผู้จัดการร้านทันทีเมื่อมีคำถามที่ AI ไม่สามารถตอบได้',
-          endpoint: 'https://n8n.gspeedarena.com/webhook/ai-escalation',
-          enabled: true,
-          lastStatus: 'Standby',
-          eventsCount: 5
-        }
-      ],
-      webhooks: {
-        leadWebhookUrl: '',
-        discordBookingUrl: '',
-        autoNotification: true
-      },
-      footer: {
-        description: 'ศูนย์กีฬาอีสปอร์ตและร้านอินเทอร์เน็ตคาเฟ่มาตรฐานสากล บริหารงานโดย GLP Living Plus Group พร้อมระบบโซลูชันแฟรนไชส์อัจฉริยะสำหรับผู้ประกอบการรุ่นใหม่',
-        phone: '02-888-9999 / 089-777-6655',
-        email: 'contact@gspeedarena.com',
-        line: '@gspeedarena',
-        address: '99/1 ซอยรามคำแหง 24 แยก 14 แขวงหัวหมาก เขตบางกะปิ กรุงเทพมหานคร 10240',
-        copyright: '© 2026 G-Speed Esport Arena (GLP Living Plus). All Rights Reserved.',
-        socialLinks: {
-          facebook: 'https://facebook.com/gspeedesport',
-          discord: 'https://discord.gg/gspeed',
-          youtube: 'https://youtube.com/@gspeedarena',
-          steam: 'https://steamcommunity.com/groups/gspeed'
-        }
-      }
-    };
+    return DEFAULT_SITE_DATA;
   });
 
   // Save to localStorage automatically on state change
@@ -786,54 +674,12 @@ export function SiteDataProvider({ children }) {
 
   // Reset to Factory Default
   const resetToDefaults = () => {
-    localStorage.removeItem(STORAGE_KEY);
-    setSiteData({
-      tickerText: 'เปิดรับสมัคร GLP VALORANT CHAMPIONSHIP 2026 ชิง 100,000 บาท | ระบบจำลองผังร้าน 3D Interior Planner พร้อมใช้งานแล้ว',
-      tickerBadge: 'ประกาศสำคัญ',
-      tickerLinkTab: 'franchise',
-      navLinks: INITIAL_NAV_LINKS,
-      hero: {
-        badge: 'THE NEXT-GEN ESPORT ARENA & FRANCHISE HUB',
-        title: 'ศูนย์รวมอีสปอร์ตครบวงจร & พื้นที่ประลองเกมมาตรฐานสากล',
-        subtitle: 'สัมผัสประสบการณ์เกมมิ่งระดับเวิลด์คลาสด้วยเครื่องสเปกไฮเอนด์ RTX 40 Series จอ 360Hz และเวทีแข่งขันมาตรฐาน Pro Circuit พร้อมระบบคำนวณและจำลองผังร้านแฟรนไชส์อัจฉริยะ',
-        primaryCta: 'สำรวจกิจกรรม & ทัวร์นาเมนต์',
-        secondaryCta: 'จำลองผังร้าน 3D แฟรนไชส์'
-      },
-      tournaments: INITIAL_TOURNAMENTS,
-      gallery: INITIAL_GALLERY,
-      news: INITIAL_NEWS,
-      founder: INITIAL_FOUNDER,
-      catalogItems: INITIAL_CATALOG,
-      hardwareTiers: INITIAL_TIERS,
-      ragKnowledge: INITIAL_RAG_KNOWLEDGE,
-      openRouterSettings: {
-        apiKey: '',
-        model: 'google/gemini-flash-3.8',
-        temperature: 0.7
-      },
-      aiGuardrails: {
-        strictStoreOnly: true,
-        outOfScopeReply: 'ขออภัยด้วยครับ ผมเป็นผู้ช่วย AI ประจำศูนย์ G-Speed Esport Arena จึงสามารถตอบได้เฉพาะข้อมูลและบริการของทางร้านเท่านั้นครับ เช่น อัตราค่าบริการ, สเปกคอมพิวเตอร์, การจองห้อง VIP, เมนูอาหาร หรือการลงทุนแฟรนไชส์ หากมีข้อสงสัยเกี่ยวกับร้าน สามารถสอบถามได้ทันทีครับ',
-        blockedKeywords: ['การเมือง', 'หวย', 'พนัน', 'เขียนโค้ด', 'แต่งกลอน', 'การบ้าน', 'คู่แข่ง', 'แฮก'],
-        pendingQuestions: [
-          { id: 'q-1', query: 'มีห้องสูบบุหรี่ในร้านไหม', timestamp: '13/09/2026 14:15', status: 'pending' },
-          { id: 'q-2', query: 'รับจัดงานแข่งระดับมัธยมแบบเหมาวันไหม', timestamp: '13/09/2026 15:02', status: 'pending' }
-        ]
-      },
-      webhooks: {
-        leadWebhookUrl: '',
-        discordBookingUrl: '',
-        autoNotification: true
-      },
-      footer: {
-        description: 'ศูนย์กีฬาอีสปอร์ตและร้านอินเทอร์เน็ตคาเฟ่มาตรฐานสากล บริหารงานโดย GLP Living Plus Group พร้อมระบบโซลูชันแฟรนไชส์อัจฉริยะสำหรับผู้ประกอบการรุ่นใหม่',
-        phone: '02-888-9999 / 089-777-6655',
-        email: 'contact@gspeedarena.com',
-        line: '@gspeedarena',
-        address: '99/1 ซอยรามคำแหง 24 แยก 14 แขวงหัวหมาก เขตบางกะปิ กรุงเทพมหานคร 10240',
-        copyright: '© 2026 G-Speed Esport Arena (GLP Living Plus). All Rights Reserved.'
-      }
-    });
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {
+      console.warn('Failed to clear storage:', e);
+    }
+    setSiteData(DEFAULT_SITE_DATA);
   };
 
   // Security & ERP Handlers

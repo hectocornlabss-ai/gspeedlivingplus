@@ -7,13 +7,14 @@ import {
   Phone, Mail, MapPin, Globe, Shield, Trophy, Search, Tag,
   TrendingUp, BarChart2, ShieldCheck, Lock, LogOut, Activity, ArrowUpRight,
   Palette, Image as ImageIcon, Flame, Coffee, Check, Copy, Clock, Share2,
-  Box, Printer, Download, Camera, Upload, CheckSquare, Zap, ChevronRight, ChevronUp, ChevronDown, Server, Info
+  Box, Printer, Download, Camera, Upload, CheckSquare, Zap, ChevronRight, ChevronUp, ChevronDown, Server, Info, Ruler, Scale, Wrench, FileUp, Wand2
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 import ThreeProductViewer from './ThreeProductViewer';
 import ProductSpecSheetModal from './ProductSpecSheetModal';
 import { compressAndConvertToWebP, formatBytes } from '../utils/imageOptimizer';
 import CMSLivePreviewModal from './CMSLivePreviewModal';
+import { analyzeProductPhoto, parseSpecSheetText } from '../utils/aiSpecParser';
 
 // Reusable Component: Section Image Field with Guidelines, Live Preview & WebP Upload
 function SectionImageUploader({
@@ -396,11 +397,22 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
 
   // State for Catalog Item Modal / Editing / 3D & Spec Sheet Views
   const [editingCatalogItem, setEditingCatalogItem] = useState(null);
+  const [aiSpecModalOpen, setAiSpecModalOpen] = useState(false);
+  const [aiSpecTarget, setAiSpecTarget] = useState('edit'); // 'edit' | 'new'
+  const [aiSpecInputText, setAiSpecInputText] = useState('');
+  const [aiSpecFeedback, setAiSpecFeedback] = useState(null);
+  const [aiImageFeedback, setAiImageFeedback] = useState(null);
+  const [isAnalyzingPhoto, setIsAnalyzingPhoto] = useState(false);
   const [viewing3DItem, setViewing3DItem] = useState(null);
   const [viewingSpecItem, setViewingSpecItem] = useState(null);
   const [newCatalogItem, setNewCatalogItem] = useState({
     type: '',
+    sku: 'GLP-NEW-01',
     name: '',
+    weightKg: 48,
+    maxLoadKg: 350,
+    weightNote: 'แยกส่วน 3 ชิ้น ขนส่งสะดวก ประกอบหน้างานภายใน 20 นาที',
+    imageAlt: 'ชุดโต๊ะเกมมิ่ง G-Speed Esport Arena สเปกมาตรฐาน',
     category: 'stations',
     grade: 'pro', // standard, pro, ultimate, vip
     image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80',
@@ -949,23 +961,33 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
               </div>
 
               {/* =========================================================================
-                  EDIT CATALOG ITEM MODAL (DUAL COLUMN WITH LIVE 3D PREVIEW & EXPORT)
+                  EDIT CATALOG ITEM MODAL (AI REAL-PHOTO 3D SYNTHESIS, SPEC OCR & EDITABLE PRICING)
                   ========================================================================= */}
               {editingCatalogItem && (
                 <div className="cms-modal-backdrop" onClick={() => setEditingCatalogItem(null)}>
                   <div className="cms-modal-card modal-extra-wide catalog-edit-dual-modal" onClick={e => e.stopPropagation()}>
                     <div className="modal-head">
                       <div className="modal-head-title">
-                        <Box size={18} className="text-blue" />
-                        <h4>แก้ไขโมดูล 3D: {editingCatalogItem.name}</h4>
-                        <span className="sub-type-tag">{editingCatalogItem.type}</span>
+                        <Box size={22} className="text-blue" />
+                        <div>
+                          <h4>แก้ไขข้อมูลอุปกรณ์ & สเปกโมดูล 3D: {editingCatalogItem.name}</h4>
+                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '4px' }}>
+                            <span className="sub-type-tag">Type: {editingCatalogItem.type}</span>
+                            <span className="sub-type-tag" style={{ background: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa', border: '1px solid rgba(59, 130, 246, 0.4)' }}>
+                              SKU: {editingCatalogItem.sku || 'GLP-' + editingCatalogItem.type.toUpperCase()}
+                            </span>
+                            <span className={`grade-tag-pill ${editingCatalogItem.grade || 'pro'}`}>
+                              {(editingCatalogItem.grade || 'pro').toUpperCase()}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                       <div className="modal-head-actions">
                         <button 
                           type="button"
                           className="btn-spec-shortcut"
                           onClick={() => setViewingSpecItem(editingCatalogItem)}
-                          title="ดูตัวอย่างเอกสารสเปกทางการ"
+                          title="ดูเอกสารสเปกอุปกรณ์ทางการ (Spec Sheet)"
                         >
                           <FileText size={14} />
                           <span>ดูเอกสารสเปก</span>
@@ -975,52 +997,152 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                     </div>
 
                     <div className="modal-dual-body">
-                      {/* Left Column: Form Controls */}
+                      {/* Left Column: Form Controls with AI Spec Importer */}
                       <div className="modal-form-scrollable">
-                        {/* Section 1: Name, Type, Category & Grade */}
+
+                        {/* AI SMART SPEC & REAL-PHOTO 3D SYNTHESIS HUB */}
+                        <div className="ai-smart-spec-card">
+                          <div className="ai-smart-card-head">
+                            <div className="ai-title-row">
+                              <Sparkles size={16} className="text-blue" />
+                              <strong className="ai-hub-title">AI Smart 3D & Spec Importer (นำเข้าและแปลงข้อมูลอัตโนมัติ 100%)</strong>
+                            </div>
+                            <span className="ai-hub-badge">One-Click Auto Fill</span>
+                          </div>
+                          <p className="ai-hub-desc">
+                            อัปโหลดภาพสินค้าจริงเพื่อสกัดสีและเรนเดอร์ 3D ทันที หรือแนบเอกสารสเปก/ใบเสนอราคา เพื่อกรอกข้อมูล ขนาด น้ำหนัก วัสดุ และราคาอัตโนมัติ
+                          </p>
+
+                          <div className="ai-action-buttons-row">
+                            {/* Action 1: Upload Real Product Photo -> Image to 3D & Real Color Extraction */}
+                            <label className="btn-ai-action-chip photo-to-3d">
+                              {isAnalyzingPhoto ? <RefreshCw size={14} className="spin-icon" /> : <Camera size={14} />}
+                              <span>{isAnalyzingPhoto ? 'กำลังวิเคราะห์ภาพ...' : '📸 อัปโหลดภาพสินค้าจริง -> แปลงเป็น 3D & สกัดสี'}</span>
+                              <input 
+                                type="file" 
+                                accept="image/*" 
+                                style={{ display: 'none' }}
+                                onChange={async (e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    setIsAnalyzingPhoto(true);
+                                    try {
+                                      const result = await analyzeProductPhoto(file);
+                                      if (result.success) {
+                                        setEditingCatalogItem(prev => ({
+                                          ...prev,
+                                          image: result.textureUrl,
+                                          deskTextureUrl: result.textureUrl,
+                                          deskColor: result.deskColor,
+                                          color: result.deskColor,
+                                          accentColor: result.accentColor,
+                                          chairColor: result.chairColor,
+                                          seats: result.suggestedSeats || prev.seats,
+                                          chairCount: result.suggestedSeats || prev.chairCount
+                                        }));
+                                        setAiImageFeedback(`✨ สกัดสีจากภาพสินค้าจริงสำเร็จ: ท็อปโต๊ะ (${result.deskColor}), ไฟ LED (${result.accentColor}), เก้าอี้ (${result.chairColor}) พร้อมลงลายท็อปโต๊ะจริงเรียบร้อย!`);
+                                        setTimeout(() => setAiImageFeedback(null), 7000);
+                                      }
+                                    } finally {
+                                      setIsAnalyzingPhoto(false);
+                                    }
+                                  }
+                                }}
+                              />
+                            </label>
+
+                            {/* Action 2: Attach Spec Sheet Document / Text OCR */}
+                            <button 
+                              type="button" 
+                              className="btn-ai-action-chip doc-to-spec"
+                              onClick={() => {
+                                setAiSpecTarget('edit');
+                                setAiSpecModalOpen(true);
+                              }}
+                            >
+                              <FileUp size={14} />
+                              <span>📄 แนบเอกสารสเปกสินค้า / ใบเสนอราคา</span>
+                            </button>
+
+                            {/* Action 3: Upload 3D Model File (.GLB / .GLTF) */}
+                            <label className="btn-ai-action-chip upload-3d-model">
+                              <Box size={14} />
+                              <span>📦 อัปโหลดโมเดล 3D (.GLB/.GLTF)</span>
+                              <input 
+                                type="file" 
+                                accept=".glb,.gltf" 
+                                style={{ display: 'none' }}
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    const modelUrl = URL.createObjectURL(file);
+                                    setEditingCatalogItem(prev => ({
+                                      ...prev,
+                                      model3DUrl: modelUrl
+                                    }));
+                                    setAiImageFeedback(`📦 นำเข้าโมเดล 3D (${file.name}) สำเร็จ! เรนเดอร์บน 3D Studio เรียบร้อย`);
+                                    setTimeout(() => setAiImageFeedback(null), 7000);
+                                  }
+                                }}
+                              />
+                            </label>
+                          </div>
+
+                          {/* AI Feedback Banners */}
+                          {aiImageFeedback && (
+                            <div className="ai-feedback-banner success">
+                              <CheckCircle2 size={15} />
+                              <span>{aiImageFeedback}</span>
+                            </div>
+                          )}
+
+                          {aiSpecFeedback && (
+                            <div className="ai-feedback-banner success">
+                              <CheckCircle2 size={15} />
+                              <span>{aiSpecFeedback}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* SECTION 1: รหัสสินค้า, ชื่อ, หมวดหมู่ & เกรด */}
                         <div className="form-subblock">
                           <h5 className="form-subblock-title">
-                            <Layers size={14} className="text-blue" />
-                            <span>1. ข้อมูลพื้นฐาน & หมวดหมู่</span>
+                            <Tag size={15} className="text-blue" />
+                            <span>1. รหัสสินค้า (SKU) & ข้อมูลพื้นฐาน</span>
                           </h5>
 
                           <div className="form-row-2">
                             <div className="form-group">
-                              <label>ชื่อโมดูล (ภาษาไทย)</label>
+                              <label>รหัสสินค้า (Product SKU)</label>
                               <input 
                                 type="text" 
-                                className="form-input" 
-                                value={editingCatalogItem.name} 
-                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, name: e.target.value })}
+                                className="form-input font-mono font-semibold" 
+                                placeholder="เช่น GLP-DSK-2P-01"
+                                value={editingCatalogItem.sku || ('GLP-' + (editingCatalogItem.type || '').toUpperCase())} 
+                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, sku: e.target.value })}
                               />
                             </div>
                             <div className="form-group">
-                              <label>รหัสประเภท (Type Code)</label>
+                              <label>รหัสประเภท 3D (Type Slug - เชื่อมโยงระบบผังร้าน)</label>
                               <input 
                                 type="text" 
                                 className="form-input" 
                                 value={editingCatalogItem.type} 
                                 disabled
-                                title="รหัสประจำโมดูลในระบบ 3D"
+                                title="รหัสประจำโมดูลในระบบเรนเดอร์ 3D"
                               />
                             </div>
                           </div>
 
-                          <div className="form-row-2">
-                            <div className="form-group">
-                              <label>หมวดหมู่สินค้า</label>
-                              <select 
-                                className="form-input"
-                                value={editingCatalogItem.category}
-                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, category: e.target.value })}
-                              >
-                                <option value="stations">โต๊ะคอมพิวเตอร์ (Stations)</option>
-                                <option value="vip">ห้อง VIP (Private Suite)</option>
-                                <option value="stage">เวทีการแข่งขัน (Stage)</option>
-                                <option value="facilities">เคาน์เตอร์ & เซอร์วิส (Facilities)</option>
-                                <option value="amenities">สิ่งอำนวยความสะดวก & โซฟา (Amenities)</option>
-                                <option value="architectural">สถาปัตยกรรม (ประตู/หน้าต่าง)</option>
-                              </select>
+                          <div className="form-row-3">
+                            <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                              <label>ชื่อโมดูลอุปกรณ์ (ภาษาไทย)</label>
+                              <input 
+                                type="text" 
+                                className="form-input font-semibold" 
+                                value={editingCatalogItem.name} 
+                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, name: e.target.value })}
+                              />
                             </div>
                             <div className="form-group">
                               <label>เกรดโมดูล (Quality Tier)</label>
@@ -1032,17 +1154,288 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                                 <option value="standard">Standard (Tier 1 - คุ้มค่า คืนทุนเร็ว)</option>
                                 <option value="pro">Pro Racing (Tier 2 - นักกีฬาแข่งขัน)</option>
                                 <option value="ultimate">Ultimate Esports (Tier 3 - ไฮเอนด์อารีนา)</option>
-                                <option value="vip">VIP Suite Grade (เกรดห้องส่วนตัวสตรีมเมอร์)</option>
+                                <option value="vip">VIP Suite Grade (เกรดห้องสตรีมเมอร์)</option>
                               </select>
+                            </div>
+                          </div>
+
+                          <div className="form-group">
+                            <label>หมวดหมู่สินค้าในแคตตาล็อก</label>
+                            <select 
+                              className="form-input"
+                              value={editingCatalogItem.category}
+                              onChange={e => setEditingCatalogItem({ ...editingCatalogItem, category: e.target.value })}
+                            >
+                              <option value="stations">โต๊ะคอมพิวเตอร์เกมมิ่ง (Stations)</option>
+                              <option value="vip">ห้อง VIP ส่วนตัว (Private Bootcamp Suite)</option>
+                              <option value="stage">เวทีการแข่งขัน (Main Tournament Stage)</option>
+                              <option value="facilities">เคาน์เตอร์แคชเชียร์ & บาร์เครื่องดื่ม (Facilities)</option>
+                              <option value="amenities">สิ่งอำนวยความสะดวก & โซฟาเลานจ์ (Amenities)</option>
+                              <option value="architectural">สถาปัตยกรรม (ผนัง, ประตู, กระจกเทมเปอร์)</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        {/* SECTION 2: ขนาดมิติ 3 มิติ (DIMENSIONS) */}
+                        <div className="form-subblock">
+                          <h5 className="form-subblock-title">
+                            <Ruler size={15} className="text-blue" />
+                            <span>2. ขนาดมิติ 3 มิติ (Dimensions) & จำนวนที่นั่ง</span>
+                          </h5>
+
+                          <div className="form-row-4">
+                            <div className="form-group">
+                              <label>กว้างหน้าโต๊ะ (ม.)</label>
+                              <input 
+                                type="number" 
+                                step="0.05" 
+                                className="form-input"
+                                value={editingCatalogItem.widthMeters}
+                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, widthMeters: parseFloat(e.target.value) || 1 })}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>ความลึก 3D (ม.)</label>
+                              <input 
+                                type="number" 
+                                step="0.05" 
+                                className="form-input"
+                                value={editingCatalogItem.depth3D || editingCatalogItem.heightMeters}
+                                onChange={e => setEditingCatalogItem({ 
+                                  ...editingCatalogItem, 
+                                  depth3D: parseFloat(e.target.value) || 1,
+                                  heightMeters: parseFloat(e.target.value) || 1
+                                })}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>ความสูง 3D (ม.)</label>
+                              <input 
+                                type="number" 
+                                step="0.05" 
+                                className="form-input"
+                                value={editingCatalogItem.height3D || 1.25}
+                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, height3D: parseFloat(e.target.value) || 1 })}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>จำนวนที่นั่ง (Seats)</label>
+                              <input 
+                                type="number" 
+                                min="0"
+                                className="form-input"
+                                value={editingCatalogItem.seats ?? editingCatalogItem.chairCount ?? 0}
+                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, seats: parseInt(e.target.value) || 0 })}
+                              />
                             </div>
                           </div>
                         </div>
 
-                        {/* Section 2: Image Management */}
+                        {/* SECTION 3: น้ำหนักและการรับน้ำหนัก (WEIGHT & LOAD CAPACITY) */}
                         <div className="form-subblock">
                           <h5 className="form-subblock-title">
-                            <ImageIcon size={14} className="text-blue" />
-                            <span>2. รูปภาพสินค้า & ปกโมดูล</span>
+                            <Scale size={15} className="text-blue" />
+                            <span>3. น้ำหนัก & โครงสร้างการรับน้ำหนัก (Weight & Load)</span>
+                          </h5>
+
+                          <div className="form-row-2">
+                            <div className="form-group">
+                              <label>น้ำหนักสินค้าสุทธิ (Net Weight กก.)</label>
+                              <input 
+                                type="number" 
+                                className="form-input"
+                                placeholder="เช่น 48"
+                                value={editingCatalogItem.weightKg || 48}
+                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, weightKg: parseFloat(e.target.value) || 0 })}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>น้ำหนักที่รองรับได้สูงสุด (Max Load กก.)</label>
+                              <input 
+                                type="number" 
+                                className="form-input"
+                                placeholder="เช่น 350"
+                                value={editingCatalogItem.maxLoadKg || 350}
+                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, maxLoadKg: parseFloat(e.target.value) || 0 })}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="form-group">
+                            <label>หมายเหตุการขนส่งและการประกอบหน้างาน</label>
+                            <input 
+                              type="text" 
+                              className="form-input"
+                              placeholder="เช่น แยกส่วน 3 ชิ้น ขนส่งสะดวก ประกอบหน้างานภายใน 20 นาที"
+                              value={editingCatalogItem.weightNote || 'แยกส่วน 3 ชิ้น ขนส่งสะดวก ประกอบหน้างานภายใน 20 นาที'}
+                              onChange={e => setEditingCatalogItem({ ...editingCatalogItem, weightNote: e.target.value })}
+                            />
+                          </div>
+                        </div>
+
+                        {/* SECTION 4: วัสดุและคุณภาพการประกอบ (MATERIALS & BUILD QUALITY) */}
+                        <div className="form-subblock">
+                          <h5 className="form-subblock-title">
+                            <Wrench size={15} className="text-blue" />
+                            <span>4. วัสดุ & คุณภาพการประกอบ (Materials & Construction)</span>
+                          </h5>
+
+                          <div className="form-group">
+                            <label>สเปกวัสดุโครงสร้างและหน้าท็อป (Material Specification)</label>
+                            <textarea 
+                              className="form-input form-textarea" 
+                              rows="2"
+                              placeholder="เช่น โครงเหล็กกล้าคาร์บอนพ่นสี Powder Coat หนา 1.8mm + หน้าท็อป HPL กันน้ำและรอยขีดข่วน..."
+                              value={editingCatalogItem.material || ''}
+                              onChange={e => setEditingCatalogItem({ ...editingCatalogItem, material: e.target.value })}
+                            />
+                          </div>
+
+                          <div className="material-quick-chips">
+                            <span className="text-xs text-muted" style={{ marginRight: '6px' }}>เลือกข้อความวัสดุด่วน:</span>
+                            {[
+                              'หน้าท็อป HPL เคลือบเมลามีนกันน้ำและรอยขูดขีด',
+                              'โครงเหล็กกล้าคาร์บอนพ่นสี Powder Coat หนา 1.8mm',
+                              'รางร้อยสายไฟเหล็ก Wireway ซ่อนใต้โต๊ะแยก High/Low Voltage',
+                              'ฉากกั้นกลางอะคริลิกซับเสียงหนา 8mm พร้อมไฟ LED Strip',
+                              'ขาโต๊ะปรับระดับความสูงได้ ±3 ซม. รองรับพื้นไม่เรียบ'
+                            ].map((mat, idx) => (
+                              <button
+                                key={idx}
+                                type="button"
+                                className="preset-chip-btn"
+                                style={{ fontSize: '11px', margin: '2px' }}
+                                onClick={() => {
+                                  const current = editingCatalogItem.material || '';
+                                  const updated = current ? `${current} + ${mat}` : mat;
+                                  setEditingCatalogItem({ ...editingCatalogItem, material: updated });
+                                }}
+                              >
+                                + {mat.split(' ')[0]} {mat.split(' ')[1]}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* SECTION 5: ราคา & สเปกอุปกรณ์ (PRICING BREAKDOWN & REAL EDITING) */}
+                        <div className="form-subblock">
+                          <h5 className="form-subblock-title">
+                            <DollarSign size={15} className="text-blue" />
+                            <span>5. ราคา & สเปกอุปกรณ์ (Pricing Breakdown & สามารถแก้ไขราคาได้จริง)</span>
+                          </h5>
+
+                          <div className="form-row-2">
+                            <div className="form-group">
+                              <label>ราคาเฉพาะโต๊ะและโครงสร้าง (บาท)</label>
+                              <input 
+                                type="number" 
+                                className="form-input font-semibold"
+                                value={editingCatalogItem.deskPrice || 0}
+                                onChange={e => {
+                                  const deskPrice = parseInt(e.target.value) || 0;
+                                  setEditingCatalogItem({ 
+                                    ...editingCatalogItem, 
+                                    deskPrice
+                                  });
+                                }}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>คำอธิบายสเปกโต๊ะ</label>
+                              <input 
+                                type="text" 
+                                className="form-input" 
+                                placeholder="โต๊ะเหล็กคาร์บอน รางร้อยสายไฟ ท็อป HPL"
+                                value={editingCatalogItem.deskDesc || ''}
+                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, deskDesc: e.target.value })}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="form-row-3">
+                            <div className="form-group">
+                              <label>รุ่นเก้าอี้เกมมิ่ง</label>
+                              <input 
+                                type="text" 
+                                className="form-input" 
+                                value={editingCatalogItem.chairModel || ''}
+                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, chairModel: e.target.value })}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>ราคาเก้าอี้/ตัว (บาท)</label>
+                              <input 
+                                type="number" 
+                                className="form-input font-semibold"
+                                value={editingCatalogItem.chairPrice || 0}
+                                onChange={e => {
+                                  const chairPrice = parseInt(e.target.value) || 0;
+                                  setEditingCatalogItem({ 
+                                    ...editingCatalogItem, 
+                                    chairPrice
+                                  });
+                                }}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>จำนวนเก้าอี้ (ตัว)</label>
+                              <input 
+                                type="number" 
+                                className="form-input font-semibold"
+                                value={editingCatalogItem.chairCount || 0}
+                                onChange={e => {
+                                  const chairCount = parseInt(e.target.value) || 0;
+                                  setEditingCatalogItem({ 
+                                    ...editingCatalogItem, 
+                                    chairCount,
+                                    seats: chairCount
+                                  });
+                                }}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Editable Total Module Cost Card */}
+                          <div className="total-cost-editable-box">
+                            <div className="total-cost-header">
+                              <div>
+                                <label className="total-cost-label">ราคารวมโมดูลที่ใช้จริง (บาท):</label>
+                                <span className="text-xs text-muted" style={{ display: 'block' }}>
+                                  คุณสามารถแก้ไขราคานี้ได้โดยตรงตามราคาแพ็กเกจจริง หรือกดปุ่มซิงค์ตามคำนวณ
+                                </span>
+                              </div>
+                              <button
+                                type="button"
+                                className="btn-sync-calc"
+                                onClick={() => {
+                                  const calculated = (editingCatalogItem.deskPrice || 0) + ((editingCatalogItem.chairPrice || 0) * (editingCatalogItem.chairCount || 0));
+                                  setEditingCatalogItem({ ...editingCatalogItem, baseCost: calculated });
+                                }}
+                                title="คำนวณจาก โต๊ะ + (ราคาเก้าอี้ x จำนวนเก้าอี้)"
+                              >
+                                <RefreshCw size={13} />
+                                <span>ซิงค์ตามคำนวณ (฿{(((editingCatalogItem.deskPrice || 0) + ((editingCatalogItem.chairPrice || 0) * (editingCatalogItem.chairCount || 0)))).toLocaleString()})</span>
+                              </button>
+                            </div>
+
+                            <div className="total-cost-input-row">
+                              <span className="currency-prefix">฿</span>
+                              <input 
+                                type="number"
+                                className="total-price-large-input"
+                                value={editingCatalogItem.baseCost || 0}
+                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, baseCost: parseInt(e.target.value) || 0 })}
+                              />
+                              <span className="currency-suffix">บาท</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* SECTION 6: ภาพประกอบ & SEO (PRODUCT IMAGES & SEO) */}
+                        <div className="form-subblock">
+                          <h5 className="form-subblock-title">
+                            <ImageIcon size={15} className="text-blue" />
+                            <span>6. ภาพประกอบสินค้า & SEO (Product Photography)</span>
                           </h5>
 
                           <div className="image-manager-row">
@@ -1057,28 +1450,42 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                               />
                             </div>
                             <div className="image-upload-wrapper">
-                              <label className="btn-upload-file" title="เลือกไฟล์ภาพ ระบบจะย่อขนาดและแปลงเป็น WebP บีบอัดอัตโนมัติ">
-                                {compressingItemId === 'edit-catalog' ? (
+                              <label className="btn-upload-file" title="เลือกไฟล์ภาพ ระบบจะแปลงเป็น WebP และสกัดสี 3D อัตโนมัติ">
+                                {isAnalyzingPhoto ? (
                                   <>
                                     <RefreshCw size={14} className="spin-icon" />
-                                    <span>กำลังแปลง WebP...</span>
+                                    <span>กำลังสกัดสี & แปลง WebP...</span>
                                   </>
                                 ) : (
                                   <>
                                     <Upload size={14} />
-                                    <span>อัปโหลดภาพ (WebP Auto)</span>
+                                    <span>อัปโหลดภาพสินค้า (WebP)</span>
                                   </>
                                 )}
                                 <input 
                                   type="file" 
                                   accept="image/*" 
                                   style={{ display: 'none' }}
-                                  onChange={e => {
+                                  onChange={async (e) => {
                                     const file = e.target.files?.[0];
                                     if (file) {
-                                      handleImageUpload(file, (dataUrl) => {
-                                        setEditingCatalogItem({ ...editingCatalogItem, image: dataUrl });
-                                      }, 'edit-catalog');
+                                      setIsAnalyzingPhoto(true);
+                                      try {
+                                        const result = await analyzeProductPhoto(file);
+                                        if (result.success) {
+                                          setEditingCatalogItem(prev => ({
+                                            ...prev,
+                                            image: result.textureUrl,
+                                            deskTextureUrl: result.textureUrl,
+                                            deskColor: result.deskColor,
+                                            color: result.deskColor,
+                                            accentColor: result.accentColor,
+                                            chairColor: result.chairColor
+                                          }));
+                                        }
+                                      } finally {
+                                        setIsAnalyzingPhoto(false);
+                                      }
                                     }
                                   }}
                                 />
@@ -1086,30 +1493,11 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                             </div>
                           </div>
 
-                          {/* Compression Feedback Badge */}
-                          {compressionToast && (
-                            <div className="webp-compression-alert" style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '8px',
-                              padding: '8px 12px',
-                              borderRadius: '8px',
-                              background: 'rgba(16, 185, 129, 0.1)',
-                              border: '1px solid rgba(16, 185, 129, 0.3)',
-                              color: '#10b981',
-                              fontSize: '13px',
-                              margin: '10px 0'
-                            }}>
-                              <CheckCircle2 size={15} />
-                              <span>แปลง WebP สำเร็จ: จาก {compressionToast.original} เหลือ {compressionToast.compressed} (ลดขนาดลง {compressionToast.ratio}) ประหยัดพื้นที่จัดเก็บและโหลดเร็วระดับ Core Web Vitals</span>
-                            </div>
-                          )}
-
                           {/* Image ALT Tag for SEO */}
-                          <div className="form-group" style={{ marginTop: '12px' }}>
+                          <div className="form-group" style={{ marginTop: '10px' }}>
                             <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
                               <Tag size={13} className="text-blue" />
-                              <span>คำอธิบายรูปภาพสำหรับ SEO (Image ALT Tag):</span>
+                              <span>คำอธิบายภาพสำหรับ SEO (Image ALT Tag):</span>
                             </label>
                             <input 
                               type="text" 
@@ -1118,13 +1506,10 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                               value={editingCatalogItem.imageAlt || ''}
                               onChange={e => setEditingCatalogItem({ ...editingCatalogItem, imageAlt: e.target.value })}
                             />
-                            <span className="text-xs text-muted" style={{ display: 'block', marginTop: '4px' }}>
-                              ใช้สำหรับ Google Image Search, Core Web Vitals และการเข้าถึง Accessibility
-                            </span>
                           </div>
 
                           {/* Quick Preset Images */}
-                          <div className="preset-images-picker">
+                          <div className="preset-images-picker" style={{ marginTop: '10px' }}>
                             <span className="text-xs text-muted">หรือเลือกภาพสำเร็จรูป:</span>
                             <div className="preset-chips-scroll">
                               {CATALOG_PRESET_IMAGES.map((p, idx) => (
@@ -1141,256 +1526,11 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                           </div>
                         </div>
 
-                        {/* Section 3: 3D Dimensions */}
+                        {/* SECTION 7: การรับประกัน & รายละเอียดสินค้า */}
                         <div className="form-subblock">
                           <h5 className="form-subblock-title">
-                            <Box size={14} className="text-blue" />
-                            <span>3. ขนาด 3 มิติ (กว้าง x ลึก x สูง) & ที่นั่ง</span>
-                          </h5>
-
-                          <div className="form-row-4">
-                            <div className="form-group">
-                              <label>กว้าง (ม.)</label>
-                              <input 
-                                type="number" 
-                                step="0.1" 
-                                className="form-input"
-                                value={editingCatalogItem.widthMeters}
-                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, widthMeters: parseFloat(e.target.value) || 1 })}
-                              />
-                            </div>
-                            <div className="form-group">
-                              <label>ลึก 3D (ม.)</label>
-                              <input 
-                                type="number" 
-                                step="0.1" 
-                                className="form-input"
-                                value={editingCatalogItem.depth3D || editingCatalogItem.heightMeters}
-                                onChange={e => setEditingCatalogItem({ 
-                                  ...editingCatalogItem, 
-                                  depth3D: parseFloat(e.target.value) || 1,
-                                  heightMeters: parseFloat(e.target.value) || 1
-                                })}
-                              />
-                            </div>
-                            <div className="form-group">
-                              <label>สูง 3D (ม.)</label>
-                              <input 
-                                type="number" 
-                                step="0.1" 
-                                className="form-input"
-                                value={editingCatalogItem.height3D || 1.25}
-                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, height3D: parseFloat(e.target.value) || 1 })}
-                              />
-                            </div>
-                            <div className="form-group">
-                              <label>จำนวนที่นั่ง</label>
-                              <input 
-                                type="number" 
-                                min="0"
-                                className="form-input"
-                                value={editingCatalogItem.seats ?? editingCatalogItem.chairCount ?? 0}
-                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, seats: parseInt(e.target.value) || 0 })}
-                              />
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Section 4: Colors Customization */}
-                        <div className="form-subblock">
-                          <h5 className="form-subblock-title">
-                            <Palette size={14} className="text-blue" />
-                            <span>4. กำหนดโทนสี & แสงไฟ LED RGB (Colors)</span>
-                          </h5>
-
-                          {/* Desk Color */}
-                          <div className="color-field-row">
-                            <div className="color-field-meta">
-                              <label>สีท็อปโต๊ะ & โครงสร้าง:</label>
-                              <div className="color-input-badge">
-                                <input 
-                                  type="color" 
-                                  className="color-picker-input"
-                                  value={editingCatalogItem.deskColor || editingCatalogItem.color || '#0f172a'}
-                                  onChange={e => setEditingCatalogItem({ 
-                                    ...editingCatalogItem, 
-                                    deskColor: e.target.value,
-                                    color: e.target.value 
-                                  })}
-                                />
-                                <code>{editingCatalogItem.deskColor || editingCatalogItem.color || '#0f172a'}</code>
-                              </div>
-                            </div>
-                            <div className="color-presets-inline">
-                              {DESK_COLOR_PRESETS.map((p, i) => (
-                                <button
-                                  key={i}
-                                  type="button"
-                                  className="color-preset-dot"
-                                  style={{ backgroundColor: p.hex }}
-                                  title={p.label}
-                                  onClick={() => setEditingCatalogItem({ 
-                                    ...editingCatalogItem, 
-                                    deskColor: p.hex,
-                                    color: p.hex 
-                                  })}
-                                />
-                              ))}
-                            </div>
-                          </div>
-
-                          {/* LED Glow Color */}
-                          <div className="color-field-row">
-                            <div className="color-field-meta">
-                              <label>สีไฟ LED RGB & แสงสะท้อน:</label>
-                              <div className="color-input-badge">
-                                <input 
-                                  type="color" 
-                                  className="color-picker-input"
-                                  value={editingCatalogItem.accentColor || '#1d4ed8'}
-                                  onChange={e => setEditingCatalogItem({ ...editingCatalogItem, accentColor: e.target.value })}
-                                />
-                                <code>{editingCatalogItem.accentColor || '#1d4ed8'}</code>
-                              </div>
-                            </div>
-                            <div className="color-presets-inline">
-                              {ACCENT_COLOR_PRESETS.map((p, i) => (
-                                <button
-                                  key={i}
-                                  type="button"
-                                  className="color-preset-dot"
-                                  style={{ backgroundColor: p.hex }}
-                                  title={p.label}
-                                  onClick={() => setEditingCatalogItem({ ...editingCatalogItem, accentColor: p.hex })}
-                                />
-                              ))}
-                            </div>
-                          </div>
-
-                          {/* Chair Color */}
-                          <div className="color-field-row">
-                            <div className="color-field-meta">
-                              <label>สีเบาะเก้าอี้เกมมิ่ง:</label>
-                              <div className="color-input-badge">
-                                <input 
-                                  type="color" 
-                                  className="color-picker-input"
-                                  value={editingCatalogItem.chairColor || '#0f172a'}
-                                  onChange={e => setEditingCatalogItem({ ...editingCatalogItem, chairColor: e.target.value })}
-                                />
-                                <code>{editingCatalogItem.chairColor || '#0f172a'}</code>
-                              </div>
-                            </div>
-                            <div className="color-presets-inline">
-                              {CHAIR_COLOR_PRESETS.map((p, i) => (
-                                <button
-                                  key={i}
-                                  type="button"
-                                  className="color-preset-dot"
-                                  style={{ backgroundColor: p.hex }}
-                                  title={p.label}
-                                  onClick={() => setEditingCatalogItem({ ...editingCatalogItem, chairColor: p.hex })}
-                                />
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Section 5: Pricing Breakdown */}
-                        <div className="form-subblock">
-                          <h5 className="form-subblock-title">
-                            <DollarSign size={14} className="text-blue" />
-                            <span>5. ราคา & สเปกอุปกรณ์</span>
-                          </h5>
-
-                          <div className="form-row-2">
-                            <div className="form-group">
-                              <label>ราคาโต๊ะและโครงสร้าง (บาท)</label>
-                              <input 
-                                type="number" 
-                                className="form-input"
-                                value={editingCatalogItem.deskPrice || 0}
-                                onChange={e => {
-                                  const deskPrice = parseInt(e.target.value) || 0;
-                                  const chairTotal = (editingCatalogItem.chairPrice || 0) * (editingCatalogItem.chairCount || 0);
-                                  setEditingCatalogItem({ 
-                                    ...editingCatalogItem, 
-                                    deskPrice, 
-                                    baseCost: deskPrice + chairTotal 
-                                  });
-                                }}
-                              />
-                            </div>
-                            <div className="form-group">
-                              <label>คำอธิบายสเปกโต๊ะ</label>
-                              <input 
-                                type="text" 
-                                className="form-input"
-                                placeholder="โต๊ะเหล็กคาร์บอน รางร้อยสายไฟ ท็อป HPL"
-                                value={editingCatalogItem.deskDesc || ''}
-                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, deskDesc: e.target.value })}
-                              />
-                            </div>
-                          </div>
-
-                          <div className="form-row-3">
-                            <div className="form-group">
-                              <label>รุ่นเก้าอี้</label>
-                              <input 
-                                type="text" 
-                                className="form-input"
-                                value={editingCatalogItem.chairModel || ''}
-                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, chairModel: e.target.value })}
-                              />
-                            </div>
-                            <div className="form-group">
-                              <label>ราคาเก้าอี้/ตัว (บาท)</label>
-                              <input 
-                                type="number" 
-                                className="form-input"
-                                value={editingCatalogItem.chairPrice || 0}
-                                onChange={e => {
-                                  const chairPrice = parseInt(e.target.value) || 0;
-                                  const chairTotal = chairPrice * (editingCatalogItem.chairCount || 0);
-                                  setEditingCatalogItem({ 
-                                    ...editingCatalogItem, 
-                                    chairPrice,
-                                    baseCost: (editingCatalogItem.deskPrice || 0) + chairTotal
-                                  });
-                                }}
-                              />
-                            </div>
-                            <div className="form-group">
-                              <label>จำนวนเก้าอี้</label>
-                              <input 
-                                type="number" 
-                                className="form-input"
-                                value={editingCatalogItem.chairCount || 0}
-                                onChange={e => {
-                                  const chairCount = parseInt(e.target.value) || 0;
-                                  const chairTotal = (editingCatalogItem.chairPrice || 0) * chairCount;
-                                  setEditingCatalogItem({ 
-                                    ...editingCatalogItem, 
-                                    chairCount,
-                                    seats: chairCount,
-                                    baseCost: (editingCatalogItem.deskPrice || 0) + chairTotal
-                                  });
-                                }}
-                              />
-                            </div>
-                          </div>
-
-                          <div className="total-cost-calc-card">
-                            <span>ราคารวมโมดูล (คำนวณอัตโนมัติ):</span>
-                            <strong>฿{(editingCatalogItem.baseCost || 0).toLocaleString()} บาท</strong>
-                          </div>
-                        </div>
-
-                        {/* Section 6: Description & Warranty */}
-                        <div className="form-subblock">
-                          <h5 className="form-subblock-title">
-                            <FileText size={14} className="text-blue" />
-                            <span>6. รายละเอียดสินค้า & การรับประกัน</span>
+                            <Shield size={15} className="text-blue" />
+                            <span>7. การรับประกัน & รายละเอียดจุดเด่น</span>
                           </h5>
 
                           <div className="form-row-2">
@@ -1398,7 +1538,7 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                               <label>เงื่อนไขการรับประกัน</label>
                               <input 
                                 type="text" 
-                                className="form-input"
+                                className="form-input" 
                                 placeholder="รับประกันโครงสร้าง 5 ปี ระบบไฟ 3 ปี"
                                 value={editingCatalogItem.warranty || ''}
                                 onChange={e => setEditingCatalogItem({ ...editingCatalogItem, warranty: e.target.value })}
@@ -1408,7 +1548,7 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                               <label>ระยะเวลาผลิต & ติดตั้ง</label>
                               <input 
                                 type="text" 
-                                className="form-input"
+                                className="form-input" 
                                 placeholder="7 - 14 วันทำการ"
                                 value={editingCatalogItem.leadTime || ''}
                                 onChange={e => setEditingCatalogItem({ ...editingCatalogItem, leadTime: e.target.value })}
@@ -1426,9 +1566,10 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                             />
                           </div>
                         </div>
+
                       </div>
 
-                      {/* Right Column: Live Interactive 3D Studio & Actions */}
+                      {/* Right Column: Live 3D Studio & Floor Plan Integration */}
                       <div className="modal-live-3d-pane">
                         <div className="live-3d-box">
                           <div className="live-3d-header">
@@ -1436,12 +1577,12 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                               <Sparkles size={13} />
                               <span>Live 3D Studio Preview</span>
                             </span>
-                            <small className="text-muted">หมุน 360° เพื่อดูแสงเงา</small>
+                            <small style={{ color: '#94a3b8', fontSize: '12px' }}>หมุน 360° • ซูม • ดูแสงเงา</small>
                           </div>
 
                           <ThreeProductViewer 
                             item={editingCatalogItem}
-                            height="340px"
+                            height="280px"
                             autoRotateDefault={true}
                             showControls={true}
                             onSetAsImage={(dataUrl) => {
@@ -1450,13 +1591,151 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                             }}
                           />
 
-                          <div className="live-3d-tips">
-                            <p className="text-xs text-muted">
-                              โมเดล 3D จะอัปเดตสีท็อปโต๊ะ, สีไฟ LED RGB, สีเก้าอี้ และขนาดความกว้าง/ลึก ทันทีที่คุณปรับเปลี่ยน
+                          <div className="live-3d-tips high-contrast">
+                            <Camera size={15} className="text-blue" style={{ flexShrink: 0 }} />
+                            <p>
+                              หมุนดูรอบทิศทาง แล้วกดปุ่ม <strong>"ใช้เป็นภาพปก"</strong> หรือ <strong>"ส่งออกภาพ 3D"</strong> ด้านล่างภาพ 3D ได้ทันที
                             </p>
                           </div>
                         </div>
 
+                        {/* Interactive Color Customization */}
+                        <div className="live-3d-colors-block">
+                          <h6 className="colors-block-title">
+                            <Palette size={14} className="text-blue" />
+                            <span>ปรับสีโมเดล & แสงไฟ LED RGB (Colors)</span>
+                          </h6>
+
+                          {/* Desk Top Color */}
+                          <div className="color-field-row" style={{ padding: '8px 0' }}>
+                            <div className="color-field-meta">
+                              <label style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>สีท็อปโต๊ะ:</label>
+                              <div className="color-input-badge">
+                                <input 
+                                  type="color" 
+                                  className="color-picker-input"
+                                  value={editingCatalogItem.deskColor || editingCatalogItem.color || '#0f172a'}
+                                  onChange={e => setEditingCatalogItem({ 
+                                    ...editingCatalogItem, 
+                                    deskColor: e.target.value,
+                                    color: e.target.value 
+                                  })}
+                                />
+                                <code style={{ fontSize: '11px', fontWeight: 700 }}>{editingCatalogItem.deskColor || editingCatalogItem.color || '#0f172a'}</code>
+                              </div>
+                            </div>
+                            <div className="color-presets-inline">
+                              {DESK_COLOR_PRESETS.map((p, i) => (
+                                <button
+                                  key={i}
+                                  type="button"
+                                  className={`color-preset-dot ${(editingCatalogItem.deskColor || editingCatalogItem.color) === p.hex ? 'selected-ring' : ''}`}
+                                  style={{ backgroundColor: p.hex }}
+                                  title={p.label}
+                                  onClick={() => setEditingCatalogItem({ 
+                                    ...editingCatalogItem, 
+                                    deskColor: p.hex,
+                                    color: p.hex 
+                                  })}
+                                />
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* LED Glow Color */}
+                          <div className="color-field-row" style={{ padding: '8px 0' }}>
+                            <div className="color-field-meta">
+                              <label style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>สีไฟ LED RGB:</label>
+                              <div className="color-input-badge">
+                                <input 
+                                  type="color" 
+                                  className="color-picker-input"
+                                  value={editingCatalogItem.accentColor || '#1d4ed8'}
+                                  onChange={e => setEditingCatalogItem({ ...editingCatalogItem, accentColor: e.target.value })}
+                                />
+                                <code style={{ fontSize: '11px', fontWeight: 700 }}>{editingCatalogItem.accentColor || '#1d4ed8'}</code>
+                              </div>
+                            </div>
+                            <div className="color-presets-inline">
+                              {ACCENT_COLOR_PRESETS.map((p, i) => (
+                                <button
+                                  key={i}
+                                  type="button"
+                                  className={`color-preset-dot glow ${editingCatalogItem.accentColor === p.hex ? 'selected-ring' : ''}`}
+                                  style={{ backgroundColor: p.hex }}
+                                  title={p.label}
+                                  onClick={() => setEditingCatalogItem({ ...editingCatalogItem, accentColor: p.hex })}
+                                />
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Chair Color */}
+                          <div className="color-field-row" style={{ padding: '8px 0' }}>
+                            <div className="color-field-meta">
+                              <label style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>สีเก้าอี้เกมมิ่ง:</label>
+                              <div className="color-input-badge">
+                                <input 
+                                  type="color" 
+                                  className="color-picker-input"
+                                  value={editingCatalogItem.chairColor || '#0f172a'}
+                                  onChange={e => setEditingCatalogItem({ ...editingCatalogItem, chairColor: e.target.value })}
+                                />
+                                <code style={{ fontSize: '11px', fontWeight: 700 }}>{editingCatalogItem.chairColor || '#0f172a'}</code>
+                              </div>
+                            </div>
+                            <div className="color-presets-inline">
+                              {CHAIR_COLOR_PRESETS.map((p, i) => (
+                                <button
+                                  key={i}
+                                  type="button"
+                                  className={`color-preset-dot ${editingCatalogItem.chairColor === p.hex ? 'selected-ring' : ''}`}
+                                  style={{ backgroundColor: p.hex }}
+                                  title={p.label}
+                                  onClick={() => setEditingCatalogItem({ ...editingCatalogItem, chairColor: p.hex })}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* FLOOR PLAN INTEGRATION BOX (HIGH CONTRAST & CLEAR READABILITY) */}
+                        <div className="floor-plan-specs-box">
+                          <div className="floor-plan-specs-header">
+                            <Compass size={15} className="text-blue" />
+                            <strong>คุณสมบัติสำหรับวางบนแปลนร้าน (Floor Planner)</strong>
+                          </div>
+                          <div className="floor-plan-specs-grid">
+                            <div className="spec-stat">
+                              <span className="spec-label">Footprint 2D:</span>
+                              <span className="spec-val font-semibold text-blue">
+                                {editingCatalogItem.widthMeters} x {editingCatalogItem.depth3D || editingCatalogItem.heightMeters} ม.
+                              </span>
+                            </div>
+                            <div className="spec-stat">
+                              <span className="spec-label">ความสูง 3D:</span>
+                              <span className="spec-val">{editingCatalogItem.height3D || 1.25} ม.</span>
+                            </div>
+                            <div className="spec-stat">
+                              <span className="spec-label">ระยะ Clearance:</span>
+                              <span className="spec-val">{(editingCatalogItem.widthMeters + 0.6).toFixed(1)} x {((editingCatalogItem.depth3D || editingCatalogItem.heightMeters) + 0.8).toFixed(1)} ม.</span>
+                            </div>
+                            <div className="spec-stat">
+                              <span className="spec-label">จุดต่อไฟ / LAN:</span>
+                              <span className="spec-val text-green font-semibold">Wireway ใต้โต๊ะ</span>
+                            </div>
+                          </div>
+                          <div className="floor-plan-palette-preview">
+                            <span className="palette-tag-badge">
+                              หมวดในพาเล็ต: {editingCatalogItem.category}
+                            </span>
+                            <span className="ready-indicator">
+                              <CheckCircle2 size={13} /> พร้อมลากวางบนแปลนร้าน 2D/3D
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Action Buttons */}
                         <div className="modal-footer-btns" style={{ marginTop: '16px' }}>
                           <button className="btn-secondary" onClick={() => setEditingCatalogItem(null)}>ยกเลิก</button>
                           <button 
@@ -1467,7 +1746,7 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                               triggerSaveToast();
                             }}
                           >
-                            <Save size={14} /> บันทึกการเปลี่ยนแปลง
+                            <Save size={15} /> บันทึกการเปลี่ยนแปลง
                           </button>
                         </div>
                       </div>
@@ -1477,72 +1756,176 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
               )}
 
               {/* =========================================================================
-                  ADD NEW CATALOG ITEM MODAL
+                  ADD NEW CATALOG ITEM MODAL (AI REAL-PHOTO 3D SYNTHESIS, SPEC OCR & EDITABLE PRICING)
                   ========================================================================= */}
               {showAddCatalogModal && (
                 <div className="cms-modal-backdrop" onClick={() => setShowAddCatalogModal(false)}>
                   <div className="cms-modal-card modal-extra-wide catalog-edit-dual-modal" onClick={e => e.stopPropagation()}>
                     <div className="modal-head">
                       <div className="modal-head-title">
-                        <Plus size={18} className="text-blue" />
-                        <h4>เพิ่มโมดูลเฟอร์นิเจอร์ 3D ใหม่</h4>
+                        <Plus size={22} className="text-blue" />
+                        <div>
+                          <h4>เพิ่มโมดูลอุปกรณ์ & เฟอร์นิเจอร์ 3D ใหม่</h4>
+                          <span style={{ color: '#94a3b8', fontSize: '13px' }}>กำหนดขนาด รหัสสินค้า ราคา น้ำหนัก วัสดุ ภาพประกอบ และโมเดล 3D สำหรับวางบนแปลนร้าน</span>
+                        </div>
                       </div>
                       <button onClick={() => setShowAddCatalogModal(false)} className="btn-close-modal">✕</button>
                     </div>
 
                     <div className="modal-dual-body">
-                      {/* Left: Form Controls */}
+                      {/* Left: Form Controls with AI Spec Importer */}
                       <div className="modal-form-scrollable">
+
+                        {/* AI SMART SPEC & REAL-PHOTO 3D SYNTHESIS HUB */}
+                        <div className="ai-smart-spec-card">
+                          <div className="ai-smart-card-head">
+                            <div className="ai-title-row">
+                              <Sparkles size={16} className="text-blue" />
+                              <strong className="ai-hub-title">AI Smart 3D & Spec Importer (นำเข้าและแปลงข้อมูลอัตโนมัติ 100%)</strong>
+                            </div>
+                            <span className="ai-hub-badge">One-Click Auto Fill</span>
+                          </div>
+                          <p className="ai-hub-desc">
+                            อัปโหลดภาพสินค้าจริงเพื่อสกัดสีและเรนเดอร์ 3D ทันที หรือแนบเอกสารสเปก/ใบเสนอราคา เพื่อกรอกข้อมูล ขนาด น้ำหนัก วัสดุ และราคาอัตโนมัติ
+                          </p>
+
+                          <div className="ai-action-buttons-row">
+                            {/* Action 1: Upload Real Product Photo */}
+                            <label className="btn-ai-action-chip photo-to-3d">
+                              {isAnalyzingPhoto ? <RefreshCw size={14} className="spin-icon" /> : <Camera size={14} />}
+                              <span>{isAnalyzingPhoto ? 'กำลังวิเคราะห์ภาพ...' : '📸 อัปโหลดภาพสินค้าจริง -> แปลงเป็น 3D & สกัดสี'}</span>
+                              <input 
+                                type="file" 
+                                accept="image/*" 
+                                style={{ display: 'none' }}
+                                onChange={async (e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    setIsAnalyzingPhoto(true);
+                                    try {
+                                      const result = await analyzeProductPhoto(file);
+                                      if (result.success) {
+                                        setNewCatalogItem(prev => ({
+                                          ...prev,
+                                          image: result.textureUrl,
+                                          deskTextureUrl: result.textureUrl,
+                                          deskColor: result.deskColor,
+                                          color: result.deskColor,
+                                          accentColor: result.accentColor,
+                                          chairColor: result.chairColor,
+                                          seats: result.suggestedSeats || prev.seats,
+                                          chairCount: result.suggestedSeats || prev.chairCount
+                                        }));
+                                        setAiImageFeedback(`✨ สกัดสีจากภาพสินค้าจริงสำเร็จ: ท็อปโต๊ะ (${result.deskColor}), ไฟ LED (${result.accentColor}), เก้าอี้ (${result.chairColor}) พร้อมลงลายท็อปโต๊ะจริงเรียบร้อย!`);
+                                        setTimeout(() => setAiImageFeedback(null), 7000);
+                                      }
+                                    } finally {
+                                      setIsAnalyzingPhoto(false);
+                                    }
+                                  }
+                                }}
+                              />
+                            </label>
+
+                            {/* Action 2: Attach Spec Sheet Document */}
+                            <button 
+                              type="button" 
+                              className="btn-ai-action-chip doc-to-spec"
+                              onClick={() => {
+                                setAiSpecTarget('new');
+                                setAiSpecModalOpen(true);
+                              }}
+                            >
+                              <FileUp size={14} />
+                              <span>📄 แนบเอกสารสเปกสินค้า / ใบเสนอราคา</span>
+                            </button>
+
+                            {/* Action 3: Upload 3D Model File (.GLB / .GLTF) */}
+                            <label className="btn-ai-action-chip upload-3d-model">
+                              <Box size={14} />
+                              <span>📦 อัปโหลดโมเดล 3D (.GLB/.GLTF)</span>
+                              <input 
+                                type="file" 
+                                accept=".glb,.gltf" 
+                                style={{ display: 'none' }}
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    const modelUrl = URL.createObjectURL(file);
+                                    setNewCatalogItem(prev => ({
+                                      ...prev,
+                                      model3DUrl: modelUrl
+                                    }));
+                                    setAiImageFeedback(`📦 นำเข้าโมเดล 3D (${file.name}) สำเร็จ! เรนเดอร์บน 3D Studio เรียบร้อย`);
+                                    setTimeout(() => setAiImageFeedback(null), 7000);
+                                  }
+                                }}
+                              />
+                            </label>
+                          </div>
+
+                          {/* AI Feedback Banners */}
+                          {aiImageFeedback && (
+                            <div className="ai-feedback-banner success">
+                              <CheckCircle2 size={15} />
+                              <span>{aiImageFeedback}</span>
+                            </div>
+                          )}
+
+                          {aiSpecFeedback && (
+                            <div className="ai-feedback-banner success">
+                              <CheckCircle2 size={15} />
+                              <span>{aiSpecFeedback}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* SECTION 1: รหัสสินค้า, ชื่อ & หมวดหมู่ */}
                         <div className="form-subblock">
                           <h5 className="form-subblock-title">
-                            <Layers size={14} className="text-blue" />
-                            <span>1. ข้อมูลพื้นฐาน & รหัสประเภท</span>
+                            <Tag size={15} className="text-blue" />
+                            <span>1. รหัสสินค้า (SKU) & ข้อมูลพื้นฐาน</span>
                           </h5>
 
                           <div className="form-row-2">
                             <div className="form-group">
-                              <label>รหัสประเภท (Type Code เช่น pc-solo-1, vr-booth)</label>
+                              <label>รหัสสินค้า (Product SKU)</label>
                               <input 
                                 type="text" 
-                                className="form-input"
-                                placeholder="custom-station-1"
+                                className="form-input font-mono font-semibold" 
+                                placeholder="เช่น GLP-DSK-NEW-01"
+                                value={newCatalogItem.sku || 'GLP-NEW-01'}
+                                onChange={e => setNewCatalogItem({ ...newCatalogItem, sku: e.target.value })}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>รหัสประเภท 3D (Type Code ภาษาอังกฤษตัวพิมพ์เล็ก)</label>
+                              <input 
+                                type="text" 
+                                className="form-input" 
+                                placeholder="เช่น custom-station-1"
                                 value={newCatalogItem.type}
                                 onChange={e => setNewCatalogItem({ ...newCatalogItem, type: e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '-') })}
                               />
                             </div>
-                            <div className="form-group">
+                          </div>
+
+                          <div className="form-row-3">
+                            <div className="form-group" style={{ gridColumn: 'span 2' }}>
                               <label>ชื่อโมดูล (ภาษาไทย)</label>
                               <input 
                                 type="text" 
-                                className="form-input"
-                                placeholder="โต๊ะเกมมิ่งสตรีมเมอร์เดี่ยว (Solo Pod)"
+                                className="form-input font-semibold" 
+                                placeholder="เช่น โต๊ะเกมมิ่งสตรีมเมอร์เดี่ยว (Solo Streamer Pod)"
                                 value={newCatalogItem.name}
                                 onChange={e => setNewCatalogItem({ ...newCatalogItem, name: e.target.value })}
                               />
-                            </div>
-                          </div>
-
-                          <div className="form-row-2">
-                            <div className="form-group">
-                              <label>หมวดหมู่</label>
-                              <select 
-                                className="form-input"
-                                value={newCatalogItem.category}
-                                onChange={e => setNewCatalogItem({ ...newCatalogItem, category: e.target.value })}
-                              >
-                                <option value="stations">โต๊ะคอมพิวเตอร์ (Stations)</option>
-                                <option value="vip">ห้อง VIP (Private Suite)</option>
-                                <option value="stage">เวทีการแข่งขัน (Stage)</option>
-                                <option value="facilities">เคาน์เตอร์ & เซอร์วิส (Facilities)</option>
-                                <option value="amenities">สิ่งอำนวยความสะดวก & โซฟา (Amenities)</option>
-                                <option value="architectural">สถาปัตยกรรม (ประตู/หน้าต่าง)</option>
-                              </select>
                             </div>
                             <div className="form-group">
                               <label>เกรดโมดูล</label>
                               <select 
                                 className="form-input"
-                                value={newCatalogItem.grade}
+                                value={newCatalogItem.grade || 'pro'}
                                 onChange={e => setNewCatalogItem({ ...newCatalogItem, grade: e.target.value })}
                               >
                                 <option value="standard">Standard (Tier 1)</option>
@@ -1552,97 +1935,36 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                               </select>
                             </div>
                           </div>
-                        </div>
 
-                        {/* Image URL & Presets */}
-                        <div className="form-subblock">
-                          <h5 className="form-subblock-title">
-                            <ImageIcon size={14} className="text-blue" />
-                            <span>2. รูปภาพสินค้า</span>
-                          </h5>
-
-                          <div className="image-manager-row">
-                            <div className="form-group" style={{ flex: 1 }}>
-                              <label>URL รูปภาพ</label>
-                              <input 
-                                type="url" 
-                                className="form-input"
-                                placeholder="https://..."
-                                value={newCatalogItem.image || ''}
-                                onChange={e => setNewCatalogItem({ ...newCatalogItem, image: e.target.value })}
-                              />
-                            </div>
-                            <div className="image-upload-wrapper">
-                              <label className="btn-upload-file" title="เลือกไฟล์ภาพ ระบบจะย่อขนาดและแปลงเป็น WebP บีบอัดอัตโนมัติ">
-                                {compressingItemId === 'new-catalog' ? (
-                                  <>
-                                    <RefreshCw size={14} className="spin-icon" />
-                                    <span>กำลังแปลง WebP...</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <Upload size={14} />
-                                    <span>อัปโหลดภาพ (WebP Auto)</span>
-                                  </>
-                                )}
-                                <input 
-                                  type="file" 
-                                  accept="image/*" 
-                                  style={{ display: 'none' }}
-                                  onChange={e => {
-                                    const file = e.target.files?.[0];
-                                    if (file) {
-                                      handleImageUpload(file, (dataUrl) => {
-                                        setNewCatalogItem({ ...newCatalogItem, image: dataUrl });
-                                      }, 'new-catalog');
-                                    }
-                                  }}
-                                />
-                              </label>
-                            </div>
-                          </div>
-
-                          {/* Image ALT Tag for SEO */}
-                          <div className="form-group" style={{ marginTop: '10px' }}>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <Tag size={13} className="text-blue" />
-                              <span>คำอธิบายรูปภาพสำหรับ SEO (Image ALT Tag):</span>
-                            </label>
-                            <input 
-                              type="text" 
+                          <div className="form-group">
+                            <label>หมวดหมู่โมดูล</label>
+                            <select 
                               className="form-input"
-                              placeholder="เช่น เก้าอี้เกมมิ่งอีสปอร์ตระดับโปร ลิขสิทธิ์ G-Speed"
-                              value={newCatalogItem.imageAlt || ''}
-                              onChange={e => setNewCatalogItem({ ...newCatalogItem, imageAlt: e.target.value })}
-                            />
-                          </div>
-
-                          <div className="preset-chips-scroll">
-                            {CATALOG_PRESET_IMAGES.map((p, idx) => (
-                              <button
-                                key={idx}
-                                type="button"
-                                className={`preset-chip-btn ${newCatalogItem.image === p.url ? 'active' : ''}`}
-                                onClick={() => setNewCatalogItem({ ...newCatalogItem, image: p.url })}
-                              >
-                                {p.label}
-                              </button>
-                            ))}
+                              value={newCatalogItem.category}
+                              onChange={e => setNewCatalogItem({ ...newCatalogItem, category: e.target.value })}
+                            >
+                              <option value="stations">โต๊ะคอมพิวเตอร์เกมมิ่ง (Stations)</option>
+                              <option value="vip">ห้อง VIP ส่วนตัว (Private Suite)</option>
+                              <option value="stage">เวทีการแข่งขัน (Main Stage)</option>
+                              <option value="facilities">เคาน์เตอร์ & บาร์ (Facilities)</option>
+                              <option value="amenities">สิ่งอำนวยความสะดวก & โซฟา (Amenities)</option>
+                              <option value="architectural">สถาปัตยกรรม (ผนัง/ประตู/กระจก)</option>
+                            </select>
                           </div>
                         </div>
 
-                        {/* Dimensions */}
+                        {/* SECTION 2: ขนาดมิติ 3 มิติ */}
                         <div className="form-subblock">
                           <h5 className="form-subblock-title">
-                            <Box size={14} className="text-blue" />
-                            <span>3. ขนาด 3 มิติ</span>
+                            <Ruler size={15} className="text-blue" />
+                            <span>2. ขนาดมิติ 3 มิติ (Dimensions) & จำนวนที่นั่ง</span>
                           </h5>
 
                           <div className="form-row-4">
                             <div className="form-group">
                               <label>กว้าง (ม.)</label>
                               <input 
-                                type="number" step="0.1" className="form-input"
+                                type="number" step="0.05" className="form-input"
                                 value={newCatalogItem.widthMeters}
                                 onChange={e => setNewCatalogItem({ ...newCatalogItem, widthMeters: parseFloat(e.target.value) || 1 })}
                               />
@@ -1650,8 +1972,8 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                             <div className="form-group">
                               <label>ลึก 3D (ม.)</label>
                               <input 
-                                type="number" step="0.1" className="form-input"
-                                value={newCatalogItem.depth3D}
+                                type="number" step="0.05" className="form-input"
+                                value={newCatalogItem.depth3D || newCatalogItem.heightMeters}
                                 onChange={e => setNewCatalogItem({ 
                                   ...newCatalogItem, 
                                   depth3D: parseFloat(e.target.value) || 1,
@@ -1662,91 +1984,128 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                             <div className="form-group">
                               <label>สูง 3D (ม.)</label>
                               <input 
-                                type="number" step="0.1" className="form-input"
-                                value={newCatalogItem.height3D}
-                                onChange={e => setNewCatalogItem({ ...newCatalogItem, height3D: parseFloat(e.target.value) || 1.2 })}
+                                type="number" step="0.05" className="form-input"
+                                value={newCatalogItem.height3D || 1.25}
+                                onChange={e => setNewCatalogItem({ ...newCatalogItem, height3D: parseFloat(e.target.value) || 1 })}
                               />
                             </div>
                             <div className="form-group">
                               <label>ที่นั่ง</label>
                               <input 
                                 type="number" min="0" className="form-input"
-                                value={newCatalogItem.seats}
+                                value={newCatalogItem.seats ?? newCatalogItem.chairCount ?? 0}
                                 onChange={e => setNewCatalogItem({ ...newCatalogItem, seats: parseInt(e.target.value) || 0 })}
                               />
                             </div>
                           </div>
                         </div>
 
-                        {/* Colors */}
+                        {/* SECTION 3: น้ำหนักและการรับน้ำหนัก */}
                         <div className="form-subblock">
                           <h5 className="form-subblock-title">
-                            <Palette size={14} className="text-blue" />
-                            <span>4. กำหนดโทนสี</span>
-                          </h5>
-
-                          <div className="color-field-row">
-                            <div className="color-field-meta">
-                              <label>สีโต๊ะ:</label>
-                              <input 
-                                type="color" 
-                                className="color-picker-input"
-                                value={newCatalogItem.deskColor}
-                                onChange={e => setNewCatalogItem({ ...newCatalogItem, deskColor: e.target.value, color: e.target.value })}
-                              />
-                              <code>{newCatalogItem.deskColor}</code>
-                            </div>
-                          </div>
-
-                          <div className="color-field-row">
-                            <div className="color-field-meta">
-                              <label>สีไฟ LED:</label>
-                              <input 
-                                type="color" 
-                                className="color-picker-input"
-                                value={newCatalogItem.accentColor}
-                                onChange={e => setNewCatalogItem({ ...newCatalogItem, accentColor: e.target.value })}
-                              />
-                              <code>{newCatalogItem.accentColor}</code>
-                            </div>
-                          </div>
-
-                          <div className="color-field-row">
-                            <div className="color-field-meta">
-                              <label>สีเก้าอี้:</label>
-                              <input 
-                                type="color" 
-                                className="color-picker-input"
-                                value={newCatalogItem.chairColor}
-                                onChange={e => setNewCatalogItem({ ...newCatalogItem, chairColor: e.target.value })}
-                              />
-                              <code>{newCatalogItem.chairColor}</code>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Prices */}
-                        <div className="form-subblock">
-                          <h5 className="form-subblock-title">
-                            <DollarSign size={14} className="text-blue" />
-                            <span>5. ราคา</span>
+                            <Scale size={15} className="text-blue" />
+                            <span>3. น้ำหนัก & โครงสร้างการรับน้ำหนัก (Weight & Load)</span>
                           </h5>
 
                           <div className="form-row-2">
                             <div className="form-group">
-                              <label>ราคาโต๊ะ (บาท)</label>
+                              <label>น้ำหนักสินค้าสุทธิ (Net Weight กก.)</label>
                               <input 
-                                type="number" className="form-input"
+                                type="number" 
+                                className="form-input"
+                                placeholder="เช่น 48"
+                                value={newCatalogItem.weightKg || 48}
+                                onChange={e => setNewCatalogItem({ ...newCatalogItem, weightKg: parseFloat(e.target.value) || 0 })}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>น้ำหนักที่รองรับได้สูงสุด (Max Load กก.)</label>
+                              <input 
+                                type="number" 
+                                className="form-input"
+                                placeholder="เช่น 350"
+                                value={newCatalogItem.maxLoadKg || 350}
+                                onChange={e => setNewCatalogItem({ ...newCatalogItem, maxLoadKg: parseFloat(e.target.value) || 0 })}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="form-group">
+                            <label>หมายเหตุการขนส่งและการประกอบหน้างาน</label>
+                            <input 
+                              type="text" 
+                              className="form-input"
+                              placeholder="เช่น แยกส่วน 3 ชิ้น ขนส่งสะดวก ประกอบหน้างานภายใน 20 นาที"
+                              value={newCatalogItem.weightNote || 'แยกส่วน 3 ชิ้น ขนส่งสะดวก ประกอบหน้างานภายใน 20 นาที'}
+                              onChange={e => setNewCatalogItem({ ...newCatalogItem, weightNote: e.target.value })}
+                            />
+                          </div>
+                        </div>
+
+                        {/* SECTION 4: วัสดุและคุณภาพการประกอบ */}
+                        <div className="form-subblock">
+                          <h5 className="form-subblock-title">
+                            <Wrench size={15} className="text-blue" />
+                            <span>4. วัสดุ & คุณภาพการประกอบ (Materials & Construction)</span>
+                          </h5>
+
+                          <div className="form-group">
+                            <label>สเปกวัสดุโครงสร้างและหน้าท็อป</label>
+                            <textarea 
+                              className="form-input form-textarea" 
+                              rows="2"
+                              value={newCatalogItem.material || ''}
+                              onChange={e => setNewCatalogItem({ ...newCatalogItem, material: e.target.value })}
+                            />
+                          </div>
+
+                          <div className="material-quick-chips">
+                            <span className="text-xs text-muted" style={{ marginRight: '6px' }}>เลือกข้อความวัสดุด่วน:</span>
+                            {[
+                              'หน้าท็อป HPL เคลือบเมลามีนกันน้ำและรอยขูดขีด',
+                              'โครงเหล็กกล้าคาร์บอนพ่นสี Powder Coat หนา 1.8mm',
+                              'รางร้อยสายไฟเหล็ก Wireway ซ่อนใต้โต๊ะแยก High/Low Voltage',
+                              'ฉากกั้นกลางอะคริลิกซับเสียงหนา 8mm พร้อมไฟ LED Strip',
+                              'ขาโต๊ะปรับระดับความสูงได้ ±3 ซม. รองรับพื้นไม่เรียบ'
+                            ].map((mat, idx) => (
+                              <button
+                                key={idx}
+                                type="button"
+                                className="preset-chip-btn"
+                                style={{ fontSize: '11px', margin: '2px' }}
+                                onClick={() => {
+                                  const current = newCatalogItem.material || '';
+                                  const updated = current ? `${current} + ${mat}` : mat;
+                                  setNewCatalogItem({ ...newCatalogItem, material: updated });
+                                }}
+                              >
+                                + {mat.split(' ')[0]} {mat.split(' ')[1]}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* SECTION 5: ราคา & สเปกอุปกรณ์ (EDITABLE REAL PRICE) */}
+                        <div className="form-subblock">
+                          <h5 className="form-subblock-title">
+                            <DollarSign size={15} className="text-blue" />
+                            <span>5. ราคา & สเปกอุปกรณ์ (Pricing Breakdown & สามารถแก้ไขราคาได้จริง)</span>
+                          </h5>
+
+                          <div className="form-row-2">
+                            <div className="form-group">
+                              <label>ราคาเฉพาะโต๊ะและโครงสร้าง (บาท)</label>
+                              <input 
+                                type="number" className="form-input font-semibold"
                                 value={newCatalogItem.deskPrice}
                                 onChange={e => {
                                   const deskPrice = parseInt(e.target.value) || 0;
-                                  const chairTotal = newCatalogItem.chairPrice * newCatalogItem.chairCount;
-                                  setNewCatalogItem({ ...newCatalogItem, deskPrice, baseCost: deskPrice + chairTotal });
+                                  setNewCatalogItem({ ...newCatalogItem, deskPrice });
                                 }}
                               />
                             </div>
                             <div className="form-group">
-                              <label>สเปกโต๊ะ</label>
+                              <label>คำอธิบายสเปกโต๊ะ</label>
                               <input 
                                 type="text" className="form-input"
                                 placeholder="โต๊ะโครงเหล็กคาร์บอน รางร้อยสายไฟ"
@@ -1766,39 +2125,202 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                               />
                             </div>
                             <div className="form-group">
-                              <label>ราคาเก้าอี้/ตัว</label>
+                              <label>ราคาเก้าอี้/ตัว (บาท)</label>
                               <input 
-                                type="number" className="form-input"
+                                type="number" className="form-input font-semibold"
                                 value={newCatalogItem.chairPrice}
                                 onChange={e => {
                                   const chairPrice = parseInt(e.target.value) || 0;
-                                  const chairTotal = chairPrice * newCatalogItem.chairCount;
-                                  setNewCatalogItem({ ...newCatalogItem, chairPrice, baseCost: newCatalogItem.deskPrice + chairTotal });
+                                  setNewCatalogItem({ ...newCatalogItem, chairPrice });
                                 }}
                               />
                             </div>
                             <div className="form-group">
-                              <label>จำนวนเก้าอี้</label>
+                              <label>จำนวนเก้าอี้ (ตัว)</label>
                               <input 
-                                type="number" className="form-input"
+                                type="number" className="form-input font-semibold"
                                 value={newCatalogItem.chairCount}
                                 onChange={e => {
                                   const chairCount = parseInt(e.target.value) || 0;
-                                  const chairTotal = newCatalogItem.chairPrice * chairCount;
-                                  setNewCatalogItem({ ...newCatalogItem, chairCount, seats: chairCount, baseCost: newCatalogItem.deskPrice + chairTotal });
+                                  setNewCatalogItem({ ...newCatalogItem, chairCount, seats: chairCount });
                                 }}
                               />
                             </div>
                           </div>
 
-                          <div className="total-cost-calc-card">
-                            <span>ราคารวมโมดูล:</span>
-                            <strong>฿{newCatalogItem.baseCost.toLocaleString()} บาท</strong>
+                          {/* Editable Total Module Cost Card */}
+                          <div className="total-cost-editable-box">
+                            <div className="total-cost-header">
+                              <div>
+                                <label className="total-cost-label">ราคารวมโมดูลที่ใช้จริง (บาท):</label>
+                                <span className="text-xs text-muted" style={{ display: 'block' }}>
+                                  คุณสามารถแก้ไขราคานี้ได้โดยตรงตามราคาแพ็กเกจจริง หรือกดปุ่มซิงค์ตามคำนวณ
+                                </span>
+                              </div>
+                              <button
+                                type="button"
+                                className="btn-sync-calc"
+                                onClick={() => {
+                                  const calculated = (newCatalogItem.deskPrice || 0) + ((newCatalogItem.chairPrice || 0) * (newCatalogItem.chairCount || 0));
+                                  setNewCatalogItem({ ...newCatalogItem, baseCost: calculated });
+                                }}
+                                title="คำนวณจาก โต๊ะ + (ราคาเก้าอี้ x จำนวนเก้าอี้)"
+                              >
+                                <RefreshCw size={13} />
+                                <span>ซิงค์ตามคำนวณ (฿{(((newCatalogItem.deskPrice || 0) + ((newCatalogItem.chairPrice || 0) * (newCatalogItem.chairCount || 0)))).toLocaleString()})</span>
+                              </button>
+                            </div>
+
+                            <div className="total-cost-input-row">
+                              <span className="currency-prefix">฿</span>
+                              <input 
+                                type="number"
+                                className="total-price-large-input"
+                                value={newCatalogItem.baseCost || 0}
+                                onChange={e => setNewCatalogItem({ ...newCatalogItem, baseCost: parseInt(e.target.value) || 0 })}
+                              />
+                              <span className="currency-suffix">บาท</span>
+                            </div>
                           </div>
                         </div>
+
+                        {/* SECTION 6: ภาพประกอบ & SEO */}
+                        <div className="form-subblock">
+                          <h5 className="form-subblock-title">
+                            <ImageIcon size={15} className="text-blue" />
+                            <span>6. ภาพประกอบสินค้า & SEO (Product Photography)</span>
+                          </h5>
+
+                          <div className="image-manager-row">
+                            <div className="form-group" style={{ flex: 1 }}>
+                              <label>URL รูปภาพสินค้า (Image URL)</label>
+                              <input 
+                                type="url" 
+                                className="form-input"
+                                placeholder="https://images.unsplash.com/..."
+                                value={newCatalogItem.image || ''}
+                                onChange={e => setNewCatalogItem({ ...newCatalogItem, image: e.target.value })}
+                              />
+                            </div>
+                            <div className="image-upload-wrapper">
+                              <label className="btn-upload-file" title="เลือกไฟล์ภาพ ระบบจะแปลงเป็น WebP และสกัดสี 3D อัตโนมัติ">
+                                {isAnalyzingPhoto ? (
+                                  <>
+                                    <RefreshCw size={14} className="spin-icon" />
+                                    <span>กำลังสกัดสี & แปลง WebP...</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Upload size={14} />
+                                    <span>อัปโหลดภาพสินค้า (WebP)</span>
+                                  </>
+                                )}
+                                <input 
+                                  type="file" 
+                                  accept="image/*" 
+                                  style={{ display: 'none' }}
+                                  onChange={async (e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      setIsAnalyzingPhoto(true);
+                                      try {
+                                        const result = await analyzeProductPhoto(file);
+                                        if (result.success) {
+                                          setNewCatalogItem(prev => ({
+                                            ...prev,
+                                            image: result.textureUrl,
+                                            deskTextureUrl: result.textureUrl,
+                                            deskColor: result.deskColor,
+                                            color: result.deskColor,
+                                            accentColor: result.accentColor,
+                                            chairColor: result.chairColor
+                                          }));
+                                        }
+                                      } finally {
+                                        setIsAnalyzingPhoto(false);
+                                      }
+                                    }
+                                  }}
+                                />
+                              </label>
+                            </div>
+                          </div>
+
+                          {/* Image ALT Tag for SEO */}
+                          <div className="form-group" style={{ marginTop: '10px' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
+                              <Tag size={13} className="text-blue" />
+                              <span>คำอธิบายภาพสำหรับ SEO (Image ALT Tag):</span>
+                            </label>
+                            <input 
+                              type="text" 
+                              className="form-input"
+                              placeholder="เช่น โต๊ะคอมพิวเตอร์เกมมิ่งอีสปอร์ต 3 มิติ รุ่น Pro Stadium Arena"
+                              value={newCatalogItem.imageAlt || ''}
+                              onChange={e => setNewCatalogItem({ ...newCatalogItem, imageAlt: e.target.value })}
+                            />
+                          </div>
+
+                          {/* Quick Presets */}
+                          <div className="preset-images-picker" style={{ marginTop: '10px' }}>
+                            <span className="text-xs text-muted">หรือเลือกภาพสำเร็จรูป:</span>
+                            <div className="preset-chips-scroll">
+                              {CATALOG_PRESET_IMAGES.map((p, idx) => (
+                                <button
+                                  key={idx}
+                                  type="button"
+                                  className={`preset-chip-btn ${newCatalogItem.image === p.url ? 'active' : ''}`}
+                                  onClick={() => setNewCatalogItem({ ...newCatalogItem, image: p.url })}
+                                >
+                                  {p.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* SECTION 7: การรับประกัน & รายละเอียด */}
+                        <div className="form-subblock">
+                          <h5 className="form-subblock-title">
+                            <Shield size={15} className="text-blue" />
+                            <span>7. การรับประกัน & รายละเอียดจุดเด่น</span>
+                          </h5>
+
+                          <div className="form-row-2">
+                            <div className="form-group">
+                              <label>เงื่อนไขการรับประกัน</label>
+                              <input 
+                                type="text" 
+                                className="form-input" 
+                                value={newCatalogItem.warranty || ''}
+                                onChange={e => setNewCatalogItem({ ...newCatalogItem, warranty: e.target.value })}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>ระยะเวลาผลิต & ติดตั้ง</label>
+                              <input 
+                                type="text" 
+                                className="form-input" 
+                                value={newCatalogItem.leadTime || ''}
+                                onChange={e => setNewCatalogItem({ ...newCatalogItem, leadTime: e.target.value })}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="form-group">
+                            <label>คำอธิบายจุดเด่นของโมดูล</label>
+                            <textarea 
+                              className="form-input form-textarea" 
+                              rows="2"
+                              value={newCatalogItem.desc || ''}
+                              onChange={e => setNewCatalogItem({ ...newCatalogItem, desc: e.target.value })}
+                            />
+                          </div>
+                        </div>
+
                       </div>
 
-                      {/* Right: Live 3D Studio */}
+                      {/* Right: Live 3D Studio & Floor Plan Integration */}
                       <div className="modal-live-3d-pane">
                         <div className="live-3d-box">
                           <div className="live-3d-header">
@@ -1806,11 +2328,12 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                               <Sparkles size={13} />
                               <span>Live 3D Studio Preview</span>
                             </span>
+                            <small style={{ color: '#94a3b8', fontSize: '12px' }}>หมุน 360° • ซูม • ดูแสงเงา</small>
                           </div>
 
                           <ThreeProductViewer 
                             item={newCatalogItem}
-                            height="340px"
+                            height="280px"
                             autoRotateDefault={true}
                             showControls={true}
                             onSetAsImage={(dataUrl) => {
@@ -1818,8 +2341,152 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                               triggerSaveToast();
                             }}
                           />
+
+                          <div className="live-3d-tips high-contrast">
+                            <Camera size={15} className="text-blue" style={{ flexShrink: 0 }} />
+                            <p>
+                              หมุนดูรอบทิศทาง แล้วกดปุ่ม <strong>"ใช้เป็นภาพปก"</strong> หรือ <strong>"ส่งออกภาพ 3D"</strong> ด้านล่างภาพ 3D ได้ทันที
+                            </p>
+                          </div>
                         </div>
 
+                        {/* Interactive Color Customization */}
+                        <div className="live-3d-colors-block">
+                          <h6 className="colors-block-title">
+                            <Palette size={14} className="text-blue" />
+                            <span>ปรับสีโมเดล & แสงไฟ LED RGB (Colors)</span>
+                          </h6>
+
+                          {/* Desk Top Color */}
+                          <div className="color-field-row" style={{ padding: '8px 0' }}>
+                            <div className="color-field-meta">
+                              <label style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>สีท็อปโต๊ะ:</label>
+                              <div className="color-input-badge">
+                                <input 
+                                  type="color" 
+                                  className="color-picker-input"
+                                  value={newCatalogItem.deskColor || newCatalogItem.color || '#0f172a'}
+                                  onChange={e => setNewCatalogItem({ 
+                                    ...newCatalogItem, 
+                                    deskColor: e.target.value,
+                                    color: e.target.value 
+                                  })}
+                                />
+                                <code style={{ fontSize: '11px', fontWeight: 700 }}>{newCatalogItem.deskColor || newCatalogItem.color || '#0f172a'}</code>
+                              </div>
+                            </div>
+                            <div className="color-presets-inline">
+                              {DESK_COLOR_PRESETS.map((p, i) => (
+                                <button
+                                  key={i}
+                                  type="button"
+                                  className={`color-preset-dot ${(newCatalogItem.deskColor || newCatalogItem.color) === p.hex ? 'selected-ring' : ''}`}
+                                  style={{ backgroundColor: p.hex }}
+                                  title={p.label}
+                                  onClick={() => setNewCatalogItem({ 
+                                    ...newCatalogItem, 
+                                    deskColor: p.hex,
+                                    color: p.hex 
+                                  })}
+                                />
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* LED Glow Color */}
+                          <div className="color-field-row" style={{ padding: '8px 0' }}>
+                            <div className="color-field-meta">
+                              <label style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>สีไฟ LED RGB:</label>
+                              <div className="color-input-badge">
+                                <input 
+                                  type="color" 
+                                  className="color-picker-input"
+                                  value={newCatalogItem.accentColor || '#1d4ed8'}
+                                  onChange={e => setNewCatalogItem({ ...newCatalogItem, accentColor: e.target.value })}
+                                />
+                                <code style={{ fontSize: '11px', fontWeight: 700 }}>{newCatalogItem.accentColor || '#1d4ed8'}</code>
+                              </div>
+                            </div>
+                            <div className="color-presets-inline">
+                              {ACCENT_COLOR_PRESETS.map((p, i) => (
+                                <button
+                                  key={i}
+                                  type="button"
+                                  className={`color-preset-dot glow ${newCatalogItem.accentColor === p.hex ? 'selected-ring' : ''}`}
+                                  style={{ backgroundColor: p.hex }}
+                                  title={p.label}
+                                  onClick={() => setNewCatalogItem({ ...newCatalogItem, accentColor: p.hex })}
+                                />
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Chair Color */}
+                          <div className="color-field-row" style={{ padding: '8px 0' }}>
+                            <div className="color-field-meta">
+                              <label style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>สีเก้าอี้เกมมิ่ง:</label>
+                              <div className="color-input-badge">
+                                <input 
+                                  type="color" 
+                                  className="color-picker-input"
+                                  value={newCatalogItem.chairColor || '#0f172a'}
+                                  onChange={e => setNewCatalogItem({ ...newCatalogItem, chairColor: e.target.value })}
+                                />
+                                <code style={{ fontSize: '11px', fontWeight: 700 }}>{newCatalogItem.chairColor || '#0f172a'}</code>
+                              </div>
+                            </div>
+                            <div className="color-presets-inline">
+                              {CHAIR_COLOR_PRESETS.map((p, i) => (
+                                <button
+                                  key={i}
+                                  type="button"
+                                  className={`color-preset-dot ${newCatalogItem.chairColor === p.hex ? 'selected-ring' : ''}`}
+                                  style={{ backgroundColor: p.hex }}
+                                  title={p.label}
+                                  onClick={() => setNewCatalogItem({ ...newCatalogItem, chairColor: p.hex })}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* FLOOR PLAN INTEGRATION BOX (HIGH CONTRAST & CLEAR READABILITY) */}
+                        <div className="floor-plan-specs-box">
+                          <div className="floor-plan-specs-header">
+                            <Compass size={15} className="text-blue" />
+                            <strong>คุณสมบัติสำหรับวางบนแปลนร้าน (Floor Planner)</strong>
+                          </div>
+                          <div className="floor-plan-specs-grid">
+                            <div className="spec-stat">
+                              <span className="spec-label">Footprint 2D:</span>
+                              <span className="spec-val font-semibold text-blue">
+                                {newCatalogItem.widthMeters} x {newCatalogItem.depth3D || newCatalogItem.heightMeters} ม.
+                              </span>
+                            </div>
+                            <div className="spec-stat">
+                              <span className="spec-label">ความสูง 3D:</span>
+                              <span className="spec-val">{newCatalogItem.height3D || 1.25} ม.</span>
+                            </div>
+                            <div className="spec-stat">
+                              <span className="spec-label">ระยะ Clearance:</span>
+                              <span className="spec-val">{(newCatalogItem.widthMeters + 0.6).toFixed(1)} x {((newCatalogItem.depth3D || newCatalogItem.heightMeters) + 0.8).toFixed(1)} ม.</span>
+                            </div>
+                            <div className="spec-stat">
+                              <span className="spec-label">จุดต่อไฟ / LAN:</span>
+                              <span className="spec-val text-green font-semibold">Wireway ใต้โต๊ะ</span>
+                            </div>
+                          </div>
+                          <div className="floor-plan-palette-preview">
+                            <span className="palette-tag-badge">
+                              หมวดในพาเล็ต: {newCatalogItem.category}
+                            </span>
+                            <span className="ready-indicator">
+                              <CheckCircle2 size={13} /> พร้อมลากวางบนแปลนร้าน 2D/3D
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Action Buttons */}
                         <div className="modal-footer-btns" style={{ marginTop: '16px' }}>
                           <button className="btn-secondary" onClick={() => setShowAddCatalogModal(false)}>ยกเลิก</button>
                           <button 
@@ -1834,9 +2501,125 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                               triggerSaveToast();
                             }}
                           >
-                            <Plus size={14} /> เพิ่มโมดูลลงระบบ
+                            <Plus size={15} /> เพิ่มโมดูลลงระบบ
                           </button>
                         </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* =========================================================================
+                  AI SPEC SHEET / DOCUMENT TEXT OCR & PARSER MODAL
+                  ========================================================================= */}
+              {aiSpecModalOpen && (
+                <div className="cms-modal-backdrop submodal" style={{ zIndex: 999999 }} onClick={() => setAiSpecModalOpen(false)}>
+                  <div className="cms-modal-card ai-spec-parser-modal" onClick={e => e.stopPropagation()}>
+                    <div className="modal-head">
+                      <div className="modal-head-title">
+                        <Wand2 size={20} className="text-blue" />
+                        <h4>AI แปลงเอกสารสเปกสินค้า / ใบเสนอราคาเป็นข้อมูล 100%</h4>
+                      </div>
+                      <button onClick={() => setAiSpecModalOpen(false)} className="btn-close-modal">✕</button>
+                    </div>
+
+                    <div className="ai-spec-modal-body">
+                      <p className="ai-spec-intro">
+                        แนบไฟล์เอกสารสเปก (.txt, .pdf, .docx, .png) หรือวางข้อความสเปกจากใบเสนอราคาหรือแคตตาล็อก ระบบจะดึงรหัสสินค้า, ขนาด, น้ำหนัก, วัสดุ, ราคา และระยะเวลารับประกัน มากรอกลงฟอร์มอัตโนมัติทันที
+                      </p>
+
+                      <div className="ai-spec-upload-row">
+                        <label className="btn-spec-upload-file">
+                          <Upload size={14} />
+                          <span>เลือกไฟล์เอกสารสเปก / รูปภาพใบเสนอราคา</span>
+                          <input 
+                            type="file" 
+                            accept=".txt,.json,.md,.csv,.pdf,.png,.jpg,.jpeg,.webp" 
+                            style={{ display: 'none' }}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onload = (ev) => {
+                                  const text = ev.target.result;
+                                  if (typeof text === 'string') {
+                                    setAiSpecInputText(text);
+                                  }
+                                };
+                                reader.readAsText(file);
+                              }
+                            }}
+                          />
+                        </label>
+
+                        <button 
+                          type="button" 
+                          className="btn-sample-spec"
+                          onClick={() => {
+                            setAiSpecInputText(`รหัสสินค้า: GLP-ULT-4P-2026
+ชื่อสินค้า: โต๊ะคอมพิวเตอร์เกมมิ่ง Ultimate Arena Quad 4 ที่นั่ง
+ขนาด: 4800 x 1200 x 1250 mm (กว้าง 4.8 ม. ลึก 1.2 ม. สูง 1.25 ม.)
+จำนวนที่นั่ง: 4 ที่นั่ง
+น้ำหนักสินค้า: 95 กก.
+รับน้ำหนักสูงสุด: 700 กก.
+วัสดุ: โครงเหล็กกล้าคาร์บอนพ่นสี Powder Coat หนา 2.0mm + หน้าท็อป HPL กันน้ำและรอยขีดข่วน + รางร้อยสายไฟเหล็ก Wireway ซ่อนใต้โต๊ะแยก High/Low Voltage
+ราคาโต๊ะ: 32,000 บาท
+รุ่นเก้าอี้: G-Speed Pro Racing PU Leather
+ราคาเก้าอี้: 6,000 บาท (จำนวน 4 ตัว = 24,000 บาท)
+ราคารวมโมดูล: 56,000 บาท
+การรับประกัน: รับประกันโครงสร้าง 5 ปี ระบบไฟ 3 ปี On-site Service
+ระยะเวลาผลิต: 10-14 วันทำการ`);
+                          }}
+                        >
+                          <FileText size={13} />
+                          <span>ลองใส่ข้อความสเปกตัวอย่าง</span>
+                        </button>
+                      </div>
+
+                      <div className="form-group" style={{ marginTop: '12px' }}>
+                        <label style={{ fontWeight: 600 }}>ข้อความสเปกสินค้า / รายการใบเสนอราคา:</label>
+                        <textarea 
+                          className="form-input ai-spec-textarea"
+                          rows="8"
+                          placeholder="วางข้อความสเปกสินค้า เช่น ขนาด 2400x1000x1250mm น้ำหนัก 48 กก. ราคา 28000 บาท..."
+                          value={aiSpecInputText}
+                          onChange={e => setAiSpecInputText(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="modal-footer-btns" style={{ marginTop: '16px' }}>
+                        <button className="btn-secondary" onClick={() => setAiSpecModalOpen(false)}>ยกเลิก</button>
+                        <button 
+                          type="button" 
+                          className="btn-primary"
+                          disabled={!aiSpecInputText.trim()}
+                          onClick={() => {
+                            const extracted = parseSpecSheetText(aiSpecInputText);
+                            if (extracted) {
+                              if (aiSpecTarget === 'edit') {
+                                setEditingCatalogItem(prev => ({
+                                  ...prev,
+                                  ...extracted,
+                                  baseCost: extracted.baseCost || prev.baseCost
+                                }));
+                              } else {
+                                setNewCatalogItem(prev => ({
+                                  ...prev,
+                                  ...extracted,
+                                  baseCost: extracted.baseCost || prev.baseCost
+                                }));
+                              }
+                              setAiSpecFeedback(`✓ อ่านเอกสารสเปกสำเร็จ: รหัส ${extracted.sku || '-'} | ขนาด ${extracted.widthMeters || '-'}x${extracted.depth3D || '-'}ม. | ราคา ฿${extracted.baseCost?.toLocaleString() || '-'} นำเข้าฟอร์มครบ 100%!`);
+                              setTimeout(() => setAiSpecFeedback(null), 8000);
+                              setAiSpecModalOpen(false);
+                            } else {
+                              alert('ไม่พบข้อมูลสเปกที่ตรวจจับได้ กรุณาตรวจสอบข้อความหรือพิมพ์รายละเอียดให้ชัดเจนขึ้นครับ');
+                            }
+                          }}
+                        >
+                          <Wand2 size={14} /> แปลงข้อมูลและนำเข้าฟอร์มทันที
+                        </button>
                       </div>
                     </div>
                   </div>

@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   Bot, MessageSquare, X, Send, Sparkles, 
-  RotateCw, ExternalLink, HelpCircle, ChevronRight, User, Terminal, Shield
+  RotateCw, ExternalLink, HelpCircle, ChevronRight, User, Terminal, Shield,
+  CheckCircle2, ArrowRight, Share2, PhoneCall
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 
@@ -13,12 +14,11 @@ export default function AIChatWidget() {
     {
       id: 'msg-1',
       role: 'assistant',
-      text: 'สวัสดีครับ! ผมคือ G-Speed AI Concierge ผู้ช่วยอัจฉริยะประจำศูนย์ G-Speed Esport Arena (GLP)\n\nผมพร้อมให้บริการตอบคำถามเกี่ยวกับอัตราค่าบริการ, สเปกคอมพิวเตอร์, เวลาทำการ, เมนูอาหาร, กิจกรรมแข่งขัน และการลงทุนแฟรนไชส์ของทางร้านครับ!'
+      text: 'สวัสดีครับ! ยินดีต้อนรับสู่ G-Speed Esport Arena (GLP) ครับ ผมเป็นแอดมินพร้อมตอบคำถาม ให้คำปรึกษา แนะนำบริการ อัตราค่าบริการ สเปกคอมพิวเตอร์ ทำเลที่ตั้ง และเวลาเปิด-ปิดของทางร้านครับ มีอะไรให้ผมช่วยเหลือสอบถามได้เลยครับ'
     }
   ]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
   const messagesEndRef = useRef(null);
 
   // Auto scroll to bottom
@@ -30,11 +30,11 @@ export default function AIChatWidget() {
 
   // Quick Prompt Suggestions
   const quickPrompts = [
-    'ราคาชั่วโมงละเท่าไหร่ มีโปรโมชันอะไรบ้าง?',
+    'ราคาชั่วโมงละเท่าไหร่ และมีโปรโมชันอะไรบ้าง?',
     'สเปกคอมพิวเตอร์ในร้านใช้การ์ดจออะไร จอกี่ Hz?',
-    'ร้านเปิดกี่โมงและมีที่จอดรถไหม?',
-    'สนใจลงทุนแฟรนไชส์ G-Speed ต้องใช้งบเท่าไหร่?',
-    'มีเมนูอาหารและเครื่องดื่มอะไรเสิร์ฟถึงโต๊ะบ้าง?'
+    'ร้านตั้งอยู่ที่ไหน และเปิดปิดกี่โมง?',
+    'สนใจติดตั้งระบบร้านเกม / แฟรนไชส์ งบคร่าวๆ เท่าไหร่?',
+    'บริการห้อง VIP Bootcamp ซ้อมแข่ง'
   ];
 
   // RAG Retriever: Find relevant store knowledge chunks
@@ -48,16 +48,22 @@ export default function AIChatWidget() {
       // Tag match
       if (item.tags) {
         item.tags.forEach(tag => {
-          if (q.includes(tag.toLowerCase())) score += 3;
+          if (q.includes(tag.toLowerCase())) score += 4;
         });
       }
       // Title match
       const titleWords = item.title.toLowerCase().split(' ');
       titleWords.forEach(w => {
-        if (w.length > 2 && q.includes(w)) score += 2;
+        if (w.length > 2 && q.includes(w)) score += 3;
       });
       // Content keyword match
-      const keywords = ['ราคา', 'ชั่วโมง', 'สเปก', 'คอม', 'การ์ดจอ', 'จอ', 'rtx', 'เปิด', 'ปิด', 'เวลา', 'อาหาร', 'กิน', 'น้ำ', 'vip', 'bootcamp', 'แข่ง', 'ทัวร์นาเมนต์', 'แฟรนไชส์', 'ลงทุน', 'คืนทุน', 'ที่จอดรถ', 'ห้องน้ำ', 'สมัคร'];
+      const keywords = [
+        'ราคา', 'ชั่วโมง', 'สเปก', 'คอม', 'การ์ดจอ', 'จอ', 'rtx', 'เปิด', 'ปิด', 
+        'เวลา', 'อาหาร', 'กิน', 'น้ำ', 'vip', 'bootcamp', 'แข่ง', 'ทัวร์นาเมนต์', 
+        'แฟรนไชส์', 'ลงทุน', 'คืนทุน', 'ที่จอดรถ', 'ห้องน้ำ', 'สมัคร',
+        'ติดตั้ง', 'diskless', 'ดิสเลส', 'เซิร์ฟเวอร์', 'icafecloud', 'ccboot',
+        'เน็ตเวิร์ก', 'แลน', 'fiber', '10gbps', 'สวิตช์', 'ping', 'ระบบไฟ', '3เฟส', 'ใบเสนอราคา'
+      ];
       keywords.forEach(k => {
         if (q.includes(k) && item.content.toLowerCase().includes(k)) score += 2;
       });
@@ -75,7 +81,7 @@ export default function AIChatWidget() {
     const q = query.toLowerCase().trim();
     const guardrails = siteData.aiGuardrails || {
       strictStoreOnly: true,
-      outOfScopeReply: 'ขออภัยด้วยครับ ผมเป็นผู้ช่วย AI ประจำศูนย์ G-Speed Esport Arena จึงสามารถตอบได้เฉพาะข้อมูลและบริการของทางร้านเท่านั้นครับ เช่น อัตราค่าบริการ, สเปกคอมพิวเตอร์, การจองห้อง VIP, เมนูอาหาร หรือการลงทุนแฟรนไชส์ หากมีข้อสงสัยเกี่ยวกับร้าน สามารถสอบถามได้ทันทีครับ',
+      outOfScopeReply: 'ขออภัยด้วยครับ ผมเป็นผู้ช่วย AI ประจำศูนย์ G-Speed Esport Arena จึงสามารถตอบได้เฉพาะข้อมูลและบริการของทางร้านเท่านั้นครับ เช่น อัตราค่าบริการ, สเปกคอมพิวเตอร์, การติดตั้งระบบร้านเกม/เดินระบบแลน Diskless, การจองห้อง VIP, เมนูอาหาร หรือการลงทุนแฟรนไชส์ หากมีข้อสงสัยเกี่ยวกับร้าน สามารถสอบถามได้ทันทีครับ',
       blockedKeywords: ['การเมือง', 'หวย', 'พนัน', 'เขียนโค้ด', 'แต่งกลอน', 'การบ้าน', 'คู่แข่ง', 'แฮก']
     };
 
@@ -102,7 +108,8 @@ export default function AIChatWidget() {
       'แข่ง', 'ทัวร์นาเมนต์', 'tournament', 'สมัคร', 'เงินรางวัล', 'เวที', 'stage', 'จัดงาน', 'เช่าสถานที่',
       'แฟรนไชส์', 'franchise', 'ลงทุน', 'เปิดร้าน', 'งบ', 'roi', 'คืนทุน', 'กี่บาท', 'สาขา', 'พาร์ตเนอร์',
       'g-speed', 'gspeed', 'glp', 'ร้าน', 'เน็ต', 'อินเทอร์เน็ต', 'ping', 'fiber', 'diskless', 'pos', 'ใบเสนอราคา',
-      'ติดต่อ', 'เบอร์', 'โทร', 'อยู่ไหน', 'สาขาไหน', 'พิกัด', 'ที่ตั้ง', 'แผนที่'
+      'ติดตั้ง', 'ดิสเลส', 'เซิร์ฟเวอร์', 'icafecloud', 'ccboot', 'แลน', 'เดินสาย', '10gbps', 'ระบบไฟ', '3เฟส', 'ตู้โหลด', 'ups',
+      'ติดต่อ', 'เบอร์', 'โทร', 'อยู่ไหน', 'สาขาไหน', 'พิกัด', 'ที่ตั้ง', 'แผนที่', 'ผู้บริหาร', 'n8n', 'ไลน์'
     ];
 
     const matchedStoreKeyword = storeKeywords.some(keyword => q.includes(keyword));
@@ -140,7 +147,7 @@ export default function AIChatWidget() {
 
     const guardrails = siteData.aiGuardrails || {
       strictStoreOnly: true,
-      outOfScopeReply: 'ขออภัยด้วยครับ ผมเป็นผู้ช่วย AI ประจำศูนย์ G-Speed Esport Arena จึงสามารถตอบได้เฉพาะข้อมูลและบริการของทางร้านเท่านั้นครับ เช่น อัตราค่าบริการ, สเปกคอมพิวเตอร์, การจองห้อง VIP, เมนูอาหาร หรือการลงทุนแฟรนไชส์ หากมีข้อสงสัยเกี่ยวกับร้าน สามารถสอบถามได้ทันทีครับ',
+      outOfScopeReply: 'ขออภัยด้วยครับ ผมเป็นผู้ช่วย AI ประจำศูนย์ G-Speed Esport Arena จึงสามารถตอบได้เฉพาะข้อมูลและบริการของทางร้านเท่านั้นครับ เช่น อัตราค่าบริการ, สเปกคอมพิวเตอร์, การติดตั้งระบบร้านเกม/เดินระบบแลน Diskless, การจองห้อง VIP, เมนูอาหาร หรือการลงทุนแฟรนไชส์ หากมีข้อสงสัยเกี่ยวกับร้าน สามารถสอบถามได้ทันทีครับ',
       blockedKeywords: ['การเมือง', 'หวย', 'พนัน', 'เขียนโค้ด', 'แต่งกลอน', 'การบ้าน', 'คู่แข่ง', 'แฮก']
     };
 
@@ -175,7 +182,7 @@ export default function AIChatWidget() {
     const useSecureProxy = siteData.openRouterSettings?.useSecureProxy;
     const model = siteData.openRouterSettings?.model || 'google/gemini-flash-3.8';
 
-    // 1. Zero-Leak Secure Proxy / n8n Webhook Mode (Production Recommended: Zero Client Key Leak)
+    // 1. Zero-Leak Secure Proxy Mode
     if (useSecureProxy && proxyUrl) {
       try {
         const response = await fetch(proxyUrl, {
@@ -204,10 +211,10 @@ export default function AIChatWidget() {
             id: `bot-${Date.now()}`,
             role: 'assistant',
             text: reply,
-            ragSources: matchedDocs.map(d => d.title)
+            userQuery: query
           }
         ]);
-        setIsTyping(false);
+        setIsLoading(false);
         return;
       } catch (err) {
         console.warn('Secure proxy unavailable, falling back to smart RAG', err);
@@ -216,23 +223,26 @@ export default function AIChatWidget() {
       }
     }
 
-    // 2. Direct OpenRouter API Mode (For Development / Staging Testing)
+    // 2. Direct OpenRouter API Mode (Gemini Flash 3.8)
     if (apiKey && apiKey.trim().startsWith('sk-')) {
       try {
-        const systemPrompt = `คุณคือ "G-Speed AI Concierge" ผู้ช่วยตอบคำถามประจำศูนย์ G-Speed Esport Arena (GLP Living Plus).
-คุณมีหน้าที่ตอบคำถามลูกค้าเฉพาะเรื่องข้อมูลและบริการของร้าน G-Speed เท่านั้น (เช่น อัตราค่าบริการ, โปรโมชัน, สเปกคอมพิวเตอร์, จอ, เก้าอี้, เวลาทำการ, อาหารและเครื่องดื่ม, การจัดแข่งขันทัวร์นาเมนต์, การจองห้อง VIP และการลงทุนแฟรนไชส์)
+        const systemPrompt = `คุณคือ "แอดมิน / พนักงานขาย" ประจำศูนย์ G-Speed Esport Arena (GLP Living Plus).
+คุณมีหน้าที่ตอบคำถาม ให้คำปรึกษา และดูแลลูกค้าเกี่ยวกับบริการของทางร้านอย่างสุภาพ เป็นมิตร และเป็นมืออาชีพ ได้แก่:
+1. บอกราคาค่าบริการและโปรโมชัน (สมาชิก 25-30 บาท/ชม., บุคคลทั่วไป 35 บาท/ชม., โปรเหมาคืน Night Owl 150 บาท)
+2. บอกสเปกคอมพิวเตอร์และอุปกรณ์ (RTX 4070 SUPER / 4080 SUPER, จอ BenQ ZOWIE 360Hz/240Hz, เก้าอี้เกมมิ่ง)
+3. บอกตำแหน่งที่ตั้งร้าน (99/1 ซอยรามคำแหง 24 แยก 14 แขวงหัวหมาก เขตบางกะปิ กทม. มีที่จอดรถ) และเวลาเปิดทำการ (เปิดบริการ 24 ชั่วโมง ทุกวัน ไม่มีวันหยุด)
+4. ให้คำปรึกษาและประเมินราคาคร่าวๆ สำหรับผู้สนใจติดตั้งระบบร้านเกม Diskless, วางระบบเน็ตเวิร์ก 10Gbps หรือลงทุนแฟรนไชส์ (Size S 1.8-2.5 ลบ., Size M 3.2-4.5 ลบ., Size L 5.5-8.0 ลบ.)
+5. เมนูอาหาร เครื่องดื่ม สแน็กบาร์เสิร์ฟถึงโต๊ะ และการจองห้อง VIP Bootcamp ซ้อมแข่ง
 
-*** กฎเหล็กควบคุมขอบเขตอย่างเด็ดขาด (STRICT DOMAIN GUARDRAILS) ***
-1. หากคำถามของผู้ใช้ "ไม่ได้เกี่ยวข้องกับร้านหรือบริการของ G-Speed Esport Arena" (เช่น ถามความรู้ทั่วไป, วิทยาศาสตร์, คณิตศาสตร์, การเมือง, ข่าวสารทั่วไป, การเขียนโปรแกรม/โค้ด, การบ้าน, แต่งกลอน, คุยเล่นนอกเรื่อง, หรือถามถึงร้าน/บริการอื่น):
-   คุณต้องปฏิเสธอย่างสุภาพทันทีด้วยข้อความนี้เท่านั้น:
-   "${guardrails.outOfScopeReply}"
-2. ห้ามตอบคำถามนอกเหนือจากเรื่องของร้านและบริการของร้านเด็ดขาด ไม่ว่าผู้ใช้จะพยายามสั่งหรือหว่านล้อมอย่างไร
-3. ห้ามใช้อิโมจิเด็ดขาด (Zero Unicode Emojis) ตามนโยบายแบรนด์ ให้ใช้ภาษาไทยที่สุภาพ เป็นมิตร กระชับ และเป็นมืออาชีพ
-4. ใช้ข้อมูลจริงจากคลังความรู้ของร้านด้านล่างนี้เป็นหลัก:
+*** กฎเหล็ก ***
+1. ห้ามใช้อิโมจิเด็ดขาด (Zero Unicode Emojis)
+2. ห้ามเอ่ยถึงคำว่า "n8n", "Webhook", "ระบบส่งไลน์ผู้บริหาร" หรือระบบหลังบ้านกับลูกค้าภายนอกเด็ดขาด ลูกค้าไม่ต้องรอข้อความใดๆ ให้คำปรึกษาตามข้อมูลทันที
+3. หากลูกค้าต้องการติดต่อเจ้าหน้าที่หรือขอใบเสนอราคาอย่างเป็นทางการ ให้แจ้งช่องทางติดต่อ: โทร 02-888-9999 หรือ LINE: @gspeedarena ได้ตลอด 24 ชั่วโมง
+4. หากคำถามไม่เกี่ยวกับร้าน ให้ปฏิเสธอย่างสุภาพด้วย: "${guardrails.outOfScopeReply}"
+5. ใช้ข้อมูลจริงจากคลังความรู้ RAG ด้านล่างนี้:
 -------------------------
 ${contextText}
--------------------------
-หากเป็นคำถามเกี่ยวกับร้านแต่ไม่มีในคลังความรู้ ให้แนะนำให้ติดต่อเคาน์เตอร์แคชเชียร์หรือโทร 02-888-9999 อย่างสุภาพ`;
+-------------------------`;
 
         const apiMessages = [
           { role: 'system', content: systemPrompt },
@@ -268,7 +278,7 @@ ${contextText}
             id: `bot-${Date.now()}`,
             role: 'assistant',
             text: reply,
-            ragSources: matchedDocs.map(d => d.title)
+            userQuery: query
           }
         ]);
         setIsLoading(false);
@@ -278,20 +288,22 @@ ${contextText}
       }
     }
 
-    // Fallback: Smart Local RAG Knowledge Engine (เมื่อไม่มีคีย์ หรือ API ล้มเหลว)
+    // Step 3: Local Smart RAG Fallback
+    handleSmartRAGFallback(query, matchedDocs);
+  };
+
+  const handleSmartRAGFallback = (query, matchedDocs) => {
     setTimeout(() => {
       let smartAnswer = '';
 
-      if (scopeCheck.isGreeting) {
-        smartAnswer = 'สวัสดีครับ! ยินดีต้อนรับสู่ G-Speed Esport Arena (GLP) ครับ สามารถสอบถามข้อมูลอัตราค่าบริการ, สเปกคอมพิวเตอร์, การจองห้อง VIP, เมนูอาหาร หรือการลงทุนแฟรนไชส์ได้เลยครับ';
-      } else if (matchedDocs.length > 0) {
+      if (matchedDocs.length > 0) {
         const primary = matchedDocs[0];
-        smartAnswer = `จากข้อมูลของ G-Speed Esport Arena (${primary.title}):\n\n${primary.content}`;
+        smartAnswer = `${primary.content}`;
         if (matchedDocs.length > 1) {
-          smartAnswer += `\n\nข้อมูลเพิ่มเติม (${matchedDocs[1].title}):\n${matchedDocs[1].content}`;
+          smartAnswer += `\n\n${matchedDocs[1].content}`;
         }
       } else {
-        smartAnswer = 'ขออภัยครับ ยังไม่พบข้อมูลที่ตรงกับคำถามในคลังความรู้ ท่านสามารถติดต่อสอบถามโดยตรงกับเคาน์เตอร์แคชเชียร์หรือโทร 02-888-9999 ครับ';
+        smartAnswer = 'ขออภัยด้วยครับ ข้อมูลในส่วนนี้ผมยังไม่มีรายละเอียดที่ชัดเจนในระบบ คุณลูกค้าสามารถสอบถามกับพนักงานที่เคาน์เตอร์แคชเชียร์ หรือโทร 02-888-9999 และ LINE: @gspeedarena ได้ตลอด 24 ชั่วโมงครับ';
         addPendingQuestion(query);
       }
 
@@ -301,11 +313,11 @@ ${contextText}
           id: `bot-${Date.now()}`,
           role: 'assistant',
           text: smartAnswer,
-          ragSources: matchedDocs.map(d => d.title)
+          userQuery: query
         }
       ]);
       setIsLoading(false);
-    }, 600);
+    }, 450);
   };
 
   return (
@@ -342,7 +354,7 @@ ${contextText}
                 <strong className="chat-title">G-SPEED AI CONCIERGE</strong>
                 <div className="chat-status-pill">
                   <span className="status-dot-green"></span>
-                  <span>Online • ตอบเฉพาะข้อมูลร้าน</span>
+                  <span>Online • ตอบข้อมูลร้าน & ติดตั้งระบบ</span>
                 </div>
               </div>
             </div>
@@ -369,16 +381,11 @@ ${contextText}
                 )}
                 <div className={`chat-bubble-content ${msg.role === 'user' ? 'bubble-user' : 'bubble-bot'} ${msg.isOutOfScopeNotice ? 'bubble-warning' : ''}`}>
                   <div className="bubble-text">{msg.text}</div>
+                  
                   {msg.isOutOfScopeNotice && (
                     <div className="out-of-scope-badge">
                       <Shield size={11} />
-                      <span>ขอบเขตข้อมูลของ AI ประจำร้าน</span>
-                    </div>
-                  )}
-                  {msg.ragSources && msg.ragSources.length > 0 && !msg.isOutOfScopeNotice && (
-                    <div className="rag-sources-pill">
-                      <Terminal size={11} />
-                      <span>RAG Sources: {msg.ragSources.join(' • ')}</span>
+                      <span>ขอบเขตข้อมูลของแอดมินร้าน</span>
                     </div>
                   )}
                 </div>
@@ -424,7 +431,7 @@ ${contextText}
             <input 
               type="text" 
               className="chat-input-field"
-              placeholder="พิมพ์คำถามเกี่ยวกับร้านเกม สเปก หรือแฟรนไชส์..."
+              placeholder="พิมพ์คำถามเกี่ยวกับร้านเกม สเปก หรือการติดตั้ง Diskless..."
               value={inputText}
               onChange={e => setInputText(e.target.value)}
               disabled={isLoading}

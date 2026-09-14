@@ -7,6 +7,7 @@ import FranchisePlanner from './components/FranchisePlanner';
 import AdminAuthGate from './components/AdminAuthGate';
 import SingleActivityView from './components/SingleActivityView';
 import AIChatWidget from './components/AIChatWidget';
+import ErrorBoundary from './components/ErrorBoundary';
 import { SiteDataProvider, useSiteData } from './context/SiteDataContext';
 import './App.css';
 
@@ -104,17 +105,15 @@ function AppContent() {
   // If visiting the isolated admin path (#/admin), render secure AdminAuthGate
   if (isAdminRoute) {
     return (
-      <div className="app-layout admin-mode">
-        <AdminAuthGate 
-          onExitToPublic={() => {
-            window.location.hash = '';
-            if (window.location.pathname === '/admin') {
-              window.history.pushState(null, '', '/');
-            }
-            setIsAdminRoute(false);
-          }} 
-        />
-      </div>
+      <AdminAuthGate 
+        onExitToPublic={() => {
+          window.location.hash = '';
+          if (window.location.pathname === '/admin') {
+            window.history.pushState(null, '', '/');
+          }
+          setIsAdminRoute(false);
+        }} 
+      />
     );
   }
 
@@ -233,8 +232,10 @@ function AppContent() {
 
 export default function App() {
   return (
-    <SiteDataProvider>
-      <AppContent />
-    </SiteDataProvider>
+    <ErrorBoundary>
+      <SiteDataProvider>
+        <AppContent />
+      </SiteDataProvider>
+    </ErrorBoundary>
   );
 }

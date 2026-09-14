@@ -16,6 +16,250 @@ import {
 } from '../data/mockData';
 import { useSiteData } from '../context/SiteDataContext';
 import { compressAndConvertToWebP, formatBytes } from '../utils/imageOptimizer';
+import { downloadFile } from '../utils/fileDownloader';
+
+const calculateBlueprintFeasibility = (w, h) => {
+  const totalArea = Math.round(w * h);
+  const mainArenaArea = Math.round(totalArea * 0.52);
+  const vipArea = totalArea >= 90 ? Math.round(totalArea * 0.14) : 0;
+  const cafeArea = Math.round(totalArea * 0.12);
+  const cashierArea = Math.min(16, Math.max(8, Math.round(totalArea * 0.05)));
+  const serverArea = Math.min(14, Math.max(6, Math.round(totalArea * 0.04)));
+  const circulationArea = totalArea - (mainArenaArea + vipArea + cafeArea + cashierArea + serverArea);
+
+  // Recommended stations: ~2.3 - 2.5 sqm per PC with aisles
+  const arenaStations = Math.max(12, Math.floor(mainArenaArea / 2.3));
+  const vipStations = vipArea > 0 ? (totalArea >= 180 ? 10 : 5) : 0;
+  const recommendedStations = arenaStations + vipStations;
+  
+  const estimatedCapex = Math.round(recommendedStations * 45000 + totalArea * 5200 + 380000);
+  const estimatedMonthlyRevenue = Math.round(recommendedStations * 30 * 14 * 30); // 30 THB/hr, 14 active hrs/day, 30 days
+  const estimatedOpex = Math.round(estimatedMonthlyRevenue * 0.46);
+  const estimatedMonthlyProfit = Math.max(50000, estimatedMonthlyRevenue - estimatedOpex);
+  const paybackMonths = Math.max(6, Math.min(24, Math.round((estimatedCapex / estimatedMonthlyProfit) * 10) / 10));
+
+  const detectedZones = [
+    {
+      id: 'arena',
+      name: 'โซนเครื่องเล่นเกมหลัก (Main Esports Arena)',
+      area: `${mainArenaArea} ตร.ม.`,
+      stations: `${arenaStations} เครื่อง`,
+      color: '#2563eb',
+      desc: 'จัดวางแถวเกาะกลางแบบ Back-to-Back เว้นระยะทางเดิน 1.5 ม. ซ่อนสายไฟเมนและท่อแอร์ลงตรงกลาง'
+    },
+    ...(vipArea > 0 ? [{
+      id: 'vip',
+      name: 'ห้องซ้อม VIP / Bootcamp Suite (กระจกเก็บเสียง)',
+      area: `${vipArea} ตร.ม.`,
+      stations: `${vipStations} เครื่อง`,
+      color: '#9333ea',
+      desc: 'จัดวางโซนด้านในสุดของอาคาร เพื่อความเงียบสงบ เป็นส่วนตัว และเหมาะสำหรับการสตรีมมิ่ง'
+    }] : []),
+    {
+      id: 'cashier',
+      name: 'เคาน์เตอร์แคชเชียร์ & จุดต้อนรับ (Reception)',
+      area: `${cashierArea} ตร.ม.`,
+      stations: '1 จุดบริการ (POS & CCTV)',
+      color: '#f59e0b',
+      desc: 'จัดวางมุมทางเข้าหลัก คุมทัศนวิสัย 180 องศา ดูแลความปลอดภัยและต้อนรับลูกค้าทันที'
+    },
+    {
+      id: 'server',
+      name: 'ห้องควบคุมระบบ MDB & Diskless Server',
+      area: `${serverArea} ตร.ม.`,
+      stations: 'ตู้ Rack 42U + UPS สำรองไฟ',
+      color: '#475569',
+      desc: 'ชิดผนังมุมหลังร้าน ใกล้แนวสายไฟหลัก เดินสาย LAN สั้นที่สุด พร้อมแอร์เฉพาะห้อง 24 ชม.'
+    },
+    {
+      id: 'cafe',
+      name: 'Cafe Prep, Food & Dining Lounge',
+      area: `${cafeArea} ตร.ม.`,
+      stations: 'บาร์เครื่องดื่ม & โซฟานั่งพัก',
+      color: '#10b981',
+      desc: 'บาร์เครื่องดื่มและของว่างปรุงสด เชื่อมต่อโซนต้อนรับ ให้ลูกค้านั่งรอหรือสั่งอาหารไปที่โต๊ะคอม'
+    },
+    {
+      id: 'circulation',
+      name: 'ทางสัญจร & ช่องทางหนีไฟ (Circulation & Safety)',
+      area: `${circulationArea} ตร.ม.`,
+      stations: 'ทางเดินกว้าง 1.2 - 1.5 ม.',
+      color: '#06b6d4',
+      desc: 'เว้นทางเดินหลักปลอดสิ่งกีดขวางตามมาตรฐานความปลอดภัย พ.ร.บ.ควบคุมอาคารและระเบียบ กทม.'
+    }
+  ];
+
+  return {
+    totalArea,
+    dimensions: `${w} x ${h} เมตร (${totalArea} ตร.ม.)`,
+    detectedZones,
+    recommendedStations,
+    estimatedCapex,
+    estimatedMonthlyProfit,
+    paybackMonths
+  };
+};
+
+const generateAutoLayout = (w, h, catalog) => {
+  const items = [];
+  let idCounter = 1;
+  const getItem = (type) => (catalog || []).find(c => c.type === type) || CATALOG_ITEMS.find(c => c.type === type);
+
+  // 1. Cashier counter near front entrance
+  const cashier = getItem('cashier-counter');
+  if (cashier) {
+    items.push({
+      id: `auto-${idCounter++}`,
+      type: 'cashier-counter',
+      x: 0.8,
+      y: 0.8,
+      rotation: 0,
+      catalog: cashier
+    });
+  }
+
+  // 2. Server Room in corner
+  const server = getItem('server-room');
+  if (server) {
+    items.push({
+      id: `auto-${idCounter++}`,
+      type: 'server-room',
+      x: Math.max(1, w - 2.8),
+      y: 0.8,
+      rotation: 0,
+      catalog: server
+    });
+  }
+
+  // 3. Cafe bar near entrance / side
+  const cafe = getItem('cafe-bar');
+  if (cafe && w >= 10) {
+    items.push({
+      id: `auto-${idCounter++}`,
+      type: 'cafe-bar',
+      x: Math.max(1, w - 3.8),
+      y: Math.min(h - 3.5, 3.2),
+      rotation: 90,
+      catalog: cafe
+    });
+  }
+
+  // 4. Lounge sofa
+  const sofa = getItem('lounge-sofa');
+  if (sofa && w >= 11 && h >= 8) {
+    items.push({
+      id: `auto-${idCounter++}`,
+      type: 'lounge-sofa',
+      x: Math.max(1, w - 3.8),
+      y: Math.min(h - 2.5, 6.6),
+      rotation: 90,
+      catalog: sofa
+    });
+  }
+
+  // 5. VIP Room in back corner if space permits
+  const vip = getItem('vip-room-5');
+  const hasVip = vip && w >= 11 && h >= 9;
+  if (hasVip) {
+    items.push({
+      id: `auto-${idCounter++}`,
+      type: 'vip-room-5',
+      x: 0.8,
+      y: h - 4.0,
+      rotation: 0,
+      catalog: vip
+    });
+    if (w >= 16) {
+      items.push({
+        id: `auto-${idCounter++}`,
+        type: 'vip-room-5',
+        x: 6.2,
+        y: h - 4.0,
+        rotation: 0,
+        catalog: vip
+      });
+    }
+  }
+
+  // 6. Central Gaming Arena
+  const pcIsland = getItem('pc-island-6');
+  const pcRow4 = getItem('pc-row-4');
+  const pcRow2 = getItem('pc-row-2');
+
+  const startY = 3.0;
+  const maxEndY = hasVip ? (h - 4.6) : (h - 1.5);
+  const rightBound = (w >= 10) ? (w - 4.6) : (w - 1.0);
+
+  let curY = startY;
+  while (curY + 1.2 <= maxEndY) {
+    if (rightBound >= 8.5 && pcIsland) {
+      items.push({
+        id: `auto-${idCounter++}`,
+        type: 'pc-island-6',
+        x: 0.8,
+        y: curY,
+        rotation: 0,
+        catalog: pcIsland
+      });
+      if (0.8 + 4.2 + 3.6 <= rightBound + 0.5) {
+        items.push({
+          id: `auto-${idCounter++}`,
+          type: 'pc-island-6',
+          x: 5.0,
+          y: curY,
+          rotation: 0,
+          catalog: pcIsland
+        });
+      }
+      curY += 2.8;
+    } else if (rightBound >= 5.0 && pcRow4) {
+      items.push({
+        id: `auto-${idCounter++}`,
+        type: 'pc-row-4',
+        x: 0.8,
+        y: curY,
+        rotation: 0,
+        catalog: pcRow4
+      });
+      if (0.8 + 5.0 + 2.4 <= rightBound + 0.5 && pcRow2) {
+        items.push({
+          id: `auto-${idCounter++}`,
+          type: 'pc-row-2',
+          x: 6.0,
+          y: curY,
+          rotation: 0,
+          catalog: pcRow2
+        });
+      }
+      curY += 1.8;
+    } else if (pcRow2) {
+      items.push({
+        id: `auto-${idCounter++}`,
+        type: 'pc-row-2',
+        x: 0.8,
+        y: curY,
+        rotation: 0,
+        catalog: pcRow2
+      });
+      curY += 1.8;
+    } else {
+      break;
+    }
+  }
+
+  if (hasVip && w >= 13 && h >= 10 && pcRow4 && !items.some(it => it.x >= (w - 6.0) && it.y >= (h - 3.0))) {
+    items.push({
+      id: `auto-${idCounter++}`,
+      type: 'pc-row-4',
+      x: Math.max(1, w - 5.5),
+      y: h - 2.0,
+      rotation: 0,
+      catalog: pcRow4
+    });
+  }
+
+  return items;
+};
 
 export default function FranchisePlanner() {
   const { siteData } = useSiteData();
@@ -25,11 +269,22 @@ export default function FranchisePlanner() {
   // Step navigation (1: พื้นที่และทำเล, 2: ออกแบบผัง 3D/2D, 3: เลือกสเปกอุปกรณ์, 4: สรุปงบประมาณ & ROI)
   const [currentStep, setCurrentStep] = useState(1); // Default to Step 1: ข้อมูลพื้นที่ & ทำเล
 
+  const handleStepChange = (step) => {
+    setCurrentStep(step);
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  };
+
+  // Automatically scroll to the top whenever currentStep changes so user is never stuck at footer
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [currentStep]);
+
   // 3D Interior & Viewport Controls
   const [viewMode, setViewMode] = useState('3d'); // '3d' or '2d'
   const [selectedWallpaper, setSelectedWallpaper] = useState('white-clean');
   const [selectedFloorMaterial, setSelectedFloorMaterial] = useState('wood-parquet');
   const [catalogCategory, setCatalogCategory] = useState('all'); // all, stations, facilities, architectural
+  const [mobileStudioTab, setMobileStudioTab] = useState('catalog'); // 'catalog' or 'inspector' on mobile/tablet
 
   // Location & Store Dimensions State
   const [storeLocation, setStoreLocation] = useState('กรุงเทพฯ และปริมณฑล');
@@ -64,6 +319,9 @@ export default function FranchisePlanner() {
   // Modals
   const [showQuotationModal, setShowQuotationModal] = useState(false);
   const [showLeadSuccess, setShowLeadSuccess] = useState(false);
+  const [exportedBlueprintModal, setExportedBlueprintModal] = useState(null);
+  const [isBlueprintZoomed, setIsBlueprintZoomed] = useState(false);
+  const [selectedCatalogModalItem, setSelectedCatalogModalItem] = useState(null);
   const [leadForm, setLeadForm] = useState({
     fullName: '',
     phone: '',
@@ -73,13 +331,19 @@ export default function FranchisePlanner() {
     note: ''
   });
 
-  // =========================================================================
   // Architectural Blueprint Upload & AI Feasibility Calculation State
   // =========================================================================
+  const [setupMethod, setSetupMethod] = useState('preset'); // 'preset' (default) or 'blueprint' (optional)
   const [uploadedBlueprint, setUploadedBlueprint] = useState(null);
   const [showBlueprintOverlay, setShowBlueprintOverlay] = useState(true);
   const [blueprintOpacity, setBlueprintOpacity] = useState(0.45);
   const [isAnalyzingBlueprint, setIsAnalyzingBlueprint] = useState(false);
+  const [isDraggingFile, setIsDraggingFile] = useState(false);
+
+  // Dynamic AI Feasibility Calculation based on actual room dimensions
+  const blueprintFeasibility = React.useMemo(() => {
+    return calculateBlueprintFeasibility(roomWidth, roomHeight);
+  }, [roomWidth, roomHeight]);
 
   // Fullscreen Studio Mode State
   const [isPlannerFullscreen, setIsPlannerFullscreen] = useState(false);
@@ -114,62 +378,62 @@ export default function FranchisePlanner() {
     try {
       // High performance WebP compression for blueprint scans
       const opt = await compressAndConvertToWebP(file, { maxWidth: 2000, maxHeight: 2000, quality: 0.85 });
-      setTimeout(() => {
-        setRoomWidth(18);
-        setRoomHeight(16);
+      const img = new window.Image();
+      img.onload = () => {
+        const ratio = img.naturalWidth / img.naturalHeight;
+        let initW = 14;
+        let initH = Math.round(initW / ratio);
+        if (ratio > 1.7) {
+          initW = 18;
+          initH = Math.round(initW / ratio);
+        } else if (ratio < 0.8) {
+          initH = 14;
+          initW = Math.round(initH * ratio);
+        }
+        initW = Math.max(8, Math.min(26, initW));
+        initH = Math.max(6, Math.min(22, initH));
+
+        setRoomWidth(initW);
+        setRoomHeight(initH);
+
         setUploadedBlueprint({
           name: file.name.replace(/\.[^.]+$/, '') + '.webp',
           size: `${opt.compressedSizeFormatted} (ลดลง ${opt.compressionRatio})`,
           originalSize: opt.originalSizeFormatted,
           compressedSize: opt.compressedSizeFormatted,
           compressionRatio: opt.compressionRatio,
-          url: opt.dataUrl,
-          dimensions: '18 x 16 เมตร (288 ตร.ม.)',
-          detectedZones: [
-            { name: 'โซนเครื่องเล่นเกมหลัก (Main Arena)', area: '144 ตร.ม.', stations: '48-52 เครื่อง', color: '#1d4ed8' },
-            { name: 'ห้องซ้อม VIP / Bootcamp Suites', area: '36 ตร.ม.', stations: '10 เครื่อง (2 ห้อง)', color: '#9333ea' },
-            { name: 'Cafe Prep & Dining Lounge', area: '44 ตร.ม.', stations: '20 ที่นั่ง & บาร์กาแฟ', color: '#10b981' },
-            { name: 'เคาน์เตอร์แคชเชียร์ & จุดต้อนรับ', area: '14 ตร.ม.', stations: '1 จุดบริการ', color: '#f59e0b' },
-            { name: 'ห้องควบคุมระบบ MDB & Diskless Server', area: '12 ตร.ม.', stations: 'ตู้ Rack 42U', color: '#64748b' },
-            { name: 'ห้องน้ำและทางสัญจร (Circulation)', area: '38 ตร.ม.', stations: 'แยกชาย-หญิง', color: '#0ea5e9' }
-          ],
-          recommendedStations: 60,
-          estimatedCapex: 3480000,
-          estimatedMonthlyProfit: 285000,
-          paybackMonths: 12.2
+          url: opt.dataUrl
         });
         setShowBlueprintOverlay(true);
+        setSetupMethod('blueprint');
         setIsAnalyzingBlueprint(false);
-      }, 700);
+      };
+      img.src = opt.dataUrl;
     } catch (err) {
       console.warn('Blueprint optimization fallback:', err);
       const reader = new FileReader();
       reader.onload = (event) => {
         const dataUrl = event.target.result;
-        setTimeout(() => {
-          setRoomWidth(18);
-          setRoomHeight(16);
+        const img = new window.Image();
+        img.onload = () => {
+          const ratio = img.naturalWidth / img.naturalHeight;
+          let initW = 14;
+          let initH = Math.round(initW / ratio);
+          initW = Math.max(8, Math.min(26, initW));
+          initH = Math.max(6, Math.min(22, initH));
+          setRoomWidth(initW);
+          setRoomHeight(initH);
+
           setUploadedBlueprint({
             name: file.name,
             size: `${Math.max(1, Math.round(file.size / 1024))} KB`,
-            url: dataUrl,
-            dimensions: '18 x 16 เมตร (288 ตร.ม.)',
-            detectedZones: [
-              { name: 'โซนเครื่องเล่นเกมหลัก (Main Arena)', area: '144 ตร.ม.', stations: '48-52 เครื่อง', color: '#1d4ed8' },
-              { name: 'ห้องซ้อม VIP / Bootcamp Suites', area: '36 ตร.ม.', stations: '10 เครื่อง (2 ห้อง)', color: '#9333ea' },
-              { name: 'Cafe Prep & Dining Lounge', area: '44 ตร.ม.', stations: '20 ที่นั่ง & บาร์กาแฟ', color: '#10b981' },
-              { name: 'เคาน์เตอร์แคชเชียร์ & จุดต้อนรับ', area: '14 ตร.ม.', stations: '1 จุดบริการ', color: '#f59e0b' },
-              { name: 'ห้องควบคุมระบบ MDB & Diskless Server', area: '12 ตร.ม.', stations: 'ตู้ Rack 42U', color: '#64748b' },
-              { name: 'ห้องน้ำและทางสัญจร (Circulation)', area: '38 ตร.ม.', stations: 'แยกชาย-หญิง', color: '#0ea5e9' }
-            ],
-            recommendedStations: 60,
-            estimatedCapex: 3480000,
-            estimatedMonthlyProfit: 285000,
-            paybackMonths: 12.2
+            url: dataUrl
           });
           setShowBlueprintOverlay(true);
+          setSetupMethod('blueprint');
           setIsAnalyzingBlueprint(false);
-        }, 700);
+        };
+        img.src = dataUrl;
       };
       reader.readAsDataURL(file);
     }
@@ -179,33 +443,29 @@ export default function FranchisePlanner() {
     setIsAnalyzingBlueprint(true);
     setTimeout(() => {
       setRoomWidth(18);
-      setRoomHeight(16);
+      setRoomHeight(14);
       setUploadedBlueprint({
-        name: 'พิมพ์เขียวอาคารพาณิชย์_แปลนสาขาหลัก.png',
+        name: 'แปลนอาคารพาณิชย์_สาขาต้นแบบ.png',
         size: '79 KB',
-        url: '/sample-blueprint.png',
-        dimensions: '18 x 16 เมตร (288 ตร.ม.)',
-        detectedZones: [
-          { name: 'โซนเครื่องเล่นเกมหลัก (Main Arena)', area: '144 ตร.ม.', stations: '48-52 เครื่อง', color: '#1d4ed8' },
-          { name: 'ห้องซ้อม VIP / Bootcamp Suites', area: '36 ตร.ม.', stations: '10 เครื่อง (2 ห้อง)', color: '#9333ea' },
-          { name: 'Cafe Prep & Dining Lounge', area: '44 ตร.ม.', stations: '20 ที่นั่ง & บาร์กาแฟ', color: '#10b981' },
-          { name: 'เคาน์เตอร์แคชเชียร์ & จุดต้อนรับ', area: '14 ตร.ม.', stations: '1 จุดบริการ', color: '#f59e0b' },
-          { name: 'ห้องควบคุมระบบ MDB & Diskless Server', area: '12 ตร.ม.', stations: 'ตู้ Rack 42U', color: '#64748b' },
-          { name: 'ห้องน้ำและทางสัญจร (Circulation)', area: '38 ตร.ม.', stations: 'แยกชาย-หญิง', color: '#0ea5e9' }
-        ],
-        recommendedStations: 60,
-        estimatedCapex: 3480000,
-        estimatedMonthlyProfit: 285000,
-        paybackMonths: 12.2
+        url: '/sample-blueprint.png'
       });
       setShowBlueprintOverlay(true);
+      setSetupMethod('blueprint');
       setIsAnalyzingBlueprint(false);
-    }, 500);
+    }, 450);
   };
 
   const handleRemoveBlueprint = () => {
     setUploadedBlueprint(null);
     setShowBlueprintOverlay(false);
+  };
+
+  // Smart AI Auto-Layout Applicator
+  const handleApplyAutoLayout = () => {
+    const autoItems = generateAutoLayout(roomWidth, roomHeight, catalogItems);
+    setPlacedItems(autoItems);
+    setShowBlueprintOverlay(true);
+    handleStepChange(2);
   };
 
   // Canvas Reference & Scale
@@ -518,8 +778,8 @@ export default function FranchisePlanner() {
   // High-Resolution 2D Architectural & Engineering Blueprint Exporter for Contractors
   const handleExportBlueprintImage = () => {
     const canvas = document.createElement('canvas');
-    const canvasWidth = 2400;
-    const canvasHeight = 1600;
+    const canvasWidth = 3200;
+    const canvasHeight = 2000;
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
     const ctx = canvas.getContext('2d');
@@ -529,141 +789,161 @@ export default function FranchisePlanner() {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-    // 2. Blueprint Architectural Border & Framing
-    ctx.lineWidth = 4;
-    ctx.strokeStyle = '#1d4ed8'; // Royal blue outer engineering border
-    ctx.strokeRect(30, 30, canvasWidth - 60, canvasHeight - 60);
+    // 2. Blueprint Architectural Outer Border & Framing
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = '#1e3a8a'; // Deep Navy Engineering Blue
+    ctx.strokeRect(36, 36, canvasWidth - 72, canvasHeight - 72);
 
-    ctx.lineWidth = 1.5;
+    ctx.lineWidth = 2;
     ctx.strokeStyle = '#93c5fd';
-    ctx.strokeRect(38, 38, canvasWidth - 76, canvasHeight - 76);
+    ctx.strokeRect(46, 46, canvasWidth - 92, canvasHeight - 92);
 
     // 3. Drawing Header Title Bar
     ctx.fillStyle = '#1e3a8a';
-    ctx.fillRect(40, 40, canvasWidth - 80, 75);
+    ctx.fillRect(50, 50, canvasWidth - 100, 95);
 
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 28px "Outfit", "Inter", sans-serif';
-    ctx.fillText('G-SPEED ESPORT ARENA | ARCHITECTURAL & MEP FITOUT BLUEPRINT', 65, 86);
+    ctx.font = 'bold 36px "Inter", "Outfit", sans-serif';
+    ctx.fillText('G-SPEED ESPORT ARENA | ARCHITECTURAL & MEP FITOUT BLUEPRINT', 85, 105);
 
-    ctx.font = '15px "Inter", sans-serif';
+    ctx.font = '19px "Inter", sans-serif';
     ctx.fillStyle = '#bfdbfe';
-    ctx.fillText('แบบแปลนระบบไฟฟ้า, โครงข่าย LAN CAT6A และการจัดวางคอมพิวเตอร์ (สำหรับผู้รับเหมาและวิศวกรระบบ)', 65, 106);
+    ctx.fillText('แบบแปลนระบบไฟฟ้า, โครงข่าย LAN CAT6A และการจัดวางคอมพิวเตอร์ (สำหรับผู้รับเหมาและวิศวกรระบบ)', 85, 133);
 
     // Header Right Info
-    ctx.font = 'bold 15px "Inter", sans-serif';
+    ctx.font = 'bold 18px "Inter", sans-serif';
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'right';
-    ctx.fillText(`DWG NO: GS-BP-${Date.now().toString().slice(-6)}`, canvasWidth - 65, 78);
-    ctx.font = '14px "Inter", sans-serif';
+    ctx.fillText(`DWG NO: GS-BP-${Date.now().toString().slice(-6)}`, canvasWidth - 85, 95);
+    ctx.font = '16px "Inter", sans-serif';
     ctx.fillStyle = '#93c5fd';
-    ctx.fillText(`สเกลระบุเมตร (METRIC) | วันที่: ${new Date().toLocaleDateString('th-TH')}`, canvasWidth - 65, 102);
+    ctx.fillText(`สเกลระบบเมตริก (METRIC 1:50) | วันที่อนุมัติ: ${new Date().toLocaleDateString('th-TH')}`, canvasWidth - 85, 126);
     ctx.textAlign = 'left';
 
-    // 4. Drawing Area Boundaries
-    const drawLeft = 80;
-    const drawTop = 150;
-    const drawWidth = canvasWidth - 560; // reserve 480px on the right for Title Block & Legend
-    const drawHeight = canvasHeight - 240; // reserve 90px at bottom for contractor notes
+    // 4. Drawing Area Boundaries & Layout Division
+    // Reserve 880px on the right for huge readable specification schedules
+    const rightPanelWidth = 880;
+    const drawLeft = 90;
+    const drawTop = 180;
+    const drawWidth = canvasWidth - rightPanelWidth - 140; // ~2180px for floor plan
+    const drawHeight = canvasHeight - 320; // reserve 120px at bottom for contractor notes
 
     // Calculate scale factor to fit the room in drawing area
-    const meterScale = Math.min((drawWidth - 140) / roomWidth, (drawHeight - 140) / roomHeight);
+    const meterScale = Math.min((drawWidth - 160) / roomWidth, (drawHeight - 160) / roomHeight);
     const roomPxW = roomWidth * meterScale;
     const roomPxH = roomHeight * meterScale;
     const roomOriginX = drawLeft + ((drawWidth - roomPxW) / 2);
     const roomOriginY = drawTop + ((drawHeight - roomPxH) / 2);
 
-    // Draw Room Background (Light grid blueprint)
+    // Draw Room Floor Background
     ctx.fillStyle = '#f8fafc';
     ctx.fillRect(roomOriginX, roomOriginY, roomPxW, roomPxH);
 
-    // 1-Meter Grid Lines
+    // 1-Meter Grid Lines with High-Contrast Subdivisions
     ctx.lineWidth = 1;
     for (let x = 0; x <= roomWidth; x += 1) {
-      ctx.strokeStyle = x % 5 === 0 ? '#cbd5e1' : '#f1f5f9';
+      ctx.strokeStyle = x % 5 === 0 ? '#94a3b8' : '#e2e8f0';
       ctx.beginPath();
       ctx.moveTo(roomOriginX + (x * meterScale), roomOriginY);
       ctx.lineTo(roomOriginX + (x * meterScale), roomOriginY + roomPxH);
       ctx.stroke();
 
-      // Meter markers along top
+      // Top Meter Markers
       if (x > 0 && x < roomWidth) {
-        ctx.fillStyle = '#94a3b8';
-        ctx.font = '12px "Inter", sans-serif';
-        ctx.fillText(`${x}m`, roomOriginX + (x * meterScale) - 8, roomOriginY - 8);
+        ctx.fillStyle = '#64748b';
+        ctx.font = 'bold 18px "Inter", sans-serif';
+        ctx.fillText(`${x}m`, roomOriginX + (x * meterScale) - 14, roomOriginY - 14);
       }
     }
 
     for (let y = 0; y <= roomHeight; y += 1) {
-      ctx.strokeStyle = y % 5 === 0 ? '#cbd5e1' : '#f1f5f9';
+      ctx.strokeStyle = y % 5 === 0 ? '#94a3b8' : '#e2e8f0';
       ctx.beginPath();
       ctx.moveTo(roomOriginX, roomOriginY + (y * meterScale));
       ctx.lineTo(roomOriginX + roomPxW, roomOriginY + (y * meterScale));
       ctx.stroke();
 
+      // Left Meter Markers
       if (y > 0 && y < roomHeight) {
-        ctx.fillStyle = '#94a3b8';
-        ctx.font = '12px "Inter", sans-serif';
-        ctx.fillText(`${y}m`, roomOriginX - 32, roomOriginY + (y * meterScale) + 4);
+        ctx.fillStyle = '#64748b';
+        ctx.font = 'bold 18px "Inter", sans-serif';
+        ctx.fillText(`${y}m`, roomOriginX - 44, roomOriginY + (y * meterScale) + 6);
       }
     }
 
-    // Outer Room Concrete Walls
-    ctx.lineWidth = 6;
+    // Outer Room Concrete Walls (Thick Architectural Wall Outline)
+    ctx.lineWidth = 8;
     ctx.strokeStyle = '#0f172a';
     ctx.strokeRect(roomOriginX, roomOriginY, roomPxW, roomPxH);
 
-    // Dimension Annotations (Engineering Arrows)
-    // Top Dimension Line
-    ctx.lineWidth = 1.5;
-    ctx.strokeStyle = '#2563eb';
+    // Dimension Annotations (Engineering Arrows & Highlight Pills)
+    // Top Overall Dimension Line
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = '#1d4ed8';
     ctx.fillStyle = '#1d4ed8';
-    const topDimY = roomOriginY - 26;
+    const topDimY = roomOriginY - 42;
     ctx.beginPath();
     ctx.moveTo(roomOriginX, topDimY);
     ctx.lineTo(roomOriginX + roomPxW, topDimY);
     ctx.stroke();
     // Arrowheads
-    ctx.beginPath(); ctx.moveTo(roomOriginX, topDimY); ctx.lineTo(roomOriginX + 12, topDimY - 4); ctx.lineTo(roomOriginX + 12, topDimY + 4); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(roomOriginX + roomPxW, topDimY); ctx.lineTo(roomOriginX + roomPxW - 12, topDimY - 4); ctx.lineTo(roomOriginX + roomPxW - 12, topDimY + 4); ctx.fill();
-    // Dimension Text
-    ctx.font = 'bold 16px "Inter", sans-serif';
+    ctx.beginPath(); ctx.moveTo(roomOriginX, topDimY); ctx.lineTo(roomOriginX + 18, topDimY - 8); ctx.lineTo(roomOriginX + 18, topDimY + 8); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(roomOriginX + roomPxW, topDimY); ctx.lineTo(roomOriginX + roomPxW - 18, topDimY - 8); ctx.lineTo(roomOriginX + roomPxW - 18, topDimY + 8); ctx.fill();
+    
+    // Top Dimension Text with White Highlight Pill
+    ctx.font = 'bold 26px "Inter", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(`ความกว้าง ${roomWidth.toFixed(2)} เมตร`, roomOriginX + (roomPxW / 2), topDimY - 8);
+    const topDimLabel = `ความกว้างห้องรวม ${roomWidth.toFixed(2)} เมตร`;
+    const topDimWidth = ctx.measureText(topDimLabel).width;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(roomOriginX + (roomPxW / 2) - (topDimWidth / 2) - 16, topDimY - 38, topDimWidth + 32, 44);
+    ctx.strokeStyle = '#1d4ed8';
+    ctx.lineWidth = 2.5;
+    ctx.strokeRect(roomOriginX + (roomPxW / 2) - (topDimWidth / 2) - 16, topDimY - 38, topDimWidth + 32, 44);
+    ctx.fillStyle = '#1e3a8a';
+    ctx.fillText(topDimLabel, roomOriginX + (roomPxW / 2), topDimY - 8);
 
-    // Left Dimension Line
-    const leftDimX = roomOriginX - 42;
+    // Left Overall Dimension Line
+    const leftDimX = roomOriginX - 68;
     ctx.beginPath();
     ctx.moveTo(leftDimX, roomOriginY);
     ctx.lineTo(leftDimX, roomOriginY + roomPxH);
     ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(leftDimX, roomOriginY); ctx.lineTo(leftDimX - 4, roomOriginY + 12); ctx.lineTo(leftDimX + 4, roomOriginY + 12); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(leftDimX, roomOriginY + roomPxH); ctx.lineTo(leftDimX - 4, roomOriginY + roomPxH - 12); ctx.lineTo(leftDimX + 4, roomOriginY + roomPxH - 12); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(leftDimX, roomOriginY); ctx.lineTo(leftDimX - 8, roomOriginY + 18); ctx.lineTo(leftDimX + 8, roomOriginY + 18); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(leftDimX, roomOriginY + roomPxH); ctx.lineTo(leftDimX - 8, roomOriginY + roomPxH - 18); ctx.lineTo(leftDimX + 8, roomOriginY + roomPxH - 18); ctx.fill();
     
-    // Left text (vertical)
+    // Left text (vertical) with White Highlight Pill
     ctx.save();
-    ctx.translate(leftDimX - 12, roomOriginY + (roomPxH / 2));
+    ctx.translate(leftDimX - 22, roomOriginY + (roomPxH / 2));
     ctx.rotate(-Math.PI / 2);
-    ctx.fillText(`ความยาว ${roomHeight.toFixed(2)} เมตร`, 0, 0);
+    const leftDimLabel = `ความยาวห้องรวม ${roomHeight.toFixed(2)} เมตร`;
+    const leftDimWidth = ctx.measureText(leftDimLabel).width;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(- (leftDimWidth / 2) - 16, -26, leftDimWidth + 32, 44);
+    ctx.strokeStyle = '#1d4ed8';
+    ctx.lineWidth = 2.5;
+    ctx.strokeRect(- (leftDimWidth / 2) - 16, -26, leftDimWidth + 32, 44);
+    ctx.fillStyle = '#1e3a8a';
+    ctx.fillText(leftDimLabel, 0, 4);
     ctx.restore();
     ctx.textAlign = 'left';
 
-    // Main Entrance Indicator
+    // Main Entrance Indicator (Large Bold)
     const entranceW = 1.4 * meterScale;
     const entranceX = roomOriginX + (roomPxW / 2) - (entranceW / 2);
     ctx.fillStyle = '#ffffff';
-    ctx.fillRect(entranceX, roomOriginY + roomPxH - 4, entranceW, 8); // wall opening
-    ctx.lineWidth = 2.5;
+    ctx.fillRect(entranceX, roomOriginY + roomPxH - 6, entranceW, 12); // wall opening
+    ctx.lineWidth = 4;
     ctx.strokeStyle = '#10b981';
     ctx.beginPath();
     ctx.arc(entranceX, roomOriginY + roomPxH, entranceW, -Math.PI / 2, 0);
     ctx.stroke();
-    ctx.fillStyle = '#059669';
-    ctx.font = 'bold 14px "Inter", sans-serif';
-    ctx.fillText('ทางเข้าร้านหลัก (MAIN ENTRANCE 1.4M)', entranceX - 50, roomOriginY + roomPxH + 28);
+    ctx.fillStyle = '#047857';
+    ctx.font = 'bold 22px "Inter", sans-serif';
+    ctx.fillText('🚪 ทางเข้าร้านหลัก (MAIN ENTRANCE 1.4M)', entranceX - 90, roomOriginY + roomPxH + 42);
 
     // 5. Electrical & LAN Conduit Lines (Connecting Server Rack to desk clusters)
-    const serverItem = placedItems.find(i => i.type === 'server-rack' || i.type === 'service-counter') || placedItems[0];
+    const serverItem = placedItems.find(i => i.type === 'server-room' || i.type === 'server-rack' || i.type === 'cashier-counter') || placedItems[0];
     const serverCenterX = serverItem 
       ? roomOriginX + (serverItem.x * meterScale) + (((serverItem.rotation === 90 || serverItem.rotation === 270 ? serverItem.catalog?.heightMeters : serverItem.catalog?.widthMeters) || 1) * meterScale / 2)
       : roomOriginX + (1.5 * meterScale);
@@ -671,9 +951,9 @@ export default function FranchisePlanner() {
       ? roomOriginY + (serverItem.y * meterScale) + (((serverItem.rotation === 90 || serverItem.rotation === 270 ? serverItem.catalog?.widthMeters : serverItem.catalog?.heightMeters) || 1) * meterScale / 2)
       : roomOriginY + (1.5 * meterScale);
 
-    ctx.lineWidth = 2;
-    ctx.setLineDash([8, 6]);
-    ctx.strokeStyle = 'rgba(37, 99, 235, 0.65)'; // Dashed blue conduit lines
+    ctx.lineWidth = 2.5;
+    ctx.setLineDash([10, 8]);
+    ctx.strokeStyle = 'rgba(37, 99, 235, 0.55)'; // Dashed blue conduit lines
 
     placedItems.forEach(item => {
       if (item === serverItem) return;
@@ -691,7 +971,149 @@ export default function FranchisePlanner() {
     });
     ctx.setLineDash([]); // reset line dash
 
-    // 6. Draw Furniture Modules
+    // --- Helper Function: High-Detail Architectural Workstation Drawing ---
+    const drawGamingWorkstation = (stX, stY, stW, stH, opts = {}) => {
+      const isFlipped = opts.isFlipped || false;
+      const isVipStation = opts.isVip || false;
+      const monLabel = opts.monitorLabel || 'จอ 27" 360Hz';
+      const pcLabel = opts.pcLabel || 'PC RTX 4070';
+      const deskDim = opts.deskDimLabel || '1.20 ม.';
+      
+      // 1. Desk Surface Frame
+      ctx.fillStyle = isVipStation ? '#fdf4ff' : '#ffffff';
+      ctx.fillRect(stX + 2, stY + 2, stW - 4, stH - 4);
+      ctx.strokeStyle = isVipStation ? '#a855f7' : '#2563eb';
+      ctx.lineWidth = 2.5;
+      ctx.strokeRect(stX + 2, stY + 2, stW - 4, stH - 4);
+
+      // Desk Dimension Badge (Large, Bold & Solid Contrast)
+      const dimBadgeW = Math.min(stW * 0.45, 88);
+      const dimBadgeH = 24;
+      const dimBadgeY = isFlipped ? stY + stH - dimBadgeH - 4 : stY + 4;
+      ctx.fillStyle = isVipStation ? '#7e22ce' : '#1e3a8a';
+      ctx.fillRect(stX + (stW / 2) - (dimBadgeW / 2), dimBadgeY, dimBadgeW, dimBadgeH);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 15px "Inter", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(deskDim, stX + (stW / 2), dimBadgeY + 17);
+
+      // 2. Gaming PC Tower (Corner bracket)
+      const towerW = Math.min(stW * 0.18, 28);
+      const towerH = Math.min(stH * 0.44, 62);
+      const towerX = stX + stW - towerW - 6;
+      const towerY = isFlipped ? stY + 8 : stY + stH - towerH - 8;
+      
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(towerX, towerY, towerW, towerH);
+      ctx.strokeStyle = isVipStation ? '#c084fc' : '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(towerX, towerY, towerW, towerH);
+      
+      // PC RGB Fans (2 Glowing Circles)
+      ctx.fillStyle = isVipStation ? '#d946ef' : '#06b6d4';
+      ctx.beginPath();
+      ctx.arc(towerX + (towerW / 2), towerY + (towerH * 0.3), 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(towerX + (towerW / 2), towerY + (towerH * 0.7), 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // PC Tower Tag
+      ctx.font = 'bold 11px "Inter", sans-serif';
+      ctx.fillStyle = '#93c5fd';
+      ctx.fillText(pcLabel, towerX + (towerW / 2), isFlipped ? towerY + towerH + 13 : towerY - 4);
+
+      // 3. Gaming Monitor (Widescreen Fast-IPS / OLED)
+      const monW = Math.min(stW * 0.58, 96);
+      const monH = 10;
+      const monX = stX + (stW / 2) - (monW / 2) - 8;
+      const monY = isFlipped ? stY + 12 : stY + stH - monH - 14;
+
+      // Monitor Stand Base
+      ctx.fillStyle = '#475569';
+      ctx.fillRect(stX + (stW / 2) - 18 - 8, isFlipped ? monY - 5 : monY + monH, 36, 6);
+
+      // Monitor Screen Panel
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(monX, monY, monW, monH);
+      ctx.strokeStyle = isVipStation ? '#a855f7' : '#0284c7';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(monX, monY, monW, monH);
+
+      // Cyan Active Screen Line
+      ctx.fillStyle = isVipStation ? '#e879f9' : '#38bdf8';
+      ctx.fillRect(monX + 2, monY + 2, monW - 4, 3);
+
+      // Monitor Spec Text
+      ctx.font = 'bold 13px "Inter", sans-serif';
+      ctx.fillStyle = isVipStation ? '#6b21a8' : '#1e3a8a';
+      ctx.fillText(monLabel, stX + (stW / 2) - 8, isFlipped ? monY + monH + 16 : monY - 6);
+
+      // 4. Gaming Deskmat, Keyboard & Mouse
+      const padW = Math.min(stW * 0.52, 82);
+      const padH = 26;
+      const padX = stX + (stW / 2) - (padW / 2) - 8;
+      const padY = isFlipped ? monY + 18 : monY - padH - 4;
+
+      // Extended Mat
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(padX, padY, padW, padH);
+
+      // Mechanical Keyboard
+      const kbW = Math.min(padW * 0.65, 52);
+      const kbH = 16;
+      ctx.fillStyle = isVipStation ? '#7c3aed' : '#2563eb';
+      ctx.fillRect(padX + 4, padY + 5, kbW, kbH);
+
+      // Gaming Mouse
+      ctx.fillStyle = '#94a3b8';
+      ctx.beginPath();
+      ctx.arc(padX + padW - 10, padY + (padH / 2), 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 5. Electrical & LAN Conduit Box Symbol (⚡ + 🖧)
+      const outletX = stX + 6;
+      const outletY = isFlipped ? stY + 6 : stY + stH - 26;
+      ctx.fillStyle = '#fef3c7';
+      ctx.fillRect(outletX, outletY, 36, 20);
+      ctx.strokeStyle = '#d97706';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(outletX, outletY, 36, 20);
+      ctx.fillStyle = '#b45309';
+      ctx.font = 'bold 10px "Inter", sans-serif';
+      ctx.fillText('⚡220V', outletX + 18, outletY + 14);
+
+      // 6. Ergonomic Gaming Chair
+      const chairRadius = 18;
+      const chairCenterX = stX + (stW / 2) - 8;
+      const chairCenterY = isFlipped ? stY - 24 : stY + stH + 24;
+
+      // Seat Cushion
+      ctx.fillStyle = isVipStation ? '#6b21a8' : '#1e40af';
+      ctx.beginPath();
+      ctx.arc(chairCenterX, chairCenterY, chairRadius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Headrest Cushion
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(chairCenterX - 14, isFlipped ? chairCenterY + chairRadius - 6 : chairCenterY - chairRadius, 28, 8);
+
+      // 3D Armrests
+      ctx.fillRect(chairCenterX - chairRadius - 6, chairCenterY - 10, 6, 20);
+      ctx.fillRect(chairCenterX + chairRadius, chairCenterY - 10, 6, 20);
+
+      // Chair Label
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 10px "Inter", sans-serif';
+      ctx.fillText('เก้าอี้', chairCenterX, chairCenterY + 4);
+
+      ctx.textAlign = 'left'; // reset
+    };
+
+    // 6. Detailed Architectural Furniture & Station Renderer
     placedItems.forEach((item, index) => {
       const isRotated = item.rotation === 90 || item.rotation === 270;
       const itemW = (isRotated ? item.catalog?.heightMeters : item.catalog?.widthMeters) || 1;
@@ -701,200 +1123,587 @@ export default function FranchisePlanner() {
       const pxW = itemW * meterScale;
       const pxH = itemH * meterScale;
 
-      const isServer = item.type === 'server-rack';
-      const isCounter = item.type === 'service-counter';
+      const isServer = item.type === 'server-room' || item.type === 'server-rack';
+      const isCounter = item.type === 'cashier-counter' || item.type === 'service-counter';
       const isVip = item.type.includes('vip');
+      const isLounge = item.type.includes('sofa') || item.type.includes('lounge');
+      const isCafe = item.type.includes('cafe');
+      const isStage = item.type.includes('stage');
 
-      // Module background
       if (isServer) {
+        // --- Main Server Room & Network Core ---
         ctx.fillStyle = '#0f172a';
         ctx.fillRect(pxX, pxY, pxW, pxH);
         ctx.strokeStyle = '#3b82f6';
-        ctx.lineWidth = 2.5;
+        ctx.lineWidth = 3.5;
         ctx.strokeRect(pxX, pxY, pxW, pxH);
+
+        // 2x 42U Server Racks
+        const rackW = Math.min((pxW - 40) / 2, 85);
+        const rackH = Math.min(pxH - 60, 110);
+        const rackY = pxY + 45;
+
+        for (let r = 0; r < 2; r++) {
+          const rx = pxX + 20 + (r * (rackW + 15));
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(rx, rackY, rackW, rackH);
+          ctx.strokeStyle = '#60a5fa';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(rx, rackY, rackW, rackH);
+          
+          // Server rack shelves/blades
+          for (let b = 0; b < 4; b++) {
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(rx + 4, rackY + 6 + (b * 22), rackW - 8, 18);
+            // LED lights
+            ctx.fillStyle = '#10b981';
+            ctx.fillRect(rx + 8, rackY + 12 + (b * 22), 4, 4);
+            ctx.fillStyle = '#38bdf8';
+            ctx.fillRect(rx + 16, rackY + 12 + (b * 22), 4, 4);
+          }
+          
+          ctx.fillStyle = '#93c5fd';
+          ctx.font = 'bold 12px "Inter", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(r === 0 ? 'ตู้แร็ค 42U: No-Disk' : 'ตู้แร็ค 42U: Switch/10G', rx + (rackW / 2), rackY + rackH + 18);
+        }
+
+        // 6kVA Online UPS Unit
+        const upsX = pxX + pxW - 140;
+        const upsY = rackY;
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(upsX, upsY, 120, 52);
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(upsX, upsY, 120, 52);
+        ctx.fillStyle = '#fbbf24';
+        ctx.font = 'bold 12px "Inter", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('⚡ Online UPS 6kVA', upsX + 60, upsY + 22);
+        ctx.font = '11px "Inter", sans-serif';
+        ctx.fillStyle = '#cbd5e1';
+        ctx.fillText('สำรองไฟฉุกเฉิน 30 นาที', upsX + 60, upsY + 40);
+
+        // Server Room 24hr Precision AC Unit
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(pxX + 20, pxY + 12, 160, 24);
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(pxX + 20, pxY + 12, 160, 24);
+        ctx.fillStyle = '#0369a1';
+        ctx.font = 'bold 12px "Inter", sans-serif';
+        ctx.fillText('❄ แอร์เซิร์ฟเวอร์ 18,000 BTU 24ชม.', pxX + 100, pxY + 28);
+        ctx.textAlign = 'left';
+
       } else if (isCounter) {
-        ctx.fillStyle = '#fef3c7';
+        // --- Cashier & Reception Counter ---
+        ctx.fillStyle = '#fffbeb';
         ctx.fillRect(pxX, pxY, pxW, pxH);
         ctx.strokeStyle = '#d97706';
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 3.5;
         ctx.strokeRect(pxX, pxY, pxW, pxH);
+
+        // Warm wood countertop front edge
+        ctx.fillStyle = '#fef3c7';
+        ctx.fillRect(pxX + 6, pxY + 6, pxW - 12, Math.min(pxH * 0.42, 45));
+        ctx.strokeStyle = '#b45309';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(pxX + 6, pxY + 6, pxW - 12, Math.min(pxH * 0.42, 45));
+
+        // 2x POS Touchscreen Terminals
+        const posSpacing = (pxW - 140) / 2;
+        for (let p = 0; p < 2; p++) {
+          const posX = pxX + 30 + (p * (posSpacing + 70));
+          const posY = pxY + 10;
+          ctx.fillStyle = '#334155';
+          ctx.fillRect(posX + 15, posY + 22, 40, 8); // stand
+          ctx.fillStyle = '#0f172a';
+          ctx.fillRect(posX, posY, 70, 24);
+          ctx.strokeStyle = '#0284c7';
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(posX, posY, 70, 24);
+          ctx.fillStyle = '#38bdf8';
+          ctx.fillRect(posX + 3, posY + 3, 64, 5);
+          ctx.font = 'bold 12px "Inter", sans-serif';
+          ctx.fillStyle = '#ffffff';
+          ctx.textAlign = 'center';
+          ctx.fillText(`POS จอสัมผัส #${p + 1}`, posX + 35, posY + 17);
+        }
+
+        // Cash Drawer & Slip Thermal Printer
+        const cashX = pxX + 24;
+        const cashY = pxY + Math.min(pxH * 0.45, 50) + 12;
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(cashX, cashY, 65, 45);
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(cashX, cashY, 65, 45);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 11px "Inter", sans-serif';
+        ctx.fillText('ตู้เซฟเก็บเงิน', cashX + 32, cashY + 20);
+        ctx.fillText('& ปริ้นเตอร์สลิป', cashX + 32, cashY + 36);
+
+        // Main Electrical Distribution Board (MDB)
+        const mdbX = pxX + pxW - 150;
+        const mdbY = cashY;
+        ctx.fillStyle = '#fff7ed';
+        ctx.fillRect(mdbX, mdbY, 125, 45);
+        ctx.strokeStyle = '#ea580c';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(mdbX, mdbY, 125, 45);
+        ctx.fillStyle = '#c2410c';
+        ctx.font = 'bold 12px "Inter", sans-serif';
+        ctx.fillText('⚡ MDB ไฟหลัก 3-Phase', mdbX + 62, mdbY + 20);
+        ctx.font = '10px "Inter", sans-serif';
+        ctx.fillText('100A Main Breaker', mdbX + 62, mdbY + 36);
+
+        // CCTV Master Screen
+        const cctvX = pxX + (pxW / 2) - 50;
+        const cctvY = cashY;
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(cctvX, cctvY, 100, 45);
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(cctvX, cctvY, 100, 45);
+        ctx.fillStyle = '#38bdf8';
+        ctx.font = 'bold 12px "Inter", sans-serif';
+        ctx.fillText('จอมอนิเตอร์ CCTV', cctvX + 50, cctvY + 20);
+        ctx.font = '10px "Inter", sans-serif';
+        ctx.fillText('16 กล้องรอบร้าน', cctvX + 50, cctvY + 36);
+        ctx.textAlign = 'left';
+
       } else if (isVip) {
+        // --- VIP Private Bootcamp Suite ---
         ctx.fillStyle = '#faf5ff';
         ctx.fillRect(pxX, pxY, pxW, pxH);
+        // Double soundproof acoustic glass outline
         ctx.strokeStyle = '#9333ea';
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 4;
         ctx.strokeRect(pxX, pxY, pxW, pxH);
+        ctx.strokeStyle = '#c084fc';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(pxX + 6, pxY + 6, pxW - 12, pxH - 12);
+
+        // Sliding door arc opening
+        const vipDoorW = Math.min(pxW * 0.25, 75);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(pxX + pxW - vipDoorW - 10, pxY + pxH - 8, vipDoorW, 14);
+        ctx.strokeStyle = '#a855f7';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(pxX + pxW - vipDoorW - 10, pxY + pxH, vipDoorW, -Math.PI / 2, 0);
+        ctx.stroke();
+        ctx.fillStyle = '#7e22ce';
+        ctx.font = 'bold 13px "Inter", sans-serif';
+        ctx.fillText('ประตูกระจกเก็บเสียง 1.0 ม.', pxX + pxW - vipDoorW - 40, pxY + pxH - 14);
+
+        // Wall-mounted Inverter Air Conditioner
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(pxX + 20, pxY + 12, 110, 22);
+        ctx.strokeStyle = '#9333ea';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(pxX + 20, pxY + 12, 110, 22);
+        ctx.fillStyle = '#6b21a8';
+        ctx.font = 'bold 12px "Inter", sans-serif';
+        ctx.fillText('❄ แอร์ 24,000 BTU Inverter', pxX + 24, pxY + 27);
+
+        // 5x VIP Pro Battlestations
+        const seats = item.catalog?.seats || 5;
+        const deskMargin = 16;
+        const availableW = pxW - (deskMargin * 2);
+        const deskPerSeatW = availableW / seats;
+        const deskDepth = Math.min(pxH * 0.42, 68);
+
+        for (let s = 0; s < seats; s++) {
+          const stX = pxX + deskMargin + (s * deskPerSeatW);
+          const stY = pxY + deskMargin + 25;
+          drawGamingWorkstation(stX, stY, deskPerSeatW, deskDepth, {
+            isVip: true,
+            monitorLabel: '32" OLED 240Hz',
+            pcLabel: 'i9+RTX4080',
+            deskDimLabel: '1.20 ม.'
+          });
+        }
+
+      } else if (isCafe) {
+        // --- Cafe Bar & Snack Station ---
+        ctx.fillStyle = '#ecfdf5';
+        ctx.fillRect(pxX, pxY, pxW, pxH);
+        ctx.strokeStyle = '#059669';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(pxX, pxY, pxW, pxH);
+
+        // 2-Door Beverage Cooler
+        const coolerW = Math.min(pxW * 0.45, 120);
+        const coolerH = Math.min(pxH * 0.42, 55);
+        ctx.fillStyle = '#065f46';
+        ctx.fillRect(pxX + 12, pxY + 12, coolerW, coolerH);
+        ctx.strokeStyle = '#34d399';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(pxX + 12, pxY + 12, coolerW, coolerH);
+        ctx.fillStyle = '#a7f3d0';
+        ctx.fillRect(pxX + 16, pxY + 16, (coolerW / 2) - 6, coolerH - 8);
+        ctx.fillRect(pxX + 14 + (coolerW / 2), pxY + 16, (coolerW / 2) - 6, coolerH - 8);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 12px "Inter", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('ตู้แช่เครื่องดื่ม 2 ประตู', pxX + 12 + (coolerW / 2), pxY + 12 + (coolerH / 2) + 4);
+
+        // Espresso & Hot Water Bar
+        const coffeeX = pxX + coolerW + 25;
+        ctx.fillStyle = '#d1fae5';
+        ctx.fillRect(coffeeX, pxY + 12, pxW - coolerW - 38, coolerH);
+        ctx.strokeStyle = '#059669';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(coffeeX, pxY + 12, pxW - coolerW - 38, coolerH);
+        ctx.fillStyle = '#065f46';
+        ctx.font = 'bold 12px "Inter", sans-serif';
+        ctx.fillText('บาร์กาแฟสด & กาน้ำร้อน', coffeeX + ((pxW - coolerW - 38) / 2), pxY + 12 + (coolerH / 2) + 4);
+
+        // Snack Shelves & Microwave
+        const snackY = pxY + coolerH + 20;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(pxX + 12, snackY, pxW - 24, pxH - coolerH - 32);
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(pxX + 12, snackY, pxW - 24, pxH - coolerH - 32);
+        ctx.fillStyle = '#047857';
+        ctx.font = 'bold 13px "Inter", sans-serif';
+        ctx.fillText('ชั้นวางขนมขบเคี้ยว & บะหมี่กึ่งสำเร็จรูป + จุดไมโครเวฟ', pxX + (pxW / 2), snackY + ((pxH - coolerH - 32) / 2) + 4);
+        ctx.textAlign = 'left';
+
+      } else if (isLounge) {
+        // --- Spectator Esports Lounge ---
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(pxX, pxY, pxW, pxH);
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(pxX, pxY, pxW, pxH);
+
+        // L-Shape Sectional Sofa
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(pxX + 16, pxY + 16, pxW - 32, 45);
+        ctx.fillRect(pxX + 16, pxY + 55, 55, pxH - 75);
+        ctx.strokeStyle = '#64748b';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(pxX + 16, pxY + 16, pxW - 32, 45);
+        ctx.strokeRect(pxX + 16, pxY + 55, 55, pxH - 75);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 13px "Inter", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('ชุดโซฟา L-Shape รองรับผู้ชม', pxX + (pxW / 2), pxY + 42);
+
+        // Glass Coffee Table
+        const tableX = pxX + 85;
+        const tableY = pxY + 75;
+        const tableW = Math.min(pxW - 110, 120);
+        const tableH = Math.min(pxH - 95, 45);
+        ctx.fillStyle = '#e2e8f0';
+        ctx.fillRect(tableX, tableY, tableW, tableH);
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(tableX, tableY, tableW, tableH);
+        ctx.fillStyle = '#334155';
+        ctx.font = 'bold 12px "Inter", sans-serif';
+        ctx.fillText('โต๊ะกลางกระจก', tableX + (tableW / 2), tableY + (tableH / 2) + 4);
+
+        // Wall-mounted 75" 4K Smart TV
+        const tvW = Math.min(pxW - 40, 180);
+        const tvX = pxX + (pxW / 2) - (tvW / 2);
+        const tvY = pxY + pxH - 24;
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(tvX, tvY, tvW, 14);
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(tvX, tvY, tvW, 14);
+        ctx.fillStyle = '#0284c7';
+        ctx.font = 'bold 12px "Inter", sans-serif';
+        ctx.fillText('📺 Smart TV 75" ถ่ายทอดสด Esports (Soundbar 5.1)', pxX + (pxW / 2), tvY - 8);
+        ctx.textAlign = 'left';
+
       } else {
+        // --- Standard & Pro Gaming Desk Modules (Single, Double, Quad, Island-6) ---
         ctx.fillStyle = '#eff6ff';
         ctx.fillRect(pxX, pxY, pxW, pxH);
         ctx.strokeStyle = '#1d4ed8';
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 3;
         ctx.strokeRect(pxX, pxY, pxW, pxH);
+
+        const seats = item.catalog?.seats || 2;
+        const isDoubleSidedIsland = seats >= 6 && item.type.includes('island');
+
+        if (isDoubleSidedIsland) {
+          // Island 6: 3 PCs top row, 3 PCs bottom row facing each other
+          const cols = Math.ceil(seats / 2);
+          const colW = pxW / cols;
+          const rowH = pxH / 2;
+
+          // Center Cable Duct / Acoustic Divider
+          ctx.fillStyle = '#1e3a8a';
+          ctx.fillRect(pxX, pxY + rowH - 12, pxW, 24);
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 12px "Inter", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('⚡ รางปลั๊กเมน 220V 16A x 6 จุด  |  🖧 ตู้กระจายสาย LAN CAT6A 10G', pxX + (pxW / 2), pxY + rowH + 4);
+          ctx.textAlign = 'left';
+
+          for (let c = 0; c < cols; c++) {
+            const deskX = pxX + (c * colW);
+
+            // Row 1 (facing down towards center)
+            drawGamingWorkstation(deskX, pxY + 3, colW, rowH - 14, {
+              isFlipped: false,
+              monitorLabel: 'จอ 27" 360Hz',
+              pcLabel: 'RTX 4070',
+              deskDimLabel: '1.20 ม.'
+            });
+
+            // Row 2 (facing up towards center)
+            drawGamingWorkstation(deskX, pxY + rowH + 12, colW, rowH - 14, {
+              isFlipped: true,
+              monitorLabel: 'จอ 27" 360Hz',
+              pcLabel: 'RTX 4070',
+              deskDimLabel: '1.20 ม.'
+            });
+          }
+        } else {
+          // Linear Row (1, 2, 4 seats)
+          const seatW = pxW / seats;
+
+          // Back cable tray / wire channel
+          ctx.fillStyle = '#dbeafe';
+          ctx.fillRect(pxX + 3, pxY + 3, pxW - 6, 12);
+          ctx.fillStyle = '#1e40af';
+          ctx.font = 'bold 11px "Inter", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('⚡ รางปลั๊ก 220V + 🖧 รางสาย LAN CAT6A', pxX + (pxW / 2), pxY + 12);
+          ctx.textAlign = 'left';
+
+          for (let s = 0; s < seats; s++) {
+            const stationX = pxX + (s * seatW);
+            drawGamingWorkstation(stationX, pxY + 16, seatW, pxH - 22, {
+              isFlipped: false,
+              monitorLabel: 'จอ 27" 360Hz',
+              pcLabel: 'RTX 4070',
+              deskDimLabel: '1.20 ม.'
+            });
+          }
+        }
       }
 
-      // Interior details & text
-      ctx.fillStyle = isServer ? '#ffffff' : (isCounter ? '#92400e' : (isVip ? '#6b21a8' : '#1e3a8a'));
-      ctx.font = 'bold 13px "Inter", sans-serif';
+      // High-Contrast Tag Overlay for Each Module (Placed outside module to prevent obscuring equipment)
       const title = item.catalog?.name?.split('(')[0] || item.type;
-      ctx.fillText(`[#${index + 1}] ${title}`, pxX + 6, pxY + 18);
+      const dimBadge = `กว้าง ${itemW.toFixed(1)} x ลึก ${itemH.toFixed(1)} ม.`;
+      
+      const badgeH = 48;
+      const badgeW = Math.min(Math.max(pxW, 260), 440);
+      let badgeX = pxX;
+      let badgeY = pxY - badgeH - 8;
+      
+      // If module is close to top wall, place badge below the module
+      if (badgeY < roomOriginY + 8) {
+        badgeY = pxY + pxH + 8;
+      }
+      
+      if (!isServer) {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.98)';
+        ctx.fillRect(badgeX, badgeY, badgeW, badgeH);
+        ctx.strokeStyle = isVip ? '#9333ea' : (isCounter ? '#d97706' : (isCafe ? '#059669' : '#1d4ed8'));
+        ctx.lineWidth = 2.5;
+        ctx.strokeRect(badgeX, badgeY, badgeW, badgeH);
 
-      ctx.font = '11px "Inter", sans-serif';
-      ctx.fillStyle = isServer ? '#93c5fd' : '#475569';
-      ctx.fillText(`${itemW}x${itemH}m | (${item.x.toFixed(1)}, ${item.y.toFixed(1)})`, pxX + 6, pxY + 34);
+        ctx.fillStyle = isVip ? '#6b21a8' : (isCounter ? '#92400e' : (isCafe ? '#065f46' : '#1e3a8a'));
+        ctx.font = 'bold 18px "Inter", sans-serif';
+        ctx.fillText(`[#${index + 1}] ${title.slice(0, 25)}`, badgeX + 12, badgeY + 22);
 
-      if (item.catalog?.seats > 0) {
-        ctx.fillStyle = '#1d4ed8';
-        ctx.font = 'bold 11px "Inter", sans-serif';
-        ctx.fillText(`⚡ ${item.catalog.seats} PCs (220V + CAT6A)`, pxX + 6, pxY + 50);
-
-        // Draw seating circles
-        const seatCount = Math.min(item.catalog.seats, 8);
-        const seatRadius = 4;
-        for (let s = 0; s < seatCount; s++) {
-          const seatX = pxX + 12 + (s * 14);
-          const seatY = pxY + pxH - 8;
-          ctx.beginPath();
-          ctx.arc(seatX, seatY, seatRadius, 0, Math.PI * 2);
-          ctx.fillStyle = '#2563eb';
-          ctx.fill();
-        }
+        ctx.fillStyle = '#334155';
+        ctx.font = 'bold 14px "Inter", sans-serif';
+        ctx.fillText(`${dimBadge} ${item.catalog?.seats ? `| ${item.catalog.seats} เครื่อง (โต๊ะ 1.20ม.)` : ''}`, badgeX + 12, badgeY + 41);
       }
     });
 
-    // 7. Right Panel: Engineering Specification Block & Legend
-    const infoPanelX = canvasWidth - 480;
-    const infoPanelY = 150;
-    const infoPanelW = 440;
-    const infoPanelH = canvasHeight - 240;
+    // 7. Right Engineering Panel: Extra Large & Highly Detailed Specifications for Contractors
+    const infoPanelX = canvasWidth - rightPanelWidth - 60;
+    const infoPanelY = 180;
+    const infoPanelW = rightPanelWidth;
+    const infoPanelH = canvasHeight - 320;
 
     // Background panel
     ctx.fillStyle = '#f8fafc';
     ctx.fillRect(infoPanelX, infoPanelY, infoPanelW, infoPanelH);
     ctx.strokeStyle = '#cbd5e1';
-    ctx.lineWidth = 1.5;
+    ctx.lineWidth = 2;
     ctx.strokeRect(infoPanelX, infoPanelY, infoPanelW, infoPanelH);
 
-    // Section 1: Project Metadata
+    let currentY = infoPanelY;
+
+    // --- Section 1: Project Metadata ---
     ctx.fillStyle = '#1e3a8a';
-    ctx.fillRect(infoPanelX, infoPanelY, infoPanelW, 36);
+    ctx.fillRect(infoPanelX, currentY, infoPanelW, 46);
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 15px "Inter", sans-serif';
-    ctx.fillText('ข้อมูลแบบแปลน (DRAWING METADATA)', infoPanelX + 14, infoPanelY + 24);
+    ctx.font = 'bold 20px "Inter", sans-serif';
+    ctx.fillText('1. ข้อมูลโครงการและงานระบบอาคาร (PROJECT & MEP METADATA)', infoPanelX + 18, currentY + 30);
+    currentY += 62;
 
     const metaRows = [
-      ['โครงการ (Project):', 'G-SPEED ESPORT ARENA'],
-      ['ขนาดพื้นที่ (Venue):', `${roomWidth} x ${roomHeight} เมตร (${roomWidth * roomHeight} ตร.ม.)`],
-      ['จำนวนสถานี (Stations):', `${totalStations} เครื่อง`],
-      ['จำนวนโมดูล (Modules):', `${placedItems.length} ชิ้นงาน`],
-      ['สเปกคอมพิวเตอร์:', currentTierInfo.name],
-      ['ทำเลที่ตั้ง (Location):', storeLocation],
-      ['ผู้ออกแบบและตรวจแบบ:', 'G-Speed Engineering Dept.']
+      ['ชื่อโครงการ (Project Name):', 'G-SPEED ESPORT ARENA OFFICIAL STORE'],
+      ['ขนาดพื้นที่ร้านรวม (Total Venue):', `${roomWidth} x ${roomHeight} เมตร (${roomWidth * roomHeight} ตร.ม.)`],
+      ['จำนวนสถานีคอมพิวเตอร์ (Capacity):', `${totalStations} เครื่อง (สัดส่วน 1 PC / 2.3 ตร.ม. ตามมาตรฐาน)`],
+      ['จำนวนโมดูลเฟอร์นิเจอร์ทั้งหมด:', `${placedItems.length} โมดูลหลัก (รวมงานสั่งผลิตและระบบ)`],
+      ['ทำเลที่ตั้งสาขา (Site Location):', storeLocation],
+      ['ระบบไฟฟ้าและโหลดเมนรวม (MDB):', '3 Phase 380V / 100A พร้อมตู้ MDB แยกเบรกเกอร์ย่อย'],
+      ['โครงข่ายอินเทอร์เน็ต (Internet):', 'Dual 10Gbps SFP+ Fiber Optic Active-Active Failover']
     ];
 
-    ctx.font = '13px "Inter", sans-serif';
-    let currentY = infoPanelY + 60;
     metaRows.forEach(([lbl, val]) => {
-      ctx.fillStyle = '#64748b';
-      ctx.fillText(lbl, infoPanelX + 14, currentY);
+      ctx.fillStyle = '#475569';
+      ctx.font = 'bold 15px "Inter", sans-serif';
+      ctx.fillText(lbl, infoPanelX + 18, currentY);
       ctx.fillStyle = '#0f172a';
-      ctx.font = 'bold 13px "Inter", sans-serif';
-      ctx.fillText(val, infoPanelX + 180, currentY);
-      ctx.font = '13px "Inter", sans-serif';
-      currentY += 25;
+      ctx.font = 'bold 16px "Inter", sans-serif';
+      ctx.fillText(val, infoPanelX + 320, currentY);
+      currentY += 28;
     });
 
-    // Section 2: Blueprint Legend (สัญลักษณ์แบบแปลน)
-    currentY += 15;
+    // --- Section 2: Complete PC Hardware Specifications ---
+    currentY += 12;
     ctx.fillStyle = '#1e3a8a';
-    ctx.fillRect(infoPanelX, currentY, infoPanelW, 36);
+    ctx.fillRect(infoPanelX, currentY, infoPanelW, 46);
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 15px "Inter", sans-serif';
-    ctx.fillText('สัญลักษณ์แบบแปลน (PLAN LEGEND)', infoPanelX + 14, currentY + 24);
+    ctx.font = 'bold 20px "Inter", sans-serif';
+    ctx.fillText(`2. สเปกคอมพิวเตอร์และอุปกรณ์ครบชุด (PC SPECIFICATIONS - ${currentTierInfo.name.toUpperCase()})`, infoPanelX + 18, currentY + 30);
+    currentY += 62;
 
-    currentY += 50;
-    const legendItems = [
-      { color: '#eff6ff', border: '#1d4ed8', label: 'โต๊ะคอมพิวเตอร์เกมมิ่ง (Gaming Stations)' },
-      { color: '#0f172a', border: '#3b82f6', label: 'ตู้ Rack Server 42U & MDB (Server Room)' },
-      { color: '#faf5ff', border: '#9333ea', label: 'ห้องซ้อม VIP / Bootcamp Suite' },
-      { color: '#fef3c7', border: '#d97706', label: 'เคาน์เตอร์คิดเงิน & POS แคชเชียร์' },
-      { line: true, color: '#2563eb', label: 'แนวท่อร้อยสายไฟ 220V & สาย LAN CAT6A' }
+    const pcSpecs = [
+      ['หน่วยประมวลผล (Processor CPU):', currentTierInfo.cpu || 'Intel Core i7-14700F / AMD Ryzen 7 7800X3D (Liquid Cooler)'],
+      ['การ์ดแสดงผล (Graphics Card GPU):', currentTierInfo.gpu || 'NVIDIA GeForce RTX 4070 SUPER 12GB GDDR6X Dual/Triple Fan'],
+      ['หน่วยความจำหลัก (RAM System):', currentTierInfo.ram || '32GB DDR5 6000MHz Dual-Channel Low Latency RGB'],
+      ['จอแสดงผลการแข่งขัน (Esports Monitor):', currentTierInfo.monitor || '27" Fast-IPS 280Hz - 360Hz QHD DyAc Ready (0.5ms Response)'],
+      ['ชุดเกมมิ่งเกียร์ (Gaming Gear Set):', currentTierInfo.gear || 'Custom Coiled Keyboard (Hotswap) + Ultralight 4K/8K Hz Mouse + Headset 7.1'],
+      ['เซิร์ฟเวอร์ดิสก์เลส (Diskless Boot Master):', '10G SFP+ Dual Master Server (Enterprise NVMe PCIe 4.0 Array + Auto Updater)'],
+      ['ระบบพาวเวอร์ซัพพลาย (Power Supply PSU):', '750W - 850W 80+ Gold Fully Modular Active PFC รับประกัน 5 ปี'],
+      ['การเชื่อมต่อระบบเครือข่าย (LAN Interface):', 'RJ-45 CAT6A Shielded 1000/2500 Mbps ต่อเครื่อง 1:1 เข้า Switch 10G']
     ];
 
-    legendItems.forEach(leg => {
-      if (leg.line) {
-        ctx.lineWidth = 2.5;
-        ctx.setLineDash([6, 4]);
-        ctx.strokeStyle = leg.color;
-        ctx.beginPath();
-        ctx.moveTo(infoPanelX + 14, currentY - 5);
-        ctx.lineTo(infoPanelX + 44, currentY - 5);
-        ctx.stroke();
-        ctx.setLineDash([]);
-      } else {
-        ctx.fillStyle = leg.color;
-        ctx.fillRect(infoPanelX + 14, currentY - 14, 30, 18);
-        ctx.strokeStyle = leg.border;
-        ctx.lineWidth = 1.5;
-        ctx.strokeRect(infoPanelX + 14, currentY - 14, 30, 18);
-      }
+    pcSpecs.forEach(([part, spec]) => {
+      ctx.fillStyle = '#1d4ed8';
+      ctx.font = 'bold 15px "Inter", sans-serif';
+      ctx.fillText(part, infoPanelX + 18, currentY);
       ctx.fillStyle = '#1e293b';
-      ctx.font = '13px "Inter", sans-serif';
-      ctx.fillText(leg.label, infoPanelX + 56, currentY);
-      currentY += 32;
+      ctx.font = '15px "Inter", sans-serif';
+      
+      if (spec.length > 46) {
+        ctx.fillText(spec.slice(0, 46), infoPanelX + 320, currentY);
+        currentY += 22;
+        ctx.fillText(spec.slice(46), infoPanelX + 320, currentY);
+      } else {
+        ctx.fillText(spec, infoPanelX + 320, currentY);
+      }
+      currentY += 28;
     });
 
-    // Section 3: Placed Modules Index Table
-    currentY += 15;
+    // --- Section 3: Desk Dimensions, Materials & Furniture Schedule ---
+    currentY += 12;
     ctx.fillStyle = '#1e3a8a';
-    ctx.fillRect(infoPanelX, currentY, infoPanelW, 36);
+    ctx.fillRect(infoPanelX, currentY, infoPanelW, 46);
     ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 20px "Inter", sans-serif';
+    ctx.fillText('3. รายละเอียดสเปกโต๊ะและเก้าอี้ติดตั้ง (DESK & FURNITURE SCHEDULE)', infoPanelX + 18, currentY + 30);
+    currentY += 62;
+
+    const deskSpecs = [
+      ['ขนาดโต๊ะต่อที่นั่ง (Station Dimensions):', 'กว้าง 1.20 x ลึก 0.80 x สูง 0.75 ม. (ระยะตามมาตรฐาน Pro Player)'],
+      ['หน้าท็อปโต๊ะ (Desk Tabletop Material):', 'ไม้สังเคราะห์เกรด HPL หนา 25 มม. ทนรอยขีดข่วน/ความร้อน/น้ำ 100%'],
+      ['การขึ้นรูปขอบโต๊ะ (Ergonomic Bevel Edge):', 'ลบมุมลาดเอียง 45 องศา ลดแรงกดทับข้อมือขณะเล่นเกมต่อเนื่อง'],
+      ['โครงสร้างขาและคาน (Steel Frame Structure):', 'เหล็กกล้าคาร์บอน (Carbon Steel) หนา 1.5 มม. อบสีพาวเดอร์โค้ตกันสนิม'],
+      ['ระบบท่อร้อยสายไฟ (Dual Wire Raceway):', 'รางเหล็กใต้โต๊ะแยกอิสระ 2 ช่อง: ช่องไฟ 220V และช่องสายสัญญาณ LAN'],
+      ['เก้าอี้เกมมิ่งมืออาชีพ (Ergonomic Chair):', currentTierInfo.chair || 'G-Speed Pro Racing PU Leather / Ergonomic Mesh'],
+      ['ระบบปรับระดับเก้าอี้ (Ergonomic Adjustability):', 'ที่พักแขน 4D ปรับได้ 4 ทิศทาง + เบาะปรับเอนนอน 160° + ปรับหนุนหลัง'],
+      ['การรับประกันสินค้า (Warranty Coverage):', 'รับประกันโครงสร้างโต๊ะ 5 ปี และเก้าอี้เกมมิ่ง 3 ปี On-site Service']
+    ];
+
+    deskSpecs.forEach(([itemTitle, itemVal]) => {
+      ctx.fillStyle = '#059669';
+      ctx.font = 'bold 15px "Inter", sans-serif';
+      ctx.fillText(itemTitle, infoPanelX + 18, currentY);
+      ctx.fillStyle = '#0f172a';
+      ctx.font = '14.5px "Inter", sans-serif';
+
+      if (itemVal.length > 46) {
+        ctx.fillText(itemVal.slice(0, 46), infoPanelX + 320, currentY);
+        currentY += 22;
+        ctx.fillText(itemVal.slice(46), infoPanelX + 320, currentY);
+      } else {
+        ctx.fillText(itemVal, infoPanelX + 320, currentY);
+      }
+      currentY += 28;
+    });
+
+    // --- Section 4: Placed Modules Breakdown Table ---
+    currentY += 12;
+    ctx.fillStyle = '#1e3a8a';
+    ctx.fillRect(infoPanelX, currentY, infoPanelW, 46);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 20px "Inter", sans-serif';
+    ctx.fillText('4. รายการโมดูลและจุดติดตั้งในผัง (EQUIPMENT SCHEDULE TABLE)', infoPanelX + 18, currentY + 30);
+    currentY += 58;
+
     ctx.font = 'bold 15px "Inter", sans-serif';
-    ctx.fillText('รายการโมดูลในผัง (EQUIPMENT SCHEDULE)', infoPanelX + 14, currentY + 24);
-
-    currentY += 40;
-    ctx.font = '12px "Inter", sans-serif';
     ctx.fillStyle = '#475569';
-    ctx.fillText('ลำดับ  ชื่อรายการโมดูล              พิกัด (X, Y)     ขนาด', infoPanelX + 14, currentY);
-    ctx.strokeStyle = '#e2e8f0';
-    ctx.beginPath(); ctx.moveTo(infoPanelX + 14, currentY + 5); ctx.lineTo(infoPanelX + infoPanelW - 14, currentY + 5); ctx.stroke();
-    currentY += 20;
+    ctx.fillText('ลำดับ  ชื่อรายการโมดูล             พิกัด (X,Y)     ขนาดโมดูล        จำนวนสถานี / สเปก', infoPanelX + 18, currentY);
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(infoPanelX + 18, currentY + 8); ctx.lineTo(infoPanelX + infoPanelW - 18, currentY + 8); ctx.stroke();
+    currentY += 28;
 
+    ctx.font = '14.5px "Inter", sans-serif';
     placedItems.slice(0, 8).forEach((it, idx) => {
-      const name = (it.catalog?.name?.split('(')[0] || it.type).slice(0, 16);
+      const name = (it.catalog?.name?.split('(')[0] || it.type).slice(0, 18);
       const coords = `(${it.x.toFixed(1)}, ${it.y.toFixed(1)})`;
       const size = `${it.catalog?.widthMeters || 1}x${it.catalog?.heightMeters || 1}m`;
+      const seatInfo = it.catalog?.seats ? `${it.catalog.seats} PCs (โต๊ะ 1.20ม.)` : 'Facility จุดบริการ';
       ctx.fillStyle = '#0f172a';
-      ctx.fillText(`#${idx + 1}    ${name.padEnd(18, ' ')} ${coords.padEnd(12, ' ')} ${size}`, infoPanelX + 14, currentY);
-      currentY += 19;
+      ctx.fillText(`#${idx + 1}    ${name.padEnd(20, ' ')} ${coords.padEnd(12, ' ')} ${size.padEnd(12, ' ')} ${seatInfo}`, infoPanelX + 18, currentY);
+      currentY += 26;
     });
+
     if (placedItems.length > 8) {
       ctx.fillStyle = '#64748b';
-      ctx.fillText(`... และอีก ${placedItems.length - 8} รายการ`, infoPanelX + 14, currentY);
+      ctx.font = 'italic 14px "Inter", sans-serif';
+      ctx.fillText(`... และยังมีอีก ${placedItems.length - 8} รายการในบัญชีรายการผลิตและการติดตั้ง`, infoPanelX + 18, currentY);
     }
 
-    // 8. Bottom Contractor Notes Banner
-    const notesY = canvasHeight - 100;
+    // 8. Bottom Contractor Notes Banner (Extra Large & Highly Detailed for Field Contractors)
+    const notesY = canvasHeight - 120;
     ctx.fillStyle = '#eff6ff';
-    ctx.fillRect(80, notesY, canvasWidth - 560, 65);
+    ctx.fillRect(90, notesY, canvasWidth - rightPanelWidth - 140, 80);
     ctx.strokeStyle = '#93c5fd';
-    ctx.lineWidth = 1.5;
-    ctx.strokeRect(80, notesY, canvasWidth - 560, 65);
+    ctx.lineWidth = 2;
+    ctx.strokeRect(90, notesY, canvasWidth - rightPanelWidth - 140, 80);
 
     ctx.fillStyle = '#1e3a8a';
-    ctx.font = 'bold 14px "Inter", sans-serif';
-    ctx.fillText('ข้อกำหนดสำคัญสำหรับผู้รับเหมางานระบบ (GENERAL CONTRACTOR NOTES):', 96, notesY + 22);
+    ctx.font = 'bold 18px "Inter", sans-serif';
+    ctx.fillText('ข้อกำหนดสำคัญสำหรับผู้รับเหมาและวิศวกรระบบ (GENERAL CONTRACTOR & MEP SPECIFICATIONS):', 110, notesY + 28);
 
     ctx.fillStyle = '#334155';
-    ctx.font = '12px "Inter", sans-serif';
-    ctx.fillText('1. ระยะทางเดินหลัก (Circulation Clearance) ต้องไม่น้อยกว่า 1.20 - 1.50 ม. ตามมาตรฐานความปลอดภัยอาคารพาณิชย์', 96, notesY + 40);
-    ctx.fillText('2. จุดเต้ารับไฟฟ้า 220V 16A เต้ารับคู่ 3 ขา มีระบบกราวด์ (Grounding <= 5 Ohm) ต่อคอมพิวเตอร์ 1:1 พร้อมแยกสาย LAN Cat6A ห่างจากสายไฟฟ้า 30 ซม.', 96, notesY + 56);
+    ctx.font = '15px "Inter", sans-serif';
+    ctx.fillText('1. ขนาดโต๊ะเกมมิ่งมาตรฐาน: กว้าง 1.20 ม. ลึก 0.80 ม. ต่อสถานี เว้นระยะทางเดินหลัก (Main Clearance) ไม่น้อยกว่า 1.20 - 1.50 ม. ตามกฎหมายอาคาร', 110, notesY + 50);
+    ctx.fillText('2. จุดเต้ารับไฟฟ้า 220V 16A เต้ารับคู่ 3 ขา มีกราวด์ (Grounding <= 5 Ohm) ต่อเครื่อง 1:1 พร้อมรางร้อยสาย LAN CAT6A แยกท่อห่างสายเมน 30 ซม.', 110, notesY + 70);
 
-    // 9. Trigger Direct Browser Download
-    const dataUrl = canvas.toDataURL('image/png');
-    const link = document.createElement('a');
-    link.download = `GSPEED-Contractor-Blueprint-${roomWidth}x${roomHeight}m-${Date.now().toString().slice(-4)}.png`;
-    link.href = dataUrl;
-    link.click();
+    // 9. Trigger Direct Browser Download and show high-res visual preview modal
+    const blueprintFilename = `GSPEED-Contractor-Blueprint-${roomWidth}x${roomHeight}m-${Date.now().toString().slice(-4)}.png`;
+    try {
+      const dataUrl = canvas.toDataURL('image/png', 1.0);
+      setExportedBlueprintModal({
+        dataUrl,
+        filename: blueprintFilename
+      });
+      downloadFile(dataUrl, blueprintFilename, 'image/png');
+    } catch (e) {
+      console.error('Failed to export blueprint:', e);
+      downloadFile(canvas, blueprintFilename, 'image/png');
+    }
   };
 
   const selectedItemObject = placedItems.find(item => item.id === selectedItemId);
@@ -902,301 +1711,588 @@ export default function FranchisePlanner() {
   return (
     <div className="franchise-planner-page">
       {/* 1. TOP HEADER & WORKFLOW TABS */}
-      <section className="planner-header-section">
-        <div className="container">
-          <div className="planner-title-row">
-            <div>
-              <div className="badge-pill badge-cyan">
-                <Calculator size={14} />
-                <span>INTERIOR 2D ESTIMATOR & CONFIGURATOR</span>
-              </div>
-              <h1 className="section-title">
-                ระบบจำลองผังร้าน & <span className="text-blue">คำนวณราคาแฟรนไชส์</span>
-              </h1>
-              <p className="section-subtitle">
-                บอกขนาดพื้นที่ เลือกสเปกคอมพิวเตอร์ และลากวางโซนในร้านตามจินตนาการ พร้อมรับใบเสนอราคาและแผนระยะเวลาติดตั้งทันที
-              </p>
+      {currentStep === 2 ? (
+        <section className="studio-compact-header glass-panel">
+          <div className="container studio-compact-header-inner">
+            {/* Step Navigation Breadcrumbs */}
+            <div className="studio-compact-steps">
+              <button 
+                type="button" 
+                id="btn-step-compact-1"
+                className="studio-step-pill completed" 
+                onClick={() => handleStepChange(1)}
+                title="ย้อนกลับไปแก้ไขขนาดห้องและทำเล (ขั้นตอนที่ 1)"
+              >
+                <span className="step-num">1</span>
+                <span className="step-txt">ขนาด {roomWidth}x{roomHeight}ม.</span>
+              </button>
+              <ChevronRight size={14} className="studio-step-sep" />
+              <button 
+                type="button" 
+                id="btn-step-compact-2"
+                className="studio-step-pill active" 
+                onClick={() => handleStepChange(2)}
+              >
+                <span className="step-num active">2</span>
+                <span className="step-txt">จัดผัง 3D Studio</span>
+                <span className="studio-active-dot"></span>
+              </button>
+              <ChevronRight size={14} className="studio-step-sep" />
+              <button 
+                type="button" 
+                id="btn-step-compact-3"
+                className="studio-step-pill" 
+                onClick={() => handleStepChange(3)}
+                title="ไปเลือกระดับสเปกฮาร์ดแวร์ (ขั้นตอนที่ 3)"
+              >
+                <span className="step-num">3</span>
+                <span className="step-txt">สเปกคอม</span>
+              </button>
+              <ChevronRight size={14} className="studio-step-sep" />
+              <button 
+                type="button" 
+                id="btn-step-compact-4"
+                className="studio-step-pill" 
+                onClick={() => handleStepChange(4)}
+                title="ไปสรุปงบประมาณและผลตอบแทน (ขั้นตอนที่ 4)"
+              >
+                <span className="step-num">4</span>
+                <span className="step-txt">งบ & ROI</span>
+              </button>
             </div>
 
-            <div className="planner-quick-actions">
+            {/* Quick Metrics & CTA */}
+            <div className="studio-compact-metrics">
+              <div className="compact-metric-pill">
+                <span className="metric-tag">ความจุ:</span>
+                <strong className="text-blue">{totalStations} เครื่อง</strong>
+              </div>
+              <div className="compact-metric-pill hide-mobile">
+                <span className="metric-tag">งบลงทุน:</span>
+                <strong className="text-emerald">฿{totalInvestmentCost.toLocaleString()}</strong>
+              </div>
               <button 
-                id="btn-open-quote-summary"
+                type="button" 
+                id="btn-open-quote-summary-compact"
                 onClick={() => setShowQuotationModal(true)} 
-                className="btn-primary quote-summary-cta-btn"
+                className="btn-compact-quote"
               >
-                <Download size={18} />
-                <span>สรุปใบเสนอราคา & สเปก</span>
+                <Download size={14} />
+                <span>สรุปใบเสนอราคา</span>
+              </button>
+              <button 
+                type="button" 
+                id="btn-next-step3-compact"
+                onClick={() => handleStepChange(3)} 
+                className="btn-compact-next"
+              >
+                <span>เลือกสเปก</span>
+                <ArrowRight size={14} />
               </button>
             </div>
           </div>
-
-          {/* Workflow Stepper Bar */}
-          <div className="workflow-stepper">
-            <button 
-              id="step-tab-1"
-              onClick={() => setCurrentStep(1)} 
-              className={`step-item ${currentStep === 1 ? 'active' : ''} ${currentStep > 1 ? 'completed' : ''}`}
-            >
-              <div className="step-number">1</div>
-              <div className="step-text">
-                <span className="step-name">ข้อมูลพื้นที่ & ทำเล</span>
-                <span className="step-hint">{roomWidth} x {roomHeight} ม. ({roomAreaSqM} ตร.ม.)</span>
+        </section>
+      ) : (
+        <section className="planner-header-section">
+          <div className="container">
+            <div className="planner-title-row">
+              <div>
+                <div className="badge-pill badge-cyan">
+                  <Calculator size={14} />
+                  <span>INTERIOR 2D ESTIMATOR & CONFIGURATOR</span>
+                </div>
+                <h1 className="section-title">
+                  ระบบจำลองผังร้าน & <span className="text-blue">คำนวณราคาแฟรนไชส์</span>
+                </h1>
+                <p className="section-subtitle">
+                  บอกขนาดพื้นที่ เลือกสเปกคอมพิวเตอร์ และลากวางโซนในร้านตามจินตนาการ พร้อมรับใบเสนอราคาและแผนระยะเวลาติดตั้งทันที
+                </p>
               </div>
-              <ChevronRight size={18} className="step-arrow" />
-            </button>
 
-            <button 
-              id="step-tab-2"
-              onClick={() => setCurrentStep(2)} 
-              className={`step-item ${currentStep === 2 ? 'active' : ''} ${currentStep > 2 ? 'completed' : ''}`}
-            >
-              <div className="step-number">2</div>
-              <div className="step-text">
-                <span className="step-name">จัดผังร้าน 3D Studio & แปลน 2D</span>
-                <span className="step-hint">ลงคอม {totalStations} เครื่อง ({placedItems.length} ชิ้น)</span>
+              <div className="planner-quick-actions">
+                <button 
+                  id="btn-open-quote-summary"
+                  onClick={() => setShowQuotationModal(true)} 
+                  className="btn-primary quote-summary-cta-btn"
+                >
+                  <Download size={18} />
+                  <span>สรุปใบเสนอราคา & สเปก</span>
+                </button>
               </div>
-              <ChevronRight size={18} className="step-arrow" />
-            </button>
+            </div>
 
-            <button 
-              id="step-tab-3"
-              onClick={() => setCurrentStep(3)} 
-              className={`step-item ${currentStep === 3 ? 'active' : ''} ${currentStep > 3 ? 'completed' : ''}`}
-            >
-              <div className="step-number">3</div>
-              <div className="step-text">
-                <span className="step-name">เลือกระดับสเปกฮาร์ดแวร์</span>
-                <span className="step-hint">{currentTierInfo.name.split(':')[1]}</span>
-              </div>
-              <ChevronRight size={18} className="step-arrow" />
-            </button>
+            {/* Workflow Stepper Bar */}
+            <div className="workflow-stepper">
+              <button 
+                id="step-tab-1"
+                onClick={() => handleStepChange(1)} 
+                className={`step-item ${currentStep === 1 ? 'active' : ''} ${currentStep > 1 ? 'completed' : ''}`}
+              >
+                <div className="step-number">1</div>
+                <div className="step-text">
+                  <span className="step-name">ข้อมูลพื้นที่ & ทำเล</span>
+                  <span className="step-hint">{roomWidth} x {roomHeight} ม. ({roomAreaSqM} ตร.ม.)</span>
+                </div>
+                <ChevronRight size={18} className="step-arrow" />
+              </button>
 
-            <button 
-              id="step-tab-4"
-              onClick={() => setCurrentStep(4)} 
-              className={`step-item ${currentStep === 4 ? 'active' : ''}`}
-            >
-              <div className="step-number">4</div>
-              <div className="step-text">
-                <span className="step-name">สรุปงบ & คืนทุน (ROI)</span>
-                <span className="step-hint">{paybackMonths} เดือนคืนทุน</span>
-              </div>
-            </button>
+              <button 
+                id="step-tab-2"
+                onClick={() => handleStepChange(2)} 
+                className={`step-item ${currentStep === 2 ? 'active' : ''} ${currentStep > 2 ? 'completed' : ''}`}
+              >
+                <div className="step-number">2</div>
+                <div className="step-text">
+                  <span className="step-name">จัดผังร้าน 3D Studio & แปลน 2D</span>
+                  <span className="step-hint">ลงคอม {totalStations} เครื่อง ({placedItems.length} ชิ้น)</span>
+                </div>
+                <ChevronRight size={18} className="step-arrow" />
+              </button>
+
+              <button 
+                id="step-tab-3"
+                onClick={() => handleStepChange(3)} 
+                className={`step-item ${currentStep === 3 ? 'active' : ''} ${currentStep > 3 ? 'completed' : ''}`}
+              >
+                <div className="step-number">3</div>
+                <div className="step-text">
+                  <span className="step-name">เลือกระดับสเปกฮาร์ดแวร์</span>
+                  <span className="step-hint">{currentTierInfo.name.split(':')[1]}</span>
+                </div>
+                <ChevronRight size={18} className="step-arrow" />
+              </button>
+
+              <button 
+                id="step-tab-4"
+                onClick={() => handleStepChange(4)} 
+                className={`step-item ${currentStep === 4 ? 'active' : ''}`}
+              >
+                <div className="step-number">4</div>
+                <div className="step-text">
+                  <span className="step-name">สรุปงบ & คืนทุน (ROI)</span>
+                  <span className="step-hint">{paybackMonths} เดือนคืนทุน</span>
+                </div>
+              </button>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* 2. STEP 1: LOCATION & ROOM SETUP */}
       {currentStep === 1 && (
         <section className="step-content-section container">
-          {/* ARCHITECTURAL BLUEPRINT UPLOAD & AI CALCULATION SECTION */}
-          <div className="blueprint-upload-card glass-panel">
-            <div className="blueprint-header-row">
-              <div className="blueprint-title-group">
-                <div className="badge-pill badge-cyan">
-                  <Sparkles size={14} />
-                  <span>NEW • AI BLUEPRINT ENGINE & SMART FEASIBILITY</span>
-                </div>
-                <h3 className="blueprint-main-title">
-                  แนบแผนผัง / พิมพ์เขียวอาคารของคุณเพื่อคำนวณและออกแบบอัตโนมัติ
-                </h3>
-                <p className="blueprint-desc">
-                  มีแปลนอาคารของตัวเองอยู่แล้ว? อัปโหลดภาพผังร้าน (Floor Plan) ของท่าน ระบบจะช่วยคำนวณสัดส่วนพื้นที่, จำแนกโซนการใช้งาน, แนะนำจำนวนเครื่องที่เหมาะสม และส่งเข้าไปในสตูดิโอ 3D ให้คุณวางตำแหน่งโต๊ะคอมได้ทันที!
-                </p>
-              </div>
-
-              <div className="blueprint-upload-actions">
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  ref={fileInputRef} 
-                  onChange={handleFileUpload} 
-                  style={{ display: 'none' }} 
-                />
-                <button 
-                  id="btn-upload-own-blueprint"
-                  className="btn-primary"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isAnalyzingBlueprint}
-                >
-                  <UploadCloud size={16} />
-                  <span>แนบไฟล์ผังร้านของคุณ (PNG / JPG)</span>
-                </button>
-                <button 
-                  id="btn-demo-blueprint"
-                  className="btn-secondary"
-                  onClick={handleUseSampleBlueprint}
-                  disabled={isAnalyzingBlueprint}
-                >
-                  <Sparkles size={16} />
-                  <span>ทดลองใช้ตัวอย่างแปลนคอมเพล็กซ์</span>
-                </button>
-              </div>
-            </div>
-
-            {/* If analyzing blueprint spinner */}
-            {isAnalyzingBlueprint && (
-              <div className="blueprint-analyzing-spinner">
-                <RefreshCw size={24} className="spin-icon text-cyan" />
-                <span>AI กำลังประมวลผลแปลนอาคาร วิเคราะห์พื้นที่ และจำแนกโซนร้านเกม...</span>
-              </div>
-            )}
-
-            {/* When Blueprint is Attached */}
-            {uploadedBlueprint && !isAnalyzingBlueprint && (
-              <div className="blueprint-analysis-preview-grid">
-                {/* Left: Blueprint Image Preview */}
-                <div className="blueprint-image-box">
-                  <div className="blueprint-image-tag">
-                    <CheckCircle2 size={14} className="text-emerald" />
-                    <span>แนบแปลน: {uploadedBlueprint.name} ({uploadedBlueprint.size})</span>
-                  </div>
-                  <div className="blueprint-img-frame">
-                    <img src={uploadedBlueprint.url} alt="Floor Plan Blueprint Preview" />
-                  </div>
-                  <div className="blueprint-image-actions">
-                    <button className="btn-text-danger" onClick={handleRemoveBlueprint}>
-                      <Trash2 size={14} /> ลบแปลนนี้
-                    </button>
-                    <button className="btn-text-blue" onClick={() => fileInputRef.current?.click()}>
-                      <RotateCw size={14} /> เปลี่ยนไฟล์ใหม่
-                    </button>
-                  </div>
-                </div>
-
-                {/* Right: AI Feasibility & Zone Allocation Breakdown */}
-                <div className="blueprint-feasibility-details">
-                  <div className="feasibility-headline">
-                    <div className="kpi-tag success">ตรวจพบขนาด: {uploadedBlueprint.dimensions}</div>
-                    <h4>ผลการวิเคราะห์และจัดสรรโซนอัจฉริยะ</h4>
-                  </div>
-
-                  <div className="zones-breakdown-grid">
-                    {uploadedBlueprint.detectedZones.map((zone, idx) => (
-                      <div key={idx} className="zone-pill-item">
-                        <div className="zone-color-bar" style={{ backgroundColor: zone.color }}></div>
-                        <div className="zone-info">
-                          <strong>{zone.name}</strong>
-                          <div className="zone-meta">
-                            <span>พื้นที่: {zone.area}</span>
-                            <span className="bullet">•</span>
-                            <span className="zone-capacity text-cyan">{zone.stations}</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="blueprint-calc-summary">
-                    <div className="calc-stat-box">
-                      <span className="lbl">ความจุเครื่องที่แนะนำ:</span>
-                      <strong className="val text-cyan">{uploadedBlueprint.recommendedStations} เครื่อง</strong>
-                    </div>
-                    <div className="calc-stat-box">
-                      <span className="lbl">งบประมาณประเมินการ:</span>
-                      <strong className="val text-blue">฿{uploadedBlueprint.estimatedCapex.toLocaleString()}</strong>
-                    </div>
-                    <div className="calc-stat-box">
-                      <span className="lbl">กำไรสุทธิคาดการณ์:</span>
-                      <strong className="val text-emerald">฿{uploadedBlueprint.estimatedMonthlyProfit.toLocaleString()} / ด.</strong>
-                    </div>
-                    <div className="calc-stat-box">
-                      <span className="lbl">จุดคุ้มทุน (ROI):</span>
-                      <strong className="val text-purple">~{uploadedBlueprint.paybackMonths} เดือน</strong>
-                    </div>
-                  </div>
-
-                  <div className="blueprint-cta-row">
-                    <button 
-                      id="btn-apply-blueprint-to-studio"
-                      className="btn-primary btn-large"
-                      onClick={() => setCurrentStep(2)}
-                    >
-                      <Layers size={18} />
-                      <span>นำแปลนนี้เข้าสู่สตูดิโอ 3D / 2D เพื่อเริ่มวางผังร้าน</span>
-                      <ArrowRight size={18} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
           <div className="setup-grid">
-            {/* Left Form: Size & Dimensions */}
+            {/* Left Form: Size, Dimensions & Blueprint AI Setup */}
             <div className="setup-card glass-panel">
               <h3 className="setup-card-title">
                 <LayoutGrid size={20} className="text-cyan" />
-                <span>กำหนดขนาดห้องและทำเลร้าน</span>
+                <span>กำหนดขนาดห้องและแปลนอาคาร</span>
               </h3>
               <p className="setup-card-desc">
-                กรอกขนาดพื้นที่จริงเพื่อใช้สร้าง Canvas จำลองผังร้านตามมาตราส่วน 1:1 หรือเลือกขนาด Preset สำเร็จรูป
+                เลือกโมเดลขนาดห้องสำเร็จรูป (Preset) เป็นค่าพื้นฐานเพื่อเริ่มคำนวณและวางผังได้ทันที หรือเลือกตัวเลือกเสริมอัปโหลดแปลนพิมพ์เขียวอาคารจริง
               </p>
 
-              {/* Preset Buttons */}
-              <div className="preset-selector-group">
-                <label className="form-label">เลือกโมเดลขนาดสำเร็จรูป (Preset Models):</label>
-                <div className="preset-cards-grid">
-                  {PRESET_ROOMS.map(preset => (
-                    <div 
-                      key={preset.id} 
-                      className={`preset-card ${roomWidth === preset.width && roomHeight === preset.height ? 'selected' : ''}`}
-                      onClick={() => handleLoadPreset(preset)}
-                    >
-                      <div className="preset-head">
-                        <strong>{preset.name}</strong>
-                        <span className="preset-dim">{preset.width}x{preset.height} ม.</span>
-                      </div>
-                      <p className="preset-info">{preset.desc}</p>
+              {/* Setup Mode Switcher Tabs */}
+              <div className="setup-mode-tabs">
+                <button 
+                  type="button"
+                  id="tab-setup-preset"
+                  className={`setup-mode-tab-btn ${setupMethod === 'preset' ? 'active' : ''}`}
+                  onClick={() => setSetupMethod('preset')}
+                >
+                  <LayoutGrid size={16} />
+                  <span>เลือกโมเดลสำเร็จรูป / กำหนดเอง</span>
+                  <span className="badge-preset-default">ค่าเริ่มต้น</span>
+                </button>
+                <button 
+                  type="button"
+                  id="tab-setup-blueprint"
+                  className={`setup-mode-tab-btn ${setupMethod === 'blueprint' ? 'active' : ''}`}
+                  onClick={() => setSetupMethod('blueprint')}
+                >
+                  <UploadCloud size={16} />
+                  <span>อัปโหลดแปลนอาคาร & คำนวณผัง</span>
+                  <span className="badge-optional-choice">ตัวเลือกเสริม AI</span>
+                </button>
+              </div>
+
+              {/* Hidden file input */}
+              <input 
+                type="file" 
+                accept="image/*" 
+                ref={fileInputRef} 
+                onChange={handleFileUpload} 
+                style={{ display: 'none' }} 
+              />
+
+              {/* TAB 1 (DEFAULT): PRESET MODELS & MANUAL SLIDERS */}
+              {setupMethod === 'preset' && (
+                <div className="preset-mode-content">
+                  {/* Preset Buttons */}
+                  <div className="preset-selector-group">
+                    <label className="form-label">เลือกโมเดลขนาดสำเร็จรูป (Preset Models):</label>
+                    <div className="preset-cards-grid">
+                      {PRESET_ROOMS.map(preset => (
+                        <div 
+                          key={preset.id} 
+                          className={`preset-card ${roomWidth === preset.width && roomHeight === preset.height ? 'selected' : ''}`}
+                          onClick={() => handleLoadPreset(preset)}
+                        >
+                          <div className="preset-head">
+                            <strong>{preset.name}</strong>
+                            <span className="preset-dim">{preset.width}x{preset.height} ม.</span>
+                          </div>
+                          <p className="preset-info">{preset.desc}</p>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Custom Sliders */}
-              <div className="dimension-sliders">
-                <div className="slider-group">
-                  <div className="slider-header">
-                    <label>ความกว้างห้อง (Width):</label>
-                    <span className="slider-val text-cyan">{roomWidth} เมตร</span>
                   </div>
-                  <input 
-                    type="range" 
-                    min="6" 
-                    max="25" 
-                    step="1" 
-                    value={roomWidth} 
-                    onChange={e => setRoomWidth(Number(e.target.value))}
-                    className="custom-range"
-                  />
-                </div>
 
-                <div className="slider-group">
-                  <div className="slider-header">
-                    <label>ความลึก/ความยาวห้อง (Length):</label>
-                    <span className="slider-val text-cyan">{roomHeight} เมตร</span>
+                  {/* Custom Sliders */}
+                  <div className="dimension-sliders">
+                    <div className="slider-group">
+                      <div className="slider-header">
+                        <label>ความกว้างห้อง (Width):</label>
+                        <span className="slider-val text-cyan">{roomWidth} เมตร</span>
+                      </div>
+                      <input 
+                        type="range" 
+                        min="6" 
+                        max="25" 
+                        step="1" 
+                        value={roomWidth} 
+                        onChange={e => setRoomWidth(Number(e.target.value))}
+                        className="custom-range"
+                      />
+                    </div>
+
+                    <div className="slider-group">
+                      <div className="slider-header">
+                        <label>ความลึก/ความยาวห้อง (Length):</label>
+                        <span className="slider-val text-cyan">{roomHeight} เมตร</span>
+                      </div>
+                      <input 
+                        type="range" 
+                        min="6" 
+                        max="20" 
+                        step="1" 
+                        value={roomHeight} 
+                        onChange={e => setRoomHeight(Number(e.target.value))}
+                        className="custom-range"
+                      />
+                    </div>
                   </div>
-                  <input 
-                    type="range" 
-                    min="6" 
-                    max="20" 
-                    step="1" 
-                    value={roomHeight} 
-                    onChange={e => setRoomHeight(Number(e.target.value))}
-                    className="custom-range"
-                  />
-                </div>
-              </div>
 
-              {/* Area Summary Pill */}
-              <div className="area-summary-pill">
-                <span>พื้นที่ใช้สอยรวม: <strong>{roomAreaSqM} ตารางเมตร</strong></span>
-                <span>(รองรับได้ประมาณ <strong>{idealMaxPCs} เครื่อง</strong> แบบไม่อึดอัด)</span>
-              </div>
+                  {/* Area Summary Pill */}
+                  <div className="area-summary-pill">
+                    <span>พื้นที่ใช้สอยรวม: <strong>{roomAreaSqM} ตารางเมตร</strong></span>
+                    <span>(รองรับได้ประมาณ <strong>{idealMaxPCs} เครื่อง</strong> แบบไม่อึดอัด)</span>
+                  </div>
+
+                  {/* Switch to Blueprint Mode Suggestion */}
+                  <div 
+                    style={{ 
+                      marginTop: '16px', 
+                      padding: '12px 14px', 
+                      background: '#f0f9ff', 
+                      border: '1px solid #bae6fd', 
+                      borderRadius: '10px',
+                      fontSize: '0.8rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '10px'
+                    }}
+                  >
+                    <span style={{ color: '#0369a1' }}>
+                      💡 มีแบบแปลนพิมพ์เขียวอาคารจริงของคุณอยู่แล้ว?
+                    </span>
+                    <button 
+                      type="button"
+                      className="btn-text-blue" 
+                      style={{ fontWeight: 700, whiteSpace: 'nowrap' }}
+                      onClick={() => setSetupMethod('blueprint')}
+                    >
+                      สลับไปอัปโหลดแปลน (ตัวเลือกเสริม) ➔
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 2 (OPTIONAL): BLUEPRINT UPLOAD & SMART FEASIBILITY */}
+              {setupMethod === 'blueprint' && (
+                <div className="blueprint-mode-content">
+                  {/* Dropzone if no blueprint */}
+                  {!uploadedBlueprint && !isAnalyzingBlueprint && (
+                    <div 
+                      className={`blueprint-dropzone-box ${isDraggingFile ? 'dragging' : ''}`}
+                      onDragOver={(e) => { e.preventDefault(); setIsDraggingFile(true); }}
+                      onDragLeave={() => setIsDraggingFile(false)}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        setIsDraggingFile(false);
+                        const file = e.dataTransfer.files?.[0];
+                        if (file) processBlueprintFile(file);
+                      }}
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <div className="blueprint-dropzone-icon">
+                        <UploadCloud size={28} />
+                      </div>
+                      <div className="blueprint-dropzone-title">
+                        ลากไฟล์แปลนอาคารมาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์ (ตัวเลือกเสริม)
+                      </div>
+                      <p className="blueprint-dropzone-sub">
+                        รองรับไฟล์ภาพแบบแปลนพิมพ์เขียว, ภาพวาดผังร้าน, สเก็ตช์ 2D, ไฟล์สแกน (PNG, JPG, WEBP)
+                      </p>
+                      <div className="blueprint-dropzone-actions" onClick={e => e.stopPropagation()}>
+                        <button 
+                          type="button"
+                          className="btn-primary"
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          <UploadCloud size={15} />
+                          <span>เลือกไฟล์แปลนจากเครื่อง</span>
+                        </button>
+                        <button 
+                          type="button"
+                          className="btn-secondary"
+                          onClick={handleUseSampleBlueprint}
+                        >
+                          <Sparkles size={15} />
+                          <span>✨ ทดลองใช้แปลนตัวอย่างอาคารพาณิชย์</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* If Analyzing */}
+                  {isAnalyzingBlueprint && (
+                    <div className="blueprint-analyzing-spinner">
+                      <RefreshCw size={24} className="spin-icon text-cyan" />
+                      <span>AI กำลังสแกนแปลนอาคาร วัดสเกลพื้นที่ และคำนวณการจัดสรรโซนร้านเกม...</span>
+                    </div>
+                  )}
+
+                  {/* Blueprint Loaded & Calculated View */}
+                  {uploadedBlueprint && !isAnalyzingBlueprint && (
+                    <div className="blueprint-loaded-view">
+                      {/* Thumbnail & File Details */}
+                      <div className="blueprint-image-box" style={{ marginBottom: '16px' }}>
+                        <div className="blueprint-image-tag">
+                          <CheckCircle2 size={15} className="text-emerald" />
+                          <span>แนบแปลนสำเร็จ: <strong>{uploadedBlueprint.name}</strong> ({uploadedBlueprint.size})</span>
+                        </div>
+                        <div className="blueprint-img-frame" style={{ height: '180px' }}>
+                          <img src={uploadedBlueprint.url} alt="Floor Plan Blueprint Preview" />
+                        </div>
+                        <div className="blueprint-image-actions">
+                          <button type="button" className="btn-text-danger" onClick={handleRemoveBlueprint}>
+                            <Trash2 size={13} /> ลบแปลนนี้
+                          </button>
+                          <button type="button" className="btn-text-blue" onClick={() => fileInputRef.current?.click()}>
+                            <RotateCw size={13} /> เปลี่ยนไฟล์ใหม่
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Dimension Calibration Sliders */}
+                      <div className="dimension-sliders" style={{ marginBottom: '16px' }}>
+                        <div className="slider-group">
+                          <div className="slider-header">
+                            <label>ความกว้างอาคารจริง (Width):</label>
+                            <span className="slider-val text-cyan">{roomWidth} เมตร</span>
+                          </div>
+                          <input 
+                            type="range" 
+                            min="6" 
+                            max="30" 
+                            step="1" 
+                            value={roomWidth} 
+                            onChange={e => setRoomWidth(Number(e.target.value))}
+                            className="custom-range"
+                          />
+                        </div>
+
+                        <div className="slider-group">
+                          <div className="slider-header">
+                            <label>ความลึก/ความยาวอาคารจริง (Length):</label>
+                            <span className="slider-val text-cyan">{roomHeight} เมตร</span>
+                          </div>
+                          <input 
+                            type="range" 
+                            min="6" 
+                            max="25" 
+                            step="1" 
+                            value={roomHeight} 
+                            onChange={e => setRoomHeight(Number(e.target.value))}
+                            className="custom-range"
+                          />
+                        </div>
+
+                        <div className="area-summary-pill" style={{ marginTop: '8px' }}>
+                          <span>พื้นที่ใช้สอยรวม: <strong>{roomAreaSqM} ตารางเมตร</strong></span>
+                          <span>(สเกลมาตราส่วน: <strong>1:{Math.round(pixelsPerMeter)}</strong>)</span>
+                        </div>
+                      </div>
+
+                      {/* AI Feasibility Stats Grid */}
+                      <div className="blueprint-calc-summary" style={{ marginBottom: '16px' }}>
+                        <div className="calc-stat-box">
+                          <span className="lbl">ความจุเครื่องที่แนะนำ:</span>
+                          <strong className="val text-cyan">{blueprintFeasibility.recommendedStations} เครื่อง</strong>
+                        </div>
+                        <div className="calc-stat-box">
+                          <span className="lbl">งบลงทุนประมาณการ:</span>
+                          <strong className="val text-blue">฿{blueprintFeasibility.estimatedCapex.toLocaleString()}</strong>
+                        </div>
+                        <div className="calc-stat-box">
+                          <span className="lbl">กำไรสุทธิคาดการณ์:</span>
+                          <strong className="val text-emerald">฿{blueprintFeasibility.estimatedMonthlyProfit.toLocaleString()} / ด.</strong>
+                        </div>
+                        <div className="calc-stat-box">
+                          <span className="lbl">จุดคุ้มทุน (ROI):</span>
+                          <strong className="val text-purple">~{blueprintFeasibility.paybackMonths} เดือน</strong>
+                        </div>
+                      </div>
+
+                      {/* Zone Allocation Pills */}
+                      <div style={{ marginBottom: '14px' }}>
+                        <label className="form-label" style={{ marginBottom: '8px' }}>การจัดสรรสัดส่วนโซนที่คำนวณได้:</label>
+                        <div className="zones-breakdown-grid">
+                          {blueprintFeasibility.detectedZones.map((zone, idx) => (
+                            <div key={idx} className="zone-pill-item">
+                              <div className="zone-color-bar" style={{ backgroundColor: zone.color }}></div>
+                              <div className="zone-info">
+                                <strong>{zone.name}</strong>
+                                <div className="zone-meta">
+                                  <span>{zone.area}</span>
+                                  <span className="bullet">•</span>
+                                  <span className="zone-capacity text-cyan">{zone.stations}</span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Layout Guidelines Box */}
+                      <div className="blueprint-guidelines-box">
+                        <div className="guidelines-header">
+                          <Sparkles size={16} className="text-cyan" />
+                          <span>คำแนะนำเชิงกลยุทธ์การจัดวางผังร้าน (Smart Layout Advice)</span>
+                        </div>
+                        <div className="guidelines-grid">
+                          <div className="guideline-card">
+                            <div className="guideline-icon amber">
+                              <DoorOpen size={16} />
+                            </div>
+                            <div className="guideline-content">
+                              <h5>1. ทางเข้า & เคาน์เตอร์แคชเชียร์</h5>
+                              <p>ตั้งขนานประตูทางเข้า คุมทัศนวิสัย 180 องศา ต้อนรับลูกค้าทันทีและดูแลความปลอดภัย</p>
+                            </div>
+                          </div>
+
+                          <div className="guideline-card">
+                            <div className="guideline-icon blue">
+                              <Monitor size={16} />
+                            </div>
+                            <div className="guideline-content">
+                              <h5>2. แนวโต๊ะคอม (Island Back-to-Back)</h5>
+                              <p>วางเกาะกลางหันหลังชนกัน ซ่อนรางสายไฟและท่อแอร์ลงกลางโต๊ะ ประหยัดสายแลน 40% เว้นทางเดิน 1.5 ม.</p>
+                            </div>
+                          </div>
+
+                          <div className="guideline-card">
+                            <div className="guideline-icon purple">
+                              <Shield size={16} />
+                            </div>
+                            <div className="guideline-content">
+                              <h5>3. ห้องซ้อม VIP Bootcamp Suite</h5>
+                              <p>กั้นห้องกระจกเก็บเสียงโซนด้านในสุด ลดเสียงรบกวน เหมาะกับการฝึกซ้อมทีมและสตรีมเมอร์</p>
+                            </div>
+                          </div>
+
+                          <div className="guideline-card">
+                            <div className="guideline-icon emerald">
+                              <Server size={16} />
+                            </div>
+                            <div className="guideline-content">
+                              <h5>4. ห้องเซิร์ฟเวอร์ & ตู้ไฟ MDB</h5>
+                              <p>วางชิดผนังมุมหลังร้าน แยกห้องล็อก ปลอดภัย ติดตั้งระบบ UPS สำรองไฟและแอร์เฉพาะตัว 24 ชม.</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* CTA Buttons */}
+                      <div className="blueprint-cta-row" style={{ marginTop: '16px' }}>
+                        <button 
+                          type="button"
+                          id="btn-apply-blueprint-to-studio"
+                          className="btn-auto-layout-primary"
+                          onClick={handleApplyAutoLayout}
+                        >
+                          <Layers size={18} />
+                          <span>🚀 จัดวางผังร้านและโต๊ะคอมลงบนแปลนนี้ให้อัตโนมัติ</span>
+                          <ArrowRight size={18} />
+                        </button>
+                        <button 
+                          type="button"
+                          className="btn-auto-layout-secondary"
+                          onClick={() => setCurrentStep(2)}
+                        >
+                          <span>📐 นำแปลนไปจัดวางด้วยตนเอง</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  {/* Switch back to Preset Suggestion */}
+                  <div 
+                    style={{ 
+                      marginTop: '16px', 
+                      padding: '12px 14px', 
+                      background: '#f8fafc', 
+                      border: '1px solid #e2e8f0', 
+                      borderRadius: '10px',
+                      fontSize: '0.8rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '10px'
+                    }}
+                  >
+                    <span style={{ color: '#475569' }}>
+                      ⚙️ ต้องการใช้ขนาดห้องและโมเดลสำเร็จรูปมาตรฐาน?
+                    </span>
+                    <button 
+                      type="button"
+                      className="btn-text-blue" 
+                      style={{ fontWeight: 700, whiteSpace: 'nowrap' }}
+                      onClick={() => setSetupMethod('preset')}
+                    >
+                      สลับไปใช้โมเดลสำเร็จรูป (ค่าเริ่มต้น) ➔
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Right Form: Location & Theme */}
             <div className="setup-card glass-panel">
+              {/* Active Blueprint / Space Badge */}
+              {uploadedBlueprint ? (
+                <div className="blueprint-source-badge">
+                  <Building2 size={16} />
+                  <span>ใช้แปลนอาคาร: <strong>{uploadedBlueprint.name}</strong> ({roomWidth}x{roomHeight} ม. | {roomAreaSqM} ตร.ม.)</span>
+                </div>
+              ) : (
+                <div className="blueprint-source-badge">
+                  <LayoutGrid size={16} />
+                  <span>ขนาดพื้นที่จำลอง: <strong>{roomWidth}x{roomHeight} เมตร ({roomAreaSqM} ตร.ม.)</strong></span>
+                </div>
+              )}
+
               <h3 className="setup-card-title">
                 <Compass size={20} className="text-magenta" />
                 <span>ข้อมูลทำเล & ธีมการตกแต่ง</span>
@@ -1266,7 +2362,7 @@ export default function FranchisePlanner() {
               <div className="setup-actions">
                 <button 
                   id="btn-step1-to-step2"
-                  onClick={() => setCurrentStep(2)} 
+                  onClick={() => handleStepChange(2)} 
                   className="btn-primary full-width"
                 >
                   <span>ไปที่ขั้นตอนถัดไป: จัดวางผังร้าน 2D</span>
@@ -1293,7 +2389,8 @@ export default function FranchisePlanner() {
                   onClick={() => setViewMode('3d')}
                 >
                   <Box size={16} />
-                  <span>3D Isometric Studio (สไตล์ Homestyler)</span>
+                  <span className="view-mode-txt-full">3D Isometric Studio (สไตล์ Homestyler)</span>
+                  <span className="view-mode-txt-short">3D Studio</span>
                 </button>
                 <button 
                   id="btn-view-mode-2d"
@@ -1301,7 +2398,8 @@ export default function FranchisePlanner() {
                   onClick={() => setViewMode('2d')}
                 >
                   <LayoutGrid size={16} />
-                  <span>2D Blueprint (แปลน 2 มิติ)</span>
+                  <span className="view-mode-txt-full">2D Blueprint (แปลน 2 มิติ)</span>
+                  <span className="view-mode-txt-short">2D แปลน</span>
                 </button>
                 <button 
                   type="button"
@@ -1311,7 +2409,18 @@ export default function FranchisePlanner() {
                   title={isPlannerFullscreen ? 'ออกจากโหมดเต็มจอ (กด ESC ได้)' : 'เปิดสตูดิโอเต็มหน้าจอ (Zen Mode ไม่เลื่อนหรือหลุดสายตา)'}
                 >
                   {isPlannerFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-                  <span>{isPlannerFullscreen ? 'ย่อหน้าต่าง (ESC)' : 'เปิดสตูดิโอเต็มจอ'}</span>
+                  <span className="view-mode-txt-full">{isPlannerFullscreen ? 'ย่อหน้าต่าง (ESC)' : 'เปิดสตูดิโอเต็มจอ'}</span>
+                  <span className="view-mode-txt-short">{isPlannerFullscreen ? 'ย่อจอ' : 'เต็มจอ'}</span>
+                </button>
+                <button 
+                  type="button"
+                  id="btn-step2-auto-layout"
+                  className="btn-toolbar-auto-layout"
+                  onClick={handleApplyAutoLayout}
+                  title="คำนวณและจัดวางโต๊ะคอมพิวเตอร์และเฟอร์นิเจอร์ใหม่อัตโนมัติ (AI Auto-Layout)"
+                >
+                  <Sparkles size={14} />
+                  <span>จัดผังอัตโนมัติ</span>
                 </button>
               </div>
             </div>
@@ -1396,8 +2505,30 @@ export default function FranchisePlanner() {
           </div>
 
           <div className="planner-canvas-layout">
+            {/* Mobile Tab Switcher Bar - Shows directly under 3D canvas on Mobile/Tablet */}
+            <div className="mobile-planner-tabs-bar">
+              <button 
+                type="button" 
+                id="btn-mobile-tab-catalog"
+                className={`mobile-planner-tab-btn ${mobileStudioTab === 'catalog' ? 'active' : ''}`}
+                onClick={() => setMobileStudioTab('catalog')}
+              >
+                <Layers size={16} />
+                <span>เพิ่มอุปกรณ์ ({catalogItems.length})</span>
+              </button>
+              <button 
+                type="button" 
+                id="btn-mobile-tab-inspector"
+                className={`mobile-planner-tab-btn ${mobileStudioTab === 'inspector' ? 'active' : ''}`}
+                onClick={() => setMobileStudioTab('inspector')}
+              >
+                <Sliders size={16} />
+                <span>ปรับแต่ง & สรุปงบ ({placedItems.length})</span>
+              </button>
+            </div>
+
             {/* Left: Item Catalog Sidebar */}
-            <div className="catalog-sidebar glass-panel">
+            <div className={`catalog-sidebar glass-panel ${mobileStudioTab === 'catalog' ? 'mobile-active' : 'mobile-hidden'}`}>
               <div className="sidebar-header">
                 <h3 className="sidebar-title">
                   <Layers size={18} className="text-cyan" />
@@ -1444,7 +2575,42 @@ export default function FranchisePlanner() {
                     return true;
                   })
                   .map((item) => (
-                    <div key={item.type} className="catalog-item-card">
+                    <div 
+                      key={item.type} 
+                      className="catalog-item-card"
+                      onClick={() => setSelectedCatalogModalItem(item)}
+                      title="คลิกเพื่อดูสเปกเต็มและภาพสินค้า"
+                    >
+                      {/* Product Thumbnail Banner with Color Swatches */}
+                      <div className="catalog-thumb-banner">
+                        <img 
+                          src={item.image || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=400&q=80'} 
+                          alt={item.name} 
+                          className="catalog-thumb-img"
+                          loading="lazy"
+                        />
+                        <div className="catalog-thumb-hover-overlay">
+                          <Eye size={13} />
+                          <span>ดูสเปกเต็ม</span>
+                        </div>
+                        
+                        {/* Mini Color Swatches overlay */}
+                        <div className="catalog-card-swatches" title="โทนสีวัสดุและไฟ">
+                          <span className="swatch-mini" style={{ backgroundColor: item.deskColor || '#0f172a' }} title="สีท็อปโต๊ะ" />
+                          <span className="swatch-mini" style={{ backgroundColor: item.accentColor || '#1d4ed8' }} title="สีไฟตกแต่ง" />
+                          {item.chairColor && (
+                            <span className="swatch-mini" style={{ backgroundColor: item.chairColor || '#0f172a' }} title="สีเก้าอี้" />
+                          )}
+                        </div>
+
+                        {/* Capacity / Type Pill */}
+                        {item.seats > 0 && (
+                          <span className="catalog-thumb-seat-badge">
+                            {item.seats} PCs
+                          </span>
+                        )}
+                      </div>
+
                       <div className="catalog-item-top">
                         <div className="catalog-item-info">
                           <strong className="item-name">{item.name}</strong>
@@ -1453,10 +2619,14 @@ export default function FranchisePlanner() {
                           </span>
                         </div>
                         <button 
+                          type="button"
                           id={`btn-add-item-${item.type}`}
                           className="btn-add-catalog"
-                          onClick={() => handleAddItem(item)}
-                          title="เพิ่มลงในผัง 3D"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAddItem(item);
+                          }}
+                          title="เพิ่มลงในผัง 3D ทันที"
                         >
                           <Plus size={16} />
                         </button>
@@ -1464,9 +2634,14 @@ export default function FranchisePlanner() {
                       
                       {/* Price Breakdown Micro-Badge */}
                       <div className="catalog-item-pricing-preview">
-                        <span className="price-tag-badge">
-                          รวม ฿{item.baseCost.toLocaleString()}
-                        </span>
+                        <div className="price-tag-row">
+                          <span className="price-tag-badge">
+                            รวม ฿{item.baseCost.toLocaleString()}
+                          </span>
+                          <span className="catalog-click-spec-hint">
+                            <Info size={11} /> ดูสเปก
+                          </span>
+                        </div>
                         <span className="price-sub-badge">
                           โต๊ะ ฿{item.deskPrice?.toLocaleString()} {item.chairCount > 0 ? `| เก้าอี้ ${item.chairCount} ตัว` : ''}
                         </span>
@@ -1785,24 +2960,11 @@ export default function FranchisePlanner() {
                     <strong>การควบคุม:</strong> หมุนมุมมองอิสระ 360° ด้วยเมาส์ซ้าย • ซูมเข้า-ออกด้วยลูกกลิ้ง • คลิกเลือกวัตถุเพื่อดูราคาโต๊ะและเก้าอี้
                   </span>
                 </div>
-                <div className="guidance-btns">
-                  <button onClick={() => setCurrentStep(1)} className="btn-secondary">
-                    ย้อนกลับไปตั้งขนาด
-                  </button>
-                  <button 
-                    id="btn-step2-to-step3"
-                    onClick={() => setCurrentStep(3)} 
-                    className="btn-primary"
-                  >
-                    <span>เลือกสเปกคอมพิวเตอร์ ({totalStations} เครื่อง)</span>
-                    <ArrowRight size={16} />
-                  </button>
-                </div>
               </div>
             </div>
 
             {/* Right: Selected Item Inspector & Cost Breakdown Panel */}
-            <div className="inspector-sidebar glass-panel">
+            <div className={`inspector-sidebar glass-panel ${mobileStudioTab === 'inspector' ? 'mobile-active' : 'mobile-hidden'}`}>
               {/* Selected Item Detail Inspector */}
               {selectedItemObject ? (
                 <div className="selected-item-inspector-expanded">
@@ -1847,7 +3009,7 @@ export default function FranchisePlanner() {
                         </span>
                         {selectedItemObject.catalog?.chairCount > 0 && (
                           <span className="chair-count-badge">
-                            {selectedItemObject.catalog?.chairCount} ตัว (฿{selectedItemObject.catalog?.chairPrice?.toLocaleString()}/ตัว)
+                            {selectedItemObject.catalog?.chairCount} ตัว <span className="unit-price">(฿{selectedItemObject.catalog?.chairPrice?.toLocaleString()}/ตัว)</span>
                           </span>
                         )}
                       </div>
@@ -2041,6 +3203,51 @@ export default function FranchisePlanner() {
                   <span className="total-cost-note">* รวมฮาร์ดแวร์ ตกแต่ง และเปิดร้านพร้อมใช้งาน</span>
                 </div>
               </div>
+
+              {/* Step Navigation in Right Sidebar - Placed prominently on the right */}
+              <div className="inspector-step-actions">
+                <button 
+                  id="btn-step2-to-step3-sidebar"
+                  onClick={() => handleStepChange(3)} 
+                  className="btn-primary full-width"
+                  style={{ padding: '13px 16px', fontSize: '0.96rem', fontWeight: 700 }}
+                >
+                  <span>เลือกสเปกคอมพิวเตอร์ ({totalStations} เครื่อง)</span>
+                  <ArrowRight size={16} />
+                </button>
+                <button 
+                  onClick={() => handleStepChange(1)} 
+                  className="btn-secondary full-width"
+                  style={{ marginTop: '6px' }}
+                >
+                  ย้อนกลับไปตั้งขนาด
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Step Navigation Bar - Placed cleanly at the bottom */}
+          <div className="planner-bottom-nav-bar glass-panel">
+            <div className="bottom-nav-left-info">
+              <Info size={16} className="text-blue" style={{ flexShrink: 0 }} />
+              <span className="bottom-nav-info-text">
+                <strong>สรุปผัง:</strong> {roomWidth}x{roomHeight} ม. ({roomAreaSqM} ตร.ม.) • วาง <strong>{totalStations} เครื่อง</strong> • งบประมาณ <strong>฿{totalInvestmentCost.toLocaleString()}</strong>
+              </span>
+            </div>
+            <div className="bottom-nav-right-actions">
+              <button onClick={() => handleStepChange(1)} className="btn-secondary">
+                <span className="hide-mobile">ย้อนกลับไปตั้งขนาด</span>
+                <span className="show-mobile">ย้อนกลับ</span>
+              </button>
+              <button 
+                id="btn-step2-to-step3"
+                onClick={() => handleStepChange(3)} 
+                className="btn-primary"
+              >
+                <span className="hide-mobile">เลือกสเปกคอมพิวเตอร์ ({totalStations} เครื่อง)</span>
+                <span className="show-mobile">เลือกสเปก ({totalStations} เครื่อง)</span>
+                <ArrowRight size={16} />
+              </button>
             </div>
           </div>
         </section>
@@ -2160,12 +3367,12 @@ export default function FranchisePlanner() {
             </div>
 
             <div className="step3-nav-actions">
-              <button onClick={() => setCurrentStep(2)} className="btn-secondary">
+              <button onClick={() => handleStepChange(2)} className="btn-secondary">
                 ย้อนกลับไปจัดผังร้าน
               </button>
               <button 
                 id="btn-step3-to-step4"
-                onClick={() => setCurrentStep(4)} 
+                onClick={() => handleStepChange(4)} 
                 className="btn-primary"
               >
                 <span>ดูสรุปงบประมาณและระยะเวลาคืนทุน (ROI)</span>
@@ -2404,7 +3611,7 @@ export default function FranchisePlanner() {
 
           {/* Step 4 Final CTA */}
           <div className="step4-footer-actions">
-            <button onClick={() => setCurrentStep(2)} className="btn-secondary">
+            <button onClick={() => handleStepChange(2)} className="btn-secondary">
               กลับไปแก้ไขผังร้าน 2D
             </button>
             <button 
@@ -2797,6 +4004,317 @@ export default function FranchisePlanner() {
                 </form>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Product Specification & Detail Showcase Modal */}
+      {selectedCatalogModalItem && (
+        <div className="catalog-detail-modal-overlay" onClick={() => setSelectedCatalogModalItem(null)}>
+          <div className="catalog-detail-modal-content" onClick={e => e.stopPropagation()}>
+            {/* Header */}
+            <div className="catalog-modal-header">
+              <div className="catalog-modal-title-wrap">
+                <div className="catalog-modal-icon-badge" style={{ color: selectedCatalogModalItem.accentColor || '#2563eb' }}>
+                  <Box size={22} />
+                </div>
+                <div>
+                  <div className="catalog-modal-tags">
+                    <span className="modal-category-tag">
+                      {selectedCatalogModalItem.category === 'stations' ? '🎮 โต๊ะคอมพิวเตอร์เกมมิ่ง' : (selectedCatalogModalItem.category === 'vip' ? '👑 ห้องซ้อม VIP Suite' : (selectedCatalogModalItem.category === 'facilities' ? '🏢 โซนบริการและแคชเชียร์' : '🏆 เวทีและสิ่งอำนวยความสะดวก'))}
+                    </span>
+                    <span className="modal-grade-tag">
+                      {selectedCatalogModalItem.grade === 'vip' ? '⭐ VIP Series' : (selectedCatalogModalItem.grade === 'ultimate' ? '🔥 Ultimate Arena' : '⚡ Pro Competitive')}
+                    </span>
+                  </div>
+                  <h3 className="catalog-modal-title">{selectedCatalogModalItem.name}</h3>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                className="catalog-modal-close-btn"
+                onClick={() => setSelectedCatalogModalItem(null)}
+                title="ปิดหน้าต่าง"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="catalog-modal-body">
+              {/* Left Column: Media & Visual Color Palette */}
+              <div className="catalog-modal-left-col">
+                <div className="catalog-modal-img-frame">
+                  <img 
+                    src={selectedCatalogModalItem.image || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1000&q=80'} 
+                    alt={selectedCatalogModalItem.name} 
+                    className="catalog-modal-main-img" 
+                  />
+                  <div className="catalog-modal-img-badge">
+                    <Sparkles size={13} />
+                    <span>ภาพสินค้าจริงจากโรงงานผลิต G-Speed</span>
+                  </div>
+                </div>
+
+                {/* Color Palette & Material Tones Card */}
+                <div className="catalog-modal-colors-card">
+                  <h5 className="modal-section-h5">
+                    <Palette size={15} className="text-cyan" />
+                    <span>โทนสีและวัสดุตกแต่งจริง (Color & Finish)</span>
+                  </h5>
+                  <div className="color-swatches-grid">
+                    <div className="color-swatch-item">
+                      <span className="color-swatch-box" style={{ backgroundColor: selectedCatalogModalItem.deskColor || '#0f172a' }} />
+                      <div className="color-swatch-text">
+                        <span className="swatch-lbl">สีท็อป & ขาโต๊ะ</span>
+                        <strong className="swatch-val">{selectedCatalogModalItem.deskColor === '#0f172a' ? 'Black Obsidian (ดำด้าน)' : (selectedCatalogModalItem.deskColor === '#1e293b' ? 'Dark Slate Gray' : selectedCatalogModalItem.deskColor)}</strong>
+                      </div>
+                    </div>
+                    <div className="color-swatch-item">
+                      <span className="color-swatch-box" style={{ backgroundColor: selectedCatalogModalItem.accentColor || '#1d4ed8' }} />
+                      <div className="color-swatch-text">
+                        <span className="swatch-lbl">สีไฟนีออน / ขอบตกแต่ง</span>
+                        <strong className="swatch-val">{selectedCatalogModalItem.accentColor === '#1d4ed8' ? 'Esport Blue (น้ำเงิน)' : (selectedCatalogModalItem.accentColor === '#38bdf8' ? 'Cyber Cyan (ฟ้าสว่าง)' : (selectedCatalogModalItem.accentColor === '#8b5cf6' ? 'Aura Purple (ม่วง)' : selectedCatalogModalItem.accentColor))}</strong>
+                      </div>
+                    </div>
+                    {selectedCatalogModalItem.chairColor && (
+                      <div className="color-swatch-item">
+                        <span className="color-swatch-box" style={{ backgroundColor: selectedCatalogModalItem.chairColor || '#0f172a' }} />
+                        <div className="color-swatch-text">
+                          <span className="swatch-lbl">สีหนังเก้าอี้เกมมิ่ง</span>
+                          <strong className="swatch-val">Racing Black (หนัง PU ดำเดินด้ายคู่)</strong>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Dimension Metric Quick Pills */}
+                <div className="catalog-modal-dimensions-card">
+                  <div className="dimension-metric-item">
+                    <span className="dim-lbl">ความกว้าง (Width)</span>
+                    <strong className="dim-val text-cyan">{selectedCatalogModalItem.widthMeters} เมตร</strong>
+                  </div>
+                  <div className="dimension-metric-item">
+                    <span className="dim-lbl">ความลึก (Depth)</span>
+                    <strong className="dim-val text-cyan">{selectedCatalogModalItem.depth3D || selectedCatalogModalItem.heightMeters} เมตร</strong>
+                  </div>
+                  <div className="dimension-metric-item">
+                    <span className="dim-lbl">ความสูง (Height)</span>
+                    <strong className="dim-val text-cyan">{selectedCatalogModalItem.height3D || 1.25} เมตร</strong>
+                  </div>
+                  <div className="dimension-metric-item">
+                    <span className="dim-lbl">จำนวนที่นั่งในเซ็ต</span>
+                    <strong className="dim-val text-emerald">{selectedCatalogModalItem.seats > 0 ? `${selectedCatalogModalItem.seats} ที่นั่ง (โต๊ะ 1.20ม.)` : 'จุดบริการ'}</strong>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Detailed Technical Specifications */}
+              <div className="catalog-modal-right-col">
+                {/* Price Breakdown Banner */}
+                <div className="catalog-modal-pricing-box">
+                  <div className="pricing-box-left">
+                    <span className="pricing-title">ราคารวมเซ็ตพร้อมติดตั้ง:</span>
+                    <div className="pricing-main-amount">
+                      <span className="currency">฿</span>
+                      <span className="amount">{selectedCatalogModalItem.baseCost?.toLocaleString()}</span>
+                      <span className="vat-note">(รวมภาษีและค่าติดตั้ง)</span>
+                    </div>
+                  </div>
+                  <div className="pricing-box-right">
+                    <div className="pricing-mini-item">
+                      <span>โต๊ะสั่งผลิต:</span>
+                      <strong>฿{selectedCatalogModalItem.deskPrice?.toLocaleString()}</strong>
+                    </div>
+                    {selectedCatalogModalItem.chairCount > 0 && (
+                      <div className="pricing-mini-item">
+                        <span>เก้าอี้เกมมิ่ง ({selectedCatalogModalItem.chairCount} ตัว):</span>
+                        <strong>฿{((selectedCatalogModalItem.chairPrice || 0) * (selectedCatalogModalItem.chairCount || 1)).toLocaleString()}</strong>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Full Specifications Accordion / Cards */}
+                <div className="catalog-modal-specs-list">
+                  {/* 1. Materials & Construction */}
+                  <div className="modal-spec-card">
+                    <div className="spec-card-header">
+                      <Shield size={16} className="text-blue" />
+                      <h4>1. สเปกวัสดุและโครงสร้างทางวิศวกรรม (Material & Construction)</h4>
+                    </div>
+                    <p className="spec-card-body-text">{selectedCatalogModalItem.material}</p>
+                    <ul className="spec-bullets-list">
+                      <li><strong>หน้าท็อปโต๊ะ:</strong> ไม้สังเคราะห์ HPL (High Pressure Laminate) ความหนา 25 มม. เกรดทนความร้อน กันน้ำ 100% และกันรอยขูดขีด</li>
+                      <li><strong>ขอบโต๊ะ Ergonomic:</strong> เจียรลบมุมลาดเอียง 45 องศา (Bevel Edge) ตามหลักสรีรศาสตร์ รองรับข้อมือผู้เล่นเกมได้สบายตลอดวัน</li>
+                      <li><strong>โครงขาและคานรับแรง:</strong> เหล็กกล้าคาร์บอน (Carbon Steel Box) หนา 1.5 - 2.0 มม. พ่นสีพาวเดอร์โค้ตกันสนิม รองรับน้ำหนักได้มากกว่า 250 กก.</li>
+                    </ul>
+                  </div>
+
+                  {/* 2. Furniture & Chairs Included */}
+                  {selectedCatalogModalItem.chairCount > 0 && (
+                    <div className="modal-spec-card">
+                      <div className="spec-card-header">
+                        <Armchair size={16} style={{ color: '#0284c7' }} />
+                        <h4>2. สเปกเก้าอี้เกมมิ่งและอุปกรณ์ที่มาในเซ็ต (Included Furniture)</h4>
+                      </div>
+                      <div className="chair-spec-info-box">
+                        <strong>รุ่นเก้าอี้: {selectedCatalogModalItem.chairModel}</strong>
+                        <span className="chair-count-badge">จำนวน {selectedCatalogModalItem.chairCount} ตัว ประจำสถานี</span>
+                      </div>
+                      <ul className="spec-bullets-list">
+                        <li><strong>เบาะรองนั่ง:</strong> โฟมขึ้นรูปเย็นความหนาแน่นสูง (High-Density Cold-Cure Foam) ไม่ยุบตัว รับประกันการใช้งานต่อเนื่อง</li>
+                        <li><strong>ฟังก์ชันการปรับระดับ:</strong> ปรับเอนหลังได้ 160 องศา พร้อมระบบล็อกมัลติฟังก์ชัน + ที่พักแขน 3D/4D ปรับระดับความสูงและองศาได้</li>
+                        <li><strong>ระบบรองรับน้ำหนัก:</strong> โช้กแก๊ส Class 4 ผ่านการทดสอบความปลอดภัยระดับสากล BIFMA รองรับน้ำหนักสูงสุด 150 กก./ตัว</li>
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* 3. Electrical & Data Raceway */}
+                  <div className="modal-spec-card">
+                    <div className="spec-card-header">
+                      <Zap size={16} className="text-amber" />
+                      <h4>3. ระบบท่อร้อยสายไฟและโครงข่ายเน็ตเวิร์ก (Electrical & LAN Raceway)</h4>
+                    </div>
+                    <ul className="spec-bullets-list">
+                      <li><strong>รางร้อยสายไฟใต้โต๊ะ (Dual Cable Raceway):</strong> รางเหล็กซ่อนสายไฟ 2 ช่องอิสระ แยกท่อไฟฟ้ากำลัง 220V และสายแลน LAN ป้องกันสัญญาณรบกวน (Zero Interference)</li>
+                      <li><strong>จุดเต้ารับไฟฟ้าต่อสถานี:</strong> เต้ารับคู่ 3 ขา มีกราวด์ (Universal Socket 220V 16A) พร้อมเบรกเกอร์กันไฟกระชาก (Surge Protection) 1:1</li>
+                      <li><strong>การเชื่อมต่อเน็ตเวิร์ก:</strong> เต้ารับ LAN RJ-45 CAT6A Shielded ความเร็ว 10Gbps Ready พร้อมท่อร้อยสายเชื่อมตรงสู่ตู้ Rack เซิร์ฟเวอร์</li>
+                    </ul>
+                  </div>
+
+                  {/* 4. Warranty & Production Lead Time */}
+                  <div className="modal-spec-card highlight-warranty">
+                    <div className="spec-card-header">
+                      <CheckCircle2 size={16} className="text-emerald" />
+                      <h4>4. การรับประกันและระยะเวลาผลิต (Warranty & Delivery)</h4>
+                    </div>
+                    <div className="warranty-grid">
+                      <div className="warranty-item">
+                        <span className="w-lbl">การรับประกัน:</span>
+                        <strong className="w-val text-emerald">{selectedCatalogModalItem.warranty}</strong>
+                      </div>
+                      <div className="warranty-item">
+                        <span className="w-lbl">ระยะเวลาสั่งผลิต:</span>
+                        <strong className="w-val text-cyan">{selectedCatalogModalItem.leadTime}</strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="catalog-modal-footer">
+              <div className="modal-footer-left">
+                <span className="footer-summary-lbl">โมเดลนี้ประกอบด้วย:</span>
+                <strong>{selectedCatalogModalItem.seats > 0 ? `โต๊ะมาตรฐาน ${selectedCatalogModalItem.widthMeters}ม. + เก้าอี้ ${selectedCatalogModalItem.chairCount} ตัว + รางสายไฟครบชุด` : selectedCatalogModalItem.desc}</strong>
+              </div>
+              <div className="modal-footer-btns">
+                <button 
+                  type="button" 
+                  className="btn-secondary"
+                  onClick={() => setSelectedCatalogModalItem(null)}
+                >
+                  ปิดหน้าต่าง
+                </button>
+                <button 
+                  type="button" 
+                  className="btn-primary"
+                  onClick={() => {
+                    handleAddItem(selectedCatalogModalItem);
+                    setSelectedCatalogModalItem(null);
+                  }}
+                >
+                  <Plus size={16} />
+                  <span>เพิ่มลงในผัง 3D (Add to Plan)</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Blueprint Drawing Export Preview Modal */}
+      {exportedBlueprintModal && (
+        <div className="blueprint-preview-modal-overlay" onClick={() => setExportedBlueprintModal(null)}>
+          <div className="blueprint-preview-modal-content" onClick={e => e.stopPropagation()}>
+            <div className="bp-modal-header">
+              <div className="bp-modal-title-wrap">
+                <Download size={20} className="text-blue" />
+                <div>
+                  <h3 className="bp-modal-title">แบบแปลนสถาปัตยกรรม & งานระบบ (PNG)</h3>
+                  <span className="bp-modal-subtitle">{exportedBlueprintModal.filename}</span>
+                </div>
+              </div>
+              <button 
+                type="button"
+                className="bp-modal-close" 
+                onClick={() => setExportedBlueprintModal(null)}
+                title="ปิดหน้าต่าง"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div 
+              className="bp-modal-body" 
+              onClick={() => setIsBlueprintZoomed(prev => !prev)}
+              title={isBlueprintZoomed ? 'คลิกเพื่อย่อมุมมองปกติ' : 'คลิกเพื่อขยายดูตัวอักษรและรายละเอียดขนาดใหญ่ (100% Zoom)'}
+            >
+              <div className="bp-floating-zoom-badge">
+                <span>{isBlueprintZoomed ? '🔍 กำลังซูม 100% (คลิกเพื่อย่อภาพรวม)' : '🔍 คลิกภาพเพื่อซูมดูตัวหนังสือและอุปกรณ์ 100%'}</span>
+              </div>
+              <img 
+                src={exportedBlueprintModal.dataUrl} 
+                alt="Architectural Blueprint Preview" 
+                className={`bp-preview-img ${isBlueprintZoomed ? 'is-zoomed' : ''}`}
+              />
+            </div>
+
+            <div className="bp-modal-footer">
+              <div className="bp-modal-tip">
+                <span>💡 <strong>คำแนะนำ:</strong> {isBlueprintZoomed ? 'คลิกที่ภาพเพื่อย่อมุมมองปกติ | เลื่อนลูกกลิ้งเมาส์เพื่อดูส่วนต่างๆ' : 'คลิกที่ภาพ หรือกดปุ่ม "ขยายดูอุปกรณ์ 100%" เพื่ออ่านตัวหนังสือชัดเจน'}</span>
+              </div>
+              <div className="bp-modal-btns">
+                <button 
+                  type="button"
+                  className="btn-secondary"
+                  style={{ 
+                    background: isBlueprintZoomed ? '#2563eb' : '#eff6ff', 
+                    color: isBlueprintZoomed ? '#ffffff' : '#1d4ed8', 
+                    borderColor: '#2563eb', 
+                    fontWeight: 700 
+                  }}
+                  onClick={() => setIsBlueprintZoomed(prev => !prev)}
+                >
+                  <ZoomIn size={16} />
+                  <span>{isBlueprintZoomed ? 'ย่อมุมมองรวม' : '🔍 ขยายดูอุปกรณ์ 100%'}</span>
+                </button>
+                <button 
+                  type="button"
+                  className="btn-secondary" 
+                  onClick={() => {
+                    const win = window.open();
+                    if (win) {
+                      win.document.write(`<!DOCTYPE html><html><head><title>${exportedBlueprintModal.filename}</title><style>body{margin:0;background:#0f172a;display:flex;align-items:center;justify-content:center;min-height:100vh;}img{max-width:98%;max-height:98vh;border-radius:6px;box-shadow:0 10px 40px rgba(0,0,0,0.5);}</style></head><body><img src="${exportedBlueprintModal.dataUrl}" alt="Blueprint" /></body></html>`);
+                    }
+                  }}
+                >
+                  <Eye size={16} />
+                  <span>เปิดภาพในแท็บใหม่</span>
+                </button>
+                <button 
+                  type="button"
+                  className="btn-primary" 
+                  onClick={() => downloadFile(exportedBlueprintModal.dataUrl, exportedBlueprintModal.filename, 'image/png')}
+                >
+                  <Download size={16} />
+                  <span>บันทึกไฟล์ (Save PNG)</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

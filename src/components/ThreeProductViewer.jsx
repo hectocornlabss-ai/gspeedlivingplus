@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { 
   Camera, Download, RotateCw, Eye, Compass, 
   ZoomIn, ZoomOut, Check, Sparkles, RefreshCw, 
   Sun, Moon, Layers, Maximize2
 } from 'lucide-react';
+import { downloadFile } from '../utils/fileDownloader';
 
 export default function ThreeProductViewer({
   item,
@@ -245,6 +247,46 @@ export default function ThreeProductViewer({
     const group = new THREE.Group();
     modelGroupRef.current = group;
 
+    // Check if custom uploaded 3D model (GLB / GLTF) is provided
+    if (item.model3DUrl) {
+      const gltfLoader = new GLTFLoader();
+      gltfLoader.load(
+        item.model3DUrl,
+        (gltf) => {
+          const customModel = gltf.scene;
+          const box = new THREE.Box3().setFromObject(customModel);
+          const size = new THREE.Vector3();
+          box.getSize(size);
+          const center = new THREE.Vector3();
+          box.getCenter(center);
+
+          customModel.position.x -= center.x;
+          customModel.position.y -= box.min.y;
+          customModel.position.z -= center.z;
+
+          const maxDim = Math.max(size.x, size.y, size.z);
+          if (maxDim > 0) {
+            const targetScale = 2.4 / maxDim;
+            customModel.scale.setScalar(targetScale);
+          }
+
+          customModel.traverse((child) => {
+            if (child.isMesh) {
+              child.castShadow = true;
+              child.receiveShadow = true;
+            }
+          });
+          group.add(customModel);
+          scene.add(group);
+        },
+        undefined,
+        (err) => {
+          console.warn('Could not load custom 3D GLTF model, falling back to procedural model:', err);
+        }
+      );
+      // Wait for GLTF or continue if fails
+    }
+
     // Colors & Materials
     const deskHex = item.deskColor || item.color || '#0f172a';
     const accentHex = item.accentColor || '#1d4ed8';
@@ -257,6 +299,18 @@ export default function ThreeProductViewer({
     const metalMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8, roughness: 0.25 });
     const chromeMat = new THREE.MeshStandardMaterial({ color: 0xd4d4d8, metalness: 0.9, roughness: 0.15 });
     const deskTopMat = new THREE.MeshStandardMaterial({ color: deskColor, roughness: 0.35, metalness: 0.12 });
+
+    // Apply real image / desk texture if provided
+    if (item.textureUrl || item.deskTextureUrl) {
+      const texLoader = new THREE.TextureLoader();
+      texLoader.load(item.textureUrl || item.deskTextureUrl, (tex) => {
+        tex.wrapS = THREE.RepeatWrapping;
+        tex.wrapT = THREE.RepeatWrapping;
+        deskTopMat.map = tex;
+        deskTopMat.needsUpdate = true;
+      });
+    }
+
     const ledGlowMat = new THREE.MeshBasicMaterial({ color: accentColor });
     const dividerMat = new THREE.MeshStandardMaterial({ color: accentColor, transparent: true, opacity: 0.75, roughness: 0.2 });
 
@@ -649,12 +703,10 @@ export default function ThreeProductViewer({
     renderer.render(scene, camera);
     const dataUrl = renderer.domElement.toDataURL('image/png');
 
-    // Trigger file download
-    const link = document.createElement('a');
+    // Trigger file download with guaranteed filename and .png extension
     const safeName = (item?.type || 'model').replace(/[^a-z0-9_-]/gi, '-');
-    link.download = `gspeed-${safeName}-3d-render.png`;
-    link.href = dataUrl;
-    link.click();
+    const filename = `gspeed-${safeName}-3d-render.png`;
+    downloadFile(renderer.domElement, filename, 'image/png');
 
     setCapturedFeedback(true);
     setTimeout(() => setCapturedFeedback(false), 2200);
@@ -707,9 +759,9 @@ export default function ThreeProductViewer({
         style={{ height, width: '100%', borderRadius: '12px', overflow: 'hidden' }}
       />
 
-      {/* Floating 3D Studio Floating Toolbar */}
+      {/* 3D Studio Bottom Controls Bar - Situated cleanly below the 3D canvas */}
       {showControls && (
-        <div className="three-floating-controls">
+        <div className="three-bottom-controls-bar">
           <div className="controls-group-left">
             <button
               type="button"
@@ -717,7 +769,7 @@ export default function ThreeProductViewer({
               onClick={() => setIsAutoRotate(!isAutoRotate)}
               title={isAutoRotate ? 'หยุดหมุน 3D อัตโนมัติ' : 'เปิดหมุน 3D อัตโนมัติ'}
             >
-              <RotateCw size={14} className={isAutoRotate ? 'spin-icon' : ''} />
+              <RotateCw size={13} className={isAutoRotate ? 'spin-icon' : ''} />
               <span>{isAutoRotate ? 'หมุน 3D' : 'หยุดหมุน'}</span>
             </button>
 
@@ -766,7 +818,7 @@ export default function ThreeProductViewer({
               }}
               title="สลับพื้นหลัง (ขาวสตูดิโอ / มืดนีออน / โปร่งแสง)"
             >
-              {bgMode === 'dark' ? <Moon size={14} /> : <Sun size={14} />}
+              {bgMode === 'dark' ? <Moon size={13} /> : <Sun size={13} />}
               <span>{bgMode === 'dark' ? 'มืด' : bgMode === 'transparent' ? 'โปร่ง' : 'สตูดิโอ'}</span>
             </button>
           </div>
@@ -779,7 +831,7 @@ export default function ThreeProductViewer({
                 onClick={handleSetAsCover}
                 title="นำภาพมุมมอง 3D ปัจจุบันไปเป็นภาพหน้าปกโมดูล"
               >
-                {setAsImageFeedback ? <Check size={14} /> : <Sparkles size={14} />}
+                {setAsImageFeedback ? <Check size={13} /> : <Sparkles size={13} />}
                 <span>{setAsImageFeedback ? 'บันทึกเป็นภาพปกแล้ว' : 'ใช้เป็นภาพปก'}</span>
               </button>
             )}
@@ -791,8 +843,8 @@ export default function ThreeProductViewer({
               onClick={handleExportSnapshot}
               title="ดาวน์โหลดภาพเรนเดอร์ 3 มิติเป็นไฟล์ PNG คมชัดสูง"
             >
-              {capturedFeedback ? <Check size={14} /> : <Download size={14} />}
-              <span>{capturedFeedback ? 'ดาวน์โหลดแล้ว' : 'ส่งออกภาพ 3D (PNG)'}</span>
+              {capturedFeedback ? <Check size={13} /> : <Download size={13} />}
+              <span>{capturedFeedback ? 'ดาวน์โหลดแล้ว' : 'ส่งออกภาพ 3D'}</span>
             </button>
           </div>
         </div>

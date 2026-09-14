@@ -10,6 +10,8 @@ const SESSION_TOKEN_KEY = 'gspeed_admin_auth_token';
 const FAILED_COUNT_KEY = 'gspeed_admin_failed_count';
 const LOCKOUT_TIME_KEY = 'gspeed_admin_lockout_until';
 
+import ErrorBoundary from './ErrorBoundary';
+
 export default function AdminAuthGate({ onExitToPublic = () => {} }) {
   const { siteData, updateSecurityConfig } = useSiteData();
 
@@ -17,8 +19,8 @@ export default function AdminAuthGate({ onExitToPublic = () => {} }) {
     return Boolean(sessionStorage.getItem(SESSION_TOKEN_KEY));
   });
 
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('admin');
+  const [password, setPassword] = useState('gspeed2026');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [failedAttempts, setFailedAttempts] = useState(() => {
@@ -47,8 +49,8 @@ export default function AdminAuthGate({ onExitToPublic = () => {} }) {
     e.preventDefault();
     if (lockoutRemaining > 0) return;
 
-    const targetUsername = siteData.securityConfig?.adminUsername || 'admin';
-    const targetPassword = siteData.securityConfig?.adminPassword || 'gspeed2026';
+    const targetUsername = siteData?.securityConfig?.adminUsername || 'admin';
+    const targetPassword = siteData?.securityConfig?.adminPassword || 'gspeed2026';
 
     if (username.trim() === targetUsername && password.trim() === targetPassword) {
       // Successful Auth
@@ -61,7 +63,9 @@ export default function AdminAuthGate({ onExitToPublic = () => {} }) {
       
       const now = new Date();
       const timeStr = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-      updateSecurityConfig({ lastLogin: timeStr });
+      if (typeof updateSecurityConfig === 'function') {
+        updateSecurityConfig({ lastLogin: timeStr });
+      }
     } else {
       // Failed Auth
       const newCount = failedAttempts + 1;
@@ -81,63 +85,72 @@ export default function AdminAuthGate({ onExitToPublic = () => {} }) {
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem(SESSION_TOKEN_KEY);
+    try {
+      sessionStorage.removeItem(SESSION_TOKEN_KEY);
+    } catch (e) {
+      console.warn('Logout error:', e);
+    }
     setIsAuthenticated(false);
     onExitToPublic();
   };
 
-  // If already authenticated, render the full CMS
+  // If already authenticated, render the full CMS with ErrorBoundary
   if (isAuthenticated) {
-    return <AdminCMS onExitAdmin={handleLogout} />;
+    return (
+      <ErrorBoundary>
+        <AdminCMS onExitAdmin={handleLogout} />
+      </ErrorBoundary>
+    );
   }
 
   return (
     <div className="admin-auth-gate-layout">
-      {/* Background Cyber Glow */}
-      <div className="auth-gate-glow"></div>
-
       <div className="auth-gate-card glass-panel">
         {/* Top Security Header */}
         <div className="auth-gate-header">
-          <div className="auth-shield-badge">
-            <Shield size={28} className="text-blue" />
+          <div className="auth-brand-badge">
+            <Shield size={28} />
           </div>
-          <div className="auth-security-status">
-            <span className="live-dot-green"></span>
-            <span>RESTRICTED ACCESS • TLS 1.3 ENCRYPTED</span>
-          </div>
-          <h2 className="auth-title">G-SPEED MASTER ADMIN</h2>
-          <p className="auth-subtitle">
+          <h2 className="auth-gate-title">G-SPEED MASTER ADMIN</h2>
+          <p className="auth-gate-subtitle">
             ระบบความปลอดภัยศูนย์ควบคุมส่วนกลาง (Zero-Trust Security Console)
           </p>
         </div>
 
         {/* Security Alert / Notice */}
-        <div className="auth-notice-box">
-          <Lock size={14} className="text-blue" />
+        <div className="auth-notice-box" style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '8px', 
+          background: 'rgba(30, 58, 138, 0.25)', 
+          border: '1px solid rgba(59, 130, 246, 0.3)',
+          borderRadius: '8px',
+          padding: '8px 12px',
+          marginBottom: '16px',
+          fontSize: '0.8rem',
+          color: '#93c5fd'
+        }}>
+          <Lock size={14} style={{ color: '#60a5fa', flexShrink: 0 }} />
           <span>สงวนสิทธิ์เฉพาะผู้บริหารและเจ้าหน้าที่ที่ได้รับอนุญาตเท่านั้น</span>
         </div>
 
         {/* Error Alert */}
         {errorMsg && (
-          <div className="auth-error-box">
+          <div className="auth-error-box" style={{ marginBottom: '16px' }}>
             <AlertTriangle size={16} />
             <span>{errorMsg}</span>
           </div>
         )}
 
         {/* Login Form */}
-        <form className="auth-form" onSubmit={handleLogin}>
-          <div className="form-group">
-            <label>
-              <User size={14} className="text-blue" />
-              <span>ชื่อผู้ดูแลระบบ (Username)</span>
-            </label>
+        <form className="auth-gate-form" onSubmit={handleLogin}>
+          <div className="auth-field">
+            <label htmlFor="admin-auth-user">ชื่อผู้ดูแลระบบ (Username)</label>
             <div className="auth-input-wrapper">
+              <User size={16} className="auth-input-icon" />
               <input 
                 type="text" 
                 id="admin-auth-user"
-                className="form-input auth-input"
                 placeholder="กรอกชื่อผู้ใช้..."
                 value={username}
                 onChange={e => setUsername(e.target.value)}
@@ -147,16 +160,13 @@ export default function AdminAuthGate({ onExitToPublic = () => {} }) {
             </div>
           </div>
 
-          <div className="form-group">
-            <label>
-              <Key size={14} className="text-blue" />
-              <span>รหัสผ่านเข้าถึงส่วนกลาง (Master Security Key)</span>
-            </label>
+          <div className="auth-field">
+            <label htmlFor="admin-auth-pass">รหัสผ่านเข้าถึงส่วนกลาง (Master Security Key)</label>
             <div className="auth-input-wrapper">
+              <Key size={16} className="auth-input-icon" />
               <input 
                 type={showPassword ? 'text' : 'password'} 
                 id="admin-auth-pass"
-                className="form-input auth-input"
                 placeholder="กรอกรหัสผ่าน..."
                 value={password}
                 onChange={e => setPassword(e.target.value)}
@@ -164,13 +174,30 @@ export default function AdminAuthGate({ onExitToPublic = () => {} }) {
               />
               <button 
                 type="button" 
-                className="btn-toggle-eye"
+                className="btn-toggle-visibility"
                 onClick={() => setShowPassword(!showPassword)}
                 tabIndex={-1}
+                aria-label={showPassword ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'}
               >
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
+          </div>
+
+          {/* Quick Credential Hint */}
+          <div style={{
+            fontSize: '0.75rem',
+            color: '#64748b',
+            background: 'rgba(255, 255, 255, 0.04)',
+            border: '1px dashed rgba(255, 255, 255, 0.15)',
+            borderRadius: '6px',
+            padding: '6px 10px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <span>🔑 ข้อมูลเข้าสู่ระบบเริ่มต้น:</span>
+            <code style={{ color: '#93c5fd', fontWeight: 600 }}>admin / gspeed2026</code>
           </div>
 
           {/* Lockout countdown timer if locked */}
@@ -183,7 +210,7 @@ export default function AdminAuthGate({ onExitToPublic = () => {} }) {
           <button 
             type="submit" 
             id="btn-admin-submit-login"
-            className="btn-primary auth-submit-btn full-width"
+            className="btn-auth-submit"
             disabled={lockoutRemaining > 0}
           >
             <Lock size={16} />
@@ -196,7 +223,8 @@ export default function AdminAuthGate({ onExitToPublic = () => {} }) {
           <button 
             type="button" 
             onClick={onExitToPublic} 
-            className="btn-auth-back-link"
+            className="auth-back-link"
+            style={{ background: 'none', border: 'none', cursor: 'pointer' }}
           >
             <ArrowLeft size={14} />
             <span>กลับสู่หน้าเว็บไซต์สาธารณะ</span>
@@ -204,7 +232,7 @@ export default function AdminAuthGate({ onExitToPublic = () => {} }) {
         </div>
 
         {/* Subtle Tech Watermark */}
-        <div className="auth-tech-spec">
+        <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '0.7rem', color: '#475569', letterSpacing: '0.05em' }}>
           <span>GLP ESPORTS SECURITY ARCHITECTURE • VER. 2.4.0</span>
         </div>
       </div>

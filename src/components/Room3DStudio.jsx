@@ -6,6 +6,7 @@ import {
   Layers, Sun, RefreshCw, ZoomIn, ZoomOut, Check, ArrowRight,
   ArrowLeft, ArrowUp, ArrowDown, Move, Camera, Download
 } from 'lucide-react';
+import { downloadFile } from '../utils/fileDownloader';
 
 export default function Room3DStudio({
   roomWidth = 12,
@@ -980,11 +981,8 @@ export default function Room3DStudio({
     if (!renderer || !scene || !camera) return;
 
     renderer.render(scene, camera);
-    const dataUrl = renderer.domElement.toDataURL('image/png');
-    const link = document.createElement('a');
-    link.download = `GSPEED-3D-Shop-Layout-${roomWidth}x${roomHeight}m-${Date.now().toString().slice(-4)}.png`;
-    link.href = dataUrl;
-    link.click();
+    const filename = `GSPEED-3D-Shop-Layout-${roomWidth}x${roomHeight}m-${Date.now().toString().slice(-4)}.png`;
+    downloadFile(renderer.domElement, filename, 'image/png');
   };
 
   // Adjust camera framing smoothly when toggling fullscreen so shop is never cut off at bottom
@@ -1094,14 +1092,6 @@ export default function Room3DStudio({
             <Camera size={15} />
             <span>ภาพ 3D</span>
           </button>
-          <button 
-            type="button"
-            className={`btn-cam-mini ${isPlannerFullscreen ? 'active text-cyan' : ''}`}
-            onClick={onToggleFullscreen} 
-            title={isPlannerFullscreen ? 'ย่อหน้าต่าง (ESC)' : 'เปิดสตูดิโอ 3D เต็มจอ (Zen Mode)'}
-          >
-            {isPlannerFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
-          </button>
         </div>
       </div>
 
@@ -1110,14 +1100,32 @@ export default function Room3DStudio({
         className="three-canvas-container" 
         ref={containerRef}
         onPointerDown={handlePointerDown}
-      />
+      >
+        {/* Prominent Fullscreen / Zen Mode Toggle Button at Bottom-Right of 3D Canvas */}
+        <button 
+          type="button"
+          id="btn-3d-floating-fullscreen"
+          className={`floating-3d-fullscreen-btn ${isPlannerFullscreen ? 'active' : ''}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleFullscreen();
+          }} 
+          title={isPlannerFullscreen ? 'ออกจากโหมดเต็มจอ (กด ESC ได้)' : 'เปิดสตูดิโอ 3D เต็มจอ (Zen Mode)'}
+        >
+          {isPlannerFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+          <span>{isPlannerFullscreen ? 'ย่อหน้าต่าง (ESC)' : 'ขยายเต็มจอ'}</span>
+        </button>
+      </div>
 
       {/* Floating Guidance & Selected Item Quick Actions */}
       <div className="studio-3d-floating-footer">
-        <div className="hint-pill">
-          <Compass size={14} className="text-blue" />
-          <span>คลิกซ้ายค้างเพื่อหมุนรอบห้อง • คลิกขวาเพื่อเลื่อน • กดปุ่มลูกศร ↑ ↓ ← → บนคีย์บอร์ดเพื่อย้ายโต๊ะ</span>
-        </div>
+        {!selectedItemData && (
+          <div className="hint-pill">
+            <Compass size={14} className="text-blue" />
+            <span className="hint-text-desktop">คลิกซ้ายค้างเพื่อหมุนรอบห้อง • คลิกขวาเพื่อเลื่อน • กดปุ่มลูกศรเพื่อย้ายโต๊ะ</span>
+            <span className="hint-text-mobile">แตะเลื่อนเพื่อหมุน 360° • สองนิ้วเพื่อซูม</span>
+          </div>
+        )}
 
         {selectedItemData && (
           <div className="quick-3d-actions-pill">
