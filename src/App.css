@@ -607,7 +607,6 @@
 .hero-section {
   position: relative;
   padding: 70px 0 50px;
-  background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
   border-bottom: 1px solid var(--border-light);
 }
 
@@ -617,9 +616,6 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: 
-    linear-gradient(135deg, rgba(29, 78, 216, 0.06) 0%, transparent 45%),
-    linear-gradient(225deg, rgba(2, 132, 199, 0.05) 0%, transparent 55%);
   pointer-events: none;
 }
 
@@ -664,15 +660,45 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.95);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
-  padding: 24px;
-  box-shadow: var(--shadow-md);
+  padding: 22px 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(12px);
+  transition: all 0.3s ease;
+}
+
+/* Dark theme metrics grid override */
+.hero-dark-theme .hero-metrics-grid {
+  background: rgba(15, 23, 42, 0.78) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45) !important;
+  backdrop-filter: blur(16px);
+}
+
+.hero-dark-theme .hero-metrics-grid .metric-box {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.hero-dark-theme .hero-metrics-grid .metric-number {
+  color: #38bdf8 !important;
+  text-shadow: 0 2px 10px rgba(56, 189, 248, 0.45);
+}
+
+.hero-dark-theme .hero-metrics-grid .metric-label {
+  color: #cbd5e1 !important;
 }
 
 .metric-box {
   text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.metric-box:hover {
+  transform: translateY(-2px);
 }
 
 .metric-number {
@@ -727,24 +753,12 @@
 }
 
 .events-banner {
-  background: 
-    linear-gradient(135deg, rgba(29, 78, 216, 0.85) 0%, rgba(15, 23, 42, 0.92) 100%),
-    url('https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80') center/cover;
+  background-color: #1e3a8a;
 }
-
-.events-banner .banner-title { color: #ffffff; }
-.events-banner .banner-desc { color: #e2e8f0; }
-.events-banner .banner-link-row { color: #93c5fd; }
 
 .blog-banner {
-  background: 
-    linear-gradient(135deg, rgba(15, 23, 42, 0.88) 0%, rgba(30, 41, 59, 0.95) 100%),
-    url('https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80') center/cover;
+  background-color: #0f172a;
 }
-
-.blog-banner .banner-title { color: #ffffff; }
-.blog-banner .banner-desc { color: #cbd5e1; }
-.blog-banner .banner-link-row { color: #93c5fd; }
 
 .banner-content {
   position: relative;
@@ -1266,7 +1280,7 @@
 }
 
 .franchise-cta-card {
-  background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+  background-color: #1e3a8a;
   border-radius: var(--radius-lg);
   padding: 50px;
   text-align: center;

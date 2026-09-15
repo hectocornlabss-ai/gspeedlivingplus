@@ -97,6 +97,73 @@ export const INITIAL_RAG_KNOWLEDGE = [
   }
 ];
 
+// Initial Media Library for Reusable Image Assets & SEO Alt Tags
+export const INITIAL_MEDIA_LIBRARY = [
+  {
+    id: 'med-hero-1',
+    name: 'โถงแข่งขัน Pro Stage สว่างสากล (White Arena)',
+    url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1920&q=80',
+    alt: 'เวทีแข่งขันอีสปอร์ตระดับสากล GLP Arena สเปก RTX 40 Series จอ 360Hz',
+    category: 'hero',
+    dimensions: '1920x1080 (16:9)',
+    isUploaded: false
+  },
+  {
+    id: 'med-hero-2',
+    name: 'บรรยากาศเคาน์เตอร์และล็อบบี้ร้านเกมลักชัวรี',
+    url: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1920&q=80',
+    alt: 'ล็อบบี้ต้อนรับและโซนคอมพิวเตอร์เกมมิ่ง G-Speed Esport Arena',
+    category: 'hero',
+    dimensions: '1920x1080 (16:9)',
+    isUploaded: false
+  },
+  {
+    id: 'med-banner-events',
+    name: 'แบนเนอร์รวมภาพกิจกรรมและการแข่งขัน LAN',
+    url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80',
+    alt: 'ภาพบรรยากาศการแข่งขันเกมและกองเชียร์อีสปอร์ต ณ GLP Arena',
+    category: 'banners',
+    dimensions: '800x450 (16:9)',
+    isUploaded: false
+  },
+  {
+    id: 'med-banner-news',
+    name: 'แบนเนอร์ข่าวสารและเทคโนโลยีฮาร์ดแวร์เกม',
+    url: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80',
+    alt: 'บทความอัปเดตสเปกเครื่องและการจัดการร้านเกมอีสปอร์ต',
+    category: 'banners',
+    dimensions: '800x450 (16:9)',
+    isUploaded: false
+  },
+  {
+    id: 'med-arena-1',
+    name: 'สเตจประลอง 5v5 Soundproof Glass',
+    url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1000&q=80',
+    alt: 'ห้องแข่งขันเก็บเสียง 5v5 สตูดิโอทัวร์นาเมนต์อีสปอร์ต',
+    category: 'arena',
+    dimensions: '1000x600',
+    isUploaded: false
+  },
+  {
+    id: 'med-store-1',
+    name: 'โซน VIP Bootcamp และสตรีมเมอร์สวีท',
+    url: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1000&q=80',
+    alt: 'ห้อง VIP Bootcamp เก้าอี้ Secretlab พร้อมไมค์บรอดแคสต์',
+    category: 'store',
+    dimensions: '1000x600',
+    isUploaded: false
+  },
+  {
+    id: 'med-founder',
+    name: 'ภาพผู้บริหารและทีมงานผู้ก่อตั้ง GLP',
+    url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80',
+    alt: 'คุณเกรียงศักดิ์ วิจิตรพงศ์พันธุ์ ผู้ก่อตั้งและประธานบริหาร G-Speed Living Plus',
+    category: 'store',
+    dimensions: '600x700',
+    isUploaded: false
+  }
+];
+
 // Initial Navigation Links
 export const INITIAL_NAV_LINKS = [
   { id: 'nav-arena', label: 'หน้าแรก & กิจกรรม', target: 'arena', visible: true },
@@ -142,10 +209,13 @@ export const DEFAULT_SITE_DATA = {
     primaryCtaLink: '#activities',
     secondaryCta: 'จำลองผังร้าน 3D แฟรนไชส์',
     bgColor: '#ffffff',
+    titleColor: '#0f172a',
+    subtitleColor: '#475569',
     backgroundImage: '',
     bgOverlayImage: '',
-    overlayOpacity: 0.82,
-    overlayType: 'dark',
+    overlayOpacity: 0.35,
+    overlayType: 'light',
+    imageAlt: 'ศูนย์รวมอีสปอร์ตครบวงจร GLP G-Speed Living Plus แฟรนไชส์ร้านเกม 3D',
     metrics: [
       { number: '750+', label: 'Battle Stations ทั่วประเทศ' },
       { number: '360Hz', label: 'Fast-IPS & OLED Displays' },
@@ -160,8 +230,12 @@ export const DEFAULT_SITE_DATA = {
       desc: 'ภาพงานแข่ง LAN, งานเปิดตัวเกม, มีตติ้ง และพิธีมอบรางวัลชนะเลิศตลอดทั้งปี',
       linkText: 'สำรวจอัลบั้มภาพกิจกรรม',
       linkTarget: '#activities',
+      bgColor: '#1e3a8a',
+      titleColor: '#ffffff',
+      descColor: '#cbd5e1',
       bgGradient: 'linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%)',
-      image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80'
+      image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80',
+      alt: 'ภาพบรรยากาศการแข่งขันเกมและกองเชียร์อีสปอร์ต ณ GLP Arena'
     },
     bannerRight: {
       badge: 'GLP BLOG & NEWS',
@@ -169,27 +243,37 @@ export const DEFAULT_SITE_DATA = {
       desc: 'เกาะติดผลการแข่งขัน ทริกการเล่น สเปกอุปกรณ์ใหม่ และประกาศจากทางร้าน',
       linkText: 'อ่านบทความล่าสุด',
       linkTarget: '#news',
+      bgColor: '#1e293b',
+      titleColor: '#ffffff',
+      descColor: '#cbd5e1',
       bgGradient: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
-      image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80'
+      image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80',
+      alt: 'บทความ ข่าวสารวงการเกม และอัปเดตสเปกฮาร์ดแวร์ GLP Esports'
     }
   },
   tournamentsSection: {
     badge: 'TOURNAMENTS & COMMUNITY EVENTS',
     title: 'ปฏิทินการแข่งขัน อีสปอร์ตประจำเดือน',
     subtitle: 'ร่วมชิงเงินรางวัลรวมกว่าหลายแสนบาท พิสูจน์ฝีมือบนเวที LAN Final ถ่ายทอดสดสู่สายตาแฟนเกมทั่วประเทศ',
-    bgColor: '#ffffff'
+    bgColor: '#ffffff',
+    titleColor: '#0f172a',
+    subtitleColor: '#475569'
   },
   zonesSection: {
     badge: 'VENUE ATMOSPHERE & ZONES',
     title: 'บรรยากาศและโซนการให้บริการ GLP ESPORTS',
     subtitle: 'สัมผัสความพรีเมียมที่ออกแบบมาสำหรับเกมเมอร์ทุกสไตล์ ตั้งแต่ผู้เล่นทั่วไป สตรีมเมอร์ ไปจนถึงการประลองระดับแชมป์เปียนชิป',
-    bgColor: '#f8fafc'
+    bgColor: '#f8fafc',
+    titleColor: '#0f172a',
+    subtitleColor: '#475569'
   },
   newsSection: {
     badge: 'ARTICLES & UPDATES',
     title: 'บทความและข่าวสาร GLP ESPORTS',
     subtitle: 'อัปเดตความเคลื่อนไหววงการอีสปอร์ต เทคโนโลยีใหม่ และสรุปผลการแข่งขันที่จัดขึ้นในร้าน',
-    bgColor: '#ffffff'
+    bgColor: '#ffffff',
+    titleColor: '#0f172a',
+    subtitleColor: '#475569'
   },
   franchiseBanner: {
     badge: 'G-SPEED FRANCHISE & INTERIOR PLANNER',
@@ -198,16 +282,24 @@ export const DEFAULT_SITE_DATA = {
     buttonText: 'เริ่มออกแบบผังร้าน & ประเมินงบประมาณทันที',
     buttonLink: 'franchise',
     bgColor: '#1e3a8a',
+    headingColor: '#ffffff',
+    descColor: '#bfdbfe',
     bgImage: ''
   },
   venueZones: INITIAL_ZONES,
   tournaments: INITIAL_TOURNAMENTS,
   gallery: INITIAL_GALLERY,
   news: INITIAL_NEWS,
-  founder: INITIAL_FOUNDER,
+  founder: {
+    ...INITIAL_FOUNDER,
+    bgColor: '#ffffff',
+    titleColor: '#0f172a',
+    textColor: '#475569'
+  },
   catalogItems: INITIAL_CATALOG,
   hardwareTiers: INITIAL_TIERS,
   ragKnowledge: INITIAL_RAG_KNOWLEDGE,
+  mediaLibrary: INITIAL_MEDIA_LIBRARY,
   openRouterSettings: {
     apiKey: '',
     proxyUrl: '',
@@ -453,9 +545,40 @@ export function SiteDataProvider({ children }) {
           });
         }
 
-        if (merged.erpData) {
-          if (!Array.isArray(merged.erpData.peakHours)) merged.erpData.peakHours = DEFAULT_SITE_DATA.erpData.peakHours;
-          if (!Array.isArray(merged.erpData.topSellingItems)) merged.erpData.topSellingItems = DEFAULT_SITE_DATA.erpData.topSellingItems;
+        if (!merged.erpData || typeof merged.erpData !== 'object') {
+          merged.erpData = DEFAULT_SITE_DATA.erpData;
+        } else {
+          if (!merged.erpData.dailyRevenue || typeof merged.erpData.dailyRevenue !== 'object') {
+            merged.erpData.dailyRevenue = DEFAULT_SITE_DATA.erpData.dailyRevenue;
+          }
+          if (!Array.isArray(merged.erpData.peakHours) || merged.erpData.peakHours.length === 0) {
+            merged.erpData.peakHours = DEFAULT_SITE_DATA.erpData.peakHours;
+          } else {
+            merged.erpData.peakHours = merged.erpData.peakHours.map(slot => ({
+              time: slot?.time || '00:00',
+              occupancy: Number(slot?.occupancy) || 0,
+              revenue: Number(slot?.revenue) || 0,
+              ...slot
+            }));
+          }
+          if (!Array.isArray(merged.erpData.topSellingItems) || merged.erpData.topSellingItems.length === 0) {
+            merged.erpData.topSellingItems = DEFAULT_SITE_DATA.erpData.topSellingItems;
+          } else {
+            merged.erpData.topSellingItems = merged.erpData.topSellingItems.map((item, idx) => ({
+              rank: item?.rank || idx + 1,
+              name: item?.name || 'รายการสินค้า',
+              count: Number(item?.count) || 0,
+              total: Number(item?.total) || (Number(item?.price) ? Number(item.price) * (Number(item.count) || 1) : 0),
+              share: Number(item?.share) || 0,
+              ...item
+            }));
+          }
+        }
+
+        if (!merged.securityConfig || typeof merged.securityConfig !== 'object') {
+          merged.securityConfig = DEFAULT_SITE_DATA.securityConfig;
+        } else {
+          merged.securityConfig = { ...DEFAULT_SITE_DATA.securityConfig, ...merged.securityConfig };
         }
 
         // Hydrate gallery items with mockData slugs & rich content if missing
@@ -493,6 +616,38 @@ export function SiteDataProvider({ children }) {
             : item;
         });
 
+        // Self-repair contrast traps and defaults for Hero Section and Feature Banners
+        if (merged.hero) {
+          // Default to 'light' clean white theme so adding an image preserves the bright white aesthetic
+          if (!merged.hero.overlayType || merged.hero.overlayType === 'dark') {
+            merged.hero.overlayType = 'light';
+          }
+          if (merged.hero.overlayType === 'light') {
+            merged.hero.bgColor = '#ffffff';
+            merged.hero.titleColor = '#0f172a';
+            merged.hero.subtitleColor = '#475569';
+            if (!merged.hero.overlayOpacity || merged.hero.overlayOpacity < 0.6) {
+              merged.hero.overlayOpacity = 0.82;
+            }
+          }
+        }
+        if (merged.featureBanners) {
+          if (!merged.featureBanners.bannerLeft?.image) {
+            merged.featureBanners.bannerLeft = {
+              ...DEFAULT_SITE_DATA.featureBanners.bannerLeft,
+              ...(merged.featureBanners.bannerLeft || {}),
+              image: DEFAULT_SITE_DATA.featureBanners.bannerLeft.image
+            };
+          }
+          if (!merged.featureBanners.bannerRight?.image) {
+            merged.featureBanners.bannerRight = {
+              ...DEFAULT_SITE_DATA.featureBanners.bannerRight,
+              ...(merged.featureBanners.bannerRight || {}),
+              image: DEFAULT_SITE_DATA.featureBanners.bannerRight.image
+            };
+          }
+        }
+
         return merged;
       }
     } catch (e) {
@@ -510,6 +665,31 @@ export function SiteDataProvider({ children }) {
       console.error('Failed to persist CMS data to localStorage', e);
     }
   }, [siteData]);
+
+  // Synchronize siteData changes across browser tabs and components in real time
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === STORAGE_KEY && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          setSiteData(prev => deepMerge(prev, parsed));
+        } catch (err) {
+          console.error('Error syncing storage across tabs', err);
+        }
+      }
+    };
+    const handleCustomSync = (e) => {
+      if (e.detail) {
+        setSiteData(prev => deepMerge(prev, e.detail));
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('gspeed-site-data-updated', handleCustomSync);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('gspeed-site-data-updated', handleCustomSync);
+    };
+  }, []);
 
   // Generic Update Handlers
   const updateTicker = (badgeOrObj, text, linkTarget, linkText, linkVisible) => {
@@ -597,6 +777,7 @@ export function SiteDataProvider({ children }) {
     const dataToSave = manualData || siteData;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+      window.dispatchEvent(new CustomEvent('gspeed-site-data-updated', { detail: dataToSave }));
       return { success: true, timestamp: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) };
     } catch (e) {
       console.error('Failed to save data', e);
@@ -869,6 +1050,41 @@ export function SiteDataProvider({ children }) {
     }));
   };
 
+  // Media Library Handlers (For Reusable Assets & SEO Alt Tags)
+  const addMediaItem = (item) => {
+    if (!item?.url) return null;
+    const newItem = {
+      id: item.id || `med-${Date.now()}`,
+      name: item.name || 'ภาพที่อัปโหลด',
+      url: item.url,
+      alt: item.alt || item.name || 'G-Speed Esport Arena',
+      category: item.category || 'uploads',
+      dimensions: item.dimensions || 'WebP / Original',
+      isUploaded: true
+    };
+    setSiteData(prev => {
+      const existing = prev.mediaLibrary || INITIAL_MEDIA_LIBRARY;
+      if (existing.some(m => m.url === newItem.url)) {
+        return {
+          ...prev,
+          mediaLibrary: existing.map(m => m.url === newItem.url ? { ...m, ...newItem } : m)
+        };
+      }
+      return {
+        ...prev,
+        mediaLibrary: [newItem, ...existing]
+      };
+    });
+    return newItem;
+  };
+
+  const deleteMediaItem = (idOrUrl) => {
+    setSiteData(prev => ({
+      ...prev,
+      mediaLibrary: (prev.mediaLibrary || INITIAL_MEDIA_LIBRARY).filter(m => m.id !== idOrUrl && m.url !== idOrUrl)
+    }));
+  };
+
   const value = {
     siteData,
     setSiteData,
@@ -909,6 +1125,8 @@ export function SiteDataProvider({ children }) {
     updateHeaderCta,
     addNavLink,
     deleteNavLink,
+    addMediaItem,
+    deleteMediaItem,
     saveSiteData,
     resetToDefaults
   };

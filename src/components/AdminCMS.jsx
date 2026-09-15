@@ -8,7 +8,7 @@ import {
   TrendingUp, BarChart2, ShieldCheck, Lock, LogOut, Activity, ArrowUpRight,
   Palette, Image as ImageIcon, Flame, Coffee, Check, Copy, Clock, Share2,
   Box, Printer, Download, Camera, Upload, CheckSquare, Zap, ChevronRight, ChevronUp, ChevronDown, Server, Info, Ruler, Scale, Wrench, FileUp, Wand2,
-  Users, Calendar, Award, Target, Gamepad2, X, List, Hash
+  Users, Calendar, Award, Target, Gamepad2, X, List, Hash, HardDrive
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 import { DEMO_TOURNAMENT_PHOTOS_50 } from '../data/mockData';
@@ -16,13 +16,18 @@ import ThreeProductViewer from './ThreeProductViewer';
 import ProductSpecSheetModal from './ProductSpecSheetModal';
 import { compressAndConvertToWebP, formatBytes } from '../utils/imageOptimizer';
 import CMSLivePreviewModal from './CMSLivePreviewModal';
+import PhotoshopColorPickerModal from './PhotoshopColorPickerModal';
+import MediaLibraryModal from './MediaLibraryModal';
 import { analyzeProductPhoto, parseSpecSheetText } from '../utils/aiSpecParser';
 
-// Reusable Component: Section Image Field with Guidelines, Live Preview & WebP Upload
+// Reusable Component: Section Image Field with Guidelines, Live Preview, SEO Alt Text & Media Library
 function SectionImageUploader({
   label,
   value,
   onChange,
+  altValue,
+  onAltChange,
+  onOpenMediaLibrary,
   recommendedSize = '1200 x 600 px',
   aspectRatio = '2:1 (แนวนอน)',
   description = 'แนะนำภาพแนวนอน คมชัด ความละเอียดสูง',
@@ -61,7 +66,7 @@ function SectionImageUploader({
         >
           {value ? (
             <>
-              <img src={value} alt="Preview" className="siu-preview-img" />
+              <img src={value} alt={altValue || 'Preview'} className="siu-preview-img" />
               <div className="siu-preview-overlay">
                 <a href={value} target="_blank" rel="noopener noreferrer" className="siu-btn-view" title="เปิดดูภาพขนาดเต็ม">
                   <Eye size={13} />
@@ -85,10 +90,36 @@ function SectionImageUploader({
             <input 
               type="url" 
               className="form-input"
-              placeholder="วาง URL รูปภาพภายนอก หรือกดปุ่มอัปโหลด..."
+              placeholder="วาง URL รูปภาพภายนอก หรือกดเลือกจากคลัง/อัปโหลด..."
               value={value || ''}
               onChange={e => onChange(e.target.value)}
             />
+
+            {/* Media Library Picker Button */}
+            {onOpenMediaLibrary && (
+              <button 
+                type="button" 
+                onClick={onOpenMediaLibrary}
+                className="btn-secondary"
+                style={{ 
+                  whiteSpace: 'nowrap', 
+                  display: 'inline-flex', 
+                  alignItems: 'center', 
+                  gap: '6px',
+                  padding: '7px 12px',
+                  fontSize: '0.82rem',
+                  color: '#2563eb',
+                  borderColor: '#bfdbfe',
+                  background: '#eff6ff',
+                  cursor: 'pointer'
+                }}
+                title="เลือกภาพจากคลังสื่อ Media Library ที่เคยอัปโหลดไว้ ประหยัดพื้นที่ ไม่ต้องอัปใหม่"
+              >
+                <HardDrive size={14} className="text-blue" />
+                <span>เลือกจากคลังสื่อ</span>
+              </button>
+            )}
+
             <label className="btn-upload-file" title="เลือกไฟล์ภาพ ระบบจะย่อขนาดและแปลงเป็น WebP บีบอัดอัตโนมัติ">
               {compressingItemId === uploadKey ? (
                 <>
@@ -116,14 +147,429 @@ function SectionImageUploader({
                 }}
               />
             </label>
+            {value && (
+              <button 
+                type="button" 
+                onClick={() => onChange('')} 
+                className="btn-secondary"
+                style={{ 
+                  whiteSpace: 'nowrap', 
+                  display: 'inline-flex', 
+                  alignItems: 'center', 
+                  gap: '4px',
+                  padding: '7px 12px',
+                  fontSize: '0.82rem',
+                  color: '#ef4444',
+                  borderColor: '#fca5a5',
+                  background: '#fef2f2',
+                  cursor: 'pointer'
+                }}
+                title="ลบภาพออกเพื่อแสดงเฉพาะสีพื้นหลังล้วน"
+              >
+                <Trash2 size={13} />
+                <span>ลบรูปภาพ</span>
+              </button>
+            )}
           </div>
-          <div className="siu-help-row">
+
+          {/* SEO ALT Text Field */}
+          <div className="siu-alt-input-wrap" style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#475569', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
+              <Tag size={12} className="text-blue" />
+              <span>ALT Text (สำหรับ SEO)*:</span>
+            </span>
+            <input 
+              type="text" 
+              className="form-input"
+              style={{ fontSize: '0.82rem', height: '32px', flex: 1 }}
+              placeholder="ใส่ข้อความกำกับภาพเพื่อเพิ่มคะแนน Google SEO เช่น เวทีแข่งอีสปอร์ต 5v5 สเปก RTX 40 Series..."
+              value={altValue || ''}
+              onChange={e => onAltChange && onAltChange(e.target.value)}
+            />
+          </div>
+
+          <div className="siu-help-row" style={{ marginTop: '4px' }}>
             <span className="text-xs text-muted">
-              {value ? '✓ รูปภาพพร้อมแสดงผล (คลิกไอคอนดวงตาบนภาพเพื่อดูขนาดเต็ม หรือกดปุ่มอัปโหลดใหม่เพื่อเปลี่ยนภาพ)' : 'คลิก "อัปโหลดภาพ (WebP)" เพื่อเลือกไฟล์จากเครื่อง หรือคัดลอกลิงก์ภาพมาวางในช่องได้ทันที'}
+              {value ? '✓ รูปภาพพร้อมแสดงผล (คลิกไอคอนดวงตาบนภาพเพื่อดูขนาดเต็ม หรือกดปุ่มอัปโหลดใหม่เพื่อเปลี่ยนภาพ)' : 'คลิก "เลือกจากคลังสื่อ" เพื่อนำภาพเก่ามาใช้ซ้ำ หรือคลิก "อัปโหลดภาพ (WebP)" เพื่อเลือกไฟล์ใหม่จากเครื่อง'}
             </span>
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// Reusable Component: Section Color & Background Customizer with Photoshop-Style Palette
+function SectionColorCustomizer({
+  title = "🎨 สีและพื้นหลัง Section (Colors & Styling)",
+  description = "กำหนดสีพื้นหลัง (เมื่อไม่ได้ใช้ภาพ) และสีฟอนต์หัวข้อ/เนื้อหาสำหรับ Section นี้",
+  bgColor = '#ffffff',
+  onBgColorChange,
+  titleColor = '#0f172a',
+  onTitleColorChange,
+  subtitleColor = '#475569',
+  onSubtitleColorChange,
+  titleLabel = "สีฟอนต์หัวข้อใหญ่ (Title Color)",
+  subtitleLabel = "สีฟอนต์คำบรรยาย/เนื้อหา (Text Color)",
+  defaultBg = '#ffffff',
+  defaultTitle = '#0f172a',
+  defaultSubtitle = '#475569',
+  presets = [
+    { label: 'สว่าง (Light White)', bg: '#ffffff', title: '#0f172a', subtitle: '#475569' },
+    { label: 'เทาอ่อน (Soft Slate)', bg: '#f8fafc', title: '#0f172a', subtitle: '#64748b' },
+    { label: 'ดาร์กอารีนา (Dark Arena)', bg: '#0b0f19', title: '#ffffff', subtitle: '#94a3b8' },
+    { label: 'น้ำเงินเข้ม (Deep Navy)', bg: '#0f172a', title: '#60a5fa', subtitle: '#cbd5e1' },
+    { label: 'น้ำเงิน GLP (Brand Blue)', bg: '#1e3a8a', title: '#ffffff', subtitle: '#bfdbfe' }
+  ]
+}) {
+  const [activePickerField, setActivePickerField] = useState(null); // 'bg', 'title', 'subtitle'
+
+  const applyPreset = (p) => {
+    if (onBgColorChange) onBgColorChange(p.bg);
+    if (onTitleColorChange) onTitleColorChange(p.title);
+    if (onSubtitleColorChange) onSubtitleColorChange(p.subtitle);
+  };
+
+  const handleReset = () => {
+    if (onBgColorChange) onBgColorChange(defaultBg);
+    if (onTitleColorChange) onTitleColorChange(defaultTitle);
+    if (onSubtitleColorChange) onSubtitleColorChange(defaultSubtitle);
+  };
+
+  return (
+    <div className="section-color-customizer-card glass-panel" style={{
+      background: 'rgba(248, 250, 252, 0.95)',
+      border: '1px solid #cbd5e1',
+      borderRadius: '12px',
+      padding: '16px 18px',
+      marginTop: '16px',
+      marginBottom: '16px',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, fontSize: '0.95rem', color: '#0f172a' }}>
+            <Palette size={16} className="text-blue" />
+            <span>{title}</span>
+          </div>
+          {description && (
+            <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: '#64748b' }}>
+              {description}
+            </p>
+          )}
+        </div>
+
+        {/* Quick Presets */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>โทนสียอดนิยม:</span>
+          {presets.map((preset, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => applyPreset(preset)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '4px 10px',
+                borderRadius: '6px',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                background: '#ffffff',
+                border: '1px solid #cbd5e1',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+              title={`ปรับเป็น ${preset.label}`}
+            >
+              <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: preset.bg, border: '1px solid #94a3b8', display: 'inline-block' }}></span>
+              <span>{preset.label.split(' ')[0]}</span>
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={handleReset}
+            style={{
+              padding: '4px 8px',
+              borderRadius: '6px',
+              fontSize: '0.72rem',
+              color: '#64748b',
+              background: 'transparent',
+              border: '1px dashed #cbd5e1',
+              cursor: 'pointer'
+            }}
+            title="รีเซ็ตเป็นค่าเริ่มต้น"
+          >
+            รีเซ็ต
+          </button>
+        </div>
+      </div>
+
+      {/* 3 Color Pickers with Photoshop Palette Modals & Direct Hex Codes */}
+      <div className="form-row-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+        
+        {/* 1. BG Color */}
+        <div className="form-group" style={{ margin: 0 }}>
+          <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#334155', marginBottom: '4px', display: 'block' }}>
+            สีพื้นหลัง (Background)
+          </label>
+          <div className="color-field-row" style={{ padding: '6px 8px', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+            {/* Color Swatch Trigger */}
+            <button
+              type="button"
+              onClick={() => setActivePickerField('bg')}
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '6px',
+                backgroundColor: bgColor || defaultBg,
+                border: '1.5px solid rgba(0,0,0,0.15)',
+                cursor: 'pointer',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                padding: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'transform 0.15s ease'
+              }}
+              title="คลิกเพื่อเปิดระบบจานสี Photoshop"
+            >
+              <Palette size={13} style={{ color: (bgColor || defaultBg) === '#ffffff' ? '#64748b' : '#ffffff', filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.4))' }} />
+            </button>
+
+            {/* Direct Hex Code Input */}
+            <div style={{ display: 'flex', alignItems: 'center', flex: 1, background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '3px 8px' }}>
+              <span style={{ fontSize: '0.82rem', color: '#64748b', fontWeight: 700, marginRight: '2px' }}>#</span>
+              <input
+                type="text"
+                maxLength={7}
+                value={(bgColor || defaultBg).replace('#', '')}
+                onChange={e => {
+                  const val = e.target.value.trim().replace('#', '');
+                  onBgColorChange && onBgColorChange(`#${val}`);
+                }}
+                style={{ width: '100%', border: 'none', fontSize: '0.82rem', fontFamily: 'monospace', fontWeight: 700, outline: 'none', background: 'transparent', color: '#0f172a' }}
+                placeholder="ffffff"
+              />
+            </div>
+
+            {/* Open Palette Button */}
+            <button
+              type="button"
+              onClick={() => setActivePickerField('bg')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '5px 8px',
+                borderRadius: '6px',
+                border: '1px solid #cbd5e1',
+                background: '#f1f5f9',
+                color: '#334155',
+                fontSize: '0.72rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+              title="เปิดระบบจานสีกราฟิกแบบ Photoshop"
+            >
+              <Palette size={12} className="text-blue" />
+              <span>จานสี</span>
+            </button>
+          </div>
+        </div>
+
+        {/* 2. Title Font Color */}
+        <div className="form-group" style={{ margin: 0 }}>
+          <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#334155', marginBottom: '4px', display: 'block' }}>
+            {titleLabel}
+          </label>
+          <div className="color-field-row" style={{ padding: '6px 8px', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+            <button
+              type="button"
+              onClick={() => setActivePickerField('title')}
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '6px',
+                backgroundColor: titleColor || defaultTitle,
+                border: '1.5px solid rgba(0,0,0,0.15)',
+                cursor: 'pointer',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                padding: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'transform 0.15s ease'
+              }}
+              title="คลิกเพื่อเปิดระบบจานสี Photoshop"
+            >
+              <Palette size={13} style={{ color: (titleColor || defaultTitle) === '#ffffff' ? '#64748b' : '#ffffff', filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.4))' }} />
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', flex: 1, background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '3px 8px' }}>
+              <span style={{ fontSize: '0.82rem', color: '#64748b', fontWeight: 700, marginRight: '2px' }}>#</span>
+              <input
+                type="text"
+                maxLength={7}
+                value={(titleColor || defaultTitle).replace('#', '')}
+                onChange={e => {
+                  const val = e.target.value.trim().replace('#', '');
+                  onTitleColorChange && onTitleColorChange(`#${val}`);
+                }}
+                style={{ width: '100%', border: 'none', fontSize: '0.82rem', fontFamily: 'monospace', fontWeight: 700, outline: 'none', background: 'transparent', color: '#0f172a' }}
+                placeholder="0f172a"
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setActivePickerField('title')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '5px 8px',
+                borderRadius: '6px',
+                border: '1px solid #cbd5e1',
+                background: '#f1f5f9',
+                color: '#334155',
+                fontSize: '0.72rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+              title="เปิดระบบจานสีกราฟิกแบบ Photoshop"
+            >
+              <Palette size={12} className="text-blue" />
+              <span>จานสี</span>
+            </button>
+          </div>
+        </div>
+
+        {/* 3. Subtitle / Text Font Color */}
+        <div className="form-group" style={{ margin: 0 }}>
+          <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#334155', marginBottom: '4px', display: 'block' }}>
+            {subtitleLabel}
+          </label>
+          <div className="color-field-row" style={{ padding: '6px 8px', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+            <button
+              type="button"
+              onClick={() => setActivePickerField('subtitle')}
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '6px',
+                backgroundColor: subtitleColor || defaultSubtitle,
+                border: '1.5px solid rgba(0,0,0,0.15)',
+                cursor: 'pointer',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                padding: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'transform 0.15s ease'
+              }}
+              title="คลิกเพื่อเปิดระบบจานสี Photoshop"
+            >
+              <Palette size={13} style={{ color: (subtitleColor || defaultSubtitle) === '#ffffff' ? '#64748b' : '#ffffff', filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.4))' }} />
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', flex: 1, background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '3px 8px' }}>
+              <span style={{ fontSize: '0.82rem', color: '#64748b', fontWeight: 700, marginRight: '2px' }}>#</span>
+              <input
+                type="text"
+                maxLength={7}
+                value={(subtitleColor || defaultSubtitle).replace('#', '')}
+                onChange={e => {
+                  const val = e.target.value.trim().replace('#', '');
+                  onSubtitleColorChange && onSubtitleColorChange(`#${val}`);
+                }}
+                style={{ width: '100%', border: 'none', fontSize: '0.82rem', fontFamily: 'monospace', fontWeight: 700, outline: 'none', background: 'transparent', color: '#0f172a' }}
+                placeholder="475569"
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setActivePickerField('subtitle')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '5px 8px',
+                borderRadius: '6px',
+                border: '1px solid #cbd5e1',
+                background: '#f1f5f9',
+                color: '#334155',
+                fontSize: '0.72rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+              title="เปิดระบบจานสีกราฟิกแบบ Photoshop"
+            >
+              <Palette size={12} className="text-blue" />
+              <span>จานสี</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Mini Live Preview Box */}
+      <div style={{
+        marginTop: '12px',
+        padding: '10px 14px',
+        borderRadius: '8px',
+        background: bgColor || defaultBg,
+        border: '1px solid #cbd5e1',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        transition: 'all 0.2s ease'
+      }}>
+        <div>
+          <div style={{ fontSize: '0.88rem', fontWeight: 700, color: titleColor || defaultTitle, marginBottom: '2px' }}>
+            ตัวอย่างหัวข้อ (Sample Section Heading)
+          </div>
+          <div style={{ fontSize: '0.78rem', color: subtitleColor || defaultSubtitle }}>
+            ตัวอย่างข้อความคำบรรยายเพื่อดูคอนทราสต์และความคมชัด (Sample Subtitle Text)
+          </div>
+        </div>
+        <span style={{
+          fontSize: '0.7rem',
+          padding: '3px 8px',
+          borderRadius: '999px',
+          background: 'rgba(59, 130, 246, 0.15)',
+          color: '#2563eb',
+          fontWeight: 700
+        }}>
+          Preview Contrast
+        </span>
+      </div>
+
+      {/* Photoshop Color Picker Modal Dialog */}
+      <PhotoshopColorPickerModal
+        isOpen={Boolean(activePickerField)}
+        onClose={() => setActivePickerField(null)}
+        initialColor={
+          activePickerField === 'bg' ? (bgColor || defaultBg) :
+          activePickerField === 'title' ? (titleColor || defaultTitle) :
+          (subtitleColor || defaultSubtitle)
+        }
+        title={
+          activePickerField === 'bg' ? 'Color Picker: สีพื้นหลัง (Background)' :
+          activePickerField === 'title' ? `Color Picker: ${titleLabel}` :
+          `Color Picker: ${subtitleLabel}`
+        }
+        onSelectColor={(selectedHex) => {
+          if (activePickerField === 'bg' && onBgColorChange) {
+            onBgColorChange(selectedHex);
+          } else if (activePickerField === 'title' && onTitleColorChange) {
+            onTitleColorChange(selectedHex);
+          } else if (activePickerField === 'subtitle' && onSubtitleColorChange) {
+            onSubtitleColorChange(selectedHex);
+          }
+        }}
+      />
     </div>
   );
 }
@@ -168,8 +614,27 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
     addNavLink,
     deleteNavLink,
     saveSiteData,
-    resetToDefaults
+    resetToDefaults,
+    addMediaItem,
+    deleteMediaItem
   } = useSiteData();
+
+  // Media Library Modal state
+  const [mediaLibraryModal, setMediaLibraryModal] = useState({
+    isOpen: false,
+    currentValue: '',
+    onSelect: null,
+    category: 'all'
+  });
+
+  const openMediaLibraryForField = (category, onSelectCallback, currentValue = '') => {
+    setMediaLibraryModal({
+      isOpen: true,
+      currentValue: currentValue || '',
+      onSelect: onSelectCallback,
+      category: category || 'all'
+    });
+  };
 
   // Active Admin Sub-tab
   const [activeTab, setActiveTab] = useState('erp-analytics'); // 'erp-analytics', 'sections', 'articles', 'ai-rag', 'catalog', 'menu-footer', 'automation', 'security'
@@ -523,6 +988,18 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
     try {
       const res = await compressAndConvertToWebP(file, { maxWidth: 1600, maxHeight: 1600, quality: 0.82 });
       onComplete(res.dataUrl, res);
+
+      // Automatically register to media library for future reuse
+      if (addMediaItem) {
+        addMediaItem({
+          name: file.name.replace(/\.[^/.]+$/, "") || 'รูปภาพอัปโหลดใหม่',
+          alt: file.name.replace(/\.[^/.]+$/, "") || 'รูปภาพอัปโหลด GLP',
+          category: fieldKey.includes('hero') ? 'hero' : (fieldKey.includes('banner') ? 'banners' : (fieldKey.includes('tourn') ? 'tournaments' : 'uploads')),
+          url: res.dataUrl,
+          dimensions: `${res.width || 1200}x${res.height || 600} (${res.format || 'WebP'})`
+        });
+      }
+
       setCompressionToast({
         original: res.originalSizeFormatted,
         compressed: res.compressedSizeFormatted,
@@ -535,6 +1012,15 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
       const reader = new FileReader();
       reader.onload = (event) => {
         onComplete(event.target.result, null);
+        if (addMediaItem) {
+          addMediaItem({
+            name: file.name.replace(/\.[^/.]+$/, "") || 'รูปภาพอัปโหลด',
+            alt: file.name.replace(/\.[^/.]+$/, "") || 'รูปภาพอัปโหลด GLP',
+            category: 'uploads',
+            url: event.target.result,
+            dimensions: 'Original'
+          });
+        }
       };
       reader.readAsDataURL(file);
     } finally {
@@ -4169,19 +4655,135 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                     </div>
                   </div>
 
+                  <SectionColorCustomizer 
+                    title="🎨 สีและพื้นหลัง Hero Section"
+                    description="กำหนดสีพื้นหลังของส่วนหัวเมื่อไม่ได้ใส่รูปภาพ (หรือแสดงผลร่วมกับภาพ) พร้อมปรับแต่งสีฟอนต์หัวข้อและคำบรรยาย"
+                    bgColor={siteData.hero?.bgColor || '#0b0f19'}
+                    onBgColorChange={val => updateHero({ bgColor: val })}
+                    titleColor={siteData.hero?.titleColor || '#ffffff'}
+                    onTitleColorChange={val => updateHero({ titleColor: val })}
+                    subtitleColor={siteData.hero?.subtitleColor || '#e2e8f0'}
+                    onSubtitleColorChange={val => updateHero({ subtitleColor: val })}
+                    defaultBg="#0b0f19"
+                    defaultTitle="#ffffff"
+                    defaultSubtitle="#e2e8f0"
+                    presets={[
+                      { label: 'ดาร์กอารีนา (Dark Arena)', bg: '#0b0f19', title: '#ffffff', subtitle: '#e2e8f0' },
+                      { label: 'น้ำเงินเข้ม (Deep Navy)', bg: '#0f172a', title: '#60a5fa', subtitle: '#cbd5e1' },
+                      { label: 'น้ำเงิน GLP (Brand Blue)', bg: '#1e3a8a', title: '#ffffff', subtitle: '#bfdbfe' },
+                      { label: 'สว่างคลีน (Clean Light)', bg: '#ffffff', title: '#0f172a', subtitle: '#475569' },
+                      { label: 'เทาพรีเมียม (Slate)', bg: '#1e293b', title: '#38bdf8', subtitle: '#94a3b8' }
+                    ]}
+                  />
+
                   <SectionImageUploader 
                     label="ภาพพื้นหลังส่วนหัว (Hero Background Image - ตัวเลือกเสริม)"
                     value={siteData.hero?.backgroundImage || ''}
                     onChange={val => updateHero({ backgroundImage: val })}
+                    altValue={siteData.hero?.imageAlt || ''}
+                    onAltChange={alt => updateHero({ imageAlt: alt })}
+                    onOpenMediaLibrary={() => openMediaLibraryForField('hero-bg-img', (item) => {
+                      updateHero({ backgroundImage: item.url, imageAlt: item.alt || item.name });
+                    })}
                     recommendedSize="1920 x 1080 px"
                     aspectRatio="16:9 (Widescreen Full HD / 4K)"
-                    description="ภาพพื้นหลังขนาดใหญ่ด้านบนสุดของหน้าแรก แนะนำภาพมุมกว้างของร้าน เวทีแข่งขัน หรืออารีนาที่สว่างคมชัด ระบบจะใส่ Gradient Overlay สีน้ำเงินเข้มให้อัตโนมัติเพื่อให้อ่านตัวหนังสือได้ง่าย"
+                    description="ภาพพื้นหลังขนาดใหญ่ด้านบนสุดของหน้าแรก แนะนำภาพมุมกว้างของร้าน เวทีแข่งขัน หรืออารีนาที่สว่างคมชัด สามารถเลือกสไตล์ฟิลเตอร์ด้านล่างเพื่อปรับโทนภาพให้สวยสดใสได้"
                     uploadKey="hero-bg-img"
                     compressingItemId={compressingItemId}
                     handleImageUpload={handleImageUpload}
                     previewWidth={192}
                     previewHeight={108}
                   />
+
+                  {/* Overlay Filter & Opacity Control - High Contrast Clean White Design */}
+                  {siteData.hero?.backgroundImage && (
+                    <div className="form-subblock" style={{ marginTop: '16px', background: '#ffffff', borderRadius: '12px', padding: '18px 20px', border: '1.5px solid #cbd5e1', boxShadow: '0 4px 14px rgba(0,0,0,0.05)' }}>
+                      <h5 className="form-subblock-title" style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', color: '#0f172a', fontWeight: 800 }}>
+                        <Sliders size={16} className="text-blue" />
+                        <span>🎨 โทนฟิลเตอร์ซ้อนภาพ (Background Overlay Style)</span>
+                      </h5>
+                      <p style={{ fontSize: '0.84rem', color: '#475569', marginBottom: '14px', lineHeight: 1.55 }}>
+                        เลือกฟิลเตอร์ให้เหมาะสมกับโทนภาพของคุณ (หากเป็นภาพโทนขาว/สว่าง แนะนำเลือก <strong>"ขาว สว่าง คลีน"</strong> ภาพจะไม่มืด ไม่ตุ่น และตัวหนังสือจะคมชัดสวยงาม)
+                      </p>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px', marginBottom: '16px' }}>
+                        {[
+                          { id: 'light', name: '☀️ ขาว สว่าง คลีน', desc: 'คงธีมเดิมของเว็บ! พื้นขาวสว่างสดใส ตัวหนังสือเข้ม คมชัด ไม่มืด ไม่หมอง' },
+                          { id: 'dark', name: '🌙 ดาร์ก อารีนา', desc: 'สไตล์เกมมิ่งมืดเท่ กล่องสถิติดำกระจกฝ้าเข้าชุด' },
+                          { id: 'soft', name: '💎 ซอฟต์ 35%', desc: 'ฟิลเตอร์บางเบา โชว์ภาพต้นฉบับชัดเจน' },
+                          { id: 'none', name: '🚫 ไม่ใส่ฟิลเตอร์', desc: 'โชว์ภาพต้นฉบับ 100%' }
+                        ].map(styleOpt => {
+                          const currentType = siteData.hero?.overlayType || 'light';
+                          const isSelected = currentType === styleOpt.id;
+                          return (
+                            <button
+                              key={styleOpt.id}
+                              type="button"
+                              onClick={() => {
+                                const newType = styleOpt.id;
+                                const newOpacity = newType === 'light' ? 0.82 : (newType === 'soft' ? 0.35 : 0.75);
+                                const updates = { 
+                                  overlayType: newType, 
+                                  overlayOpacity: newOpacity 
+                                };
+                                if (newType === 'light') {
+                                  updates.titleColor = '#0f172a';
+                                  updates.subtitleColor = '#475569';
+                                  updates.bgColor = '#ffffff';
+                                } else if (newType === 'dark') {
+                                  updates.titleColor = '#ffffff';
+                                  updates.subtitleColor = '#e2e8f0';
+                                  updates.bgColor = '#0b0f19';
+                                }
+                                updateHero(updates);
+                              }}
+                              style={{
+                                padding: '12px 10px',
+                                borderRadius: '8px',
+                                border: isSelected ? '2px solid #2563eb' : '1.5px solid #cbd5e1',
+                                background: isSelected ? '#eff6ff' : '#f8fafc',
+                                color: isSelected ? '#1d4ed8' : '#0f172a',
+                                cursor: 'pointer',
+                                textAlign: 'center',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '4px',
+                                transition: 'all 0.2s ease',
+                                boxShadow: isSelected ? '0 4px 12px rgba(37,99,235,0.15)' : 'none'
+                              }}
+                            >
+                              <strong style={{ fontSize: '0.88rem', color: isSelected ? '#1d4ed8' : '#0f172a' }}>{styleOpt.name}</strong>
+                              <span style={{ fontSize: '0.72rem', color: isSelected ? '#2563eb' : '#64748b', lineHeight: 1.3, fontWeight: isSelected ? 600 : 400 }}>{styleOpt.desc}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {(siteData.hero?.overlayType || 'light') !== 'none' && (
+                        <div className="form-group" style={{ marginBottom: '0', paddingTop: '12px', borderTop: '1px solid #e2e8f0' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                            <label style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>ความสว่าง / ความเข้มของเลเยอร์ขาว (Overlay Opacity)</label>
+                            <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#1d4ed8', background: '#dbeafe', border: '1px solid #bfdbfe', padding: '2px 10px', borderRadius: '999px' }}>
+                              {Math.round(((siteData.hero?.overlayOpacity ?? ((siteData.hero?.overlayType || 'light') === 'light' ? 0.82 : 0.75))) * 100)}%
+                            </span>
+                          </div>
+                          <input 
+                            type="range" 
+                            min="5" 
+                            max="95" 
+                            step="5"
+                            value={Math.round(((siteData.hero?.overlayOpacity ?? ((siteData.hero?.overlayType || 'light') === 'light' ? 0.82 : 0.75))) * 100)}
+                            onChange={e => updateHero({ overlayOpacity: Number(e.target.value) / 100 })}
+                            style={{ width: '100%', accentColor: '#2563eb', cursor: 'pointer', height: '6px' }}
+                          />
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginTop: '4px' }}>
+                            <span style={{ color: '#64748b', fontWeight: 600 }}>เห็นรูปชัดขึ้น (ขาวบางเบา ~30%)</span>
+                            <span style={{ color: '#1d4ed8', fontWeight: 700 }}>ขาวสว่างคลีน (คงธีมเดิม ~85%)</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   <div className="modal-footer-btns" style={{ marginTop: '16px' }}>
                     <button type="button" className="btn-section-preview" onClick={() => openPreview('hero')}>
@@ -4273,6 +4875,29 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                         </div>
                       </div>
 
+                      <SectionColorCustomizer 
+                        title="🎨 สีพื้นหลังและฟอนต์แบนเนอร์ซ้าย"
+                        description="กำหนดสีพื้นหลังและสีตัวอักษรเมื่อไม่ได้ใช้ภาพ หรือแสดงผลร่วมกัน"
+                        bgColor={siteData.featureBanners?.bannerLeft?.bgColor || '#1e3a8a'}
+                        onBgColorChange={val => updateSectionConfig('featureBanners', {
+                          ...siteData.featureBanners,
+                          bannerLeft: { ...siteData.featureBanners?.bannerLeft, bgColor: val }
+                        })}
+                        titleColor={siteData.featureBanners?.bannerLeft?.titleColor || '#ffffff'}
+                        onTitleColorChange={val => updateSectionConfig('featureBanners', {
+                          ...siteData.featureBanners,
+                          bannerLeft: { ...siteData.featureBanners?.bannerLeft, titleColor: val }
+                        })}
+                        subtitleColor={siteData.featureBanners?.bannerLeft?.descColor || '#cbd5e1'}
+                        onSubtitleColorChange={val => updateSectionConfig('featureBanners', {
+                          ...siteData.featureBanners,
+                          bannerLeft: { ...siteData.featureBanners?.bannerLeft, descColor: val }
+                        })}
+                        defaultBg="#1e3a8a"
+                        defaultTitle="#ffffff"
+                        defaultSubtitle="#cbd5e1"
+                      />
+
                       <SectionImageUploader 
                         label="ภาพพื้นหลังแบนเนอร์กิจกรรม (Left Banner Image)"
                         value={siteData.featureBanners?.bannerLeft?.image || ''}
@@ -4280,6 +4905,17 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                           ...siteData.featureBanners,
                           bannerLeft: { ...siteData.featureBanners?.bannerLeft, image: val }
                         })}
+                        altValue={siteData.featureBanners?.bannerLeft?.alt || ''}
+                        onAltChange={alt => updateSectionConfig('featureBanners', {
+                          ...siteData.featureBanners,
+                          bannerLeft: { ...siteData.featureBanners?.bannerLeft, alt }
+                        })}
+                        onOpenMediaLibrary={() => openMediaLibraryForField('banners', (item) => {
+                          updateSectionConfig('featureBanners', {
+                            ...siteData.featureBanners,
+                            bannerLeft: { ...siteData.featureBanners?.bannerLeft, image: item.url, alt: item.alt || item.name }
+                          });
+                        }, siteData.featureBanners?.bannerLeft?.image)}
                         recommendedSize="1200 x 600 px"
                         aspectRatio="2:1 (แนวนอนมาตรฐาน)"
                         description="ภาพพื้นหลังแบนเนอร์ฝั่งซ้าย (รวมภาพกิจกรรม Our Events) แนะนำรูปงานแข่ง บรรยากาศเวที หรือพิธีมอบรางวัล"
@@ -4359,6 +4995,29 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                         </div>
                       </div>
 
+                      <SectionColorCustomizer 
+                        title="🎨 สีพื้นหลังและฟอนต์แบนเนอร์ขวา"
+                        description="กำหนดสีพื้นหลังและสีตัวอักษรเมื่อไม่ได้ใช้ภาพ หรือแสดงผลร่วมกัน"
+                        bgColor={siteData.featureBanners?.bannerRight?.bgColor || '#0f172a'}
+                        onBgColorChange={val => updateSectionConfig('featureBanners', {
+                          ...siteData.featureBanners,
+                          bannerRight: { ...siteData.featureBanners?.bannerRight, bgColor: val }
+                        })}
+                        titleColor={siteData.featureBanners?.bannerRight?.titleColor || '#ffffff'}
+                        onTitleColorChange={val => updateSectionConfig('featureBanners', {
+                          ...siteData.featureBanners,
+                          bannerRight: { ...siteData.featureBanners?.bannerRight, titleColor: val }
+                        })}
+                        subtitleColor={siteData.featureBanners?.bannerRight?.descColor || '#cbd5e1'}
+                        onSubtitleColorChange={val => updateSectionConfig('featureBanners', {
+                          ...siteData.featureBanners,
+                          bannerRight: { ...siteData.featureBanners?.bannerRight, descColor: val }
+                        })}
+                        defaultBg="#0f172a"
+                        defaultTitle="#ffffff"
+                        defaultSubtitle="#cbd5e1"
+                      />
+
                       <SectionImageUploader 
                         label="ภาพพื้นหลังแบนเนอร์บทความ & ข่าวสาร (Right Banner Image)"
                         value={siteData.featureBanners?.bannerRight?.image || ''}
@@ -4366,6 +5025,17 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                           ...siteData.featureBanners,
                           bannerRight: { ...siteData.featureBanners?.bannerRight, image: val }
                         })}
+                        altValue={siteData.featureBanners?.bannerRight?.alt || ''}
+                        onAltChange={alt => updateSectionConfig('featureBanners', {
+                          ...siteData.featureBanners,
+                          bannerRight: { ...siteData.featureBanners?.bannerRight, alt }
+                        })}
+                        onOpenMediaLibrary={() => openMediaLibraryForField('banners', (item) => {
+                          updateSectionConfig('featureBanners', {
+                            ...siteData.featureBanners,
+                            bannerRight: { ...siteData.featureBanners?.bannerRight, image: item.url, alt: item.alt || item.name }
+                          });
+                        }, siteData.featureBanners?.bannerRight?.image)}
                         recommendedSize="1200 x 600 px"
                         aspectRatio="2:1 (แนวนอนมาตรฐาน)"
                         description="ภาพพื้นหลังแบนเนอร์ฝั่งขวา (บทความ ข่าวสาร & ไฮไลต์) แนะนำรูปอุปกรณ์เกมมิ่ง, มุมคอมพิวเตอร์ หรือบรรยากาศร้านโมเดิร์น"
@@ -4453,6 +5123,29 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                       })}
                     />
                   </div>
+
+                  <SectionColorCustomizer 
+                    title="🎨 สีพื้นหลังและฟอนต์ส่วนทัวร์นาเมนต์"
+                    description="กำหนดสีพื้นหลังของโซนตารางแข่งขัน และสีฟอนต์หัวข้อ/คำบรรยาย"
+                    bgColor={siteData.tournamentsSection?.bgColor || '#ffffff'}
+                    onBgColorChange={val => updateSectionConfig('tournamentsSection', {
+                      ...siteData.tournamentsSection,
+                      bgColor: val
+                    })}
+                    titleColor={siteData.tournamentsSection?.titleColor || '#0f172a'}
+                    onTitleColorChange={val => updateSectionConfig('tournamentsSection', {
+                      ...siteData.tournamentsSection,
+                      titleColor: val
+                    })}
+                    subtitleColor={siteData.tournamentsSection?.subtitleColor || '#475569'}
+                    onSubtitleColorChange={val => updateSectionConfig('tournamentsSection', {
+                      ...siteData.tournamentsSection,
+                      subtitleColor: val
+                    })}
+                    defaultBg="#ffffff"
+                    defaultTitle="#0f172a"
+                    defaultSubtitle="#475569"
+                  />
 
                   {/* Tournaments Data Table */}
                   <div className="cms-table-wrapper" style={{ marginTop: '16px' }}>
@@ -4634,6 +5327,29 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                     />
                   </div>
 
+                  <SectionColorCustomizer 
+                    title="🎨 สีพื้นหลังและฟอนต์ส่วนโซนบรรยากาศร้าน"
+                    description="กำหนดสีพื้นหลังของโซนบรรยากาศร้าน และสีฟอนต์หัวข้อ/คำบรรยาย"
+                    bgColor={siteData.zonesSection?.bgColor || '#f8fafc'}
+                    onBgColorChange={val => updateSectionConfig('zonesSection', {
+                      ...siteData.zonesSection,
+                      bgColor: val
+                    })}
+                    titleColor={siteData.zonesSection?.titleColor || '#0f172a'}
+                    onTitleColorChange={val => updateSectionConfig('zonesSection', {
+                      ...siteData.zonesSection,
+                      titleColor: val
+                    })}
+                    subtitleColor={siteData.zonesSection?.subtitleColor || '#475569'}
+                    onSubtitleColorChange={val => updateSectionConfig('zonesSection', {
+                      ...siteData.zonesSection,
+                      subtitleColor: val
+                    })}
+                    defaultBg="#f8fafc"
+                    defaultTitle="#0f172a"
+                    defaultSubtitle="#475569"
+                  />
+
                   {/* Zones Grid */}
                   <div className="form-row-2" style={{ gap: '16px', marginTop: '16px' }}>
                     {(siteData.venueZones || []).map(zone => {
@@ -4762,34 +5478,49 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                     />
                   </div>
 
-                  <div className="form-row-2">
-                    <div className="form-group">
-                      <label>ข้อความบนปุ่มกด</label>
-                      <input 
-                        type="text" className="form-input"
-                        value={siteData.franchiseBanner?.buttonText || 'เริ่มออกแบบผังร้าน & ประเมินงบประมาณทันที'}
-                        onChange={e => updateSectionConfig('franchiseBanner', {
-                          ...siteData.franchiseBanner,
-                          buttonText: e.target.value
-                        })}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>สีพื้นหลังแบนเนอร์</label>
-                      <div className="color-field-row" style={{ padding: '6px' }}>
-                        <input 
-                          type="color" 
-                          className="color-picker-input"
-                          value={siteData.franchiseBanner?.bgColor || '#1e3a8a'}
-                          onChange={e => updateSectionConfig('franchiseBanner', {
-                            ...siteData.franchiseBanner,
-                            bgColor: e.target.value
-                          })}
-                        />
-                        <code>{siteData.franchiseBanner?.bgColor || '#1e3a8a'}</code>
-                      </div>
-                    </div>
+                  <div className="form-group">
+                    <label>ข้อความบนปุ่มกด</label>
+                    <input 
+                      type="text" className="form-input"
+                      value={siteData.franchiseBanner?.buttonText || 'เริ่มออกแบบผังร้าน & ประเมินงบประมาณทันที'}
+                      onChange={e => updateSectionConfig('franchiseBanner', {
+                        ...siteData.franchiseBanner,
+                        buttonText: e.target.value
+                      })}
+                    />
                   </div>
+
+                  <SectionColorCustomizer 
+                    title="🎨 สีพื้นหลังและฟอนต์แบนเนอร์แฟรนไชส์"
+                    description="กำหนดสีพื้นหลังของกล่องแบนเนอร์ (เมื่อไม่ได้ใช้ภาพ หรือแสดงผลร่วมกัน) และสีฟอนต์หัวข้อ/คำบรรยาย"
+                    bgColor={siteData.franchiseBanner?.bgColor || '#1e3a8a'}
+                    onBgColorChange={val => updateSectionConfig('franchiseBanner', {
+                      ...siteData.franchiseBanner,
+                      bgColor: val
+                    })}
+                    titleColor={siteData.franchiseBanner?.headingColor || '#ffffff'}
+                    onTitleColorChange={val => updateSectionConfig('franchiseBanner', {
+                      ...siteData.franchiseBanner,
+                      headingColor: val
+                    })}
+                    subtitleColor={siteData.franchiseBanner?.descColor || '#bfdbfe'}
+                    onSubtitleColorChange={val => updateSectionConfig('franchiseBanner', {
+                      ...siteData.franchiseBanner,
+                      descColor: val
+                    })}
+                    titleLabel="สีฟอนต์หัวข้อชวนลงทุน (Heading Color)"
+                    subtitleLabel="สีฟอนต์คำอธิบายข้อเสนอ (Desc Color)"
+                    defaultBg="#1e3a8a"
+                    defaultTitle="#ffffff"
+                    defaultSubtitle="#bfdbfe"
+                    presets={[
+                      { label: 'น้ำเงิน GLP (Brand Blue)', bg: '#1e3a8a', title: '#ffffff', subtitle: '#bfdbfe' },
+                      { label: 'ดาร์กอารีนา (Dark Arena)', bg: '#0b0f19', title: '#60a5fa', subtitle: '#cbd5e1' },
+                      { label: 'น้ำเงินเข้ม (Deep Navy)', bg: '#0f172a', title: '#ffffff', subtitle: '#94a3b8' },
+                      { label: 'เทาพรีเมียม (Slate)', bg: '#1e293b', title: '#38bdf8', subtitle: '#e2e8f0' },
+                      { label: 'สว่างคลีน (Clean Light)', bg: '#ffffff', title: '#0f172a', subtitle: '#475569' }
+                    ]}
+                  />
 
                   <SectionImageUploader 
                     label="ภาพพื้นหลังแบนเนอร์แฟรนไชส์ (Franchise CTA Background Image - ตัวเลือกเสริม)"
@@ -4866,6 +5597,29 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                     />
                   </div>
 
+                  <SectionColorCustomizer 
+                    title="🎨 สีพื้นหลังและฟอนต์ส่วนบทความ & ข่าวสาร"
+                    description="กำหนดสีพื้นหลังของส่วนข่าวสาร และสีฟอนต์หัวข้อ/คำบรรยาย"
+                    bgColor={siteData.newsSection?.bgColor || '#ffffff'}
+                    onBgColorChange={val => updateSectionConfig('newsSection', {
+                      ...siteData.newsSection,
+                      bgColor: val
+                    })}
+                    titleColor={siteData.newsSection?.titleColor || '#0f172a'}
+                    onTitleColorChange={val => updateSectionConfig('newsSection', {
+                      ...siteData.newsSection,
+                      titleColor: val
+                    })}
+                    subtitleColor={siteData.newsSection?.subtitleColor || '#475569'}
+                    onSubtitleColorChange={val => updateSectionConfig('newsSection', {
+                      ...siteData.newsSection,
+                      subtitleColor: val
+                    })}
+                    defaultBg="#ffffff"
+                    defaultTitle="#0f172a"
+                    defaultSubtitle="#475569"
+                  />
+
                   <div className="modal-footer-btns" style={{ marginTop: '16px' }}>
                     <button type="button" className="btn-section-preview" onClick={() => openPreview('news-sec')}>
                       <Eye size={14} /> พรีวิวตัวอย่างก่อนบันทึก
@@ -4935,6 +5689,31 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                       })}
                     />
                   </div>
+
+                  <SectionColorCustomizer 
+                    title="🎨 สีพื้นหลังและฟอนต์ส่วนผู้ก่อตั้ง & บริษัท"
+                    description="กำหนดสีพื้นหลังและการ์ดโปรไฟล์ผู้ก่อตั้ง และสีฟอนต์ชื่อ/คำคม/ประวัติ"
+                    bgColor={siteData.founder?.bgColor || '#ffffff'}
+                    onBgColorChange={val => updateSectionConfig('founder', {
+                      ...siteData.founder,
+                      bgColor: val
+                    })}
+                    titleColor={siteData.founder?.titleColor || '#0f172a'}
+                    onTitleColorChange={val => updateSectionConfig('founder', {
+                      ...siteData.founder,
+                      titleColor: val
+                    })}
+                    subtitleColor={siteData.founder?.textColor || '#475569'}
+                    onSubtitleColorChange={val => updateSectionConfig('founder', {
+                      ...siteData.founder,
+                      textColor: val
+                    })}
+                    titleLabel="สีฟอนต์ชื่อผู้ก่อตั้ง (Name Color)"
+                    subtitleLabel="สีฟอนต์คำคมและเนื้อหา (Quote & Bio Color)"
+                    defaultBg="#ffffff"
+                    defaultTitle="#0f172a"
+                    defaultSubtitle="#475569"
+                  />
 
                   <SectionImageUploader 
                     label="ภาพถ่ายผู้บริหาร / ผู้ก่อตั้ง (Founder & CEO Portrait)"
@@ -7595,7 +8374,7 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                           <div className="slot-numbers">
                             <span className="slot-rev">
                               <DollarSign size={12} className="text-blue" />
-                              <strong>฿{slot.revenue?.toLocaleString()}</strong>
+                              <strong>฿{(slot?.revenue || 0).toLocaleString()}</strong>
                             </span>
                             <span className={`slot-rate ${slot.occupancy >= 85 ? 'peak' : ''}`}>
                               {slot.occupancy}% {slot.occupancy >= 85 ? 'Peak' : ''}
@@ -7669,19 +8448,19 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                                 {item.rank || idx + 1}
                               </span>
                             </td>
-                            <td className="font-semibold text-slate-800">{item.name}</td>
+                            <td className="font-semibold text-slate-800">{item?.name || 'รายการสินค้า'}</td>
                             <td style={{ textAlign: 'center' }}>
                               <span className="fnb-qty-pill">
-                                {item.count} จาน
+                                {item?.count || 0} จาน
                               </span>
                             </td>
                             <td style={{ textAlign: 'center' }}>
                               <span className="fnb-share-pill">
-                                {item.share || (idx === 0 ? 29.2 : idx === 1 ? 23.2 : idx === 2 ? 20.6 : idx === 3 ? 13.9 : 13.1)}%
+                                {item?.share || (idx === 0 ? 29.2 : idx === 1 ? 23.2 : idx === 2 ? 20.6 : idx === 3 ? 13.9 : 13.1)}%
                               </span>
                             </td>
                             <td style={{ textAlign: 'right' }} className="text-blue font-bold">
-                              ฿{item.total.toLocaleString()}
+                              ฿{(item?.total || 0).toLocaleString()}
                             </td>
                           </tr>
                         ))}
@@ -8067,6 +8846,38 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
         onSave={() => {
           handleManualSave();
         }}
+      />
+
+      {/* Media Library Modal for Reusable Image Assets & SEO Alt Tags */}
+      <MediaLibraryModal 
+        isOpen={mediaLibraryModal.isOpen}
+        onClose={() => setMediaLibraryModal(prev => ({ ...prev, isOpen: false }))}
+        currentValue={mediaLibraryModal.currentValue}
+        mediaList={siteData.mediaLibrary || []}
+        onSelectImage={(item) => {
+          if (mediaLibraryModal.onSelect) {
+            mediaLibraryModal.onSelect(item);
+          }
+          setMediaLibraryModal(prev => ({ ...prev, isOpen: false }));
+        }}
+        onUploadImage={(file, meta) => {
+          handleImageUpload(file, (dataUrl) => {
+            const added = addMediaItem({
+              name: meta?.name || file.name.replace(/\.[^/.]+$/, ""),
+              alt: meta?.alt || meta?.name || file.name.replace(/\.[^/.]+$/, ""),
+              category: meta?.category || mediaLibraryModal.category || 'uploads',
+              url: dataUrl,
+              dimensions: 'WebP / Original'
+            });
+            if (mediaLibraryModal.onSelect && added) {
+              mediaLibraryModal.onSelect(added);
+            }
+          }, 'media-modal-upload');
+        }}
+        onDeleteImage={(idOrUrl) => {
+          deleteMediaItem(idOrUrl);
+        }}
+        compressing={compressingItemId === 'media-modal-upload'}
       />
     </div>
   );

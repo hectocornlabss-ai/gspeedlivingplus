@@ -3,7 +3,7 @@ import {
   Headphones, MessageSquare, X, Send, Sparkles, 
   RotateCw, ExternalLink, HelpCircle, ChevronRight, User, Terminal, Shield,
   CheckCircle2, ArrowRight, Share2, PhoneCall, MapPin, Clock, Trophy, Wrench,
-  Globe
+  Globe, Compass, Layers
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 
@@ -42,9 +42,10 @@ const ChinaFlag = () => (
   </svg>
 );
 
-// Safe rich text renderer for chat bubbles supporting bold and clickable markdown links / phone links
-const FormattedChatMessage = ({ text }) => {
+// Safe rich text renderer for chat bubbles supporting bold and clickable markdown links / phone links / internal routing
+const FormattedChatMessage = ({ text, onNavigate }) => {
   if (!text) return null;
+
   const lines = text.split('\n');
 
   return (
@@ -52,7 +53,7 @@ const FormattedChatMessage = ({ text }) => {
       {lines.map((line, lIdx) => {
         // Parse markdown link: [label](url)
         const parts = [];
-        const linkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+|tel:[^\s)]+)\)/g;
+        const linkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+|tel:[^\s)]+|\/[^\s)]+|#[^\s)]+)\)/g;
         let match;
         let lastIndex = 0;
 
@@ -62,13 +63,26 @@ const FormattedChatMessage = ({ text }) => {
           if (matchStart > lastIndex) {
             parts.push(line.slice(lastIndex, matchStart));
           }
+          const targetUrl = match[2];
+          const isInternal = targetUrl.startsWith('/') || targetUrl.startsWith('#');
           parts.push(
             <a 
               key={`link-${lIdx}-${matchStart}`} 
-              href={match[2]} 
-              target={match[2].startsWith('tel:') ? '_self' : '_blank'} 
+              href={targetUrl} 
+              onClick={(e) => {
+                if (isInternal) {
+                  e.preventDefault();
+                  const clean = targetUrl.startsWith('#') ? (targetUrl.replace(/^#\/?/, '/') || '/') : targetUrl;
+                  window.history.pushState(null, '', clean);
+                  window.dispatchEvent(new Event('popstate'));
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  if (onNavigate) onNavigate();
+                }
+              }}
+              target={targetUrl.startsWith('tel:') || isInternal ? '_self' : '_blank'} 
               rel="noopener noreferrer"
               className="chat-bubble-link"
+              style={isInternal ? { fontWeight: 700, textDecoration: 'underline', color: '#38bdf8' } : {}}
             >
               {match[1]}
             </a>
@@ -260,6 +274,10 @@ G-Speed 提供专业级电竞馆软硬件综合工程：
 5. ออกแบบแปลนร้าน 2D/3D และตกแต่งตามมาตรฐานแบรนด์ G-Speed
 6. อบรมบุคลากรและทีมวิศวกรดูแลระบบตลอดอายุสัญญา
 
+📐 **ระบบจำลองผังร้าน 3D & คำนวณงบประมาณเบื้องต้น:**
+คุณสามารถเข้าไปจำลองขนาดห้อง กว้าง x ยาว จัดวางเครื่อง และคำนวณงบลงทุน ROI ได้ทันทีที่:
+👉 [**คลิกที่นี่เพื่อไปหน้าระบบออกแบบแปลนร้าน 3D/2D**](/franchise)
+
 📞 **ปรึกษาคำนวณงบประมาณและสำรวจหน้างานฟรี:** โทร [063 793 7704](tel:0637937704) หรือพิมพ์แจ้งขนาดพื้นที่และเบอร์ติดต่อไว้ในแชทนี้ได้เลยครับ เจ้าหน้าที่จะติดต่อกลับทันทีครับ!`,
     en: `🏢 **G-Speed Esport Arena Franchise & Store Opening Investment:**
 
@@ -270,6 +288,10 @@ We offer 3 turnkey investment models:
 
 📦 **Turnkey Package Includes:** Tournament-grade PCs (RTX 40 series), NVMe Diskless Server, 10Gbps Multi-WAN low-latency network, Cloud POS, 2D/3D layout design, and operational staff training.
 
+📐 **Try our 3D/2D Store Planner & ROI Calculator:**
+You can simulate your venue size, arrange gaming stations, and estimate your budget right now:
+👉 [**Click here to open the 3D/2D Floor Planner**](/franchise)
+
 📞 **For customized ROI calculation & site survey:** Call [063 793 7704](tel:0637937704) or leave your phone number here!`,
     zh: `🏢 **G-Speed Esport Arena 电竞馆加盟与开店投资方案：**
 
@@ -279,6 +301,10 @@ We offer 3 turnkey investment models:
 • **Size L 大型电竞超级馆 (80-120台)：** 投资预算约 550 - 800 万泰铢 (配备 5v5 比赛舞台与 VIP 战队包间)
 
 📦 **全案交付清单：** 顶级电竞整机（RTX 40系列 + 360Hz显示器）、高速纯固态无盘服务器、万兆多线低延迟网络工程、云端POS收银计费、2D/3D空间设计与施工指导。
+
+📐 **3D/2D 空间规划与投资回报测算系统：**
+您可以直接输入场地尺寸，进行设备布局并测算投资预算：
+👉 [**点击此处进入 3D/2D 空间规划与预算测算系统**](/franchise)
 
 📞 **方案评估与场地勘测：** 请致电 [063 793 7704](tel:0637937704) 或在此留下您的联系方式！`
   },
@@ -551,7 +577,8 @@ export default function AIChatWidget() {
 1. ให้ตอบกลับเป็นภาษาเดียวกับที่ลูกค้าถาม (หากถามเป็นภาษาไทยตอบภาษาไทย, หากถามภาษาอังกฤษตอบภาษาอังกฤษ, หากถามภาษาจีนตอบภาษาจีน)
 2. สุภาพ ชัดเจน และเป็นมิตร
 3. หากลูกค้าต้องการติดต่อเจ้าหน้าที่โดยตรง ให้แจ้งเบอร์โทรศัพท์: 063 793 7704
-4. อ้างอิงข้อมูลเพิ่มเติมจาก:
+4. หากลูกค้าสอบถามเกี่ยวกับการลงทุนเปิดร้าน, แฟรนไชส์, งบประมาณ, หรือการจัดผังร้าน ให้แนะนำให้ลูกค้าทดลองจัดผังร้าน 2D/3D และคำนวณงบประมาณได้ด้วยตนเอง พร้อมแนบลิงก์ [📐 ออกแบบแปลนร้านและประเมินงบประมาณ](/franchise) เพื่อให้ลูกค้ากดเข้าไปใส่รายละเอียดได้ทันที
+5. อ้างอิงข้อมูลเพิ่มเติมจาก:
 -------------------------
 ${contextText}
 -------------------------`;
@@ -730,8 +757,64 @@ ${contextText}
                   </div>
                 )}
                 <div className={`chat-bubble-content ${msg.role === 'user' ? 'bubble-user' : 'bubble-bot'} ${msg.isOutOfScopeNotice ? 'bubble-warning' : ''}`}>
-                  <FormattedChatMessage text={msg.text} />
+                  <FormattedChatMessage text={msg.text} onNavigate={() => setIsOpen(false)} />
                   
+                  {/* Interactive Store Planner CTA Button */}
+                  {msg.role === 'assistant' && (
+                    msg.text.includes('/franchise') || 
+                    msg.text.includes('ออกแบบแปลน') || 
+                    msg.text.includes('แพ็กเกจ Turnkey') || 
+                    msg.text.includes('เปิดร้านเกม') ||
+                    msg.text.includes('จำลองผังร้าน') ||
+                    msg.text.includes('วางผังร้าน')
+                  ) && (
+                    <div style={{
+                      marginTop: '12px',
+                      padding: '12px 14px',
+                      background: 'rgba(30, 58, 138, 0.25)',
+                      border: '1px solid rgba(59, 130, 246, 0.4)',
+                      borderRadius: '10px'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#60a5fa', fontSize: '0.84rem', fontWeight: 700, marginBottom: '4px' }}>
+                        <Compass size={15} />
+                        <span>ระบบจำลองผังร้าน 3D & คำนวณงบประมาณ</span>
+                      </div>
+                      <p style={{ fontSize: '0.78rem', color: '#cbd5e1', margin: '0 0 10px 0', lineHeight: 1.45 }}>
+                        ทดลองใส่ขนาดพื้นที่ห้อง กว้าง x ยาว จัดวางเครื่อง สเปกคอม และคำนวณงบลงทุน ROI ได้ทันที
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          window.history.pushState(null, '', '/franchise');
+                          window.dispatchEvent(new Event('popstate'));
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                          setIsOpen(false);
+                        }}
+                        style={{
+                          width: '100%',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          padding: '8px 14px',
+                          background: '#2563eb',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: '8px',
+                          fontWeight: 700,
+                          fontSize: '0.84rem',
+                          cursor: 'pointer',
+                          boxShadow: '0 4px 12px rgba(37, 99, 235, 0.35)',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        <Compass size={15} />
+                        <span>เปิดระบบออกแบบแปลนร้าน & ใส่รายละเอียด</span>
+                        <ArrowRight size={14} />
+                      </button>
+                    </div>
+                  )}
+
                   {msg.isOutOfScopeNotice && (
                     <div className="out-of-scope-badge">
                       <Shield size={11} />

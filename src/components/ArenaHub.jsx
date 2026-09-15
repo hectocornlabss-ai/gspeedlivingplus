@@ -12,6 +12,30 @@ import {
 } from '../data/mockData';
 import { useSiteData } from '../context/SiteDataContext';
 
+// Helper functions for dynamic theme contrast & color overlays
+function isColorDark(hexColor) {
+  if (!hexColor || typeof hexColor !== 'string') return false;
+  let c = hexColor.trim().replace('#', '');
+  if (c.length === 3) c = c.split('').map(x => x + x).join('');
+  if (c.length !== 6) return false;
+  const r = parseInt(c.substr(0, 2), 16) || 0;
+  const g = parseInt(c.substr(2, 2), 16) || 0;
+  const b = parseInt(c.substr(4, 2), 16) || 0;
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+  return yiq < 135;
+}
+
+function hexToRgba(hex, alpha = 1) {
+  if (!hex || typeof hex !== 'string') return `rgba(15, 23, 42, ${alpha})`;
+  let c = hex.trim().replace('#', '');
+  if (c.length === 3) c = c.split('').map(x => x + x).join('');
+  if (c.length !== 6) return `rgba(15, 23, 42, ${alpha})`;
+  const r = parseInt(c.substr(0, 2), 16) || 0;
+  const g = parseInt(c.substr(2, 2), 16) || 0;
+  const b = parseInt(c.substr(4, 2), 16) || 0;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 export default function ArenaHub({ 
   onNavigateFranchise, 
   initialTournamentSlug, 
@@ -170,12 +194,27 @@ export default function ArenaHub({
       {/* 2. HERO BANNER: GLP ESPORT STADIUM MEETING */}
       {(() => {
         const heroBg = heroData.backgroundImage || heroData.bgOverlayImage;
-        const isDarkHero = Boolean(heroBg) && heroData.overlayType !== 'light';
-        const opacity = heroData.overlayOpacity ?? 0.82;
+        const overlayType = heroData.overlayType || 'light';
+        const isDarkHero = Boolean(heroBg) 
+          ? (overlayType === 'dark') 
+          : (heroData.bgColor ? (heroData.bgColor === '#0b0f19' || heroData.bgColor === '#0f172a') : false);
+        const opacity = heroData.overlayOpacity ?? (overlayType === 'light' ? 0.82 : (overlayType === 'soft' ? 0.35 : 0.75));
+
+        let overlayGradient = 'none';
+        if (heroBg && overlayType !== 'none') {
+          if (overlayType === 'dark') {
+            overlayGradient = `linear-gradient(180deg, rgba(11, 15, 25, ${opacity}) 0%, rgba(15, 23, 42, ${Math.min(1, opacity + 0.1)}) 100%)`;
+          } else if (overlayType === 'soft') {
+            overlayGradient = `linear-gradient(180deg, rgba(255, 255, 255, ${opacity}) 0%, rgba(241, 245, 249, ${Math.min(1, opacity + 0.1)}) 100%)`;
+          } else {
+            // 'light' default: Soft clean white frosted gradient to preserve original bright white look!
+            overlayGradient = `linear-gradient(180deg, rgba(255, 255, 255, ${opacity}) 0%, rgba(255, 255, 255, ${Math.max(0.45, opacity - 0.18)}) 50%, rgba(248, 250, 252, ${Math.min(1, opacity + 0.12)}) 100%)`;
+          }
+        }
 
         return (
           <section 
-            className={`hero-section ${heroBg ? 'has-bg-image' : ''} ${isDarkHero ? 'hero-dark-theme' : ''}`} 
+            className={`hero-section ${heroBg ? 'has-bg-image' : ''} ${isDarkHero ? 'hero-dark-theme' : 'hero-light-theme'}`} 
             style={{ 
               position: 'relative',
               overflow: 'hidden',
@@ -186,23 +225,21 @@ export default function ArenaHub({
               padding: '85px 0 65px 0',
               transition: 'all 0.3s ease'
             }}
+            aria-label={heroData.imageAlt || heroData.title || 'G-Speed Esport Arena'}
           >
             {/* Dynamic Background Overlay */}
-            {heroBg ? (
+            {heroBg && overlayType !== 'none' && (
               <div 
                 className="hero-background-overlay"
                 style={{
                   position: 'absolute',
                   inset: 0,
-                  background: isDarkHero
-                    ? `linear-gradient(180deg, rgba(11, 15, 25, ${opacity}) 0%, rgba(15, 23, 42, ${Math.min(1, opacity + 0.08)}) 100%)`
-                    : `linear-gradient(180deg, rgba(255, 255, 255, ${opacity}) 0%, rgba(241, 245, 249, ${Math.min(1, opacity + 0.08)}) 100%)`,
+                  background: overlayGradient,
                   zIndex: 1,
-                  pointerEvents: 'none'
+                  pointerEvents: 'none',
+                  transition: 'background 0.3s ease'
                 }}
               />
-            ) : (
-              <div className="hero-background-overlay"></div>
             )}
 
             <div className="container hero-container" style={{ position: 'relative', zIndex: 2 }}>
@@ -214,7 +251,11 @@ export default function ArenaHub({
                     borderColor: 'rgba(96, 165, 250, 0.45)',
                     color: '#93c5fd',
                     backdropFilter: 'blur(6px)'
-                  } : {}}
+                  } : {
+                    background: 'rgba(37, 99, 235, 0.08)',
+                    borderColor: 'rgba(37, 99, 235, 0.25)',
+                    color: '#1d4ed8'
+                  }}
                 >
                   <span className="live-dot"></span>
                   <span>{heroData.badge}</span>
@@ -224,8 +265,8 @@ export default function ArenaHub({
                   className="hero-title" 
                   style={{ 
                     whiteSpace: 'pre-line',
-                    color: isDarkHero ? '#ffffff' : '#0f172a',
-                    textShadow: isDarkHero ? '0 4px 20px rgba(0,0,0,0.85)' : 'none',
+                    color: isDarkHero ? '#ffffff' : (heroData.titleColor && heroData.titleColor !== '#ffffff' ? heroData.titleColor : '#0f172a'),
+                    textShadow: isDarkHero ? '0 3px 16px rgba(0,0,0,0.75)' : 'none',
                     letterSpacing: '-0.02em'
                   }}
                 >
@@ -235,8 +276,8 @@ export default function ArenaHub({
                 <p 
                   className="hero-description"
                   style={{
-                    color: isDarkHero ? '#e2e8f0' : '#475569',
-                    textShadow: isDarkHero ? '0 2px 10px rgba(0,0,0,0.7)' : 'none',
+                    color: isDarkHero ? '#e2e8f0' : (heroData.subtitleColor && heroData.subtitleColor !== '#ffffff' && heroData.subtitleColor !== '#e2e8f0' ? heroData.subtitleColor : '#475569'),
+                    textShadow: isDarkHero ? '0 2px 8px rgba(0,0,0,0.6)' : 'none',
                     lineHeight: 1.75
                   }}
                 >
@@ -248,38 +289,49 @@ export default function ArenaHub({
                     onClick={() => {
                       window.history.pushState(null, '', '/activities');
                       const el = document.getElementById('activities');
-                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      if (el) el.scrollIntoView({ behavior: 'smooth' });
                     }} 
-                    className="btn-primary"
+                    className="btn-primary cta-btn-large"
                   >
-                    <ImageIcon size={18} />
                     <span>{heroData.primaryCta || heroData.primaryCtaText || 'สำรวจกิจกรรม & ทัวร์นาเมนต์'}</span>
+                    <ArrowRight size={18} />
                   </button>
+
                   <button 
-                    onClick={() => {
-                      window.history.pushState(null, '', '/events');
-                      const el = document.getElementById('tournaments');
-                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }} 
-                    className="btn-secondary"
+                    id="btn-hero-navigate-franchise"
+                    onClick={onNavigateFranchise} 
+                    className="btn-secondary cta-btn-large"
                     style={isDarkHero ? {
-                      background: 'rgba(255, 255, 255, 0.14)',
-                      color: '#ffffff',
+                      background: 'rgba(255, 255, 255, 0.12)',
                       borderColor: 'rgba(255, 255, 255, 0.25)',
-                      backdropFilter: 'blur(6px)'
-                    } : {}}
+                      color: '#ffffff',
+                      backdropFilter: 'blur(8px)'
+                    } : {
+                      background: 'rgba(255, 255, 255, 0.9)',
+                      borderColor: 'rgba(203, 213, 225, 0.9)',
+                      color: '#1e293b'
+                    }}
                   >
-                    <Trophy size={18} />
+                    <Compass size={18} />
                     <span>{heroData.secondaryCta || heroData.secondaryCtaText || 'จำลองผังร้าน 3D แฟรนไชส์'}</span>
-                  </button>
-                  <button onClick={onNavigateFranchise} className="btn-accent">
-                    <Calculator size={18} />
-                    <span>สนใจระบบแฟรนไชส์ / จัดผังร้าน</span>
                   </button>
                 </div>
 
-                {/* Quick Metrics Bar */}
-                <div className="hero-metrics-grid">
+                {/* Quick Metrics Bar: 4 columns on desktop / 2 columns on mobile */}
+                <div 
+                  className="hero-metrics-grid"
+                  style={isDarkHero ? {
+                    background: 'rgba(15, 23, 42, 0.78)',
+                    borderColor: 'rgba(255, 255, 255, 0.16)',
+                    boxShadow: '0 16px 36px rgba(0, 0, 0, 0.45)',
+                    backdropFilter: 'blur(16px)'
+                  } : {
+                    background: 'rgba(255, 255, 255, 0.95)',
+                    borderColor: 'rgba(226, 232, 240, 0.8)',
+                    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.08)',
+                    backdropFilter: 'blur(12px)'
+                  }}
+                >
                   {(heroData.metrics || [
                     { number: '750+', label: 'Battle Stations ทั่วประเทศ' },
                     { number: '360Hz', label: 'Fast-IPS & OLED Displays' },
@@ -289,15 +341,14 @@ export default function ArenaHub({
                     <div 
                       key={mIdx} 
                       className="metric-box"
-                      style={isDarkHero ? {
-                        background: 'rgba(15, 23, 42, 0.65)',
-                        borderColor: 'rgba(255, 255, 255, 0.18)',
-                        backdropFilter: 'blur(10px)',
-                        boxShadow: '0 8px 24px rgba(0,0,0,0.35)'
-                      } : {}}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        boxShadow: 'none'
+                      }}
                     >
-                      <div className="metric-number" style={{ color: isDarkHero ? '#38bdf8' : undefined }}>{m.number}</div>
-                      <div className="metric-label" style={{ color: isDarkHero ? '#cbd5e1' : undefined }}>{m.label}</div>
+                      <div className="metric-number" style={{ color: isDarkHero ? '#38bdf8' : '#1d4ed8' }}>{m.number}</div>
+                      <div className="metric-label" style={{ color: isDarkHero ? '#cbd5e1' : '#64748b' }}>{m.label}</div>
                     </div>
                   ))}
                 </div>
@@ -318,18 +369,20 @@ export default function ArenaHub({
               style={{ 
                 background: siteData?.featureBanners?.bannerLeft?.image
                   ? `linear-gradient(180deg, rgba(15, 23, 42, 0.45) 0%, rgba(15, 23, 42, 0.88) 100%), url(${siteData.featureBanners.bannerLeft.image}) center/cover no-repeat`
-                  : (siteData?.featureBanners?.bannerLeft?.bgGradient || 'linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%)')
+                  : (siteData?.featureBanners?.bannerLeft?.bgGradient || 'linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%)')
               }}
             >
               <div className="banner-content">
                 <span className="badge-pill badge-blue">{siteData?.featureBanners?.bannerLeft?.badge || 'GLP OUR EVENTS'}</span>
-                <h3 className="banner-title">{siteData?.featureBanners?.bannerLeft?.title || 'รวมภาพกิจกรรม & บรรยากาศสด'}</h3>
-                <p className="banner-desc">
+                <h3 className="banner-title" style={{ color: '#ffffff' }}>
+                  {siteData?.featureBanners?.bannerLeft?.title || 'รวมภาพกิจกรรม & บรรยากาศสด'}
+                </h3>
+                <p className="banner-desc" style={{ color: '#cbd5e1' }}>
                   {siteData?.featureBanners?.bannerLeft?.desc || 'ภาพงานแข่ง LAN, งานเปิดตัวเกม, มีตติ้ง และพิธีมอบรางวัลชนะเลิศตลอดทั้งปี'}
                 </p>
                 <div className="banner-link-row text-blue">
-                  <span>{siteData?.featureBanners?.bannerLeft?.linkText || 'สำรวจอัลบั้มภาพกิจกรรม'}</span>
-                  <ArrowRight size={18} />
+                  <span style={{ color: '#60a5fa' }}>{siteData?.featureBanners?.bannerLeft?.linkText || 'สำรวจอัลบั้มภาพกิจกรรม'}</span>
+                  <ArrowRight size={18} color="#60a5fa" />
                 </div>
               </div>
             </a>
@@ -341,18 +394,20 @@ export default function ArenaHub({
               style={{ 
                 background: siteData?.featureBanners?.bannerRight?.image
                   ? `linear-gradient(180deg, rgba(15, 23, 42, 0.45) 0%, rgba(15, 23, 42, 0.88) 100%), url(${siteData.featureBanners.bannerRight.image}) center/cover no-repeat`
-                  : (siteData?.featureBanners?.bannerRight?.bgGradient || 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)')
+                  : (siteData?.featureBanners?.bannerRight?.bgGradient || 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)')
               }}
             >
               <div className="banner-content">
                 <span className="badge-pill badge-white">{siteData?.featureBanners?.bannerRight?.badge || 'GLP BLOG & NEWS'}</span>
-                <h3 className="banner-title">{siteData?.featureBanners?.bannerRight?.title || 'บทความ ข่าวสาร & ไฮไลต์เกม'}</h3>
-                <p className="banner-desc">
+                <h3 className="banner-title" style={{ color: '#ffffff' }}>
+                  {siteData?.featureBanners?.bannerRight?.title || 'บทความ ข่าวสาร & ไฮไลต์เกม'}
+                </h3>
+                <p className="banner-desc" style={{ color: '#cbd5e1' }}>
                   {siteData?.featureBanners?.bannerRight?.desc || 'เกาะติดผลการแข่งขัน ทริกการเล่น สเปกอุปกรณ์ใหม่ และประกาศจากทางร้าน'}
                 </p>
                 <div className="banner-link-row text-blue">
-                  <span>{siteData?.featureBanners?.bannerRight?.linkText || 'อ่านบทความล่าสุด'}</span>
-                  <ArrowRight size={18} />
+                  <span style={{ color: '#60a5fa' }}>{siteData?.featureBanners?.bannerRight?.linkText || 'อ่านบทความล่าสุด'}</span>
+                  <ArrowRight size={18} color="#60a5fa" />
                 </div>
               </div>
             </a>
@@ -447,322 +502,364 @@ export default function ArenaHub({
       </section>
 
       {/* 5. TOURNAMENTS & ACTIVITIES SCHEDULE */}
-      <section 
-        className="tournaments-section" 
-        id="tournaments"
-        style={{ backgroundColor: siteData?.tournamentsSection?.bgColor || '#ffffff' }}
-      >
-        <div className="container">
-          <div className="section-header">
-            <div className="badge-pill badge-amber">
-              <Flame size={14} />
-              <span>{siteData?.tournamentsSection?.badge || 'TOURNAMENTS & COMMUNITY EVENTS'}</span>
-            </div>
-            <h2 className="section-title">
-              {siteData?.tournamentsSection?.title || 'ปฏิทินการแข่งขัน อีสปอร์ตประจำเดือน'}
-            </h2>
-            <p className="section-subtitle">
-              {siteData?.tournamentsSection?.subtitle || 'ร่วมชิงเงินรางวัลรวมกว่าหลายแสนบาท พิสูจน์ฝีมือบนเวที LAN Final ถ่ายทอดสดสู่สายตาแฟนเกมทั่วประเทศ'}
-            </p>
-          </div>
-
-          <div className="tournaments-grid">
-            {tournamentsList.map((t) => {
-              const photoCount = (t.galleryPhotos || []).length;
-              const teamCount = (t.teams || []).length;
-              return (
-                <div key={t.id} className="tournament-card glass-panel" style={{ overflow: 'hidden', padding: 0 }}>
-                  {t.bannerImage && (
-                    <div style={{ position: 'relative', height: '170px', overflow: 'hidden' }}>
-                      <img 
-                        src={t.bannerImage} 
-                        alt={t.title} 
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      />
-                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(15,23,42,0.85) 0%, transparent 60%)' }} />
-                      <div style={{ position: 'absolute', top: '12px', left: '12px', display: 'flex', gap: '6px' }}>
-                        <span className={`badge-pill badge-${t.badgeType === 'cyan' ? 'blue' : t.badgeType === 'magenta' ? 'white' : 'amber'}`}>
-                          {t.badge}
-                        </span>
-                      </div>
-                      <div style={{ position: 'absolute', bottom: '10px', left: '14px', right: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                        <span className="t-game-tag" style={{ background: 'rgba(255,255,255,0.92)', color: '#1d4ed8', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>
-                          {t.game}
-                        </span>
-                        {photoCount > 0 && (
-                          <span style={{ background: 'rgba(0,0,0,0.65)', color: '#fff', fontSize: '0.72rem', padding: '2px 8px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px', backdropFilter: 'blur(4px)' }}>
-                            <Camera size={11} /> {photoCount} ภาพ
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  <div style={{ padding: '20px 24px 24px 24px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-                    {!t.bannerImage && (
-                      <div className="t-card-header">
-                        <span className={`badge-pill badge-${t.badgeType === 'cyan' ? 'blue' : t.badgeType === 'magenta' ? 'white' : 'amber'}`}>
-                          {t.badge}
-                        </span>
-                        <span className="t-game-tag">{t.game}</span>
-                      </div>
-                    )}
-
-                    <h3 className="t-card-title" style={{ marginTop: t.bannerImage ? 0 : '8px', fontSize: '1.15rem' }}>
-                      {t.title}
-                    </h3>
-
-                    <div className="t-details-list" style={{ marginTop: '12px' }}>
-                      <div className="t-detail-item">
-                        <Calendar size={16} className="text-cyan" />
-                        <span><strong>วันที่:</strong> {t.date} ({t.time})</span>
-                      </div>
-                      <div className="t-detail-item">
-                        <Trophy size={16} className="text-amber" />
-                        <span><strong>เงินรางวัลรวม:</strong> <span className="text-amber prize-text">{t.prizePool}</span></span>
-                      </div>
-                      <div className="t-detail-item">
-                        <Users size={16} className="text-muted" />
-                        <span><strong>จำนวนทีม:</strong> {t.slots} ({teamCount} ทีมร่วมแข่ง)</span>
-                      </div>
-                      <div className="t-detail-item">
-                        <Zap size={16} className="text-muted" />
-                        <span><strong>รูปแบบ:</strong> {t.format}</span>
-                      </div>
-                    </div>
-
-                    <div className="t-card-footer" style={{ marginTop: 'auto', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                        <button 
-                          type="button"
-                          className="btn-secondary"
-                          style={{ padding: '8px 10px', fontSize: '0.82rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}
-                          onClick={() => handleOpenTournament(t, 'gallery')}
-                        >
-                          <Camera size={13} />
-                          <span>ภาพกิจกรรม</span>
-                        </button>
-                        <button 
-                          type="button"
-                          className="btn-secondary"
-                          style={{ padding: '8px 10px', fontSize: '0.82rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}
-                          onClick={() => handleOpenTournament(t, 'roster')}
-                        >
-                          <Users size={13} />
-                          <span>ดูรายชื่อทีม</span>
-                        </button>
-                      </div>
-
-                      {t.status === 'Open' ? (
-                        <button 
-                          id={`btn-reg-${t.id}`}
-                          className="btn-primary full-width"
-                          onClick={() => handleOpenTournament(t, 'register')}
-                        >
-                          <span>สมัครเข้าร่วมแข่งขัน</span>
-                          <ArrowRight size={16} />
-                        </button>
-                      ) : t.status === 'Full' ? (
-                        <button 
-                          className="btn-secondary full-width disabled-btn"
-                          onClick={() => handleOpenTournament(t, 'roster')}
-                        >
-                          <span>ที่นั่งเต็มแล้ว (ดูรายชื่อทีม & ภาพ)</span>
-                        </button>
-                      ) : (
-                        <button 
-                          className="btn-secondary full-width"
-                          onClick={() => handleOpenTournament(t, 'overview')}
-                        >
-                          <span>ติดตามรายละเอียดการแข่งขัน</span>
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* 6. VENUE ATMOSPHERE & SIGNATURE ZONES */}
-      <section 
-        className="zones-section" 
-        id="zones"
-        style={{ backgroundColor: siteData?.zonesSection?.bgColor || '#f8fafc' }}
-      >
-        <div className="container">
-          <div className="section-header">
-            <div className="badge-pill badge-white">
-              <Layers size={14} />
-              <span>{siteData?.zonesSection?.badge || 'VENUE ATMOSPHERE & ZONES'}</span>
-            </div>
-            <h2 className="section-title">
-              {siteData?.zonesSection?.title || 'บรรยากาศและโซนการให้บริการ GLP ESPORTS'}
-            </h2>
-            <p className="section-subtitle">
-              {siteData?.zonesSection?.subtitle || 'สัมผัสความพรีเมียมที่ออกแบบมาสำหรับเกมเมอร์ทุกสไตล์ ตั้งแต่ผู้เล่นทั่วไป สตรีมเมอร์ ไปจนถึงการประลองระดับแชมป์เปียนชิป'}
-            </p>
-          </div>
-
-          {/* Zone Tabs */}
-          <div className="zone-tabs-list">
-            {(siteData?.venueZones || VENUE_ZONES).map((zone) => (
-              <button
-                key={zone.id}
-                id={`btn-zone-tab-${zone.id}`}
-                onClick={() => setActiveZone(zone.id)}
-                className={`zone-tab-btn ${activeZone === zone.id ? 'active' : ''}`}
-              >
-                {zone.id === 'stage' && <Trophy size={18} />}
-                {zone.id === 'vip' && <Shield size={18} />}
-                {zone.id === 'standard' && <Monitor size={18} />}
-                {zone.id === 'cafe' && <Coffee size={18} />}
-                <span>{zone.title}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Active Zone Detail Showcase */}
-          <div className="zone-showcase-panel glass-panel">
-            <div className="zone-image-wrapper">
-              <img 
-                src={currentZoneData.image} 
-                alt={currentZoneData.title}
-                className="zone-feature-img" 
-              />
-              <div className="zone-badge-overlay">
-                <span className="badge-pill badge-blue">{currentZoneData.badge}</span>
-              </div>
-            </div>
-
-            <div className="zone-info-wrapper">
-              <div className="zone-sub">{currentZoneData.subtitle}</div>
-              <h3 className="zone-heading">{currentZoneData.title}</h3>
-              <p className="zone-desc">{currentZoneData.description}</p>
-
-              <div className="zone-specs-box">
-                <div className="specs-title">
-                  <Zap size={16} className="text-blue" />
-                  <span>จุดเด่นของโซนนี้:</span>
-                </div>
-                <div className="specs-grid">
-                  {currentZoneData.specs.map((spec, idx) => (
-                    <div key={idx} className="spec-item">
-                      <CheckCircle2 size={16} className="text-blue" />
-                      <span>{spec}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="zone-action-bar">
-                <button 
-                  onClick={onNavigateFranchise} 
-                  className="btn-primary"
-                >
-                  <Compass size={16} />
-                  <span>ลองใส่โซนนี้ในผังร้านของคุณ</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 7. GAME NEWS & ARTICLES (บทความและข่าวสาร) */}
-      <section 
-        className="news-section" 
-        id="news"
-        style={{ backgroundColor: siteData?.newsSection?.bgColor || '#ffffff' }}
-      >
-        <div className="container">
-          <div className="section-header">
-            <div className="badge-pill badge-blue">
-              <Newspaper size={14} />
-              <span>{siteData?.newsSection?.badge || 'ARTICLES & UPDATES'}</span>
-            </div>
-            <h2 className="section-title">
-              {siteData?.newsSection?.title || 'บทความและข่าวสาร GLP ESPORTS'}
-            </h2>
-            <p className="section-subtitle">
-              {siteData?.newsSection?.subtitle || 'อัปเดตความเคลื่อนไหววงการอีสปอร์ต เทคโนโลยีใหม่ และสรุปผลการแข่งขันที่จัดขึ้นในร้าน'}
-            </p>
-          </div>
-
-          <div className="news-grid">
-            {newsList.map(news => (
-              <div 
-                key={news.id} 
-                className="news-card glass-panel clickable-article-card"
-                onClick={() => {
-                  if (onSelectActivitySlug) {
-                    onSelectActivitySlug(news.slug || news.id);
-                  } else {
-                    window.history.pushState(null, '', `/activities/${news.slug || news.id}`);
-                  }
-                }}
-              >
-                <div className="news-thumb-wrapper">
-                  <img src={news.image} alt={news.imageAlt || news.title} className="news-img" />
-                  <span className="news-cat-pill">{news.tag || news.category}</span>
-                </div>
-                <div className="news-body">
-                  <div className="news-meta">
-                    <span>{news.date}</span>
-                    <span>•</span>
-                    <span>อ่าน {news.readTime}</span>
-                  </div>
-                  <h3 className="news-title">{news.title}</h3>
-                  <p className="news-excerpt">{news.excerpt || news.desc}</p>
-                  <div className="news-read-more-link text-blue">
-                    <span>อ่านบทความเต็ม</span>
-                    <ExternalLink size={14} />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 8. FRANCHISE CTA SECTION */}
-      <section className="franchise-callout-section">
-        <div className="container">
-          <div 
-            className="franchise-cta-card"
+      {(() => {
+        const tourBg = siteData?.tournamentsSection?.bgColor || '#ffffff';
+        const isDarkTour = isColorDark(tourBg);
+        return (
+          <section 
+            className="tournaments-section" 
+            id="tournaments"
             style={{ 
-              backgroundColor: siteData?.franchiseBanner?.bgColor || '#1e3a8a',
-              backgroundImage: siteData?.franchiseBanner?.bgImage ? `url(${siteData.franchiseBanner.bgImage})` : undefined
+              background: tourBg,
+              backgroundColor: tourBg,
+              backgroundImage: 'none'
             }}
           >
-            <div className="cta-content">
-              <div className="badge-pill badge-blue">
-                <Layers size={14} />
-                <span>{siteData?.franchiseBanner?.badge || 'G-SPEED FRANCHISE & INTERIOR PLANNER'}</span>
+            <div className="container">
+              <div className="section-header">
+                <div className="badge-pill badge-amber">
+                  <Flame size={14} />
+                  <span>{siteData?.tournamentsSection?.badge || 'TOURNAMENTS & COMMUNITY EVENTS'}</span>
+                </div>
+                <h2 className="section-title" style={{ color: siteData?.tournamentsSection?.titleColor || (isDarkTour ? '#ffffff' : '#0f172a') }}>
+                  {siteData?.tournamentsSection?.title || 'ปฏิทินการแข่งขัน อีสปอร์ตประจำเดือน'}
+                </h2>
+                <p className="section-subtitle" style={{ color: siteData?.tournamentsSection?.subtitleColor || (isDarkTour ? '#cbd5e1' : '#475569') }}>
+                  {siteData?.tournamentsSection?.subtitle || 'ร่วมชิงเงินรางวัลรวมกว่าหลายแสนบาท พิสูจน์ฝีมือบนเวที LAN Final ถ่ายทอดสดสู่สายตาแฟนเกมทั่วประเทศ'}
+                </p>
               </div>
-              <h2 className="cta-heading">
-                {siteData?.franchiseBanner?.heading || 'อยากมีร้านเกมอีสปอร์ตสเปกเทพเป็นของตัวเอง?'}
-              </h2>
-              <p className="cta-desc">
-                {siteData?.franchiseBanner?.desc || 'เพียงแค่คุณมีพื้นที่หรืออาคาร เรามีระบบ Interior Floor Plan Configurator ช่วยจำลองผังร้าน 2D สเกลจริง จัดวางโต๊ะคอมพิวเตอร์ เวทีแข่งขัน เคาน์เตอร์ และคำนวณต้นทุน สเปกอุปกรณ์ ระยะเวลาคืนทุน (ROI) และเวลาติดตั้งให้ทันที!'}
-              </p>
-              <div className="cta-buttons">
-                <button 
-                  id="btn-hero-interior-start"
-                  onClick={onNavigateFranchise} 
-                  className="btn-primary cta-btn-large"
-                >
-                  <Compass size={18} />
-                  <span>{siteData?.franchiseBanner?.buttonText || 'เริ่มออกแบบผังร้าน & ประเมินงบประมาณทันที'}</span>
-                  <ArrowRight size={18} />
-                </button>
+
+              <div className="tournaments-grid">
+                {tournamentsList.map((t) => {
+                  const photoCount = (t.galleryPhotos || []).length;
+                  const teamCount = (t.teams || []).length;
+                  return (
+                    <div key={t.id} className="tournament-card glass-panel" style={{ overflow: 'hidden', padding: 0 }}>
+                      {t.bannerImage && (
+                        <div style={{ position: 'relative', height: '170px', overflow: 'hidden' }}>
+                          <img 
+                            src={t.bannerImage} 
+                            alt={t.title} 
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
+                          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(15,23,42,0.85) 0%, transparent 60%)' }} />
+                          <div style={{ position: 'absolute', top: '12px', left: '12px', display: 'flex', gap: '6px' }}>
+                            <span className={`badge-pill badge-${t.badgeType === 'cyan' ? 'blue' : t.badgeType === 'magenta' ? 'white' : 'amber'}`}>
+                              {t.badge}
+                            </span>
+                          </div>
+                          <div style={{ position: 'absolute', bottom: '10px', left: '14px', right: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                            <span className="t-game-tag" style={{ background: 'rgba(255,255,255,0.92)', color: '#1d4ed8', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>
+                              {t.game}
+                            </span>
+                            {photoCount > 0 && (
+                              <span style={{ background: 'rgba(0,0,0,0.65)', color: '#fff', fontSize: '0.72rem', padding: '2px 8px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px', backdropFilter: 'blur(4px)' }}>
+                                <Camera size={11} /> {photoCount} ภาพ
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      <div style={{ padding: '20px 24px 24px 24px', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                        {!t.bannerImage && (
+                          <div className="t-card-header">
+                            <span className={`badge-pill badge-${t.badgeType === 'cyan' ? 'blue' : t.badgeType === 'magenta' ? 'white' : 'amber'}`}>
+                              {t.badge}
+                            </span>
+                            <span className="t-game-tag">{t.game}</span>
+                          </div>
+                        )}
+
+                        <h3 className="t-card-title" style={{ marginTop: t.bannerImage ? 0 : '8px', fontSize: '1.15rem' }}>
+                          {t.title}
+                        </h3>
+
+                        <div className="t-details-list" style={{ marginTop: '12px' }}>
+                          <div className="t-detail-item">
+                            <Calendar size={16} className="text-cyan" />
+                            <span><strong>วันที่:</strong> {t.date} ({t.time})</span>
+                          </div>
+                          <div className="t-detail-item">
+                            <Trophy size={16} className="text-amber" />
+                            <span><strong>เงินรางวัลรวม:</strong> <span className="text-amber prize-text">{t.prizePool}</span></span>
+                          </div>
+                          <div className="t-detail-item">
+                            <Users size={16} className="text-muted" />
+                            <span><strong>จำนวนทีม:</strong> {t.slots} ({teamCount} ทีมร่วมแข่ง)</span>
+                          </div>
+                          <div className="t-detail-item">
+                            <Zap size={16} className="text-muted" />
+                            <span><strong>รูปแบบ:</strong> {t.format}</span>
+                          </div>
+                        </div>
+
+                        <div className="t-card-footer" style={{ marginTop: 'auto', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                            <button 
+                              type="button"
+                              className="btn-secondary"
+                              style={{ padding: '8px 10px', fontSize: '0.82rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}
+                              onClick={() => handleOpenTournament(t, 'gallery')}
+                            >
+                              <Camera size={13} />
+                              <span>ภาพกิจกรรม</span>
+                            </button>
+                            <button 
+                              type="button"
+                              className="btn-secondary"
+                              style={{ padding: '8px 10px', fontSize: '0.82rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}
+                              onClick={() => handleOpenTournament(t, 'roster')}
+                            >
+                              <Users size={13} />
+                              <span>ดูรายชื่อทีม</span>
+                            </button>
+                          </div>
+
+                          {t.status === 'Open' ? (
+                            <button 
+                              id={`btn-reg-${t.id}`}
+                              className="btn-primary full-width"
+                              onClick={() => handleOpenTournament(t, 'register')}
+                            >
+                              <span>สมัครเข้าร่วมแข่งขัน</span>
+                              <ArrowRight size={16} />
+                            </button>
+                          ) : t.status === 'Full' ? (
+                            <button 
+                              className="btn-secondary full-width disabled-btn"
+                              onClick={() => handleOpenTournament(t, 'roster')}
+                            >
+                              <span>ที่นั่งเต็มแล้ว (ดูรายชื่อทีม & ภาพ)</span>
+                            </button>
+                          ) : (
+                            <button 
+                              className="btn-secondary full-width"
+                              onClick={() => handleOpenTournament(t, 'overview')}
+                            >
+                              <span>ติดตามรายละเอียดการแข่งขัน</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
-          </div>
-        </div>
-      </section>
+          </section>
+        );
+      })()}
+
+      {/* 6. VENUE ATMOSPHERE & SIGNATURE ZONES */}
+      {(() => {
+        const zonesBg = siteData?.zonesSection?.bgColor || '#f8fafc';
+        const isDarkZones = isColorDark(zonesBg);
+        return (
+          <section 
+            className="zones-section" 
+            id="zones"
+            style={{ 
+              background: zonesBg,
+              backgroundColor: zonesBg,
+              backgroundImage: 'none'
+            }}
+          >
+            <div className="container">
+              <div className="section-header">
+                <div className="badge-pill badge-white">
+                  <Layers size={14} />
+                  <span>{siteData?.zonesSection?.badge || 'VENUE ATMOSPHERE & ZONES'}</span>
+                </div>
+                <h2 className="section-title" style={{ color: siteData?.zonesSection?.titleColor || (isDarkZones ? '#ffffff' : '#0f172a') }}>
+                  {siteData?.zonesSection?.title || 'บรรยากาศและโซนการให้บริการ GLP ESPORTS'}
+                </h2>
+                <p className="section-subtitle" style={{ color: siteData?.zonesSection?.subtitleColor || (isDarkZones ? '#cbd5e1' : '#475569') }}>
+                  {siteData?.zonesSection?.subtitle || 'สัมผัสความพรีเมียมที่ออกแบบมาสำหรับเกมเมอร์ทุกสไตล์ ตั้งแต่ผู้เล่นทั่วไป สตรีมเมอร์ ไปจนถึงการประลองระดับแชมป์เปียนชิป'}
+                </p>
+              </div>
+
+              {/* Zone Tabs */}
+              <div className="zone-tabs-list">
+                {(siteData?.venueZones || VENUE_ZONES).map((zone) => (
+                  <button
+                    key={zone.id}
+                    id={`btn-zone-tab-${zone.id}`}
+                    onClick={() => setActiveZone(zone.id)}
+                    className={`zone-tab-btn ${activeZone === zone.id ? 'active' : ''}`}
+                  >
+                    {zone.id === 'stage' && <Trophy size={18} />}
+                    {zone.id === 'vip' && <Shield size={18} />}
+                    {zone.id === 'standard' && <Monitor size={18} />}
+                    {zone.id === 'cafe' && <Coffee size={18} />}
+                    <span>{zone.title}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Active Zone Detail Showcase */}
+              <div className="zone-showcase-panel glass-panel">
+                <div className="zone-image-wrapper">
+                  <img 
+                    src={currentZoneData.image} 
+                    alt={currentZoneData.title}
+                    className="zone-feature-img" 
+                  />
+                  <div className="zone-badge-overlay">
+                    <span className="badge-pill badge-blue">{currentZoneData.badge}</span>
+                  </div>
+                </div>
+
+                <div className="zone-info-wrapper">
+                  <div className="zone-sub">{currentZoneData.subtitle}</div>
+                  <h3 className="zone-heading">{currentZoneData.title}</h3>
+                  <p className="zone-desc">{currentZoneData.description}</p>
+
+                  <div className="zone-specs-box">
+                    <div className="specs-title">
+                      <Zap size={16} className="text-blue" />
+                      <span>จุดเด่นของโซนนี้:</span>
+                    </div>
+                    <div className="specs-grid">
+                      {currentZoneData.specs.map((spec, idx) => (
+                        <div key={idx} className="spec-item">
+                          <CheckCircle2 size={16} className="text-blue" />
+                          <span>{spec}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="zone-action-bar">
+                    <button 
+                      onClick={onNavigateFranchise} 
+                      className="btn-primary"
+                    >
+                      <Compass size={16} />
+                      <span>ลองใส่โซนนี้ในผังร้านของคุณ</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        );
+      })()}
+
+      {/* 7. GAME NEWS & ARTICLES (บทความและข่าวสาร) */}
+      {(() => {
+        const newsBg = siteData?.newsSection?.bgColor || '#ffffff';
+        const isDarkNews = isColorDark(newsBg);
+        return (
+          <section 
+            className="news-section" 
+            id="news"
+            style={{ 
+              background: newsBg,
+              backgroundColor: newsBg,
+              backgroundImage: 'none'
+            }}
+          >
+            <div className="container">
+              <div className="section-header">
+                <div className="badge-pill badge-blue">
+                  <Newspaper size={14} />
+                  <span>{siteData?.newsSection?.badge || 'ARTICLES & UPDATES'}</span>
+                </div>
+                <h2 className="section-title" style={{ color: siteData?.newsSection?.titleColor || (isDarkNews ? '#ffffff' : '#0f172a') }}>
+                  {siteData?.newsSection?.title || 'บทความและข่าวสาร GLP ESPORTS'}
+                </h2>
+                <p className="section-subtitle" style={{ color: siteData?.newsSection?.subtitleColor || (isDarkNews ? '#cbd5e1' : '#475569') }}>
+                  {siteData?.newsSection?.subtitle || 'อัปเดตความเคลื่อนไหววงการอีสปอร์ต เทคโนโลยีใหม่ และสรุปผลการแข่งขันที่จัดขึ้นในร้าน'}
+                </p>
+              </div>
+
+              <div className="news-grid">
+                {newsList.map(news => (
+                  <div 
+                    key={news.id} 
+                    className="news-card glass-panel clickable-article-card"
+                    onClick={() => {
+                      if (onSelectActivitySlug) {
+                        onSelectActivitySlug(news.slug || news.id);
+                      } else {
+                        window.history.pushState(null, '', `/activities/${news.slug || news.id}`);
+                      }
+                    }}
+                  >
+                    <div className="news-thumb-wrapper">
+                      <img src={news.image} alt={news.imageAlt || news.title} className="news-img" />
+                      <span className="news-cat-pill">{news.tag || news.category}</span>
+                    </div>
+                    <div className="news-body">
+                      <div className="news-meta">
+                        <span>{news.date}</span>
+                        <span>•</span>
+                        <span>อ่าน {news.readTime}</span>
+                      </div>
+                      <h3 className="news-title">{news.title}</h3>
+                      <p className="news-excerpt">{news.excerpt || news.desc}</p>
+                      <div className="news-read-more-link text-blue">
+                        <span>อ่านบทความเต็ม</span>
+                        <ExternalLink size={14} />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        );
+      })()}
+
+      {/* 8. FRANCHISE CTA SECTION */}
+      {(() => {
+        const fBg = siteData?.franchiseBanner?.bgColor || '#1e3a8a';
+        const fImg = siteData?.franchiseBanner?.bgImage;
+        const isDarkF = isColorDark(fBg);
+        const cardBg = fImg
+          ? `linear-gradient(180deg, ${hexToRgba(fBg, 0.70)} 0%, ${hexToRgba(fBg, 0.92)} 100%), url(${fImg}) center/cover no-repeat`
+          : fBg;
+
+        return (
+          <section className="franchise-callout-section">
+            <div className="container">
+              <div 
+                className="franchise-cta-card"
+                style={{ 
+                  background: cardBg,
+                  backgroundColor: fBg,
+                  backgroundImage: fImg ? undefined : 'none'
+                }}
+              >
+                <div className="cta-content">
+                  <div className="badge-pill badge-blue">
+                    <Layers size={14} />
+                    <span>{siteData?.franchiseBanner?.badge || 'G-SPEED FRANCHISE & INTERIOR PLANNER'}</span>
+                  </div>
+                  <h2 className="cta-heading" style={{ color: siteData?.franchiseBanner?.headingColor || siteData?.franchiseBanner?.titleColor || (isDarkF ? '#ffffff' : '#0f172a') }}>
+                    {siteData?.franchiseBanner?.heading || 'อยากมีร้านเกมอีสปอร์ตสเปกเทพเป็นของตัวเอง?'}
+                  </h2>
+                  <p className="cta-desc" style={{ color: siteData?.franchiseBanner?.descColor || siteData?.franchiseBanner?.textColor || (isDarkF ? '#bfdbfe' : '#475569') }}>
+                    {siteData?.franchiseBanner?.desc || 'เพียงแค่คุณมีพื้นที่หรืออาคาร เรามีระบบ Interior Floor Plan Configurator ช่วยจำลองผังร้าน 2D สเกลจริง จัดวางโต๊ะคอมพิวเตอร์ เวทีแข่งขัน เคาน์เตอร์ และคำนวณต้นทุน สเปกอุปกรณ์ ระยะเวลาคืนทุน (ROI) และเวลาติดตั้งให้ทันที!'}
+                  </p>
+                  <div className="cta-buttons">
+                    <button 
+                      id="btn-hero-interior-start"
+                      onClick={onNavigateFranchise} 
+                      className="btn-primary cta-btn-large"
+                    >
+                      <Compass size={18} />
+                      <span>{siteData?.franchiseBanner?.buttonText || 'เริ่มออกแบบผังร้าน & ประเมินงบประมาณทันที'}</span>
+                      <ArrowRight size={18} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        );
+      })()}
 
       {/* MODAL: GALLERY ITEM DETAIL (LIGHTBOX) */}
       {selectedGalleryItem && (

@@ -6,6 +6,30 @@ import {
   Share2, Check, Shield, Coffee, ChevronRight, Zap, Info, RefreshCw
 } from 'lucide-react';
 
+// Helpers for dynamic theme contrast & color overlays
+function isColorDark(hexColor) {
+  if (!hexColor || typeof hexColor !== 'string') return false;
+  let c = hexColor.trim().replace('#', '');
+  if (c.length === 3) c = c.split('').map(x => x + x).join('');
+  if (c.length !== 6) return false;
+  const r = parseInt(c.substr(0, 2), 16) || 0;
+  const g = parseInt(c.substr(2, 2), 16) || 0;
+  const b = parseInt(c.substr(4, 2), 16) || 0;
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+  return yiq < 135;
+}
+
+function hexToRgba(hex, alpha = 1) {
+  if (!hex || typeof hex !== 'string') return `rgba(15, 23, 42, ${alpha})`;
+  let c = hex.trim().replace('#', '');
+  if (c.length === 3) c = c.split('').map(x => x + x).join('');
+  if (c.length !== 6) return `rgba(15, 23, 42, ${alpha})`;
+  const r = parseInt(c.substr(0, 2), 16) || 0;
+  const g = parseInt(c.substr(2, 2), 16) || 0;
+  const b = parseInt(c.substr(4, 2), 16) || 0;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 export default function CMSLivePreviewModal({
   isOpen,
   onClose,
@@ -74,158 +98,229 @@ export default function CMSLivePreviewModal({
             <button 
               className={`viewport-toggle-btn ${viewport === 'tablet' ? 'active' : ''}`}
               onClick={() => setViewport('tablet')}
-              title="มุมมองหน้าจอแท็บเล็ต Tablet (768px)"
+              title="มุมมองแท็บเล็ต Tablet (768px)"
             >
               <Tablet size={14} />
-              <span>Tablet (768px)</span>
+              <span>Tablet</span>
             </button>
             <button 
               className={`viewport-toggle-btn ${viewport === 'mobile' ? 'active' : ''}`}
               onClick={() => setViewport('mobile')}
-              title="มุมมองหน้าจอมือถือ Mobile (390px)"
+              title="มุมมองมือถือ Mobile (390px)"
             >
               <Smartphone size={14} />
-              <span>Mobile (390px)</span>
+              <span>Mobile</span>
             </button>
           </div>
 
-          <button className="btn-close-preview-modal" onClick={onClose} title="ปิดหน้าต่างพรีวิว">
+          <button className="cms-preview-close-btn" onClick={onClose} title="ปิดหน้าต่างพรีวิว">
             <X size={18} />
           </button>
         </div>
 
-        {/* Modal Body / Preview Canvas */}
+        {/* Modal Body with Viewport Simulator */}
         <div className="cms-preview-modal-body">
-          <div className={`cms-preview-stage stage-${viewport}`}>
-            
+          <div className={`cms-preview-canvas viewport-${viewport}`}>
+
             {/* 1. HERO SECTION PREVIEW */}
-            {sectionType === 'hero' && (
-              <div 
-                className="preview-hero-block"
-                style={{
-                  padding: viewport === 'mobile' ? '40px 16px' : '70px 40px',
-                  background: siteData?.hero?.backgroundImage
-                    ? `linear-gradient(180deg, rgba(15, 23, 42, 0.75) 0%, rgba(15, 23, 42, 0.94) 100%), url(${siteData.hero.backgroundImage}) center/cover no-repeat`
-                    : 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0f172a 100%)',
-                  color: '#ffffff',
-                  textAlign: 'center',
-                  borderRadius: '12px'
-                }}
-              >
-                <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(56, 189, 248, 0.15)', border: '1px solid rgba(56, 189, 248, 0.4)', padding: '6px 14px', borderRadius: '999px', fontSize: '0.78rem', fontWeight: 700, color: '#38bdf8', marginBottom: '16px' }}>
-                    <Sparkles size={14} />
-                    <span>{siteData?.hero?.badge || 'THAILAND FLAGSHIP ESPORT ARENA'}</span>
-                  </div>
+            {sectionType === 'hero' && (() => {
+              const heroBg = siteData?.hero?.backgroundImage || siteData?.hero?.bgOverlayImage;
+              const effectiveBg = siteData?.hero?.bgColor || '#ffffff';
+              const overlayType = siteData?.hero?.overlayType || 'light';
+              const isDarkHero = Boolean(heroBg)
+                ? (overlayType === 'dark')
+                : isColorDark(effectiveBg);
+              const opacity = siteData?.hero?.overlayOpacity ?? (overlayType === 'light' ? 0.82 : (overlayType === 'soft' ? 0.35 : 0.75));
 
-                  <h1 style={{ fontSize: viewport === 'mobile' ? '1.5rem' : '2.4rem', fontWeight: 800, lineHeight: '1.25', marginBottom: '16px', color: '#ffffff' }}>
-                    {siteData?.hero?.title || 'ศูนย์อีสปอร์ตครบวงจร & ระบบแฟรนไชส์จัดผังร้านอัจฉริยะ'}
-                  </h1>
+              let previewBg = effectiveBg;
+              if (heroBg) {
+                if (overlayType === 'dark') {
+                  previewBg = `linear-gradient(180deg, rgba(11, 15, 25, ${opacity}) 0%, rgba(15, 23, 42, ${Math.min(1, opacity + 0.1)}) 100%), url(${heroBg}) center/cover no-repeat`;
+                } else if (overlayType === 'soft') {
+                  previewBg = `linear-gradient(180deg, rgba(255, 255, 255, ${opacity}) 0%, rgba(241, 245, 249, ${Math.min(1, opacity + 0.1)}) 100%), url(${heroBg}) center/cover no-repeat`;
+                } else if (overlayType === 'none') {
+                  previewBg = `url(${heroBg}) center/cover no-repeat`;
+                } else {
+                  // 'light' default: Soft clean white frosted gradient
+                  previewBg = `linear-gradient(180deg, rgba(255, 255, 255, ${opacity}) 0%, rgba(255, 255, 255, ${Math.max(0.45, opacity - 0.18)}) 50%, rgba(248, 250, 252, ${Math.min(1, opacity + 0.12)}) 100%), url(${heroBg}) center/cover no-repeat`;
+                }
+              }
 
-                  <p style={{ fontSize: viewport === 'mobile' ? '0.86rem' : '1.05rem', color: '#cbd5e1', lineHeight: '1.6', marginBottom: '28px', maxWidth: '640px', margin: '0 auto 28px' }}>
-                    {siteData?.hero?.subtitle || 'สัมผัสประสบการณ์เกมมิ่งระดับทัวร์นาเมนต์ สเปก RTX 40 Series จอ 360Hz และระบบ 3D Interior Floor Plan คำนวณงบประมาณและผลตอบแทนการลงทุนทันที'}
-                  </p>
+              const resolvedTitleColor = isDarkHero 
+                ? '#ffffff' 
+                : (siteData?.hero?.titleColor && siteData?.hero?.titleColor !== '#ffffff' ? siteData?.hero?.titleColor : '#0f172a');
+              const resolvedSubtitleColor = isDarkHero 
+                ? '#cbd5e1' 
+                : (siteData?.hero?.subtitleColor && siteData?.hero?.subtitleColor !== '#ffffff' && siteData?.hero?.subtitleColor !== '#e2e8f0' ? siteData?.hero?.subtitleColor : '#475569');
 
-                  <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                    <button className="btn-primary" style={{ padding: '12px 24px', fontSize: '0.9rem' }}>
-                      <Compass size={17} />
-                      <span>{siteData?.hero?.primaryCta || 'จำลองผังร้าน 3D & คำนวณงบประมาณ'}</span>
-                      <ArrowRight size={17} />
-                    </button>
-                    <button className="btn-secondary" style={{ padding: '12px 22px', fontSize: '0.9rem', background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' }}>
-                      <Trophy size={17} />
-                      <span>{siteData?.hero?.secondaryCta || 'ปฏิทินแข่งขัน & สมัครทัวร์นาเมนต์'}</span>
-                    </button>
+              return (
+                <div 
+                  className="preview-hero-block"
+                  style={{
+                    padding: viewport === 'mobile' ? '40px 16px' : '70px 40px',
+                    backgroundColor: effectiveBg,
+                    background: previewBg,
+                    color: resolvedSubtitleColor,
+                    textAlign: 'center',
+                    borderRadius: '12px',
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+                    <div style={{ 
+                      display: 'inline-flex', 
+                      alignItems: 'center', 
+                      gap: '6px', 
+                      background: isDarkHero ? 'rgba(56, 189, 248, 0.15)' : 'rgba(37, 99, 235, 0.08)', 
+                      border: isDarkHero ? '1px solid rgba(56, 189, 248, 0.4)' : '1px solid rgba(37, 99, 235, 0.25)', 
+                      padding: '6px 14px', 
+                      borderRadius: '999px', 
+                      fontSize: '0.78rem', 
+                      fontWeight: 700, 
+                      color: isDarkHero ? '#38bdf8' : '#1d4ed8', 
+                      marginBottom: '16px' 
+                    }}>
+                      <Sparkles size={14} />
+                      <span>{siteData?.hero?.badge || 'THAILAND FLAGSHIP ESPORT ARENA'}</span>
+                    </div>
+
+                    <h1 style={{ 
+                      fontSize: viewport === 'mobile' ? '1.5rem' : '2.4rem', 
+                      fontWeight: 800, 
+                      lineHeight: '1.25', 
+                      marginBottom: '16px', 
+                      color: resolvedTitleColor,
+                      textShadow: isDarkHero ? '0 2px 12px rgba(0,0,0,0.7)' : 'none'
+                    }}>
+                      {siteData?.hero?.title || 'ศูนย์อีสปอร์ตครบวงจร & ระบบแฟรนไชส์จัดผังร้านอัจฉริยะ'}
+                    </h1>
+
+                    <p style={{ 
+                      fontSize: viewport === 'mobile' ? '0.86rem' : '1.05rem', 
+                      color: resolvedSubtitleColor, 
+                      lineHeight: '1.6', 
+                      marginBottom: '28px', 
+                      maxWidth: '640px', 
+                      margin: '0 auto 28px' 
+                    }}>
+                      {siteData?.hero?.subtitle || 'สัมผัสประสบการณ์เกมมิ่งระดับทัวร์นาเมนต์ สเปก RTX 40 Series จอ 360Hz และระบบ 3D Interior Floor Plan คำนวณงบประมาณและผลตอบแทนการลงทุนทันที'}
+                    </p>
+
+                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                      <button className="btn-primary" style={{ padding: '12px 24px', fontSize: '0.9rem' }}>
+                        <Compass size={17} />
+                        <span>{siteData?.hero?.primaryCta || 'จำลองผังร้าน 3D & คำนวณงบประมาณ'}</span>
+                        <ArrowRight size={17} />
+                      </button>
+                      <button className="btn-secondary" style={{ padding: '12px 22px', fontSize: '0.9rem', background: isDarkHero ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.9)', color: isDarkHero ? '#fff' : '#1e293b', border: isDarkHero ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(203,213,225,0.9)' }}>
+                        <Trophy size={17} />
+                        <span>{siteData?.hero?.secondaryCta || 'ปฏิทินแข่งขัน & สมัครทัวร์นาเมนต์'}</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
             {/* 2. FEATURE BANNERS PREVIEW */}
-            {sectionType === 'banners' && (
-              <div style={{ padding: viewport === 'mobile' ? '20px 14px' : '36px 30px', background: '#ffffff' }}>
-                <div style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: viewport === 'mobile' ? '1fr' : '1fr 1fr', 
-                  gap: '20px' 
-                }}>
-                  {/* Left Banner: Events */}
-                  <div style={{
-                    padding: '28px 24px',
-                    borderRadius: '16px',
-                    background: siteData?.featureBanners?.bannerLeft?.image
-                      ? `linear-gradient(180deg, rgba(15, 23, 42, 0.45) 0%, rgba(15, 23, 42, 0.9) 100%), url(${siteData.featureBanners.bannerLeft.image}) center/cover no-repeat`
-                      : (siteData?.featureBanners?.bannerLeft?.bgGradient || 'linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%)'),
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                    minHeight: '220px',
-                    boxShadow: '0 8px 20px rgba(0,0,0,0.3)'
-                  }}>
-                    <div>
-                      <span style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '999px', background: '#1d4ed8', color: '#fff', fontSize: '0.72rem', fontWeight: 700, marginBottom: '12px' }}>
-                        {siteData?.featureBanners?.bannerLeft?.badge || 'GLP OUR EVENTS'}
-                      </span>
-                      <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#fff', marginBottom: '8px' }}>
-                        {siteData?.featureBanners?.bannerLeft?.title || 'รวมภาพกิจกรรม & บรรยากาศสด'}
-                      </h3>
-                      <p style={{ fontSize: '0.84rem', color: '#cbd5e1', lineHeight: '1.5', margin: 0 }}>
-                        {siteData?.featureBanners?.bannerLeft?.desc || 'ภาพงานแข่ง LAN, งานเปิดตัวเกม, มีตติ้ง และพิธีมอบรางวัลชนะเลิศตลอดทั้งปี'}
-                      </p>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#38bdf8', fontWeight: 600, fontSize: '0.86rem', marginTop: '20px' }}>
-                      <span>{siteData?.featureBanners?.bannerLeft?.linkText || 'สำรวจอัลบั้มภาพกิจกรรม'}</span>
-                      <ArrowRight size={16} />
-                    </div>
-                  </div>
+            {sectionType === 'banners' && (() => {
+              const leftBg = siteData?.featureBanners?.bannerLeft?.bgColor || '#1e3a8a';
+              const leftImg = siteData?.featureBanners?.bannerLeft?.image;
+              const isDarkLeft = isColorDark(leftBg);
+              const cardBgLeft = leftImg
+                ? `linear-gradient(180deg, ${hexToRgba(leftBg, 0.65)} 0%, ${hexToRgba(leftBg, 0.92)} 100%), url(${leftImg}) center/cover no-repeat`
+                : leftBg;
 
-                  {/* Right Banner: News */}
-                  <div style={{
-                    padding: '28px 24px',
-                    borderRadius: '16px',
-                    background: siteData?.featureBanners?.bannerRight?.image
-                      ? `linear-gradient(180deg, rgba(15, 23, 42, 0.45) 0%, rgba(15, 23, 42, 0.9) 100%), url(${siteData.featureBanners.bannerRight.image}) center/cover no-repeat`
-                      : (siteData?.featureBanners?.bannerRight?.bgGradient || 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)'),
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                    minHeight: '220px',
-                    boxShadow: '0 8px 20px rgba(0,0,0,0.3)'
+              const rightBg = siteData?.featureBanners?.bannerRight?.bgColor || '#1e293b';
+              const rightImg = siteData?.featureBanners?.bannerRight?.image;
+              const isDarkRight = isColorDark(rightBg);
+              const cardBgRight = rightImg
+                ? `linear-gradient(180deg, ${hexToRgba(rightBg, 0.65)} 0%, ${hexToRgba(rightBg, 0.92)} 100%), url(${rightImg}) center/cover no-repeat`
+                : rightBg;
+
+              return (
+                <div style={{ padding: viewport === 'mobile' ? '20px 14px' : '36px 30px', background: '#ffffff' }}>
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: viewport === 'mobile' ? '1fr' : '1fr 1fr', 
+                    gap: '20px' 
                   }}>
-                    <div>
-                      <span style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '999px', background: 'rgba(255, 255, 255, 0.15)', color: '#fff', fontSize: '0.72rem', fontWeight: 700, marginBottom: '12px' }}>
-                        {siteData?.featureBanners?.bannerRight?.badge || 'GLP BLOG & NEWS'}
-                      </span>
-                      <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#fff', marginBottom: '8px' }}>
-                        {siteData?.featureBanners?.bannerRight?.title || 'บทความ ข่าวสาร & ไฮไลต์เกม'}
-                      </h3>
-                      <p style={{ fontSize: '0.84rem', color: '#cbd5e1', lineHeight: '1.5', margin: 0 }}>
-                        {siteData?.featureBanners?.bannerRight?.desc || 'เกาะติดผลการแข่งขัน ทริกการเล่น สเปกอุปกรณ์ใหม่ และประกาศจากทางร้าน'}
-                      </p>
+                    {/* Left Banner: Events */}
+                    <div style={{
+                      padding: '28px 24px',
+                      borderRadius: '16px',
+                      backgroundColor: leftBg,
+                      background: cardBgLeft,
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      minHeight: '220px',
+                      boxShadow: '0 8px 20px rgba(0,0,0,0.3)'
+                    }}>
+                      <div>
+                        <span style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '999px', background: '#1d4ed8', color: '#fff', fontSize: '0.72rem', fontWeight: 700, marginBottom: '12px' }}>
+                          {siteData?.featureBanners?.bannerLeft?.badge || 'GLP OUR EVENTS'}
+                        </span>
+                        <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: siteData?.featureBanners?.bannerLeft?.titleColor || (isDarkLeft ? '#fff' : '#0f172a'), marginBottom: '8px' }}>
+                          {siteData?.featureBanners?.bannerLeft?.title || 'รวมภาพกิจกรรม & บรรยากาศสด'}
+                        </h3>
+                        <p style={{ fontSize: '0.84rem', color: siteData?.featureBanners?.bannerLeft?.descColor || (isDarkLeft ? '#cbd5e1' : '#475569'), lineHeight: '1.5', margin: 0 }}>
+                          {siteData?.featureBanners?.bannerLeft?.desc || 'ภาพงานแข่ง LAN, งานเปิดตัวเกม, มีตติ้ง และพิธีมอบรางวัลชนะเลิศตลอดทั้งปี'}
+                        </p>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#38bdf8', fontWeight: 600, fontSize: '0.86rem', marginTop: '20px' }}>
+                        <span>{siteData?.featureBanners?.bannerLeft?.linkText || 'สำรวจอัลบั้มภาพกิจกรรม'}</span>
+                        <ArrowRight size={16} />
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#38bdf8', fontWeight: 600, fontSize: '0.86rem', marginTop: '20px' }}>
-                      <span>{siteData?.featureBanners?.bannerRight?.linkText || 'อ่านบทความล่าสุด'}</span>
-                      <ArrowRight size={16} />
+
+                    {/* Right Banner: News */}
+                    <div style={{
+                      padding: '28px 24px',
+                      borderRadius: '16px',
+                      backgroundColor: rightBg,
+                      background: cardBgRight,
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      minHeight: '220px',
+                      boxShadow: '0 8px 20px rgba(0,0,0,0.3)'
+                    }}>
+                      <div>
+                        <span style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '999px', background: 'rgba(255, 255, 255, 0.15)', color: '#fff', fontSize: '0.72rem', fontWeight: 700, marginBottom: '12px' }}>
+                          {siteData?.featureBanners?.bannerRight?.badge || 'GLP BLOG & NEWS'}
+                        </span>
+                        <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: siteData?.featureBanners?.bannerRight?.titleColor || (isDarkRight ? '#fff' : '#0f172a'), marginBottom: '8px' }}>
+                          {siteData?.featureBanners?.bannerRight?.title || 'บทความ ข่าวสาร & ไฮไลต์เกม'}
+                        </h3>
+                        <p style={{ fontSize: '0.84rem', color: siteData?.featureBanners?.bannerRight?.descColor || (isDarkRight ? '#cbd5e1' : '#475569'), lineHeight: '1.5', margin: 0 }}>
+                          {siteData?.featureBanners?.bannerRight?.desc || 'เกาะติดผลการแข่งขัน ทริกการเล่น สเปกอุปกรณ์ใหม่ และประกาศจากทางร้าน'}
+                        </p>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#38bdf8', fontWeight: 600, fontSize: '0.86rem', marginTop: '20px' }}>
+                        <span>{siteData?.featureBanners?.bannerRight?.linkText || 'อ่านบทความล่าสุด'}</span>
+                        <ArrowRight size={16} />
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
             {/* 3. VENUE ATMOSPHERE & ZONES PREVIEW */}
             {sectionType === 'zones' && (
-              <div style={{ padding: viewport === 'mobile' ? '20px 14px' : '36px 30px', background: '#f8fafc' }}>
+              <div style={{ padding: viewport === 'mobile' ? '20px 14px' : '36px 30px', background: siteData?.zonesSection?.bgColor || '#f8fafc' }}>
                 <div style={{ textAlign: 'center', marginBottom: '24px' }}>
                   <span className="badge-pill badge-blue" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
                     <Layers size={13} />
                     <span>{siteData?.zonesSection?.badge || 'VENUE ATMOSPHERE & ZONES'}</span>
                   </span>
-                  <h2 style={{ fontSize: viewport === 'mobile' ? '1.3rem' : '1.8rem', fontWeight: 800, color: '#0f172a', margin: '4px 0 8px' }}>
+                  <h2 style={{ fontSize: viewport === 'mobile' ? '1.3rem' : '1.8rem', fontWeight: 800, color: siteData?.zonesSection?.titleColor || '#0f172a', margin: '4px 0 8px' }}>
                     {siteData?.zonesSection?.title || 'บรรยากาศและโซนการให้บริการ GLP ESPORTS'}
                   </h2>
-                  <p style={{ fontSize: '0.84rem', color: '#64748b', maxWidth: '600px', margin: '0 auto' }}>
+                  <p style={{ fontSize: '0.84rem', color: siteData?.zonesSection?.subtitleColor || '#64748b', maxWidth: '600px', margin: '0 auto' }}>
                     {siteData?.zonesSection?.subtitle || 'สัมผัสความพรีเมียมที่ออกแบบมาสำหรับเกมเมอร์ทุกสไตล์'}
                   </p>
                 </div>
@@ -334,7 +429,7 @@ export default function CMSLivePreviewModal({
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   border: '1px solid rgba(255, 255, 255, 0.15)',
-                  color: '#ffffff',
+                  color: siteData?.franchiseBanner?.descColor || '#ffffff',
                   textAlign: 'center',
                   boxShadow: '0 20px 40px rgba(0,0,0,0.4)'
                 }}>
@@ -343,11 +438,11 @@ export default function CMSLivePreviewModal({
                     <span>{siteData?.franchiseBanner?.badge || 'G-SPEED FRANCHISE & INTERIOR PLANNER'}</span>
                   </div>
 
-                  <h2 style={{ fontSize: viewport === 'mobile' ? '1.3rem' : '2rem', fontWeight: 800, color: '#ffffff', margin: '0 0 14px', lineHeight: '1.3' }}>
+                  <h2 style={{ fontSize: viewport === 'mobile' ? '1.3rem' : '2rem', fontWeight: 800, color: siteData?.franchiseBanner?.headingColor || '#ffffff', margin: '0 0 14px', lineHeight: '1.3' }}>
                     {siteData?.franchiseBanner?.heading || 'อยากมีร้านเกมอีสปอร์ตสเปกเทพเป็นของตัวเอง?'}
                   </h2>
 
-                  <p style={{ fontSize: viewport === 'mobile' ? '0.84rem' : '0.96rem', color: '#e2e8f0', lineHeight: '1.6', maxWidth: '680px', margin: '0 auto 24px' }}>
+                  <p style={{ fontSize: viewport === 'mobile' ? '0.84rem' : '0.96rem', color: siteData?.franchiseBanner?.descColor || '#e2e8f0', lineHeight: '1.6', maxWidth: '680px', margin: '0 auto 24px' }}>
                     {siteData?.franchiseBanner?.desc || 'เพียงแค่คุณมีพื้นที่หรืออาคาร เรามีระบบ Interior Floor Plan Configurator ช่วยจำลองผังร้าน 2D สเกลจริง จัดวางโต๊ะคอมพิวเตอร์ เวทีแข่งขัน เคาน์เตอร์ และคำนวณต้นทุน สเปกอุปกรณ์ ระยะเวลาคืนทุน (ROI) และเวลาติดตั้งให้ทันที!'}
                   </p>
 
@@ -361,48 +456,53 @@ export default function CMSLivePreviewModal({
             )}
 
             {/* 5. TOURNAMENTS SECTION PREVIEW */}
-            {sectionType === 'tournaments' && (
-              <div style={{ padding: viewport === 'mobile' ? '20px 14px' : '36px 30px', background: '#0f172a', color: '#fff' }}>
-                <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', padding: '4px 12px', borderRadius: '999px', fontSize: '0.72rem', fontWeight: 700, marginBottom: '8px' }}>
-                    <Trophy size={13} />
-                    <span>{siteData?.tournamentsSection?.badge || 'TOURNAMENTS & COMMUNITY EVENTS'}</span>
-                  </span>
-                  <h2 style={{ fontSize: viewport === 'mobile' ? '1.3rem' : '1.8rem', fontWeight: 800, margin: '4px 0 8px' }}>
-                    {siteData?.tournamentsSection?.title || 'ปฏิทินการแข่งขัน & ทัวร์นาเมนต์'}
-                  </h2>
-                  <p style={{ fontSize: '0.84rem', color: '#94a3b8', maxWidth: '600px', margin: '0 auto' }}>
-                    {siteData?.tournamentsSection?.subtitle || 'เข้าร่วมชิงเงินรางวัลรวมกว่า ฿150,000 ทุกเดือน'}
-                  </p>
-                </div>
+            {sectionType === 'tournaments' && (() => {
+              const tourBg = siteData?.tournamentsSection?.bgColor || '#ffffff';
+              const isDarkTour = isColorDark(tourBg);
 
-                <div style={{ display: 'grid', gridTemplateColumns: viewport === 'mobile' ? '1fr' : 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-                  {(siteData?.tournaments || []).map(t => (
-                    <div key={t.id} style={{ background: '#1e293b', borderRadius: '12px', padding: '18px', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                      <div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                          <span style={{ background: '#1d4ed8', color: '#fff', fontSize: '0.7rem', fontWeight: 700, padding: '3px 8px', borderRadius: '6px' }}>{t.game}</span>
-                          <span style={{ fontSize: '0.72rem', color: t.status === 'Open' ? '#4ade80' : '#f59e0b', fontWeight: 600 }}>{t.status}</span>
+              return (
+                <div style={{ padding: viewport === 'mobile' ? '20px 14px' : '36px 30px', background: tourBg, color: siteData?.tournamentsSection?.subtitleColor || (isDarkTour ? '#fff' : '#475569') }}>
+                  <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', padding: '4px 12px', borderRadius: '999px', fontSize: '0.72rem', fontWeight: 700, marginBottom: '8px' }}>
+                      <Trophy size={13} />
+                      <span>{siteData?.tournamentsSection?.badge || 'TOURNAMENTS & COMMUNITY EVENTS'}</span>
+                    </span>
+                    <h2 style={{ fontSize: viewport === 'mobile' ? '1.3rem' : '1.8rem', fontWeight: 800, margin: '4px 0 8px', color: siteData?.tournamentsSection?.titleColor || (isDarkTour ? '#ffffff' : '#0f172a') }}>
+                      {siteData?.tournamentsSection?.title || 'ปฏิทินการแข่งขัน & ทัวร์นาเมนต์'}
+                    </h2>
+                    <p style={{ fontSize: '0.84rem', color: siteData?.tournamentsSection?.subtitleColor || (isDarkTour ? '#94a3b8' : '#64748b'), maxWidth: '600px', margin: '0 auto' }}>
+                      {siteData?.tournamentsSection?.subtitle || 'เข้าร่วมชิงเงินรางวัลรวมกว่า ฿150,000 ทุกเดือน'}
+                    </p>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: viewport === 'mobile' ? '1fr' : 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+                    {(siteData?.tournaments || []).map(t => (
+                      <div key={t.id} style={{ background: isDarkTour ? '#1e293b' : '#ffffff', borderRadius: '12px', padding: '18px', border: isDarkTour ? '1px solid rgba(255,255,255,0.08)' : '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+                        <div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                            <span style={{ background: '#1d4ed8', color: '#fff', fontSize: '0.7rem', fontWeight: 700, padding: '3px 8px', borderRadius: '6px' }}>{t.game}</span>
+                            <span style={{ fontSize: '0.72rem', color: t.status === 'Open' ? '#4ade80' : '#f59e0b', fontWeight: 600 }}>{t.status}</span>
+                          </div>
+                          <h4 style={{ fontSize: '1rem', fontWeight: 700, color: isDarkTour ? '#fff' : '#0f172a', marginBottom: '8px' }}>{t.title}</h4>
+                          <div style={{ fontSize: '0.78rem', color: isDarkTour ? '#94a3b8' : '#64748b', display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '14px' }}>
+                            <div><strong>วันแข่ง:</strong> {t.date}</div>
+                            <div><strong>เงินรางวัล:</strong> <span style={{ color: '#1d4ed8', fontWeight: 700 }}>{t.prizePool}</span></div>
+                            <div><strong>จำนวนทีม:</strong> {t.slots}</div>
+                          </div>
                         </div>
-                        <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#fff', marginBottom: '8px' }}>{t.title}</h4>
-                        <div style={{ fontSize: '0.78rem', color: '#94a3b8', display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '14px' }}>
-                          <div><strong>วันแข่ง:</strong> {t.date}</div>
-                          <div><strong>เงินรางวัล:</strong> <span style={{ color: '#38bdf8', fontWeight: 700 }}>{t.prizePool}</span></div>
-                          <div><strong>จำนวนทีม:</strong> {t.slots}</div>
-                        </div>
+                        <button className="btn-primary" style={{ width: '100%', justifyContent: 'center', fontSize: '0.8rem', padding: '8px 12px' }}>
+                          สมัครแข่งขันฟรี
+                        </button>
                       </div>
-                      <button className="btn-primary" style={{ width: '100%', justifyContent: 'center', fontSize: '0.8rem', padding: '8px 12px' }}>
-                        สมัครแข่งขันฟรี
-                      </button>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
             {/* 6. FOUNDER & COMPANY STORY PREVIEW */}
             {sectionType === 'founder' && (
-              <div style={{ padding: viewport === 'mobile' ? '20px 14px' : '36px 30px', background: '#f8fafc' }}>
+              <div style={{ padding: viewport === 'mobile' ? '20px 14px' : '36px 30px', background: siteData?.founder?.bgColor || '#f8fafc' }}>
                 <div style={{
                   background: '#ffffff',
                   borderRadius: '16px',
@@ -442,7 +542,7 @@ export default function CMSLivePreviewModal({
                       <Award size={13} />
                       <span>LEADERSHIP & VISION</span>
                     </span>
-                    <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0f172a', margin: '4px 0 2px' }}>
+                    <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: siteData?.founder?.titleColor || '#0f172a', margin: '4px 0 2px' }}>
                       {siteData?.founder?.name || 'คุณธนภัทร วรเชษฐ์'}
                     </h2>
                     <div style={{ fontSize: '0.82rem', color: '#1d4ed8', fontWeight: 600, marginBottom: '14px' }}>
@@ -454,10 +554,47 @@ export default function CMSLivePreviewModal({
                       "{siteData?.founder?.quote || 'เราไม่ได้มองว่าร้านเกมเป็นแค่ที่เล่นเกม แต่คือสนามซ้อมกีฬาของคนรุ่นใหม่'}"
                     </div>
 
-                    <p style={{ fontSize: '0.84rem', color: '#475569', lineHeight: '1.6', margin: 0 }}>
+                    <p style={{ fontSize: '0.84rem', color: siteData?.founder?.textColor || '#475569', lineHeight: '1.6', margin: 0 }}>
                       {siteData?.founder?.bio || 'มุ่งมั่นขับเคลื่อนอุตสาหกรรมอีสปอร์ตไทยสู่มาตรฐานสากล ด้วยเทคโนโลยีระดับมืออาชีพ และระบบการจัดการที่โปร่งใส มั่นคง ยั่งยืน'}
                     </p>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* 7. NEWS SECTION PREVIEW */}
+            {sectionType === 'news-sec' && (
+              <div style={{ padding: viewport === 'mobile' ? '20px 14px' : '36px 30px', background: siteData?.newsSection?.bgColor || '#ffffff' }}>
+                <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                  <span className="badge-pill badge-blue" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                    <FileText size={13} />
+                    <span>{siteData?.newsSection?.badge || 'ARTICLES & UPDATES'}</span>
+                  </span>
+                  <h2 style={{ fontSize: viewport === 'mobile' ? '1.3rem' : '1.8rem', fontWeight: 800, color: siteData?.newsSection?.titleColor || '#0f172a', margin: '4px 0 8px' }}>
+                    {siteData?.newsSection?.title || 'บทความ ไฮไลต์ & ข่าวสารวงการเกม'}
+                  </h2>
+                  <p style={{ fontSize: '0.84rem', color: siteData?.newsSection?.subtitleColor || '#64748b', maxWidth: '600px', margin: '0 auto' }}>
+                    {siteData?.newsSection?.subtitle || 'เกาะติดข่าวสารการแข่งขัน ทริกเกมน่ารู้ และอัปเดตสเปกฮาร์ดแวร์ล่าสุด'}
+                  </p>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: viewport === 'mobile' ? '1fr' : 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
+                  {(siteData?.news || [
+                    { id: 'sample-1', title: 'เปิดตัวเวทีแข่งขันใหม่มาตรฐาน Pro Circuit รองรับผู้ชม 200+ ที่นั่ง', date: '14 ก.ย. 2026', tag: 'ARENA UPDATE', image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=600&q=80', desc: 'ยกระดับประสบการณ์การแข่งขันด้วยจอแสดงผล 4K HDR ระบบเสียงสตูดิโอ และห้องกระจกซับเสียง 100%' },
+                    { id: 'sample-2', title: 'เจาะลึก 5 สเปกคอมพิวเตอร์เกมมิ่ง RTX 40 Series สำหรับร้านเกมยุคใหม่', date: '12 ก.ย. 2026', tag: 'TECH SPEC', image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=600&q=80', desc: 'คู่มือเลือกการ์ดจอ ซีพียู และจอ 360Hz เพื่อให้ร้านเกมของคุณคืนทุนไวและมีลูกค้าประจำแน่นขนัด' }
+                  ]).slice(0, 2).map(item => (
+                    <div key={item.id} style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+                      <div style={{ height: '140px', overflow: 'hidden', position: 'relative' }}>
+                        <img src={item.image} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <span style={{ position: 'absolute', top: '10px', left: '10px', background: '#1d4ed8', color: '#fff', fontSize: '0.68rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px' }}>{item.tag}</span>
+                      </div>
+                      <div style={{ padding: '14px' }}>
+                        <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginBottom: '4px' }}>{item.date}</div>
+                        <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0f172a', lineHeight: '1.4', margin: '0 0 8px' }}>{item.title}</h4>
+                        <p style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: '1.5', margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{item.desc}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}

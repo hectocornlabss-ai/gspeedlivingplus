@@ -6,9 +6,24 @@ import {
 import { FOUNDER_INFO } from '../data/mockData';
 import { useSiteData } from '../context/SiteDataContext';
 
+function isColorDark(hexColor) {
+  if (!hexColor || typeof hexColor !== 'string') return false;
+  let c = hexColor.trim().replace('#', '');
+  if (c.length === 3) c = c.split('').map(x => x + x).join('');
+  if (c.length !== 6) return false;
+  const r = parseInt(c.substr(0, 2), 16) || 0;
+  const g = parseInt(c.substr(2, 2), 16) || 0;
+  const b = parseInt(c.substr(4, 2), 16) || 0;
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+  return yiq < 135;
+}
+
 export default function CompanyProfile({ onNavigateFranchise }) {
   const { siteData } = useSiteData();
   const founder = siteData?.founder || FOUNDER_INFO;
+  const founderBg = founder.bgColor || '#ffffff';
+  const isDarkFounder = isColorDark(founderBg);
+
   return (
     <div className="company-profile-page">
       {/* 1. Header Banner */}
@@ -30,9 +45,22 @@ export default function CompanyProfile({ onNavigateFranchise }) {
       </section>
 
       {/* 2. Founder & Executive Profile Showcase */}
-      <section className="founder-section">
+      <section 
+        className="founder-section" 
+        style={{ 
+          background: founderBg, 
+          backgroundColor: founderBg, 
+          backgroundImage: 'none' 
+        }}
+      >
         <div className="container">
-          <div className="founder-card glass-panel">
+          <div 
+            className="founder-card glass-panel" 
+            style={{ 
+              backgroundColor: isDarkFounder ? 'rgba(15, 23, 42, 0.75)' : 'rgba(255, 255, 255, 0.95)',
+              borderColor: isDarkFounder ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.08)'
+            }}
+          >
             <div className="founder-grid">
               {/* Photo & Badge */}
               <div className="founder-media-col">
@@ -64,12 +92,12 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                   <Award size={14} />
                   <span>PRESIDENT & FOUNDER</span>
                 </div>
-                <h2 className="founder-name">{founder.name}</h2>
-                <div className="founder-title">{founder.title}</div>
+                <h2 className="founder-name" style={{ color: founder.titleColor || (isDarkFounder ? '#ffffff' : '#0f172a') }}>{founder.name}</h2>
+                <div className="founder-title" style={{ color: isDarkFounder ? '#94a3b8' : '#64748b' }}>{founder.title}</div>
 
                 <div className="founder-quote-box">
                   <Quote size={28} className="quote-icon text-blue" />
-                  <p className="quote-text">{founder.quote}</p>
+                  <p className="quote-text" style={{ color: founder.textColor || (isDarkFounder ? '#e2e8f0' : '#334155') }}>{founder.quote}</p>
                 </div>
 
                 <div className="vision-box">
@@ -77,7 +105,7 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                     <TrendingUp size={18} className="text-blue" />
                     <span>วิสัยทัศน์และการขับเคลื่อน (Core Vision)</span>
                   </h4>
-                  <p className="vision-text">{founder.vision}</p>
+                  <p className="vision-text" style={{ color: founder.textColor || (isDarkFounder ? '#cbd5e1' : '#475569') }}>{founder.vision}</p>
                 </div>
 
                 <div className="founder-philosophy-list">

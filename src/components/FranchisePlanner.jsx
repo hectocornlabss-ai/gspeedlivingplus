@@ -2241,7 +2241,7 @@ export default function FranchisePlanner() {
                           onClick={handleUseSampleBlueprint}
                         >
                           <Sparkles size={15} />
-                          <span>✨ ทดลองใช้แปลนตัวอย่างอาคารพาณิชย์</span>
+                          <span>ทดลองใช้แปลนตัวอย่างอาคารพาณิชย์</span>
                         </button>
                       </div>
                     </div>
