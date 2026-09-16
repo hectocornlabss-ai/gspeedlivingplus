@@ -8,14 +8,26 @@
 export async function analyzeProductPhoto(fileOrDataUrl) {
   return new Promise((resolve) => {
     let img = new Image();
-    img.crossOrigin = 'anonymous';
+    if (typeof fileOrDataUrl === 'string' && fileOrDataUrl.startsWith('http')) {
+      img.crossOrigin = 'anonymous';
+    }
 
     const handleLoaded = () => {
       try {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-        const width = Math.min(img.width, 400);
-        const height = Math.min(img.height, 400);
+        const maxDim = 800;
+        let width = img.width || 400;
+        let height = img.height || 400;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
         canvas.width = width;
         canvas.height = height;
 
@@ -103,6 +115,7 @@ export async function analyzeProductPhoto(fileOrDataUrl) {
         });
       } catch (e) {
         console.error('Error analyzing image colors:', e);
+        clearTimeout(safetyTimer);
         resolve({
           success: false,
           deskColor: '#0f172a',
@@ -112,7 +125,24 @@ export async function analyzeProductPhoto(fileOrDataUrl) {
       }
     };
 
+    // Safeguard: Never hang indefinitely
+    const safetyTimer = setTimeout(() => {
+      console.warn('Image analysis timed out, returning fallback colors');
+      resolve({
+        success: false,
+        deskColor: '#0f172a',
+        accentColor: '#1d4ed8',
+        chairColor: '#0f172a'
+      });
+    }, 4000);
+
+    img.onload = () => {
+      clearTimeout(safetyTimer);
+      handleLoaded();
+    };
+
     img.onerror = () => {
+      clearTimeout(safetyTimer);
       resolve({
         success: false,
         deskColor: '#0f172a',
@@ -127,6 +157,15 @@ export async function analyzeProductPhoto(fileOrDataUrl) {
       const reader = new FileReader();
       reader.onload = (e) => {
         img.src = e.target.result;
+      };
+      reader.onerror = () => {
+        clearTimeout(safetyTimer);
+        resolve({
+          success: false,
+          deskColor: '#0f172a',
+          accentColor: '#1d4ed8',
+          chairColor: '#0f172a'
+        });
       };
       reader.readAsDataURL(fileOrDataUrl);
     }

@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 
-export default function SingleActivityView({ activity, onBack = () => {}, onSelectActivity = () => {} }) {
+export default function SingleActivityView({ activity, onBack = () => {}, onSelectActivity = () => {}, isPreview = false }) {
   const { siteData } = useSiteData();
   const allActivities = [...(siteData?.gallery || []), ...(siteData?.news || [])];
 
@@ -15,10 +15,13 @@ export default function SingleActivityView({ activity, onBack = () => {}, onSele
 
   // State for Photo Lightbox
   const [activePhotoIdx, setActivePhotoIdx] = useState(null);
+  const [lightboxImage, setLightboxImage] = useState(null);
 
   // Scroll to top & set dynamic SEO meta tags + Schema.org Structured Data on mount or when activity changes
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (!isPreview) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
     const pageTitle = activity?.seo?.metaTitle || `${activity?.title || 'กิจกรรม'} | G-SPEED ESPORT ARENA`;
     const pageDesc = activity?.seo?.metaDescription || activity?.desc || activity?.excerpt || 'ศูนย์รวมอีสปอร์ตครบวงจรและกิจกรรมทัวร์นาเมนต์ระดับประเทศ';
@@ -289,24 +292,165 @@ export default function SingleActivityView({ activity, onBack = () => {}, onSele
               </div>
             </div>
 
-            {/* Article Paragraphs & Highlight Quote */}
+            {/* Article Content: WordPress-style Visual Blocks or Legacy Paragraphs */}
             <div className="article-story-content">
-              <p className="story-p lead-p">{contentParagraphs[0]}</p>
+              {activity.contentBlocks && activity.contentBlocks.length > 0 ? (
+                <div className="article-rendered-blocks">
+                  {activity.contentBlocks.map((block, bIdx) => {
+                    if (block.type === 'heading') {
+                      return block.level === 3 ? (
+                        <h3 key={block.id || bIdx} className="content-block-heading level-3">{block.text}</h3>
+                      ) : (
+                        <h2 key={block.id || bIdx} className="content-block-heading level-2">{block.text}</h2>
+                      );
+                    }
+                    if (block.type === 'paragraph') {
+                      return (
+                        <p key={block.id || bIdx} className={`content-block-paragraph ${block.align === 'center' ? 'align-center' : ''}`}>
+                          {block.text}
+                        </p>
+                      );
+                    }
+                    if (block.type === 'media-text') {
+                      return (
+                        <div 
+                          key={block.id || bIdx} 
+                          className={`content-block-media-text ${block.mediaPosition === 'right' ? 'media-right' : 'media-left'}`}
+                        >
+                          <div className="media-pane">
+                            <div 
+                              className="media-img-wrap" 
+                              onClick={() => block.imageUrl && setLightboxImage({ url: block.imageUrl, caption: block.caption || block.title, alt: block.imageAlt })}
+                              title="คลิกเพื่อดูภาพขยาย"
+                            >
+                              <img src={block.imageUrl || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80'} alt={block.imageAlt || block.title || 'Media'} loading="lazy" />
+                            </div>
+                            {block.caption && <div className="media-caption">{block.caption}</div>}
+                          </div>
+                          <div className="text-pane">
+                            {block.title && <h3>{block.title}</h3>}
+                            {block.text && <p>{block.text}</p>}
+                          </div>
+                        </div>
+                      );
+                    }
+                    if (block.type === 'image') {
+                      return (
+                        <div key={block.id || bIdx} className={`content-block-image align-${block.align || 'center'}`}>
+                          <div 
+                            className="img-frame" 
+                            onClick={() => block.url && setLightboxImage({ url: block.url, caption: block.caption, alt: block.alt })}
+                            title="คลิกเพื่อดูภาพขยาย"
+                          >
+                            <img src={block.url} alt={block.alt || block.caption || 'Image'} loading="lazy" />
+                          </div>
+                          {block.caption && <div className="img-caption">{block.caption}</div>}
+                        </div>
+                      );
+                    }
+                    if (block.type === 'columns-2') {
+                      const ratioClass = block.ratio === '60-40' ? 'ratio-60-40' : block.ratio === '40-60' ? 'ratio-40-60' : 'ratio-50-50';
+                      return (
+                        <div key={block.id || bIdx} className={`content-block-columns-2 ${ratioClass}`}>
+                          <div className="col-card">
+                            {block.leftTitle && <h4>{block.leftTitle}</h4>}
+                            {block.leftText && <p>{block.leftText}</p>}
+                          </div>
+                          <div className="col-card">
+                            {block.rightTitle && <h4>{block.rightTitle}</h4>}
+                            {block.rightText && <p>{block.rightText}</p>}
+                          </div>
+                        </div>
+                      );
+                    }
+                    if (block.type === 'columns-3') {
+                      return (
+                        <div key={block.id || bIdx} className="content-block-columns-3">
+                          <div className="col-feature-card">
+                            {block.col1Title && <h4>{block.col1Title}</h4>}
+                            {block.col1Text && <p>{block.col1Text}</p>}
+                          </div>
+                          <div className="col-feature-card">
+                            {block.col2Title && <h4>{block.col2Title}</h4>}
+                            {block.col2Text && <p>{block.col2Text}</p>}
+                          </div>
+                          <div className="col-feature-card">
+                            {block.col3Title && <h4>{block.col3Title}</h4>}
+                            {block.col3Text && <p>{block.col3Text}</p>}
+                          </div>
+                        </div>
+                      );
+                    }
+                    if (block.type === 'list') {
+                      const validItems = (block.items || []).filter(item => item && item.trim());
+                      return block.style === 'numbered' ? (
+                        <ol key={block.id || bIdx} className="content-block-list">
+                          {validItems.map((item, iIdx) => <li key={iIdx}>{item}</li>)}
+                        </ol>
+                      ) : (
+                        <ul key={block.id || bIdx} className="content-block-list">
+                          {validItems.map((item, iIdx) => <li key={iIdx}>{item}</li>)}
+                        </ul>
+                      );
+                    }
+                    if (block.type === 'quote') {
+                      return (
+                        <blockquote key={block.id || bIdx} className="article-highlight-quote">
+                          <div className="quote-mark">“</div>
+                          <p className="quote-body">{block.text}</p>
+                          {block.author && <cite className="quote-author">— {block.author}</cite>}
+                        </blockquote>
+                      );
+                    }
+                    if (block.type === 'callout') {
+                      return (
+                        <div key={block.id || bIdx} className={`content-block-callout theme-${block.style || 'info'}`}>
+                          {block.title && <h4>{block.title}</h4>}
+                          {block.text && <p>{block.text}</p>}
+                        </div>
+                      );
+                    }
+                    if (block.type === 'button') {
+                      return (
+                        <div key={block.id || bIdx} className={`content-block-button align-${block.align || 'center'}`}>
+                          <a 
+                            href={block.url || '#'} 
+                            className={`article-action-btn ${block.style || 'primary'}`}
+                            target={block.url?.startsWith('http') ? '_blank' : '_self'}
+                            rel="noopener noreferrer"
+                          >
+                            <span>{block.label || 'คลิกที่นี่'}</span>
+                            <ExternalLink size={16} />
+                          </a>
+                        </div>
+                      );
+                    }
+                    if (block.type === 'divider') {
+                      return <hr key={block.id || bIdx} className="content-block-divider" />;
+                    }
+                    return null;
+                  })}
+                </div>
+              ) : (
+                <>
+                  <p className="story-p lead-p">{contentParagraphs[0]}</p>
 
-              {/* Highlight Quote Box */}
-              <blockquote className="article-highlight-quote">
-                <div className="quote-mark">“</div>
-                <p className="quote-body">
-                  {activity.quote || 'งานนี้ถือเป็นอีกหนึ่งก้าวสำคัญในการขับเคลื่อนวงการอีสปอร์ตไทยสู่มาตรฐานสากล ทั้งฮาร์ดแวร์ บรรยากาศ และพลังของคอมมูนิตี้'}
-                </p>
-                <cite className="quote-author">
-                  — {activity.author || 'ฝ่ายกิจกรรมและพัฒนาการแข่งขัน G-SPEED ESPORT CO., LTD.'}
-                </cite>
-              </blockquote>
+                  {/* Highlight Quote Box */}
+                  <blockquote className="article-highlight-quote">
+                    <div className="quote-mark">“</div>
+                    <p className="quote-body">
+                      {activity.quote || 'งานนี้ถือเป็นอีกหนึ่งก้าวสำคัญในการขับเคลื่อนวงการอีสปอร์ตไทยสู่มาตรฐานสากล ทั้งฮาร์ดแวร์ บรรยากาศ และพลังของคอมมูนิตี้'}
+                    </p>
+                    <cite className="quote-author">
+                      — {activity.author || 'ฝ่ายกิจกรรมและพัฒนาการแข่งขัน G-SPEED ESPORT CO., LTD.'}
+                    </cite>
+                  </blockquote>
 
-              {contentParagraphs.slice(1).map((para, idx) => (
-                <p key={idx} className="story-p">{para}</p>
-              ))}
+                  {contentParagraphs.slice(1).map((para, idx) => (
+                    <p key={idx} className="story-p">{para}</p>
+                  ))}
+                </>
+              )}
 
               {/* Related Tags Cluster */}
               <div className="article-tags-cluster">
@@ -646,6 +790,32 @@ export default function SingleActivityView({ activity, onBack = () => {}, onSele
             >
               <ChevronRight size={28} />
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Full-Screen Photo Lightbox Modal (For Gutenberg Content Blocks) */}
+      {lightboxImage && (
+        <div className="photo-lightbox-backdrop" onClick={() => setLightboxImage(null)}>
+          <div className="lightbox-container" onClick={e => e.stopPropagation()}>
+            <button 
+              className="btn-lightbox-close" 
+              onClick={() => setLightboxImage(null)}
+              title="ปิดหน้าต่างภาพ"
+            >
+              <X size={24} />
+            </button>
+            <div className="lightbox-img-wrapper">
+              <img 
+                src={lightboxImage.url} 
+                alt={lightboxImage.alt || lightboxImage.caption || activity.title} 
+              />
+              {lightboxImage.caption && (
+                <div className="lightbox-caption">
+                  <span>{lightboxImage.caption}</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

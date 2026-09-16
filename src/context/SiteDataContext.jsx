@@ -171,6 +171,249 @@ export const INITIAL_NAV_LINKS = [
   { id: 'nav-franchise', label: 'จำลองผังร้าน 3D', target: 'franchise', visible: true }
 ];
 
+// Initial Franchise & Tournament Leads Pipeline Data
+export const INITIAL_LEADS = [
+  {
+    id: 'lead-1',
+    name: 'คุณอนุรักษ์ รัตนวิเชียร',
+    company: 'Chiang Mai Esports Hub Co., Ltd.',
+    phone: '081-456-7890',
+    email: 'anurak.cm@gmail.com',
+    location: 'ถ. นิมมานเหมินท์ อ.เมือง จ.เชียงใหม่',
+    type: 'franchise_m',
+    typeName: 'แฟรนไชส์ Size M (60 เครื่อง)',
+    budget: 3800000,
+    stage: 'proposal',
+    assignedStaff: 'คุณนัท (ฝ่ายขายแฟรนไชส์)',
+    channel: 'web_3d_planner',
+    floorArea: '220 ตร.ม.',
+    expectedOpening: 'พฤศจิกายน 2026',
+    notes: 'ส่งแปลน 3D Interior และใบเสนอราคาระบบ Diskless ให้แล้ว ลูกค้าชอบการจัดโซน VIP Suite 2 ห้อง กำลังนัดคุยรายละเอียดสัญญา',
+    createdAt: '14/09/2026 11:30',
+    updatedAt: '15/09/2026 16:45',
+    lastFollowUp: '15/09/2026',
+    nextFollowUp: '18/09/2026'
+  },
+  {
+    id: 'lead-2',
+    name: 'คุณกัญญาณัฐ สุขสมบัติ',
+    company: 'ชมรมอีสปอร์ต มหาวิทยาลัยเกษตรศาสตร์',
+    phone: '089-112-3344',
+    email: 'esports.ku@ku.ac.th',
+    location: 'วิทยาเขตบางเขน กทม.',
+    type: 'tournament_venue',
+    typeName: 'เช่าสถานที่จัดแข่ง (VALORANT Campus Cup)',
+    budget: 85000,
+    stage: 'contacted',
+    assignedStaff: 'คุณกอล์ฟ (ฝ่ายกิจกรรม & ทัวร์นาเมนต์)',
+    channel: 'line_oa',
+    floorArea: 'โซน Main Stage + Battleground',
+    expectedOpening: '10-11 ตุลาคม 2026',
+    notes: 'ต้องการใช้เวทีแข่งขัน 5v5 พร้อมจอ LED Wall และโต๊ะพากย์แคสเตอร์ 2 วันเต็ม โทรคุยรายละเอียดและเสนอแพ็กเกจแล้ว รอเข้าชมสถานที่จริงวันศุกร์นี้',
+    createdAt: '15/09/2026 09:15',
+    updatedAt: '15/09/2026 14:20',
+    lastFollowUp: '15/09/2026',
+    nextFollowUp: '17/09/2026'
+  },
+  {
+    id: 'lead-3',
+    name: 'คุณธีรพัฒน์ อัศวเดชากุล',
+    company: 'อาคารพาณิชย์ลาดพร้าว 101',
+    phone: '092-998-1234',
+    email: 'teerapat.invest@gmail.com',
+    location: 'ซ.ลาดพร้าว 101 วังทองหลาง กทม.',
+    type: 'franchise_l',
+    typeName: 'แฟรนไชส์ Size L Mega Arena (100 เครื่อง)',
+    budget: 6800000,
+    stage: 'new',
+    assignedStaff: 'คุณนัท (ฝ่ายขายแฟรนไชส์)',
+    channel: 'web_3d_planner',
+    floorArea: '380 ตร.ม. (ตึก 3 ชั้น)',
+    expectedOpening: 'มกราคม 2027',
+    notes: 'ลูกค้ากรอกข้อมูลผ่านระบบ 3D Planner บนเว็บ มีตึกพาณิชย์ 3 ชั้นใกล้โรงเรียนและมหาวิทยาลัย สนใจระบบไฟ 3 เฟสและ Diskless',
+    createdAt: '16/09/2026 08:40',
+    updatedAt: '16/09/2026 08:40',
+    lastFollowUp: '16/09/2026',
+    nextFollowUp: '16/09/2026'
+  },
+  {
+    id: 'lead-4',
+    name: 'บริษัท ไซเบอร์เกมส์ อารีน่า จำกัด (คุณสมชาย)',
+    company: 'CyberGames Chonburi',
+    phone: '086-778-9900',
+    email: 'cybergames.chon@gmail.com',
+    location: 'ถ.ลงหาดบางแสน จ.ชลบุรี',
+    type: 'diskless_setup',
+    typeName: 'ติดตั้งระบบ Diskless Server & 10G Multi-WAN (40 เครื่อง)',
+    budget: 450000,
+    stage: 'won',
+    assignedStaff: 'ช่างเอก (วิศวกรระบบเน็ตเวิร์ก)',
+    channel: 'facebook',
+    floorArea: '160 ตร.ม.',
+    expectedOpening: 'ตุลาคม 2026',
+    notes: 'เซ็นสัญญาและชำระมัดจำ 50% เรียบร้อยแล้ว ทีมงานเตรียมเข้าเดินสายแลน CAT6A และติดตั้งเซิร์ฟเวอร์ CCBoot/iCafeCloud วันที่ 22 ก.ย.',
+    createdAt: '10/09/2026 14:00',
+    updatedAt: '15/09/2026 17:00',
+    lastFollowUp: '15/09/2026',
+    nextFollowUp: '22/09/2026'
+  }
+];
+
+// Initial Daily Petty Cash Expenses Data
+export const INITIAL_PETTY_CASH = [
+  {
+    id: 'exp-1',
+    time: '10:30',
+    date: '16/09/2026',
+    amount: 450,
+    category: 'maintenance',
+    categoryName: 'ซ่อมบำรุง / แอร์',
+    desc: 'ค่าล้างแอร์ โซน VIP Suite 1-2',
+    recordedBy: 'แอดมิน กอล์ฟ (LINE)',
+    rawCommand: '/pay 450 ค่าล้างแอร์ โซน VIP Suite 1-2'
+  },
+  {
+    id: 'exp-2',
+    time: '12:15',
+    date: '16/09/2026',
+    amount: 1200,
+    category: 'fnb',
+    categoryName: 'วัตถุดิบอาหาร & คาเฟ่',
+    desc: 'สั่งไก่ป๊อปและเฟรนช์ฟรายส์เข้าร้าน (Lotus Express)',
+    recordedBy: 'ผู้จัดการ บอย (LINE)',
+    rawCommand: '/pay 1200 สั่งไก่ป๊อปและเฟรนช์ฟรายส์เข้าร้าน'
+  },
+  {
+    id: 'exp-3',
+    time: '14:40',
+    date: '16/09/2026',
+    amount: 350,
+    category: 'fnb',
+    categoryName: 'วัตถุดิบอาหาร & คาเฟ่',
+    desc: 'ค่าน้ำแข็งหลอดยูนิต 3 กระสอบ',
+    recordedBy: 'พนักงาน นัท (LINE)',
+    rawCommand: '/pay 350 ค่าน้ำแข็งหลอดยูนิต 3 กระสอบ'
+  },
+  {
+    id: 'exp-4',
+    time: '16:00',
+    date: '16/09/2026',
+    amount: 680,
+    category: 'it_hardware',
+    categoryName: 'อุปกรณ์ไอที / สายไฟ',
+    desc: 'ซื้อหัวแลน RJ45 CAT6A และสาย Patch Cord สำรอง',
+    recordedBy: 'ช่างเอก (LINE)',
+    rawCommand: '/pay 680 ซื้อหัวแลน RJ45 CAT6A'
+  }
+];
+
+// Initial Omnichannel Unified Inbox Conversations
+export const INITIAL_OMNICHANNEL_CHATS = [
+  {
+    id: 'chat-line-1',
+    channel: 'line',
+    channelName: 'LINE Official Account (@gspeedarena)',
+    customerName: 'คุณอาร์ม (Arm Gamer)',
+    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80',
+    lastMessage: 'ตอนนี้เครื่องโซน VIP ว่างไหมครับ จะพาเพื่อนไปซ้อม 5 คน',
+    timestamp: '15:20 น.',
+    status: 'assigned',
+    assignedAgent: 'แอดมิน กอล์ฟ (ฝ่ายบริการลูกค้า)',
+    aiMutedUntil: Date.now() + 2400000,
+    department: 'customer_service',
+    unreadCount: 0,
+    messages: [
+      { id: 'm-1', sender: 'customer', text: 'สวัสดีครับ', time: '15:15' },
+      { id: 'm-2', sender: 'bot', text: 'สวัสดีครับ! ยินดีต้อนรับสู่ G-Speed Esport Arena สอบถามข้อมูลด้านใดแจ้งได้เลยครับ', time: '15:15' },
+      { id: 'm-3', sender: 'customer', text: 'ตอนนี้เครื่องโซน VIP ว่างไหมครับ จะพาเพื่อนไปซ้อม 5 คน', time: '15:18' },
+      { id: 'm-4', sender: 'system', text: '👤 แอดมิน กอล์ฟ (ฝ่ายบริการลูกค้า) รับเคสดูแลต่อแล้ว (AI ถูกระงับชั่วคราว 60 นาที)', time: '15:19' },
+      { id: 'm-5', sender: 'agent', agentName: 'แอดมิน กอล์ฟ', text: 'สวัสดีครับคุณอาร์ม ตอนนี้ห้อง VIP Suite 1 กำลังว่างครับ สามารถ walk-in เข้ามาได้เลย หรือให้ผมล็อกเครื่องไว้ให้ก่อน 30 นาทีไหมครับ?', time: '15:20' }
+    ]
+  },
+  {
+    id: 'chat-web-2',
+    channel: 'web',
+    channelName: 'Web Live Chat',
+    customerName: 'คุณธีรพัฒน์ (นักลงทุน)',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=100&q=80',
+    lastMessage: 'กำลังดูระบบจำลองผังร้าน 3D ขนาด Size L คืนทุนเฉลี่ยกี่เดือนครับ?',
+    timestamp: '15:25 น.',
+    status: 'bot',
+    assignedAgent: null,
+    aiMutedUntil: null,
+    department: 'franchise_sales',
+    unreadCount: 1,
+    messages: [
+      { id: 'm-1', sender: 'customer', text: 'กำลังดูระบบจำลองผังร้าน 3D ขนาด Size L คืนทุนเฉลี่ยกี่เดือนครับ?', time: '15:25' },
+      { id: 'm-2', sender: 'bot', text: 'แฟรนไชส์ Size L Mega Arena (80-120 เครื่อง) งบประมาณ 5.5 - 8.0 ลบ. มีระยะเวลาคืนทุนเฉลี่ยอยู่ที่ 18-24 เดือนครับ โดยขึ้นอยู่กับทำเลและบริการเสริม (F&B / Bootcamp) ทางเรามีระบบ Diskless และ POS บัญชีคลาวด์ช่วยบริหารต้นทุน หากต้องการใบเสนอราคาอย่างละเอียด แจ้งเบอร์โทรให้เจ้าหน้าที่ติดต่อกลับได้เลยครับ', time: '15:25' }
+    ]
+  },
+  {
+    id: 'chat-fb-3',
+    channel: 'facebook',
+    channelName: 'Facebook Messenger',
+    customerName: 'Sompong E-Sport Club',
+    avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=100&q=80',
+    lastMessage: 'ขอรายละเอียดระเบียบการแข่ง VALORANT ทัวร์นาเมนต์สิ้นเดือนนี้หน่อยครับ',
+    timestamp: '14:50 น.',
+    status: 'bot',
+    assignedAgent: null,
+    aiMutedUntil: null,
+    department: 'tournament',
+    unreadCount: 0,
+    messages: [
+      { id: 'm-1', sender: 'customer', text: 'ขอรายละเอียดระเบียบการแข่ง VALORANT ทัวร์นาเมนต์สิ้นเดือนนี้หน่อยครับ', time: '14:50' },
+      { id: 'm-2', sender: 'bot', text: 'การแข่งขัน GLP VALORANT CHAMPIONSHIP 2026 ชิงเงินรางวัลรวม 100,000 บาท แข่งขันรอบ LAN Final ณ Main Stage วันที่ 28-30 กันยายน 2026 สมัครได้ตั้งแต่วันนี้ - 25 ก.ย. รับจำกัด 32 ทีมครับ ค่าสมัครฟรี ดูรายละเอียดและกติกาบนหน้าเว็บไซต์ได้ทันทีครับ', time: '14:50' }
+    ]
+  }
+];
+
+// Initial Hardware Stations & Asset Health
+export const INITIAL_HARDWARE_STATIONS = [
+  { id: 'PC-01', zone: 'Standard Battleground', gpu: 'RTX 4070 SUPER', monitor: 'BenQ 240Hz', status: 'gaming', user: 'Member #0842', uptime: '3.5 ชม.' },
+  { id: 'PC-02', zone: 'Standard Battleground', gpu: 'RTX 4070 SUPER', monitor: 'BenQ 240Hz', status: 'gaming', user: 'Member #1120', uptime: '1.2 ชม.' },
+  { id: 'PC-03', zone: 'Standard Battleground', gpu: 'RTX 4070 SUPER', monitor: 'BenQ 240Hz', status: 'available', user: '-', uptime: '0 ชม.' },
+  { id: 'PC-04', zone: 'Standard Battleground', gpu: 'RTX 4070 SUPER', monitor: 'BenQ 240Hz', status: 'gaming', user: 'Guest #33', uptime: '4.1 ชม.' },
+  { id: 'PC-05', zone: 'Standard Battleground', gpu: 'RTX 4070 SUPER', monitor: 'BenQ 240Hz', status: 'available', user: '-', uptime: '0 ชม.' },
+  { id: 'PC-06', zone: 'Standard Battleground', gpu: 'RTX 4070 SUPER', monitor: 'BenQ 240Hz', status: 'gaming', user: 'Member #0991', uptime: '2.0 ชม.' },
+  { id: 'VIP-01', zone: 'VIP Private Bootcamp', gpu: 'RTX 4080 SUPER', monitor: 'BenQ 360Hz', status: 'gaming', user: 'Team Slayer (Cpt)', uptime: '5.0 ชม.' },
+  { id: 'VIP-02', zone: 'VIP Private Bootcamp', gpu: 'RTX 4080 SUPER', monitor: 'BenQ 360Hz', status: 'gaming', user: 'Team Slayer', uptime: '5.0 ชม.' },
+  { id: 'VIP-03', zone: 'VIP Private Bootcamp', gpu: 'RTX 4080 SUPER', monitor: 'BenQ 360Hz', status: 'maintenance', user: 'RMA Fan Issue', uptime: '-' },
+  { id: 'VIP-04', zone: 'VIP Private Bootcamp', gpu: 'RTX 4080 SUPER', monitor: 'BenQ 360Hz', status: 'gaming', user: 'Team Slayer', uptime: '5.0 ชม.' },
+  { id: 'STAGE-01', zone: 'Main Arena Stage 5v5', gpu: 'RTX 4090 OC', monitor: 'BenQ 360Hz OLED', status: 'standby', user: 'Tournament Host', uptime: '-' },
+  { id: 'STAGE-02', zone: 'Main Arena Stage 5v5', gpu: 'RTX 4090 OC', monitor: 'BenQ 360Hz OLED', status: 'standby', user: 'Tournament Host', uptime: '-' }
+];
+
+// Initial RMA & Warranty Claims Data
+export const INITIAL_RMA_CLAIMS = [
+  {
+    id: 'rma-1',
+    stationId: 'PC-24',
+    item: 'หน้าจอ BenQ ZOWIE XL2566K 360Hz',
+    sn: 'ETL890281923',
+    distributor: 'Synnex Thailand',
+    issue: 'มีเส้นสีฟ้าพาดกลางจอ 1 เส้น (Vertical Artifact)',
+    sentDate: '10/09/2026',
+    status: 'repairing',
+    statusName: 'กำลังอยู่ระหว่างซ่อม/เปลี่ยนแผงวงจร',
+    trackingNo: 'TH0192847291',
+    estimatedReturn: '20/09/2026'
+  },
+  {
+    id: 'rma-2',
+    stationId: 'VIP-03',
+    item: 'การ์ดจอ NVIDIA GeForce RTX 4080 SUPER 16GB',
+    sn: 'SN4080SP8812',
+    distributor: 'Ascenti Resources (ARC)',
+    issue: 'พัดลมตัวที่ 2 หมุนมีเสียงดังผิดปกติและรอบตก',
+    sentDate: '13/09/2026',
+    status: 'sent',
+    statusName: 'ส่งศูนย์บริการแล้ว รอการตรวจสอบ',
+    trackingNo: 'ARC-RMA-8921',
+    estimatedReturn: '25/09/2026'
+  }
+];
+
 // Initial Site Data Key
 const STORAGE_KEY = 'gspeed_site_cms_data_v2';
 
@@ -449,7 +692,12 @@ export const DEFAULT_SITE_DATA = {
       youtube: 'https://youtube.com/@gspeedarena',
       steam: 'https://steamcommunity.com/groups/gspeed'
     }
-  }
+  },
+  leads: INITIAL_LEADS,
+  pettyCashExpenses: INITIAL_PETTY_CASH,
+  omnichannelChats: INITIAL_OMNICHANNEL_CHATS,
+  hardwareStations: INITIAL_HARDWARE_STATIONS,
+  rmaClaims: INITIAL_RMA_CLAIMS
 };
 
 // Deep merge helper ensuring every nested property in defaults is present
@@ -646,6 +894,22 @@ export function SiteDataProvider({ children }) {
               image: DEFAULT_SITE_DATA.featureBanners.bannerRight.image
             };
           }
+        }
+
+        if (!Array.isArray(merged.leads) || merged.leads.length === 0) {
+          merged.leads = INITIAL_LEADS;
+        }
+        if (!Array.isArray(merged.pettyCashExpenses) || merged.pettyCashExpenses.length === 0) {
+          merged.pettyCashExpenses = INITIAL_PETTY_CASH;
+        }
+        if (!Array.isArray(merged.omnichannelChats) || merged.omnichannelChats.length === 0) {
+          merged.omnichannelChats = INITIAL_OMNICHANNEL_CHATS;
+        }
+        if (!Array.isArray(merged.hardwareStations) || merged.hardwareStations.length === 0) {
+          merged.hardwareStations = INITIAL_HARDWARE_STATIONS;
+        }
+        if (!Array.isArray(merged.rmaClaims) || merged.rmaClaims.length === 0) {
+          merged.rmaClaims = INITIAL_RMA_CLAIMS;
         }
 
         return merged;
@@ -1085,6 +1349,185 @@ export function SiteDataProvider({ children }) {
     }));
   };
 
+  // Omnichannel Leads Pipeline Handlers
+  const addLead = (lead) => {
+    const now = new Date();
+    const timeStr = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    const newLead = {
+      id: lead.id || `lead-${Date.now()}`,
+      createdAt: timeStr,
+      updatedAt: timeStr,
+      stage: 'new',
+      ...lead
+    };
+    setSiteData(prev => ({
+      ...prev,
+      leads: [newLead, ...(prev.leads || INITIAL_LEADS)]
+    }));
+    return newLead;
+  };
+
+  const updateLead = (id, updates) => {
+    const now = new Date();
+    const timeStr = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    setSiteData(prev => ({
+      ...prev,
+      leads: (prev.leads || INITIAL_LEADS).map(item => 
+        item.id === id 
+          ? { 
+              ...item, 
+              ...updates, 
+              updatedAt: timeStr 
+            } 
+          : item
+      )
+    }));
+  };
+
+  const deleteLead = (id) => {
+    setSiteData(prev => ({
+      ...prev,
+      leads: (prev.leads || INITIAL_LEADS).filter(item => item.id !== id)
+    }));
+  };
+
+  const moveLeadStage = (id, newStage) => {
+    updateLead(id, { stage: newStage });
+  };
+
+  // Daily Cashflow & Petty Cash Handlers
+  const addExpense = (expense) => {
+    const now = new Date();
+    const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    const dateStr = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
+    const newExpense = {
+      id: expense.id || `exp-${Date.now()}`,
+      time: timeStr,
+      date: dateStr,
+      ...expense
+    };
+    setSiteData(prev => ({
+      ...prev,
+      pettyCashExpenses: [newExpense, ...(prev.pettyCashExpenses || INITIAL_PETTY_CASH)]
+    }));
+    return newExpense;
+  };
+
+  const deleteExpense = (id) => {
+    setSiteData(prev => ({
+      ...prev,
+      pettyCashExpenses: (prev.pettyCashExpenses || INITIAL_PETTY_CASH).filter(item => item.id !== id)
+    }));
+  };
+
+  // Omnichannel Chat Handlers
+  const assignAgentToChat = (chatId, agentName = 'แอดมิน กอล์ฟ (ฝ่ายบริการลูกค้า)') => {
+    const now = new Date();
+    const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    setSiteData(prev => ({
+      ...prev,
+      omnichannelChats: (prev.omnichannelChats || INITIAL_OMNICHANNEL_CHATS).map(chat => {
+        if (chat.id === chatId) {
+          return {
+            ...chat,
+            status: 'assigned',
+            assignedAgent: agentName,
+            aiMutedUntil: Date.now() + 3600000, // Mute 60 minutes
+            messages: [
+              ...chat.messages,
+              {
+                id: `sys-${Date.now()}`,
+                sender: 'system',
+                text: `👤 ${agentName} รับเคสดูแลต่อแล้ว (AI ถูกระงับชั่วคราว 60 นาที)`,
+                time: timeStr
+              }
+            ]
+          };
+        }
+        return chat;
+      })
+    }));
+  };
+
+  const toggleAIMute = (chatId, shouldMute) => {
+    setSiteData(prev => ({
+      ...prev,
+      omnichannelChats: (prev.omnichannelChats || INITIAL_OMNICHANNEL_CHATS).map(chat => {
+        if (chat.id === chatId) {
+          return {
+            ...chat,
+            status: shouldMute ? 'assigned' : 'bot',
+            aiMutedUntil: shouldMute ? (Date.now() + 3600000) : null
+          };
+        }
+        return chat;
+      })
+    }));
+  };
+
+  const sendChatMessage = (chatId, text, senderType = 'agent', senderName = 'แอดมิน กอล์ฟ') => {
+    if (!text?.trim()) return;
+    const now = new Date();
+    const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    setSiteData(prev => ({
+      ...prev,
+      omnichannelChats: (prev.omnichannelChats || INITIAL_OMNICHANNEL_CHATS).map(chat => {
+        if (chat.id === chatId) {
+          const newMsg = {
+            id: `msg-${Date.now()}`,
+            sender: senderType,
+            agentName: senderType === 'agent' ? senderName : undefined,
+            text: text.trim(),
+            time: timeStr
+          };
+          return {
+            ...chat,
+            lastMessage: text.trim(),
+            timestamp: `${timeStr} น.`,
+            messages: [...chat.messages, newMsg]
+          };
+        }
+        return chat;
+      })
+    }));
+  };
+
+  // Hardware Asset & RMA Handlers
+  const updateStationStatus = (stationId, newStatus) => {
+    setSiteData(prev => ({
+      ...prev,
+      hardwareStations: (prev.hardwareStations || INITIAL_HARDWARE_STATIONS).map(st => 
+        st.id === stationId ? { ...st, status: newStatus } : st
+      )
+    }));
+  };
+
+  const addRMAClaim = (claim) => {
+    const now = new Date();
+    const dateStr = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
+    const newClaim = {
+      id: claim.id || `rma-${Date.now()}`,
+      sentDate: dateStr,
+      status: 'sent',
+      statusName: 'ส่งศูนย์บริการแล้ว รอการตรวจสอบ',
+      ...claim
+    };
+    setSiteData(prev => ({
+      ...prev,
+      rmaClaims: [newClaim, ...(prev.rmaClaims || INITIAL_RMA_CLAIMS)]
+    }));
+    return newClaim;
+  };
+
+  const updateRMAClaim = (id, updates) => {
+    setSiteData(prev => ({
+      ...prev,
+      rmaClaims: (prev.rmaClaims || INITIAL_RMA_CLAIMS).map(claim => 
+        claim.id === id ? { ...claim, ...updates } : claim
+      )
+    }));
+  };
+
   const value = {
     siteData,
     setSiteData,
@@ -1127,6 +1570,18 @@ export function SiteDataProvider({ children }) {
     deleteNavLink,
     addMediaItem,
     deleteMediaItem,
+    addLead,
+    updateLead,
+    deleteLead,
+    moveLeadStage,
+    addExpense,
+    deleteExpense,
+    assignAgentToChat,
+    toggleAIMute,
+    sendChatMessage,
+    updateStationStatus,
+    addRMAClaim,
+    updateRMAClaim,
     saveSiteData,
     resetToDefaults
   };

@@ -1089,13 +1089,12 @@ export const PRESET_ROOMS = [
     height: 8,
     desc: 'ขนาด 8x8 ม. เหมาะกับพื้นที่อาคารพาณิชย์ 2 คูหา รองรับ 20-26 เครื่อง คืนทุนเร็ว',
     defaultItems: [
-      { id: 'item-1', type: 'cashier-counter', x: 0.5, y: 0.5, rotation: 0 },
-      { id: 'item-2', type: 'server-room', x: 5.5, y: 0.5, rotation: 0 },
-      { id: 'item-3', type: 'pc-row-4', x: 0.5, y: 2.8, rotation: 0 },
-      { id: 'item-4', type: 'pc-row-4', x: 0.5, y: 4.5, rotation: 0 },
-      { id: 'item-5', type: 'pc-row-4', x: 0.5, y: 6.2, rotation: 0 },
-      { id: 'item-6', type: 'pc-row-2', x: 5.2, y: 3.5, rotation: 90 },
-      { id: 'item-7', type: 'pc-row-2', x: 5.2, y: 5.5, rotation: 90 }
+      { id: 'item-1', type: 'cashier-counter', x: 0.6, y: 0.6, rotation: 0 },
+      { id: 'item-2', type: 'server-room', x: 5.4, y: 0.6, rotation: 0 },
+      { id: 'item-3', type: 'pc-row-4', x: 0.6, y: 2.8, rotation: 0 },
+      { id: 'item-4', type: 'pc-row-4', x: 0.6, y: 4.5, rotation: 0 },
+      { id: 'item-5', type: 'pc-row-4', x: 0.6, y: 6.2, rotation: 0 },
+      { id: 'item-6', type: 'pc-row-2', x: 6.0, y: 3.4, rotation: 90 }
     ]
   },
   {
@@ -1106,13 +1105,12 @@ export const PRESET_ROOMS = [
     desc: 'ขนาด 12x10 ม. เหมาะกับอาคารเดี่ยวหรือในห้าง รองรับ 40-52 เครื่อง พร้อมห้อง VIP 1 ห้อง',
     defaultItems: [
       { id: 'item-1', type: 'cashier-counter', x: 0.8, y: 0.6, rotation: 0 },
-      { id: 'item-2', type: 'cafe-bar', x: 4.2, y: 0.6, rotation: 0 },
-      { id: 'item-3', type: 'server-room', x: 9.5, y: 0.6, rotation: 0 },
-      { id: 'item-4', type: 'vip-room-5', x: 0.8, y: 5.8, rotation: 0 },
-      { id: 'item-5', type: 'pc-island-6', x: 6.8, y: 3.5, rotation: 0 },
-      { id: 'item-6', type: 'pc-island-6', x: 6.8, y: 6.5, rotation: 0 },
-      { id: 'item-7', type: 'pc-row-4', x: 0.8, y: 3.2, rotation: 0 },
-      { id: 'item-8', type: 'lounge-sofa', x: 7.2, y: 0.6, rotation: 0 }
+      { id: 'item-2', type: 'cafe-bar', x: 4.5, y: 0.6, rotation: 0 },
+      { id: 'item-3', type: 'server-room', x: 9.2, y: 0.6, rotation: 0 },
+      { id: 'item-4', type: 'lounge-sofa', x: 0.8, y: 3.2, rotation: 0 },
+      { id: 'item-5', type: 'vip-room-5', x: 0.8, y: 5.8, rotation: 0 },
+      { id: 'item-6', type: 'pc-row-4', x: 6.4, y: 3.6, rotation: 0 },
+      { id: 'item-7', type: 'pc-island-6', x: 6.8, y: 6.2, rotation: 0 }
     ]
   },
   {
@@ -1125,12 +1123,12 @@ export const PRESET_ROOMS = [
       { id: 'item-1', type: 'stage-5v5', x: 4.8, y: 0.6, rotation: 0 },
       { id: 'item-2', type: 'cashier-counter', x: 0.8, y: 0.6, rotation: 0 },
       { id: 'item-3', type: 'server-room', x: 15.2, y: 0.6, rotation: 0 },
-      { id: 'item-4', type: 'cafe-bar', x: 14.0, y: 3.2, rotation: 90 },
-      { id: 'item-5', type: 'lounge-sofa', x: 7.5, y: 4.5, rotation: 0 },
+      { id: 'item-4', type: 'cafe-bar', x: 15.0, y: 3.4, rotation: 90 },
+      { id: 'item-5', type: 'lounge-sofa', x: 7.4, y: 4.6, rotation: 0 },
       { id: 'item-6', type: 'vip-room-5', x: 0.8, y: 7.8, rotation: 0 },
-      { id: 'item-7', type: 'vip-room-5', x: 6.2, y: 7.8, rotation: 0 },
-      { id: 'item-8', type: 'pc-island-6', x: 12.0, y: 6.5, rotation: 0 },
-      { id: 'item-9', type: 'pc-island-6', x: 12.0, y: 9.2, rotation: 0 }
+      { id: 'item-7', type: 'vip-room-5', x: 6.4, y: 7.8, rotation: 0 },
+      { id: 'item-8', type: 'pc-island-6', x: 13.0, y: 7.4, rotation: 0 },
+      { id: 'item-9', type: 'pc-island-6', x: 13.0, y: 9.8, rotation: 0 }
     ]
   }
 ];

@@ -100,162 +100,160 @@ const calculateBlueprintFeasibility = (w, h) => {
   };
 };
 
-const generateAutoLayout = (w, h, catalog) => {
+const generateAutoLayout = (w, h, catalog, doorConfig = { wall: 'right', offsetRatio: 0.75 }) => {
   const items = [];
   let idCounter = 1;
   const getItem = (type) => (catalog || []).find(c => c.type === type) || CATALOG_ITEMS.find(c => c.type === type);
 
-  // 1. Cashier counter near front entrance
-  const cashier = getItem('cashier-counter');
-  if (cashier) {
-    items.push({
-      id: `auto-${idCounter++}`,
-      type: 'cashier-counter',
-      x: 0.8,
-      y: 0.8,
-      rotation: 0,
-      catalog: cashier
-    });
+  // Helper to compute effective bounding box of an item considering rotation
+  const getItemBox = (item) => {
+    const isRot = item.rotation === 90 || item.rotation === 270;
+    const itemW = isRot ? (item.catalog?.heightMeters || 1) : (item.catalog?.widthMeters || 1);
+    const itemH = isRot ? (item.catalog?.widthMeters || 1) : (item.catalog?.heightMeters || 1);
+    return { x: item.x, y: item.y, w: itemW, h: itemH };
+  };
+
+  // Helper to check if two boxes collide with a given walkway margin
+  const boxesCollide = (b1, b2, margin = 0.3) => {
+    return (
+      b1.x < b2.x + b2.w + margin &&
+      b1.x + b1.w + margin > b2.x &&
+      b1.y < b2.y + b2.h + margin &&
+      b1.y + b1.h + margin > b2.y
+    );
+  };
+
+  // Calculate door entrance clearance corridor so furniture doesn't block entryway
+  const doorWall = doorConfig?.wall || 'right';
+  const doorRatio = doorConfig?.offsetRatio ?? 0.75;
+  const doorClearance = [];
+
+  if (doorWall === 'right') {
+    const doorY = Math.max(0.6, Math.min(h - 2.0, h * doorRatio));
+    doorClearance.push({ x: w - 2.2, y: Math.max(0, doorY - 1.2), w: 2.2, h: 2.4 });
+  } else if (doorWall === 'left') {
+    const doorY = Math.max(0.6, Math.min(h - 2.0, h * doorRatio));
+    doorClearance.push({ x: 0, y: Math.max(0, doorY - 1.2), w: 2.2, h: 2.4 });
+  } else if (doorWall === 'front') {
+    const doorX = Math.max(0.6, Math.min(w - 2.0, w * doorRatio));
+    doorClearance.push({ x: Math.max(0, doorX - 1.2), y: h - 2.2, w: 2.4, h: 2.2 });
+  } else if (doorWall === 'back') {
+    const doorX = Math.max(0.6, Math.min(w - 2.0, w * doorRatio));
+    doorClearance.push({ x: Math.max(0, doorX - 1.2), y: 0, w: 2.4, h: 2.2 });
   }
 
-  // 2. Server Room in corner
+  // Validate candidate placement
+  const canPlaceItem = (candidate, margin = 0.35) => {
+    const box = getItemBox(candidate);
+    if (box.x < 0.5 || box.y < 0.5 || (box.x + box.w) > (w - 0.5) || (box.y + box.h) > (h - 0.5)) {
+      return false;
+    }
+    for (const d of doorClearance) {
+      if (boxesCollide(box, d, 0.2)) return false;
+    }
+    for (const it of items) {
+      const existingBox = getItemBox(it);
+      if (boxesCollide(box, existingBox, margin)) return false;
+    }
+    return true;
+  };
+
+  const tryPlace = (type, x, y, rotation = 0, margin = 0.35) => {
+    const cat = getItem(type);
+    if (!cat) return false;
+    const candidate = {
+      id: `auto-${idCounter++}`,
+      type,
+      x: Number(x.toFixed(2)),
+      y: Number(y.toFixed(2)),
+      rotation,
+      catalog: cat
+    };
+    if (canPlaceItem(candidate, margin)) {
+      items.push(candidate);
+      return true;
+    }
+    return false;
+  };
+
+  // 1. Reception / Cashier Counter (3.0 x 1.5m)
+  tryPlace('cashier-counter', 0.8, 0.6, 0);
+
+  // 2. Server Room in perimeter corner
   const server = getItem('server-room');
-  if (server) {
-    items.push({
-      id: `auto-${idCounter++}`,
-      type: 'server-room',
-      x: Math.max(1, w - 2.8),
-      y: 0.8,
-      rotation: 0,
-      catalog: server
-    });
-  }
+  const serverW = server?.widthMeters || 2.0;
+  tryPlace('server-room', Math.max(0.8, w - serverW - 0.8), 0.6, 0);
 
-  // 3. Cafe bar near entrance / side
-  const cafe = getItem('cafe-bar');
-  if (cafe && w >= 10) {
-    items.push({
-      id: `auto-${idCounter++}`,
-      type: 'cafe-bar',
-      x: Math.max(1, w - 3.8),
-      y: Math.min(h - 3.5, 3.2),
-      rotation: 90,
-      catalog: cafe
-    });
-  }
-
-  // 4. Lounge sofa
-  const sofa = getItem('lounge-sofa');
-  if (sofa && w >= 11 && h >= 8) {
-    items.push({
-      id: `auto-${idCounter++}`,
-      type: 'lounge-sofa',
-      x: Math.max(1, w - 3.8),
-      y: Math.min(h - 2.5, 6.6),
-      rotation: 90,
-      catalog: sofa
-    });
-  }
-
-  // 5. VIP Room in back corner if space permits
-  const vip = getItem('vip-room-5');
-  const hasVip = vip && w >= 11 && h >= 9;
-  if (hasVip) {
-    items.push({
-      id: `auto-${idCounter++}`,
-      type: 'vip-room-5',
-      x: 0.8,
-      y: h - 4.0,
-      rotation: 0,
-      catalog: vip
-    });
-    if (w >= 16) {
-      items.push({
-        id: `auto-${idCounter++}`,
-        type: 'vip-room-5',
-        x: 6.2,
-        y: h - 4.0,
-        rotation: 0,
-        catalog: vip
-      });
+  // 3. Cafe bar along top wall or side wall if space permits
+  if (w >= 10 && h >= 7) {
+    const cafePlaced = tryPlace('cafe-bar', 4.5, 0.6, 0);
+    if (!cafePlaced && h >= 9) {
+      tryPlace('cafe-bar', Math.max(0.8, w - 3.0), 3.4, 90);
     }
   }
 
-  // 6. Central Gaming Arena
+  // 4. Spectator / Lounge sofa near waiting area
+  if (w >= 11 && h >= 8) {
+    tryPlace('lounge-sofa', 0.8, 3.2, 0);
+  }
+
+  // 5. VIP Private Suite in rear quiet corner
+  if (w >= 11 && h >= 9) {
+    const vip = getItem('vip-room-5');
+    const vipH = vip?.heightMeters || 3.5;
+    tryPlace('vip-room-5', 0.8, Math.max(0.6, h - vipH - 0.7), 0);
+
+    if (w >= 16 && h >= 10) {
+      const vipW = vip?.widthMeters || 5.0;
+      tryPlace('vip-room-5', 0.8 + vipW + 0.6, Math.max(0.6, h - vipH - 0.7), 0);
+    }
+  }
+
+  // 6. Tournament 5v5 Stage (for Mega Arena w >= 16 && h >= 11)
+  if (w >= 16 && h >= 11) {
+    tryPlace('stage-5v5', Math.max(0.8, (w - 8.5) / 2), 0.6, 0);
+  }
+
+  // 7. Central Gaming Arena - fill with PC Islands or PC Rows neatly
   const pcIsland = getItem('pc-island-6');
   const pcRow4 = getItem('pc-row-4');
   const pcRow2 = getItem('pc-row-2');
 
-  const startY = 3.0;
-  const maxEndY = hasVip ? (h - 4.6) : (h - 1.5);
-  const rightBound = (w >= 10) ? (w - 4.6) : (w - 1.0);
+  const startAisleX = (w >= 11 && h >= 8) ? 6.0 : 0.8;
+  const stepX = 4.4; // 3.6m + 0.8m aisle
+  const stepY = 2.8; // 2.0m + 0.8m aisle
 
-  let curY = startY;
-  while (curY + 1.2 <= maxEndY) {
-    if (rightBound >= 8.5 && pcIsland) {
-      items.push({
-        id: `auto-${idCounter++}`,
-        type: 'pc-island-6',
-        x: 0.8,
-        y: curY,
-        rotation: 0,
-        catalog: pcIsland
-      });
-      if (0.8 + 4.2 + 3.6 <= rightBound + 0.5) {
-        items.push({
-          id: `auto-${idCounter++}`,
-          type: 'pc-island-6',
-          x: 5.0,
-          y: curY,
-          rotation: 0,
-          catalog: pcIsland
-        });
+  for (let posX = startAisleX; posX + 3.6 <= w - 0.6; posX += stepX) {
+    for (let posY = 3.2; posY + 2.0 <= h - 0.6; posY += stepY) {
+      if (pcIsland && tryPlace('pc-island-6', posX, posY, 0, 0.35)) {
+        continue;
       }
-      curY += 2.8;
-    } else if (rightBound >= 5.0 && pcRow4) {
-      items.push({
-        id: `auto-${idCounter++}`,
-        type: 'pc-row-4',
-        x: 0.8,
-        y: curY,
-        rotation: 0,
-        catalog: pcRow4
-      });
-      if (0.8 + 5.0 + 2.4 <= rightBound + 0.5 && pcRow2) {
-        items.push({
-          id: `auto-${idCounter++}`,
-          type: 'pc-row-2',
-          x: 6.0,
-          y: curY,
-          rotation: 0,
-          catalog: pcRow2
-        });
+      if (pcRow4 && tryPlace('pc-row-4', posX, posY, 0, 0.35)) {
+        continue;
       }
-      curY += 1.8;
-    } else if (pcRow2) {
-      items.push({
-        id: `auto-${idCounter++}`,
-        type: 'pc-row-2',
-        x: 0.8,
-        y: curY,
-        rotation: 0,
-        catalog: pcRow2
-      });
-      curY += 1.8;
-    } else {
-      break;
+      if (pcRow2 && tryPlace('pc-row-2', posX, posY, 0, 0.35)) {
+        continue;
+      }
     }
   }
 
-  if (hasVip && w >= 13 && h >= 10 && pcRow4 && !items.some(it => it.x >= (w - 6.0) && it.y >= (h - 3.0))) {
-    items.push({
-      id: `auto-${idCounter++}`,
-      type: 'pc-row-4',
-      x: Math.max(1, w - 5.5),
-      y: h - 2.0,
-      rotation: 0,
-      catalog: pcRow4
-    });
+  // Secondary sweep for any remaining left spaces if lounge sofa wasn't placed
+  if (!items.some(it => it.type === 'lounge-sofa')) {
+    for (let posY = 3.0; posY + 1.0 <= (h >= 9 ? h - 4.5 : h - 1.0); posY += 1.8) {
+      if (pcRow4 && tryPlace('pc-row-4', 0.8, posY, 0, 0.3)) {
+        continue;
+      }
+      if (pcRow2 && tryPlace('pc-row-2', 0.8, posY, 0, 0.3)) {
+        continue;
+      }
+    }
+  }
+
+  // Secondary sweep along right perimeter wall with 2-PC stations if space allows
+  if (pcRow2) {
+    for (let posY = 3.0; posY + 2.4 <= h - 1.0; posY += 2.8) {
+      tryPlace('pc-row-2', w - 1.8, posY, 90, 0.3);
+    }
   }
 
   return items;
@@ -472,7 +470,7 @@ export default function FranchisePlanner() {
 
   // Smart AI Auto-Layout Applicator
   const handleApplyAutoLayout = () => {
-    const autoItems = generateAutoLayout(roomWidth, roomHeight, catalogItems);
+    const autoItems = generateAutoLayout(roomWidth, roomHeight, catalogItems, doorConfig);
     setPlacedItems(autoItems);
     setShowBlueprintOverlay(true);
     handleStepChange(2);
@@ -484,20 +482,26 @@ export default function FranchisePlanner() {
   const placedItemsRef = useRef(placedItems);
   placedItemsRef.current = placedItems;
 
-  // Scale factor: pixels per meter (dynamically computed to fit container)
-  const [pixelsPerMeter, setPixelsPerMeter] = useState(45);
+  // Base scale factor & dynamic zoom multiplier (50% to 250%)
+  const [basePixelsPerMeter, setBasePixelsPerMeter] = useState(45);
+  const [zoomMultiplier, setZoomMultiplier] = useState(1.0);
+  const pixelsPerMeter = Math.max(18, Math.min(120, Math.round(basePixelsPerMeter * zoomMultiplier)));
+  const lastContainerSize = useRef({ w: 0, h: 0 });
 
-  // Recalculate pixels per meter dynamically when dimensions change, container resizes, or fullscreen toggles
+  // Recalculate base pixels per meter dynamically when dimensions change, container resizes, or fullscreen toggles
   useEffect(() => {
     const updateScale = () => {
       if (canvasContainerRef.current) {
         const containerWidth = canvasContainerRef.current.clientWidth || 700;
         const containerHeight = canvasContainerRef.current.clientHeight || 520;
-        // Accounting for generous clearance (badges, dimension markers, container padding)
-        const scaleX = Math.floor((containerWidth - 280) / roomWidth);
-        const scaleY = Math.floor((containerHeight - 160) / roomHeight);
-        const computedScale = Math.min(Math.max(Math.min(scaleX, scaleY > 0 ? scaleY : scaleX), 20), 75);
-        setPixelsPerMeter(computedScale);
+        // Only update base if container size changed by > 30px to prevent scrollbar flicker loops
+        if (Math.abs(containerWidth - lastContainerSize.current.w) > 30 || Math.abs(containerHeight - lastContainerSize.current.h) > 30) {
+          lastContainerSize.current = { w: containerWidth, h: containerHeight };
+          const scaleX = Math.floor((containerWidth - 220) / roomWidth);
+          const scaleY = Math.floor((containerHeight - 150) / roomHeight);
+          const computedScale = Math.min(Math.max(Math.min(scaleX, scaleY > 0 ? scaleY : scaleX), 22), 65);
+          setBasePixelsPerMeter(computedScale);
+        }
       }
     };
 
@@ -513,6 +517,23 @@ export default function FranchisePlanner() {
       if (observer) observer.disconnect();
     };
   }, [roomWidth, roomHeight, isPlannerFullscreen, viewMode]);
+
+  // Non-passive mouse wheel zoom on blueprint canvas
+  useEffect(() => {
+    const container = canvasContainerRef.current;
+    if (!container) return;
+
+    const handleCanvasWheel = (e) => {
+      e.preventDefault();
+      const zoomDelta = e.deltaY < 0 ? 0.12 : -0.12;
+      setZoomMultiplier(prev => Math.min(Math.max(Number((prev + zoomDelta).toFixed(2)), 0.5), 2.5));
+    };
+
+    container.addEventListener('wheel', handleCanvasWheel, { passive: false });
+    return () => {
+      container.removeEventListener('wheel', handleCanvasWheel);
+    };
+  }, [viewMode]);
 
   // Keep room box perfectly centered without scroll drift
   useEffect(() => {
@@ -3098,18 +3119,36 @@ export default function FranchisePlanner() {
                     <button 
                       type="button" 
                       className="btn-floorplan-ctrl" 
-                      onClick={() => setPixelsPerMeter(p => Math.min(p + 5, 80))} 
-                      title="ซูมขยายแปลน (+)"
+                      onClick={() => setZoomMultiplier(z => Math.max(Number((z - 0.15).toFixed(2)), 0.5))} 
+                      title="ซูมย่อแปลน (-)"
                     >
-                      <ZoomIn size={15} />
+                      <ZoomOut size={15} />
+                    </button>
+                    <button 
+                      type="button"
+                      className="floorplan-zoom-indicator-btn" 
+                      onClick={() => setZoomMultiplier(1.0)} 
+                      title="คลิกเพื่อรีเซ็ต 100%"
+                    >
+                      {Math.round(zoomMultiplier * 100)}%
                     </button>
                     <button 
                       type="button" 
                       className="btn-floorplan-ctrl" 
-                      onClick={() => setPixelsPerMeter(p => Math.max(p - 5, 25))} 
-                      title="ซูมย่อแปลน (-)"
+                      onClick={() => setZoomMultiplier(z => Math.min(Number((z + 0.15).toFixed(2)), 2.5))} 
+                      title="ซูมขยายแปลน (+)"
                     >
-                      <ZoomOut size={15} />
+                      <ZoomIn size={15} />
+                    </button>
+                    <div className="floorplan-ctrl-divider" />
+                    <button 
+                      type="button" 
+                      className="btn-floorplan-ctrl btn-fit-screen" 
+                      onClick={() => setZoomMultiplier(1.0)} 
+                      title="รีเซ็ตพอดีหน้าจอ (Fit to Screen 100%)"
+                    >
+                      <Maximize2 size={13} />
+                      <span className="btn-fit-text">100% พอดีจอ</span>
                     </button>
                   </div>
 
@@ -3133,8 +3172,8 @@ export default function FranchisePlanner() {
                     )}
 
                     {/* Scale Labels */}
-                    <div className="canvas-scale-marker top-marker">{roomWidth} เมตร</div>
-                    <div className="canvas-scale-marker left-marker">{roomHeight} เมตร</div>
+                    <div className="canvas-scale-marker top-marker">⟵ {roomWidth}.0 ม. ⟶</div>
+                    <div className="canvas-scale-marker left-marker">⟵ {roomHeight}.0 ม. ⟶</div>
 
                     {/* Doorway opening slot on perimeter border */}
                     <div 
@@ -3240,11 +3279,15 @@ export default function FranchisePlanner() {
                           {/* Visual details inside item */}
                           <div className="item-inner-content">
                             <div className="item-icon-tag" style={{ color: item.catalog?.color || '#1d4ed8' }}>
-                              {item.catalog?.seats > 0 ? `${item.catalog.seats} PCs` : item.catalog?.name?.split(' ')[0]}
+                              {item.type === 'lounge-sofa' || item.catalog?.category === 'amenities'
+                                ? 'โซฟาเลานจ์'
+                                : item.catalog?.seats > 0
+                                  ? `${item.catalog.seats} PCs`
+                                  : item.catalog?.name?.split(' ')[0]}
                             </div>
 
-                            {/* Station Seats Visual Dots */}
-                            {item.catalog?.seats > 0 && (
+                            {/* Station Seats Visual Dots (only for gaming PC stations) */}
+                            {item.catalog?.seats > 0 && item.type !== 'lounge-sofa' && item.catalog?.category !== 'amenities' && (
                               <div className="seat-dots-row">
                                 {Array.from({ length: Math.min(item.catalog.seats, 10) }).map((_, i) => (
                                   <span key={i} className="seat-dot" style={{ background: item.catalog?.color || '#1d4ed8' }}></span>
@@ -3257,8 +3300,8 @@ export default function FranchisePlanner() {
                             </div>
 
                             <div className="item-drag-handle" title="คลิกเลือก หรือลากเพื่อย้ายตำแหน่ง">
-                              <Move size={10} />
-                              <span>{isSelected ? 'กำลังเลือก (ลาก/ลูกศร)' : 'คลิก/ลากย้าย'}</span>
+                              <Move size={11} />
+                              {isSelected && <span className="drag-handle-pill">เลือกอยู่</span>}
                             </div>
 
                             {justAddedId === item.id && (

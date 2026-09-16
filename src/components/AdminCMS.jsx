@@ -8,7 +8,8 @@ import {
   TrendingUp, BarChart2, ShieldCheck, Lock, LogOut, Activity, ArrowUpRight,
   Palette, Image as ImageIcon, Flame, Coffee, Check, Copy, Clock, Share2,
   Box, Printer, Download, Camera, Upload, CheckSquare, Zap, ChevronRight, ChevronUp, ChevronDown, Server, Info, Ruler, Scale, Wrench, FileUp, Wand2,
-  Users, Calendar, Award, Target, Gamepad2, X, List, Hash, HardDrive
+  Users, Calendar, Award, Target, Gamepad2, X, List, Hash, HardDrive,
+  MessagesSquare, Receipt
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 import { DEMO_TOURNAMENT_PHOTOS_50 } from '../data/mockData';
@@ -18,6 +19,8 @@ import { compressAndConvertToWebP, formatBytes } from '../utils/imageOptimizer';
 import CMSLivePreviewModal from './CMSLivePreviewModal';
 import PhotoshopColorPickerModal from './PhotoshopColorPickerModal';
 import MediaLibraryModal from './MediaLibraryModal';
+import OmnichannelLeadsCMS from './OmnichannelLeadsCMS';
+import ArticleBlockEditor from './ArticleBlockEditor';
 import { analyzeProductPhoto, parseSpecSheetText } from '../utils/aiSpecParser';
 
 // Reusable Component: Section Image Field with Guidelines, Live Preview, SEO Alt Text & Media Library
@@ -911,6 +914,20 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
     seoMetaDesc: '',
     seoKeywords: '',
     enableAISearch: true,
+    contentBlocks: [
+      {
+        id: 'block_init_h1',
+        type: 'heading',
+        level: 2,
+        text: 'สรุปภาพรวมกิจกรรมและการแข่งขัน'
+      },
+      {
+        id: 'block_init_p1',
+        type: 'paragraph',
+        align: 'left',
+        text: 'รายละเอียดการจัดกิจกรรมและการแข่งขันอีสปอร์ตสุดมันส์ พร้อมบรรยากาศกองเชียร์และผู้เข้าแข่งขันที่มาร่วมสร้างปรากฏการณ์ในครั้งนี้'
+      }
+    ],
     contentParagraphsText: 'รายละเอียดการจัดกิจกรรมและการแข่งขันอีสปอร์ตสุดมันส์...\n\nบรรยากาศภายในงานเต็มไปด้วยกองเชียร์และผู้เข้าแข่งขัน...',
     galleryPhotos: [
       {
@@ -1368,6 +1385,18 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
             </button>
 
             <button 
+              id="cms-tab-omnichannel"
+              className={`admin-nav-item ${activeTab === 'omnichannel-leads' ? 'active' : ''}`}
+              onClick={() => setActiveTab('omnichannel-leads')}
+            >
+              <MessagesSquare size={18} />
+              <div>
+                <strong>Omnichannel & Leads Hub</strong>
+                <span>รวมแชท, Leads แฟรนไชส์, งบดุล /pay</span>
+              </div>
+            </button>
+
+            <button 
               id="cms-tab-catalog"
               className={`admin-nav-item ${activeTab === 'catalog' ? 'active' : ''}`}
               onClick={() => setActiveTab('catalog')}
@@ -1455,6 +1484,13 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
 
         {/* Right Editor Area */}
         <main className="admin-content-area">
+
+          {/* =========================================================================
+              TAB: OMNICHANNEL LEADS & DAILY CASHFLOW HUB
+              ========================================================================= */}
+          {activeTab === 'omnichannel-leads' && (
+            <OmnichannelLeadsCMS />
+          )}
 
           {/* =========================================================================
               TAB 1: CATALOG & 3D HARDWARE/FURNITURE MANAGEMENT (หลายเกรด)
@@ -1721,9 +1757,17 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                                         }));
                                         setAiImageFeedback(`✨ สกัดสีจากภาพสินค้าจริงสำเร็จ: ท็อปโต๊ะ (${result.deskColor}), ไฟ LED (${result.accentColor}), เก้าอี้ (${result.chairColor}) พร้อมลงลายท็อปโต๊ะจริงเรียบร้อย!`);
                                         setTimeout(() => setAiImageFeedback(null), 7000);
+                                      } else {
+                                        setAiImageFeedback('⚠️ ไม่สามารถวิเคราะห์พิกเซลภาพได้ กรุณาใช้ไฟล์ภาพ JPG/PNG ที่คมชัด');
+                                        setTimeout(() => setAiImageFeedback(null), 5000);
                                       }
+                                    } catch (err) {
+                                      console.error(err);
+                                      setAiImageFeedback('⚠️ เกิดข้อผิดพลาดในการโหลดรูปภาพ');
+                                      setTimeout(() => setAiImageFeedback(null), 5000);
                                     } finally {
                                       setIsAnalyzingPhoto(false);
+                                      e.target.value = '';
                                     }
                                   }
                                 }}
@@ -1790,37 +1834,45 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                             <span>1. รหัสสินค้า (SKU) & ข้อมูลพื้นฐาน</span>
                           </h5>
 
+                          {/* Row 1: ชื่อโมดูล & หมวดหมู่สินค้า */}
+                          <div className="form-row-2">
+                            <div className="form-group">
+                              <label>ชื่อโมดูลอุปกรณ์ (ภาษาไทย)</label>
+                              <input 
+                                type="text" 
+                                className="form-input font-semibold" 
+                                placeholder="เช่น โต๊ะคอมพิวเตอร์ 2 ที่นั่ง (Double Station)"
+                                value={editingCatalogItem.name} 
+                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, name: e.target.value })}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>หมวดหมู่สินค้าในแคตตาล็อก</label>
+                              <select 
+                                className="form-input"
+                                value={editingCatalogItem.category}
+                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, category: e.target.value })}
+                              >
+                                <option value="stations">โต๊ะคอมพิวเตอร์เกมมิ่ง (Stations)</option>
+                                <option value="vip">ห้อง VIP ส่วนตัว (Private Bootcamp Suite)</option>
+                                <option value="stage">เวทีการแข่งขัน (Main Tournament Stage)</option>
+                                <option value="facilities">เคาน์เตอร์แคชเชียร์ & บาร์เครื่องดื่ม (Facilities)</option>
+                                <option value="amenities">สิ่งอำนวยความสะดวก & โซฟาเลานจ์ (Amenities)</option>
+                                <option value="architectural">สถาปัตยกรรม (ผนัง, ประตู, กระจกเทมเปอร์)</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          {/* Row 2: รหัสสินค้า (SKU) & เกรดโมดูล */}
                           <div className="form-row-2">
                             <div className="form-group">
                               <label>รหัสสินค้า (Product SKU)</label>
                               <input 
                                 type="text" 
                                 className="form-input font-mono font-semibold" 
-                                placeholder="เช่น GLP-DSK-2P-01"
+                                placeholder="เช่น GLP-PC-ROW-2"
                                 value={editingCatalogItem.sku || ('GLP-' + (editingCatalogItem.type || '').toUpperCase())} 
                                 onChange={e => setEditingCatalogItem({ ...editingCatalogItem, sku: e.target.value })}
-                              />
-                            </div>
-                            <div className="form-group">
-                              <label>รหัสประเภท 3D (Type Slug - เชื่อมโยงระบบผังร้าน)</label>
-                              <input 
-                                type="text" 
-                                className="form-input" 
-                                value={editingCatalogItem.type} 
-                                disabled
-                                title="รหัสประจำโมดูลในระบบเรนเดอร์ 3D"
-                              />
-                            </div>
-                          </div>
-
-                          <div className="form-row-3">
-                            <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                              <label>ชื่อโมดูลอุปกรณ์ (ภาษาไทย)</label>
-                              <input 
-                                type="text" 
-                                className="form-input font-semibold" 
-                                value={editingCatalogItem.name} 
-                                onChange={e => setEditingCatalogItem({ ...editingCatalogItem, name: e.target.value })}
                               />
                             </div>
                             <div className="form-group">
@@ -1838,20 +1890,36 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                             </div>
                           </div>
 
-                          <div className="form-group">
-                            <label>หมวดหมู่สินค้าในแคตตาล็อก</label>
-                            <select 
-                              className="form-input"
-                              value={editingCatalogItem.category}
-                              onChange={e => setEditingCatalogItem({ ...editingCatalogItem, category: e.target.value })}
-                            >
-                              <option value="stations">โต๊ะคอมพิวเตอร์เกมมิ่ง (Stations)</option>
-                              <option value="vip">ห้อง VIP ส่วนตัว (Private Bootcamp Suite)</option>
-                              <option value="stage">เวทีการแข่งขัน (Main Tournament Stage)</option>
-                              <option value="facilities">เคาน์เตอร์แคชเชียร์ & บาร์เครื่องดื่ม (Facilities)</option>
-                              <option value="amenities">สิ่งอำนวยความสะดวก & โซฟาเลานจ์ (Amenities)</option>
-                              <option value="architectural">สถาปัตยกรรม (ผนัง, ประตู, กระจกเทมเปอร์)</option>
-                            </select>
+                          {/* Row 3: รหัสประเภท 3D (Type Slug) พร้อมการ์ดแนะนำ */}
+                          <div className="type-slug-card">
+                            <div className="type-slug-field">
+                              <div className="type-slug-label-row">
+                                <label className="type-slug-label">
+                                  <Box size={13} className="text-blue" />
+                                  <span>รหัสประเภท 3D (Type Slug)</span>
+                                </label>
+                                <span className="type-slug-badge" title="ระบบล็อกไว้เพื่อรักษาโครงสร้างเรขาคณิต 3 มิติ">
+                                  <Lock size={10} style={{ display: 'inline', marginRight: '3px' }} />
+                                  3D Engine Key
+                                </span>
+                              </div>
+                              <input 
+                                type="text" 
+                                className="form-input font-mono font-semibold" 
+                                value={editingCatalogItem.type} 
+                                disabled
+                                title="รหัสประจำโมดูลในระบบเรนเดอร์ 3D (ล็อกไว้เพื่อรักษาโครงสร้างโมเดล)"
+                              />
+                            </div>
+                            <div className="type-slug-helper">
+                              <div className="helper-title">
+                                <Info size={13} className="text-blue" />
+                                <span>รหัสประเภท 3D คืออะไร?</span>
+                              </div>
+                              <p className="helper-text">
+                                เป็นคีย์ระบุโครงสร้างเรขาคณิตใน Three.js เช่น <code>pc-row-2</code>, <code>pc-row-4</code>, <code>vip-room-5</code> เพื่อสร้างรูปทรงโต๊ะ เก้าอี้ จอคอมพิวเตอร์ และเชื่อมโยงกับการจัดวางผังร้าน 2D/3D อัตโนมัติ
+                              </p>
+                            </div>
                           </div>
                         </div>
 
@@ -2171,6 +2239,26 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                               </label>
                             </div>
                           </div>
+
+                          {/* Live Image Preview Thumbnail */}
+                          {editingCatalogItem.image && (
+                            <div className="catalog-image-preview-card" style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#f8fafc', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', marginTop: '10px' }}>
+                              <img 
+                                src={editingCatalogItem.image} 
+                                alt={editingCatalogItem.imageAlt || editingCatalogItem.name || 'พรีวิวภาพสินค้า'} 
+                                style={{ width: '90px', height: '60px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #cbd5e1', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}
+                              />
+                              <div style={{ flex: 1 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                  <CheckCircle2 size={14} className="text-blue" />
+                                  <strong style={{ fontSize: '13px', color: '#1e293b' }}>ภาพพรีวิวสินค้าปัจจุบัน (Active Preview Photo)</strong>
+                                </div>
+                                <p style={{ margin: '3px 0 0 0', fontSize: '12px', color: '#64748b', lineHeight: 1.4 }}>
+                                  ภาพนี้จะถูกใช้เป็นภาพปกในหน้าร้าน, ตารางแคตตาล็อก, เอกสารสเปก (Spec Sheet), และสกรีนเป็นลายท็อปโต๊ะ 3D
+                                </p>
+                              </div>
+                            </div>
+                          )}
 
                           {/* Image ALT Tag for SEO */}
                           <div className="form-group" style={{ marginTop: '10px' }}>
@@ -2497,9 +2585,17 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                                         }));
                                         setAiImageFeedback(`✨ สกัดสีจากภาพสินค้าจริงสำเร็จ: ท็อปโต๊ะ (${result.deskColor}), ไฟ LED (${result.accentColor}), เก้าอี้ (${result.chairColor}) พร้อมลงลายท็อปโต๊ะจริงเรียบร้อย!`);
                                         setTimeout(() => setAiImageFeedback(null), 7000);
+                                      } else {
+                                        setAiImageFeedback('⚠️ ไม่สามารถวิเคราะห์พิกเซลภาพได้ กรุณาใช้ไฟล์ภาพ JPG/PNG ที่คมชัด');
+                                        setTimeout(() => setAiImageFeedback(null), 5000);
                                       }
+                                    } catch (err) {
+                                      console.error(err);
+                                      setAiImageFeedback('⚠️ เกิดข้อผิดพลาดในการโหลดรูปภาพ');
+                                      setTimeout(() => setAiImageFeedback(null), 5000);
                                     } finally {
                                       setIsAnalyzingPhoto(false);
+                                      e.target.value = '';
                                     }
                                   }
                                 }}
@@ -2566,6 +2662,36 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                             <span>1. รหัสสินค้า (SKU) & ข้อมูลพื้นฐาน</span>
                           </h5>
 
+                          {/* Row 1: ชื่อโมดูล & หมวดหมู่สินค้า */}
+                          <div className="form-row-2">
+                            <div className="form-group">
+                              <label>ชื่อโมดูล (ภาษาไทย)</label>
+                              <input 
+                                type="text" 
+                                className="form-input font-semibold" 
+                                placeholder="เช่น โต๊ะเกมมิ่งสตรีมเมอร์เดี่ยว (Solo Streamer Pod)"
+                                value={newCatalogItem.name}
+                                onChange={e => setNewCatalogItem({ ...newCatalogItem, name: e.target.value })}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>หมวดหมู่โมดูล</label>
+                              <select 
+                                className="form-input"
+                                value={newCatalogItem.category}
+                                onChange={e => setNewCatalogItem({ ...newCatalogItem, category: e.target.value })}
+                              >
+                                <option value="stations">โต๊ะคอมพิวเตอร์เกมมิ่ง (Stations)</option>
+                                <option value="vip">ห้อง VIP ส่วนตัว (Private Suite)</option>
+                                <option value="stage">เวทีการแข่งขัน (Main Stage)</option>
+                                <option value="facilities">เคาน์เตอร์ & บาร์ (Facilities)</option>
+                                <option value="amenities">สิ่งอำนวยความสะดวก & โซฟา (Amenities)</option>
+                                <option value="architectural">สถาปัตยกรรม (ผนัง/ประตู/กระจก)</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          {/* Row 2: รหัสสินค้า (SKU) & เกรดโมดูล */}
                           <div className="form-row-2">
                             <div className="form-group">
                               <label>รหัสสินค้า (Product SKU)</label>
@@ -2578,57 +2704,60 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                               />
                             </div>
                             <div className="form-group">
-                              <label>รหัสประเภท 3D (Type Code ภาษาอังกฤษตัวพิมพ์เล็ก)</label>
-                              <input 
-                                type="text" 
-                                className="form-input" 
-                                placeholder="เช่น custom-station-1"
-                                value={newCatalogItem.type}
-                                onChange={e => setNewCatalogItem({ ...newCatalogItem, type: e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '-') })}
-                              />
-                            </div>
-                          </div>
-
-                          <div className="form-row-3">
-                            <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                              <label>ชื่อโมดูล (ภาษาไทย)</label>
-                              <input 
-                                type="text" 
-                                className="form-input font-semibold" 
-                                placeholder="เช่น โต๊ะเกมมิ่งสตรีมเมอร์เดี่ยว (Solo Streamer Pod)"
-                                value={newCatalogItem.name}
-                                onChange={e => setNewCatalogItem({ ...newCatalogItem, name: e.target.value })}
-                              />
-                            </div>
-                            <div className="form-group">
                               <label>เกรดโมดูล</label>
                               <select 
                                 className="form-input"
                                 value={newCatalogItem.grade || 'pro'}
                                 onChange={e => setNewCatalogItem({ ...newCatalogItem, grade: e.target.value })}
                               >
-                                <option value="standard">Standard (Tier 1)</option>
-                                <option value="pro">Pro Racing (Tier 2)</option>
-                                <option value="ultimate">Ultimate Esports (Tier 3)</option>
-                                <option value="vip">VIP Suite Grade</option>
+                                <option value="standard">Standard (Tier 1 - คุ้มค่า คืนทุนเร็ว)</option>
+                                <option value="pro">Pro Racing (Tier 2 - นักกีฬาแข่งขัน)</option>
+                                <option value="ultimate">Ultimate Esports (Tier 3 - ไฮเอนด์อารีนา)</option>
+                                <option value="vip">VIP Suite Grade (เกรดห้องสตรีมเมอร์)</option>
                               </select>
                             </div>
                           </div>
 
-                          <div className="form-group">
-                            <label>หมวดหมู่โมดูล</label>
-                            <select 
-                              className="form-input"
-                              value={newCatalogItem.category}
-                              onChange={e => setNewCatalogItem({ ...newCatalogItem, category: e.target.value })}
-                            >
-                              <option value="stations">โต๊ะคอมพิวเตอร์เกมมิ่ง (Stations)</option>
-                              <option value="vip">ห้อง VIP ส่วนตัว (Private Suite)</option>
-                              <option value="stage">เวทีการแข่งขัน (Main Stage)</option>
-                              <option value="facilities">เคาน์เตอร์ & บาร์ (Facilities)</option>
-                              <option value="amenities">สิ่งอำนวยความสะดวก & โซฟา (Amenities)</option>
-                              <option value="architectural">สถาปัตยกรรม (ผนัง/ประตู/กระจก)</option>
-                            </select>
+                          {/* Row 3: รหัสประเภท 3D (Type Slug) พร้อมพรีเซ็ตสำเร็จรูป */}
+                          <div className="type-slug-card">
+                            <div className="type-slug-field">
+                              <div className="type-slug-label-row">
+                                <label className="type-slug-label">
+                                  <Box size={13} className="text-blue" />
+                                  <span>รหัสประเภท 3D (Type Slug)</span>
+                                </label>
+                                <span className="type-slug-badge editable">เลือกโครงสร้าง 3D</span>
+                              </div>
+                              <input 
+                                type="text" 
+                                className="form-input font-mono" 
+                                placeholder="เช่น pc-row-2, pc-row-4, vip-room-5"
+                                value={newCatalogItem.type}
+                                onChange={e => setNewCatalogItem({ ...newCatalogItem, type: e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '-') })}
+                              />
+                              <div className="type-slug-presets">
+                                <span className="text-xs text-muted">โครงสร้างสำเร็จรูป:</span>
+                                {['pc-row-2', 'pc-row-4', 'pc-island-6', 'vip-room-5', 'stage-5v5', 'counter'].map((t) => (
+                                  <button
+                                    key={t}
+                                    type="button"
+                                    className={`type-preset-pill ${newCatalogItem.type === t ? 'active' : ''}`}
+                                    onClick={() => setNewCatalogItem({ ...newCatalogItem, type: t })}
+                                  >
+                                    {t}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="type-slug-helper">
+                              <div className="helper-title">
+                                <Info size={13} className="text-blue" />
+                                <span>รหัสประเภท 3D คืออะไร?</span>
+                              </div>
+                              <p className="helper-text">
+                                กำหนดโครงสร้างเรขาคณิต 3D ใน Three.js สำหรับประกอบโต๊ะ เก้าอี้ จอคอม และเชื่อมโยงกับการจำลองผังร้าน 2D/3D อัตโนมัติ (คลิกเลือกพรีเซ็ตสำเร็จรูป หรือระบุรหัสเอง)
+                              </p>
+                            </div>
                           </div>
                         </div>
 
@@ -2924,6 +3053,26 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                               </label>
                             </div>
                           </div>
+
+                          {/* Live Image Preview Thumbnail */}
+                          {newCatalogItem.image && (
+                            <div className="catalog-image-preview-card" style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#f8fafc', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', marginTop: '10px' }}>
+                              <img 
+                                src={newCatalogItem.image} 
+                                alt={newCatalogItem.imageAlt || newCatalogItem.name || 'พรีวิวภาพสินค้า'} 
+                                style={{ width: '90px', height: '60px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #cbd5e1', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}
+                              />
+                              <div style={{ flex: 1 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                  <CheckCircle2 size={14} className="text-blue" />
+                                  <strong style={{ fontSize: '13px', color: '#1e293b' }}>ภาพพรีวิวสินค้าปัจจุบัน (Active Preview Photo)</strong>
+                                </div>
+                                <p style={{ margin: '3px 0 0 0', fontSize: '12px', color: '#64748b', lineHeight: 1.4 }}>
+                                  ภาพนี้จะถูกใช้เป็นภาพปกในหน้าร้าน, ตารางแคตตาล็อก, เอกสารสเปก (Spec Sheet), และสกรีนเป็นลายท็อปโต๊ะ 3D
+                                </p>
+                              </div>
+                            </div>
+                          )}
 
                           {/* Image ALT Tag for SEO */}
                           <div className="form-group" style={{ marginTop: '10px' }}>
@@ -6953,6 +7102,14 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                                 onClick={() => {
                                   setEditingActivity({
                                     ...item,
+                                    contentBlocks: (item.contentBlocks && item.contentBlocks.length > 0)
+                                      ? item.contentBlocks
+                                      : (item.contentParagraphs && item.contentParagraphs.length > 0 ? item.contentParagraphs : [item.desc || '']).map((paraText, pI) => ({
+                                          id: `block_conv_${pI}_${Date.now()}`,
+                                          type: 'paragraph',
+                                          align: 'left',
+                                          text: paraText
+                                        })),
                                     contentParagraphsText: (item.contentParagraphs || [item.desc]).join('\n\n'),
                                     enableAISearch: item.enableAISearch !== false,
                                     galleryPhotos: (item.galleryPhotos || []).map((p, idx) => {
@@ -6995,13 +7152,13 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
               {/* Edit Activity Modal */}
               {editingActivity && (
                 <div className="cms-modal-backdrop" onClick={() => setEditingActivity(null)}>
-                  <div className="cms-modal-card modal-extra-wide" onClick={e => e.stopPropagation()}>
-                    <div className="modal-head">
+                  <div className="cms-modal-card modal-extra-wide" style={{ maxHeight: '92vh', display: 'flex', flexDirection: 'column' }} onClick={e => e.stopPropagation()}>
+                    <div className="modal-head" style={{ flexShrink: 0 }}>
                       <h4>แก้ไขบทความกิจกรรม: {editingActivity.title}</h4>
                       <button onClick={() => setEditingActivity(null)} className="btn-close-modal">✕</button>
                     </div>
 
-                    <div className="modal-body-form">
+                    <div className="modal-body-form" style={{ flex: '1 1 auto', overflowY: 'auto', minHeight: 0 }}>
                       <div className="form-row-2">
                         <div className="form-group">
                           <label>ชื่อกิจกรรม / หัวข้อบทความ</label>
@@ -7157,12 +7314,18 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                         />
                       </div>
 
-                      <div className="form-group">
-                        <label>เนื้อหาบทความเต็ม (แยกแต่ละย่อหน้าด้วยการเค้นบรรทัด 2 ครั้ง)</label>
-                        <textarea 
-                          className="form-input form-textarea" rows="6"
-                          value={editingActivity.contentParagraphsText || ''}
-                          onChange={e => setEditingActivity({ ...editingActivity, contentParagraphsText: e.target.value })}
+                      <div className="form-group" style={{ marginBottom: '24px' }}>
+                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 700, fontSize: '0.95rem' }}>
+                          เนื้อหาบทความเต็ม (Visual Block Editor สไตล์ WordPress Gutenberg)
+                        </label>
+                        <ArticleBlockEditor 
+                          blocks={editingActivity.contentBlocks || []} 
+                          onChange={(updatedBlocks) => {
+                            setEditingActivity(prev => ({
+                              ...prev,
+                              contentBlocks: updatedBlocks
+                            }));
+                          }} 
                         />
                       </div>
 
@@ -7406,7 +7569,7 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                       </div>
                     </div>
 
-                    <div className="modal-footer-btns">
+                    <div className="modal-footer-btns" style={{ flexShrink: 0 }}>
                       <button className="btn-secondary" onClick={() => setEditingActivity(null)}>ยกเลิก</button>
                       <button 
                         type="button" 
@@ -7418,10 +7581,28 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                       <button 
                         className="btn-primary" 
                         onClick={() => {
-                          const paragraphs = (editingActivity.contentParagraphsText || '')
-                            .split('\n\n')
-                            .map(p => p.trim())
-                            .filter(Boolean);
+                          let paragraphs = [];
+                          if (editingActivity.contentBlocks && editingActivity.contentBlocks.length > 0) {
+                            paragraphs = editingActivity.contentBlocks
+                              .map(b => {
+                                if (b.type === 'heading') return b.text;
+                                if (b.type === 'paragraph') return b.text;
+                                if (b.type === 'media-text') return `${b.title ? b.title + ': ' : ''}${b.text || ''}`.trim();
+                                if (b.type === 'columns-2') return `${b.leftTitle || ''} ${b.leftText || ''}\n${b.rightTitle || ''} ${b.rightText || ''}`.trim();
+                                if (b.type === 'columns-3') return `${b.col1Text || ''}\n${b.col2Text || ''}\n${b.col3Text || ''}`.trim();
+                                if (b.type === 'quote') return `"${b.text}" ${b.author ? `— ${b.author}` : ''}`.trim();
+                                if (b.type === 'callout') return `${b.title ? b.title + ': ' : ''}${b.text || ''}`.trim();
+                                if (b.type === 'list') return (b.items || []).join('\n');
+                                return '';
+                              })
+                              .filter(Boolean);
+                          }
+                          if (paragraphs.length === 0) {
+                            paragraphs = (editingActivity.contentParagraphsText || '')
+                              .split('\n\n')
+                              .map(p => p.trim())
+                              .filter(Boolean);
+                          }
                           const validPhotos = (editingActivity.galleryPhotos || []).map(p => {
                             if (typeof p === 'string') return { url: p, caption: editingActivity.title, alt: editingActivity.imageAlt || editingActivity.title };
                             return {
@@ -7433,6 +7614,7 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
 
                           updateActivityItem(editingActivity.id, {
                             ...editingActivity,
+                            contentBlocks: editingActivity.contentBlocks || [],
                             contentParagraphs: paragraphs.length > 0 ? paragraphs : [editingActivity.desc],
                             galleryPhotos: validPhotos.length > 0 ? validPhotos : [{ url: editingActivity.image, caption: editingActivity.title, alt: editingActivity.imageAlt || editingActivity.title }]
                           });
@@ -7450,13 +7632,13 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
               {/* Add New Activity Modal */}
               {showAddActivityModal && (
                 <div className="cms-modal-backdrop" onClick={() => setShowAddActivityModal(false)}>
-                  <div className="cms-modal-card modal-extra-wide" onClick={e => e.stopPropagation()}>
-                    <div className="modal-head">
+                  <div className="cms-modal-card modal-extra-wide" style={{ maxHeight: '92vh', display: 'flex', flexDirection: 'column' }} onClick={e => e.stopPropagation()}>
+                    <div className="modal-head" style={{ flexShrink: 0 }}>
                       <h4>เพิ่มกิจกรรม & บทความใหม่ (New Article)</h4>
                       <button onClick={() => setShowAddActivityModal(false)} className="btn-close-modal">✕</button>
                     </div>
 
-                    <div className="modal-body-form">
+                    <div className="modal-body-form" style={{ flex: '1 1 auto', overflowY: 'auto', minHeight: 0 }}>
                       <div className="form-row-2">
                         <div className="form-group">
                           <label>ชื่อกิจกรรม / หัวข้อบทความ</label>
@@ -7596,12 +7778,18 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                         />
                       </div>
 
-                      <div className="form-group">
-                        <label>เนื้อหาบทความเต็ม (แยกแต่ละย่อหน้าด้วยการเค้นบรรทัด 2 ครั้ง)</label>
-                        <textarea 
-                          className="form-input form-textarea" rows="5"
-                          value={newActivity.contentParagraphsText}
-                          onChange={e => setNewActivity({ ...newActivity, contentParagraphsText: e.target.value })}
+                      <div className="form-group" style={{ marginBottom: '24px' }}>
+                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 700, fontSize: '0.95rem' }}>
+                          เนื้อหาบทความเต็ม (Visual Block Editor สไตล์ WordPress Gutenberg)
+                        </label>
+                        <ArticleBlockEditor 
+                          blocks={newActivity.contentBlocks || []} 
+                          onChange={(updatedBlocks) => {
+                            setNewActivity(prev => ({
+                              ...prev,
+                              contentBlocks: updatedBlocks
+                            }));
+                          }} 
                         />
                       </div>
                       {/* Interactive High-Res Photo Gallery & SEO ALT Manager */}
@@ -7844,7 +8032,7 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                       </div>
                     </div>
 
-                    <div className="modal-footer-btns">
+                    <div className="modal-footer-btns" style={{ flexShrink: 0 }}>
                       <button className="btn-secondary" onClick={() => setShowAddActivityModal(false)}>ยกเลิก</button>
                       <button 
                         type="button" 
@@ -7860,10 +8048,28 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                             alert('กรุณาระบุชื่อกิจกรรม');
                             return;
                           }
-                          const paragraphs = (newActivity.contentParagraphsText || '')
-                            .split('\n\n')
-                            .map(p => p.trim())
-                            .filter(Boolean);
+                          let paragraphs = [];
+                          if (newActivity.contentBlocks && newActivity.contentBlocks.length > 0) {
+                            paragraphs = newActivity.contentBlocks
+                              .map(b => {
+                                if (b.type === 'heading') return b.text;
+                                if (b.type === 'paragraph') return b.text;
+                                if (b.type === 'media-text') return `${b.title ? b.title + ': ' : ''}${b.text || ''}`.trim();
+                                if (b.type === 'columns-2') return `${b.leftTitle || ''} ${b.leftText || ''}\n${b.rightTitle || ''} ${b.rightText || ''}`.trim();
+                                if (b.type === 'columns-3') return `${b.col1Text || ''}\n${b.col2Text || ''}\n${b.col3Text || ''}`.trim();
+                                if (b.type === 'quote') return `"${b.text}" ${b.author ? `— ${b.author}` : ''}`.trim();
+                                if (b.type === 'callout') return `${b.title ? b.title + ': ' : ''}${b.text || ''}`.trim();
+                                if (b.type === 'list') return (b.items || []).join('\n');
+                                return '';
+                              })
+                              .filter(Boolean);
+                          }
+                          if (paragraphs.length === 0) {
+                            paragraphs = (newActivity.contentParagraphsText || '')
+                              .split('\n\n')
+                              .map(p => p.trim())
+                              .filter(Boolean);
+                          }
                           const validPhotos = (newActivity.galleryPhotos || []).map(p => {
                             if (typeof p === 'string') return { url: p, caption: newActivity.title, alt: newActivity.imageAlt || newActivity.title };
                             return {
@@ -7875,6 +8081,7 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
 
                           addActivityItem({
                             ...newActivity,
+                            contentBlocks: newActivity.contentBlocks || [],
                             contentParagraphs: paragraphs.length > 0 ? paragraphs : [newActivity.desc],
                             galleryPhotos: validPhotos.length > 0 ? validPhotos : [{ url: newActivity.image, caption: newActivity.title, alt: newActivity.imageAlt || newActivity.title }]
                           });
@@ -8181,6 +8388,13 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                   >
                     <RefreshCw size={14} className={isSyncingERP ? 'spin-icon' : ''} />
                     <span>{isSyncingERP ? 'กำลังดึงข้อมูล POS...' : 'ซิงค์ข้อมูลสด (Live Sync)'}</span>
+                  </button>
+                  <button 
+                    className="btn-secondary"
+                    onClick={() => setActiveTab('omnichannel-leads')}
+                  >
+                    <Receipt size={14} />
+                    <span>จัดการรายจ่ายสดย่อย (/pay)</span>
                   </button>
                   <button 
                     className="btn-primary"

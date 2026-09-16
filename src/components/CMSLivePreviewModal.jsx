@@ -5,6 +5,7 @@ import {
   Compass, Sparkles, MapPin, Calendar, Clock, Tag, Award, Quote, TrendingUp,
   Share2, Check, Shield, Coffee, ChevronRight, Zap, Info, RefreshCw
 } from 'lucide-react';
+import SingleActivityView from './SingleActivityView';
 
 // Helpers for dynamic theme contrast & color overlays
 function isColorDark(hexColor) {
@@ -85,42 +86,71 @@ export default function CMSLivePreviewModal({
             <span className="cms-preview-badge">LIVE PREVIEW</span>
           </div>
 
-          {/* Device Viewport Selector */}
-          <div className="cms-preview-viewport-bar">
-            <button 
-              className={`viewport-toggle-btn ${viewport === 'desktop' ? 'active' : ''}`}
-              onClick={() => setViewport('desktop')}
-              title="มุมมองหน้าจอคอมพิวเตอร์ Desktop (100%)"
-            >
-              <Monitor size={14} />
-              <span>Desktop</span>
-            </button>
-            <button 
-              className={`viewport-toggle-btn ${viewport === 'tablet' ? 'active' : ''}`}
-              onClick={() => setViewport('tablet')}
-              title="มุมมองแท็บเล็ต Tablet (768px)"
-            >
-              <Tablet size={14} />
-              <span>Tablet</span>
-            </button>
-            <button 
-              className={`viewport-toggle-btn ${viewport === 'mobile' ? 'active' : ''}`}
-              onClick={() => setViewport('mobile')}
-              title="มุมมองมือถือ Mobile (390px)"
-            >
-              <Smartphone size={14} />
-              <span>Mobile</span>
+          <div className="cms-preview-header-right" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {/* Page Tabs for Full-Site Mode */}
+            {sectionType === 'full-site' && (
+              <div className="cms-preview-page-tabs">
+                <button 
+                  type="button"
+                  className={`preview-page-pill ${previewPage === 'home' ? 'active' : ''}`}
+                  onClick={() => setPreviewPage('home')}
+                >
+                  หน้าแรก
+                </button>
+                <button 
+                  type="button"
+                  className={`preview-page-pill ${previewPage === 'company' ? 'active' : ''}`}
+                  onClick={() => setPreviewPage('company')}
+                >
+                  ผู้ก่อตั้ง & บริษัท
+                </button>
+                <button 
+                  type="button"
+                  className={`preview-page-pill ${previewPage === 'franchise' ? 'active' : ''}`}
+                  onClick={() => setPreviewPage('franchise')}
+                >
+                  ผังร้าน 3D
+                </button>
+              </div>
+            )}
+
+            {/* Device Viewport Selector */}
+            <div className="cms-preview-viewport-bar">
+              <button 
+                className={`viewport-toggle-btn ${viewport === 'desktop' ? 'active' : ''}`}
+                onClick={() => setViewport('desktop')}
+                title="มุมมองหน้าจอคอมพิวเตอร์ Desktop (100%)"
+              >
+                <Monitor size={14} />
+                <span>Desktop</span>
+              </button>
+              <button 
+                className={`viewport-toggle-btn ${viewport === 'tablet' ? 'active' : ''}`}
+                onClick={() => setViewport('tablet')}
+                title="มุมมองแท็บเล็ต Tablet (768px)"
+              >
+                <Tablet size={14} />
+                <span>Tablet</span>
+              </button>
+              <button 
+                className={`viewport-toggle-btn ${viewport === 'mobile' ? 'active' : ''}`}
+                onClick={() => setViewport('mobile')}
+                title="มุมมองมือถือ Mobile (390px)"
+              >
+                <Smartphone size={14} />
+                <span>Mobile</span>
+              </button>
+            </div>
+
+            <button className="cms-preview-close-btn" onClick={onClose} title="ปิดหน้าต่างพรีวิว">
+              <X size={18} />
             </button>
           </div>
-
-          <button className="cms-preview-close-btn" onClick={onClose} title="ปิดหน้าต่างพรีวิว">
-            <X size={18} />
-          </button>
         </div>
 
         {/* Modal Body with Viewport Simulator */}
         <div className="cms-preview-modal-body">
-          <div className={`cms-preview-canvas viewport-${viewport}`}>
+          <div className={`cms-preview-stage stage-${viewport} cms-preview-canvas viewport-${viewport}`}>
 
             {/* 1. HERO SECTION PREVIEW */}
             {sectionType === 'hero' && (() => {
@@ -685,77 +715,13 @@ export default function CMSLivePreviewModal({
             )}
 
             {/* 9. ARTICLE / EVENT FULL READER PREVIEW */}
-            {sectionType === 'article-view' && draftData && (
-              <div style={{ padding: viewport === 'mobile' ? '20px 14px' : '36px 30px', background: '#ffffff' }}>
-                <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-                  {/* Article Category & Title */}
-                  <div style={{ display: 'inline-block', background: '#1d4ed8', color: '#fff', padding: '4px 12px', borderRadius: '999px', fontSize: '0.74rem', fontWeight: 700, marginBottom: '12px' }}>
-                    {draftData.tag || draftData.category || 'EVENT HIGHLIGHT'}
-                  </div>
-                  <h1 style={{ fontSize: viewport === 'mobile' ? '1.4rem' : '2rem', fontWeight: 800, color: '#0f172a', lineHeight: '1.3', marginBottom: '12px' }}>
-                    {draftData.title || 'ชื่อกิจกรรม'}
-                  </h1>
-                  
-                  {/* Meta */}
-                  <div style={{ display: 'flex', gap: '14px', fontSize: '0.78rem', color: '#64748b', flexWrap: 'wrap', marginBottom: '20px', borderBottom: '1px solid #e2e8f0', paddingBottom: '14px' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Calendar size={13} /> {draftData.date || 'กันยายน 2026'}</span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><MapPin size={13} /> {draftData.location || 'G-Speed Arena'}</span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Trophy size={13} /> {draftData.partner || 'ASUS ROG'}</span>
-                  </div>
-
-                  {/* Cover Image */}
-                  <div style={{ borderRadius: '12px', overflow: 'hidden', marginBottom: '24px', boxShadow: '0 8px 24px rgba(0,0,0,0.08)' }}>
-                    <img 
-                      src={draftData.image} 
-                      alt={draftData.imageAlt || draftData.title}
-                      style={{ width: '100%', maxHeight: '420px', objectFit: 'cover' }}
-                    />
-                    {draftData.imageAlt && (
-                      <div style={{ background: '#f8fafc', padding: '8px 14px', fontSize: '0.74rem', color: '#64748b', borderTop: '1px solid #e2e8f0' }}>
-                        <strong>SEO ALT:</strong> {draftData.imageAlt}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Excerpt */}
-                  {draftData.desc && (
-                    <div style={{ fontSize: '0.96rem', fontWeight: 600, color: '#1e293b', lineHeight: '1.6', marginBottom: '20px', background: '#eff6ff', padding: '14px 18px', borderRadius: '10px', borderLeft: '4px solid #1d4ed8' }}>
-                      {draftData.desc}
-                    </div>
-                  )}
-
-                  {/* Paragraphs */}
-                  <div style={{ fontSize: '0.9rem', color: '#334155', lineHeight: '1.8', marginBottom: '30px' }}>
-                    {(draftData.contentParagraphsText ? draftData.contentParagraphsText.split('\n\n') : (draftData.contentParagraphs || [''])).map((p, pIdx) => (
-                      <p key={pIdx} style={{ marginBottom: '14px' }}>{p}</p>
-                    ))}
-                  </div>
-
-                  {/* Gallery Section */}
-                  {(draftData.galleryPhotos || []).length > 0 && (
-                    <div style={{ marginTop: '30px', borderTop: '1px solid #e2e8f0', paddingTop: '20px' }}>
-                      <h4 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a', marginBottom: '14px' }}>
-                        อัลบั้มภาพกิจกรรม ({(draftData.galleryPhotos || []).length} ภาพ)
-                      </h4>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '12px' }}>
-                        {(draftData.galleryPhotos || []).map((photo, phIdx) => (
-                          <div key={phIdx} style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
-                            <img 
-                              src={photo.url || photo} 
-                              alt={photo.alt || 'Gallery photo'} 
-                              style={{ width: '100%', height: '120px', objectFit: 'cover' }}
-                            />
-                            {photo.caption && (
-                              <div style={{ padding: '6px 8px', fontSize: '0.7rem', color: '#64748b', background: '#f8fafc' }}>
-                                {photo.caption}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
+            {sectionType === 'article-view' && (draftData || siteData?.gallery?.[0]) && (
+              <div className="preview-real-article-wrapper">
+                <SingleActivityView 
+                  activity={draftData || siteData?.gallery?.[0]} 
+                  isPreview={true} 
+                  onBack={() => {}} 
+                />
               </div>
             )}
 
@@ -769,14 +735,22 @@ export default function CMSLivePreviewModal({
                 </div>
 
                 {/* Navbar */}
-                <div style={{ padding: '14px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-                  <div style={{ fontWeight: 800, fontSize: '1.1rem', color: '#38bdf8' }}>G-SPEED ESPORT</div>
-                  <div style={{ display: 'flex', gap: '16px', fontSize: '0.84rem' }}>
-                    {(siteData?.navLinks || []).map(l => (
-                      <span key={l.id} style={{ color: l.visible ? '#fff' : '#64748b' }}>{l.label}</span>
-                    ))}
-                  </div>
-                  <button className="btn-primary btn-sm">
+                <div style={{ padding: viewport === 'mobile' ? '12px 16px' : '14px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                  <div style={{ fontWeight: 800, fontSize: viewport === 'mobile' ? '0.95rem' : '1.1rem', color: '#38bdf8' }}>G-SPEED ESPORT</div>
+                  {viewport === 'desktop' && (
+                    <div style={{ display: 'flex', gap: '16px', fontSize: '0.84rem' }}>
+                      {(siteData?.navLinks || []).map(l => (
+                        <span key={l.id} style={{ color: l.visible ? '#fff' : '#64748b' }}>{l.label}</span>
+                      ))}
+                    </div>
+                  )}
+                  {viewport !== 'desktop' && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.08)', padding: '5px 10px', borderRadius: '6px', fontSize: '0.76rem', color: '#94a3b8' }}>
+                      <Menu size={15} />
+                      <span>เมนู</span>
+                    </div>
+                  )}
+                  <button className="btn-primary btn-sm" style={{ display: viewport === 'mobile' ? 'none' : 'inline-flex' }}>
                     {siteData?.headerCta?.text || 'จองเครื่องล่วงหน้า'}
                   </button>
                 </div>
@@ -820,37 +794,51 @@ export default function CMSLivePreviewModal({
 
             {/* 11. FULL SITE INTERACTIVE PREVIEW */}
             {sectionType === 'full-site' && (
-              <div style={{ width: '100%', height: '700px', display: 'flex', flexDirection: 'column' }}>
-                <div style={{ background: '#1e293b', padding: '8px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button 
-                      onClick={() => setPreviewPage('home')}
-                      style={{ padding: '4px 12px', borderRadius: '6px', background: previewPage === 'home' ? '#1d4ed8' : '#334155', color: '#fff', border: 'none', fontSize: '0.74rem', cursor: 'pointer', fontWeight: 600 }}
-                    >
-                      หน้าแรก (Home Arena)
-                    </button>
-                    <button 
-                      onClick={() => setPreviewPage('company')}
-                      style={{ padding: '4px 12px', borderRadius: '6px', background: previewPage === 'company' ? '#1d4ed8' : '#334155', color: '#fff', border: 'none', fontSize: '0.74rem', cursor: 'pointer', fontWeight: 600 }}
-                    >
-                      ผู้ก่อตั้ง & บริษัท (Company Profile)
-                    </button>
-                    <button 
-                      onClick={() => setPreviewPage('franchise')}
-                      style={{ padding: '4px 12px', borderRadius: '6px', background: previewPage === 'franchise' ? '#1d4ed8' : '#334155', color: '#fff', border: 'none', fontSize: '0.74rem', cursor: 'pointer', fontWeight: 600 }}
-                    >
-                      ผังร้าน 3D & แฟรนไชส์ (Franchise Planner)
-                    </button>
+              <div style={{ 
+                width: '100%', 
+                height: viewport === 'mobile' ? '740px' : viewport === 'tablet' ? '850px' : '700px', 
+                display: 'flex', 
+                flexDirection: 'column' 
+              }}>
+                {/* Hide navbar on tablet and mobile to prevent overlapping */}
+                {viewport === 'desktop' && (
+                  <div style={{ background: '#1e293b', padding: '8px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button 
+                        onClick={() => setPreviewPage('home')}
+                        style={{ padding: '4px 12px', borderRadius: '6px', background: previewPage === 'home' ? '#1d4ed8' : '#334155', color: '#fff', border: 'none', fontSize: '0.74rem', cursor: 'pointer', fontWeight: 600 }}
+                      >
+                        หน้าแรก (Home Arena)
+                      </button>
+                      <button 
+                        onClick={() => setPreviewPage('company')}
+                        style={{ padding: '4px 12px', borderRadius: '6px', background: previewPage === 'company' ? '#1d4ed8' : '#334155', color: '#fff', border: 'none', fontSize: '0.74rem', cursor: 'pointer', fontWeight: 600 }}
+                      >
+                        ผู้ก่อตั้ง & บริษัท (Company Profile)
+                      </button>
+                      <button 
+                        onClick={() => setPreviewPage('franchise')}
+                        style={{ padding: '4px 12px', borderRadius: '6px', background: previewPage === 'franchise' ? '#1d4ed8' : '#334155', color: '#fff', border: 'none', fontSize: '0.74rem', cursor: 'pointer', fontWeight: 600 }}
+                      >
+                        ผังร้าน 3D & แฟรนไชส์ (Franchise Planner)
+                      </button>
+                    </div>
+                    <a href={`#/${previewPage === 'home' ? '' : previewPage}`} target="_blank" rel="noopener noreferrer" style={{ color: '#38bdf8', fontSize: '0.74rem', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none' }}>
+                      <span>เปิดในแท็บใหม่</span>
+                      <ExternalLink size={12} />
+                    </a>
                   </div>
-                  <a href={`#/${previewPage === 'home' ? '' : previewPage}`} target="_blank" rel="noopener noreferrer" style={{ color: '#38bdf8', fontSize: '0.74rem', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none' }}>
-                    <span>เปิดในแท็บใหม่</span>
-                    <ExternalLink size={12} />
-                  </a>
-                </div>
+                )}
                 <iframe 
                   src={`#/${previewPage === 'home' ? '' : previewPage}`} 
                   title="Full Live Site Simulator"
-                  style={{ width: '100%', height: '100%', border: 'none', background: '#ffffff' }}
+                  style={{ 
+                    width: '100%', 
+                    height: '100%', 
+                    border: 'none', 
+                    background: '#ffffff',
+                    borderRadius: viewport === 'mobile' ? '0 0 26px 26px' : viewport === 'tablet' ? '0 0 16px 16px' : '0'
+                  }}
                 />
               </div>
             )}

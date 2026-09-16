@@ -301,11 +301,15 @@ export default function ThreeProductViewer({
     const deskTopMat = new THREE.MeshStandardMaterial({ color: deskColor, roughness: 0.35, metalness: 0.12 });
 
     // Apply real image / desk texture if provided
-    if (item.textureUrl || item.deskTextureUrl) {
+    const targetTextureUrl = item.deskTextureUrl || item.textureUrl || 
+      (typeof item.image === 'string' && (item.image.startsWith('data:image') || item.image.startsWith('blob:') || item.image.includes('texture')) ? item.image : null);
+
+    if (targetTextureUrl) {
       const texLoader = new THREE.TextureLoader();
-      texLoader.load(item.textureUrl || item.deskTextureUrl, (tex) => {
+      texLoader.load(targetTextureUrl, (tex) => {
         tex.wrapS = THREE.RepeatWrapping;
         tex.wrapT = THREE.RepeatWrapping;
+        deskTopMat.color.setHex(0xffffff); // Prevent dark color tinting so uploaded photo texture renders in true color
         deskTopMat.map = tex;
         deskTopMat.needsUpdate = true;
       });
