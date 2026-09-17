@@ -6,7 +6,14 @@ import {
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 
-export default function SingleActivityView({ activity, onBack = () => {}, onSelectActivity = () => {}, isPreview = false }) {
+export default function SingleActivityView({ 
+  activity, 
+  onBack = () => {}, 
+  onSelectActivity = () => {}, 
+  onSelectTag = null,
+  onSelectCategory = null,
+  isPreview = false 
+}) {
   const { siteData } = useSiteData();
   const allActivities = [...(siteData?.gallery || []), ...(siteData?.news || [])];
 
@@ -16,6 +23,10 @@ export default function SingleActivityView({ activity, onBack = () => {}, onSele
   // State for Photo Lightbox
   const [activePhotoIdx, setActivePhotoIdx] = useState(null);
   const [lightboxImage, setLightboxImage] = useState(null);
+
+  // State for Tag & Category In-page Filtering
+  const [activeFilterTag, setActiveFilterTag] = useState(null);
+  const [activeFilterCategory, setActiveFilterCategory] = useState(null);
 
   // Scroll to top & set dynamic SEO meta tags + Schema.org Structured Data on mount or when activity changes
   useEffect(() => {
@@ -179,10 +190,46 @@ export default function SingleActivityView({ activity, onBack = () => {}, onSele
         'ทางทีมงาน G-Speed Esport Arena ขอขอบคุณค่ายเกม พันธมิตร และแฟนคลับทุกคนที่มาร่วมสร้างความทรงจำอันยอดเยี่ยมนี้ แล้วพบกันใหม่ในกิจกรรมและการแข่งขันรอบถัดไป!'
       ];
 
-  // Related Activities (excluding current)
-  const relatedActivities = allActivities
-    .filter(a => a.id !== activity.id)
-    .slice(0, 3);
+  // Filtered Related Activities based on selected Tag or Category
+  const filteredRelatedActivities = allActivities.filter(a => {
+    if (a.id === activity.id) return false;
+    if (activeFilterTag) {
+      return Array.isArray(a.tags) && a.tags.some(t => t.toLowerCase() === activeFilterTag.toLowerCase());
+    }
+    if (activeFilterCategory) {
+      return a.category === activeFilterCategory;
+    }
+    return true;
+  });
+
+  const displayRelatedActivities = (activeFilterTag || activeFilterCategory)
+    ? filteredRelatedActivities
+    : filteredRelatedActivities.slice(0, 3);
+
+  // Tag & Category Click Handlers
+  const handleTagClick = (tag) => {
+    setActiveFilterCategory(null);
+    const nextTag = activeFilterTag === tag ? null : tag;
+    setActiveFilterTag(nextTag);
+    if (nextTag) {
+      setTimeout(() => {
+        const el = document.getElementById('related-activities-section');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 50);
+    }
+  };
+
+  const handleCategoryClick = (cat) => {
+    setActiveFilterTag(null);
+    const nextCat = activeFilterCategory === cat ? null : cat;
+    setActiveFilterCategory(nextCat);
+    if (nextCat) {
+      setTimeout(() => {
+        const el = document.getElementById('related-activities-section');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 50);
+    }
+  };
 
   // Category Icon helper
   const renderCategoryIcon = (cat) => {
@@ -245,10 +292,15 @@ export default function SingleActivityView({ activity, onBack = () => {}, onSele
       <header className="activity-article-header">
         <div className="container header-container">
           <div className="article-meta-top">
-            <span className="badge-pill badge-blue">
+            <button 
+              type="button"
+              className={`badge-pill badge-blue category-badge-clickable ${activeFilterCategory === activity.category ? 'active-filter' : ''}`}
+              onClick={() => handleCategoryClick(activity.category)}
+              title={`คลิกเพื่อกรองบทความในหมวดหมู่ ${activity.tag || activity.category}`}
+            >
               {renderCategoryIcon(activity.category)}
               <span>{activity.tag || 'GLP OFFICIAL EVENT'}</span>
-            </span>
+            </button>
 
             <span className="article-date-badge">
               <Calendar size={14} />
@@ -269,6 +321,29 @@ export default function SingleActivityView({ activity, onBack = () => {}, onSele
           </div>
 
           <h1 className="article-title">{activity.title}</h1>
+
+          {/* Article Header Tags */}
+          {activity.tags && activity.tags.length > 0 && (
+            <div className="article-header-tags-row">
+              <span className="header-tags-label">
+                <Tag size={13} className="text-blue" />
+                <span>แท็กบทความ:</span>
+              </span>
+              <div className="header-tags-list">
+                {activity.tags.map((tag, tIdx) => (
+                  <button
+                    key={tIdx}
+                    type="button"
+                    className={`header-tag-pill ${activeFilterTag === tag ? 'active' : ''}`}
+                    onClick={() => handleTagClick(tag)}
+                    title={`คลิกเพื่อดูบทความที่เกี่ยวข้องกับ ${tag}`}
+                  >
+                    #{tag.replace(/^#/, '')}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {activity.desc && (
             <div className="article-lead-card glass-panel">
@@ -456,12 +531,28 @@ export default function SingleActivityView({ activity, onBack = () => {}, onSele
               <div className="article-tags-cluster">
                 <div className="tags-label-row">
                   <Tag size={15} className="text-blue" />
-                  <span>แท็กหัวข้อที่เกี่ยวข้อง (Article Tags):</span>
+                  <span className="tags-title">แท็กหัวข้อที่เกี่ยวข้อง (Article Tags):</span>
+                  <span className="tags-hint-guide">(คลิกที่แท็กเพื่อดูบทความที่เกี่ยวข้อง)</span>
                 </div>
                 <div className="tags-pill-list">
-                  {(activity.tags || ['#EsportsThailand', '#GLP2026', '#Tournament', '#GamingArena']).map((tag, tIdx) => (
-                    <span key={tIdx} className="article-tag-chip">{tag}</span>
-                  ))}
+                  {(activity.tags && activity.tags.length > 0 
+                    ? activity.tags 
+                    : ['#EsportsThailand', '#GLP2026', '#Tournament', '#GamingArena']
+                  ).map((tag, tIdx) => {
+                    const isActive = activeFilterTag === tag;
+                    return (
+                      <button 
+                        key={tIdx} 
+                        type="button"
+                        className={`article-tag-chip clickable ${isActive ? 'active' : ''}`}
+                        onClick={() => handleTagClick(tag)}
+                        title={`คลิกเพื่อดูบทความทั้งหมดที่ติดแท็ก ${tag}`}
+                      >
+                        <span className="tag-symbol">#</span>
+                        <span>{tag.replace(/^#/, '')}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -500,101 +591,84 @@ export default function SingleActivityView({ activity, onBack = () => {}, onSele
               </div>
             </div>
 
-            {/* Social Share & Copy Link Panel (Replaces old download/video buttons) */}
-            <div className="article-actions-panel glass-panel social-share-panel">
-              <div className="actions-header">
-                <div className="actions-icon-wrap">
-                  <Share2 size={22} className="text-blue" />
+            {/* Compact & Sleek Social Share Strip */}
+            <div className="article-share-strip glass-panel">
+              <div className="share-strip-header">
+                <div className="share-strip-title-row">
+                  <Share2 size={16} className="text-blue" />
+                  <span className="share-strip-title">แชร์กิจกรรม & บทความนี้</span>
                 </div>
-                <div>
-                  <h4 className="actions-card-title">แชร์กิจกรรม & บทความนี้ หรือคัดลอกลิงก์</h4>
-                  <p className="actions-card-desc">
-                    ร่วมส่งต่อความมันส์และไฮไลต์กิจกรรม ให้เพื่อนๆ ในทีมและคอมมูนิตี้เกมเมอร์ได้ร่วมรับชม
-                  </p>
-                </div>
+                <span className="share-strip-subtitle">ร่วมส่งต่อความมันส์และไฮไลต์กิจกรรมให้เพื่อนและคอมมูนิตี้</span>
               </div>
 
-              {/* Grid of Main Social Share Buttons */}
-              <div className="social-share-buttons-grid">
-                {/* Facebook Share */}
-                <button 
-                  onClick={handleShareFacebook}
-                  className="social-share-card-btn btn-share-facebook"
-                  title="แชร์ลง Facebook"
-                >
-                  <svg className="social-icon-svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                  </svg>
-                  <div className="share-btn-text">
-                    <span className="share-btn-name">Facebook</span>
-                    <span className="share-btn-action">แชร์ลงหน้าฟีดหรือกลุ่ม</span>
-                  </div>
-                </button>
+              <div className="share-strip-actions">
+                <div className="share-buttons-row">
+                  {/* Facebook */}
+                  <button 
+                    onClick={handleShareFacebook}
+                    className="share-pill-btn fb"
+                    title="แชร์ลง Facebook"
+                  >
+                    <svg className="social-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                    <span>Facebook</span>
+                  </button>
 
-                {/* LINE Share */}
-                <button 
-                  onClick={handleShareLine}
-                  className="social-share-card-btn btn-share-line"
-                  title="แชร์ไปยัง LINE"
-                >
-                  <svg className="social-icon-svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 4.269 8.846 10.019 9.607.391.084.922.258 1.057.592.121.303.079.778.039 1.085l-.171 1.027c-.053.303-.242 1.186 1.039.646 1.281-.54 6.915-4.072 9.434-6.973 1.796-1.999 2.583-4.024 2.583-5.382z"/>
-                  </svg>
-                  <div className="share-btn-text">
-                    <span className="share-btn-name">LINE</span>
-                    <span className="share-btn-action">ส่งให้เพื่อนหรือกลุ่มแชต</span>
-                  </div>
-                </button>
+                  {/* LINE */}
+                  <button 
+                    onClick={handleShareLine}
+                    className="share-pill-btn line"
+                    title="แชร์ไปยัง LINE"
+                  >
+                    <svg className="social-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 4.269 8.846 10.019 9.607.391.084.922.258 1.057.592.121.303.079.778.039 1.085l-.171 1.027c-.053.303-.242 1.186 1.039.646 1.281-.54 6.915-4.072 9.434-6.973 1.796-1.999 2.583-4.024 2.583-5.382z"/>
+                    </svg>
+                    <span>LINE</span>
+                  </button>
 
-                {/* X (Twitter) Share */}
-                <button 
-                  onClick={handleShareTwitter}
-                  className="social-share-card-btn btn-share-x"
-                  title="แชร์ลง X (Twitter)"
-                >
-                  <svg className="social-icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                  </svg>
-                  <div className="share-btn-text">
-                    <span className="share-btn-name">X (Twitter)</span>
-                    <span className="share-btn-action">โพสต์สู่ไทม์ไลน์</span>
-                  </div>
-                </button>
+                  {/* X (Twitter) */}
+                  <button 
+                    onClick={handleShareTwitter}
+                    className="share-pill-btn x-twitter"
+                    title="แชร์ลง X (Twitter)"
+                  >
+                    <svg className="social-icon-svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
+                    <span>X</span>
+                  </button>
 
-                {/* Copy Link Main Button */}
-                <button 
-                  onClick={handleCopyLink}
-                  className={`social-share-card-btn btn-share-copy ${copiedLink ? 'copied' : ''}`}
-                  title="คัดลอกลิงก์บทความนี้"
-                >
-                  {copiedLink ? <Check size={20} className="text-emerald" /> : <Copy size={20} />}
-                  <div className="share-btn-text">
-                    <span className="share-btn-name">{copiedLink ? 'คัดลอกแล้ว!' : 'คัดลอกลิงก์'}</span>
-                    <span className="share-btn-action">{copiedLink ? 'พร้อมส่งต่อได้ทันที' : 'คัดลอก URL สู่คลิปบอร์ด'}</span>
-                  </div>
-                </button>
-              </div>
+                  {/* Copy Link */}
+                  <button 
+                    onClick={handleCopyLink}
+                    className={`share-pill-btn copy ${copiedLink ? 'copied' : ''}`}
+                    title="คัดลอกลิงก์บทความนี้"
+                  >
+                    {copiedLink ? <Check size={14} className="text-emerald" /> : <Copy size={14} />}
+                    <span>{copiedLink ? 'คัดลอกแล้ว!' : 'คัดลอกลิงก์'}</span>
+                  </button>
+                </div>
 
-              {/* Direct URL Box for convenient 1-click select & copy */}
-              <div className="share-url-inline-box">
-                <div className="url-field-wrap">
-                  <Globe size={16} className="text-muted" />
+                {/* Direct URL Inline Field */}
+                <div className="share-url-inline-pill">
+                  <Globe size={14} className="url-globe-icon" />
                   <input 
                     type="text" 
                     readOnly 
                     value={typeof window !== 'undefined' ? window.location.href : ''} 
                     onClick={(e) => e.target.select()}
-                    className="share-url-input"
+                    className="share-url-input-slim"
                     title="คลิกเพื่อเลือก URL ทั้งหมด"
                   />
+                  <button 
+                    onClick={handleCopyLink} 
+                    className={`btn-url-copy-icon ${copiedLink ? 'copied' : ''}`}
+                    title="คลิกเพื่อคัดลอก URL"
+                  >
+                    {copiedLink ? <Check size={13} /> : <Copy size={13} />}
+                  </button>
                 </div>
-                <button 
-                  onClick={handleCopyLink} 
-                  className={`btn-url-copy-trigger ${copiedLink ? 'copied' : ''}`}
-                >
-                  {copiedLink ? <Check size={15} /> : <Copy size={15} />}
-                  <span>{copiedLink ? 'คัดลอกแล้ว' : 'คัดลอก'}</span>
-                </button>
               </div>
             </div>
           </article>
@@ -656,6 +730,27 @@ export default function SingleActivityView({ activity, onBack = () => {}, onSele
                     <strong className="fact-val">{activity.tag || 'ESPORTS EVENT'}</strong>
                   </div>
                 </li>
+
+                {activity.tags && activity.tags.length > 0 && (
+                  <li className="fact-item fact-item-tags">
+                    <div className="fact-icon-box"><Tag size={16} /></div>
+                    <div className="fact-content">
+                      <span className="fact-lbl">แท็กที่เกี่ยวข้อง</span>
+                      <div className="sidebar-tags-wrap">
+                        {activity.tags.map((tg, idx) => (
+                          <span 
+                            key={idx} 
+                            className={`sidebar-tag-item ${activeFilterTag === tg ? 'active' : ''}`}
+                            onClick={() => handleTagClick(tg)}
+                            title={`คลิกเพื่อกรองบทความแท็ก ${tg}`}
+                          >
+                            {tg}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </li>
+                )}
               </ul>
             </div>
 
@@ -708,47 +803,130 @@ export default function SingleActivityView({ activity, onBack = () => {}, onSele
       </section>
 
       {/* Related Activities Section */}
-      <section className="related-activities-section">
+      <section className="related-activities-section" id="related-activities-section">
         <div className="container">
           <div className="section-header">
             <div className="badge-pill badge-blue">
               <LayoutGrid size={14} />
               <span>EXPLORE MORE EVENTS</span>
             </div>
-            <h2 className="section-title">กิจกรรมและบทความอื่นๆ ที่น่าสนใจ</h2>
-            <p className="section-subtitle">ย้อนชมความสนุกและข่าวสารความเคลื่อนไหวล่าสุดจาก G-Speed Esport Arena</p>
-          </div>
+            <h2 className="section-title">
+              {activeFilterTag 
+                ? <>บทความที่เกี่ยวข้องกับแท็ก <span className="text-blue">{activeFilterTag}</span></>
+                : activeFilterCategory
+                ? <>บทความในหมวดหมู่ <span className="text-blue">{activity.tag || activeFilterCategory}</span></>
+                : 'กิจกรรมและบทความอื่นๆ ที่น่าสนใจ'}
+            </h2>
+            <p className="section-subtitle">
+              {activeFilterTag || activeFilterCategory
+                ? `พบทั้งหมด ${displayRelatedActivities.length} บทความที่เกี่ยวข้อง คลิกเพื่อเปิดอ่านเนื้อหาฉบับเต็มได้ทันที`
+                : 'ย้อนชมความสนุกและข่าวสารความเคลื่อนไหวล่าสุดจาก G-Speed Esport Arena'}
+            </p>
 
-          <div className="related-grid">
-            {relatedActivities.map((item) => (
-              <div 
-                key={item.id} 
-                className="related-card glass-panel"
-                onClick={() => {
-                  onSelectActivity(item);
-                  window.history.pushState(null, '', `/activities/${item.slug || item.id}`);
-                }}
-              >
-                <div className="related-thumb">
-                  <img src={item.image} alt={item.imageAlt || item.title} />
-                  <span className="related-tag">{item.tag}</span>
+            {/* Filter Active Indicator Banner */}
+            {(activeFilterTag || activeFilterCategory) && (
+              <div className="active-tag-filter-banner glass-panel">
+                <div className="active-filter-meta">
+                  <span className="filter-pill-current">
+                    <Tag size={14} />
+                    <span>ตัวกรอง: <strong>{activeFilterTag || activity.tag || activeFilterCategory}</strong></span>
+                  </span>
+                  <span className="filter-count-label">พบ {displayRelatedActivities.length} บทความ</span>
                 </div>
-                <div className="related-info">
-                  <div className="related-meta">
-                    <span>{item.date}</span>
-                    <span>•</span>
-                    <span>{item.partner}</span>
-                  </div>
-                  <h4 className="related-title">{item.title}</h4>
-                  <p className="related-desc">{item.desc}</p>
-                  <div className="related-read-more text-blue">
-                    <span>อ่านบทความเต็ม</span>
-                    <ChevronRight size={14} />
-                  </div>
+                <div className="active-filter-btn-group">
+                  <button 
+                    type="button" 
+                    className="btn-filter-clear" 
+                    onClick={() => { setActiveFilterTag(null); setActiveFilterCategory(null); }}
+                  >
+                    <X size={14} />
+                    <span>ล้างตัวกรอง</span>
+                  </button>
+                  <button 
+                    type="button" 
+                    className="btn-filter-view-all" 
+                    onClick={() => {
+                      if (onSelectTag && activeFilterTag) {
+                        onSelectTag(activeFilterTag);
+                      } else if (onSelectCategory && activeFilterCategory) {
+                        onSelectCategory(activeFilterCategory);
+                      } else {
+                        onBack('activities');
+                      }
+                    }}
+                  >
+                    <span>ดูทั้งหมดในคลังกิจกรรม</span>
+                    <ExternalLink size={13} />
+                  </button>
                 </div>
               </div>
-            ))}
+            )}
           </div>
+
+          {displayRelatedActivities.length > 0 ? (
+            <div className="related-grid">
+              {displayRelatedActivities.map((item) => (
+                <div 
+                  key={item.id} 
+                  className="related-card glass-panel"
+                  onClick={() => {
+                    onSelectActivity(item);
+                    window.history.pushState(null, '', `/activities/${item.slug || item.id}`);
+                  }}
+                >
+                  <div className="related-thumb">
+                    <img src={item.image} alt={item.imageAlt || item.title} />
+                    <span className="related-tag">{item.tag || item.category}</span>
+                  </div>
+                  <div className="related-info">
+                    <div className="related-meta">
+                      <span>{item.date}</span>
+                      <span>•</span>
+                      <span>{item.partner}</span>
+                    </div>
+                    <h4 className="related-title">{item.title}</h4>
+                    <p className="related-desc">{item.desc}</p>
+                    
+                    {/* Tags on card */}
+                    {item.tags && item.tags.length > 0 && (
+                      <div className="card-mini-tags-row">
+                        {item.tags.slice(0, 3).map((tg, tgIdx) => (
+                          <span 
+                            key={tgIdx} 
+                            className={`mini-tag-badge ${activeFilterTag === tg ? 'active' : ''}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleTagClick(tg);
+                            }}
+                          >
+                            {tg}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="related-read-more text-blue">
+                      <span>อ่านบทความเต็ม</span>
+                      <ChevronRight size={14} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="no-related-articles-box glass-panel">
+              <Tag size={32} className="text-muted" />
+              <h3>ไม่พบบทความอื่นที่ตรงกับตัวกรองนี้</h3>
+              <p>ลองกดล้างตัวกรองเพื่อดูบทความและกิจกรรมน่าสนใจทั้งหมด</p>
+              <button 
+                type="button" 
+                className="btn-primary"
+                onClick={() => { setActiveFilterTag(null); setActiveFilterCategory(null); }}
+              >
+                ล้างตัวกรองทั้งหมด
+              </button>
+            </div>
+          )}
         </div>
       </section>
 

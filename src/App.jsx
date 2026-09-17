@@ -60,7 +60,12 @@ function AppContent() {
     const actMatch = path.match(/^\/(?:activities|activity|news|article)\/([^/?#]+)/i);
     const actSlug = actMatch ? decodeURIComponent(actMatch[1]) : null;
 
-    // 4. Tab selection
+    // 4. Query Params (Tags and Categories filter)
+    const searchParams = new URLSearchParams(window.location.search);
+    const tagParam = searchParams.get('tag') ? decodeURIComponent(searchParams.get('tag')) : null;
+    const catParam = searchParams.get('category') ? decodeURIComponent(searchParams.get('category')) : null;
+
+    // 5. Tab selection
     let tab = 'arena';
     let sectionToScroll = null;
 
@@ -84,6 +89,8 @@ function AppContent() {
       actSlug,
       tab,
       sectionToScroll,
+      tagParam,
+      catParam,
       pathname: path
     };
   }, []);
@@ -202,12 +209,22 @@ function AppContent() {
         {routeState.actSlug ? (
           <SingleActivityView 
             activity={matchedActivity}
-            onBack={(target = 'activities') => {
+            onBack={(target = 'activities', filterParams = null) => {
               if (target === 'home') {
                 navigateTo('/');
+              } else if (filterParams?.tag) {
+                navigateTo(`/activities?tag=${encodeURIComponent(filterParams.tag)}`);
+              } else if (filterParams?.category) {
+                navigateTo(`/activities?category=${encodeURIComponent(filterParams.category)}`);
               } else {
                 navigateTo('/activities');
               }
+            }}
+            onSelectTag={(tag) => {
+              navigateTo(`/activities?tag=${encodeURIComponent(tag)}`);
+            }}
+            onSelectCategory={(cat) => {
+              navigateTo(`/activities?category=${encodeURIComponent(cat)}`);
             }}
             onSelectActivity={(act) => {
               const slug = act.slug || act.id;
@@ -219,6 +236,8 @@ function AppContent() {
             {routeState.tab === 'arena' && (
               <ArenaHub 
                 initialTournamentSlug={routeState.eventSlug}
+                initialCategory={routeState.catParam || 'all'}
+                initialTag={routeState.tagParam || 'all'}
                 onSelectTournamentSlug={(slug) => {
                   if (slug) {
                     navigateTo(`/events/${slug}`);

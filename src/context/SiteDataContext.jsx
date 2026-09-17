@@ -6,7 +6,9 @@ import {
   GALLERY_ACTIVITIES as INITIAL_GALLERY,
   GAME_NEWS as INITIAL_NEWS,
   FOUNDER_INFO as INITIAL_FOUNDER,
-  VENUE_ZONES as INITIAL_ZONES
+  VENUE_ZONES as INITIAL_ZONES,
+  EVENT_CATEGORIES as INITIAL_CATEGORIES,
+  DEFAULT_ARTICLE_TAGS as INITIAL_TAGS
 } from '../data/mockData';
 
 // Initial Store RAG Knowledge Base Chunks
@@ -532,6 +534,8 @@ export const DEFAULT_SITE_DATA = {
   venueZones: INITIAL_ZONES,
   tournaments: INITIAL_TOURNAMENTS,
   gallery: INITIAL_GALLERY,
+  activityCategories: INITIAL_CATEGORIES,
+  articleTags: INITIAL_TAGS,
   news: INITIAL_NEWS,
   founder: {
     ...INITIAL_FOUNDER,
@@ -697,7 +701,88 @@ export const DEFAULT_SITE_DATA = {
   pettyCashExpenses: INITIAL_PETTY_CASH,
   omnichannelChats: INITIAL_OMNICHANNEL_CHATS,
   hardwareStations: INITIAL_HARDWARE_STATIONS,
-  rmaClaims: INITIAL_RMA_CLAIMS
+  rmaClaims: INITIAL_RMA_CLAIMS,
+  securityConfig: {
+    adminUsername: 'admin',
+    adminPassword: 'gspeed2026',
+    quickPin: '998877',
+    sessionTimeoutMinutes: 30,
+    rememberMeDurationDays: 7,
+    lastLogin: null,
+    lockoutDurationSeconds: 30,
+    maxFailedAttempts: 5
+  },
+  adminAuditLogs: [
+    {
+      id: 'log-1',
+      timestamp: '17/09/2026 10:00',
+      action: 'LOGIN_SUCCESS',
+      adminUser: 'admin',
+      ip: '127.0.0.1 (Localhost)',
+      device: 'Chrome / Windows',
+      status: 'success',
+      details: 'เข้าสู่ระบบคอนโซลศูนย์ควบคุมส่วนกลางสำเร็จ'
+    },
+    {
+      id: 'log-2',
+      timestamp: '16/09/2026 18:30',
+      action: 'UPDATE_HERO',
+      adminUser: 'admin',
+      ip: '127.0.0.1 (Localhost)',
+      device: 'Chrome / Windows',
+      status: 'info',
+      details: 'ปรับปรุงข้อความและธีมส่วนหัว Banner Hero'
+    }
+  ],
+  tournamentApplications: [
+    {
+      id: 'app-tourney-1',
+      tournamentId: 'tourney-1',
+      tournamentTitle: 'VALORANT CHAMPIONSHIP 2026',
+      teamName: 'TALON ESPORTS JR.',
+      teamTag: 'TLN',
+      logo: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80',
+      captainName: 'พีรภัทร วรเดชสกุล (Captain Pat)',
+      captainPhone: '081-992-3456',
+      captainEmail: 'pat.talon@gmail.com',
+      captainDiscord: 'PatVlr#1234',
+      players: [
+        { ign: 'PatVlr', realName: 'พีรภัทร วรเดชสกุล', role: 'Duelist (Captain)' },
+        { ign: 'NightStrike', realName: 'กิตติศักดิ์ มั่นคง', role: 'Initiator' },
+        { ign: 'CynicZ', realName: 'ชัชวาล เลิศปรีชา', role: 'Controller' },
+        { ign: 'ShadowAim', realName: 'ธนากร ภักดีผล', role: 'Sentinel' },
+        { ign: 'ViperKing', realName: 'อภิสิทธิ์ ศรีสวัสดิ์', role: 'Flex' }
+      ],
+      substitutes: [
+        { ign: 'SubZeroX', realName: 'ณัฐพล พรหมเมศ', role: 'Sub 1' }
+      ],
+      status: 'Pending',
+      submittedAt: '17/09/2026 09:30',
+      notes: 'พร้อมลงสนามรอบออฟไลน์ นำอุปกรณ์เมาส์/หูฟังมาเอง'
+    },
+    {
+      id: 'app-tourney-2',
+      tournamentId: 'tourney-2',
+      tournamentTitle: 'PUBG BATTLEGROUNDS SQUAD ARENA',
+      teamName: 'PHOENIX VORTEX',
+      teamTag: 'PHX',
+      logo: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=150&q=80',
+      captainName: 'ชานนท์ สิทธิชัย (Chanon)',
+      captainPhone: '089-445-1289',
+      captainEmail: 'chanon.pubg@gmail.com',
+      captainDiscord: 'ChanonPHX#7788',
+      players: [
+        { ign: 'PHX_Nont', realName: 'ชานนท์ สิทธิชัย', role: 'IGL / Scout' },
+        { ign: 'PHX_Blaster', realName: 'วรพล เกษมสันต์', role: 'Fragger' },
+        { ign: 'PHX_SniperD', realName: 'ดนัย บุญมี', role: 'Sniper' },
+        { ign: 'PHX_Support', realName: 'ศุภกร แก้วมณี', role: 'Support' }
+      ],
+      substitutes: [],
+      status: 'Pending',
+      submittedAt: '17/09/2026 11:15',
+      notes: 'ขอสิทธิ์รอบบ่ายเนื่องจากเดินทางมาจากชลบุรี'
+    }
+  ]
 };
 
 // Deep merge helper ensuring every nested property in defaults is present
@@ -829,6 +914,14 @@ export function SiteDataProvider({ children }) {
           merged.securityConfig = { ...DEFAULT_SITE_DATA.securityConfig, ...merged.securityConfig };
         }
 
+        if (!Array.isArray(merged.adminAuditLogs)) {
+          merged.adminAuditLogs = DEFAULT_SITE_DATA.adminAuditLogs;
+        }
+
+        if (!Array.isArray(merged.tournamentApplications)) {
+          merged.tournamentApplications = DEFAULT_SITE_DATA.tournamentApplications;
+        }
+
         // Hydrate gallery items with mockData slugs & rich content if missing
         merged.gallery = merged.gallery.map(item => {
           const initial = INITIAL_GALLERY.find(g => g.id === item.id);
@@ -894,6 +987,19 @@ export function SiteDataProvider({ children }) {
               image: DEFAULT_SITE_DATA.featureBanners.bannerRight.image
             };
           }
+        }
+
+        if (!Array.isArray(merged.activityCategories) || merged.activityCategories.length === 0) {
+          merged.activityCategories = INITIAL_CATEGORIES;
+        }
+        if (!Array.isArray(merged.articleTags) || merged.articleTags.length === 0) {
+          merged.articleTags = INITIAL_TAGS;
+        }
+        if (Array.isArray(merged.gallery)) {
+          merged.gallery = merged.gallery.map(g => ({
+            ...g,
+            tags: Array.isArray(g.tags) && g.tags.length > 0 ? g.tags : (INITIAL_GALLERY.find(ig => ig.id === g.id)?.tags || ['#EsportsThailand', '#GLP2026', '#Tournament', '#GamingArena'])
+          }));
         }
 
         if (!Array.isArray(merged.leads) || merged.leads.length === 0) {
@@ -1123,6 +1229,65 @@ export function SiteDataProvider({ children }) {
     }));
   };
 
+  // Activity Categories & Tags Handlers
+  const updateActivityCategories = (categories) => {
+    setSiteData(prev => ({
+      ...prev,
+      activityCategories: categories
+    }));
+  };
+
+  const addActivityCategory = (newCat) => {
+    const id = newCat.id || (newCat.label || newCat.name || 'cat').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    setSiteData(prev => ({
+      ...prev,
+      activityCategories: [...(prev.activityCategories || INITIAL_CATEGORIES), { ...newCat, id }]
+    }));
+  };
+
+  const updateActivityCategory = (id, updates) => {
+    setSiteData(prev => ({
+      ...prev,
+      activityCategories: (prev.activityCategories || INITIAL_CATEGORIES).map(cat => 
+        cat.id === id ? { ...cat, ...updates } : cat
+      )
+    }));
+  };
+
+  const deleteActivityCategory = (id) => {
+    setSiteData(prev => ({
+      ...prev,
+      activityCategories: (prev.activityCategories || INITIAL_CATEGORIES).filter(cat => cat.id !== id)
+    }));
+  };
+
+  const updateArticleTags = (tags) => {
+    setSiteData(prev => ({
+      ...prev,
+      articleTags: tags
+    }));
+  };
+
+  const addArticleTag = (tag) => {
+    const cleanTag = tag.trim().startsWith('#') ? tag.trim() : `#${tag.trim()}`;
+    if (!cleanTag || cleanTag === '#') return;
+    setSiteData(prev => {
+      const existing = prev.articleTags || INITIAL_TAGS;
+      if (existing.includes(cleanTag)) return prev;
+      return {
+        ...prev,
+        articleTags: [...existing, cleanTag]
+      };
+    });
+  };
+
+  const deleteArticleTag = (tag) => {
+    setSiteData(prev => ({
+      ...prev,
+      articleTags: (prev.articleTags || INITIAL_TAGS).filter(t => t !== tag)
+    }));
+  };
+
   // OpenRouter & Webhook Handlers
   const updateOpenRouterSettings = (settings) => {
     setSiteData(prev => ({
@@ -1195,6 +1360,122 @@ export function SiteDataProvider({ children }) {
     setSiteData(prev => ({
       ...prev,
       securityConfig: { ...prev.securityConfig, ...updates }
+    }));
+  };
+
+  const addAuditLog = (logEntry) => {
+    const now = new Date();
+    const timeStr = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    const newLog = {
+      id: `log-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      timestamp: timeStr,
+      ip: '127.0.0.1 (Localhost)',
+      device: typeof navigator !== 'undefined' ? `${navigator.userAgent.includes('Chrome') ? 'Chrome' : 'Browser'} / Windows` : 'Web',
+      status: logEntry.status || 'info',
+      adminUser: logEntry.adminUser || 'admin',
+      ...logEntry
+    };
+    setSiteData(prev => ({
+      ...prev,
+      adminAuditLogs: [newLog, ...(prev.adminAuditLogs || [])].slice(0, 100)
+    }));
+  };
+
+  const clearAuditLogs = () => {
+    setSiteData(prev => ({
+      ...prev,
+      adminAuditLogs: []
+    }));
+  };
+
+  // Tournament Registration Applications Handlers
+  const addTournamentApplication = (applicationData) => {
+    const now = new Date();
+    const timeStr = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    const newApp = {
+      id: `app-${Date.now()}`,
+      submittedAt: timeStr,
+      status: 'Pending',
+      ...applicationData
+    };
+
+    setSiteData(prev => ({
+      ...prev,
+      tournamentApplications: [newApp, ...(prev.tournamentApplications || [])]
+    }));
+
+    addAuditLog({
+      action: 'TEAM_REGISTERED',
+      adminUser: 'System',
+      status: 'info',
+      details: `ทีม ${newApp.teamName} (${newApp.teamTag || ''}) ยื่นสมัครแข่งขัน ${newApp.tournamentTitle || ''}`
+    });
+
+    return newApp;
+  };
+
+  const updateApplicationStatus = (applicationId, newStatus, adminNotes = '') => {
+    setSiteData(prev => {
+      const apps = prev.tournamentApplications || [];
+      const targetApp = apps.find(a => a.id === applicationId);
+      if (!targetApp) return prev;
+
+      const updatedApps = apps.map(a => 
+        a.id === applicationId 
+          ? { ...a, status: newStatus, adminNotes: adminNotes || a.adminNotes, reviewedAt: new Date().toLocaleTimeString('th-TH') } 
+          : a
+      );
+
+      // If approved (Confirmed), also automatically register team into tournament.teams
+      let updatedTournaments = prev.tournaments || [];
+      if (newStatus === 'Confirmed' && targetApp.tournamentId) {
+        updatedTournaments = updatedTournaments.map(t => {
+          if (t.id === targetApp.tournamentId) {
+            const currentTeams = t.teams || [];
+            if (!currentTeams.some(tm => tm.name.toLowerCase() === targetApp.teamName.toLowerCase())) {
+              const newConfirmedTeam = {
+                id: `team-${Date.now()}`,
+                name: targetApp.teamName,
+                tag: targetApp.teamTag || targetApp.teamName.slice(0, 3).toUpperCase(),
+                logo: targetApp.logo || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80',
+                seed: currentTeams.length + 1,
+                status: 'Confirmed',
+                captain: `${targetApp.captainName} (กัปตันทีม)`,
+                captainPhone: targetApp.captainPhone,
+                captainDiscord: targetApp.captainDiscord,
+                players: (targetApp.players || []).map(p => typeof p === 'string' ? p : (p.ign || p.realName || 'Player')),
+                substitutes: (targetApp.substitutes || []).map(s => typeof s === 'string' ? s : (s.ign || s.realName || 'Sub')),
+                wins: 0,
+                losses: 0
+              };
+              return {
+                ...t,
+                teams: [...currentTeams, newConfirmedTeam]
+              };
+            }
+          }
+          return t;
+        });
+      }
+
+      return {
+        ...prev,
+        tournamentApplications: updatedApps,
+        tournaments: updatedTournaments
+      };
+    });
+
+    addAuditLog({
+      action: `APPLICATION_${newStatus.toUpperCase()}`,
+      status: newStatus === 'Confirmed' ? 'success' : newStatus === 'Rejected' ? 'warning' : 'info',
+      details: `ปรับสถานะใบสมัคร ${applicationId} เป็น ${newStatus}`
+    });
+  };
+
+  const deleteTournamentApplication = (applicationId) => {
+    setSiteData(prev => ({
+      ...prev,
+      tournamentApplications: (prev.tournamentApplications || []).filter(a => a.id !== applicationId)
     }));
   };
 
@@ -1544,6 +1825,13 @@ export function SiteDataProvider({ children }) {
     addActivityItem,
     updateActivityItem,
     deleteActivityItem,
+    updateActivityCategories,
+    addActivityCategory,
+    updateActivityCategory,
+    deleteActivityCategory,
+    updateArticleTags,
+    addArticleTag,
+    deleteArticleTag,
     updateNewsItem,
     addNewsItem,
     deleteNewsItem,
@@ -1563,6 +1851,11 @@ export function SiteDataProvider({ children }) {
     addPendingQuestion,
     deletePendingQuestion,
     updateSecurityConfig,
+    addAuditLog,
+    clearAuditLogs,
+    addTournamentApplication,
+    updateApplicationStatus,
+    deleteTournamentApplication,
     updateERPData,
     updateWebhooks,
     updateHeaderCta,

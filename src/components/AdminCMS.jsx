@@ -12,7 +12,7 @@ import {
   MessagesSquare, Receipt
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
-import { DEMO_TOURNAMENT_PHOTOS_50 } from '../data/mockData';
+import { DEMO_TOURNAMENT_PHOTOS_50, EVENT_CATEGORIES, DEFAULT_ARTICLE_TAGS } from '../data/mockData';
 import ThreeProductViewer from './ThreeProductViewer';
 import ProductSpecSheetModal from './ProductSpecSheetModal';
 import { compressAndConvertToWebP, formatBytes } from '../utils/imageOptimizer';
@@ -619,7 +619,19 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
     saveSiteData,
     resetToDefaults,
     addMediaItem,
-    deleteMediaItem
+    deleteMediaItem,
+    updateActivityCategories,
+    addActivityCategory,
+    updateActivityCategory,
+    deleteActivityCategory,
+    updateArticleTags,
+    addArticleTag,
+    deleteArticleTag,
+    addAuditLog,
+    clearAuditLogs,
+    addTournamentApplication,
+    updateApplicationStatus,
+    deleteTournamentApplication
   } = useSiteData();
 
   // Media Library Modal state
@@ -890,6 +902,17 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
   };
 
   // Activities & Articles CMS State
+  const [articleAdminSubTab, setArticleAdminSubTab] = useState('list'); // 'list' | 'taxonomy'
+  const [newTagInput, setNewTagInput] = useState('');
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [editingCategoryDraft, setEditingCategoryDraft] = useState(null);
+  const [newCategoryDraft, setNewCategoryDraft] = useState({
+    id: '',
+    label: '',
+    description: '',
+    badgeColor: '#1d4ed8',
+    icon: 'LayoutGrid'
+  });
   const [editingActivity, setEditingActivity] = useState(null);
   const [showAddActivityModal, setShowAddActivityModal] = useState(false);
   const [newActivity, setNewActivity] = useState({
@@ -953,6 +976,17 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
   // Security credentials edit state
   const [adminUserEdit, setAdminUserEdit] = useState(siteData.securityConfig?.adminUsername || 'admin');
   const [adminPassEdit, setAdminPassEdit] = useState(siteData.securityConfig?.adminPassword || 'gspeed2026');
+  const [quickPinEdit, setQuickPinEdit] = useState(siteData.securityConfig?.quickPin || '998877');
+  const [sessionTimeoutEdit, setSessionTimeoutEdit] = useState(siteData.securityConfig?.sessionTimeoutMinutes || 30);
+  const [auditLogFilter, setAuditLogFilter] = useState('all');
+  const [auditSearchQuery, setAuditSearchQuery] = useState('');
+
+  // Tournament Applications Management state
+  const [tourneyAppFilter, setTourneyAppFilter] = useState('all'); // 'all', 'Pending', 'Confirmed', 'Rejected', 'Waitlist'
+  const [tourneyAppSearch, setTourneyAppSearch] = useState('');
+  const [selectedTourneyFilter, setSelectedTourneyFilter] = useState('all');
+  const [selectedAppForRosterModal, setSelectedAppForRosterModal] = useState(null);
+  const [rejectionNotes, setRejectionNotes] = useState('');
 
   // AI Revenue Analysis generation state
   const [isAnalyzingRevenue, setIsAnalyzingRevenue] = useState(false);
@@ -1441,6 +1475,22 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
               <div>
                 <strong>กิจกรรม & บทความ (Articles)</strong>
                 <span>กำหนด URL Slug, ลิงก์แยก, รูปภาพ</span>
+              </div>
+            </button>
+
+            <button 
+              id="cms-tab-tourney-apps"
+              className={`admin-nav-item ${activeTab === 'tourney-apps' ? 'active' : ''}`}
+              onClick={() => setActiveTab('tourney-apps')}
+            >
+              <Users size={18} />
+              <div>
+                <strong>รายชื่อทีมสมัครแข่งขัน {((siteData.tournamentApplications || []).filter(a => a.status === 'Pending').length > 0) && (
+                  <span style={{ marginLeft: '6px', background: '#ef4444', color: '#fff', fontSize: '0.72rem', padding: '1px 6px', borderRadius: '10px' }}>
+                    {((siteData.tournamentApplications || []).filter(a => a.status === 'Pending').length)}
+                  </span>
+                )}</strong>
+                <span>อนุมัติทีมแข่ง, เช็ก Roster, บันทึกสาย</span>
               </div>
             </button>
 
@@ -7034,7 +7084,58 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                 </button>
               </div>
 
-              {/* Activities Data Table */}
+              {/* Sub-tab Switcher: Articles List vs Taxonomy (Categories & Tags) */}
+              <div className="cms-subtab-pills" style={{ display: 'flex', gap: '8px', marginBottom: '20px', borderBottom: '1px solid #e2e8f0', paddingBottom: '12px' }}>
+                <button
+                  type="button"
+                  id="tab-articles-list"
+                  className={`subtab-pill-btn ${articleAdminSubTab === 'list' ? 'active' : ''}`}
+                  onClick={() => setArticleAdminSubTab('list')}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    fontSize: '0.88rem',
+                    fontWeight: 600,
+                    border: '1px solid',
+                    borderColor: articleAdminSubTab === 'list' ? '#1d4ed8' : '#cbd5e1',
+                    background: articleAdminSubTab === 'list' ? '#eff6ff' : '#ffffff',
+                    color: articleAdminSubTab === 'list' ? '#1d4ed8' : '#475569',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <FileText size={15} />
+                  <span>รายการบทความทั้งหมด ({(siteData.gallery || []).length})</span>
+                </button>
+                <button
+                  type="button"
+                  id="tab-articles-taxonomy"
+                  className={`subtab-pill-btn ${articleAdminSubTab === 'taxonomy' ? 'active' : ''}`}
+                  onClick={() => setArticleAdminSubTab('taxonomy')}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    fontSize: '0.88rem',
+                    fontWeight: 600,
+                    border: '1px solid',
+                    borderColor: articleAdminSubTab === 'taxonomy' ? '#1d4ed8' : '#cbd5e1',
+                    background: articleAdminSubTab === 'taxonomy' ? '#eff6ff' : '#ffffff',
+                    color: articleAdminSubTab === 'taxonomy' ? '#1d4ed8' : '#475569',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <Tag size={15} />
+                  <span>🏷️ จัดการหมวดหมู่ & แท็ก (Categories & Tags)</span>
+                </button>
+              </div>
+
+              {/* VIEW 1: Activities Data Table */}
+              {articleAdminSubTab === 'list' && (
               <div className="admin-subcard glass-panel">
                 <div className="subcard-title">
                   <Trophy size={16} className="text-blue" />
@@ -7102,6 +7203,9 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                                 onClick={() => {
                                   setEditingActivity({
                                     ...item,
+                                    tags: Array.isArray(item.tags) && item.tags.length > 0 
+                                      ? item.tags 
+                                      : (item.tagsText ? item.tagsText.split(/[, ]+/).filter(Boolean) : ['#EsportsThailand', '#GLP2026', '#Tournament', '#GamingArena']),
                                     contentBlocks: (item.contentBlocks && item.contentBlocks.length > 0)
                                       ? item.contentBlocks
                                       : (item.contentParagraphs && item.contentParagraphs.length > 0 ? item.contentParagraphs : [item.desc || '']).map((paraText, pI) => ({
@@ -7148,6 +7252,351 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                   </table>
                 </div>
               </div>
+              )}
+
+              {/* VIEW 2: Categories & Tags Taxonomy Manager */}
+              {articleAdminSubTab === 'taxonomy' && (
+                <div className="taxonomy-manager-container" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                  
+                  {/* SECTION A: Activity Categories Manager */}
+                  <div className="admin-subcard glass-panel" style={{ padding: '22px', borderRadius: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+                      <div>
+                        <h4 style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, fontSize: '1.05rem', color: '#0f172a' }}>
+                          <LayoutGrid size={18} className="text-blue" />
+                          <span>หมวดหมู่กิจกรรม & บทความ (Activity Categories)</span>
+                        </h4>
+                        <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: '#64748b' }}>
+                          กำหนดชื่อ คำอธิบาย และสีประจำหมวดหมู่ เพื่อให้แสดงบนหน้าแรกและหน้ารวมกิจกรรม
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        className="btn-secondary btn-sm"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                        onClick={() => {
+                          setNewCategoryDraft({
+                            id: '',
+                            label: '',
+                            description: '',
+                            badgeColor: '#1d4ed8',
+                            icon: 'LayoutGrid'
+                          });
+                          setShowCategoryModal(true);
+                        }}
+                      >
+                        <Plus size={14} /> เพิ่มหมวดหมู่ใหม่
+                      </button>
+                    </div>
+
+                    <div className="categories-grid-admin" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '14px' }}>
+                      {(siteData.activityCategories || EVENT_CATEGORIES).map((cat) => {
+                        const articleCount = (siteData.gallery || []).filter(g => cat.id === 'all' ? true : g.category === cat.id).length;
+                        return (
+                          <div 
+                            key={cat.id} 
+                            className="cat-admin-card glass-panel" 
+                            style={{ 
+                              padding: '16px', 
+                              borderRadius: '10px', 
+                              border: '1px solid #e2e8f0', 
+                              background: '#ffffff',
+                              display: 'flex', 
+                              flexDirection: 'column', 
+                              justifyContent: 'space-between',
+                              boxShadow: '0 2px 6px rgba(0,0,0,0.03)'
+                            }}
+                          >
+                            <div>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: cat.badgeColor || '#1d4ed8', display: 'inline-block' }}></span>
+                                  <strong style={{ fontSize: '0.95rem', color: '#0f172a' }}>{cat.label}</strong>
+                                </div>
+                                <span style={{ fontSize: '0.72rem', padding: '2px 8px', borderRadius: '999px', background: '#eff6ff', color: '#1d4ed8', fontWeight: 600 }}>
+                                  {articleCount} บทความ
+                                </span>
+                              </div>
+                              <div style={{ fontSize: '0.76rem', color: '#64748b', marginBottom: '8px', fontFamily: 'monospace' }}>
+                                รหัสหมวดหมู่: <code>{cat.id}</code>
+                              </div>
+                              <p style={{ fontSize: '0.8rem', color: '#475569', margin: 0, lineHeight: 1.5, minHeight: '36px' }}>
+                                {cat.description || 'ไม่มีคำอธิบาย'}
+                              </p>
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px', marginTop: '14px', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
+                              <button
+                                type="button"
+                                className="btn-table-action edit"
+                                title="แก้ไขรายละเอียดหมวดหมู่"
+                                onClick={() => {
+                                  setEditingCategoryDraft(cat);
+                                }}
+                              >
+                                <Edit3 size={13} />
+                              </button>
+                              {cat.id !== 'all' && (
+                                <button
+                                  type="button"
+                                  className="btn-table-action delete"
+                                  title="ลบหมวดหมู่นี้"
+                                  onClick={() => {
+                                    if (window.confirm(`ต้องการลบหมวดหมู่ "${cat.label}" หรือไม่?`)) {
+                                      deleteActivityCategory(cat.id);
+                                      triggerSaveToast();
+                                    }
+                                  }}
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* SECTION B: Article Tags Cloud Manager */}
+                  <div className="admin-subcard glass-panel" style={{ padding: '22px', borderRadius: '12px' }}>
+                    <div style={{ marginBottom: '16px' }}>
+                      <h4 style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, fontSize: '1.05rem', color: '#0f172a' }}>
+                        <Tag size={18} className="text-blue" />
+                        <span>แท็กบทความที่เกี่ยวข้อง (Article Tags Cloud)</span>
+                      </h4>
+                      <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: '#64748b' }}>
+                        กำหนดแท็กหัวข้อที่เกี่ยวข้อง เช่น <strong>#EsportsThailand</strong>, <strong>#GLP2026</strong>, <strong>#Tournament</strong>, <strong>#GamingArena</strong> เมื่อผู้ใช้คลิกแท็กใดๆ บนบทความ จะแสดงเฉพาะบทความที่เกี่ยวข้องกับแท็กนั้นทันที
+                      </p>
+                    </div>
+
+                    {/* Quick Add Tag Input */}
+                    <div style={{ display: 'flex', gap: '8px', maxWidth: '480px', marginBottom: '18px' }}>
+                      <input
+                        type="text"
+                        id="input-new-global-tag"
+                        className="form-input"
+                        placeholder="พิมพ์ชื่อแท็กใหม่ เช่น #VALORANT, #PUBG, #GLP2026..."
+                        value={newTagInput}
+                        onChange={e => setNewTagInput(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            if (newTagInput.trim()) {
+                              addArticleTag(newTagInput);
+                              setNewTagInput('');
+                              triggerSaveToast();
+                            }
+                          }
+                        }}
+                      />
+                      <button
+                        type="button"
+                        id="btn-add-global-tag"
+                        className="btn-primary"
+                        style={{ whiteSpace: 'nowrap' }}
+                        onClick={() => {
+                          if (newTagInput.trim()) {
+                            addArticleTag(newTagInput);
+                            setNewTagInput('');
+                            triggerSaveToast();
+                          }
+                        }}
+                      >
+                        <Plus size={14} /> เพิ่มแท็ก
+                      </button>
+                    </div>
+
+                    {/* All Tags Chips */}
+                    <div className="tags-cloud-list" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                      {(siteData.articleTags || DEFAULT_ARTICLE_TAGS).map((tag, tIdx) => {
+                        const count = (siteData.gallery || []).filter(g => Array.isArray(g.tags) && g.tags.includes(tag)).length;
+                        return (
+                          <div 
+                            key={tIdx}
+                            className="tag-cloud-chip-item"
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              padding: '6px 12px',
+                              borderRadius: '20px',
+                              background: '#f8fafc',
+                              border: '1.5px solid #cbd5e1',
+                              fontSize: '0.85rem',
+                              fontWeight: 600,
+                              color: '#0f172a',
+                              transition: 'all 0.15s ease'
+                            }}
+                          >
+                            <span style={{ color: '#2563eb', fontWeight: 700 }}>{tag}</span>
+                            <span style={{ fontSize: '0.72rem', color: '#64748b', background: '#e2e8f0', padding: '1px 6px', borderRadius: '10px' }}>
+                              {count}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (window.confirm(`ต้องการลบแท็ก "${tag}" ออกจากระบบหรือไม่?`)) {
+                                  deleteArticleTag(tag);
+                                  triggerSaveToast();
+                                }
+                              }}
+                              style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#94a3b8', padding: '0', display: 'flex', alignItems: 'center' }}
+                              title="ลบแท็กนี้"
+                            >
+                              <X size={13} />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Add New Category Modal */}
+              {showCategoryModal && (
+                <div className="cms-modal-backdrop" onClick={() => setShowCategoryModal(false)}>
+                  <div className="cms-modal-card" style={{ maxWidth: '500px' }} onClick={e => e.stopPropagation()}>
+                    <div className="modal-head">
+                      <h4>เพิ่มหมวดหมู่กิจกรรมใหม่</h4>
+                      <button onClick={() => setShowCategoryModal(false)} className="btn-close-modal">✕</button>
+                    </div>
+                    <div className="modal-body-form">
+                      <div className="form-group">
+                        <label>ชื่อหมวดหมู่ (Label)</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          placeholder="เช่น แมตช์กระชับมิตร & มีตติ้ง"
+                          value={newCategoryDraft.label}
+                          onChange={e => {
+                            const val = e.target.value;
+                            const slug = val.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                            setNewCategoryDraft({ ...newCategoryDraft, label: val, id: newCategoryDraft.id || slug });
+                          }}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label>รหัสหมวดหมู่ / Slug (ภาษาอังกฤษ)</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          placeholder="เช่น friendly-match"
+                          value={newCategoryDraft.id}
+                          onChange={e => setNewCategoryDraft({ ...newCategoryDraft, id: e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, '') })}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label>คำอธิบายหมวดหมู่ (Description)</label>
+                        <textarea
+                          className="form-input"
+                          rows={2}
+                          placeholder="อธิบายสั้นๆ เกี่ยวกับเนื้อหาในหมวดหมู่นี้..."
+                          value={newCategoryDraft.description}
+                          onChange={e => setNewCategoryDraft({ ...newCategoryDraft, description: e.target.value })}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label>สีประจำหมวดหมู่ (Badge Color Hex)</label>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <input
+                            type="color"
+                            value={newCategoryDraft.badgeColor || '#1d4ed8'}
+                            onChange={e => setNewCategoryDraft({ ...newCategoryDraft, badgeColor: e.target.value })}
+                            style={{ width: '40px', height: '36px', border: 'none', cursor: 'pointer' }}
+                          />
+                          <input
+                            type="text"
+                            className="form-input"
+                            value={newCategoryDraft.badgeColor || '#1d4ed8'}
+                            onChange={e => setNewCategoryDraft({ ...newCategoryDraft, badgeColor: e.target.value })}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="modal-footer-btns">
+                      <button className="btn-secondary" onClick={() => setShowCategoryModal(false)}>ยกเลิก</button>
+                      <button
+                        className="btn-primary"
+                        onClick={() => {
+                          if (!newCategoryDraft.label || !newCategoryDraft.id) {
+                            alert('กรุณากรอกชื่อและรหัสหมวดหมู่');
+                            return;
+                          }
+                          addActivityCategory(newCategoryDraft);
+                          setShowCategoryModal(false);
+                          triggerSaveToast();
+                        }}
+                      >
+                        <Save size={14} /> บันทึกหมวดหมู่ใหม่
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Edit Category Modal */}
+              {editingCategoryDraft && (
+                <div className="cms-modal-backdrop" onClick={() => setEditingCategoryDraft(null)}>
+                  <div className="cms-modal-card" style={{ maxWidth: '500px' }} onClick={e => e.stopPropagation()}>
+                    <div className="modal-head">
+                      <h4>แก้ไขหมวดหมู่: {editingCategoryDraft.label}</h4>
+                      <button onClick={() => setEditingCategoryDraft(null)} className="btn-close-modal">✕</button>
+                    </div>
+                    <div className="modal-body-form">
+                      <div className="form-group">
+                        <label>ชื่อหมวดหมู่ (Label)</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          value={editingCategoryDraft.label}
+                          onChange={e => setEditingCategoryDraft({ ...editingCategoryDraft, label: e.target.value })}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label>คำอธิบายหมวดหมู่ (Description)</label>
+                        <textarea
+                          className="form-input"
+                          rows={2}
+                          value={editingCategoryDraft.description || ''}
+                          onChange={e => setEditingCategoryDraft({ ...editingCategoryDraft, description: e.target.value })}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label>สีประจำหมวดหมู่ (Badge Color Hex)</label>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <input
+                            type="color"
+                            value={editingCategoryDraft.badgeColor || '#1d4ed8'}
+                            onChange={e => setEditingCategoryDraft({ ...editingCategoryDraft, badgeColor: e.target.value })}
+                            style={{ width: '40px', height: '36px', border: 'none', cursor: 'pointer' }}
+                          />
+                          <input
+                            type="text"
+                            className="form-input"
+                            value={editingCategoryDraft.badgeColor || '#1d4ed8'}
+                            onChange={e => setEditingCategoryDraft({ ...editingCategoryDraft, badgeColor: e.target.value })}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="modal-footer-btns">
+                      <button className="btn-secondary" onClick={() => setEditingCategoryDraft(null)}>ยกเลิก</button>
+                      <button
+                        className="btn-primary"
+                        onClick={() => {
+                          updateActivityCategory(editingCategoryDraft.id, editingCategoryDraft);
+                          setEditingCategoryDraft(null);
+                          triggerSaveToast();
+                        }}
+                      >
+                        <Save size={14} /> บันทึกการเปลี่ยนแปลง
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Edit Activity Modal */}
               {editingActivity && (
@@ -7193,10 +7642,9 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                             value={editingActivity.category}
                             onChange={e => setEditingActivity({ ...editingActivity, category: e.target.value })}
                           >
-                            <option value="tournament">การแข่งขัน & ทัวร์นาเมนต์ (tournament)</option>
-                            <option value="publisher">งานเปิดตัวเกม & ค่ายเกม (publisher)</option>
-                            <option value="community">คอมมูนิตี้ & แจกรางวัล (community)</option>
-                            <option value="venue">บรรยากาศร้าน & แข่ง LAN 24 ชม. (venue)</option>
+                            {(siteData.activityCategories || EVENT_CATEGORIES).map(cat => (
+                              <option key={cat.id} value={cat.id}>{cat.label} ({cat.id})</option>
+                            ))}
                           </select>
                         </div>
 
@@ -7216,6 +7664,100 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                             value={editingActivity.partner || ''}
                             onChange={e => setEditingActivity({ ...editingActivity, partner: e.target.value })}
                           />
+                        </div>
+                      </div>
+
+                      {/* Interactive Article Tags Multi-Selector */}
+                      <div className="form-group" style={{ background: '#f8fafc', padding: '14px 16px', borderRadius: '10px', border: '1px solid #e2e8f0', margin: '14px 0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, fontSize: '0.88rem', color: '#0f172a' }}>
+                            <Tag size={15} className="text-blue" />
+                            <span>แท็กบทความที่เกี่ยวข้อง (Article Tags) *คลิกเพื่อเลือก/ยกเลิกแท็ก:</span>
+                          </span>
+                          <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                            เลือกแล้ว: {(editingActivity.tags || []).length} แท็ก
+                          </span>
+                        </div>
+
+                        {/* Tag Chips Picker */}
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '10px' }}>
+                          {(siteData.articleTags || DEFAULT_ARTICLE_TAGS).map((tag, tIdx) => {
+                            const isSelected = (editingActivity.tags || []).includes(tag);
+                            return (
+                              <button
+                                key={tIdx}
+                                type="button"
+                                onClick={() => {
+                                  setEditingActivity(prev => {
+                                    const current = prev.tags || [];
+                                    const next = current.includes(tag)
+                                      ? current.filter(t => t !== tag)
+                                      : [...current, tag];
+                                    return { ...prev, tags: next };
+                                  });
+                                }}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  padding: '4px 10px',
+                                  borderRadius: '20px',
+                                  fontSize: '0.78rem',
+                                  fontWeight: 600,
+                                  cursor: 'pointer',
+                                  transition: 'all 0.15s ease',
+                                  border: isSelected ? '1.5px solid #2563eb' : '1px solid #cbd5e1',
+                                  background: isSelected ? '#eff6ff' : '#ffffff',
+                                  color: isSelected ? '#1d4ed8' : '#475569'
+                                }}
+                              >
+                                <span>{tag}</span>
+                                {isSelected ? <Check size={12} color="#1d4ed8" /> : <Plus size={12} color="#94a3b8" />}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* Quick Add Custom Tag */}
+                        <div style={{ display: 'flex', gap: '8px', maxWidth: '400px' }}>
+                          <input 
+                            type="text" 
+                            className="form-input form-input-sm"
+                            placeholder="พิมพ์แท็กใหม่ เช่น #RoV, #VALORANT..."
+                            value={newTagInput}
+                            onChange={e => setNewTagInput(e.target.value)}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                if (newTagInput.trim()) {
+                                  const tag = newTagInput.trim().startsWith('#') ? newTagInput.trim() : '#' + newTagInput.trim();
+                                  addArticleTag(tag);
+                                  setEditingActivity(prev => ({
+                                    ...prev,
+                                    tags: [...(prev.tags || []), tag]
+                                  }));
+                                  setNewTagInput('');
+                                }
+                              }
+                            }}
+                          />
+                          <button
+                            type="button"
+                            className="btn-secondary btn-sm"
+                            onClick={() => {
+                              if (newTagInput.trim()) {
+                                const tag = newTagInput.trim().startsWith('#') ? newTagInput.trim() : '#' + newTagInput.trim();
+                                addArticleTag(tag);
+                                setEditingActivity(prev => ({
+                                  ...prev,
+                                  tags: [...(prev.tags || []), tag]
+                                }));
+                                setNewTagInput('');
+                              }
+                            }}
+                          >
+                            <Plus size={12} /> เพิ่ม
+                          </button>
                         </div>
                       </div>
 
@@ -7614,6 +8156,9 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
 
                           updateActivityItem(editingActivity.id, {
                             ...editingActivity,
+                            tags: Array.isArray(editingActivity.tags) && editingActivity.tags.length > 0 
+                              ? editingActivity.tags 
+                              : ['#EsportsThailand', '#GLP2026', '#Tournament', '#GamingArena'],
                             contentBlocks: editingActivity.contentBlocks || [],
                             contentParagraphs: paragraphs.length > 0 ? paragraphs : [editingActivity.desc],
                             galleryPhotos: validPhotos.length > 0 ? validPhotos : [{ url: editingActivity.image, caption: editingActivity.title, alt: editingActivity.imageAlt || editingActivity.title }]
@@ -7683,10 +8228,9 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                             value={newActivity.category}
                             onChange={e => setNewActivity({ ...newActivity, category: e.target.value })}
                           >
-                            <option value="tournament">การแข่งขัน & ทัวร์นาเมนต์ (tournament)</option>
-                            <option value="publisher">งานเปิดตัวเกม & ค่ายเกม (publisher)</option>
-                            <option value="community">คอมมูนิตี้ & แจกรางวัล (community)</option>
-                            <option value="venue">บรรยากาศร้าน & แข่ง LAN 24 ชม. (venue)</option>
+                            {(siteData.activityCategories || EVENT_CATEGORIES).map(cat => (
+                              <option key={cat.id} value={cat.id}>{cat.label} ({cat.id})</option>
+                            ))}
                           </select>
                         </div>
 
@@ -7708,6 +8252,100 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                             value={newActivity.partner}
                             onChange={e => setNewActivity({ ...newActivity, partner: e.target.value })}
                           />
+                        </div>
+                      </div>
+
+                      {/* Interactive Article Tags Multi-Selector for New Article */}
+                      <div className="form-group" style={{ background: '#f8fafc', padding: '14px 16px', borderRadius: '10px', border: '1px solid #e2e8f0', margin: '14px 0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, fontSize: '0.88rem', color: '#0f172a' }}>
+                            <Tag size={15} className="text-blue" />
+                            <span>แท็กบทความที่เกี่ยวข้อง (Article Tags) *คลิกเพื่อเลือก/ยกเลิกแท็ก:</span>
+                          </span>
+                          <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                            เลือกแล้ว: {(newActivity.tags || []).length} แท็ก
+                          </span>
+                        </div>
+
+                        {/* Tag Chips Picker */}
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '10px' }}>
+                          {(siteData.articleTags || DEFAULT_ARTICLE_TAGS).map((tag, tIdx) => {
+                            const isSelected = (newActivity.tags || []).includes(tag);
+                            return (
+                              <button
+                                key={tIdx}
+                                type="button"
+                                onClick={() => {
+                                  setNewActivity(prev => {
+                                    const current = prev.tags || [];
+                                    const next = current.includes(tag)
+                                      ? current.filter(t => t !== tag)
+                                      : [...current, tag];
+                                    return { ...prev, tags: next };
+                                  });
+                                }}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  padding: '4px 10px',
+                                  borderRadius: '20px',
+                                  fontSize: '0.78rem',
+                                  fontWeight: 600,
+                                  cursor: 'pointer',
+                                  transition: 'all 0.15s ease',
+                                  border: isSelected ? '1.5px solid #2563eb' : '1px solid #cbd5e1',
+                                  background: isSelected ? '#eff6ff' : '#ffffff',
+                                  color: isSelected ? '#1d4ed8' : '#475569'
+                                }}
+                              >
+                                <span>{tag}</span>
+                                {isSelected ? <Check size={12} color="#1d4ed8" /> : <Plus size={12} color="#94a3b8" />}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* Quick Add Custom Tag */}
+                        <div style={{ display: 'flex', gap: '8px', maxWidth: '400px' }}>
+                          <input 
+                            type="text" 
+                            className="form-input form-input-sm"
+                            placeholder="พิมพ์แท็กใหม่ เช่น #RoV, #VALORANT..."
+                            value={newTagInput}
+                            onChange={e => setNewTagInput(e.target.value)}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                if (newTagInput.trim()) {
+                                  const tag = newTagInput.trim().startsWith('#') ? newTagInput.trim() : '#' + newTagInput.trim();
+                                  addArticleTag(tag);
+                                  setNewActivity(prev => ({
+                                    ...prev,
+                                    tags: [...(prev.tags || []), tag]
+                                  }));
+                                  setNewTagInput('');
+                                }
+                              }
+                            }}
+                          />
+                          <button
+                            type="button"
+                            className="btn-secondary btn-sm"
+                            onClick={() => {
+                              if (newTagInput.trim()) {
+                                const tag = newTagInput.trim().startsWith('#') ? newTagInput.trim() : '#' + newTagInput.trim();
+                                addArticleTag(tag);
+                                setNewActivity(prev => ({
+                                  ...prev,
+                                  tags: [...(prev.tags || []), tag]
+                                }));
+                                setNewTagInput('');
+                              }
+                            }}
+                          >
+                            <Plus size={12} /> เพิ่ม
+                          </button>
                         </div>
                       </div>
 
@@ -8081,6 +8719,9 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
 
                           addActivityItem({
                             ...newActivity,
+                            tags: Array.isArray(newActivity.tags) && newActivity.tags.length > 0 
+                              ? newActivity.tags 
+                              : ['#EsportsThailand', '#GLP2026', '#Tournament', '#GamingArena'],
                             contentBlocks: newActivity.contentBlocks || [],
                             contentParagraphs: paragraphs.length > 0 ? paragraphs : [newActivity.desc],
                             galleryPhotos: validPhotos.length > 0 ? validPhotos : [{ url: newActivity.image, caption: newActivity.title, alt: newActivity.imageAlt || newActivity.title }]
@@ -8101,6 +8742,464 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
           {/* =========================================================================
               TAB 5: AUTOMATION, N8N WORKFLOWS & WEBHOOKS
               ========================================================================= */}
+          
+          {/* =========================================================================
+              TAB: TOURNAMENT APPLICATIONS & TEAM ROSTER MANAGER
+              ========================================================================= */}
+          {activeTab === 'tourney-apps' && (
+            <div className="cms-panel-block">
+              <div className="panel-header-row">
+                <div>
+                  <h3 className="panel-title">
+                    <Trophy size={20} className="text-blue" />
+                    <span>ระบบจัดการใบสมัครทีมแข่งขันอีสปอร์ต (Tournament Applications Hub)</span>
+                  </h3>
+                  <p className="panel-desc">
+                    ตรวจสอบรายชื่อทีมที่สมัครเข้าร่วมแข่ง, ข้อมูลกัปตันทีม, เบอร์โทร, Discord, และรายชื่อผู้เล่นตัวจริง 5 คน พร้อมอนุมัติสิทธิ์เข้าสู่สายการแข่งขัน (Sync to Bracket) ทันที
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <button 
+                    type="button" 
+                    className="btn-secondary"
+                    onClick={() => {
+                      const apps = siteData.tournamentApplications || [];
+                      if (apps.length === 0) {
+                        alert('ยังไม่มีข้อมูลใบสมัครสำหรับส่งออก');
+                        return;
+                      }
+                      const headers = ['ลำดับ', 'ชื่อทีม', 'แท็ก', 'ทัวร์นาเมนต์', 'กัปตัน', 'เบอร์โทร', 'อีเมล', 'Discord', 'รายชื่อผู้เล่น', 'ตัวสำรอง', 'สถานะ', 'วันที่ยื่นสมัคร'];
+                      const rows = apps.map((a, idx) => [
+                        idx + 1,
+                        '"' + (a.teamName || '').replace(/"/g, '""') + '"',
+                        '"' + (a.teamTag || '').replace(/"/g, '""') + '"',
+                        '"' + (a.tournamentTitle || '').replace(/"/g, '""') + '"',
+                        '"' + (a.captainName || '').replace(/"/g, '""') + '"',
+                        '"' + (a.captainPhone || '').replace(/"/g, '""') + '"',
+                        '"' + (a.captainEmail || '').replace(/"/g, '""') + '"',
+                        '"' + (a.captainDiscord || '').replace(/"/g, '""') + '"',
+                        '"' + (Array.isArray(a.players) ? a.players.join(', ') : '').replace(/"/g, '""') + '"',
+                        '"' + (Array.isArray(a.substitutes) ? a.substitutes.join(', ') : (a.substitute || '')).replace(/"/g, '""') + '"',
+                        '"' + (a.status || 'Pending') + '"',
+                        '"' + (a.submittedAt || '') + '"'
+                      ]);
+                      const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
+                      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                      const url = URL.createObjectURL(blob);
+                      const link = document.createElement('a');
+                      link.href = url;
+                      link.setAttribute('download', `GLP_Tournament_Teams_${new Date().toISOString().slice(0, 10)}.csv`);
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <Download size={14} /> ส่งออก CSV
+                  </button>
+                  <button 
+                    type="button" 
+                    className="btn-secondary"
+                    onClick={() => {
+                      const apps = siteData.tournamentApplications || [];
+                      const blob = new Blob([JSON.stringify(apps, null, 2)], { type: 'application/json' });
+                      const url = URL.createObjectURL(blob);
+                      const link = document.createElement('a');
+                      link.href = url;
+                      link.setAttribute('download', `GLP_Tournament_Teams_${new Date().toISOString().slice(0, 10)}.json`);
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <Download size={14} /> ส่งออก JSON
+                  </button>
+                </div>
+              </div>
+
+              {/* KPI Summary Cards */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', marginBottom: '20px' }}>
+                <div className="admin-subcard glass-panel" style={{ padding: '16px', borderLeft: '4px solid #3b82f6' }}>
+                  <span className="text-xs text-muted" style={{ fontWeight: 600 }}>ใบสมัครทั้งหมด</span>
+                  <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', marginTop: '4px' }}>
+                    {(siteData.tournamentApplications || []).length}
+                  </div>
+                  <span className="text-xs text-muted">จากทุกทัวร์นาเมนต์</span>
+                </div>
+                <div className="admin-subcard glass-panel" style={{ padding: '16px', borderLeft: '4px solid #f59e0b', background: 'rgba(254, 243, 199, 0.3)' }}>
+                  <span className="text-xs" style={{ fontWeight: 600, color: '#b45309' }}>รอดำเนินการ (Pending)</span>
+                  <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#d97706', marginTop: '4px' }}>
+                    {(siteData.tournamentApplications || []).filter(a => a.status === 'Pending').length}
+                  </div>
+                  <span className="text-xs text-muted">ต้องการการอนุมัติ</span>
+                </div>
+                <div className="admin-subcard glass-panel" style={{ padding: '16px', borderLeft: '4px solid #10b981', background: 'rgba(209, 250, 229, 0.3)' }}>
+                  <span className="text-xs" style={{ fontWeight: 600, color: '#047857' }}>อนุมัติแล้ว (Confirmed)</span>
+                  <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#059669', marginTop: '4px' }}>
+                    {(siteData.tournamentApplications || []).filter(a => a.status === 'Confirmed').length}
+                  </div>
+                  <span className="text-xs text-muted">เข้าสายการแข่งขันเรียบร้อย</span>
+                </div>
+                <div className="admin-subcard glass-panel" style={{ padding: '16px', borderLeft: '4px solid #ef4444' }}>
+                  <span className="text-xs" style={{ fontWeight: 600, color: '#b91c1c' }}>ปฏิเสธสิทธิ์ (Rejected)</span>
+                  <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#dc2626', marginTop: '4px' }}>
+                    {(siteData.tournamentApplications || []).filter(a => a.status === 'Rejected').length}
+                  </div>
+                  <span className="text-xs text-muted">ข้อมูลไม่ผ่านเกณฑ์</span>
+                </div>
+                <div className="admin-subcard glass-panel" style={{ padding: '16px', borderLeft: '4px solid #6366f1' }}>
+                  <span className="text-xs" style={{ fontWeight: 600, color: '#4338ca' }}>คิวสำรอง (Waitlist)</span>
+                  <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#4f46e5', marginTop: '4px' }}>
+                    {(siteData.tournamentApplications || []).filter(a => a.status === 'Waitlist').length}
+                  </div>
+                  <span className="text-xs text-muted">พร้อมเสียบแทนทีมสละสิทธิ์</span>
+                </div>
+              </div>
+
+              {/* Filter and Search Bar */}
+              <div className="admin-subcard glass-panel" style={{ padding: '14px 18px', marginBottom: '18px' }}>
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
+                  {/* Status Filters */}
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    {[
+                      { id: 'all', label: 'ทั้งหมด' },
+                      { id: 'Pending', label: 'รอดำเนินการ' },
+                      { id: 'Confirmed', label: 'อนุมัติแล้ว' },
+                      { id: 'Rejected', label: 'ปฏิเสธ' },
+                      { id: 'Waitlist', label: 'คิวสำรอง' }
+                    ].map(st => (
+                      <button
+                        key={st.id}
+                        type="button"
+                        className={tourneyAppFilter === st.id ? 'btn-primary' : 'btn-secondary'}
+                        style={{ padding: '6px 12px', fontSize: '0.82rem' }}
+                        onClick={() => setTourneyAppFilter(st.id)}
+                      >
+                        {st.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Tournament Filter Dropdown */}
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <select
+                      className="form-input"
+                      style={{ padding: '6px 12px', fontSize: '0.82rem', width: 'auto', minWidth: '180px' }}
+                      value={selectedTourneyFilter}
+                      onChange={e => setSelectedTourneyFilter(e.target.value)}
+                    >
+                      <option value="all">-- ทุกทัวร์นาเมนต์ --</option>
+                      {(siteData.tournaments || []).map(t => (
+                        <option key={t.id} value={t.id}>{t.title}</option>
+                      ))}
+                    </select>
+
+                    {/* Search Input */}
+                    <div style={{ position: 'relative' }}>
+                      <input 
+                        type="text"
+                        className="form-input"
+                        placeholder="ค้นหาชื่อทีม, กัปตัน, Discord..."
+                        value={tourneyAppSearch}
+                        onChange={e => setTourneyAppSearch(e.target.value)}
+                        style={{ padding: '6px 10px 6px 30px', fontSize: '0.82rem', width: '220px' }}
+                      />
+                      <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tournament Applications List / Table */}
+              <div className="admin-subcard glass-panel" style={{ padding: '0', overflow: 'hidden' }}>
+                {(() => {
+                  const filtered = (siteData.tournamentApplications || []).filter(app => {
+                    const matchStatus = tourneyAppFilter === 'all' || app.status === tourneyAppFilter;
+                    const matchTourney = selectedTourneyFilter === 'all' || app.tournamentId === selectedTourneyFilter;
+                    const q = tourneyAppSearch.toLowerCase().trim();
+                    const matchSearch = !q || 
+                      (app.teamName || '').toLowerCase().includes(q) ||
+                      (app.teamTag || '').toLowerCase().includes(q) ||
+                      (app.captainName || '').toLowerCase().includes(q) ||
+                      (app.captainPhone || '').toLowerCase().includes(q) ||
+                      (app.captainDiscord || '').toLowerCase().includes(q) ||
+                      (app.tournamentTitle || '').toLowerCase().includes(q);
+                    return matchStatus && matchTourney && matchSearch;
+                  });
+
+                  if (filtered.length === 0) {
+                    return (
+                      <div style={{ padding: '40px 20px', textAlign: 'center', color: '#64748b' }}>
+                        <Users size={36} style={{ margin: '0 auto 12px auto', color: '#94a3b8' }} />
+                        <h4 style={{ margin: '0 0 6px 0', color: '#0f172a' }}>ไม่พบรายการใบสมัคร</h4>
+                        <p style={{ margin: 0, fontSize: '0.85rem' }}>ยังไม่มีทีมยื่นสมัครที่ตรงกับตัวกรองนี้ หรือยังไม่มีผู้สมัครเข้ามา</p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div style={{ overflowX: 'auto' }}>
+                      <table className="admin-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                        <thead>
+                          <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', textAlign: 'left', color: '#475569' }}>
+                            <th style={{ padding: '12px 16px' }}>ทีมแข่งขัน</th>
+                            <th style={{ padding: '12px 16px' }}>รายการแข่งขัน</th>
+                            <th style={{ padding: '12px 16px' }}>หัวหน้าทีม (Captain)</th>
+                            <th style={{ padding: '12px 16px' }}>ผู้เล่นในทีม (Roster)</th>
+                            <th style={{ padding: '12px 16px' }}>วันที่ยื่นสมัคร</th>
+                            <th style={{ padding: '12px 16px' }}>สถานะ</th>
+                            <th style={{ padding: '12px 16px', textAlign: 'right' }}>การจัดการ</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filtered.map(app => {
+                            const statusColor = 
+                              app.status === 'Confirmed' ? '#059669' :
+                              app.status === 'Rejected' ? '#dc2626' :
+                              app.status === 'Waitlist' ? '#4f46e5' : '#d97706';
+
+                            const statusBg = 
+                              app.status === 'Confirmed' ? '#ecfdf5' :
+                              app.status === 'Rejected' ? '#fef2f2' :
+                              app.status === 'Waitlist' ? '#eef2ff' : '#fffbeb';
+
+                            return (
+                              <tr key={app.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                <td style={{ padding: '12px 16px' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <img 
+                                      src={app.logo || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80'} 
+                                      alt="" 
+                                      style={{ width: '36px', height: '36px', borderRadius: '8px', objectFit: 'cover', border: '1px solid #cbd5e1' }}
+                                    />
+                                    <div>
+                                      <strong style={{ color: '#0f172a', display: 'block' }}>{app.teamName}</strong>
+                                      <span style={{ fontSize: '0.75rem', background: '#e2e8f0', padding: '1px 6px', borderRadius: '4px', color: '#334155' }}>
+                                        [{app.teamTag || 'GLP'}]
+                                      </span>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td style={{ padding: '12px 16px' }}>
+                                  <strong style={{ color: '#1e3a8a', display: 'block' }}>{app.tournamentTitle || 'ทัวร์นาเมนต์ทั่วไป'}</strong>
+                                  <span className="text-xs text-muted">ID: {app.tournamentId}</span>
+                                </td>
+                                <td style={{ padding: '12px 16px' }}>
+                                  <div style={{ color: '#0f172a', fontWeight: 600 }}>{app.captainName}</div>
+                                  <div style={{ fontSize: '0.76rem', color: '#64748b' }}>📞 {app.captainPhone || '-'}</div>
+                                  <div style={{ fontSize: '0.76rem', color: '#2563eb' }}>💬 {app.captainDiscord || '-'}</div>
+                                </td>
+                                <td style={{ padding: '12px 16px' }}>
+                                  <button
+                                    type="button"
+                                    onClick={() => setSelectedAppForRosterModal(app)}
+                                    className="btn-secondary"
+                                    style={{ padding: '4px 8px', fontSize: '0.76rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                                  >
+                                    <Users size={12} />
+                                    <span>{(app.players || []).length || 5} คน + {(app.substitutes || []).length || (app.substitute ? 1 : 0)} สำรอง</span>
+                                  </button>
+                                </td>
+                                <td style={{ padding: '12px 16px', whiteSpace: 'nowrap', fontSize: '0.78rem', color: '#64748b' }}>
+                                  {app.submittedAt || '-'}
+                                </td>
+                                <td style={{ padding: '12px 16px' }}>
+                                  <span style={{
+                                    display: 'inline-block',
+                                    padding: '3px 8px',
+                                    borderRadius: '999px',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 700,
+                                    color: statusColor,
+                                    background: statusBg,
+                                    border: `1px solid ${statusColor}33`
+                                  }}>
+                                    {app.status === 'Confirmed' ? '✓ ยืนยันแล้ว' :
+                                     app.status === 'Rejected' ? '✕ ปฏิเสธ' :
+                                     app.status === 'Waitlist' ? '⏳ คิวสำรอง' : '● รอดำเนินการ'}
+                                  </span>
+                                </td>
+                                <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                                  <div style={{ display: 'inline-flex', gap: '6px', alignItems: 'center' }}>
+                                    {app.status !== 'Confirmed' && (
+                                      <button
+                                        type="button"
+                                        className="btn-primary"
+                                        style={{ padding: '4px 8px', fontSize: '0.75rem', background: '#059669', borderColor: '#059669' }}
+                                        title="อนุมัติทีมนี้และนำเข้าสู่สายการแข่งขัน"
+                                        onClick={() => {
+                                          if (confirm(`ยืนยันการอนุมัติทีม "${app.teamName}" เข้าร่วมการแข่งขัน?`)) {
+                                            updateApplicationStatus(app.id, 'Confirmed');
+                                            triggerSaveToast();
+                                          }
+                                        }}
+                                      >
+                                        <Check size={12} /> อนุมัติ
+                                      </button>
+                                    )}
+
+                                    {app.status !== 'Waitlist' && app.status !== 'Confirmed' && (
+                                      <button
+                                        type="button"
+                                        className="btn-secondary"
+                                        style={{ padding: '4px 8px', fontSize: '0.75rem' }}
+                                        title="ย้ายเข้าสู่คิวสำรอง"
+                                        onClick={() => {
+                                          updateApplicationStatus(app.id, 'Waitlist');
+                                          triggerSaveToast();
+                                        }}
+                                      >
+                                        สำรอง
+                                      </button>
+                                    )}
+
+                                    {app.status !== 'Rejected' && (
+                                      <button
+                                        type="button"
+                                        className="btn-secondary"
+                                        style={{ padding: '4px 8px', fontSize: '0.75rem', color: '#dc2626', borderColor: '#fca5a5' }}
+                                        title="ปฏิเสธสิทธิ์การเข้าร่วม"
+                                        onClick={() => {
+                                          const reason = prompt('กรุณาระบุเหตุผลการปฏิเสธ (ถ้ามี):', 'ข้อมูลผู้เล่นไม่ครบถ้วน / สายแข่งเต็ม');
+                                          if (reason !== null) {
+                                            updateApplicationStatus(app.id, 'Rejected', reason);
+                                            triggerSaveToast();
+                                          }
+                                        }}
+                                      >
+                                        ปฏิเสธ
+                                      </button>
+                                    )}
+
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        if (confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบใบสมัครทีม "${app.teamName}"?`)) {
+                                          deleteTournamentApplication(app.id);
+                                          triggerSaveToast();
+                                        }
+                                      }}
+                                      className="btn-icon-danger"
+                                      style={{ padding: '5px' }}
+                                      title="ลบใบสมัครนี้"
+                                    >
+                                      <Trash2 size={13} />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* Full Roster Modal Dialog */}
+              {selectedAppForRosterModal && (
+                <div className="modal-backdrop" onClick={() => setSelectedAppForRosterModal(null)} style={{ zIndex: 10020 }}>
+                  <div className="modal-dialog glass-panel" onClick={e => e.stopPropagation()} style={{ maxWidth: '620px', padding: '24px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <img 
+                          src={selectedAppForRosterModal.logo || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80'} 
+                          alt="" 
+                          style={{ width: '48px', height: '48px', borderRadius: '10px', objectFit: 'cover' }}
+                        />
+                        <div>
+                          <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#0f172a' }}>
+                            {selectedAppForRosterModal.teamName} [{selectedAppForRosterModal.teamTag || 'GLP'}]
+                          </h3>
+                          <span className="text-xs text-blue" style={{ fontWeight: 600 }}>
+                            {selectedAppForRosterModal.tournamentTitle}
+                          </span>
+                        </div>
+                      </div>
+                      <button className="btn-icon-close" onClick={() => setSelectedAppForRosterModal(null)}>
+                        <X size={18} />
+                      </button>
+                    </div>
+
+                    {/* Captain Info Box */}
+                    <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '10px', marginBottom: '16px', border: '1px solid #e2e8f0' }}>
+                      <strong style={{ display: 'block', fontSize: '0.86rem', color: '#0f172a', marginBottom: '8px' }}>
+                        👑 ข้อมูลกัปตันทีม (Team Captain)
+                      </strong>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '10px', fontSize: '0.82rem' }}>
+                        <div><span className="text-muted">ชื่อ/IGN:</span> <strong>{selectedAppForRosterModal.captainName}</strong></div>
+                        <div><span className="text-muted">เบอร์โทร:</span> <strong>{selectedAppForRosterModal.captainPhone || '-'}</strong></div>
+                        <div><span className="text-muted">Discord:</span> <strong className="text-blue">{selectedAppForRosterModal.captainDiscord || '-'}</strong></div>
+                        <div><span className="text-muted">อีเมล:</span> <strong>{selectedAppForRosterModal.captainEmail || '-'}</strong></div>
+                      </div>
+                    </div>
+
+                    {/* Lineup List */}
+                    <div style={{ marginBottom: '16px' }}>
+                      <strong style={{ display: 'block', fontSize: '0.86rem', color: '#0f172a', marginBottom: '8px' }}>
+                        🎮 ผู้เล่นตัวจริง 5 คน (Starting 5 Players)
+                      </strong>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '8px' }}>
+                        {(selectedAppForRosterModal.players || [selectedAppForRosterModal.captainName, 'Player 2', 'Player 3', 'Player 4', 'Player 5']).map((p, idx) => (
+                          <div key={idx} style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '8px 10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 800 }}>
+                              {idx + 1}
+                            </span>
+                            <span style={{ fontSize: '0.84rem', fontWeight: 600, color: '#1e293b' }}>
+                              {typeof p === 'string' ? p : (p.ign || p.realName || `ผู้เล่นคนที่ ${idx + 1}`)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Substitute Player */}
+                    {(selectedAppForRosterModal.substitutes?.length > 0 || selectedAppForRosterModal.substitute) && (
+                      <div style={{ marginBottom: '16px', background: '#fdf4ff', padding: '10px 14px', borderRadius: '8px', border: '1px solid #f0abfc' }}>
+                        <span style={{ fontSize: '0.8rem', color: '#86198f', fontWeight: 600 }}>
+                          🔄 ผู้เล่นสำรอง (Substitute): {Array.isArray(selectedAppForRosterModal.substitutes) ? selectedAppForRosterModal.substitutes.join(', ') : selectedAppForRosterModal.substitute}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Admin Actions in Modal */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e2e8f0', paddingTop: '16px' }}>
+                      <div style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                        ยื่นสมัครเมื่อ: {selectedAppForRosterModal.submittedAt}
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        {selectedAppForRosterModal.status !== 'Confirmed' && (
+                          <button
+                            type="button"
+                            className="btn-primary"
+                            style={{ background: '#059669', borderColor: '#059669', fontSize: '0.82rem' }}
+                            onClick={() => {
+                              updateApplicationStatus(selectedAppForRosterModal.id, 'Confirmed');
+                              setSelectedAppForRosterModal(null);
+                              triggerSaveToast();
+                            }}
+                          >
+                            <Check size={14} /> อนุมัติทีมนี้
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          className="btn-secondary"
+                          style={{ fontSize: '0.82rem' }}
+                          onClick={() => setSelectedAppForRosterModal(null)}
+                        >
+                          ปิด
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {activeTab === 'automation' && (
             <div className="cms-panel-block">
               <div className="panel-header-row">
@@ -8961,12 +10060,12 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
               <div className="admin-subcard glass-panel">
                 <div className="subcard-title">
                   <Lock size={16} className="text-blue" />
-                  <strong>เปลี่ยนชื่อผู้ใช้และรหัสผ่าน Master Admin</strong>
+                  <strong>ตั้งค่าความปลอดภัย Master Admin & รหัส PIN เข้าถึงด่วน</strong>
                 </div>
 
                 <div className="form-row-2">
                   <div className="form-group">
-                    <label>ชื่อผู้ดูแลระบบ (Admin Username)</label>
+                    <label>ชื่อผู้ดูแลระบบ (Admin Username) *</label>
                     <input 
                       type="text" 
                       className="form-input"
@@ -8976,7 +10075,7 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                   </div>
 
                   <div className="form-group">
-                    <label>รหัสผ่าน Master (Admin Password)</label>
+                    <label>รหัสผ่าน Master (Admin Password) *</label>
                     <input 
                       type="text" 
                       className="form-input"
@@ -8987,7 +10086,37 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                   </div>
                 </div>
 
-                <div className="modal-footer-btns">
+                <div className="form-row-2" style={{ marginTop: '10px' }}>
+                  <div className="form-group">
+                    <label>รหัส PIN ด่วน 6 หลัก (Quick Access PIN) *</label>
+                    <input 
+                      type="text" 
+                      maxLength={6}
+                      className="form-input"
+                      value={quickPinEdit}
+                      onChange={e => setQuickPinEdit(e.target.value.replace(/\D/g, ''))}
+                      placeholder="998877"
+                    />
+                    <small className="form-hint">PIN 6 หลัก สำหรับเข้าสู่ระบบด่วนจากปุ่มลัดโดยไม่ต้องพิมพ์รหัสผ่านเต็ม</small>
+                  </div>
+
+                  <div className="form-group">
+                    <label>ตัดเซสชันอัตโนมัติเมื่อไม่มีการใช้งาน (Inactivity Auto-Logout)</label>
+                    <select
+                      className="form-input"
+                      value={sessionTimeoutEdit}
+                      onChange={e => setSessionTimeoutEdit(Number(e.target.value))}
+                    >
+                      <option value={15}>15 นาที (ความปลอดภัยสูงสุด)</option>
+                      <option value={30}>30 นาที (แนะนำตามมาตรฐาน Zero-Trust)</option>
+                      <option value={60}>60 นาที (1 ชั่วโมง)</option>
+                      <option value={120}>120 นาที (2 ชั่วโมง)</option>
+                    </select>
+                    <small className="form-hint">ระบบจะเคลียร์เซสชันและล็อกเอาต์อัตโนมัติหากไม่มีการเคลื่อนไหวเมาส์หรือแป้นพิมพ์</small>
+                  </div>
+                </div>
+
+                <div className="modal-footer-btns" style={{ marginTop: '18px' }}>
                   <button 
                     className="btn-primary"
                     onClick={() => {
@@ -8995,15 +10124,26 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                         alert('กรุณากรอกชื่อผู้ใช้และรหัสผ่านให้ครบถ้วน');
                         return;
                       }
+                      if (quickPinEdit.length !== 6) {
+                        alert('กรุณากำหนดรหัส PIN ด่วนให้ครบ 6 หลักตัวเลข');
+                        return;
+                      }
                       updateSecurityConfig({
                         adminUsername: adminUserEdit.trim(),
-                        adminPassword: adminPassEdit.trim()
+                        adminPassword: adminPassEdit.trim(),
+                        quickPin: quickPinEdit.trim(),
+                        sessionTimeoutMinutes: Number(sessionTimeoutEdit) || 30
+                      });
+                      addAuditLog({
+                        action: 'SECURITY_CONFIG_UPDATED',
+                        status: 'success',
+                        details: `อัปเดตสิทธิ์ Master Admin, PIN ด่วน 6 หลัก และตัดเซสชัน ${sessionTimeoutEdit} นาที`
                       });
                       triggerSaveToast();
-                      alert('อัปเดตรหัสผ่าน Master Admin สำเร็จเรียบร้อย!');
+                      alert('อัปเดตการตั้งค่าความปลอดภัย Master Admin สำเร็จเรียบร้อย!');
                     }}
                   >
-                    <Save size={14} /> บันทึกรหัสผ่านใหม่
+                    <Save size={14} /> บันทึกการตั้งค่าความปลอดภัย
                   </button>
                   <button 
                     className="btn-admin-logout"
@@ -9012,6 +10152,205 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                     <LogOut size={14} /> ออกจากระบบทันที
                   </button>
                 </div>
+              </div>
+
+              {/* Zero-Trust Security Audit Logs Console */}
+              <div className="admin-subcard glass-panel" style={{ marginTop: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
+                  <div>
+                    <div className="subcard-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 4px 0' }}>
+                      <Activity size={18} className="text-blue" />
+                      <strong>ประวัติการเข้าใช้งาน & บันทึกความปลอดภัย (Security Audit Logs)</strong>
+                    </div>
+                    <p style={{ margin: 0, fontSize: '0.82rem', color: '#64748b' }}>
+                      บันทึกกิจกรรมการเข้าสู่ระบบ, การยืนยันตัวตนผิดพลาด, การหมดเวลาเซสชัน, และการแก้ไขสิทธิ์แบบ Real-time
+                    </p>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      className="btn-secondary"
+                      style={{ fontSize: '0.8rem', padding: '6px 12px' }}
+                      onClick={() => {
+                        const logs = siteData.adminAuditLogs || [];
+                        if (logs.length === 0) {
+                          alert('ไม่มีข้อมูล Audit Logs ให้ส่งออก');
+                          return;
+                        }
+                        const headers = ['ลำดับ', 'เวลา', 'ประเภทกิจกรรม (Action)', 'ผู้ใช้ (User)', 'IP Address / อุปกรณ์', 'สถานะ', 'รายละเอียด'];
+                        const rows = logs.map((l, i) => [
+                          i + 1,
+                          '"' + (l.timestamp || '') + '"',
+                          '"' + (l.action || '') + '"',
+                          '"' + (l.adminUser || 'admin') + '"',
+                          '"' + (l.ip || '127.0.0.1') + ' / ' + (l.device || 'Browser') + '"',
+                          '"' + (l.status || 'info') + '"',
+                          '"' + (l.details || '').replace(/"/g, '""') + '"'
+                        ]);
+                        const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
+                        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.setAttribute('download', `GLP_Security_AuditLogs_${new Date().toISOString().slice(0, 10)}.csv`);
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                      }}
+                    >
+                      <Download size={13} /> ส่งออก CSV
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-secondary"
+                      style={{ fontSize: '0.8rem', padding: '6px 12px', color: '#dc2626', borderColor: '#fca5a5' }}
+                      onClick={() => {
+                        if (confirm('คุณแน่ใจหรือไม่ว่าต้องการล้างประวัติ Audit Logs ทั้งหมด?')) {
+                          clearAuditLogs();
+                          triggerSaveToast();
+                        }
+                      }}
+                    >
+                      <Trash2 size={13} /> ล้างประวัติทั้งหมด
+                    </button>
+                  </div>
+                </div>
+
+                {/* Filter and Search Bar for Logs */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '14px', background: '#f8fafc', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    {[
+                      { id: 'all', label: 'ทั้งหมด' },
+                      { id: 'logins', label: 'การล็อกอิน' },
+                      { id: 'security', label: 'ความปลอดภัย' },
+                      { id: 'tournaments', label: 'แข่งทัวร์นาเมนต์' }
+                    ].map(f => (
+                      <button
+                        key={f.id}
+                        type="button"
+                        className={auditLogFilter === f.id ? 'btn-primary' : 'btn-secondary'}
+                        style={{ padding: '4px 10px', fontSize: '0.78rem' }}
+                        onClick={() => setAuditLogFilter(f.id)}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div style={{ position: 'relative' }}>
+                    <input 
+                      type="text"
+                      className="form-input"
+                      placeholder="ค้นหากิจกรรม, ผู้ใช้, IP..."
+                      value={auditSearchQuery}
+                      onChange={e => setAuditSearchQuery(e.target.value)}
+                      style={{ padding: '5px 8px 5px 28px', fontSize: '0.8rem', width: '180px' }}
+                    />
+                    <Search size={13} style={{ position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                  </div>
+                </div>
+
+                {/* Audit Logs Table */}
+                {(() => {
+                  const logs = siteData.adminAuditLogs || [];
+                  const filtered = logs.filter(l => {
+                    let matchTab = true;
+                    if (auditLogFilter === 'logins') {
+                      matchTab = l.action === 'LOGIN_SUCCESS' || l.action === 'LOGIN_FAILED' || l.action === 'LOGOUT' || l.action === 'SESSION_TIMEOUT';
+                    } else if (auditLogFilter === 'security') {
+                      matchTab = l.action.startsWith('SECURITY_') || l.action.startsWith('PIN_') || l.action.startsWith('LOCKOUT_');
+                    } else if (auditLogFilter === 'tournaments') {
+                      matchTab = l.action.includes('APPLICATION') || l.action.includes('TEAM');
+                    }
+
+                    const q = auditSearchQuery.toLowerCase().trim();
+                    const matchSearch = !q ||
+                      (l.action || '').toLowerCase().includes(q) ||
+                      (l.adminUser || '').toLowerCase().includes(q) ||
+                      (l.details || '').toLowerCase().includes(q) ||
+                      (l.ip || '').toLowerCase().includes(q);
+
+                    return matchTab && matchSearch;
+                  });
+
+                  if (filtered.length === 0) {
+                    return (
+                      <div style={{ padding: '30px 20px', textAlign: 'center', color: '#64748b' }}>
+                        <ShieldCheck size={32} style={{ margin: '0 auto 8px auto', color: '#94a3b8' }} />
+                        <p style={{ margin: 0, fontSize: '0.85rem' }}>ไม่มีรายการบันทึกความปลอดภัยที่ตรงกับตัวกรองนี้</p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div style={{ overflowX: 'auto', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                      <table className="admin-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+                        <thead>
+                          <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', textAlign: 'left', color: '#475569' }}>
+                            <th style={{ padding: '10px 14px', width: '150px' }}>เวลา (Timestamp)</th>
+                            <th style={{ padding: '10px 14px', width: '170px' }}>เหตุการณ์ (Action)</th>
+                            <th style={{ padding: '10px 14px', width: '100px' }}>ผู้ใช้</th>
+                            <th style={{ padding: '10px 14px', width: '170px' }}>ที่อยู่ IP & อุปกรณ์</th>
+                            <th style={{ padding: '10px 14px' }}>รายละเอียดเหตุการณ์</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filtered.map(l => {
+                            let badgeBg = '#eff6ff';
+                            let badgeColor = '#2563eb';
+                            let badgeBorder = '#bfdbfe';
+
+                            if (l.action === 'LOGIN_SUCCESS' || l.status === 'success') {
+                              badgeBg = '#ecfdf5'; badgeColor = '#059669'; badgeBorder = '#a7f3d0';
+                            } else if (l.action === 'LOGIN_FAILED' || l.action === 'LOCKOUT_ACTIVATED' || l.status === 'error') {
+                              badgeBg = '#fef2f2'; badgeColor = '#dc2626'; badgeBorder = '#fecaca';
+                            } else if (l.action === 'SESSION_TIMEOUT' || l.action === 'LOGOUT') {
+                              badgeBg = '#fffbeb'; badgeColor = '#d97706'; badgeBorder = '#fde68a';
+                            } else if (l.action.includes('APPLICATION') || l.action.includes('TEAM')) {
+                              badgeBg = '#fdf4ff'; badgeColor = '#9333ea'; badgeBorder = '#f5d0fe';
+                            }
+
+                            return (
+                              <tr key={l.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                <td style={{ padding: '10px 14px', whiteSpace: 'nowrap', color: '#64748b' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                    <Clock size={12} />
+                                    <span>{l.timestamp}</span>
+                                  </div>
+                                </td>
+                                <td style={{ padding: '10px 14px' }}>
+                                  <span style={{
+                                    display: 'inline-block',
+                                    padding: '2px 8px',
+                                    borderRadius: '6px',
+                                    fontSize: '0.74rem',
+                                    fontWeight: 700,
+                                    background: badgeBg,
+                                    color: badgeColor,
+                                    border: `1px solid ${badgeBorder}`
+                                  }}>
+                                    {l.action}
+                                  </span>
+                                </td>
+                                <td style={{ padding: '10px 14px', fontWeight: 600, color: '#0f172a' }}>
+                                  {l.adminUser || 'admin'}
+                                </td>
+                                <td style={{ padding: '10px 14px', color: '#64748b', fontSize: '0.78rem' }}>
+                                  <div>{l.ip || '127.0.0.1 (Localhost)'}</div>
+                                  <div style={{ color: '#94a3b8' }}>{l.device || 'Chrome / Windows'}</div>
+                                </td>
+                                <td style={{ padding: '10px 14px', color: '#334155' }}>
+                                  {l.details || '-'}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           )}

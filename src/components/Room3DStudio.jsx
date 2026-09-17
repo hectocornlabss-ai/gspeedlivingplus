@@ -1444,6 +1444,66 @@ export default function Room3DStudio({
       coffeeTable.position.set(0, 0.175, 0.75);
       group.add(coffeeTable);
     }
+    else if (type === 'vip-lounge-sofa') {
+      // 3.6m x 2.2m Luxury VIP Console Lounge with 65" Screen
+      const sofaBase = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.45, 1.1), new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5 }));
+      sofaBase.position.set(-0.3, 0.225, -0.4);
+      group.add(sofaBase);
+
+      const chaise = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.45, 1.4), new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5 }));
+      chaise.position.set(0.95, 0.225, 0.2);
+      group.add(chaise);
+
+      const back = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.55, 0.25), new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6 }));
+      back.position.set(-0.2, 0.65, -0.9);
+      group.add(back);
+
+      // Low table with LED glow
+      const coffeeTable = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.28, 0.75), new THREE.MeshStandardMaterial({ color: 0x020617, roughness: 0.2 }));
+      coffeeTable.position.set(-0.3, 0.14, 0.3);
+      group.add(coffeeTable);
+
+      const ledTable = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.02, 0.7), new THREE.MeshBasicMaterial({ color: 0x38bdf8 }));
+      ledTable.position.set(-0.3, 0.02, 0.3);
+      group.add(ledTable);
+
+      // 65" Curved Display Facing the sofa
+      const tvPole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.4, 8), metalMat);
+      tvPole.position.set(-0.3, 0.7, 1.1);
+      group.add(tvPole);
+
+      const tvScreen = new THREE.Mesh(new THREE.BoxGeometry(2.0, 1.1, 0.06), new THREE.MeshBasicMaterial({ color: 0x1e3a8a }));
+      tvScreen.position.set(-0.3, 1.35, 1.1);
+      group.add(tvScreen);
+    }
+    else if (type === 'smart-kiosk') {
+      // 1.0m x 0.8m Cyber Smart Kiosk Totem
+      const base = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.44, 0.06, 16), metalMat);
+      base.position.set(0, 0.03, 0);
+      group.add(base);
+
+      const body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.6, 0.22), deskTopMat);
+      body.position.set(0, 0.83, 0);
+      group.add(body);
+
+      const touchScreen = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.82, 0.04), screenMat);
+      touchScreen.position.set(0, 1.12, 0.11);
+      group.add(touchScreen);
+
+      const scanner = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.1, 0.02), rgbStripMat);
+      scanner.position.set(0, 0.55, 0.12);
+      group.add(scanner);
+    }
+    else if (type === 'neon-brand-sign') {
+      // Wall Mounted 3D Glowing Neon Sign
+      const plate = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.9, 0.05), new THREE.MeshStandardMaterial({ color: 0x020617 }));
+      plate.position.set(0, 1.4, 0);
+      group.add(plate);
+
+      const glowLogo = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.55, 0.08), new THREE.MeshBasicMaterial({ color: 0x38bdf8 }));
+      glowLogo.position.set(0, 1.4, 0.05);
+      group.add(glowLogo);
+    }
     else {
       // Fallback architectural block
       const w = item.catalog?.widthMeters || 1;

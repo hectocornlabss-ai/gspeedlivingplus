@@ -1895,12 +1895,12 @@ export default function FranchisePlanner() {
               <button 
                 type="button" 
                 id="btn-export-pdf-compact"
-                onClick={() => window.print()} 
+                onClick={() => setShowQuotationModal(true)} 
                 className="btn-compact-next"
                 style={{ background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)' }}
               >
                 <Printer size={14} />
-                <span>พิมพ์ใบเสนอราคา</span>
+                <span>พิมพ์ใบเสนอราคา (A4)</span>
               </button>
             )}
           </div>
@@ -3869,9 +3869,10 @@ export default function FranchisePlanner() {
                 id="btn-view-quotation-step4"
                 onClick={() => setShowQuotationModal(true)} 
                 className="btn-primary"
+                style={{ background: 'linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%)', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.35)' }}
               >
-                <Download size={16} />
-                <span>ดูใบเสนอราคาแบบละเอียด (PDF Preview)</span>
+                <Printer size={16} />
+                <span>📄 พิมพ์ใบเสนอราคาทางการ (Official Quotation / Print A4)</span>
               </button>
             </div>
           </div>
@@ -4358,11 +4359,40 @@ export default function FranchisePlanner() {
 
                   {/* Official Signatures Section */}
                   <div className="quote-signatures-row">
-                    <div className="signature-box">
+                    <div className="signature-box" style={{ position: 'relative', overflow: 'visible' }}>
+                      {/* Authentic Corporate Stamp / Official Seal */}
+                      <div className="official-company-seal" style={{
+                        position: 'absolute',
+                        right: '18px',
+                        top: '-15px',
+                        width: '108px',
+                        height: '108px',
+                        borderRadius: '50%',
+                        border: '3px double #dc2626',
+                        color: '#dc2626',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        textAlign: 'center',
+                        transform: 'rotate(-12deg)',
+                        opacity: 0.88,
+                        pointerEvents: 'none',
+                        userSelect: 'none',
+                        zIndex: 2,
+                        background: 'rgba(254, 242, 242, 0.25)',
+                        boxShadow: 'inset 0 0 0 1px rgba(220, 38, 38, 0.2)'
+                      }}>
+                        <div style={{ fontSize: '0.5rem', fontWeight: 800, letterSpacing: '0.5px' }}>★ G-SPEED LIVING PLUS ★</div>
+                        <div style={{ fontSize: '0.64rem', fontWeight: 900, borderTop: '1px solid #dc2626', borderBottom: '1px solid #dc2626', padding: '1px 0', width: '84%', margin: '2px 0', letterSpacing: '0.5px' }}>OFFICIAL SEAL</div>
+                        <div style={{ fontSize: '0.48rem', fontWeight: 700 }}>AUTHORIZED DEPT</div>
+                        <div style={{ fontSize: '0.44rem', opacity: 0.85 }}>TAX: 0105566012345</div>
+                      </div>
+
                       <div className="sign-line"></div>
                       <div className="sign-name">ผู้อนุมัติเสนอราคา (Authorized Signature)</div>
-                      <div className="sign-title">ฝ่ายพัฒนาธุรกิจแฟรนไชส์ / G-Speed Esport Co., Ltd.</div>
-                      <div className="sign-date">วันที่: ..... / ..... / ..........</div>
+                      <div className="sign-title">ฝ่ายพัฒนาธุรกิจแฟรนไชส์ / G-Speed Living Plus Co., Ltd.</div>
+                      <div className="sign-date">วันที่: {new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'numeric', day: 'numeric' })}</div>
                     </div>
                     <div className="signature-box">
                       <div className="sign-line"></div>

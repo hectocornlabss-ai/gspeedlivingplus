@@ -650,6 +650,136 @@ export default function ThreeProductViewer({
       table.position.set(0, 0.15, depthMeters * 0.55);
       group.add(table);
 
+    } else if (type === 'vip-lounge-sofa') {
+      // Premium VIP Console Lounge Sofa with 65" Curved Display & Marble Coffee Table
+      const leatherMat = new THREE.MeshStandardMaterial({ color: chairColor, roughness: 0.4, metalness: 0.1 });
+      const cushionMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 });
+      const marbleMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2, metalness: 0.2 });
+
+      // L-Shape Main Sofa Base
+      const mainSeat = new THREE.Mesh(new THREE.BoxGeometry(widthMeters * 0.75, 0.42, depthMeters * 0.55), leatherMat);
+      mainSeat.position.set(-widthMeters * 0.1, 0.21, -depthMeters * 0.2);
+      group.add(mainSeat);
+
+      // Chaise Longue section
+      const chaise = new THREE.Mesh(new THREE.BoxGeometry(widthMeters * 0.35, 0.42, depthMeters * 0.65), leatherMat);
+      chaise.position.set(widthMeters * 0.28, 0.21, depthMeters * 0.1);
+      group.add(chaise);
+
+      // Backrest
+      const backrest = new THREE.Mesh(new THREE.BoxGeometry(widthMeters * 0.95, 0.55, 0.22), leatherMat);
+      backrest.position.set(0, 0.62, -depthMeters * 0.42);
+      group.add(backrest);
+
+      // Armrest Left
+      const armL = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.5, depthMeters * 0.6), leatherMat);
+      armL.position.set(-widthMeters * 0.45, 0.45, -depthMeters * 0.15);
+      group.add(armL);
+
+      // Plush seat cushions with accent glow seams
+      [-widthMeters * 0.3, -widthMeters * 0.1, widthMeters * 0.1].forEach(cx => {
+        const cushion = new THREE.Mesh(new THREE.BoxGeometry(widthMeters * 0.22, 0.08, depthMeters * 0.45), cushionMat);
+        cushion.position.set(cx, 0.46, -depthMeters * 0.2);
+        group.add(cushion);
+      });
+
+      // Low Marble Coffee Table
+      const coffeeTable = new THREE.Mesh(new THREE.BoxGeometry(widthMeters * 0.5, 0.28, depthMeters * 0.35), marbleMat);
+      coffeeTable.position.set(-widthMeters * 0.1, 0.14, depthMeters * 0.25);
+      group.add(coffeeTable);
+
+      // LED strip under coffee table
+      const tableGlow = new THREE.Mesh(new THREE.BoxGeometry(widthMeters * 0.48, 0.02, depthMeters * 0.33), ledGlowMat);
+      tableGlow.position.set(-widthMeters * 0.1, 0.02, depthMeters * 0.25);
+      group.add(tableGlow);
+
+      // 65" Curved Display on Minimalist Stand
+      const tvStand = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.04, 0.3), metalMat);
+      tvStand.position.set(0, 0.02, depthMeters * 0.7);
+      group.add(tvStand);
+
+      const tvPole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.2, 16), metalMat);
+      tvPole.position.set(0, 0.6, depthMeters * 0.7);
+      group.add(tvPole);
+
+      // Curved Screen Frame
+      const tvFrame = new THREE.Mesh(new THREE.BoxGeometry(widthMeters * 0.65, 0.75, 0.06), screenFrameMat);
+      tvFrame.position.set(0, 1.2, depthMeters * 0.7);
+      group.add(tvFrame);
+
+      // Glowing Ultra-wide Screen
+      const tvScreen = new THREE.Mesh(new THREE.PlaneGeometry(widthMeters * 0.62, 0.71), screenMat);
+      tvScreen.position.set(0, 1.2, depthMeters * 0.7 - 0.035);
+      tvScreen.rotation.y = Math.PI; // Face the sofa
+      group.add(tvScreen);
+
+    } else if (type === 'smart-kiosk') {
+      // Interactive Cyberpunk Smart Order & Top-Up Kiosk
+      const kioskBase = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.48, 0.06, 24), metalMat);
+      kioskBase.position.set(0, 0.03, 0);
+      group.add(kioskBase);
+
+      // Standing Totem Body
+      const kioskBody = new THREE.Mesh(new THREE.BoxGeometry(0.65, 1.6, 0.22), deskTopMat);
+      kioskBody.position.set(0, 0.83, 0);
+      group.add(kioskBody);
+
+      // Glowing LED Edge Rim
+      const rimL = new THREE.Mesh(new THREE.BoxGeometry(0.02, 1.62, 0.02), ledGlowMat);
+      rimL.position.set(-0.33, 0.83, 0.11);
+      const rimR = new THREE.Mesh(new THREE.BoxGeometry(0.02, 1.62, 0.02), ledGlowMat);
+      rimR.position.set(0.33, 0.83, 0.11);
+      group.add(rimL);
+      group.add(rimR);
+
+      // 32" Vertical Touch Display
+      const screenHousing = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.9, 0.04), screenFrameMat);
+      screenHousing.position.set(0, 1.1, 0.12);
+      group.add(screenHousing);
+
+      const touchDisplay = new THREE.Mesh(new THREE.PlaneGeometry(0.48, 0.84), screenMat);
+      touchDisplay.position.set(0, 1.1, 0.142);
+      group.add(touchDisplay);
+
+      // QR Scanner / PromptPay Window
+      const scanner = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.12, 0.03), ledGlowMat);
+      scanner.position.set(0, 0.52, 0.12);
+      group.add(scanner);
+
+      // Thermal Receipt Dispenser Slot
+      const receiptSlot = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.02, 0.03), metalMat);
+      receiptSlot.position.set(0, 0.38, 0.12);
+      group.add(receiptSlot);
+
+    } else if (type === 'neon-brand-sign') {
+      // 3D Glowing GLP Brand Neon Sign
+      const backPlate = new THREE.Mesh(new THREE.BoxGeometry(widthMeters * 0.9, 0.9, 0.05), new THREE.MeshStandardMaterial({ color: 0x020617, roughness: 0.3, metalness: 0.7 }));
+      backPlate.position.set(0, 1.2, 0);
+      group.add(backPlate);
+
+      // Acrylic Logo Core (Emissive Glowing GLP Badge)
+      const logoBadge = new THREE.Mesh(new THREE.BoxGeometry(widthMeters * 0.7, 0.55, 0.08), new THREE.MeshStandardMaterial({
+        color: 0x1d4ed8,
+        emissive: accentColor,
+        emissiveIntensity: 1.2,
+        roughness: 0.1
+      }));
+      logoBadge.position.set(0, 1.2, 0.06);
+      group.add(logoBadge);
+
+      // Cyber Neon Halo Outer Ring
+      const haloRing = new THREE.Mesh(new THREE.TorusGeometry(0.65, 0.035, 16, 64), ledGlowMat);
+      haloRing.position.set(0, 1.2, 0.11);
+      group.add(haloRing);
+
+      // Wall Mount Brackets
+      [-widthMeters * 0.35, widthMeters * 0.35].forEach(bx => {
+        const bracket = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.25, 12), metalMat);
+        bracket.rotation.x = Math.PI / 2;
+        bracket.position.set(bx, 1.2, -0.125);
+        group.add(bracket);
+      });
+
     } else {
       // Generic Adaptive Modular Desk Table
       const desk = new THREE.Mesh(new THREE.BoxGeometry(widthMeters, 0.06, depthMeters), deskTopMat);
