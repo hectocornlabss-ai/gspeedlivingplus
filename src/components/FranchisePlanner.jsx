@@ -2026,176 +2026,7 @@ export default function FranchisePlanner() {
                     <span>(รองรับได้ประมาณ <strong>{idealMaxPCs} เครื่อง</strong> แบบไม่อึดอัด)</span>
                   </div>
 
-                  {/* Store Entrance Configuration Card */}
-                  <div className="door-config-card">
-                    <div className="door-config-header">
-                      <div className="door-header-title">
-                        <DoorOpen size={16} className="text-emerald" />
-                        <div>
-                          <strong>ตำแหน่งประตูทางเข้าร้าน (Store Entrance)</strong>
-                          <p className="sub-desc">กำหนดผนังและปรับเลื่อนตำแหน่งประตูตามผังจริงของแต่ละร้าน</p>
-                        </div>
-                      </div>
-                      <span className="door-wall-badge">
-                        {doorConfig.wall === 'front' ? 'ด้านหน้า' :
-                         doorConfig.wall === 'left' ? 'ผนังซ้าย' :
-                         doorConfig.wall === 'back' ? 'ผนังหลัง' : 'ผนังขวา'}
-                      </span>
-                    </div>
 
-                    <div className="wall-selector-grid">
-                      <button 
-                        type="button" 
-                        className={`wall-btn ${doorConfig.wall === 'front' ? 'active' : ''}`}
-                        onClick={() => setDoorConfig({ ...doorConfig, wall: 'front' })}
-                      >
-                        <ArrowDown size={14} /> ด้านหน้า (Front)
-                      </button>
-                      <button 
-                        type="button" 
-                        className={`wall-btn ${doorConfig.wall === 'right' ? 'active' : ''}`}
-                        onClick={() => setDoorConfig({ ...doorConfig, wall: 'right' })}
-                      >
-                        <ArrowRight size={14} /> ผนังขวา (Right)
-                      </button>
-                      <button 
-                        type="button" 
-                        className={`wall-btn ${doorConfig.wall === 'left' ? 'active' : ''}`}
-                        onClick={() => setDoorConfig({ ...doorConfig, wall: 'left' })}
-                      >
-                        <ArrowLeft size={14} /> ผนังซ้าย (Left)
-                      </button>
-                      <button 
-                        type="button" 
-                        className={`wall-btn ${doorConfig.wall === 'back' ? 'active' : ''}`}
-                        onClick={() => setDoorConfig({ ...doorConfig, wall: 'back' })}
-                      >
-                        <ArrowUp size={14} /> ผนังหลัง (Back)
-                      </button>
-                    </div>
-
-                    <div className="door-slider-box">
-                      <div className="slider-header-mini">
-                        <label>ตำแหน่งตามแนวผนัง:</label>
-                        <span className="slider-val-mini text-emerald">{Math.round(doorConfig.offsetRatio * 100)}%</span>
-                      </div>
-                      <div className="door-offset-presets">
-                        <button type="button" className="btn-preset-offset" onClick={() => setDoorConfig({ ...doorConfig, offsetRatio: 0.25 })}>
-                          {doorConfig.wall === 'front' || doorConfig.wall === 'back' ? 'ซ้าย 25%' : 'หลัง 25%'}
-                        </button>
-                        <button type="button" className="btn-preset-offset" onClick={() => setDoorConfig({ ...doorConfig, offsetRatio: 0.50 })}>
-                          ตรงกลาง 50%
-                        </button>
-                        <button type="button" className="btn-preset-offset" onClick={() => setDoorConfig({ ...doorConfig, offsetRatio: 0.75 })}>
-                          {doorConfig.wall === 'front' || doorConfig.wall === 'back' ? 'ขวา 75%' : 'หน้า 75%'}
-                        </button>
-                      </div>
-                      <input 
-                        type="range"
-                        min="0.15"
-                        max="0.85"
-                        step="0.05"
-                        value={doorConfig.offsetRatio}
-                        onChange={(e) => setDoorConfig({ ...doorConfig, offsetRatio: parseFloat(e.target.value) })}
-                        className="custom-range"
-                      />
-                    </div>
-
-                    <div className="door-style-mini-row">
-                      <label>รูปแบบประตู:</label>
-                      <div className="door-style-pills">
-                        <button 
-                          type="button"
-                          className={`door-pill ${doorConfig.style === 'wood' ? 'active' : ''}`}
-                          onClick={() => setDoorConfig({ ...doorConfig, style: 'wood' })}
-                        >
-                          <DoorClosed size={14} />
-                          <span>บานไม้โมเดิร์น</span>
-                        </button>
-                        <button 
-                          type="button"
-                          className={`door-pill ${doorConfig.style === 'glass' ? 'active' : ''}`}
-                          onClick={() => setDoorConfig({ ...doorConfig, style: 'glass' })}
-                        >
-                          <SplitSquareVertical size={14} />
-                          <span>กระจกใสบานคู่</span>
-                        </button>
-                        <button 
-                          type="button"
-                          className={`door-pill ${doorConfig.style === 'auto-sliding' ? 'active' : ''}`}
-                          onClick={() => setDoorConfig({ ...doorConfig, style: 'auto-sliding' })}
-                        >
-                          <Sliders size={14} />
-                          <span>บานเลื่อนออโต้</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="door-field-group" style={{ marginTop: '12px' }}>
-                      <div className="slider-header-mini">
-                        <label>ชื่อร้าน / ป้ายหน้าร้าน:</label>
-                        <span className="slider-val-mini text-cyan">ป้าย 3D Real-time</span>
-                      </div>
-                      <input 
-                        type="text"
-                        value={doorConfig.storeName || 'GLP : G SPEED LIVING PLUS'}
-                        onChange={(e) => setDoorConfig({ ...doorConfig, storeName: e.target.value })}
-                        placeholder="เช่น GLP : G SPEED LIVING PLUS, สาขา พระราม 9..."
-                        className="store-name-card-input"
-                        maxLength={36}
-                      />
-                      <div className="store-name-presets" style={{ marginTop: '6px' }}>
-                        {['GLP : G SPEED LIVING PLUS', 'G-SPEED LIVING PLUS', 'สาขา สยามสแควร์', 'GLP CYBER LOUNGE'].map((preset) => (
-                          <button 
-                            key={preset}
-                            type="button" 
-                            className="btn-preset-name"
-                            onClick={() => setDoorConfig({ ...doorConfig, storeName: preset })}
-                          >
-                            {preset}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="door-style-mini-row" style={{ marginTop: '10px' }}>
-                      <label>รูปแบบป้าย & สติ๊กเกอร์:</label>
-                      <div className="door-style-pills">
-                        <button 
-                          type="button" 
-                          className={`door-pill ${doorConfig.signStyle === 'neon-lightbox' || !doorConfig.signStyle ? 'active' : ''}`}
-                          onClick={() => setDoorConfig({ ...doorConfig, signStyle: 'neon-lightbox' })}
-                        >
-                          <Sparkles size={14} />
-                          <span>นีออน LED</span>
-                        </button>
-                        <button 
-                          type="button" 
-                          className={`door-pill ${doorConfig.signStyle === 'acrylic-gold' ? 'active' : ''}`}
-                          onClick={() => setDoorConfig({ ...doorConfig, signStyle: 'acrylic-gold' })}
-                        >
-                          <Award size={14} />
-                          <span>อะคริลิกทอง</span>
-                        </button>
-                        <button 
-                          type="button" 
-                          className={`door-pill ${doorConfig.signStyle === 'minimal-dark' ? 'active' : ''}`}
-                          onClick={() => setDoorConfig({ ...doorConfig, signStyle: 'minimal-dark' })}
-                        >
-                          <Zap size={14} />
-                          <span>มินิมอลไซเบอร์</span>
-                        </button>
-                        <button 
-                          type="button" 
-                          className={`door-pill ${doorConfig.signStyle === 'grand-arch' ? 'active' : ''}`}
-                          onClick={() => setDoorConfig({ ...doorConfig, signStyle: 'grand-arch' })}
-                        >
-                          <Building2 size={14} />
-                          <span>ซุ้มแกรนด์</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
 
                   {/* Switch to Blueprint Mode Suggestion */}
                   <div 
@@ -2343,177 +2174,6 @@ export default function FranchisePlanner() {
                         <div className="area-summary-pill" style={{ marginTop: '8px' }}>
                           <span>พื้นที่ใช้สอยรวม: <strong>{roomAreaSqM} ตารางเมตร</strong></span>
                           <span>(สเกลมาตราส่วน: <strong>1:{Math.round(pixelsPerMeter)}</strong>)</span>
-                        </div>
-
-                        {/* Store Entrance Configuration Card (Blueprint Mode) */}
-                        <div className="door-config-card" style={{ marginTop: '12px' }}>
-                          <div className="door-config-header">
-                            <div className="door-header-title">
-                              <DoorOpen size={16} className="text-emerald" />
-                              <div>
-                                <strong>ตำแหน่งประตูทางเข้าร้าน (Store Entrance)</strong>
-                                <p className="sub-desc">กำหนดผนังและปรับเลื่อนตำแหน่งประตูตามผังจริงของแต่ละร้าน</p>
-                              </div>
-                            </div>
-                            <span className="door-wall-badge">
-                              {doorConfig.wall === 'front' ? 'ด้านหน้า' :
-                               doorConfig.wall === 'left' ? 'ผนังซ้าย' :
-                               doorConfig.wall === 'back' ? 'ผนังหลัง' : 'ผนังขวา'}
-                            </span>
-                          </div>
-
-                          <div className="wall-selector-grid">
-                            <button 
-                              type="button" 
-                              className={`wall-btn ${doorConfig.wall === 'front' ? 'active' : ''}`}
-                              onClick={() => setDoorConfig({ ...doorConfig, wall: 'front' })}
-                            >
-                              <ArrowDown size={14} /> ด้านหน้า (Front)
-                            </button>
-                            <button 
-                              type="button" 
-                              className={`wall-btn ${doorConfig.wall === 'right' ? 'active' : ''}`}
-                              onClick={() => setDoorConfig({ ...doorConfig, wall: 'right' })}
-                            >
-                              <ArrowRight size={14} /> ผนังขวา (Right)
-                            </button>
-                            <button 
-                              type="button" 
-                              className={`wall-btn ${doorConfig.wall === 'left' ? 'active' : ''}`}
-                              onClick={() => setDoorConfig({ ...doorConfig, wall: 'left' })}
-                            >
-                              <ArrowLeft size={14} /> ผนังซ้าย (Left)
-                            </button>
-                            <button 
-                              type="button" 
-                              className={`wall-btn ${doorConfig.wall === 'back' ? 'active' : ''}`}
-                              onClick={() => setDoorConfig({ ...doorConfig, wall: 'back' })}
-                            >
-                              <ArrowUp size={14} /> ผนังหลัง (Back)
-                            </button>
-                          </div>
-
-                          <div className="door-slider-box">
-                            <div className="slider-header-mini">
-                              <label>ตำแหน่งตามแนวผนัง:</label>
-                              <span className="slider-val-mini text-emerald">{Math.round(doorConfig.offsetRatio * 100)}%</span>
-                            </div>
-                            <div className="door-offset-presets">
-                              <button type="button" className="btn-preset-offset" onClick={() => setDoorConfig({ ...doorConfig, offsetRatio: 0.25 })}>
-                                {doorConfig.wall === 'front' || doorConfig.wall === 'back' ? 'ซ้าย 25%' : 'หลัง 25%'}
-                              </button>
-                              <button type="button" className="btn-preset-offset" onClick={() => setDoorConfig({ ...doorConfig, offsetRatio: 0.50 })}>
-                                ตรงกลาง 50%
-                              </button>
-                              <button type="button" className="btn-preset-offset" onClick={() => setDoorConfig({ ...doorConfig, offsetRatio: 0.75 })}>
-                                {doorConfig.wall === 'front' || doorConfig.wall === 'back' ? 'ขวา 75%' : 'หน้า 75%'}
-                              </button>
-                            </div>
-                            <input 
-                              type="range"
-                              min="0.15"
-                              max="0.85"
-                              step="0.05"
-                              value={doorConfig.offsetRatio}
-                              onChange={(e) => setDoorConfig({ ...doorConfig, offsetRatio: parseFloat(e.target.value) })}
-                              className="custom-range"
-                            />
-                          </div>
-
-                          <div className="door-style-mini-row">
-                            <label>รูปแบบประตู:</label>
-                            <div className="door-style-pills">
-                              <button 
-                                type="button"
-                                className={`door-pill ${doorConfig.style === 'wood' ? 'active' : ''}`}
-                                onClick={() => setDoorConfig({ ...doorConfig, style: 'wood' })}
-                              >
-                                <DoorClosed size={14} />
-                                <span>บานไม้โมเดิร์น</span>
-                              </button>
-                              <button 
-                                type="button"
-                                className={`door-pill ${doorConfig.style === 'glass' ? 'active' : ''}`}
-                                onClick={() => setDoorConfig({ ...doorConfig, style: 'glass' })}
-                              >
-                                <SplitSquareVertical size={14} />
-                                <span>กระจกใสบานคู่</span>
-                              </button>
-                              <button 
-                                type="button"
-                                className={`door-pill ${doorConfig.style === 'auto-sliding' ? 'active' : ''}`}
-                                onClick={() => setDoorConfig({ ...doorConfig, style: 'auto-sliding' })}
-                              >
-                                <Sliders size={14} />
-                                <span>บานเลื่อนออโต้</span>
-                              </button>
-                            </div>
-                          </div>
-
-                          <div className="door-field-group" style={{ marginTop: '12px' }}>
-                            <div className="slider-header-mini">
-                              <label>ชื่อร้าน / ป้ายหน้าร้าน:</label>
-                              <span className="slider-val-mini text-cyan">ป้าย 3D Real-time</span>
-                            </div>
-                            <input 
-                              type="text"
-                              value={doorConfig.storeName || 'GLP : G SPEED LIVING PLUS'}
-                              onChange={(e) => setDoorConfig({ ...doorConfig, storeName: e.target.value })}
-                              placeholder="เช่น GLP : G SPEED LIVING PLUS, สาขา พระราม 9..."
-                              className="store-name-card-input"
-                              maxLength={36}
-                            />
-                            <div className="store-name-presets" style={{ marginTop: '6px' }}>
-                              {['GLP : G SPEED LIVING PLUS', 'G-SPEED LIVING PLUS', 'สาขา สยามสแควร์', 'GLP CYBER LOUNGE'].map((preset) => (
-                                <button 
-                                  key={preset}
-                                  type="button" 
-                                  className="btn-preset-name"
-                                  onClick={() => setDoorConfig({ ...doorConfig, storeName: preset })}
-                                >
-                                  {preset}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-
-                          <div className="door-style-mini-row" style={{ marginTop: '10px' }}>
-                            <label>รูปแบบป้าย & สติ๊กเกอร์:</label>
-                            <div className="door-style-pills">
-                              <button 
-                                type="button" 
-                                className={`door-pill ${doorConfig.signStyle === 'neon-lightbox' || !doorConfig.signStyle ? 'active' : ''}`}
-                                onClick={() => setDoorConfig({ ...doorConfig, signStyle: 'neon-lightbox' })}
-                              >
-                                <Sparkles size={14} />
-                                <span>นีออน LED</span>
-                              </button>
-                              <button 
-                                type="button" 
-                                className={`door-pill ${doorConfig.signStyle === 'acrylic-gold' ? 'active' : ''}`}
-                                onClick={() => setDoorConfig({ ...doorConfig, signStyle: 'acrylic-gold' })}
-                              >
-                                <Award size={14} />
-                                <span>อะคริลิกทอง</span>
-                              </button>
-                              <button 
-                                type="button" 
-                                className={`door-pill ${doorConfig.signStyle === 'minimal-dark' ? 'active' : ''}`}
-                                onClick={() => setDoorConfig({ ...doorConfig, signStyle: 'minimal-dark' })}
-                              >
-                                <Zap size={14} />
-                                <span>มินิมอลไซเบอร์</span>
-                              </button>
-                              <button 
-                                type="button" 
-                                className={`door-pill ${doorConfig.signStyle === 'grand-arch' ? 'active' : ''}`}
-                                onClick={() => setDoorConfig({ ...doorConfig, signStyle: 'grand-arch' })}
-                              >
-                                <Building2 size={14} />
-                                <span>ซุ้มแกรนด์</span>
-                              </button>
-                            </div>
-                          </div>
                         </div>
                       </div>
 
@@ -2832,8 +2492,26 @@ export default function FranchisePlanner() {
             <div className="topbar-quick-shortcuts">
               <button
                 type="button"
-                className="btn-topbar-pill"
-                onClick={() => setInspectorTab('materials')}
+                id="btn-topbar-door"
+                className={`btn-topbar-pill ${inspectorTab === 'door' || selectedItemId === 'store-door' ? 'active' : ''}`}
+                onClick={() => {
+                  setInspectorTab('door');
+                  setSelectedItemId('store-door');
+                }}
+                title="คลิกเพื่อปรับตำแหน่งประตูทางเข้าร้านและป้ายชื่อร้าน (ในแถบซ้าย)"
+              >
+                <DoorOpen size={13} className="text-emerald" />
+                <span>ประตู: {doorConfig.wall === 'front' ? 'ด้านหน้า' : doorConfig.wall === 'left' ? 'ผนังซ้าย' : doorConfig.wall === 'back' ? 'ผนังหลัง' : 'ผนังขวา'}</span>
+                <span className="pill-dot" style={{ backgroundColor: '#10b981' }} />
+              </button>
+
+              <button
+                type="button"
+                className={`btn-topbar-pill ${inspectorTab === 'materials' ? 'active' : ''}`}
+                onClick={() => {
+                  setInspectorTab('materials');
+                  if (selectedItemId === 'store-door') setSelectedItemId(null);
+                }}
                 title="คลิกเพื่อเปลี่ยนวอลเปเปอร์ผนังและวัสดุพื้น (ในแถบซ้าย)"
               >
                 <Palette size={13} className="text-blue" />
@@ -2846,8 +2524,11 @@ export default function FranchisePlanner() {
 
               <button
                 type="button"
-                className="btn-topbar-pill btn-topbar-add-pill"
-                onClick={() => setInspectorTab('catalog')}
+                className={`btn-topbar-pill btn-topbar-add-pill ${inspectorTab === 'catalog' ? 'active' : ''}`}
+                onClick={() => {
+                  setInspectorTab('catalog');
+                  if (selectedItemId === 'store-door') setSelectedItemId(null);
+                }}
                 title="คลิกเพื่อเปิดแท็บเพิ่มอุปกรณ์ (ในแถบซ้าย)"
               >
                 <PlusCircle size={13} className="text-blue" />
@@ -2858,16 +2539,19 @@ export default function FranchisePlanner() {
 
           <div className="planner-canvas-layout">
             {/* ========================================================================= */}
-            {/* LEFT SIDEBAR: UNIFIED MANAGEMENT STUDIO (Details, Materials, Add Equipment) */}
+            {/* LEFT SIDEBAR: UNIFIED MANAGEMENT STUDIO (Details, Door, Materials, Add)  */}
             {/* ========================================================================= */}
             <div className="studio-management-sidebar glass-panel">
-              {/* 3-Tab Segmented Header */}
+              {/* 4-Tab Segmented Header */}
               <div className="inspector-tabs-nav">
                 <button 
                   type="button"
                   id="tab-btn-details"
-                  className={`inspector-tab-btn ${inspectorTab === 'details' ? 'active' : ''}`}
-                  onClick={() => setInspectorTab('details')}
+                  className={`inspector-tab-btn ${inspectorTab === 'details' && selectedItemId !== 'store-door' ? 'active' : ''}`}
+                  onClick={() => {
+                    setInspectorTab('details');
+                    if (selectedItemId === 'store-door') setSelectedItemId(null);
+                  }}
                   title="ดูรายละเอียดอุปกรณ์ที่เลือก และรายการอุปกรณ์ในร้าน"
                 >
                   <Sliders size={14} />
@@ -2879,9 +2563,26 @@ export default function FranchisePlanner() {
 
                 <button 
                   type="button"
+                  id="tab-btn-door"
+                  className={`inspector-tab-btn ${inspectorTab === 'door' || selectedItemId === 'store-door' ? 'active' : ''}`}
+                  onClick={() => {
+                    setInspectorTab('door');
+                    setSelectedItemId('store-door');
+                  }}
+                  title="ปรับแต่งตำแหน่งประตูทางเข้าร้าน รูปแบบประตู และป้ายชื่อร้าน"
+                >
+                  <DoorOpen size={14} />
+                  <span>ประตูทางเข้า</span>
+                </button>
+
+                <button 
+                  type="button"
                   id="tab-btn-materials"
                   className={`inspector-tab-btn ${inspectorTab === 'materials' ? 'active' : ''}`}
-                  onClick={() => setInspectorTab('materials')}
+                  onClick={() => {
+                    setInspectorTab('materials');
+                    if (selectedItemId === 'store-door') setSelectedItemId(null);
+                  }}
                   title="ปรับแต่งวอลเปเปอร์ผนังและวัสดุปูพื้นห้อง"
                 >
                   <Palette size={14} />
@@ -2892,7 +2593,10 @@ export default function FranchisePlanner() {
                   type="button"
                   id="tab-btn-catalog"
                   className={`inspector-tab-btn ${inspectorTab === 'catalog' ? 'active' : ''}`}
-                  onClick={() => setInspectorTab('catalog')}
+                  onClick={() => {
+                    setInspectorTab('catalog');
+                    if (selectedItemId === 'store-door') setSelectedItemId(null);
+                  }}
                   title="เลือกและเพิ่มอุปกรณ์/โต๊ะคอมลงในผัง"
                 >
                   <PlusCircle size={14} />
@@ -2900,11 +2604,10 @@ export default function FranchisePlanner() {
                 </button>
               </div>
 
-              {/* TAB 1: รายละเอียด & อุปกรณ์ที่ติดตั้งในร้าน */}
-              {inspectorTab === 'details' && (
+              {/* TAB: ประตูทางเข้า หรือเมื่อเลือก store-door */}
+              {(inspectorTab === 'door' || selectedItemId === 'store-door') && (
                 <div className="inspector-tab-content tab-details-content">
-                  {selectedItemId === 'store-door' ? (
-                    <div className="selected-item-inspector-expanded door-inspector-panel">
+                  <div className="selected-item-inspector-expanded door-inspector-panel">
                       <div className="insp-head">
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                           <span className="badge-pill badge-emerald">
@@ -2914,7 +2617,10 @@ export default function FranchisePlanner() {
                           <button 
                             type="button" 
                             className="btn-popover-close-mini" 
-                            onClick={() => setSelectedItemId(null)}
+                            onClick={() => {
+                              setSelectedItemId(null);
+                              if (inspectorTab === 'door') setInspectorTab('details');
+                            }}
                             title="ปิดหน้าต่างปรับประตู"
                           >
                             ✕
@@ -3107,14 +2813,23 @@ export default function FranchisePlanner() {
                           type="button"
                           className="btn-spatial-action"
                           style={{ flex: 1, background: '#10b981', color: '#ffffff', borderColor: '#059669', padding: '10px 14px', fontWeight: 700 }}
-                          onClick={() => setSelectedItemId(null)}
+                          onClick={() => {
+                            setSelectedItemId(null);
+                            setInspectorTab('details');
+                          }}
                         >
                           <Check size={15} />
                           <span>เสร็จสิ้น / บันทึกตำแหน่งประตู</span>
                         </button>
                       </div>
                     </div>
-                  ) : selectedItemObject ? (
+                </div>
+              )}
+
+              {/* TAB 1: รายละเอียด & อุปกรณ์ที่ติดตั้งในร้าน */}
+              {inspectorTab === 'details' && selectedItemId !== 'store-door' && (
+                <div className="inspector-tab-content tab-details-content">
+                  {selectedItemObject ? (
                     <div className="selected-item-inspector-expanded">
                       <div className="insp-head">
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -3279,7 +2994,10 @@ export default function FranchisePlanner() {
                       {/* Quick Entrance Door Management Banner */}
                       <div 
                         className="entrance-quick-manage-banner"
-                        onClick={() => setSelectedItemId('store-door')}
+                        onClick={() => {
+                          setSelectedItemId('store-door');
+                          setInspectorTab('door');
+                        }}
                         title="คลิกเพื่อจัดการตำแหน่งและรูปแบบประตูทางเข้าร้าน"
                       >
                         {/* Top Header Row */}
@@ -3352,8 +3070,11 @@ export default function FranchisePlanner() {
                           {/* Store Door always at top of list */}
                           <button
                             type="button"
-                            className={`quick-item-select-btn quick-item-door ${selectedItemId === 'store-door' ? 'active' : ''}`}
-                            onClick={() => setSelectedItemId('store-door')}
+                            className={`quick-item-select-btn quick-item-door ${selectedItemId === 'store-door' || inspectorTab === 'door' ? 'active' : ''}`}
+                            onClick={() => {
+                              setSelectedItemId('store-door');
+                              setInspectorTab('door');
+                            }}
                             title="คลิกเพื่อเลือกและจัดตำแหน่งประตูทางเข้าร้าน"
                             style={{ background: '#ecfdf5', borderColor: '#a7f3d0' }}
                           >
