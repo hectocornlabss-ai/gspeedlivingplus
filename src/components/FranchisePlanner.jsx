@@ -6,7 +6,7 @@ import {
   Sliders, ChevronRight, RefreshCw, Layers, Zap, Compass, Info, Check, X, Cpu, DoorOpen, DoorClosed, Award,
   Gamepad2, Wind, Ruler, Box, Eye, Palette, Sparkles, Move, ChevronUp, ChevronDown, ChevronLeft,
   UploadCloud, Image, FileText, SplitSquareVertical, FileCheck, Maximize2, Minimize2, ZoomIn, ZoomOut, MousePointerClick,
-  Printer, Building2
+  Printer, Building2, PlusCircle
 } from 'lucide-react';
 import Room3DStudio from './Room3DStudio';
 import { 
@@ -312,9 +312,17 @@ export default function FranchisePlanner() {
 
   // Selected item on canvas for manipulation (moving, rotating, deleting)
   const [selectedItemId, setSelectedItemId] = useState(null);
+  const [inspectorTab, setInspectorTab] = useState('details'); // 'details' | 'materials' | 'catalog'
   const [draggingItemId, setDraggingItemId] = useState(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [justAddedId, setJustAddedId] = useState(null);
+
+  // Auto-switch to details tab when an item or the door is selected
+  useEffect(() => {
+    if (selectedItemId) {
+      setInspectorTab('details');
+    }
+  }, [selectedItemId]);
 
   // Hardware Tier Selection
   const [selectedTier, setSelectedTier] = useState('pro'); // standard, pro, ultimate
@@ -2820,221 +2828,950 @@ export default function FranchisePlanner() {
               </div>
             )}
 
-            {/* Material & Finish Customization (Homestyler style) */}
-            <div className="material-customizers-row">
-              {/* Wallpaper / Wall Finish Selector */}
-              <div className="material-selector-block">
-                <div className="material-label">
-                  <Palette size={14} className="text-blue" />
-                  <span>วอลเปเปอร์ผนังร้าน:</span>
-                </div>
-                <div className="material-swatches">
-                  {WALLPAPERS.map(wp => (
-                    <button
-                      key={wp.id}
-                      id={`swatch-wall-${wp.id}`}
-                      className={`swatch-btn ${selectedWallpaper === wp.id ? 'active' : ''}`}
-                      onClick={() => setSelectedWallpaper(wp.id)}
-                      title={`${wp.name} - ${wp.desc}`}
-                    >
-                      <span className="swatch-color-dot" style={{ backgroundColor: wp.color, border: '1px solid #cbd5e1' }} />
-                      <span className="swatch-name">{wp.name.split(' ')[0]}</span>
-                      {selectedWallpaper === wp.id && <Check size={12} className="swatch-check" />}
-                    </button>
-                  ))}
-                </div>
-              </div>
+            {/* Quick Material & Catalog Indicator Pills (Slim Homestyler Topbar) */}
+            <div className="topbar-quick-shortcuts">
+              <button
+                type="button"
+                className="btn-topbar-pill"
+                onClick={() => setInspectorTab('materials')}
+                title="คลิกเพื่อเปลี่ยนวอลเปเปอร์ผนังและวัสดุพื้น (ในแถบซ้าย)"
+              >
+                <Palette size={13} className="text-blue" />
+                <span>ผนัง: {WALLPAPERS.find(w => w.id === selectedWallpaper)?.name.split(' ')[0]}</span>
+                <span className="pill-dot" style={{ backgroundColor: WALLPAPERS.find(w => w.id === selectedWallpaper)?.color || '#e2e8f0' }} />
+                <span className="pill-divider">|</span>
+                <span>พื้น: {FLOOR_MATERIALS.find(f => f.id === selectedFloorMaterial)?.name.split(' ')[0]}</span>
+                <span className="pill-dot floor-dot" style={{ backgroundColor: FLOOR_MATERIALS.find(f => f.id === selectedFloorMaterial)?.color || '#b45309' }} />
+              </button>
 
-              {/* Floor Material Selector */}
-              <div className="material-selector-block">
-                <div className="material-label">
-                  <Layers size={14} className="text-blue" />
-                  <span>วัสดุปูพื้นห้อง:</span>
-                </div>
-                <div className="material-swatches">
-                  {FLOOR_MATERIALS.map(fl => (
-                    <button
-                      key={fl.id}
-                      id={`swatch-floor-${fl.id}`}
-                      className={`swatch-btn ${selectedFloorMaterial === fl.id ? 'active' : ''}`}
-                      onClick={() => setSelectedFloorMaterial(fl.id)}
-                      title={`${fl.name} - ${fl.desc}`}
-                    >
-                      <span className="swatch-color-dot floor-dot" style={{ backgroundColor: fl.color }} />
-                      <span className="swatch-name">{fl.name.split(' ')[0]}</span>
-                      {selectedFloorMaterial === fl.id && <Check size={12} className="swatch-check" />}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <button
+                type="button"
+                className="btn-topbar-pill btn-topbar-add-pill"
+                onClick={() => setInspectorTab('catalog')}
+                title="คลิกเพื่อเปิดแท็บเพิ่มอุปกรณ์ (ในแถบซ้าย)"
+              >
+                <PlusCircle size={13} className="text-blue" />
+                <span>+ เพิ่มอุปกรณ์</span>
+              </button>
             </div>
           </div>
 
           <div className="planner-canvas-layout">
-            {/* Mobile Tab Switcher Bar - Shows directly under 3D canvas on Mobile/Tablet */}
-            <div className="mobile-planner-tabs-bar">
-              <button 
-                type="button" 
-                id="btn-mobile-tab-catalog"
-                className={`mobile-planner-tab-btn ${mobileStudioTab === 'catalog' ? 'active' : ''}`}
-                onClick={() => setMobileStudioTab('catalog')}
-              >
-                <Layers size={16} />
-                <span>เพิ่มอุปกรณ์ ({catalogItems.length})</span>
-              </button>
-              <button 
-                type="button" 
-                id="btn-mobile-tab-inspector"
-                className={`mobile-planner-tab-btn ${mobileStudioTab === 'inspector' ? 'active' : ''}`}
-                onClick={() => setMobileStudioTab('inspector')}
-              >
-                <Sliders size={16} />
-                <span>ปรับแต่ง & สรุปงบ ({placedItems.length})</span>
-              </button>
-            </div>
+            {/* ========================================================================= */}
+            {/* LEFT SIDEBAR: UNIFIED MANAGEMENT STUDIO (Details, Materials, Add Equipment) */}
+            {/* ========================================================================= */}
+            <div className="studio-management-sidebar glass-panel">
+              {/* 3-Tab Segmented Header */}
+              <div className="inspector-tabs-nav">
+                <button 
+                  type="button"
+                  id="tab-btn-details"
+                  className={`inspector-tab-btn ${inspectorTab === 'details' ? 'active' : ''}`}
+                  onClick={() => setInspectorTab('details')}
+                  title="ดูรายละเอียดอุปกรณ์ที่เลือก และรายการอุปกรณ์ในร้าน"
+                >
+                  <Sliders size={14} />
+                  <span>รายละเอียด</span>
+                  {placedItems.length > 0 && (
+                    <span className="tab-pill-count">{placedItems.length}</span>
+                  )}
+                </button>
 
-            {/* Left: Item Catalog Sidebar */}
-            <div className={`catalog-sidebar glass-panel ${mobileStudioTab === 'catalog' ? 'mobile-active' : 'mobile-hidden'}`}>
-              <div className="sidebar-header">
-                <h3 className="sidebar-title">
-                  <Layers size={18} className="text-cyan" />
-                  <span>อุปกรณ์และโซนในร้าน</span>
-                </h3>
-                <span className="sidebar-subtitle">เลือกและเพิ่มลงในผัง 3D</span>
-              </div>
+                <button 
+                  type="button"
+                  id="tab-btn-materials"
+                  className={`inspector-tab-btn ${inspectorTab === 'materials' ? 'active' : ''}`}
+                  onClick={() => setInspectorTab('materials')}
+                  title="ปรับแต่งวอลเปเปอร์ผนังและวัสดุปูพื้นห้อง"
+                >
+                  <Palette size={14} />
+                  <span>วอลเปเปอร์/พื้น</span>
+                </button>
 
-              {/* Category Filter Tabs */}
-              <div className="catalog-filter-tabs">
                 <button 
-                  className={`filter-tab ${catalogCategory === 'all' ? 'active' : ''}`}
-                  onClick={() => setCatalogCategory('all')}
+                  type="button"
+                  id="tab-btn-catalog"
+                  className={`inspector-tab-btn ${inspectorTab === 'catalog' ? 'active' : ''}`}
+                  onClick={() => setInspectorTab('catalog')}
+                  title="เลือกและเพิ่มอุปกรณ์/โต๊ะคอมลงในผัง"
                 >
-                  ทั้งหมด
-                </button>
-                <button 
-                  className={`filter-tab ${catalogCategory === 'stations' ? 'active' : ''}`}
-                  onClick={() => setCatalogCategory('stations')}
-                >
-                  โต๊ะคอม
-                </button>
-                <button 
-                  className={`filter-tab ${catalogCategory === 'facilities' ? 'active' : ''}`}
-                  onClick={() => setCatalogCategory('facilities')}
-                >
-                  บริการ/เคาน์เตอร์
-                </button>
-                <button 
-                  className={`filter-tab ${catalogCategory === 'architectural' ? 'active' : ''}`}
-                  onClick={() => setCatalogCategory('architectural')}
-                >
-                  ประตู/หน้าต่าง
+                  <PlusCircle size={14} />
+                  <span>เพิ่มอุปกรณ์</span>
                 </button>
               </div>
 
-              <div className="catalog-items-list">
-                {catalogItems
-                  .filter(item => {
-                    if (catalogCategory === 'all') return true;
-                    if (catalogCategory === 'stations') return item.category === 'stations' || item.category === 'vip' || item.category === 'stage';
-                    if (catalogCategory === 'facilities') return item.category === 'facilities' || item.category === 'amenities';
-                    if (catalogCategory === 'architectural') return item.category === 'architectural';
-                    return true;
-                  })
-                  .map((item) => (
-                    <div 
-                      key={item.type} 
-                      className="catalog-item-card"
-                      onClick={() => setSelectedCatalogModalItem(item)}
-                      title="คลิกเพื่อดูสเปกเต็มและภาพสินค้า"
-                    >
-                      {/* Product Thumbnail Banner with Color Swatches */}
-                      <div className="catalog-thumb-banner">
-                        <img 
-                          src={item.image || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=400&q=80'} 
-                          alt={item.name} 
-                          className="catalog-thumb-img"
-                          loading="lazy"
-                        />
-                        <div className="catalog-thumb-hover-overlay">
-                          <Eye size={13} />
-                          <span>ดูสเปกเต็ม</span>
-                        </div>
-                        
-                        {/* Mini Color Swatches overlay */}
-                        <div className="catalog-card-swatches" title="โทนสีวัสดุและไฟ">
-                          <span className="swatch-mini" style={{ backgroundColor: item.deskColor || '#0f172a' }} title="สีท็อปโต๊ะ" />
-                          <span className="swatch-mini" style={{ backgroundColor: item.accentColor || '#1d4ed8' }} title="สีไฟตกแต่ง" />
-                          {item.chairColor && (
-                            <span className="swatch-mini" style={{ backgroundColor: item.chairColor || '#0f172a' }} title="สีเก้าอี้" />
-                          )}
-                        </div>
-
-                        {/* Capacity / Type Pill */}
-                        {item.seats > 0 && (
-                          <span className="catalog-thumb-seat-badge">
-                            {item.seats} PCs
+              {/* TAB 1: รายละเอียด & อุปกรณ์ที่ติดตั้งในร้าน */}
+              {inspectorTab === 'details' && (
+                <div className="inspector-tab-content tab-details-content">
+                  {selectedItemId === 'store-door' ? (
+                    <div className="selected-item-inspector-expanded door-inspector-panel">
+                      <div className="insp-head">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                          <span className="badge-pill badge-emerald">
+                            <DoorOpen size={13} />
+                            <span>โครงสร้างสถาปัตยกรรม</span>
                           </span>
+                          <button 
+                            type="button" 
+                            className="btn-popover-close-mini" 
+                            onClick={() => setSelectedItemId(null)}
+                            title="ปิดหน้าต่างปรับประตู"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                        <h4>ประตูทางเข้าร้านหลัก</h4>
+                        <p className="sub-desc" style={{ fontSize: '0.78rem', color: '#64748b', margin: '3px 0 0 0' }}>
+                          Store Entrance • ปรับผนัง สัดส่วนระยะ และรูปแบบประตูหน้าร้าน
+                        </p>
+                      </div>
+
+                      {/* Door Wall Selector */}
+                      <div className="spatial-control-card" style={{ marginTop: '12px' }}>
+                        <div className="control-section-title">
+                          <Compass size={14} className="text-emerald" />
+                          <span>เลือกผนังติดตั้งประตู:</span>
+                        </div>
+                        <div className="wall-selector-grid" style={{ marginTop: '8px' }}>
+                          <button 
+                            type="button" 
+                            className={`wall-btn ${doorConfig.wall === 'front' ? 'active' : ''}`}
+                            onClick={() => setDoorConfig({ ...doorConfig, wall: 'front' })}
+                          >
+                            <ArrowDown size={14} /> ด้านหน้า (Front)
+                          </button>
+                          <button 
+                            type="button" 
+                            className={`wall-btn ${doorConfig.wall === 'right' || !doorConfig.wall ? 'active' : ''}`}
+                            onClick={() => setDoorConfig({ ...doorConfig, wall: 'right' })}
+                          >
+                            <ArrowRight size={14} /> ผนังขวา (Right)
+                          </button>
+                          <button 
+                            type="button" 
+                            className={`wall-btn ${doorConfig.wall === 'left' ? 'active' : ''}`}
+                            onClick={() => setDoorConfig({ ...doorConfig, wall: 'left' })}
+                          >
+                            <ArrowLeft size={14} /> ผนังซ้าย (Left)
+                          </button>
+                          <button 
+                            type="button" 
+                            className={`wall-btn ${doorConfig.wall === 'back' ? 'active' : ''}`}
+                            onClick={() => setDoorConfig({ ...doorConfig, wall: 'back' })}
+                          >
+                            <ArrowUp size={14} /> ผนังหลัง (Back)
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Position Along Wall Slider */}
+                      <div className="spatial-control-card" style={{ marginTop: '12px' }}>
+                        <div className="control-section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <Sliders size={14} className="text-emerald" />
+                            <span>ตำแหน่งตามแนวผนัง:</span>
+                          </div>
+                          <span className="slider-val-mini text-emerald" style={{ fontWeight: 800 }}>{Math.round((doorConfig.offsetRatio ?? 0.75) * 100)}%</span>
+                        </div>
+                        <div className="door-offset-presets" style={{ marginTop: '8px' }}>
+                          <button type="button" className="btn-preset-offset" onClick={() => setDoorConfig({ ...doorConfig, offsetRatio: 0.25 })}>
+                            {doorConfig.wall === 'front' || doorConfig.wall === 'back' ? 'ซ้าย 25%' : 'หลัง 25%'}
+                          </button>
+                          <button type="button" className="btn-preset-offset" onClick={() => setDoorConfig({ ...doorConfig, offsetRatio: 0.50 })}>
+                            ตรงกลาง 50%
+                          </button>
+                          <button type="button" className="btn-preset-offset" onClick={() => setDoorConfig({ ...doorConfig, offsetRatio: 0.75 })}>
+                            {doorConfig.wall === 'front' || doorConfig.wall === 'back' ? 'ขวา 75%' : 'หน้า 75%'}
+                          </button>
+                        </div>
+                        <input 
+                          type="range"
+                          min="0.15"
+                          max="0.85"
+                          step="0.05"
+                          value={doorConfig.offsetRatio ?? 0.75}
+                          onChange={(e) => setDoorConfig({ ...doorConfig, offsetRatio: parseFloat(e.target.value) })}
+                          className="custom-range"
+                          style={{ marginTop: '10px' }}
+                        />
+                      </div>
+
+                      {/* Door Style Selection */}
+                      <div className="spatial-control-card" style={{ marginTop: '12px' }}>
+                        <div className="control-section-title">
+                          <DoorClosed size={14} className="text-emerald" />
+                          <span>รูปแบบประตู:</span>
+                        </div>
+                        <div className="door-style-pills" style={{ marginTop: '8px' }}>
+                          <button 
+                            type="button"
+                            className={`door-pill ${doorConfig.style === 'wood' || !doorConfig.style ? 'active' : ''}`}
+                            onClick={() => setDoorConfig({ ...doorConfig, style: 'wood' })}
+                          >
+                            <DoorClosed size={14} />
+                            <span>บานไม้โมเดิร์น</span>
+                          </button>
+                          <button 
+                            type="button"
+                            className={`door-pill ${doorConfig.style === 'glass' ? 'active' : ''}`}
+                            onClick={() => setDoorConfig({ ...doorConfig, style: 'glass' })}
+                          >
+                            <SplitSquareVertical size={14} />
+                            <span>กระจกใสบานคู่</span>
+                          </button>
+                          <button 
+                            type="button"
+                            className={`door-pill ${doorConfig.style === 'auto-sliding' ? 'active' : ''}`}
+                            onClick={() => setDoorConfig({ ...doorConfig, style: 'auto-sliding' })}
+                          >
+                            <Sliders size={14} />
+                            <span>บานเลื่อนออโต้</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Store Name / Signage Input */}
+                      <div className="spatial-control-card" style={{ marginTop: '12px' }}>
+                        <div className="control-section-title">
+                          <Building2 size={14} className="text-cyan" />
+                          <span>ชื่อร้าน / ป้ายกล่องไฟ 3D หน้าร้าน:</span>
+                        </div>
+                        <input 
+                          type="text"
+                          value={doorConfig.storeName || 'GLP : G SPEED LIVING PLUS'}
+                          onChange={(e) => setDoorConfig({ ...doorConfig, storeName: e.target.value })}
+                          placeholder="เช่น GLP : G SPEED LIVING PLUS..."
+                          className="store-name-card-input"
+                          maxLength={36}
+                          style={{ marginTop: '8px', width: '100%' }}
+                        />
+                        <div className="store-name-presets" style={{ marginTop: '6px' }}>
+                          {['GLP : G SPEED LIVING PLUS', 'G-SPEED LIVING PLUS', 'สาขา สยามสแควร์', 'GLP CYBER LOUNGE'].map((preset) => (
+                            <button 
+                              key={preset}
+                              type="button" 
+                              className="btn-preset-name"
+                              onClick={() => setDoorConfig({ ...doorConfig, storeName: preset })}
+                            >
+                              {preset}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Sign & Decal Style */}
+                      <div className="spatial-control-card" style={{ marginTop: '12px' }}>
+                        <div className="control-section-title">
+                          <Sparkles size={14} className="text-amber" />
+                          <span>สไตล์ป้ายไฟ & สติ๊กเกอร์:</span>
+                        </div>
+                        <div className="door-style-pills" style={{ marginTop: '8px' }}>
+                          <button 
+                            type="button" 
+                            className={`door-pill ${doorConfig.signStyle === 'neon-lightbox' || !doorConfig.signStyle ? 'active' : ''}`}
+                            onClick={() => setDoorConfig({ ...doorConfig, signStyle: 'neon-lightbox' })}
+                          >
+                            <Sparkles size={14} />
+                            <span>นีออน LED</span>
+                          </button>
+                          <button 
+                            type="button" 
+                            className={`door-pill ${doorConfig.signStyle === 'acrylic-gold' ? 'active' : ''}`}
+                            onClick={() => setDoorConfig({ ...doorConfig, signStyle: 'acrylic-gold' })}
+                          >
+                            <Award size={14} />
+                            <span>อะคริลิกทอง</span>
+                          </button>
+                          <button 
+                            type="button" 
+                            className={`door-pill ${doorConfig.signStyle === 'minimal-dark' ? 'active' : ''}`}
+                            onClick={() => setDoorConfig({ ...doorConfig, signStyle: 'minimal-dark' })}
+                          >
+                            <Zap size={14} />
+                            <span>มินิมอลไซเบอร์</span>
+                          </button>
+                          <button 
+                            type="button" 
+                            className={`door-pill ${doorConfig.signStyle === 'grand-arch' ? 'active' : ''}`}
+                            onClick={() => setDoorConfig({ ...doorConfig, signStyle: 'grand-arch' })}
+                          >
+                            <Building2 size={14} />
+                            <span>ซุ้มแกรนด์</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Done / Close Action */}
+                      <div className="spatial-action-buttons" style={{ marginTop: '16px' }}>
+                        <button 
+                          type="button"
+                          className="btn-spatial-action"
+                          style={{ flex: 1, background: '#10b981', color: '#ffffff', borderColor: '#059669', padding: '10px 14px', fontWeight: 700 }}
+                          onClick={() => setSelectedItemId(null)}
+                        >
+                          <Check size={15} />
+                          <span>เสร็จสิ้น / บันทึกตำแหน่งประตู</span>
+                        </button>
+                      </div>
+                    </div>
+                  ) : selectedItemObject ? (
+                    <div className="selected-item-inspector-expanded">
+                      <div className="insp-head">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span className="badge-pill badge-blue">
+                            <Box size={13} />
+                            <span>โมดูลที่เลือก</span>
+                          </span>
+                          <button 
+                            type="button" 
+                            className="btn-popover-close-mini" 
+                            onClick={() => setSelectedItemId(null)}
+                            title="ปิดการเลือก"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                        <h4>{selectedItemObject.catalog?.name}</h4>
+
+                        {/* Small preview image under name */}
+                        {selectedItemObject.catalog?.image && (
+                          <div 
+                            className="insp-thumb-banner"
+                            onClick={() => setSelectedCatalogModalItem(selectedItemObject.catalog)}
+                            title="คลิกเพื่อดูสเปกเต็มและภาพสินค้าขยาย"
+                          >
+                            <img 
+                              src={selectedItemObject.catalog.image} 
+                              alt={selectedItemObject.catalog.name} 
+                              className="insp-thumb-img"
+                              loading="lazy"
+                            />
+                            <div className="insp-thumb-overlay">
+                              <Eye size={13} />
+                              <span>คลิกดูภาพขยาย & สเปกเต็ม</span>
+                            </div>
+                            {selectedItemObject.catalog.seats > 0 && (
+                              <span className="insp-thumb-seat-badge">
+                                {selectedItemObject.catalog.seats} PCs
+                              </span>
+                            )}
+                            <span className="insp-thumb-dim-badge">
+                              {selectedItemObject.catalog.widthMeters} x {selectedItemObject.catalog.depth3D || selectedItemObject.catalog.heightMeters} ม.
+                            </span>
+                          </div>
                         )}
                       </div>
 
-                      <div className="catalog-item-top">
-                        <div className="catalog-item-info">
-                          <strong className="item-name">{item.name}</strong>
-                          <span className="item-dim">
-                            ขนาด 3D: {item.widthMeters} x {item.depth3D || item.heightMeters} ม. (สูง {item.height3D || 1.2}ม.)
+                      {/* Component Breakdown Card: Desk vs Chair */}
+                      <div className="component-breakdown-card">
+                        <div className="breakdown-section-title">
+                          <span>รายละเอียดราคาอุปกรณ์ในโมดูล</span>
+                        </div>
+
+                        {/* Desk Price Breakdown */}
+                        <div className="component-spec-box desk-box">
+                          <div className="spec-box-header">
+                            <span className="box-title">โต๊ะและโครงสร้าง</span>
+                            <strong className="box-price text-blue">
+                              ฿{selectedItemObject.catalog?.deskPrice?.toLocaleString()}
+                            </strong>
+                          </div>
+                          <p className="box-desc">{selectedItemObject.catalog?.deskDesc}</p>
+                        </div>
+
+                        {/* Chair Model & Price Breakdown */}
+                        <div className="component-spec-box chair-box">
+                          <div className="spec-box-header">
+                            <span className="box-title">เก้าอี้เกมมิ่ง / ที่นั่ง</span>
+                            <strong className="box-price text-blue">
+                              {selectedItemObject.catalog?.chairCount > 0 
+                                ? `฿${((selectedItemObject.catalog?.chairPrice || 0) * (selectedItemObject.catalog?.chairCount || 0)).toLocaleString()}`
+                                : 'ไม่มี'}
+                            </strong>
+                          </div>
+                          <div className="chair-detail-row">
+                            <span className="chair-model-name">
+                              {selectedItemObject.catalog?.chairModel}
+                            </span>
+                            {selectedItemObject.catalog?.chairCount > 0 && (
+                              <span className="chair-count-badge">
+                                {selectedItemObject.catalog?.chairCount} ตัว <span className="unit-price">(฿{selectedItemObject.catalog?.chairPrice?.toLocaleString()}/ตัว)</span>
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* 3D Physical Dimensions */}
+                        <div className="component-spec-box dimensions-box">
+                          <div className="spec-box-header">
+                            <span className="box-title">มิติขนาด (กว้าง x ลึก x สูง)</span>
+                          </div>
+                          <div className="dimensions-pills">
+                            <span className="dim-tag">กว้าง: {selectedItemObject.catalog?.widthMeters} ม.</span>
+                            <span className="dim-tag">ลึก: {selectedItemObject.catalog?.depth3D || selectedItemObject.catalog?.heightMeters} ม.</span>
+                            <span className="dim-tag">สูง: {selectedItemObject.catalog?.height3D || 1.25} ม.</span>
+                          </div>
+                        </div>
+
+                        {/* Total Module Price */}
+                        <div className="total-module-price-row">
+                          <span>ราคารวมโมดูลนี้:</span>
+                          <strong className="text-blue font-bold">
+                            ฿{selectedItemObject.catalog?.baseCost?.toLocaleString()}
+                          </strong>
+                        </div>
+                      </div>
+
+                      {/* Placement & Spatial Controls */}
+                      <div className="spatial-controls-card">
+                        <div className="spatial-title">
+                          <Move size={14} className="text-blue" />
+                          <span>ตำแหน่ง & ทิศทางในห้อง</span>
+                        </div>
+                        <div className="coords-info">
+                          <span><strong>X:</strong> {selectedItemObject.x.toFixed(1)} ม.</span>
+                          <span><strong>Y:</strong> {selectedItemObject.y.toFixed(1)} ม.</span>
+                          <span><strong>มุม:</strong> {selectedItemObject.rotation}°</span>
+                        </div>
+
+                        {/* Unified Quick Actions */}
+                        <div className="spatial-actions-row">
+                          <button 
+                            type="button"
+                            id="btn-sidebar-rotate-item"
+                            className="btn-spatial-action btn-rotate"
+                            onClick={() => handleRotateItem(selectedItemObject.id)}
+                            title="หมุน 90 องศา (กด R)"
+                          >
+                            <RotateCw size={13} />
+                            <span>หมุน 90°</span>
+                          </button>
+                          <button 
+                            type="button"
+                            id="btn-sidebar-duplicate-item"
+                            className="btn-spatial-action btn-duplicate"
+                            onClick={() => handleDuplicateItem(selectedItemObject.id)}
+                            title="คัดลอกโมดูลนี้ (Duplicate)"
+                          >
+                            <Copy size={13} />
+                            <span>คัดลอก</span>
+                          </button>
+                          <button 
+                            type="button"
+                            id="btn-sidebar-delete-item"
+                            className="btn-spatial-action btn-delete"
+                            onClick={() => handleDeleteItem(selectedItemObject.id)}
+                            title="ลบโมดูลนี้ออกจากผัง (กด Delete)"
+                          >
+                            <Trash2 size={13} />
+                            <span>ลบออก</span>
+                          </button>
+                        </div>
+
+                        <div className="spatial-keyboard-hint">
+                          <Compass size={12} className="text-blue" />
+                          <span>คลิกลากย้ายอิสระ หรือกดปุ่มลูกศร <strong>[↑][↓][←][→]</strong> บนคีย์บอร์ด</span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="no-item-selected-state">
+                      {/* Quick Entrance Door Management Banner */}
+                      <div 
+                        className="entrance-quick-manage-banner"
+                        onClick={() => setSelectedItemId('store-door')}
+                        title="คลิกเพื่อจัดการตำแหน่งและรูปแบบประตูทางเข้าร้าน"
+                      >
+                        {/* Top Header Row */}
+                        <div className="eq-header">
+                          <div className="eq-header-info">
+                            <div className="eq-icon-bubble">
+                              <DoorOpen size={17} />
+                            </div>
+                            <div className="eq-title-group">
+                              <span className="eq-main-title">ประตูทางเข้าร้าน</span>
+                              <span className="eq-sub-title">Store Entrance</span>
+                            </div>
+                          </div>
+                          <span className="eq-wall-badge">
+                            {doorConfig.wall === 'front' ? 'ด้านหน้า' :
+                             doorConfig.wall === 'left' ? 'ผนังซ้าย' :
+                             doorConfig.wall === 'back' ? 'ผนังหลัง' : 'ผนังขวา'} • {Math.round((doorConfig.offsetRatio ?? 0.75) * 100)}%
                           </span>
                         </div>
-                        <button 
-                          type="button"
-                          id={`btn-add-item-${item.type}`}
-                          className="btn-add-catalog"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleAddItem(item);
-                          }}
-                          title="เพิ่มลงในผัง 3D ทันที"
-                        >
-                          <Plus size={16} />
-                        </button>
+
+                        {/* Middle Info Chips */}
+                        <div className="eq-info-chips">
+                          <div className="eq-chip">
+                            <span className="eq-chip-lbl">ผนังที่ติดตั้ง</span>
+                            <strong className="eq-chip-val">
+                              {doorConfig.wall === 'front' ? 'ด้านหน้า (Front)' :
+                               doorConfig.wall === 'left' ? 'ผนังซ้าย (Left)' :
+                               doorConfig.wall === 'back' ? 'ผนังหลัง (Back)' : 'ผนังขวา (Right)'}
+                            </strong>
+                          </div>
+                          <div className="eq-chip">
+                            <span className="eq-chip-lbl">รูปแบบประตู</span>
+                            <strong className="eq-chip-val">
+                              {doorConfig.style === 'glass' ? 'กระจกใสบานคู่' :
+                               doorConfig.style === 'auto-sliding' ? 'บานเลื่อนออโต้' : 'บานไม้โมเดิร์น'}
+                            </strong>
+                          </div>
+                        </div>
+
+                        {/* Action Bar */}
+                        <div className="eq-action-bar">
+                          <span className="eq-action-hint">คลิกปรับตำแหน่ง / ดีไซน์</span>
+                          <div className="eq-action-btn">
+                            <Sliders size={12} />
+                            <span>ปรับแต่งประตู</span>
+                            <ChevronRight size={12} />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Installed Items Section Header */}
+                      <div className="quick-items-card" style={{ marginTop: '14px' }}>
+                        <div className="quick-items-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span className="quick-title" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700 }}>
+                            <Layers size={15} className="text-blue" />
+                            <span>อุปกรณ์ที่ติดตั้งในร้าน ({placedItems.length} ชิ้น):</span>
+                          </span>
+                          <button
+                            type="button"
+                            className="btn-quick-add-link"
+                            onClick={() => setInspectorTab('catalog')}
+                            title="ไปที่แท็บเพิ่มอุปกรณ์"
+                          >
+                            <Plus size={13} />
+                            <span>+ เพิ่มอุปกรณ์</span>
+                          </button>
+                        </div>
+
+                        <div className="quick-items-scrollable">
+                          {/* Store Door always at top of list */}
+                          <button
+                            type="button"
+                            className={`quick-item-select-btn quick-item-door ${selectedItemId === 'store-door' ? 'active' : ''}`}
+                            onClick={() => setSelectedItemId('store-door')}
+                            title="คลิกเพื่อเลือกและจัดตำแหน่งประตูทางเข้าร้าน"
+                            style={{ background: '#ecfdf5', borderColor: '#a7f3d0' }}
+                          >
+                            <span className="quick-item-num" style={{ background: '#10b981', color: '#fff' }}>🚪</span>
+                            <span className="quick-item-name" style={{ color: '#065f46', fontWeight: 600 }}>ประตูทางเข้าร้านหลัก (Entrance)</span>
+                            <span className="quick-item-pill" style={{ background: '#d1fae5', color: '#047857' }}>
+                              {doorConfig.wall === 'front' ? 'ด้านหน้า' :
+                               doorConfig.wall === 'left' ? 'ผนังซ้าย' :
+                               doorConfig.wall === 'back' ? 'ผนังหลัง' : 'ผนังขวา'} {Math.round((doorConfig.offsetRatio ?? 0.75) * 100)}%
+                            </span>
+                          </button>
+
+                          {placedItems.length === 0 ? (
+                            <div style={{ padding: '24px 10px', textAlign: 'center', color: '#94a3b8', fontSize: '0.84rem' }}>
+                              ยังไม่มีอุปกรณ์ในผังร้าน คลิกปุ่ม <strong>"+ เพิ่มอุปกรณ์"</strong> ด้านบนเพื่อเริ่มจัดวาง
+                            </div>
+                          ) : (
+                            placedItems.map((item, idx) => (
+                              <div key={item.id} className="installed-item-row">
+                                <button
+                                  type="button"
+                                  className={`quick-item-select-btn ${selectedItemId === item.id ? 'active' : ''}`}
+                                  onClick={() => setSelectedItemId(item.id)}
+                                  title="คลิกเพื่อเลือกและจัดตำแหน่งโต๊ะนี้ทันที"
+                                  style={{ flex: 1 }}
+                                >
+                                  <span className="quick-item-num">#{idx + 1}</span>
+                                  <span className="quick-item-name">{item.catalog?.name || item.type}</span>
+                                  <span className="quick-item-pill">
+                                    {item.catalog?.seats > 0 ? `${item.catalog.seats} PCs` : `${item.catalog?.widthMeters}x${item.catalog?.heightMeters}ม.`}
+                                  </span>
+                                </button>
+                                <button
+                                  type="button"
+                                  className="btn-item-del-mini"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteItem(item.id);
+                                  }}
+                                  title="ลบชิ้นนี้ออกจากผัง"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              </div>
+                            ))
+                          )}
+                        </div>
                       </div>
                       
-                      {/* Price Breakdown Micro-Badge */}
-                      <div className="catalog-item-pricing-preview">
-                        <div className="price-tag-row">
-                          <span className="price-tag-badge">
-                            รวม ฿{item.baseCost.toLocaleString()}
-                          </span>
-                          <span className="catalog-click-spec-hint">
-                            <Info size={11} /> ดูสเปก
-                          </span>
+                      {/* Current Active Materials Summary */}
+                      <div className="active-materials-summary" style={{ marginTop: '14px' }}>
+                        <div 
+                          className="mat-summary-row" 
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => setInspectorTab('materials')}
+                          title="คลิกเพื่อเปลี่ยนวอลเปเปอร์ในแท็บ 2"
+                        >
+                          <span className="mat-key">วอลเปเปอร์:</span>
+                          <strong className="mat-val text-blue" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span>{WALLPAPERS.find(w => w.id === selectedWallpaper)?.name}</span>
+                            <ChevronRight size={13} />
+                          </strong>
                         </div>
-                        <span className="price-sub-badge">
-                          โต๊ะ ฿{item.deskPrice?.toLocaleString()} {item.chairCount > 0 ? `| เก้าอี้ ${item.chairCount} ตัว` : ''}
-                        </span>
+                        <div 
+                          className="mat-summary-row" 
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => setInspectorTab('materials')}
+                          title="คลิกเพื่อเปลี่ยนวัสดุปูพื้นในแท็บ 2"
+                        >
+                          <span className="mat-key">วัสดุปูพื้น:</span>
+                          <strong className="mat-val text-blue" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span>{FLOOR_MATERIALS.find(f => f.id === selectedFloorMaterial)?.name}</span>
+                            <ChevronRight size={13} />
+                          </strong>
+                        </div>
+                        <div 
+                          className="mat-summary-row" 
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => setSelectedItemId('store-door')}
+                          title="คลิกเพื่อปรับตำแหน่งประตู"
+                        >
+                          <span className="mat-key">ประตูทางเข้า:</span>
+                          <strong className="mat-val text-emerald" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span>
+                              {doorConfig.wall === 'front' ? 'ด้านหน้า (Front)' :
+                               doorConfig.wall === 'left' ? 'ผนังซ้าย (Left)' :
+                               doorConfig.wall === 'back' ? 'ผนังหลัง (Back)' : 'ผนังขวา (Right)'} ({Math.round((doorConfig.offsetRatio ?? 0.75) * 100)}%)
+                            </span>
+                            <ChevronRight size={13} />
+                          </strong>
+                        </div>
                       </div>
-
-                      <p className="catalog-item-desc">{item.desc}</p>
                     </div>
-                  ))}
-              </div>
+                  )}
 
-              <div className="sidebar-footer-presets">
-                <span className="sub-label">โมเดลผังร้านสำเร็จรูป:</span>
-                <div className="preset-quick-btns">
-                  {PRESET_ROOMS.map(p => (
+                  <div className="inspector-divider"></div>
+
+                  {/* Overall Estimated Cost Summary */}
+                  <div className="mini-cost-summary">
+                    <h4 className="summary-title">
+                      <DollarSign size={16} className="text-blue" />
+                      <span>สรุปงบลงทุนเบื้องต้น</span>
+                    </h4>
+                    <div className="cost-row">
+                      <span>ฮาร์ดแวร์ ({totalStations} เครื่อง):</span>
+                      <strong>฿{hardwareCost.toLocaleString()}</strong>
+                    </div>
+                    <div className="cost-row">
+                      <span>โต๊ะ เก้าอี้ และห้อง VIP:</span>
+                      <strong>฿{furnitureItemsCost.toLocaleString()}</strong>
+                    </div>
+                    <div className="cost-row">
+                      <span>งานตกแต่ง Interior ({roomAreaSqM} ตร.ม.):</span>
+                      <strong>฿{interiorDecorCost.toLocaleString()}</strong>
+                    </div>
+                    <div className="cost-row">
+                      <span>ระบบแอร์ & ระบายอากาศ:</span>
+                      <strong>฿{airconCost.toLocaleString()}</strong>
+                    </div>
+                    <div className="cost-row">
+                      <span>Diskless Server & 10G Network:</span>
+                      <strong>฿{(disklessCost + networkCost).toLocaleString()}</strong>
+                    </div>
+                    <div className="cost-row">
+                      <span>ค่าแฟรนไชส์ & สิทธิ์การใช้แบรนด์:</span>
+                      <strong>฿{franchiseLicenseCost.toLocaleString()}</strong>
+                    </div>
+
+                    <div className="cost-divider"></div>
+
+                    <div className="total-cost-box">
+                      <span className="total-cost-label">งบประมาณลงทุนรวมโดยประมาณ:</span>
+                      <div className="total-cost-number text-blue font-bold">
+                        ฿{totalInvestmentCost.toLocaleString()}
+                      </div>
+                      <span className="total-cost-note">* รวมฮาร์ดแวร์ ตกแต่ง และเปิดร้านพร้อมใช้งาน</span>
+                    </div>
+                  </div>
+
+                  {/* Step Navigation in Left Sidebar */}
+                  <div className="inspector-step-actions">
                     <button 
-                      key={p.id}
-                      onClick={() => handleLoadPreset(p)}
-                      className="btn-mini-preset"
+                      id="btn-step2-to-step3-sidebar"
+                      onClick={() => handleStepChange(3)} 
+                      className="btn-primary full-width"
+                      style={{ padding: '13px 16px', fontSize: '0.96rem', fontWeight: 700 }}
                     >
-                      {p.name.split(':')[0]}
+                      <span>เลือกสเปกคอมพิวเตอร์ ({totalStations} เครื่อง)</span>
+                      <ArrowRight size={16} />
                     </button>
-                  ))}
-                  <button onClick={handleClearCanvas} className="btn-mini-clear" title="ล้างผังทั้งหมด">
-                    <Trash2 size={14} />
-                  </button>
+                    <button 
+                      onClick={() => handleStepChange(1)} 
+                      className="btn-secondary full-width"
+                      style={{ marginTop: '6px' }}
+                    >
+                      ย้อนกลับไปตั้งขนาด
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* TAB 2: วอลเปเปอร์ & วัสดุปูพื้นห้อง */}
+              {inspectorTab === 'materials' && (
+                <div className="inspector-tab-content tab-materials-content">
+                  <div className="tab-section-intro">
+                    <div className="tab-section-header">
+                      <Palette size={18} className="text-blue" />
+                      <div>
+                        <h4>วอลเปเปอร์ผนัง & วัสดุพื้น</h4>
+                        <p>คลิกเพื่อเปลี่ยนโทนสี แสดงผล 3D จำลองแสงทันที</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 1. Wallpaper Selector */}
+                  <div className="material-group-box">
+                    <div className="material-group-title">
+                      <Sparkles size={14} className="text-blue" />
+                      <span>1. วอลเปเปอร์ผนังร้าน (Wall Finishes):</span>
+                    </div>
+                    <div className="material-cards-vertical">
+                      {WALLPAPERS.map(wp => {
+                        const isActive = selectedWallpaper === wp.id;
+                        return (
+                          <div
+                            key={wp.id}
+                            id={`tab-swatch-wall-${wp.id}`}
+                            className={`mat-card-item ${isActive ? 'active' : ''}`}
+                            onClick={() => setSelectedWallpaper(wp.id)}
+                            title={`${wp.name} - ${wp.desc}`}
+                          >
+                            <span 
+                              className="mat-card-color-thumb" 
+                              style={{ backgroundColor: wp.color }} 
+                            />
+                            <div className="mat-card-info">
+                              <div className="mat-card-name-row">
+                                <strong className="mat-card-name">{wp.name}</strong>
+                                {isActive && (
+                                  <span className="mat-active-pill">
+                                    <Check size={11} /> ใช้งานอยู่
+                                  </span>
+                                )}
+                              </div>
+                              <span className="mat-card-desc">{wp.desc}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* 2. Floor Material Selector */}
+                  <div className="material-group-box" style={{ marginTop: '16px' }}>
+                    <div className="material-group-title">
+                      <Layers size={14} className="text-emerald" />
+                      <span>2. วัสดุปูพื้นห้อง (Floor Finishes):</span>
+                    </div>
+                    <div className="material-cards-vertical">
+                      {FLOOR_MATERIALS.map(fl => {
+                        const isActive = selectedFloorMaterial === fl.id;
+                        return (
+                          <div
+                            key={fl.id}
+                            id={`tab-swatch-floor-${fl.id}`}
+                            className={`mat-card-item ${isActive ? 'active' : ''}`}
+                            onClick={() => setSelectedFloorMaterial(fl.id)}
+                            title={`${fl.name} - ${fl.desc}`}
+                          >
+                            <span 
+                              className="mat-card-color-thumb floor-thumb" 
+                              style={{ backgroundColor: fl.color }} 
+                            />
+                            <div className="mat-card-info">
+                              <div className="mat-card-name-row">
+                                <strong className="mat-card-name">{fl.name}</strong>
+                                {isActive && (
+                                  <span className="mat-active-pill">
+                                    <Check size={11} /> ใช้งานอยู่
+                                  </span>
+                                )}
+                              </div>
+                              <span className="mat-card-desc">{fl.desc}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="material-tip-card">
+                    <Info size={14} className="text-blue" />
+                    <span>💡 ผนังและพื้นจะคำนวณในหมวด <strong>"งานตกแต่ง Interior"</strong> ในงบลงทุนโดยอัตโนมัติ</span>
+                  </div>
+
+                  <div style={{ marginTop: '16px' }}>
+                    <button 
+                      type="button"
+                      className="btn-secondary full-width"
+                      onClick={() => setInspectorTab('details')}
+                    >
+                      ← กลับไปดูรายละเอียดผังร้าน
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 3: เพิ่มอุปกรณ์ลงในผัง (Catalog Items with + icon) */}
+              {inspectorTab === 'catalog' && (
+                <div className="inspector-tab-content tab-catalog-content">
+                  <div className="tab-section-intro">
+                    <div className="tab-section-header">
+                      <Layers size={18} className="text-cyan" />
+                      <div>
+                        <h4>เพิ่มอุปกรณ์และโซนในร้าน</h4>
+                        <p>กดปุ่ม <span style={{ color: '#2563eb', fontWeight: 800 }}>+</span> ด้านขวา เพื่อเพิ่มโต๊ะ/อุปกรณ์ลงในห้องทันที</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Category Filter Tabs */}
+                  <div className="catalog-filter-tabs" style={{ marginTop: '10px' }}>
+                    <button 
+                      type="button"
+                      className={`filter-tab ${catalogCategory === 'all' ? 'active' : ''}`}
+                      onClick={() => setCatalogCategory('all')}
+                    >
+                      ทั้งหมด
+                    </button>
+                    <button 
+                      type="button"
+                      className={`filter-tab ${catalogCategory === 'stations' ? 'active' : ''}`}
+                      onClick={() => setCatalogCategory('stations')}
+                    >
+                      โต๊ะคอม
+                    </button>
+                    <button 
+                      type="button"
+                      className={`filter-tab ${catalogCategory === 'facilities' ? 'active' : ''}`}
+                      onClick={() => setCatalogCategory('facilities')}
+                    >
+                      บริการ/เคาน์เตอร์
+                    </button>
+                    <button 
+                      type="button"
+                      className={`filter-tab ${catalogCategory === 'architectural' ? 'active' : ''}`}
+                      onClick={() => setCatalogCategory('architectural')}
+                    >
+                      ประตู/หน้าต่าง
+                    </button>
+                  </div>
+
+                  {/* Catalog Items List (Homestyler style grid) */}
+                  <div className="catalog-items-list tab-catalog-items-scroll">
+                    {catalogItems
+                      .filter(item => {
+                        if (catalogCategory === 'all') return true;
+                        if (catalogCategory === 'stations') return item.category === 'stations' || item.category === 'vip' || item.category === 'stage';
+                        if (catalogCategory === 'facilities') return item.category === 'facilities' || item.category === 'amenities';
+                        if (catalogCategory === 'architectural') return item.category === 'architectural';
+                        return true;
+                      })
+                      .map((item) => (
+                        <div 
+                          key={item.type} 
+                          className="catalog-item-card"
+                          onClick={() => setSelectedCatalogModalItem(item)}
+                          title="คลิกเพื่อดูสเปกเต็มและภาพสินค้า"
+                        >
+                          {/* Product Thumbnail Banner */}
+                          <div className="catalog-thumb-banner">
+                            <img 
+                              src={item.image || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=400&q=80'} 
+                              alt={item.name} 
+                              className="catalog-thumb-img"
+                              loading="lazy"
+                            />
+                            <div className="catalog-thumb-hover-overlay">
+                              <Eye size={13} />
+                              <span>ดูสเปกเต็ม</span>
+                            </div>
+                            
+                            <div className="catalog-card-swatches" title="โทนสีวัสดุและไฟ">
+                              <span className="swatch-mini" style={{ backgroundColor: item.deskColor || '#0f172a' }} title="สีท็อปโต๊ะ" />
+                              <span className="swatch-mini" style={{ backgroundColor: item.accentColor || '#1d4ed8' }} title="สีไฟตกแต่ง" />
+                              {item.chairColor && (
+                                <span className="swatch-mini" style={{ backgroundColor: item.chairColor || '#0f172a' }} title="สีเก้าอี้" />
+                              )}
+                            </div>
+
+                            {item.seats > 0 && (
+                              <span className="catalog-thumb-seat-badge">
+                                {item.seats} PCs
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="catalog-item-top">
+                            <div className="catalog-item-info">
+                              <strong className="item-name">{item.name}</strong>
+                              <span className="item-dim">
+                                ขนาด: {item.widthMeters} x {item.depth3D || item.heightMeters} ม. (สูง {item.height3D || 1.2}ม.)
+                              </span>
+                            </div>
+                            <button 
+                              type="button"
+                              id={`btn-tab-add-${item.type}`}
+                              className="btn-add-catalog"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAddItem(item);
+                              }}
+                              title="เพิ่มลงในผัง 3D ทันที"
+                            >
+                              <Plus size={18} />
+                            </button>
+                          </div>
+                          
+                          <div className="catalog-item-pricing-preview">
+                            <div className="price-tag-row">
+                              <span className="price-tag-badge">
+                                รวม ฿{item.baseCost.toLocaleString()}
+                              </span>
+                              <span className="catalog-click-spec-hint">
+                                <Info size={11} /> ดูสเปก
+                              </span>
+                            </div>
+                            <span className="price-sub-badge">
+                              โต๊ะ ฿{item.deskPrice?.toLocaleString()} {item.chairCount > 0 ? `| เก้าอี้ ${item.chairCount} ตัว` : ''}
+                            </span>
+                          </div>
+
+                          <p className="catalog-item-desc">{item.desc}</p>
+                        </div>
+                      ))}
+                  </div>
+
+                  {/* Presets & Clear Section */}
+                  <div className="sidebar-footer-presets" style={{ marginTop: '12px' }}>
+                    <span className="sub-label">โมเดลผังร้านสำเร็จรูป:</span>
+                    <div className="preset-quick-btns">
+                      {PRESET_ROOMS.map(p => (
+                        <button 
+                          key={p.id}
+                          type="button"
+                          onClick={() => handleLoadPreset(p)}
+                          className="btn-mini-preset"
+                        >
+                          {p.name.split(':')[0]}
+                        </button>
+                      ))}
+                      <button type="button" onClick={handleClearCanvas} className="btn-mini-clear" title="ล้างผังทั้งหมด">
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Center: 3D Studio or 2D Canvas */}
@@ -3405,284 +4142,6 @@ export default function FranchisePlanner() {
                     <strong>การควบคุม:</strong> หมุนมุมมองอิสระ 360° ด้วยเมาส์ซ้าย • ซูมเข้า-ออกด้วยลูกกลิ้ง • คลิกเลือกวัตถุเพื่อดูราคาโต๊ะและเก้าอี้
                   </span>
                 </div>
-              </div>
-            </div>
-
-            {/* Right: Selected Item Inspector & Cost Breakdown Panel */}
-            <div className={`inspector-sidebar glass-panel ${mobileStudioTab === 'inspector' ? 'mobile-active' : 'mobile-hidden'}`}>
-              {/* Selected Item Detail Inspector */}
-              {selectedItemObject ? (
-                <div className="selected-item-inspector-expanded">
-                  <div className="insp-head">
-                    <span className="badge-pill badge-blue">
-                      <Box size={13} />
-                      <span>โมดูลที่เลือก</span>
-                    </span>
-                    <h4>{selectedItemObject.catalog?.name}</h4>
-
-                    {/* Small preview image under name */}
-                    {selectedItemObject.catalog?.image && (
-                      <div 
-                        className="insp-thumb-banner"
-                        onClick={() => setSelectedCatalogModalItem(selectedItemObject.catalog)}
-                        title="คลิกเพื่อดูสเปกเต็มและภาพสินค้าขยาย"
-                      >
-                        <img 
-                          src={selectedItemObject.catalog.image} 
-                          alt={selectedItemObject.catalog.name} 
-                          className="insp-thumb-img"
-                          loading="lazy"
-                        />
-                        <div className="insp-thumb-overlay">
-                          <Eye size={13} />
-                          <span>คลิกดูภาพขยาย & สเปกเต็ม</span>
-                        </div>
-                        {selectedItemObject.catalog.seats > 0 && (
-                          <span className="insp-thumb-seat-badge">
-                            {selectedItemObject.catalog.seats} PCs
-                          </span>
-                        )}
-                        <span className="insp-thumb-dim-badge">
-                          {selectedItemObject.catalog.widthMeters} x {selectedItemObject.catalog.depth3D || selectedItemObject.catalog.heightMeters} ม.
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Component Breakdown Card: Desk vs Chair */}
-                  <div className="component-breakdown-card">
-                    <div className="breakdown-section-title">
-                      <span>รายละเอียดราคาอุปกรณ์ในโมดูล</span>
-                    </div>
-
-                    {/* Desk Price Breakdown */}
-                    <div className="component-spec-box desk-box">
-                      <div className="spec-box-header">
-                        <span className="box-title">โต๊ะและโครงสร้าง</span>
-                        <strong className="box-price text-blue">
-                          ฿{selectedItemObject.catalog?.deskPrice?.toLocaleString()}
-                        </strong>
-                      </div>
-                      <p className="box-desc">{selectedItemObject.catalog?.deskDesc}</p>
-                    </div>
-
-                    {/* Chair Model & Price Breakdown */}
-                    <div className="component-spec-box chair-box">
-                      <div className="spec-box-header">
-                        <span className="box-title">เก้าอี้เกมมิ่ง / ที่นั่ง</span>
-                        <strong className="box-price text-blue">
-                          {selectedItemObject.catalog?.chairCount > 0 
-                            ? `฿${((selectedItemObject.catalog?.chairPrice || 0) * (selectedItemObject.catalog?.chairCount || 0)).toLocaleString()}`
-                            : 'ไม่มี'}
-                        </strong>
-                      </div>
-                      <div className="chair-detail-row">
-                        <span className="chair-model-name">
-                          {selectedItemObject.catalog?.chairModel}
-                        </span>
-                        {selectedItemObject.catalog?.chairCount > 0 && (
-                          <span className="chair-count-badge">
-                            {selectedItemObject.catalog?.chairCount} ตัว <span className="unit-price">(฿{selectedItemObject.catalog?.chairPrice?.toLocaleString()}/ตัว)</span>
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* 3D Physical Dimensions */}
-                    <div className="component-spec-box dimensions-box">
-                      <div className="spec-box-header">
-                        <span className="box-title">มิติขนาด (กว้าง x ลึก x สูง)</span>
-                      </div>
-                      <div className="dimensions-pills">
-                        <span className="dim-tag">กว้าง: {selectedItemObject.catalog?.widthMeters} ม.</span>
-                        <span className="dim-tag">ลึก: {selectedItemObject.catalog?.depth3D || selectedItemObject.catalog?.heightMeters} ม.</span>
-                        <span className="dim-tag">สูง: {selectedItemObject.catalog?.height3D || 1.25} ม.</span>
-                      </div>
-                    </div>
-
-                    {/* Total Module Price */}
-                    <div className="total-module-price-row">
-                      <span>ราคารวมโมดูลนี้:</span>
-                      <strong className="text-blue font-bold">
-                        ฿{selectedItemObject.catalog?.baseCost?.toLocaleString()}
-                      </strong>
-                    </div>
-                  </div>
-
-                  {/* Placement & Spatial Controls */}
-                  <div className="spatial-controls-card">
-                    <div className="spatial-title">
-                      <Move size={14} className="text-blue" />
-                      <span>ตำแหน่ง & ทิศทางในห้อง</span>
-                    </div>
-                    <div className="coords-info">
-                      <span><strong>X:</strong> {selectedItemObject.x.toFixed(1)} ม.</span>
-                      <span><strong>Y:</strong> {selectedItemObject.y.toFixed(1)} ม.</span>
-                      <span><strong>มุม:</strong> {selectedItemObject.rotation}°</span>
-                    </div>
-
-                    {/* Unified Quick Actions */}
-                    <div className="spatial-actions-row">
-                      <button 
-                        type="button"
-                        id="btn-sidebar-rotate-item"
-                        className="btn-spatial-action btn-rotate"
-                        onClick={() => handleRotateItem(selectedItemObject.id)}
-                        title="หมุน 90 องศา (กด R)"
-                      >
-                        <RotateCw size={13} />
-                        <span>หมุน 90°</span>
-                      </button>
-                      <button 
-                        type="button"
-                        id="btn-sidebar-duplicate-item"
-                        className="btn-spatial-action btn-duplicate"
-                        onClick={() => handleDuplicateItem(selectedItemObject.id)}
-                        title="คัดลอกโมดูลนี้ (Duplicate)"
-                      >
-                        <Copy size={13} />
-                        <span>คัดลอก</span>
-                      </button>
-                      <button 
-                        type="button"
-                        id="btn-sidebar-delete-item"
-                        className="btn-spatial-action btn-delete"
-                        onClick={() => handleDeleteItem(selectedItemObject.id)}
-                        title="ลบโมดูลนี้ออกจากผัง (กด Delete)"
-                      >
-                        <Trash2 size={13} />
-                        <span>ลบออก</span>
-                      </button>
-                    </div>
-
-                    <div className="spatial-keyboard-hint">
-                      <Compass size={12} className="text-blue" />
-                      <span>คลิกลากย้ายอิสระ หรือกดปุ่มลูกศร <strong>[↑][↓][←][→]</strong> บนคีย์บอร์ด</span>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="no-item-selected-state">
-                  <div className="empty-selection-icon">
-                    <MousePointerClick size={28} className="text-blue" />
-                  </div>
-                  <h4>เลือกดูหรือปรับตำแหน่งชิ้นส่วน</h4>
-                  <p>คลิกที่โต๊ะบนผัง 2D/3D หรือเลือกจากรายการด้านล่าง เพื่อเลื่อนตำแหน่ง หมุน หรือคัดลอก</p>
-
-                  {/* Quick Item Picker List */}
-                  {placedItems.length > 0 && (
-                    <div className="quick-items-card">
-                      <div className="quick-items-header">
-                        <span className="quick-title">โต๊ะและโซนในห้อง ({placedItems.length} ชิ้น):</span>
-                      </div>
-                      <div className="quick-items-scrollable">
-                        {placedItems.map((item, idx) => (
-                          <button
-                            key={item.id}
-                            type="button"
-                            className="quick-item-select-btn"
-                            onClick={() => setSelectedItemId(item.id)}
-                            title="คลิกเพื่อเลือกและจัดตำแหน่งโต๊ะนี้ทันที"
-                          >
-                            <span className="quick-item-num">#{idx + 1}</span>
-                            <span className="quick-item-name">{item.catalog?.name || item.type}</span>
-                            <span className="quick-item-pill">
-                              {item.catalog?.seats > 0 ? `${item.catalog.seats} PCs` : `${item.catalog?.widthMeters}x${item.catalog?.heightMeters}ม.`}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Current Active Materials & Entrance Badge */}
-                  <div className="active-materials-summary">
-                    <div className="mat-summary-row">
-                      <span className="mat-key">วอลเปเปอร์:</span>
-                      <strong className="mat-val">
-                        {WALLPAPERS.find(w => w.id === selectedWallpaper)?.name}
-                      </strong>
-                    </div>
-                    <div className="mat-summary-row">
-                      <span className="mat-key">วัสดุปูพื้น:</span>
-                      <strong className="mat-val">
-                        {FLOOR_MATERIALS.find(f => f.id === selectedFloorMaterial)?.name}
-                      </strong>
-                    </div>
-                    <div className="mat-summary-row">
-                      <span className="mat-key">ประตูทางเข้า:</span>
-                      <strong className="mat-val text-emerald">
-                        {doorConfig.wall === 'front' ? 'ด้านหน้า (Front)' :
-                         doorConfig.wall === 'left' ? 'ผนังซ้าย (Left)' :
-                         doorConfig.wall === 'back' ? 'ผนังหลัง (Back)' : 'ผนังขวา (Right)'} ({Math.round(doorConfig.offsetRatio * 100)}%)
-                      </strong>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="inspector-divider"></div>
-
-              {/* Overall Estimated Cost Summary */}
-              <div className="mini-cost-summary">
-                <h4 className="summary-title">
-                  <DollarSign size={16} className="text-blue" />
-                  <span>สรุปงบลงทุนเบื้องต้น</span>
-                </h4>
-                <div className="cost-row">
-                  <span>ฮาร์ดแวร์ ({totalStations} เครื่อง):</span>
-                  <strong>฿{hardwareCost.toLocaleString()}</strong>
-                </div>
-                <div className="cost-row">
-                  <span>โต๊ะ เก้าอี้ และห้อง VIP:</span>
-                  <strong>฿{furnitureItemsCost.toLocaleString()}</strong>
-                </div>
-                <div className="cost-row">
-                  <span>งานตกแต่ง Interior ({roomAreaSqM} ตร.ม.):</span>
-                  <strong>฿{interiorDecorCost.toLocaleString()}</strong>
-                </div>
-                <div className="cost-row">
-                  <span>ระบบแอร์ & ระบายอากาศ:</span>
-                  <strong>฿{airconCost.toLocaleString()}</strong>
-                </div>
-                <div className="cost-row">
-                  <span>Diskless Server & 10G Network:</span>
-                  <strong>฿{(disklessCost + networkCost).toLocaleString()}</strong>
-                </div>
-                <div className="cost-row">
-                  <span>ค่าแฟรนไชส์ & สิทธิ์การใช้แบรนด์:</span>
-                  <strong>฿{franchiseLicenseCost.toLocaleString()}</strong>
-                </div>
-
-                <div className="cost-divider"></div>
-
-                <div className="total-cost-box">
-                  <span className="total-cost-label">งบประมาณลงทุนรวมโดยประมาณ:</span>
-                  <div className="total-cost-number text-blue font-bold">
-                    ฿{totalInvestmentCost.toLocaleString()}
-                  </div>
-                  <span className="total-cost-note">* รวมฮาร์ดแวร์ ตกแต่ง และเปิดร้านพร้อมใช้งาน</span>
-                </div>
-              </div>
-
-              {/* Step Navigation in Right Sidebar - Placed prominently on the right */}
-              <div className="inspector-step-actions">
-                <button 
-                  id="btn-step2-to-step3-sidebar"
-                  onClick={() => handleStepChange(3)} 
-                  className="btn-primary full-width"
-                  style={{ padding: '13px 16px', fontSize: '0.96rem', fontWeight: 700 }}
-                >
-                  <span>เลือกสเปกคอมพิวเตอร์ ({totalStations} เครื่อง)</span>
-                  <ArrowRight size={16} />
-                </button>
-                <button 
-                  onClick={() => handleStepChange(1)} 
-                  className="btn-secondary full-width"
-                  style={{ marginTop: '6px' }}
-                >
-                  ย้อนกลับไปตั้งขนาด
-                </button>
               </div>
             </div>
           </div>

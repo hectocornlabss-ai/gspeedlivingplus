@@ -8,7 +8,8 @@ import {
   FOUNDER_INFO as INITIAL_FOUNDER,
   VENUE_ZONES as INITIAL_ZONES,
   EVENT_CATEGORIES as INITIAL_CATEGORIES,
-  DEFAULT_ARTICLE_TAGS as INITIAL_TAGS
+  DEFAULT_ARTICLE_TAGS as INITIAL_TAGS,
+  ARENA_SEATING_ZONES
 } from '../data/mockData';
 
 // Initial Store RAG Knowledge Base Chunks
@@ -416,10 +417,88 @@ export const INITIAL_RMA_CLAIMS = [
   }
 ];
 
+// Initial Arena Seat Bookings
+export const INITIAL_ARENA_BOOKINGS = [
+  {
+    id: 'BKG-2026-0918-01',
+    bookingCode: 'GLP-SEAT-8941',
+    customerName: 'คุณอาร์ม (Arm Gamer)',
+    phone: '081-234-5678',
+    email: 'arm.gamer@gmail.com',
+    discord: 'arm#1337',
+    memberId: 'GLP-VIP-042',
+    zoneId: 'vip',
+    zoneName: 'VIP & Streamer Pods',
+    seatNumbers: ['V01'],
+    date: '2026-09-18',
+    timeSlot: '14:00 - 18:00 น.',
+    durationHours: 4,
+    hardwareTier: 'RTX 4080 SUPER + 360Hz BenQ',
+    foodPackage: 'Energy Boost Combo (Red Bull + ข้าวไข่ข้นแฮม)',
+    foodPackagePrice: 89,
+    baseRatePerHour: 50,
+    seatTotal: 200,
+    totalPrice: 289,
+    status: 'Checked-In',
+    createdAt: '2026-09-18T11:30:00.000Z',
+    notes: 'ขอกล้อง 4K สำหรับสตรีมแข่ง Valorant'
+  },
+  {
+    id: 'BKG-2026-0918-02',
+    bookingCode: 'GLP-SEAT-8942',
+    customerName: 'คุณกิตติศักดิ์ (Talon Fan)',
+    phone: '089-776-5544',
+    email: 'kittisak.t@gmail.com',
+    discord: 'kitti#9900',
+    memberId: '',
+    zoneId: 'stage',
+    zoneName: '5v5 Tournament Stage Pro Booths',
+    seatNumbers: ['S03', 'S04'],
+    date: '2026-09-18',
+    timeSlot: '18:00 - 22:00 น.',
+    durationHours: 4,
+    hardwareTier: 'RTX 4080 SUPER + 360Hz BenQ (Stage Booth)',
+    foodPackage: 'Gamer Feast Combo (ชานมพ่นไฟ + กะเพราหมูกรอบ)',
+    foodPackagePrice: 149,
+    baseRatePerHour: 50,
+    seatTotal: 400,
+    totalPrice: 549,
+    status: 'Confirmed',
+    createdAt: '2026-09-18T12:15:00.000Z',
+    notes: 'ซ้อมคู่ Duo ก่อนเริ่มแมตช์ทัวร์นาเมนต์'
+  },
+  {
+    id: 'BKG-2026-0918-03',
+    bookingCode: 'GLP-SEAT-8943',
+    customerName: 'คุณภานุวัฒน์',
+    phone: '086-332-1199',
+    email: 'panuwat@outlook.co.th',
+    discord: '',
+    memberId: 'GLP-MEM-109',
+    zoneId: 'standard',
+    zoneName: 'Esports Battleground Zone',
+    seatNumbers: ['B07', 'B08', 'B09', 'B10', 'B11'],
+    date: '2026-09-18',
+    timeSlot: '23:00 - 08:00 น. (Night Owl เหมาค่ำ)',
+    durationHours: 9,
+    hardwareTier: 'RTX 4070 SUPER + 240Hz Fast-IPS',
+    foodPackage: 'None',
+    foodPackagePrice: 0,
+    baseRatePerHour: 16.6,
+    seatTotal: 750,
+    totalPrice: 750,
+    status: 'Confirmed',
+    createdAt: '2026-09-18T13:40:00.000Z',
+    notes: 'ทีม 5 คน ซ้อมข้ามคืน'
+  }
+];
+
 // Initial Site Data Key
 const STORAGE_KEY = 'gspeed_site_cms_data_v2';
 
 export const DEFAULT_SITE_DATA = {
+  arenaSeatingZones: ARENA_SEATING_ZONES,
+  arenaBookings: INITIAL_ARENA_BOOKINGS,
   theme: {
     primaryColor: '#1d4ed8',
     secondaryColor: '#0ea5e9',
@@ -841,6 +920,7 @@ export function SiteDataProvider({ children }) {
                 ...def,
                 ...t,
                 teams: (t.teams && t.teams.length > 0) ? t.teams : def.teams,
+                bracketMatches: (t.bracketMatches && t.bracketMatches.length > 0) ? t.bracketMatches : (def.bracketMatches || []),
                 galleryPhotos: (t.galleryPhotos && t.galleryPhotos.length > 0) ? t.galleryPhotos : def.galleryPhotos,
                 rules: (t.rules && t.rules.length > 0) ? t.rules : def.rules,
                 prizeDistribution: (t.prizeDistribution && t.prizeDistribution.length > 0) ? t.prizeDistribution : def.prizeDistribution,
@@ -850,6 +930,7 @@ export function SiteDataProvider({ children }) {
             }
             return {
               teams: [],
+              bracketMatches: [],
               galleryPhotos: [],
               rules: [],
               prizeDistribution: [],
@@ -920,6 +1001,13 @@ export function SiteDataProvider({ children }) {
 
         if (!Array.isArray(merged.tournamentApplications)) {
           merged.tournamentApplications = DEFAULT_SITE_DATA.tournamentApplications;
+        }
+
+        if (!Array.isArray(merged.arenaBookings)) {
+          merged.arenaBookings = INITIAL_ARENA_BOOKINGS;
+        }
+        if (!Array.isArray(merged.arenaSeatingZones)) {
+          merged.arenaSeatingZones = ARENA_SEATING_ZONES;
         }
 
         // Hydrate gallery items with mockData slugs & rich content if missing
@@ -1539,6 +1627,88 @@ export function SiteDataProvider({ children }) {
     }));
   };
 
+  const updateTournamentBracketMatch = (tournamentId, matchId, matchUpdates) => {
+    setSiteData(prev => {
+      const tourneyList = prev.tournaments || [];
+      const updatedTournaments = tourneyList.map(tour => {
+        if (tour.id !== tournamentId) return tour;
+        const currentMatches = tour.bracketMatches || [];
+        const matchIdx = currentMatches.findIndex(m => m.id === matchId);
+        if (matchIdx === -1) return tour;
+
+        const targetMatch = currentMatches[matchIdx];
+        const updatedMatch = { ...targetMatch, ...matchUpdates };
+        let newMatches = [...currentMatches];
+        newMatches[matchIdx] = updatedMatch;
+
+        // Auto Advance Winner to nextMatchId if set
+        if (updatedMatch.nextMatchId && updatedMatch.nextMatchSlot) {
+          const winningTeam = updatedMatch.teamA?.isWinner 
+            ? updatedMatch.teamA 
+            : (updatedMatch.teamB?.isWinner ? updatedMatch.teamB : null);
+
+          if (winningTeam) {
+            const nextMatchIdx = newMatches.findIndex(m => m.id === updatedMatch.nextMatchId);
+            if (nextMatchIdx !== -1) {
+              const nextMatch = newMatches[nextMatchIdx];
+              newMatches[nextMatchIdx] = {
+                ...nextMatch,
+                [updatedMatch.nextMatchSlot]: {
+                  ...winningTeam,
+                  score: 0,
+                  isWinner: false
+                }
+              };
+            }
+          }
+        }
+
+        return {
+          ...tour,
+          bracketMatches: newMatches
+        };
+      });
+
+      return {
+        ...prev,
+        tournaments: updatedTournaments
+      };
+    });
+  };
+
+  // Arena Seat Booking Handlers
+  const createArenaBooking = (bookingData) => {
+    const newId = `BKG-${Date.now()}`;
+    const bookingCode = `GLP-SEAT-${Math.floor(1000 + Math.random() * 9000)}`;
+    const newBooking = {
+      id: newId,
+      bookingCode,
+      status: 'Confirmed',
+      createdAt: new Date().toISOString(),
+      ...bookingData
+    };
+
+    setSiteData(prev => ({
+      ...prev,
+      arenaBookings: [newBooking, ...(prev.arenaBookings || [])]
+    }));
+
+    return newBooking;
+  };
+
+  const updateArenaBookingStatus = (bookingId, newStatus) => {
+    setSiteData(prev => ({
+      ...prev,
+      arenaBookings: (prev.arenaBookings || []).map(b => 
+        b.id === bookingId ? { ...b, status: newStatus, updatedAt: new Date().toISOString() } : b
+      )
+    }));
+  };
+
+  const cancelArenaBooking = (bookingId) => {
+    updateArenaBookingStatus(bookingId, 'Cancelled');
+  };
+
   // News & Articles CRUD Handlers
   const addNewsItem = (newItem) => {
     const slug = newItem.slug || (newItem.title || 'news').toLowerCase().replace(/[^a-z0-9\u0E00-\u0E7F]+/g, '-').replace(/(^-|-$)/g, '') || `news-${Date.now()}`;
@@ -1838,6 +2008,10 @@ export function SiteDataProvider({ children }) {
     updateTournament,
     addTournament,
     deleteTournament,
+    updateTournamentBracketMatch,
+    createArenaBooking,
+    updateArenaBookingStatus,
+    cancelArenaBooking,
     updateVenueZone,
     updateTheme,
     updateGlobalSEO,

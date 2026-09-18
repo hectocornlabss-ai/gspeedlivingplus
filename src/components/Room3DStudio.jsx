@@ -28,9 +28,14 @@ export default function Room3DStudio({
   isPlannerFullscreen = false,
   onToggleFullscreen = () => {},
   doorConfig = { wall: 'right', offsetRatio: 0.75, width: 1.4, style: 'wood' },
-  onChangeDoorConfig = () => {}
+  onChangeDoorConfig = () => {},
+  isWalkMode = false,
+  onWalkModeChange = () => {},
+  onRequestFullscreen = () => {}
 }) {
   const [isDoorPopoverOpen, setIsDoorPopoverOpen] = useState(false);
+  const doorPopoverRef = useRef(null);
+  const doorToggleBtnRef = useRef(null);
   const containerRef = useRef(null);
   const rendererRef = useRef(null);
   const sceneRef = useRef(null);
@@ -40,6 +45,56 @@ export default function Room3DStudio({
   const selectedHighlightRef = useRef(null);
   const raycasterRef = useRef(new THREE.Raycaster());
   const mouseRef = useRef(new THREE.Vector2());
+
+  // Camera Presets & Real-time FPS Game Walk Controller Refs
+  const [activeCamPreset, setActiveCamPreset] = useState('iso');
+  const activeCamPresetRef = useRef('iso');
+  const [fpsCoords, setFpsCoords] = useState({ x: 0, z: 0 });
+  const [isPointerLocked, setIsPointerLocked] = useState(false);
+  const wasPointerLockedRef = useRef(false);
+  const exitWalkModeRef = useRef(null);
+  const fpsStateRef = useRef({
+    pos: new THREE.Vector3(0, 1.65, 0),
+    yaw: 0,
+    pitch: -0.05,
+    keys: { w: false, a: false, s: false, d: false, up: false, down: false, left: false, right: false, shift: false },
+    isDragging: false,
+    lastMouseX: 0,
+    lastMouseY: 0
+  });
+
+  // Auto-close door configuration popover when clicking anywhere outside or pressing Escape
+  useEffect(() => {
+    if (!isDoorPopoverOpen) return;
+
+    const handleOutsidePointerDown = (e) => {
+      // If click originated inside popover, keep it open
+      if (doorPopoverRef.current && doorPopoverRef.current.contains(e.target)) {
+        return;
+      }
+      // If click is on the toggle button itself, let button onClick handle it
+      if (doorToggleBtnRef.current && doorToggleBtnRef.current.contains(e.target)) {
+        return;
+      }
+      // Clicked anywhere else -> close popover automatically
+      setIsDoorPopoverOpen(false);
+    };
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setIsDoorPopoverOpen(false);
+      }
+    };
+
+    // Use capture phase so stopPropagation inside canvas or 3D view won't block closing
+    document.addEventListener('pointerdown', handleOutsidePointerDown, true);
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('pointerdown', handleOutsidePointerDown, true);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isDoorPopoverOpen]);
 
   // Procedural Canvas Texture Generator for Realistic Floors
   const createFloorTexture = useCallback((materialId) => {
@@ -500,14 +555,157 @@ export default function Room3DStudio({
     scene.add(highlightMesh);
     selectedHighlightRef.current = highlightMesh;
 
-    // Animation Loop
+    // Animation Loop with FPS Walking Controller
     let animationFrameId;
+    let lastFrameTime = performance.now();
+    let lastCoordUpdate = 0;
+
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
-      controls.update();
+      const now = performance.now();
+      const dt = Math.min((now - lastFrameTime) / 1000, 0.1);
+      lastFrameTime = now;
+
+      if (activeCamPresetRef.current === 'walk') {
+        const fps = fpsStateRef.current;
+        const keys = fps.keys;
+        const speed = keys.shift ? 5.8 : 3.4; // m/s (Sprint or Walk)
+        const moveDist = speed * dt;
+
+        // Current horizontal facing direction
+        const yaw = fps.yaw;
+        // Forward vector (on horizontal XZ plane)
+        const forwardX = -Math.sin(yaw);
+        const forwardZ = -Math.cos(yaw);
+        // Right vector (on horizontal XZ plane)
+        const rightX = Math.cos(yaw);
+        const rightZ = -Math.sin(yaw);
+
+        let moveX = 0;
+        let moveZ = 0;
+
+        if (keys.w || keys.up) {
+          moveX += forwardX;
+          moveZ += forwardZ;
+        }
+        if (keys.s || keys.down) {
+          moveX -= forwardX;
+          moveZ -= forwardZ;
+        }
+        if (keys.d || keys.right) {
+          moveX += rightX;
+          moveZ += rightZ;
+        }
+        if (keys.a || keys.left) {
+          moveX -= rightX;
+          moveZ -= rightZ;
+        }
+
+        const len = Math.hypot(moveX, moveZ);
+        if (len > 0.001) {
+          fps.pos.x += (moveX / len) * moveDist;
+          fps.pos.z += (moveZ / len) * moveDist;
+        }
+
+        // Keep player strictly inside the room walls with 0.65m clearance
+        const minX = -roomWidth / 2 + 0.65;
+        const maxX = roomWidth / 2 - 0.65;
+        const minZ = -roomHeight / 2 + 0.65;
+        const maxZ = roomHeight / 2 - 0.65;
+        fps.pos.x = Math.max(minX, Math.min(maxX, fps.pos.x));
+        fps.pos.z = Math.max(minZ, Math.min(maxZ, fps.pos.z));
+        fps.pos.y = 1.65; // Realistic human eye height
+
+        camera.position.copy(fps.pos);
+        camera.rotation.order = 'YXZ';
+        camera.rotation.y = fps.yaw;
+        camera.rotation.x = fps.pitch;
+        camera.rotation.z = 0; // STRICT ZERO ROLL - HORIZON ALWAYS STRAIGHT!
+
+        // Throttle coordinate HUD update
+        if (now - lastCoordUpdate > 120) {
+          lastCoordUpdate = now;
+          setFpsCoords({ x: fps.pos.x, z: fps.pos.z });
+        }
+      } else {
+        controls.update();
+      }
+
       renderer.render(scene, camera);
     };
     animate();
+
+    // True FPS Mouse-Look (Pointer Lock API) & Drag Fallback Listener
+    const handleGlobalPointerMove = (e) => {
+      if (activeCamPresetRef.current === 'walk') {
+        const canvasEl = renderer.domElement || container;
+        const isLocked = document.pointerLockElement === canvasEl;
+
+        let dx = 0;
+        let dy = 0;
+
+        if (isLocked) {
+          // Authentic PC FPS Game Aiming: directly track physical mouse movement without clicking!
+          dx = e.movementX || e.mozMovementX || e.webkitMovementX || 0;
+          dy = e.movementY || e.mozMovementY || e.webkitMovementY || 0;
+
+          // Prevent first-frame anomalous spikes when locking pointer
+          if (Math.abs(dx) > 250 || Math.abs(dy) > 250) {
+            return;
+          }
+        } else if (fpsStateRef.current.isDragging) {
+          // Dragging fallback when pointer is not locked yet (or touch screen)
+          dx = e.clientX - fpsStateRef.current.lastMouseX;
+          dy = e.clientY - fpsStateRef.current.lastMouseY;
+          fpsStateRef.current.lastMouseX = e.clientX;
+          fpsStateRef.current.lastMouseY = e.clientY;
+        }
+
+        if (dx !== 0 || dy !== 0) {
+          const sensitivity = 0.0022; // Pro esports mouse sensitivity
+          // Moving mouse RIGHT (dx > 0) turns camera RIGHT (decreases Three.js yaw)
+          // Moving mouse LEFT (dx < 0) turns camera LEFT (increases Three.js yaw)
+          fpsStateRef.current.yaw -= dx * sensitivity;
+          // Moving mouse UP (dy < 0) looks UP (increases pitch)
+          // Moving mouse DOWN (dy > 0) looks DOWN (decreases pitch)
+          fpsStateRef.current.pitch -= dy * sensitivity;
+
+          // Clamp vertical look between -1.42 and +1.42 radians (~ -81° to +81°)
+          fpsStateRef.current.pitch = Math.max(-1.42, Math.min(1.42, fpsStateRef.current.pitch));
+
+          camera.rotation.order = 'YXZ';
+          camera.rotation.y = fpsStateRef.current.yaw;
+          camera.rotation.x = fpsStateRef.current.pitch;
+          camera.rotation.z = 0; // STRICT ZERO ROLL - HORIZON ALWAYS STRAIGHT!
+        }
+      }
+    };
+
+    const handleGlobalPointerUp = () => {
+      fpsStateRef.current.isDragging = false;
+    };
+
+    const handlePointerLockChange = () => {
+      const canvasEl = renderer.domElement || container;
+      const locked = document.pointerLockElement === canvasEl;
+      setIsPointerLocked(locked);
+
+      if (!locked && wasPointerLockedRef.current && activeCamPresetRef.current === 'walk') {
+        // Native ESC or browser unlock -> cleanly exit walk mode back to 3D studio
+        wasPointerLockedRef.current = false;
+        if (exitWalkModeRef.current) {
+          exitWalkModeRef.current();
+        }
+      } else {
+        wasPointerLockedRef.current = locked;
+      }
+    };
+
+    document.addEventListener('pointerlockchange', handlePointerLockChange);
+    document.addEventListener('mozpointerlockchange', handlePointerLockChange);
+    document.addEventListener('webkitpointerlockchange', handlePointerLockChange);
+    window.addEventListener('pointermove', handleGlobalPointerMove);
+    window.addEventListener('pointerup', handleGlobalPointerUp);
 
     // Resize Handler with ResizeObserver for ultra-smooth fullscreen responsiveness
     const handleResize = () => {
@@ -527,6 +725,11 @@ export default function Room3DStudio({
     }
 
     return () => {
+      document.removeEventListener('pointerlockchange', handlePointerLockChange);
+      document.removeEventListener('mozpointerlockchange', handlePointerLockChange);
+      document.removeEventListener('webkitpointerlockchange', handlePointerLockChange);
+      window.removeEventListener('pointermove', handleGlobalPointerMove);
+      window.removeEventListener('pointerup', handleGlobalPointerUp);
       window.removeEventListener('resize', handleResize);
       if (resizeObserver) resizeObserver.disconnect();
       cancelAnimationFrame(animationFrameId);
@@ -630,6 +833,8 @@ export default function Room3DStudio({
     const backSkirting = new THREE.Mesh(new THREE.BoxGeometry(roomWidth, 0.12, 0.04), skirtingMat);
     backSkirting.position.set(0, 0.06, -roomHeight / 2 + 0.13);
     roomGroup.add(backSkirting);
+
+    // Wall Material (Open-Air Cutaway View - No solid black roof blocking interior layout)
 
     // Wall Material
     const wallColor = getWallpaperColor(selectedWallpaper);
@@ -886,6 +1091,12 @@ export default function Room3DStudio({
         assembly.add(cMesh);
       });
 
+      assembly.name = 'store_door_group';
+      assembly.userData = { itemId: 'store-door', isDoor: true };
+      assembly.traverse((child) => {
+        child.userData = { itemId: 'store-door', isDoor: true };
+      });
+
       return assembly;
     };
 
@@ -1089,6 +1300,20 @@ export default function Room3DStudio({
       const frontBase = new THREE.Mesh(frontBaseGeo, exteriorWallMat);
       frontBase.position.set(0, 0.075, roomHeight / 2);
       roomGroup.add(frontBase);
+
+      // Frameless Panoramic Glass Storefront Facade
+      const frontGlassMat = new THREE.MeshPhysicalMaterial({
+        color: 0x93c5fd,
+        transmission: 0.94,
+        opacity: 0.35,
+        transparent: true,
+        roughness: 0.04,
+        ior: 1.5,
+        side: THREE.DoubleSide
+      });
+      const frontGlass = new THREE.Mesh(new THREE.BoxGeometry(roomWidth, wallHeight, 0.02), frontGlassMat);
+      frontGlass.position.set(0, wallHeight / 2, roomHeight / 2);
+      roomGroup.add(frontGlass);
     }
 
     scene.add(roomGroup);
@@ -1571,8 +1796,26 @@ export default function Room3DStudio({
     }
   }, [selectedItemId]);
 
-  // Raycasting for Direct 3D Item Clicking
+  // Raycasting for Direct 3D Item Clicking & Pointer Lock Request
   const handlePointerDown = (event) => {
+    if (activeCamPresetRef.current === 'walk') {
+      const canvasEl = rendererRef.current?.domElement || containerRef.current;
+      if (canvasEl && document.pointerLockElement !== canvasEl) {
+        try {
+          const res = canvasEl.requestPointerLock();
+          if (res && typeof res.catch === 'function') {
+            res.catch(() => {});
+          }
+        } catch (err) {
+          // Handled safely
+        }
+      }
+      fpsStateRef.current.isDragging = true;
+      fpsStateRef.current.lastMouseX = event.clientX;
+      fpsStateRef.current.lastMouseY = event.clientY;
+      return;
+    }
+
     const container = containerRef.current;
     const camera = cameraRef.current;
     const scene = sceneRef.current;
@@ -1584,9 +1827,21 @@ export default function Room3DStudio({
 
     raycasterRef.current.setFromCamera(mouseRef.current, camera);
     const furnitureGroup = scene.getObjectByName('placed_furniture_group');
-    if (!furnitureGroup) return;
+    const roomGroup = scene.getObjectByName('room_structure_group');
 
-    const intersects = raycasterRef.current.intersectObjects(furnitureGroup.children, true);
+    const raycastTargets = [];
+    if (furnitureGroup) raycastTargets.push(...furnitureGroup.children);
+    if (roomGroup) {
+      roomGroup.traverse((child) => {
+        if (child.userData?.itemId === 'store-door' || child.name === 'store_door_group') {
+          raycastTargets.push(child);
+        }
+      });
+    }
+
+    if (raycastTargets.length === 0) return;
+
+    const intersects = raycasterRef.current.intersectObjects(raycastTargets, true);
     if (intersects.length > 0) {
       // Find top group with userData.itemId
       let cur = intersects[0].object;
@@ -1599,33 +1854,45 @@ export default function Room3DStudio({
     }
   };
 
-  // Camera Presets
-  const [activeCamPreset, setActiveCamPreset] = useState('iso');
-
+  // Camera Presets & First-Person Walk Setup
   const setCameraView = (viewType) => {
     const camera = cameraRef.current;
     const controls = controlsRef.current;
     if (!camera || !controls) return;
 
+    if (viewType !== 'walk') {
+      if (document.exitPointerLock && document.pointerLockElement) {
+        document.exitPointerLock();
+      }
+    }
+
     setActiveCamPreset(viewType);
+    activeCamPresetRef.current = viewType;
     const maxDim = Math.max(roomWidth, roomHeight);
     const activeWall = doorConfig?.wall || 'right';
     const doorRatio = Math.max(0.15, Math.min(0.85, doorConfig?.offsetRatio ?? 0.75));
 
     if (viewType === 'iso') {
-      // 45-degree Isometric View (Homestyler style) - raised target to keep whole venue centered
+      controls.enabled = true;
       camera.position.set(maxDim * 1.38, maxDim * 1.56, maxDim * 1.56);
       controls.target.set(0, -0.22, 0.65);
+      controls.update();
+      onWalkModeChange(false);
     } else if (viewType === 'top') {
-      // Top-Down 2D Blueprint angle
+      controls.enabled = true;
       camera.position.set(0, maxDim * 1.95, 0.01);
       controls.target.set(0, 0, 0);
+      controls.update();
+      onWalkModeChange(false);
     } else if (viewType === 'front') {
-      // Front Eye-Level Angle
+      controls.enabled = true;
       camera.position.set(0, 2.2, maxDim * 1.5);
       controls.target.set(0, 0.7, 0);
+      controls.update();
+      onWalkModeChange(false);
     } else if (viewType === 'storefront') {
-      // Storefront Entrance View: Automatically frame outside the door looking at sign/stickers
+      controls.enabled = true;
+      onWalkModeChange(false);
       if (activeWall === 'front') {
         const doorX = (doorRatio - 0.5) * roomWidth;
         camera.position.set(doorX, 2.3, roomHeight / 2 + 7.2);
@@ -1643,18 +1910,109 @@ export default function Room3DStudio({
         camera.position.set(roomWidth / 2 + 7.2, 2.3, doorZ);
         controls.target.set(roomWidth / 2, 1.9, doorZ);
       }
+      controls.update();
     } else if (viewType === 'walk') {
-      // Walkthrough inside arena at eye level
-      camera.position.set(0, 1.65, roomHeight * 0.28);
-      controls.target.set(0, 1.45, -roomHeight * 0.15);
+      // ENTER REAL FPS 3D GAME WALK MODE!
+      controls.enabled = false;
+      onSelectItem(null); // deselect furniture so no orange boxes or widgets
+
+      // Place camera inside room near the entrance door
+      let spawnX = 0;
+      let spawnZ = roomHeight * 0.28;
+      let targetX = 0;
+      let targetZ = 0;
+
+      if (activeWall === 'right') {
+        spawnX = roomWidth / 2 - 1.2;
+        spawnZ = (doorRatio - 0.5) * roomHeight;
+        targetX = -roomWidth * 0.2;
+        targetZ = spawnZ;
+      } else if (activeWall === 'left') {
+        spawnX = -roomWidth / 2 + 1.2;
+        spawnZ = (doorRatio - 0.5) * roomHeight;
+        targetX = roomWidth * 0.2;
+        targetZ = spawnZ;
+      } else if (activeWall === 'back') {
+        spawnX = (doorRatio - 0.5) * roomWidth;
+        spawnZ = -roomHeight / 2 + 1.2;
+        targetX = spawnX;
+        targetZ = roomHeight * 0.2;
+      } else if (activeWall === 'front') {
+        spawnX = (doorRatio - 0.5) * roomWidth;
+        spawnZ = roomHeight / 2 - 1.2;
+        targetX = spawnX;
+        targetZ = -roomHeight * 0.2;
+      }
+
+      fpsStateRef.current.pos.set(spawnX, 1.65, spawnZ);
+      camera.position.set(spawnX, 1.65, spawnZ);
+
+      // Compute initial yaw angle towards center of arena
+      const dirX = targetX - spawnX;
+      const dirZ = targetZ - spawnZ;
+      const initialYaw = Math.atan2(-dirX, -dirZ);
+      fpsStateRef.current.yaw = initialYaw;
+      fpsStateRef.current.pitch = -0.05;
+
+      camera.rotation.order = 'YXZ';
+      camera.rotation.y = initialYaw;
+      camera.rotation.x = -0.05;
+      camera.rotation.z = 0; // STRICT ZERO ROLL - HORIZON ALWAYS STRAIGHT!
+
+      setFpsCoords({ x: spawnX, z: spawnZ });
+      onWalkModeChange(true);
+      onRequestFullscreen(true);
+
+      // Auto-request pointer lock for real FPS feel
+      setTimeout(() => {
+        const canvasEl = rendererRef.current?.domElement || containerRef.current;
+        if (canvasEl && canvasEl.requestPointerLock && document.pointerLockElement !== canvasEl) {
+          try {
+            canvasEl.requestPointerLock();
+          } catch (e) {
+            // Ignored if browser policy requires direct canvas click
+          }
+        }
+      }, 80);
     }
-    controls.update();
   };
+
+  // Sync exit walk mode handler for pointer lock listeners
+  useEffect(() => {
+    exitWalkModeRef.current = () => {
+      setCameraView('iso');
+      onWalkModeChange(false);
+      onRequestFullscreen(false);
+    };
+  });
+
+  const triggerPointerLock = useCallback(() => {
+    const canvasEl = rendererRef.current?.domElement || containerRef.current?.querySelector('canvas') || containerRef.current;
+    if (canvasEl && canvasEl.requestPointerLock && document.pointerLockElement !== canvasEl) {
+      try {
+        const res = canvasEl.requestPointerLock();
+        if (res && typeof res.catch === 'function') {
+          res.catch(() => {});
+        }
+      } catch (err) {
+        // Handled safely
+      }
+    }
+  }, []);
+
+  // Synchronize Walk Mode with external prop
+  useEffect(() => {
+    if (isWalkMode && activeCamPreset !== 'walk') {
+      setCameraView('walk');
+    } else if (!isWalkMode && activeCamPreset === 'walk') {
+      setCameraView('iso');
+    }
+  }, [isWalkMode]);
 
   const handleZoom = (delta) => {
     const camera = cameraRef.current;
     const controls = controlsRef.current;
-    if (!camera || !controls) return;
+    if (!camera || !controls || activeCamPresetRef.current === 'walk') return;
     camera.position.multiplyScalar(delta > 0 ? 0.80 : 1.25);
     controls.update();
   };
@@ -1671,15 +2029,15 @@ export default function Room3DStudio({
     downloadFile(renderer.domElement, filename, 'image/png');
   };
 
-  // Adjust camera framing smoothly when toggling fullscreen so shop is never cut off at bottom
+  // Adjust camera framing smoothly when toggling fullscreen - NOT in walk mode
   useEffect(() => {
     const camera = cameraRef.current;
     const controls = controlsRef.current;
     if (!camera || !controls) return;
+    if (activeCamPresetRef.current === 'walk') return; // Do NOT override walk camera!
 
     const maxDim = Math.max(roomWidth, roomHeight);
     if (isPlannerFullscreen) {
-      // In fullscreen mode, elevate camera angle & adjust target to provide ample bottom clearance
       camera.position.set(maxDim * 1.45, maxDim * 1.62, maxDim * 1.62);
       controls.target.set(0, -0.32, 0.75);
     } else {
@@ -1689,11 +2047,42 @@ export default function Room3DStudio({
     controls.update();
   }, [isPlannerFullscreen, roomWidth, roomHeight]);
 
-  // Real-time Keyboard Arrow Movement & Shortcut Listener
+  // Real-time Keyboard Controller for FPS Walk and Item Manipulation
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (!selectedItemId) return;
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
+
+      if (activeCamPresetRef.current === 'walk') {
+        const key = e.key.toLowerCase();
+        const code = e.code;
+        if (key === 'w' || code === 'KeyW' || key === 'arrowup') {
+          e.preventDefault();
+          fpsStateRef.current.keys.w = true;
+        } else if (key === 's' || code === 'KeyS' || key === 'arrowdown') {
+          e.preventDefault();
+          fpsStateRef.current.keys.s = true;
+        } else if (key === 'a' || code === 'KeyA' || key === 'arrowleft') {
+          e.preventDefault();
+          fpsStateRef.current.keys.a = true;
+        } else if (key === 'd' || code === 'KeyD' || key === 'arrowright') {
+          e.preventDefault();
+          fpsStateRef.current.keys.d = true;
+        } else if (key === 'shift' || e.shiftKey) {
+          fpsStateRef.current.keys.shift = true;
+        } else if (key === 'escape') {
+          e.preventDefault();
+          wasPointerLockedRef.current = false;
+          if (document.exitPointerLock && document.pointerLockElement) {
+            document.exitPointerLock();
+          }
+          setCameraView('iso');
+          onWalkModeChange(false);
+          onRequestFullscreen(false);
+        }
+        return;
+      }
+
+      if (!selectedItemId) return;
 
       if (e.key === 'ArrowLeft') {
         e.preventDefault();
@@ -1716,100 +2105,193 @@ export default function Room3DStudio({
       }
     };
 
+    const handleKeyUp = (e) => {
+      if (activeCamPresetRef.current === 'walk') {
+        const key = e.key.toLowerCase();
+        const code = e.code;
+        if (key === 'w' || code === 'KeyW' || key === 'arrowup') fpsStateRef.current.keys.w = false;
+        if (key === 's' || code === 'KeyS' || key === 'arrowdown') fpsStateRef.current.keys.s = false;
+        if (key === 'a' || code === 'KeyA' || key === 'arrowleft') fpsStateRef.current.keys.a = false;
+        if (key === 'd' || code === 'KeyD' || key === 'arrowright') fpsStateRef.current.keys.d = false;
+        if (key === 'shift') fpsStateRef.current.keys.shift = false;
+      }
+    };
+
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedItemId, onNudgeItem, onRotateItem, onDeleteItem]);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [selectedItemId, onNudgeItem, onRotateItem, onDeleteItem, onWalkModeChange, onRequestFullscreen]);
 
   const selectedItemData = placedItems.find(i => i.id === selectedItemId);
 
   return (
-    <div className="room-3d-studio-wrapper">
-      {/* 3D Viewport Toolbar */}
-      <div className="studio-3d-topbar">
-        <div className="topbar-left">
-          <span className="badge-pill badge-blue">
-            <Compass size={14} />
-            <span>3D STUDIO</span>
-          </span>
-          <span className="studio-info-text">
-            ขนาดร้าน: <strong>{roomWidth} x {roomHeight} ม.</strong> ({roomWidth * roomHeight} ตร.ม.)
-          </span>
-        </div>
+    <div className={`room-3d-studio-wrapper ${activeCamPreset === 'walk' ? 'studio-walk-fps-active' : ''}`}>
+      {/* 1. TOP BAR: Standard 3D Toolbar OR Sleek Gaming HUD */}
+      {activeCamPreset !== 'walk' ? (
+        <div className="studio-3d-topbar">
+          {/* Camera Views Selector */}
+          <div className="camera-view-btns">
+            {/* Quick Door Entrance Position Popover Button */}
+            <button 
+              type="button" 
+              ref={doorToggleBtnRef}
+              id="btn-3d-door-toggle"
+              className={`btn-cam-view btn-door-toggle ${isDoorPopoverOpen || selectedItemId === 'store-door' ? 'active' : ''}`}
+              onClick={() => {
+                setIsDoorPopoverOpen(!isDoorPopoverOpen);
+                onSelectItem('store-door');
+              }}
+              title="กำหนดตำแหน่งและรูปแบบประตูทางเข้าร้าน"
+            >
+              <DoorOpen size={15} className={isDoorPopoverOpen || selectedItemId === 'store-door' ? 'text-white' : 'text-emerald'} />
+              <span>🚪 ทางเข้า: {
+                doorConfig?.wall === 'front' ? 'ด้านหน้า' :
+                doorConfig?.wall === 'left' ? 'ผนังซ้าย' :
+                doorConfig?.wall === 'back' ? 'ผนังหลัง' : 'ผนังขวา'
+              } ({Math.round((doorConfig?.offsetRatio ?? 0.75) * 100)}%)</span>
+            </button>
 
-        {/* Camera Views Selector */}
-        <div className="camera-view-btns">
-          <div className="camera-views-cluster">
-          <button 
-            className={`btn-cam-view ${activeCamPreset === 'iso' ? 'active' : ''}`}
-            onClick={() => setCameraView('iso')}
-            title="มุมมอง 3D Isometric (สไตล์ตัวอย่าง)"
-          >
-            <Eye size={15} />
-            <span>3D Isometric (45°)</span>
-          </button>
-          <button 
-            className={`btn-cam-view btn-cam-storefront ${activeCamPreset === 'storefront' ? 'active' : ''}`}
-            onClick={() => setCameraView('storefront')}
-            title="หมุนกล้องไปส่องป้ายและสติ๊กเกอร์หน้าร้านตรงประตูทางเข้า"
-          >
-            <Sparkles size={15} className="text-emerald" />
-            <span>หน้าร้าน (Storefront)</span>
-          </button>
-          <button 
-            className={`btn-cam-view ${activeCamPreset === 'walk' ? 'active' : ''}`}
-            onClick={() => setCameraView('walk')}
-            title="มุมมองระดับสายตาคนเดินชมในร้าน (Eye-Level Walk)"
-          >
-            <Footprints size={15} />
-            <span>เดินชมในร้าน</span>
-          </button>
-          <button 
-            className={`btn-cam-view ${activeCamPreset === 'top' ? 'active' : ''}`}
-            onClick={() => setCameraView('top')}
-            title="มุมมองแปลนด้านบน (Top-Down)"
-          >
-            <Layers size={15} />
-            <span>Top-Down (แปลน)</span>
-          </button>
+            <div className="cam-zoom-divider"></div>
+
+            <div className="camera-views-cluster">
+              <button 
+                className={`btn-cam-view ${activeCamPreset === 'iso' ? 'active' : ''}`}
+                onClick={() => setCameraView('iso')}
+                title="มุมมอง 3D Isometric (สไตล์ตัวอย่าง)"
+              >
+                <Eye size={15} />
+                <span>3D Isometric (45°)</span>
+              </button>
+              <button 
+                className={`btn-cam-view btn-cam-storefront ${activeCamPreset === 'storefront' ? 'active' : ''}`}
+                onClick={() => setCameraView('storefront')}
+                title="หมุนกล้องไปส่องป้ายและสติ๊กเกอร์หน้าร้านตรงประตูทางเข้า"
+              >
+                <Sparkles size={15} className="text-emerald" />
+                <span>หน้าร้าน (Storefront)</span>
+              </button>
+              <button 
+                className={`btn-cam-view ${activeCamPreset === 'walk' ? 'active' : ''}`}
+                onClick={() => setCameraView('walk')}
+                title="มุมมองระดับสายตาคนเดินชมในร้าน (Eye-Level Walk)"
+              >
+                <Footprints size={15} />
+                <span>เดินชมในร้าน</span>
+              </button>
+              <button 
+                className={`btn-cam-view ${activeCamPreset === 'top' ? 'active' : ''}`}
+                onClick={() => setCameraView('top')}
+                title="มุมมองแปลนด้านบน (Top-Down)"
+              >
+                <Layers size={15} />
+                <span>Top-Down (แปลน)</span>
+              </button>
+            </div>
+
+            <div className="cam-zoom-divider"></div>
+
+            <div className="camera-tools-cluster">
+              <button className="btn-cam-mini" onClick={() => handleZoom(1)} title="ซูมเข้า">
+                <ZoomIn size={15} />
+              </button>
+              <button className="btn-cam-mini" onClick={() => handleZoom(-1)} title="ซูมออก">
+                <ZoomOut size={15} />
+              </button>
+              <button 
+                type="button" 
+                className="btn-cam-mini"
+                onClick={handleExport3DSnapshot}
+                title="ถ่ายภาพเรนเดอร์ 3D (PNG)"
+              >
+                <Camera size={15} />
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* Top Gaming HUD Bar in Walk Mode */
+        <div className="studio-3d-gamer-hud">
+          {/* Top-Left Gaming Title Badge */}
+          <div className="walk-hud-brand">
+            <div className="walk-hud-pill">
+              <span className="live-game-dot"></span>
+              <Footprints size={15} />
+              <span>3D FPS WALK MODE</span>
+            </div>
+            <span className="walk-hud-store-title">{doorConfig?.storeName || 'GLP : G SPEED LIVING PLUS'}</span>
           </div>
 
-          <div className="cam-zoom-divider"></div>
-
-          <div className="camera-tools-cluster">
-            <button className="btn-cam-mini" onClick={() => handleZoom(1)} title="ซูมเข้า">
-              <ZoomIn size={15} />
-            </button>
-            <button className="btn-cam-mini" onClick={() => handleZoom(-1)} title="ซูมออก">
-              <ZoomOut size={15} />
+          {/* Quick Camera Angle Switchers */}
+          <div className="walk-hud-cam-switchers">
+            <button 
+              type="button" 
+              className="btn-walk-hud-cam active"
+              title="กำลังอยู่ในโหมดเดินชมร้านระดับสายตา"
+            >
+              <Footprints size={13} />
+              <span>เดินชมร้าน</span>
             </button>
             <button 
               type="button" 
-              className="btn-cam-mini"
-              onClick={handleExport3DSnapshot}
-              title="ถ่ายภาพเรนเดอร์ 3D (PNG)"
+              className="btn-walk-hud-cam"
+              onClick={() => setCameraView('storefront')}
+              title="มุมมองหน้าร้าน"
             >
-              <Camera size={15} />
+              <Sparkles size={13} />
+              <span>หน้าร้าน</span>
+            </button>
+            <button 
+              type="button" 
+              className="btn-walk-hud-cam"
+              onClick={() => {
+                setCameraView('iso');
+                onWalkModeChange(false);
+                onRequestFullscreen(false);
+              }}
+              title="สลับเป็นมุมมอง 3D Isometric"
+            >
+              <Eye size={13} />
+              <span>3D Isometric</span>
+            </button>
+            <button 
+              type="button" 
+              className="btn-walk-hud-cam"
+              onClick={() => {
+                setCameraView('top');
+                onWalkModeChange(false);
+                onRequestFullscreen(false);
+              }}
+              title="สลับเป็นมุมมองแปลนด้านบน"
+            >
+              <Layers size={13} />
+              <span>Top-Down</span>
             </button>
           </div>
 
-          <div className="cam-zoom-divider"></div>
-          {/* Quick Door Entrance Position Popover Button */}
+          {/* Top-Right Exit Button */}
           <button 
             type="button" 
-            id="btn-3d-door-toggle"
-            className={`btn-cam-view btn-door-toggle ${isDoorPopoverOpen ? 'active' : ''}`}
-            onClick={() => setIsDoorPopoverOpen(!isDoorPopoverOpen)}
-            title="กำหนดตำแหน่งและผนังประตูทางเข้าร้าน"
+            id="btn-walk-hud-exit"
+            className="btn-walk-hud-exit"
+            onClick={() => {
+              wasPointerLockedRef.current = false;
+              if (document.exitPointerLock && document.pointerLockElement) {
+                document.exitPointerLock();
+              }
+              setCameraView('iso');
+              onWalkModeChange(false);
+              onRequestFullscreen(false);
+            }}
+            title="ออกจากโหมดเดินชมร้าน (กด ESC ได้)"
           >
-            <DoorOpen size={15} className={isDoorPopoverOpen ? 'text-white' : 'text-emerald'} />
-            <span>ทางเข้า: {
-              doorConfig?.wall === 'front' ? 'ด้านหน้า' :
-              doorConfig?.wall === 'left' ? 'ผนังซ้าย' :
-              doorConfig?.wall === 'back' ? 'ผนังหลัง' : 'ผนังขวา'
-            }</span>
+            <Minimize2 size={15} />
+            <span>ออกจากโหมดเดิน (ESC)</span>
           </button>
         </div>
-      </div>
+      )}
 
       {/* Main 3D WebGL Canvas */}
       <div className="three-canvas-container">
@@ -1819,9 +2301,81 @@ export default function Room3DStudio({
           ref={containerRef}
           onPointerDown={handlePointerDown}
         />
-        {/* Floating Quick Door Configuration Popover */}
-        {isDoorPopoverOpen && (
-          <div className="door-3d-floating-popover" onClick={(e) => e.stopPropagation()}>
+
+        {/* 2. Walk Mode Immersion: Center Gamer Crosshair */}
+        {activeCamPreset === 'walk' && (
+          <div className="walk-hud-crosshair">
+            <div className="walk-crosshair-dot"></div>
+            <div className="walk-crosshair-line top"></div>
+            <div className="walk-crosshair-line btm"></div>
+            <div className="walk-crosshair-line lft"></div>
+            <div className="walk-crosshair-line rgt"></div>
+          </div>
+        )}
+
+        {/* 2.1 Click to Lock FPS Aim Floating Prompt */}
+        {activeCamPreset === 'walk' && !isPointerLocked && (
+          <div 
+            id="walk-hud-lock-prompt"
+            className="walk-hud-lock-prompt"
+            onClick={triggerPointerLock}
+            title="คลิกเพื่อล็อคเมาส์หันมองรอบทิศ 360° แบบเกม FPS (กด ESC เพื่อออก)"
+          >
+            <span className="prompt-icon">🎯</span>
+            <span className="prompt-text">คลิกบนหน้าจอเพื่อ <strong className="prompt-highlight">ล็อคเมาส์หันมองแบบเกม FPS</strong></span>
+            <span className="prompt-badge">ขยับเมาส์หันมอง 360° อิสระ</span>
+          </div>
+        )}
+
+        {/* 3. Walk Mode Immersion: Floating Bottom Controls Banner */}
+        {activeCamPreset === 'walk' && (
+          <div className="walk-hud-controls-pill">
+            <div className="hud-ctrl-item">
+              <span className="hud-key">W</span>
+              <span className="hud-key">A</span>
+              <span className="hud-key">S</span>
+              <span className="hud-key">D</span>
+              <span className="hud-txt">หรือ</span>
+              <span className="hud-key">↑</span>
+              <span className="hud-key">←</span>
+              <span className="hud-key">↓</span>
+              <span className="hud-key">→</span>
+              <span className="hud-txt">เดินชมในร้าน</span>
+            </div>
+            <div className="hud-ctrl-sep">•</div>
+            <div className="hud-ctrl-item">
+              <span className="hud-key">{isPointerLocked ? 'เมาส์ 360°' : 'คลิกเมาส์'}</span>
+              <span className="hud-txt">{isPointerLocked ? 'ขยับเมาส์หันมองรอบทิศ (FPS Lock)' : 'คลิกเพื่อล็อคเมาส์หันมอง 360°'}</span>
+            </div>
+            <div className="hud-ctrl-sep">•</div>
+            <div className="hud-ctrl-item">
+              <span className="hud-key">Shift</span>
+              <span className="hud-txt">วิ่งเร็ว</span>
+            </div>
+            <div className="hud-ctrl-sep">•</div>
+            <div className="hud-ctrl-item">
+              <span className="hud-key">ESC</span>
+              <span className="hud-txt">ออกจากโหมดเดิน / ปลดล็อค</span>
+            </div>
+          </div>
+        )}
+
+        {/* 4. Walk Mode Immersion: Bottom-Left Live Coords & Info */}
+        {activeCamPreset === 'walk' && (
+          <div className="walk-hud-stats-pill">
+            <span className={`hud-stat-badge ${isPointerLocked ? 'locked' : ''}`}>
+              {isPointerLocked ? '🔒 FPS MOUSE ACTIVE' : 'FPS WALK'}
+            </span>
+            <span className="hud-stat-level">สายตา 1.65ม.</span>
+            <span className="hud-stat-coord">
+              X: {fpsCoords.x >= 0 ? `+${fpsCoords.x.toFixed(1)}` : fpsCoords.x.toFixed(1)}ม. | Z: {fpsCoords.z >= 0 ? `+${fpsCoords.z.toFixed(1)}` : fpsCoords.z.toFixed(1)}ม.
+            </span>
+          </div>
+        )}
+
+        {/* Floating Quick Door Configuration Popover (Only in editing mode) */}
+        {activeCamPreset !== 'walk' && isDoorPopoverOpen && (
+          <div ref={doorPopoverRef} className="door-3d-floating-popover" onClick={(e) => e.stopPropagation()}>
             <div className="door-popover-header">
               <div className="popover-title">
                 <DoorOpen size={16} className="text-emerald" />
@@ -2017,84 +2571,86 @@ export default function Room3DStudio({
 
       </div>
 
-      {/* Floating Guidance & Selected Item Quick Actions */}
-      <div className="studio-3d-floating-footer">
-        {!selectedItemData && (
-          <div className="hint-pill">
-            <Compass size={14} className="text-blue" />
-            <span className="hint-text-desktop">คลิกซ้ายค้างเพื่อหมุนรอบห้อง • คลิกขวาเพื่อเลื่อน • กดปุ่มลูกศรเพื่อย้ายโต๊ะ</span>
-            <span className="hint-text-mobile">แตะเลื่อนเพื่อหมุน 360° • สองนิ้วเพื่อซูม</span>
-          </div>
-        )}
+      {/* Floating Guidance & Selected Item Quick Actions (Hidden in Walk Mode) */}
+      {activeCamPreset !== 'walk' && (
+        <div className="studio-3d-floating-footer">
+          {!selectedItemData && (
+            <div className="hint-pill">
+              <Compass size={14} className="text-blue" />
+              <span className="hint-text-desktop">คลิกซ้ายค้างเพื่อหมุนรอบห้อง • คลิกขวาเพื่อเลื่อน • กดปุ่มลูกศรเพื่อย้ายโต๊ะ</span>
+              <span className="hint-text-mobile">แตะเลื่อนเพื่อหมุน 360° • สองนิ้วเพื่อซูม</span>
+            </div>
+          )}
 
-        {selectedItemData && (
-          <div className="quick-3d-actions-pill">
-            <span className="selected-tag">{selectedItemData.catalog?.name.split(' ')[0]}</span>
+          {selectedItemData && (
+            <div className="quick-3d-actions-pill">
+              <span className="selected-tag">{selectedItemData.catalog?.name.split(' ')[0]}</span>
 
-            {/* D-Pad Nudge Buttons */}
-            <div className="nudge-3d-group" title="เลื่อนตำแหน่งวัตถุใน 3D (หรือกดปุ่มลูกศรบนคีย์บอร์ด)">
-              <span className="nudge-lbl">ย้าย:</span>
+              {/* D-Pad Nudge Buttons */}
+              <div className="nudge-3d-group" title="เลื่อนตำแหน่งวัตถุใน 3D (หรือกดปุ่มลูกศรบนคีย์บอร์ด)">
+                <span className="nudge-lbl">ย้าย:</span>
+                <button 
+                  type="button"
+                  className="nudge-btn-mini" 
+                  onClick={() => onNudgeItem(selectedItemData.id, -0.5, 0)}
+                  title="เลื่อนซ้าย (-0.5ม.) หรือกดปุ่ม ←"
+                >
+                  <ArrowLeft size={12} />
+                </button>
+                <button 
+                  type="button"
+                  className="nudge-btn-mini" 
+                  onClick={() => onNudgeItem(selectedItemData.id, 0.5, 0)}
+                  title="เลื่อนขวา (+0.5ม.) หรือกดปุ่ม →"
+                >
+                  <ArrowRight size={12} />
+                </button>
+                <button 
+                  type="button"
+                  className="nudge-btn-mini" 
+                  onClick={() => onNudgeItem(selectedItemData.id, 0, -0.5)}
+                  title="เลื่อนขึ้น/ลึก (-0.5ม.) หรือกดปุ่ม ↑"
+                >
+                  <ArrowUp size={12} />
+                </button>
+                <button 
+                  type="button"
+                  className="nudge-btn-mini" 
+                  onClick={() => onNudgeItem(selectedItemData.id, 0, 0.5)}
+                  title="เลื่อนลง/หน้า (+0.5ม.) หรือกดปุ่ม ↓"
+                >
+                  <ArrowDown size={12} />
+                </button>
+              </div>
+
               <button 
-                type="button"
-                className="nudge-btn-mini" 
-                onClick={() => onNudgeItem(selectedItemData.id, -0.5, 0)}
-                title="เลื่อนซ้าย (-0.5ม.) หรือกดปุ่ม ←"
+                className="btn-quick-action" 
+                onClick={() => onRotateItem(selectedItemData.id)}
+                title="หมุน 90 องศา (กด R)"
               >
-                <ArrowLeft size={12} />
+                <RotateCw size={14} />
+                <span>หมุน 90°</span>
               </button>
               <button 
-                type="button"
-                className="nudge-btn-mini" 
-                onClick={() => onNudgeItem(selectedItemData.id, 0.5, 0)}
-                title="เลื่อนขวา (+0.5ม.) หรือกดปุ่ม →"
+                className="btn-quick-action" 
+                onClick={() => onDuplicateItem(selectedItemData.id)}
+                title="คัดลอก"
               >
-                <ArrowRight size={12} />
+                <Copy size={14} />
+                <span>คัดลอก</span>
               </button>
               <button 
-                type="button"
-                className="nudge-btn-mini" 
-                onClick={() => onNudgeItem(selectedItemData.id, 0, -0.5)}
-                title="เลื่อนขึ้น/ลึก (-0.5ม.) หรือกดปุ่ม ↑"
+                className="btn-quick-action delete" 
+                onClick={() => onDeleteItem(selectedItemData.id)}
+                title="ลบออก (กด Delete)"
               >
-                <ArrowUp size={12} />
-              </button>
-              <button 
-                type="button"
-                className="nudge-btn-mini" 
-                onClick={() => onNudgeItem(selectedItemData.id, 0, 0.5)}
-                title="เลื่อนลง/หน้า (+0.5ม.) หรือกดปุ่ม ↓"
-              >
-                <ArrowDown size={12} />
+                <Trash2 size={14} />
+                <span>ลบ</span>
               </button>
             </div>
-
-            <button 
-              className="btn-quick-action" 
-              onClick={() => onRotateItem(selectedItemData.id)}
-              title="หมุน 90 องศา (กด R)"
-            >
-              <RotateCw size={14} />
-              <span>หมุน 90°</span>
-            </button>
-            <button 
-              className="btn-quick-action" 
-              onClick={() => onDuplicateItem(selectedItemData.id)}
-              title="คัดลอก"
-            >
-              <Copy size={14} />
-              <span>คัดลอก</span>
-            </button>
-            <button 
-              className="btn-quick-action delete" 
-              onClick={() => onDeleteItem(selectedItemData.id)}
-              title="ลบออก (กด Delete)"
-            >
-              <Trash2 size={14} />
-              <span>ลบ</span>
-            </button>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

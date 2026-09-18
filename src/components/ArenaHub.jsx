@@ -12,6 +12,7 @@ import {
 } from '../data/mockData';
 import { useSiteData } from '../context/SiteDataContext';
 import TournamentDetailModal from './TournamentDetailModal';
+import ArenaSeatBookingModal from './ArenaSeatBookingModal';
 
 // Helper functions for dynamic theme contrast & color overlays
 function isColorDark(hexColor) {
@@ -82,7 +83,11 @@ export default function ArenaHub({
   // Modals state
   const [selectedTournament, setSelectedTournament] = useState(null);
   const [selectedGalleryItem, setSelectedGalleryItem] = useState(null);
-  const [tourneyModalTab, setTourneyModalTab] = useState('overview'); // 'overview', 'schedule', 'roster', 'gallery', 'register'
+  const [tourneyModalTab, setTourneyModalTab] = useState('overview'); // 'overview', 'schedule', 'bracket', 'roster', 'gallery', 'register'
+
+  // Arena Live Seat Booking Modal State
+  const [isSeatBookingOpen, setIsSeatBookingOpen] = useState(false);
+  const [bookingInitialZone, setBookingInitialZone] = useState('stage');
 
   // Sync initialTournamentSlug prop with selectedTournament modal
   useEffect(() => {
@@ -253,12 +258,38 @@ export default function ArenaHub({
 
                 <div className="hero-cta-group">
                   <button 
+                    id="btn-hero-live-seat-booking"
+                    onClick={() => {
+                      setBookingInitialZone('stage');
+                      setIsSeatBookingOpen(true);
+                    }} 
+                    className="btn-primary cta-btn-large"
+                    style={{
+                      background: 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)',
+                      boxShadow: '0 8px 24px rgba(2, 132, 199, 0.35)'
+                    }}
+                  >
+                    <Gamepad2 size={18} />
+                    <span>จองที่นั่ง Arena ล่วงหน้า (Live Booking)</span>
+                  </button>
+
+                  <button 
                     onClick={() => {
                       window.history.pushState(null, '', '/activities');
                       const el = document.getElementById('activities');
                       if (el) el.scrollIntoView({ behavior: 'smooth' });
                     }} 
-                    className="btn-primary cta-btn-large"
+                    className="btn-secondary cta-btn-large"
+                    style={isDarkHero ? {
+                      background: 'rgba(255, 255, 255, 0.12)',
+                      borderColor: 'rgba(255, 255, 255, 0.25)',
+                      color: '#ffffff',
+                      backdropFilter: 'blur(8px)'
+                    } : {
+                      background: 'rgba(255, 255, 255, 0.9)',
+                      borderColor: 'rgba(203, 213, 225, 0.9)',
+                      color: '#1e293b'
+                    }}
                   >
                     <span>{heroData.primaryCta || heroData.primaryCtaText || 'สำรวจกิจกรรม & ทัวร์นาเมนต์'}</span>
                     <ArrowRight size={18} />
@@ -641,29 +672,39 @@ export default function ArenaHub({
                           </div>
 
                           {t.status === 'Open' ? (
-                            <button 
-                              id={`btn-reg-${t.id}`}
-                              className="t-btn-register"
-                              onClick={() => handleOpenTournament(t, 'register')}
-                            >
-                              <Zap size={16} className="text-amber-300" style={{ filter: 'drop-shadow(0 0 4px rgba(251, 191, 36, 0.8))' }} />
-                              <span>สมัครเข้าร่วมแข่งขัน</span>
-                              <ArrowRight size={17} className="btn-arrow-icon" />
-                            </button>
+                            <div className="t-action-open-grid">
+                              <button 
+                                id={`btn-reg-${t.id}`}
+                                className="t-btn-register"
+                                onClick={() => handleOpenTournament(t, 'register')}
+                              >
+                                <Zap size={16} className="text-amber-300" style={{ filter: 'drop-shadow(0 0 4px rgba(251, 191, 36, 0.8))' }} />
+                                <span>สมัครแข่ง</span>
+                                <ArrowRight size={17} className="btn-arrow-icon" />
+                              </button>
+                              <button
+                                className="t-btn-bracket-split"
+                                title="ดูสายการแข่งขัน & สกอร์สด"
+                                onClick={() => handleOpenTournament(t, 'bracket')}
+                              >
+                                <Trophy size={15} />
+                                <span>สายแข่ง</span>
+                              </button>
+                            </div>
                           ) : t.status === 'Full' ? (
                             <button 
                               className="t-btn-full"
-                              onClick={() => handleOpenTournament(t, 'roster')}
+                              onClick={() => handleOpenTournament(t, 'bracket')}
                             >
-                              <Users size={15} />
-                              <span>ที่นั่งเต็มแล้ว (ดูสายแข่ง & ภาพ)</span>
+                              <Trophy size={15} />
+                              <span>ดูสายการแข่งขัน & สกอร์สด (Brackets)</span>
                             </button>
                           ) : (
                             <button 
                               className="t-btn-details"
-                              onClick={() => handleOpenTournament(t, 'overview')}
+                              onClick={() => handleOpenTournament(t, 'bracket')}
                             >
-                              <span>ติดตามรายละเอียดการแข่งขัน</span>
+                              <span>ดูสายแข่ง & รายละเอียดการแข่งขัน</span>
                               <ArrowRight size={16} />
                             </button>
                           )}
@@ -757,10 +798,21 @@ export default function ArenaHub({
                     </div>
                   </div>
 
-                  <div className="zone-action-bar">
+                  <div className="zone-action-bar" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <button 
+                      onClick={() => {
+                        setBookingInitialZone(currentZoneData.id);
+                        setIsSeatBookingOpen(true);
+                      }} 
+                      className="btn-primary"
+                      style={{ background: 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)' }}
+                    >
+                      <Monitor size={16} />
+                      <span>จองที่นั่งโซนนี้ล่วงหน้า (Live Booking)</span>
+                    </button>
                     <button 
                       onClick={onNavigateFranchise} 
-                      className="btn-primary"
+                      className="btn-secondary"
                     >
                       <Compass size={16} />
                       <span>ลองใส่โซนนี้ในผังร้านของคุณ</span>
@@ -953,6 +1005,13 @@ export default function ArenaHub({
           }}
         />
       )}
+
+      {/* Arena Live Seat Booking Modal */}
+      <ArenaSeatBookingModal
+        isOpen={isSeatBookingOpen}
+        onClose={() => setIsSeatBookingOpen(false)}
+        initialZoneId={bookingInitialZone}
+      />
     </div>
   );
 }

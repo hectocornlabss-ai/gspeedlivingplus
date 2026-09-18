@@ -1,17 +1,67 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ArenaHub from './components/ArenaHub';
-import CompanyProfile from './components/CompanyProfile';
-import FranchisePlanner from './components/FranchisePlanner';
-import AdminAuthGate from './components/AdminAuthGate';
-import SingleActivityView from './components/SingleActivityView';
 import AIChatWidget from './components/AIChatWidget';
 import ErrorBoundary from './components/ErrorBoundary';
 import { SiteDataProvider, useSiteData } from './context/SiteDataContext';
 import { getRouteMetadata } from './data/routesConfig';
 import { applySEOMetadata } from './utils/seoManager';
 import './App.css';
+
+// Code Splitting: Lazy load heavy modules for lightning fast initial load
+const AdminAuthGate = lazy(() => import('./components/AdminAuthGate'));
+const CompanyProfile = lazy(() => import('./components/CompanyProfile'));
+const FranchisePlanner = lazy(() => import('./components/FranchisePlanner'));
+const SingleActivityView = lazy(() => import('./components/SingleActivityView'));
+
+function PageLoadingSpinner({ label = 'กำลังโหลดข้อมูลระบบ...' }) {
+  return (
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: '55vh',
+      padding: '40px 20px',
+      color: '#0f172a'
+    }}>
+      <div style={{
+        position: 'relative',
+        width: '64px',
+        height: '64px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: '20px'
+      }}>
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          borderRadius: '50%',
+          border: '3px solid rgba(37, 99, 235, 0.15)',
+          borderTopColor: '#2563eb',
+          animation: 'spin 0.8s linear infinite'
+        }} />
+        <div style={{
+          position: 'absolute',
+          inset: '8px',
+          borderRadius: '50%',
+          border: '3px solid rgba(249, 115, 22, 0.15)',
+          borderBottomColor: '#ea580c',
+          animation: 'spin 1.2s linear infinite reverse'
+        }} />
+        <span style={{ fontSize: '11px', fontWeight: 900, color: '#1d4ed8', letterSpacing: '0.05em' }}>GLP</span>
+      </div>
+      <div style={{ fontWeight: 800, fontSize: '16px', color: '#0f172a', letterSpacing: '0.02em', marginBottom: '6px' }}>
+        {label}
+      </div>
+      <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 500 }}>
+        G-Speed Esport Arena System
+      </div>
+    </div>
+  );
+}
 
 /**
  * แปลง Legacy Hash (#/admin, #tournaments) ให้เป็น Clean Semantic Path แบบไร้ # ทันที
@@ -156,11 +206,13 @@ function AppContent() {
   // 1. ถ้าเข้าเส้นทาง /admin แสดงหน้า AdminAuthGate แบบเต็มจอ
   if (routeState.isAdmin) {
     return (
-      <AdminAuthGate 
-        onExitToPublic={() => {
-          navigateTo('/');
-        }} 
-      />
+      <Suspense fallback={<PageLoadingSpinner label="กำลังโหลดระบบควบคุม Admin Security..." />}>
+        <AdminAuthGate 
+          onExitToPublic={() => {
+            navigateTo('/');
+          }} 
+        />
+      </Suspense>
     );
   }
 
@@ -206,67 +258,69 @@ function AppContent() {
 
       {/* Main Content Areas */}
       <main className="main-content">
-        {routeState.actSlug ? (
-          <SingleActivityView 
-            activity={matchedActivity}
-            onBack={(target = 'activities', filterParams = null) => {
-              if (target === 'home') {
-                navigateTo('/');
-              } else if (filterParams?.tag) {
-                navigateTo(`/activities?tag=${encodeURIComponent(filterParams.tag)}`);
-              } else if (filterParams?.category) {
-                navigateTo(`/activities?category=${encodeURIComponent(filterParams.category)}`);
-              } else {
-                navigateTo('/activities');
-              }
-            }}
-            onSelectTag={(tag) => {
-              navigateTo(`/activities?tag=${encodeURIComponent(tag)}`);
-            }}
-            onSelectCategory={(cat) => {
-              navigateTo(`/activities?category=${encodeURIComponent(cat)}`);
-            }}
-            onSelectActivity={(act) => {
-              const slug = act.slug || act.id;
-              navigateTo(`/activities/${slug}`);
-            }}
-          />
-        ) : (
-          <>
-            {routeState.tab === 'arena' && (
-              <ArenaHub 
-                initialTournamentSlug={routeState.eventSlug}
-                initialCategory={routeState.catParam || 'all'}
-                initialTag={routeState.tagParam || 'all'}
-                onSelectTournamentSlug={(slug) => {
-                  if (slug) {
-                    navigateTo(`/events/${slug}`);
-                  } else {
-                    navigateTo('/events');
-                  }
-                }}
-                onSelectActivitySlug={(slug) => {
-                  navigateTo(`/activities/${slug}`);
-                }}
-                onNavigateFranchise={() => {
-                  navigateTo('/franchise');
-                }} 
-              />
-            )}
+        <Suspense fallback={<PageLoadingSpinner />}>
+          {routeState.actSlug ? (
+            <SingleActivityView 
+              activity={matchedActivity}
+              onBack={(target = 'activities', filterParams = null) => {
+                if (target === 'home') {
+                  navigateTo('/');
+                } else if (filterParams?.tag) {
+                  navigateTo(`/activities?tag=${encodeURIComponent(filterParams.tag)}`);
+                } else if (filterParams?.category) {
+                  navigateTo(`/activities?category=${encodeURIComponent(filterParams.category)}`);
+                } else {
+                  navigateTo('/activities');
+                }
+              }}
+              onSelectTag={(tag) => {
+                navigateTo(`/activities?tag=${encodeURIComponent(tag)}`);
+              }}
+              onSelectCategory={(cat) => {
+                navigateTo(`/activities?category=${encodeURIComponent(cat)}`);
+              }}
+              onSelectActivity={(act) => {
+                const slug = act.slug || act.id;
+                navigateTo(`/activities/${slug}`);
+              }}
+            />
+          ) : (
+            <>
+              {routeState.tab === 'arena' && (
+                <ArenaHub 
+                  initialTournamentSlug={routeState.eventSlug}
+                  initialCategory={routeState.catParam || 'all'}
+                  initialTag={routeState.tagParam || 'all'}
+                  onSelectTournamentSlug={(slug) => {
+                    if (slug) {
+                      navigateTo(`/events/${slug}`);
+                    } else {
+                      navigateTo('/events');
+                    }
+                  }}
+                  onSelectActivitySlug={(slug) => {
+                    navigateTo(`/activities/${slug}`);
+                  }}
+                  onNavigateFranchise={() => {
+                    navigateTo('/franchise');
+                  }} 
+                />
+              )}
 
-            {routeState.tab === 'company' && (
-              <CompanyProfile 
-                onNavigateFranchise={() => {
-                  navigateTo('/franchise');
-                }} 
-              />
-            )}
+              {routeState.tab === 'company' && (
+                <CompanyProfile 
+                  onNavigateFranchise={() => {
+                    navigateTo('/franchise');
+                  }} 
+                />
+              )}
 
-            {routeState.tab === 'franchise' && (
-              <FranchisePlanner />
-            )}
-          </>
-        )}
+              {routeState.tab === 'franchise' && (
+                <FranchisePlanner />
+              )}
+            </>
+          )}
+        </Suspense>
       </main>
 
       {/* Global Footer (Clean Navigation) */}

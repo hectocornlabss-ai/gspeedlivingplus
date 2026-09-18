@@ -9,7 +9,7 @@ import {
   Palette, Image as ImageIcon, Flame, Coffee, Check, Copy, Clock, Share2,
   Box, Printer, Download, Camera, Upload, CheckSquare, Zap, ChevronRight, ChevronUp, ChevronDown, Server, Info, Ruler, Scale, Wrench, FileUp, Wand2,
   Users, Calendar, Award, Target, Gamepad2, X, List, Hash, HardDrive,
-  MessagesSquare, Receipt
+  MessagesSquare, Receipt, Crown
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 import { DEMO_TOURNAMENT_PHOTOS_50, EVENT_CATEGORIES, DEFAULT_ARTICLE_TAGS } from '../data/mockData';
@@ -631,8 +631,29 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
     clearAuditLogs,
     addTournamentApplication,
     updateApplicationStatus,
-    deleteTournamentApplication
+    deleteTournamentApplication,
+    updateTournamentBracketMatch,
+    createArenaBooking,
+    updateArenaBookingStatus,
+    cancelArenaBooking
   } = useSiteData();
+
+  // Tournament Tab sub-mode
+  const [tourneySubTab, setTourneySubTab] = useState('applications'); // 'applications' | 'brackets'
+  const [selectedTourneyBracketId, setSelectedTourneyBracketId] = useState('tour-1');
+
+  // Arena Booking Filter & Search
+  const [arenaBookingFilter, setArenaBookingFilter] = useState('all');
+  const [arenaBookingSearch, setArenaBookingSearch] = useState('');
+  const [showManualBookingModal, setShowManualBookingModal] = useState(false);
+  const [manualBookingForm, setManualBookingForm] = useState({
+    customerName: '',
+    phone: '',
+    zoneId: 'stage',
+    seatNumbers: 'S01',
+    durationHours: 2,
+    foodPackage: 'none'
+  });
 
   // Media Library Modal state
   const [mediaLibraryModal, setMediaLibraryModal] = useState({
@@ -1485,12 +1506,28 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
             >
               <Users size={18} />
               <div>
-                <strong>รายชื่อทีมสมัครแข่งขัน {((siteData.tournamentApplications || []).filter(a => a.status === 'Pending').length > 0) && (
+                <strong>ทัวร์นาเมนต์ & สายการแข่งขัน {((siteData.tournamentApplications || []).filter(a => a.status === 'Pending').length > 0) && (
                   <span style={{ marginLeft: '6px', background: '#ef4444', color: '#fff', fontSize: '0.72rem', padding: '1px 6px', borderRadius: '10px' }}>
                     {((siteData.tournamentApplications || []).filter(a => a.status === 'Pending').length)}
                   </span>
                 )}</strong>
-                <span>อนุมัติทีมแข่ง, เช็ก Roster, บันทึกสาย</span>
+                <span>อนุมัติทีมแข่ง, ควบคุมสายแข่ง, สกอร์สด</span>
+              </div>
+            </button>
+
+            <button 
+              id="cms-tab-arena-bookings"
+              className={`admin-nav-item ${activeTab === 'arena-bookings' ? 'active' : ''}`}
+              onClick={() => setActiveTab('arena-bookings')}
+            >
+              <Gamepad2 size={18} />
+              <div>
+                <strong>การจองที่นั่ง Arena Live Bookings {((siteData.arenaBookings || []).filter(b => b.status === 'Confirmed').length > 0) && (
+                  <span style={{ marginLeft: '6px', background: '#2563eb', color: '#fff', fontSize: '0.72rem', padding: '1px 6px', borderRadius: '10px' }}>
+                    {((siteData.arenaBookings || []).filter(b => b.status === 'Confirmed').length)}
+                  </span>
+                )}</strong>
+                <span>ผังที่นั่งสด, ออกตั๋ว E-Ticket, เช็กอินลูกค้า</span>
               </div>
             </button>
 
@@ -8818,8 +8855,48 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                 </div>
               </div>
 
-              {/* KPI Summary Cards */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', marginBottom: '20px' }}>
+              {/* Tournament Mode Sub-tabs */}
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', background: '#f1f5f9', padding: '4px', borderRadius: '10px', width: 'fit-content' }}>
+                <button
+                  type="button"
+                  onClick={() => setTourneySubTab('applications')}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    fontSize: '0.85rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    background: tourneySubTab === 'applications' ? '#ffffff' : 'transparent',
+                    color: tourneySubTab === 'applications' ? '#1d4ed8' : '#64748b',
+                    boxShadow: tourneySubTab === 'applications' ? '0 2px 6px rgba(0,0,0,0.08)' : 'none'
+                  }}
+                >
+                  📋 รายชื่อทีมยื่นสมัคร ({((siteData.tournamentApplications || []).length)})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTourneySubTab('brackets')}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    fontSize: '0.85rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    background: tourneySubTab === 'brackets' ? '#ffffff' : 'transparent',
+                    color: tourneySubTab === 'brackets' ? '#1d4ed8' : '#64748b',
+                    boxShadow: tourneySubTab === 'brackets' ? '0 2px 6px rgba(0,0,0,0.08)' : 'none'
+                  }}
+                >
+                  🏆 ควบคุมสายการแข่งขัน & สกอร์สด (Bracket Manager)
+                </button>
+              </div>
+
+              {tourneySubTab === 'applications' && (
+                <>
+                  {/* KPI Summary Cards */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', marginBottom: '20px' }}>
                 <div className="admin-subcard glass-panel" style={{ padding: '16px', borderLeft: '4px solid #3b82f6' }}>
                   <span className="text-xs text-muted" style={{ fontWeight: 600 }}>ใบสมัครทั้งหมด</span>
                   <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', marginTop: '4px' }}>
@@ -9194,6 +9271,628 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                         </button>
                       </div>
                     </div>
+                  </div>
+                </div>
+              )}
+                </>
+              )}
+
+              {/* Bracket Manager Sub-tab */}
+              {tourneySubTab === 'brackets' && (() => {
+                const tourneyList = siteData.tournaments || [];
+                const currentTourney = tourneyList.find(t => t.id === selectedTourneyBracketId) || tourneyList[0] || {};
+                const matches = currentTourney.bracketMatches || [];
+
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                    {/* Tournament Selector Dropdown */}
+                    <div className="admin-subcard glass-panel" style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <Trophy size={20} color="#2563eb" />
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                            เลือกทัวร์นาเมนต์ที่ต้องการจัดการผลการแข่งขัน:
+                          </label>
+                          <select
+                            className="form-input"
+                            value={selectedTourneyBracketId}
+                            onChange={e => setSelectedTourneyBracketId(e.target.value)}
+                            style={{ fontWeight: 700, fontSize: '0.95rem', padding: '6px 12px', minWidth: '320px', marginTop: '4px' }}
+                          >
+                            {tourneyList.map(t => (
+                              <option key={t.id} value={t.id}>
+                                {t.title} ({t.game})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.85rem', color: '#64748b' }}>
+                          แมตช์ทั้งหมด: <strong style={{ color: '#0f172a' }}>{matches.length}</strong>
+                        </span>
+                        <span style={{ fontSize: '0.85rem', color: '#64748b' }}>
+                          กำลังแข่งสด: <strong style={{ color: '#ef4444' }}>{matches.filter(m => m.status === 'LIVE').length}</strong>
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Matches List Editor */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '16px' }}>
+                      {matches.map(match => (
+                        <div
+                          key={match.id}
+                          className="admin-subcard glass-panel"
+                          style={{
+                            padding: '16px',
+                            borderLeft: match.status === 'LIVE' ? '4px solid #ef4444' : match.status === 'Finished' ? '4px solid #10b981' : '4px solid #3b82f6',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '12px'
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontWeight: 800, fontSize: '0.85rem', color: '#1d4ed8' }}>
+                              {match.roundLabel || match.title}
+                            </span>
+                            <select
+                              value={match.status || 'Upcoming'}
+                              onChange={e => {
+                                updateTournamentBracketMatch(selectedTourneyBracketId, match.id, { status: e.target.value });
+                                addAuditLog('UPDATE_MATCH_STATUS', `เปลี่ยนสถานะแมตช์ ${match.id} เป็น ${e.target.value}`);
+                                triggerSaveToast();
+                              }}
+                              style={{
+                                fontSize: '0.75rem',
+                                fontWeight: 700,
+                                padding: '3px 8px',
+                                borderRadius: '6px',
+                                border: '1px solid #cbd5e1',
+                                background: match.status === 'LIVE' ? '#fee2e2' : match.status === 'Finished' ? '#ecfdf5' : '#f1f5f9',
+                                color: match.status === 'LIVE' ? '#b91c1c' : match.status === 'Finished' ? '#047857' : '#475569'
+                              }}
+                            >
+                              <option value="Upcoming">⏳ รอแข่ง (Upcoming)</option>
+                              <option value="LIVE">🔴 แข่งสด (LIVE)</option>
+                              <option value="Finished">✓ จบแล้ว (Finished)</option>
+                            </select>
+                          </div>
+
+                          {/* Team A vs Team B score editors */}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            {/* Team A */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', background: match.teamA?.isWinner ? '#eff6ff' : '#f8fafc', borderRadius: '8px', border: match.teamA?.isWinner ? '1px solid #93c5fd' : '1px solid #e2e8f0' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+                                {match.teamA?.isWinner && <Crown size={15} color="#eab308" />}
+                                <span style={{ fontWeight: match.teamA?.isWinner ? 800 : 600, fontSize: '0.85rem', color: '#0f172a' }}>
+                                  {match.teamA?.name || 'TBD'}
+                                </span>
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  max="10"
+                                  value={match.teamA?.score ?? 0}
+                                  onChange={e => {
+                                    const score = parseInt(e.target.value) || 0;
+                                    updateTournamentBracketMatch(selectedTourneyBracketId, match.id, {
+                                      teamA: { ...match.teamA, score }
+                                    });
+                                  }}
+                                  style={{ width: '48px', padding: '4px', textAlign: 'center', fontWeight: 800, borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    updateTournamentBracketMatch(selectedTourneyBracketId, match.id, {
+                                      teamA: { ...match.teamA, isWinner: true },
+                                      teamB: { ...match.teamB, isWinner: false },
+                                      status: 'Finished'
+                                    });
+                                    addAuditLog('SET_MATCH_WINNER', `กำหนดให้ ${match.teamA?.name} ชนะแมตช์ ${match.id} และส่งเข้ารอบถัดไป`);
+                                    triggerSaveToast();
+                                  }}
+                                  style={{
+                                    fontSize: '0.72rem',
+                                    fontWeight: 700,
+                                    padding: '4px 8px',
+                                    borderRadius: '6px',
+                                    border: 'none',
+                                    background: match.teamA?.isWinner ? '#2563eb' : '#e2e8f0',
+                                    color: match.teamA?.isWinner ? '#ffffff' : '#475569',
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  {match.teamA?.isWinner ? '🏆 ชนะ' : 'เลือกชนะ'}
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Team B */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', background: match.teamB?.isWinner ? '#eff6ff' : '#f8fafc', borderRadius: '8px', border: match.teamB?.isWinner ? '1px solid #93c5fd' : '1px solid #e2e8f0' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+                                {match.teamB?.isWinner && <Crown size={15} color="#eab308" />}
+                                <span style={{ fontWeight: match.teamB?.isWinner ? 800 : 600, fontSize: '0.85rem', color: '#0f172a' }}>
+                                  {match.teamB?.name || 'TBD'}
+                                </span>
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  max="10"
+                                  value={match.teamB?.score ?? 0}
+                                  onChange={e => {
+                                    const score = parseInt(e.target.value) || 0;
+                                    updateTournamentBracketMatch(selectedTourneyBracketId, match.id, {
+                                      teamB: { ...match.teamB, score }
+                                    });
+                                  }}
+                                  style={{ width: '48px', padding: '4px', textAlign: 'center', fontWeight: 800, borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    updateTournamentBracketMatch(selectedTourneyBracketId, match.id, {
+                                      teamA: { ...match.teamA, isWinner: false },
+                                      teamB: { ...match.teamB, isWinner: true },
+                                      status: 'Finished'
+                                    });
+                                    addAuditLog('SET_MATCH_WINNER', `กำหนดให้ ${match.teamB?.name} ชนะแมตช์ ${match.id} และส่งเข้ารอบถัดไป`);
+                                    triggerSaveToast();
+                                  }}
+                                  style={{
+                                    fontSize: '0.72rem',
+                                    fontWeight: 700,
+                                    padding: '4px 8px',
+                                    borderRadius: '6px',
+                                    border: 'none',
+                                    background: match.teamB?.isWinner ? '#2563eb' : '#e2e8f0',
+                                    color: match.teamB?.isWinner ? '#ffffff' : '#475569',
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  {match.teamB?.isWinner ? '🏆 ชนะ' : 'เลือกชนะ'}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Footer Meta */}
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.72rem', color: '#64748b', paddingTop: '4px' }}>
+                            <span>{match.time} • {match.stage}</span>
+                            <span>{match.format}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
+
+          {/* =========================================================================
+              TAB: ARENA LIVE SEAT BOOKINGS & PASS MANAGER
+              ========================================================================= */}
+          {activeTab === 'arena-bookings' && (
+            <div className="cms-panel-block">
+              <div className="panel-header-row">
+                <div>
+                  <h3 className="panel-title">
+                    <Gamepad2 size={20} className="text-blue" />
+                    <span>ระบบจัดการการจองที่นั่งอารีน่า (Arena Live Seat Reservations)</span>
+                  </h3>
+                  <p className="panel-desc">
+                    ตรวจสอบรายชื่อลูกค้าจองที่นั่ง, อัปเดตสถานะเช็กอินหน้างาน, ยอดชำระเงิน, และออกบัตร E-Ticket ประจำจุดแข่งขัน
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <button 
+                    type="button" 
+                    className="btn-primary"
+                    onClick={() => setShowManualBookingModal(true)}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <Plus size={14} /> + เพิ่มการจองหน้างาน (Walk-in)
+                  </button>
+                  <button 
+                    type="button" 
+                    className="btn-secondary"
+                    onClick={() => {
+                      const bookings = siteData.arenaBookings || [];
+                      if (bookings.length === 0) {
+                        alert('ยังไม่มีข้อมูลการจองที่นั่งสำหรับส่งออก');
+                        return;
+                      }
+                      const headers = ['รหัสตั๋ว', 'ชื่อลูกค้า', 'เบอร์โทร', 'สมาชิก', 'โซน', 'ที่นั่ง', 'วันที่', 'เวลา', 'อาหารเสริม', 'ยอดเงิน (฿)', 'สถานะ', 'วันที่จอง'];
+                      const rows = bookings.map(b => [
+                        b.bookingCode || b.id,
+                        '"' + (b.customerName || '').replace(/"/g, '""') + '"',
+                        '"' + (b.phone || '').replace(/"/g, '""') + '"',
+                        b.memberId || 'ทั่วไป',
+                        '"' + (b.zoneName || '').replace(/"/g, '""') + '"',
+                        '"' + (Array.isArray(b.seatNumbers) ? b.seatNumbers.join(', ') : (b.seatNumbers || '')).replace(/"/g, '""') + '"',
+                        b.date || '',
+                        '"' + (b.timeSlot || '').replace(/"/g, '""') + '"',
+                        '"' + (b.foodPackage || '').replace(/"/g, '""') + '"',
+                        b.totalPrice || 0,
+                        b.status || 'Confirmed',
+                        b.createdAt || ''
+                      ]);
+                      const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
+                      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                      const url = URL.createObjectURL(blob);
+                      const link = document.createElement('a');
+                      link.href = url;
+                      link.setAttribute('download', `GLP_Arena_Bookings_${new Date().toISOString().slice(0, 10)}.csv`);
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <Download size={14} /> ส่งออก CSV
+                  </button>
+                </div>
+              </div>
+
+              {/* KPI Summary Cards */}
+              {(() => {
+                const bookings = siteData.arenaBookings || [];
+                const totalRevenue = bookings.reduce((sum, b) => sum + (Number(b.totalPrice) || 0), 0);
+                const confirmedCount = bookings.filter(b => b.status === 'Confirmed').length;
+                const checkedInCount = bookings.filter(b => b.status === 'Checked-In').length;
+
+                return (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', marginBottom: '20px' }}>
+                    <div className="admin-subcard glass-panel" style={{ padding: '16px', borderLeft: '4px solid #3b82f6' }}>
+                      <span className="text-xs text-muted" style={{ fontWeight: 600 }}>การจองทั้งหมด</span>
+                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', marginTop: '4px' }}>
+                        {bookings.length}
+                      </div>
+                      <span className="text-xs text-muted">ทุกโซนในอารีน่า</span>
+                    </div>
+                    <div className="admin-subcard glass-panel" style={{ padding: '16px', borderLeft: '4px solid #2563eb', background: 'rgba(219, 234, 254, 0.3)' }}>
+                      <span className="text-xs" style={{ fontWeight: 600, color: '#1d4ed8' }}>รอยืนยัน/เข้าใช้งาน (Confirmed)</span>
+                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#1d4ed8', marginTop: '4px' }}>
+                        {confirmedCount}
+                      </div>
+                      <span className="text-xs text-muted">รอเช็กอินหน้าเคาน์เตอร์</span>
+                    </div>
+                    <div className="admin-subcard glass-panel" style={{ padding: '16px', borderLeft: '4px solid #10b981', background: 'rgba(209, 250, 229, 0.3)' }}>
+                      <span className="text-xs" style={{ fontWeight: 600, color: '#047857' }}>เช็กอินกำลังเล่น (Checked-In)</span>
+                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#059669', marginTop: '4px' }}>
+                        {checkedInCount}
+                      </div>
+                      <span className="text-xs text-muted">กำลังใช้งานเครื่องในร้าน</span>
+                    </div>
+                    <div className="admin-subcard glass-panel" style={{ padding: '16px', borderLeft: '4px solid #8b5cf6' }}>
+                      <span className="text-xs" style={{ fontWeight: 600, color: '#6d28d9' }}>รายได้รวมการจอง (Revenue)</span>
+                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#7c3aed', marginTop: '4px' }}>
+                        ฿{totalRevenue.toLocaleString()}
+                      </div>
+                      <span className="text-xs text-muted">จาก {bookings.length} รายการ</span>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Filters & Search */}
+              <div className="admin-subcard glass-panel" style={{ padding: '14px 18px', marginBottom: '18px' }}>
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    {[
+                      { id: 'all', label: 'ทั้งหมด' },
+                      { id: 'Confirmed', label: 'รอยืนยัน (Confirmed)' },
+                      { id: 'Checked-In', label: 'กำลังเล่น (Checked-In)' },
+                      { id: 'Completed', label: 'เสร็จสิ้น (Completed)' },
+                      { id: 'Cancelled', label: 'ยกเลิก (Cancelled)' }
+                    ].map(f => (
+                      <button
+                        key={f.id}
+                        type="button"
+                        onClick={() => setArenaBookingFilter(f.id)}
+                        style={{
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          fontSize: '0.8rem',
+                          fontWeight: 600,
+                          border: '1px solid',
+                          borderColor: arenaBookingFilter === f.id ? '#2563eb' : '#cbd5e1',
+                          background: arenaBookingFilter === f.id ? '#2563eb' : '#ffffff',
+                          color: arenaBookingFilter === f.id ? '#ffffff' : '#475569',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div style={{ minWidth: '260px' }}>
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="ค้นหาชื่อลูกค้า, เบอร์โทร, รหัสตั๋ว หรือที่นั่ง..."
+                      value={arenaBookingSearch}
+                      onChange={e => setArenaBookingSearch(e.target.value)}
+                      style={{ padding: '6px 12px', fontSize: '0.84rem', width: '100%' }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Bookings Table */}
+              {(() => {
+                const bookings = (siteData.arenaBookings || []).filter(b => {
+                  const matchFilter = arenaBookingFilter === 'all' || b.status === arenaBookingFilter;
+                  const q = arenaBookingSearch.toLowerCase().trim();
+                  const matchSearch = !q || 
+                    (b.customerName || '').toLowerCase().includes(q) ||
+                    (b.phone || '').toLowerCase().includes(q) ||
+                    (b.bookingCode || '').toLowerCase().includes(q) ||
+                    (Array.isArray(b.seatNumbers) ? b.seatNumbers.join(' ') : (b.seatNumbers || '')).toLowerCase().includes(q);
+                  return matchFilter && matchSearch;
+                });
+
+                if (bookings.length === 0) {
+                  return (
+                    <div className="admin-subcard glass-panel" style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>
+                      <Gamepad2 size={40} style={{ opacity: 0.3, marginBottom: '8px' }} />
+                      <div style={{ fontWeight: 700, fontSize: '1rem', color: '#0f172a' }}>ไม่พบรายการจองที่ตรงกับเงื่อนไข</div>
+                      <p style={{ fontSize: '0.85rem', margin: '4px 0 0 0' }}>คลิกปุ่ม "+ เพิ่มการจองหน้างาน" เพื่อสร้างรายการจองใหม่</p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="admin-subcard glass-panel" style={{ padding: '0', overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
+                      <thead>
+                        <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569' }}>
+                          <th style={{ padding: '12px 16px' }}>รหัสตั๋ว</th>
+                          <th style={{ padding: '12px 16px' }}>ลูกค้า</th>
+                          <th style={{ padding: '12px 16px' }}>โซน & ที่นั่ง</th>
+                          <th style={{ padding: '12px 16px' }}>วัน & เวลา</th>
+                          <th style={{ padding: '12px 16px' }}>อาหาร/เครื่องดื่ม</th>
+                          <th style={{ padding: '12px 16px' }}>ยอดเงิน</th>
+                          <th style={{ padding: '12px 16px' }}>สถานะ</th>
+                          <th style={{ padding: '12px 16px', textAlign: 'center' }}>จัดการ</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {bookings.map((b, idx) => (
+                          <tr key={b.id || idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                            <td style={{ padding: '12px 16px', fontWeight: 800, color: '#2563eb' }}>
+                              {b.bookingCode || b.id}
+                            </td>
+                            <td style={{ padding: '12px 16px' }}>
+                              <div style={{ fontWeight: 700, color: '#0f172a' }}>{b.customerName}</div>
+                              <div style={{ fontSize: '0.74rem', color: '#64748b' }}>{b.phone} {b.memberId ? `• สมาชิก (${b.memberId})` : ''}</div>
+                            </td>
+                            <td style={{ padding: '12px 16px' }}>
+                              <div style={{ fontWeight: 600, color: '#334155' }}>{b.zoneName}</div>
+                              <div style={{ display: 'flex', gap: '4px', marginTop: '2px' }}>
+                                {(Array.isArray(b.seatNumbers) ? b.seatNumbers : [b.seatNumbers]).map(sn => (
+                                  <span key={sn} style={{ background: '#dbeafe', color: '#1d4ed8', padding: '1px 6px', borderRadius: '4px', fontSize: '0.74rem', fontWeight: 700 }}>
+                                    {sn}
+                                  </span>
+                                ))}
+                              </div>
+                            </td>
+                            <td style={{ padding: '12px 16px', fontSize: '0.8rem' }}>
+                              <div>{b.date}</div>
+                              <div style={{ color: '#64748b' }}>{b.timeSlot}</div>
+                            </td>
+                            <td style={{ padding: '12px 16px', fontSize: '0.78rem', color: '#475569', maxWidth: '180px' }}>
+                              {b.foodPackage || 'ไม่ได้รับ'}
+                            </td>
+                            <td style={{ padding: '12px 16px', fontWeight: 800, color: '#0f172a' }}>
+                              ฿{Number(b.totalPrice || 0).toLocaleString()}
+                            </td>
+                            <td style={{ padding: '12px 16px' }}>
+                              <span style={{
+                                padding: '3px 8px',
+                                borderRadius: '12px',
+                                fontSize: '0.74rem',
+                                fontWeight: 700,
+                                background: b.status === 'Confirmed' ? '#dbeafe' : b.status === 'Checked-In' ? '#dcfce7' : b.status === 'Completed' ? '#f1f5f9' : '#fee2e2',
+                                color: b.status === 'Confirmed' ? '#1d4ed8' : b.status === 'Checked-In' ? '#15803d' : b.status === 'Completed' ? '#475569' : '#b91c1c'
+                              }}>
+                                {b.status}
+                              </span>
+                            </td>
+                            <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                              <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
+                                {b.status === 'Confirmed' && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      updateArenaBookingStatus(b.id, 'Checked-In');
+                                      addAuditLog('CHECKIN_SEAT', `เช็กอินลูกค้า ${b.customerName} ที่นั่ง ${(b.seatNumbers || []).join(', ')}`);
+                                      triggerSaveToast();
+                                    }}
+                                    style={{ padding: '4px 8px', borderRadius: '6px', border: 'none', background: '#10b981', color: '#fff', fontSize: '0.74rem', fontWeight: 700, cursor: 'pointer' }}
+                                  >
+                                    เช็กอิน
+                                  </button>
+                                )}
+                                {b.status === 'Checked-In' && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      updateArenaBookingStatus(b.id, 'Completed');
+                                      addAuditLog('COMPLETE_SEAT_BOOKING', `เล่นเสร็จสิ้นการจอง ${b.bookingCode}`);
+                                      triggerSaveToast();
+                                    }}
+                                    style={{ padding: '4px 8px', borderRadius: '6px', border: 'none', background: '#2563eb', color: '#fff', fontSize: '0.74rem', fontWeight: 700, cursor: 'pointer' }}
+                                  >
+                                    เสร็จสิ้น
+                                  </button>
+                                )}
+                                {b.status !== 'Cancelled' && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (confirm(`ต้องการยกเลิกการจองรหัส ${b.bookingCode} หรือไม่?`)) {
+                                        cancelArenaBooking(b.id);
+                                        addAuditLog('CANCEL_SEAT_BOOKING', `ยกเลิกการจองรหัส ${b.bookingCode} ของ ${b.customerName}`);
+                                        triggerSaveToast();
+                                      }
+                                    }}
+                                    style={{ padding: '4px 8px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#dc2626', fontSize: '0.74rem', fontWeight: 600, cursor: 'pointer' }}
+                                  >
+                                    ยกเลิก
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              })()}
+
+              {/* Manual Booking Modal */}
+              {showManualBookingModal && (
+                <div
+                  style={{
+                    position: 'fixed',
+                    inset: 0,
+                    background: 'rgba(10, 15, 29, 0.8)',
+                    backdropFilter: 'blur(6px)',
+                    zIndex: 100200,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '20px'
+                  }}
+                  onClick={() => setShowManualBookingModal(false)}
+                >
+                  <div
+                    style={{
+                      background: '#ffffff',
+                      borderRadius: '14px',
+                      maxWidth: '480px',
+                      width: '100%',
+                      padding: '22px',
+                      boxShadow: '0 25px 50px rgba(0,0,0,0.25)'
+                    }}
+                    onClick={e => e.stopPropagation()}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                      <h4 style={{ margin: 0, fontSize: '1.1rem', color: '#0f172a' }}>+ เพิ่มการจองที่นั่งหน้างาน (Walk-in)</h4>
+                      <button type="button" onClick={() => setShowManualBookingModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                        <X size={18} />
+                      </button>
+                    </div>
+
+                    <form
+                      onSubmit={e => {
+                        e.preventDefault();
+                        if (!manualBookingForm.customerName || !manualBookingForm.phone) {
+                          alert('กรุณากรอกชื่อและเบอร์โทรศัพท์');
+                          return;
+                        }
+                        const zone = (siteData.arenaSeatingZones || ARENA_SEATING_ZONES).find(z => z.id === manualBookingForm.zoneId) || {};
+                        const rate = zone.pricePerHour || 40;
+                        const hrs = parseInt(manualBookingForm.durationHours) || 2;
+                        const seatArr = manualBookingForm.seatNumbers.split(',').map(s => s.trim()).filter(Boolean);
+
+                        createArenaBooking({
+                          customerName: manualBookingForm.customerName,
+                          phone: manualBookingForm.phone,
+                          zoneId: manualBookingForm.zoneId,
+                          zoneName: zone.name || 'Arena Zone',
+                          seatNumbers: seatArr.length > 0 ? seatArr : ['S01'],
+                          date: new Date().toISOString().split('T')[0],
+                          timeSlot: 'Walk-in ตอนนี้',
+                          durationHours: hrs,
+                          hardwareTier: zone.specs || 'RTX 4080 SUPER',
+                          foodPackage: 'None',
+                          totalPrice: rate * hrs * Math.max(1, seatArr.length),
+                          status: 'Checked-In',
+                          notes: 'สร้างโดยแอดมินหน้างาน'
+                        });
+
+                        addAuditLog('MANUAL_WALKIN_BOOKING', `สร้างการจอง Walk-in สำหรับ ${manualBookingForm.customerName} ที่นั่ง ${manualBookingForm.seatNumbers}`);
+                        setShowManualBookingModal(false);
+                        triggerSaveToast();
+                      }}
+                      style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+                    >
+                      <div className="form-group">
+                        <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>ชื่อลูกค้า *</label>
+                        <input
+                          type="text"
+                          required
+                          className="form-input"
+                          placeholder="เช่น คุณสมชาย"
+                          value={manualBookingForm.customerName}
+                          onChange={e => setManualBookingForm({ ...manualBookingForm, customerName: e.target.value })}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>เบอร์โทรติดต่อ *</label>
+                        <input
+                          type="tel"
+                          required
+                          className="form-input"
+                          placeholder="08X-XXX-XXXX"
+                          value={manualBookingForm.phone}
+                          onChange={e => setManualBookingForm({ ...manualBookingForm, phone: e.target.value })}
+                        />
+                      </div>
+                      <div className="form-row-2">
+                        <div className="form-group">
+                          <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>โซนที่นั่ง</label>
+                          <select
+                            className="form-input"
+                            value={manualBookingForm.zoneId}
+                            onChange={e => setManualBookingForm({ ...manualBookingForm, zoneId: e.target.value })}
+                          >
+                            {(siteData.arenaSeatingZones || ARENA_SEATING_ZONES).map(z => (
+                              <option key={z.id} value={z.id}>{z.name} (฿{z.pricePerHour}/ชม.)</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="form-group">
+                          <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>หมายเลขเครื่อง (เช่น S01, S02)</label>
+                          <input
+                            type="text"
+                            className="form-input"
+                            value={manualBookingForm.seatNumbers}
+                            onChange={e => setManualBookingForm({ ...manualBookingForm, seatNumbers: e.target.value })}
+                          />
+                        </div>
+                      </div>
+                      <div className="form-group">
+                        <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>จำนวนชั่วโมง</label>
+                        <select
+                          className="form-input"
+                          value={manualBookingForm.durationHours}
+                          onChange={e => setManualBookingForm({ ...manualBookingForm, durationHours: e.target.value })}
+                        >
+                          <option value="1">1 ชั่วโมง</option>
+                          <option value="2">2 ชั่วโมง</option>
+                          <option value="4">4 ชั่วโมง</option>
+                          <option value="6">6 ชั่วโมง</option>
+                        </select>
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '10px' }}>
+                        <button type="button" className="btn-secondary" onClick={() => setShowManualBookingModal(false)}>
+                          ยกเลิก
+                        </button>
+                        <button type="submit" className="btn-primary">
+                          บันทึก & เช็กอินลูกค้า
+                        </button>
+                      </div>
+                    </form>
                   </div>
                 </div>
               )}

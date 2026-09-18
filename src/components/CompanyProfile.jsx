@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   Users, Award, Cpu, Zap, Armchair, Monitor, 
-  Wifi, ShieldCheck, CheckCircle2, TrendingUp, Mail, Phone, MapPin, Quote, Calculator
+  Wifi, ShieldCheck, CheckCircle2, TrendingUp, Mail, Phone, MapPin, Quote, Calculator, ArrowRight
 } from 'lucide-react';
 import { FOUNDER_INFO } from '../data/mockData';
 import { useSiteData } from '../context/SiteDataContext';
@@ -230,9 +230,20 @@ export default function CompanyProfile({ onNavigateFranchise }) {
             </div>
 
             <div className="standards-action">
-              <button onClick={onNavigateFranchise} className="btn-primary">
-                <Calculator size={16} />
-                <span>ร่วมเป็นพาร์ตเนอร์แฟรนไชส์กับเรา</span>
+              <button 
+                type="button"
+                onClick={onNavigateFranchise} 
+                className="btn-partner-cta"
+                title="คลิกเพื่อเปิดระบบคำนวณงบและวางแผนเปิดร้านแฟรนไชส์"
+              >
+                <div className="btn-partner-icon-box">
+                  <Calculator size={20} />
+                </div>
+                <div className="btn-partner-text-stack">
+                  <span className="btn-partner-tier-sub">คำนวณงบลงทุน & วางระบบร้าน</span>
+                  <span className="btn-partner-tier-main">ร่วมเป็นพาร์ตเนอร์แฟรนไชส์กับเรา</span>
+                </div>
+                <ArrowRight size={18} className="btn-partner-arrow" />
               </button>
             </div>
           </div>

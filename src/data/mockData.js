@@ -102,6 +102,543 @@ export const DEMO_TOURNAMENT_PHOTOS_50 = [
   { id: 'p-52', url: 'https://images.unsplash.com/photo-1568992687947-868a62a9f521?auto=format&fit=crop&w=800&q=80', caption: 'ภาพความทรงจำส่งท้ายงาน แฟนคลับและนักกีฬาร่วมบันทึกประวัติศาสตร์', category: 'crowd' }
 ];
 
+// Arena Interactive Seating Map Zones & Stations
+export const ARENA_SEATING_ZONES = [
+  {
+    id: 'stage',
+    name: 'Main Stage Pro Booths',
+    subtitle: 'เวทีแข่งขันหลัก 5v5 Soundproof Glass Booths',
+    pricePerHour: 50,
+    memberPricePerHour: 40,
+    color: '#2563eb',
+    badge: 'Pro Stage',
+    specs: 'Intel Core i9-14900K • RTX 4080 SUPER • 360Hz BenQ ZOWIE OLED • Soundproof Booth',
+    seats: [
+      { id: 'S01', name: 'Stage A-01', row: 'Stage Left (Team A)', x: 1, y: 1, status: 'available' },
+      { id: 'S02', name: 'Stage A-02', row: 'Stage Left (Team A)', x: 2, y: 1, status: 'available' },
+      { id: 'S03', name: 'Stage A-03', row: 'Stage Left (Team A)', x: 3, y: 1, status: 'occupied' },
+      { id: 'S04', name: 'Stage A-04', row: 'Stage Left (Team A)', x: 4, y: 1, status: 'occupied' },
+      { id: 'S05', name: 'Stage A-05', row: 'Stage Left (Team A)', x: 5, y: 1, status: 'available' },
+      { id: 'S06', name: 'Stage B-01', row: 'Stage Right (Team B)', x: 7, y: 1, status: 'available' },
+      { id: 'S07', name: 'Stage B-02', row: 'Stage Right (Team B)', x: 8, y: 1, status: 'available' },
+      { id: 'S08', name: 'Stage B-03', row: 'Stage Right (Team B)', x: 9, y: 1, status: 'available' },
+      { id: 'S09', name: 'Stage B-04', row: 'Stage Right (Team B)', x: 10, y: 1, status: 'available' },
+      { id: 'S10', name: 'Stage B-05', row: 'Stage Right (Team B)', x: 11, y: 1, status: 'available' }
+    ]
+  },
+  {
+    id: 'vip',
+    name: 'VIP & Streamer Pods',
+    subtitle: 'ห้องกระจกส่วนตัว 4K Broadcast Streamer Room',
+    pricePerHour: 65,
+    memberPricePerHour: 50,
+    color: '#8b5cf6',
+    badge: 'Ultra VIP',
+    specs: 'Intel Core i9 • RTX 4080 SUPER • 360Hz + 4K Cam + Broadcast Mic + Secretlab TITAN',
+    seats: [
+      { id: 'V01', name: 'VIP Suite 1', row: 'VIP Pod A', x: 1, y: 2, status: 'occupied' },
+      { id: 'V02', name: 'VIP Suite 2', row: 'VIP Pod A', x: 2, y: 2, status: 'available' },
+      { id: 'V03', name: 'VIP Suite 3', row: 'VIP Pod A', x: 3, y: 2, status: 'available' },
+      { id: 'V04', name: 'VIP Suite 4', row: 'VIP Pod B', x: 5, y: 2, status: 'available' },
+      { id: 'V05', name: 'VIP Suite 5', row: 'VIP Pod B', x: 6, y: 2, status: 'available' },
+      { id: 'V06', name: 'VIP Suite 6', row: 'VIP Pod B', x: 7, y: 2, status: 'available' }
+    ]
+  },
+  {
+    id: 'standard',
+    name: 'Esports Battleground Zone',
+    subtitle: 'โซนหลักความจุกว่า 80 ที่นั่ง สเปกแข่ง 240Hz Fast-IPS',
+    pricePerHour: 35,
+    memberPricePerHour: 25,
+    color: '#0ea5e9',
+    badge: 'Most Popular',
+    specs: 'Intel Core i7-14700K • RTX 4070 SUPER • 240Hz Fast-IPS • 10Gbps Multi-WAN',
+    seats: [
+      { id: 'B01', name: 'B-01', row: 'Row 1', x: 1, y: 3, status: 'available' },
+      { id: 'B02', name: 'B-02', row: 'Row 1', x: 2, y: 3, status: 'available' },
+      { id: 'B03', name: 'B-03', row: 'Row 1', x: 3, y: 3, status: 'available' },
+      { id: 'B04', name: 'B-04', row: 'Row 1', x: 4, y: 3, status: 'occupied' },
+      { id: 'B05', name: 'B-05', row: 'Row 1', x: 5, y: 3, status: 'occupied' },
+      { id: 'B06', name: 'B-06', row: 'Row 1', x: 6, y: 3, status: 'available' },
+      { id: 'B07', name: 'B-07', row: 'Row 2', x: 1, y: 4, status: 'occupied' },
+      { id: 'B08', name: 'B-08', row: 'Row 2', x: 2, y: 4, status: 'occupied' },
+      { id: 'B09', name: 'B-09', row: 'Row 2', x: 3, y: 4, status: 'occupied' },
+      { id: 'B10', name: 'B-10', row: 'Row 2', x: 4, y: 4, status: 'occupied' },
+      { id: 'B11', name: 'B-11', row: 'Row 2', x: 5, y: 4, status: 'occupied' },
+      { id: 'B12', name: 'B-12', row: 'Row 2', x: 6, y: 4, status: 'available' },
+      { id: 'B13', name: 'B-13', row: 'Row 3', x: 1, y: 5, status: 'available' },
+      { id: 'B14', name: 'B-14', row: 'Row 3', x: 2, y: 5, status: 'available' },
+      { id: 'B15', name: 'B-15', row: 'Row 3', x: 3, y: 5, status: 'available' },
+      { id: 'B16', name: 'B-16', row: 'Row 3', x: 4, y: 5, status: 'available' },
+      { id: 'B17', name: 'B-17', row: 'Row 3', x: 5, y: 5, status: 'available' },
+      { id: 'B18', name: 'B-18', row: 'Row 3', x: 6, y: 5, status: 'available' }
+    ]
+  },
+  {
+    id: 'console',
+    name: 'Console & Sim Racing Lounge',
+    subtitle: 'โซน PS5 Pro จอยักษ์ 4K และซิมมูเลเตอร์พวงมาลัยแข่งรถ F1',
+    pricePerHour: 45,
+    memberPricePerHour: 35,
+    color: '#f97316',
+    badge: 'Specialty',
+    specs: 'PlayStation 5 Pro • 65" 4K OLED 120Hz VRR • Fanatec Direct Drive Racing Cockpit',
+    seats: [
+      { id: 'C01', name: 'PS5 Pod 1', row: 'Console Row', x: 1, y: 6, status: 'available' },
+      { id: 'C02', name: 'PS5 Pod 2', row: 'Console Row', x: 2, y: 6, status: 'available' },
+      { id: 'C03', name: 'PS5 Pod 3', row: 'Console Row', x: 3, y: 6, status: 'available' },
+      { id: 'C04', name: 'Sim Racing 1', row: 'Racing Pod', x: 5, y: 6, status: 'available' },
+      { id: 'C05', name: 'Sim Racing 2', row: 'Racing Pod', x: 6, y: 6, status: 'occupied' }
+    ]
+  }
+];
+
+// Initial Tournament Bracket Match Datasets
+export const VALORANT_BRACKET_MATCHES = [
+  // --- Round 1: Quarter-Finals (Round of 8) ---
+  {
+    id: 'm-qf1',
+    round: 'Quarter-Finals',
+    roundLabel: 'รอบ 8 ทีมสุดท้าย (QF 1)',
+    roundIndex: 1,
+    matchOrder: 1,
+    nextMatchId: 'm-sf1',
+    nextMatchSlot: 'teamA',
+    time: '28 ก.ย. 2026 • 11:00 น.',
+    status: 'Finished',
+    stage: 'Main Stage LAN (Booth A vs B)',
+    streamUrl: 'https://twitch.tv/gspeed_esport',
+    format: 'Best of 3 (BO3)',
+    teamA: {
+      id: 'team-1',
+      name: 'Talon Academy',
+      tag: 'TLN',
+      logo: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80',
+      seed: 1,
+      score: 2,
+      isWinner: true
+    },
+    teamB: {
+      id: 'team-8',
+      name: 'Bangkok Ronin',
+      tag: 'RON',
+      logo: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=150&q=80',
+      seed: 8,
+      score: 0,
+      isWinner: false
+    },
+    maps: [
+      { mapName: 'Bind', scoreA: 13, scoreB: 8, winner: 'TLN' },
+      { mapName: 'Ascent', scoreA: 13, scoreB: 6, winner: 'TLN' }
+    ],
+    mvp: {
+      name: 'SScary',
+      teamTag: 'TLN',
+      stats: '41 Kills / 16 Deaths • 1.48 Rating',
+      role: 'Controller / IGL'
+    }
+  },
+  {
+    id: 'm-qf2',
+    round: 'Quarter-Finals',
+    roundLabel: 'รอบ 8 ทีมสุดท้าย (QF 2)',
+    roundIndex: 1,
+    matchOrder: 2,
+    nextMatchId: 'm-sf1',
+    nextMatchSlot: 'teamB',
+    time: '28 ก.ย. 2026 • 13:30 น.',
+    status: 'Finished',
+    stage: 'Main Stage LAN (Booth A vs B)',
+    streamUrl: 'https://twitch.tv/gspeed_esport',
+    format: 'Best of 3 (BO3)',
+    teamA: {
+      id: 'team-4',
+      name: 'Made in Thailand (MiTH)',
+      tag: 'MiTH',
+      logo: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=150&q=80',
+      seed: 4,
+      score: 2,
+      isWinner: true
+    },
+    teamB: {
+      id: 'team-5',
+      name: 'G-Speed Slayer Squad',
+      tag: 'GLP',
+      logo: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=150&q=80',
+      seed: 5,
+      score: 1,
+      isWinner: false
+    },
+    maps: [
+      { mapName: 'Haven', scoreA: 13, scoreB: 11, winner: 'MiTH' },
+      { mapName: 'Sunset', scoreA: 9, scoreB: 13, winner: 'GLP' },
+      { mapName: 'Lotus', scoreA: 14, scoreB: 12, winner: 'MiTH' }
+    ],
+    mvp: {
+      name: 'Kadoom',
+      teamTag: 'MiTH',
+      stats: '68 Kills / 42 Deaths • 1.39 Rating',
+      role: 'Duelist (Jett)'
+    }
+  },
+  {
+    id: 'm-qf3',
+    round: 'Quarter-Finals',
+    roundLabel: 'รอบ 8 ทีมสุดท้าย (QF 3)',
+    roundIndex: 1,
+    matchOrder: 3,
+    nextMatchId: 'm-sf2',
+    nextMatchSlot: 'teamA',
+    time: '28 ก.ย. 2026 • 16:00 น.',
+    status: 'LIVE',
+    stage: 'Main Stage LAN (Booth A vs B)',
+    streamUrl: 'https://twitch.tv/gspeed_esport',
+    format: 'Best of 3 (BO3)',
+    teamA: {
+      id: 'team-2',
+      name: 'Full Sense Elite',
+      tag: 'FS',
+      logo: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=150&q=80',
+      seed: 2,
+      score: 1,
+      isWinner: false
+    },
+    teamB: {
+      id: 'team-7',
+      name: 'HyperX Predators',
+      tag: 'HX',
+      logo: 'https://images.unsplash.com/photo-1511882150382-421056c89033?auto=format&fit=crop&w=150&q=80',
+      seed: 7,
+      score: 1,
+      isWinner: false
+    },
+    maps: [
+      { mapName: 'Abyss', scoreA: 13, scoreB: 9, winner: 'FS' },
+      { mapName: 'Split', scoreA: 10, scoreB: 13, winner: 'HX' },
+      { mapName: 'Ascent (Decider)', scoreA: 11, scoreB: 10, winner: null, isCurrent: true }
+    ],
+    mvp: {
+      name: 'JohnOlsen',
+      teamTag: 'FS',
+      stats: '49 Kills • กำลังแข่งแมตช์ตัดสิน Map 3',
+      role: 'Initiator'
+    }
+  },
+  {
+    id: 'm-qf4',
+    round: 'Quarter-Finals',
+    roundLabel: 'รอบ 8 ทีมสุดท้าย (QF 4)',
+    roundIndex: 1,
+    matchOrder: 4,
+    nextMatchId: 'm-sf2',
+    nextMatchSlot: 'teamB',
+    time: '28 ก.ย. 2026 • 18:30 น.',
+    status: 'Upcoming',
+    stage: 'Main Stage LAN (Booth A vs B)',
+    streamUrl: 'https://twitch.tv/gspeed_esport',
+    format: 'Best of 3 (BO3)',
+    teamA: {
+      id: 'team-3',
+      name: 'XERXIA NextGen',
+      tag: 'XIA',
+      logo: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=150&q=80',
+      seed: 3,
+      score: 0,
+      isWinner: false
+    },
+    teamB: {
+      id: 'team-6',
+      name: 'Ramkhamhaeng Titans',
+      tag: 'RKH',
+      logo: 'https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=150&q=80',
+      seed: 6,
+      score: 0,
+      isWinner: false
+    },
+    maps: [
+      { mapName: 'Haven', scoreA: 0, scoreB: 0, winner: null },
+      { mapName: 'Bind', scoreA: 0, scoreB: 0, winner: null }
+    ],
+    mvp: null
+  },
+
+  // --- Round 2: Semi-Finals (Round of 4) ---
+  {
+    id: 'm-sf1',
+    round: 'Semi-Finals',
+    roundLabel: 'รอบ 4 ทีมสุดท้าย (Semi-Final 1)',
+    roundIndex: 2,
+    matchOrder: 1,
+    nextMatchId: 'm-gf',
+    nextMatchSlot: 'teamA',
+    time: '29 ก.ย. 2026 • 14:00 น.',
+    status: 'Upcoming',
+    stage: 'Main Stage LAN (Booth A vs B)',
+    streamUrl: 'https://twitch.tv/gspeed_esport',
+    format: 'Best of 3 (BO3)',
+    teamA: {
+      id: 'team-1',
+      name: 'Talon Academy',
+      tag: 'TLN',
+      logo: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80',
+      seed: 1,
+      score: 0,
+      isWinner: false
+    },
+    teamB: {
+      id: 'team-4',
+      name: 'Made in Thailand (MiTH)',
+      tag: 'MiTH',
+      logo: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=150&q=80',
+      seed: 4,
+      score: 0,
+      isWinner: false
+    },
+    maps: [],
+    mvp: null
+  },
+  {
+    id: 'm-sf2',
+    round: 'Semi-Finals',
+    roundLabel: 'รอบ 4 ทีมสุดท้าย (Semi-Final 2)',
+    roundIndex: 2,
+    matchOrder: 2,
+    nextMatchId: 'm-gf',
+    nextMatchSlot: 'teamB',
+    time: '29 ก.ย. 2026 • 17:00 น.',
+    status: 'Upcoming',
+    stage: 'Main Stage LAN (Booth A vs B)',
+    streamUrl: 'https://twitch.tv/gspeed_esport',
+    format: 'Best of 3 (BO3)',
+    teamA: {
+      id: null,
+      name: 'ผู้ชนะ QF 3 (FS หรือ HX)',
+      tag: 'TBD',
+      logo: '',
+      seed: null,
+      score: 0,
+      isWinner: false
+    },
+    teamB: {
+      id: null,
+      name: 'ผู้ชนะ QF 4 (XIA หรือ RKH)',
+      tag: 'TBD',
+      logo: '',
+      seed: null,
+      score: 0,
+      isWinner: false
+    },
+    maps: [],
+    mvp: null
+  },
+
+  // --- Round 3: Grand Final ---
+  {
+    id: 'm-gf',
+    round: 'Grand Final',
+    roundLabel: 'รอบชิงชนะเลิศ (Grand Final ชิงแชมป์ ฿50,000)',
+    roundIndex: 3,
+    matchOrder: 1,
+    nextMatchId: null,
+    time: '30 ก.ย. 2026 • 18:00 น.',
+    status: 'Upcoming',
+    stage: 'Main Stage LAN Live Broadcast',
+    streamUrl: 'https://twitch.tv/gspeed_esport',
+    format: 'Best of 5 (BO5)',
+    teamA: {
+      id: null,
+      name: 'ผู้ชนะ Semi-Final 1',
+      tag: 'TBD',
+      logo: '',
+      seed: null,
+      score: 0,
+      isWinner: false
+    },
+    teamB: {
+      id: null,
+      name: 'ผู้ชนะ Semi-Final 2',
+      tag: 'TBD',
+      logo: '',
+      seed: null,
+      score: 0,
+      isWinner: false
+    },
+    maps: [],
+    mvp: null
+  }
+];
+
+export const ROV_BRACKET_MATCHES = [
+  {
+    id: 'rov-m-sf1',
+    round: 'Semi-Finals',
+    roundLabel: 'รอบ 4 ทีมสุดท้าย (Semi-Final 1)',
+    roundIndex: 2,
+    matchOrder: 1,
+    nextMatchId: 'rov-m-gf',
+    nextMatchSlot: 'teamA',
+    time: '11 ต.ค. 2026 • 14:00 น.',
+    status: 'Upcoming',
+    stage: 'Mobile Studio Arena',
+    streamUrl: 'https://youtube.com/gspeed_esport',
+    format: 'Best of 5 (BO5)',
+    teamA: {
+      id: 'rov-1',
+      name: 'Chula Pegasus',
+      tag: 'CU',
+      logo: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80',
+      seed: 1,
+      score: 0,
+      isWinner: false
+    },
+    teamB: {
+      id: 'rov-4',
+      name: 'Kasetsart Bulls',
+      tag: 'KU',
+      logo: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=150&q=80',
+      seed: 4,
+      score: 0,
+      isWinner: false
+    },
+    maps: [],
+    mvp: null
+  },
+  {
+    id: 'rov-m-sf2',
+    round: 'Semi-Finals',
+    roundLabel: 'รอบ 4 ทีมสุดท้าย (Semi-Final 2)',
+    roundIndex: 2,
+    matchOrder: 2,
+    nextMatchId: 'rov-m-gf',
+    nextMatchSlot: 'teamB',
+    time: '11 ต.ค. 2026 • 16:30 น.',
+    status: 'Upcoming',
+    stage: 'Mobile Studio Arena',
+    streamUrl: 'https://youtube.com/gspeed_esport',
+    format: 'Best of 5 (BO5)',
+    teamA: {
+      id: 'rov-2',
+      name: 'Thammasat Titans',
+      tag: 'TU',
+      logo: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=150&q=80',
+      seed: 2,
+      score: 0,
+      isWinner: false
+    },
+    teamB: {
+      id: 'rov-3',
+      name: 'KMUTT CyberCraft',
+      tag: 'MOD',
+      logo: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=150&q=80',
+      seed: 3,
+      score: 0,
+      isWinner: false
+    },
+    maps: [],
+    mvp: null
+  },
+  {
+    id: 'rov-m-gf',
+    round: 'Grand Final',
+    roundLabel: 'รอบชิงชนะเลิศ (Grand Final ชิงแชมป์ ฿25,000)',
+    roundIndex: 3,
+    matchOrder: 1,
+    nextMatchId: null,
+    time: '12 ต.ค. 2026 • 18:00 น.',
+    status: 'Upcoming',
+    stage: 'Main Stage LAN Grand Final',
+    streamUrl: 'https://youtube.com/gspeed_esport',
+    format: 'Best of 7 (BO7)',
+    teamA: {
+      id: null,
+      name: 'ผู้ชนะ Semi-Final 1',
+      tag: 'TBD',
+      logo: '',
+      seed: null,
+      score: 0,
+      isWinner: false
+    },
+    teamB: {
+      id: null,
+      name: 'ผู้ชนะ Semi-Final 2',
+      tag: 'TBD',
+      logo: '',
+      seed: null,
+      score: 0,
+      isWinner: false
+    },
+    maps: [],
+    mvp: null
+  }
+];
+
+export function generateDefaultBracket(teams = [], tournamentTitle = 'Tournament') {
+  const safeTeams = Array.isArray(teams) ? teams : [];
+  if (safeTeams.length >= 4) {
+    const t1 = safeTeams[0] || { id: 't1', name: 'Team Alpha', tag: 'ALP' };
+    const t2 = safeTeams[1] || { id: 't2', name: 'Team Beta', tag: 'BET' };
+    const t3 = safeTeams[2] || { id: 't3', name: 'Team Gamma', tag: 'GAM' };
+    const t4 = safeTeams[3] || { id: 't4', name: 'Team Delta', tag: 'DEL' };
+
+    return [
+      {
+        id: `gen-sf1-${Date.now()}`,
+        round: 'Semi-Finals',
+        roundLabel: 'รอบ 4 ทีมสุดท้าย (Match 1)',
+        roundIndex: 2,
+        matchOrder: 1,
+        nextMatchId: 'gen-gf',
+        nextMatchSlot: 'teamA',
+        time: 'วันแข่งขัน • 13:00 น.',
+        status: 'Upcoming',
+        stage: 'Main Stage LAN',
+        streamUrl: 'https://twitch.tv/gspeed_esport',
+        format: 'Best of 3 (BO3)',
+        teamA: { ...t1, score: 0, isWinner: false },
+        teamB: { ...t4, score: 0, isWinner: false },
+        maps: [],
+        mvp: null
+      },
+      {
+        id: `gen-sf2-${Date.now()}`,
+        round: 'Semi-Finals',
+        roundLabel: 'รอบ 4 ทีมสุดท้าย (Match 2)',
+        roundIndex: 2,
+        matchOrder: 2,
+        nextMatchId: 'gen-gf',
+        nextMatchSlot: 'teamB',
+        time: 'วันแข่งขัน • 15:30 น.',
+        status: 'Upcoming',
+        stage: 'Main Stage LAN',
+        streamUrl: 'https://twitch.tv/gspeed_esport',
+        format: 'Best of 3 (BO3)',
+        teamA: { ...t2, score: 0, isWinner: false },
+        teamB: { ...t3, score: 0, isWinner: false },
+        maps: [],
+        mvp: null
+      },
+      {
+        id: `gen-gf-${Date.now()}`,
+        round: 'Grand Final',
+        roundLabel: 'รอบชิงชนะเลิศ (Grand Final)',
+        roundIndex: 3,
+        matchOrder: 1,
+        nextMatchId: null,
+        time: 'วันแข่งขัน • 18:00 น.',
+        status: 'Upcoming',
+        stage: 'Main Stage LAN Live',
+        streamUrl: 'https://twitch.tv/gspeed_esport',
+        format: 'Best of 5 (BO5)',
+        teamA: { id: null, name: 'ผู้ชนะ Semi-Final 1', tag: 'TBD', score: 0, isWinner: false },
+        teamB: { id: null, name: 'ผู้ชนะ Semi-Final 2', tag: 'TBD', score: 0, isWinner: false },
+        maps: [],
+        mvp: null
+      }
+    ];
+  }
+  return [];
+}
+
 export const TOURNAMENTS = [
   {
     id: 'tour-1',
@@ -234,8 +771,39 @@ export const TOURNAMENTS = [
         substitutes: ['SolarFlare'],
         wins: 2,
         losses: 2
+      },
+      {
+        id: 'team-7',
+        name: 'HyperX Predators',
+        tag: 'HX',
+        logo: 'https://images.unsplash.com/photo-1511882150382-421056c89033?auto=format&fit=crop&w=150&q=80',
+        seed: 7,
+        status: 'Confirmed',
+        captain: 'PredatorAim (กัปตันทีม)',
+        captainPhone: '083-456-7890',
+        captainDiscord: 'hx_aim#7788',
+        players: ['PredatorAim', 'SwiftShot', 'Vortex', 'Blitzkrieg', 'NightHawk'],
+        substitutes: ['ShadowX'],
+        wins: 2,
+        losses: 2
+      },
+      {
+        id: 'team-8',
+        name: 'Bangkok Ronin',
+        tag: 'RON',
+        logo: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=150&q=80',
+        seed: 8,
+        status: 'Confirmed',
+        captain: 'RoninZero (กัปตันทีม)',
+        captainPhone: '085-123-9988',
+        captainDiscord: 'ronin_zero#0088',
+        players: ['RoninZero', 'Katana', 'Bushido', 'SilentCut', 'MistWalker'],
+        substitutes: ['ShadowRonin'],
+        wins: 1,
+        losses: 3
       }
     ],
+    bracketMatches: VALORANT_BRACKET_MATCHES,
     galleryPhotos: DEMO_TOURNAMENT_PHOTOS_50,
     seo: {
       metaTitle: 'G-SPEED VALORANT CHAMPIONSHIP 2026 | ทัวร์นาเมนต์ชิงเงินรางวัล ฿100,000',
@@ -329,8 +897,24 @@ export const TOURNAMENTS = [
         substitutes: ['KU_Taara'],
         wins: 4,
         losses: 2
+      },
+      {
+        id: 'rov-4',
+        name: 'KMUTT CyberCraft',
+        tag: 'MOD',
+        logo: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=150&q=80',
+        seed: 4,
+        status: 'Confirmed',
+        captain: 'MOD_Cap (กัปตันทีม)',
+        captainPhone: '084-555-6677',
+        captainDiscord: 'mod_cap#3344',
+        players: ['MOD_Cap', 'MOD_Ignis', 'MOD_Laville', 'MOD_Baldum', 'MOD_Toro'],
+        substitutes: ['MOD_Enzo'],
+        wins: 3,
+        losses: 2
       }
     ],
+    bracketMatches: ROV_BRACKET_MATCHES,
     galleryPhotos: DEMO_TOURNAMENT_PHOTOS_50,
     seo: {
       metaTitle: 'ROV UNIVERSITY BATTLE LEAGUE 2026 | ชิงทุนการศึกษา ฿50,000',
@@ -736,6 +1320,127 @@ export const FOUNDER_INFO = {
     { name: 'AIS Fibre Esports', tier: 'High-speed 10Gbps Fiber Partner', icon: 'Wifi' }
   ]
 };
+
+// Interior Decoration Themes for Franchise Planner & 3D Interior Studio
+export const INTERIOR_THEMES = [
+  {
+    id: 'royal',
+    name: 'G-Speed Royal Modern',
+    badge: 'Official Standard',
+    badgeType: 'blue',
+    tagline: 'โทนขาว-น้ำเงิน มาตรฐานแบรนด์ GLP สว่าง สบายตา ทันสมัย',
+    description: 'การตกแต่งระดับแฟล็กชิปที่ผสมผสานความโมเดิร์นกับจิตวิญญาณอีสปอร์ต ไฟ LED สีน้ำเงินสลับขาว สว่างเพียงพอสำหรับทุกเพศทุกวัย ถ่ายรูปสวย โดดเด่นเป็นเอกลักษณ์',
+    coverImage: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
+    gallery: [
+      {
+        url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
+        caption: 'มุมมองโซนแข่งขันหลัก Main Arena พร้อมไฟแอลอีดีเอกลักษณ์ GLP'
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200&q=80',
+        caption: 'แถวเครื่องคอมพิวเตอร์ระดับโปร ท็อปโต๊ะคาร์บอนและเก้าอี้พรีเมียม'
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1200&q=80',
+        caption: 'บรรยากาศเกาะกลาง 6 ที่นั่ง แสงไฟคมชัดสบายตา ไม่สะท้อนหน้าจอ'
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200&q=80',
+        caption: 'เคาน์เตอร์แคชเชียร์และบาร์เครื่องดื่มสไตล์ Cyberpunk Modern'
+      }
+    ],
+    palette: [
+      { name: 'Royal Blue', hex: '#1d4ed8' },
+      { name: 'Ice Cyan', hex: '#38bdf8' },
+      { name: 'Pure White', hex: '#ffffff' },
+      { name: 'Dark Slate', hex: '#0f172a' }
+    ],
+    lighting: 'ไฟ Dual-tone 4000K Natural White ผสานเส้นสายไฟซ่อน Royal Blue LED strip',
+    acoustic: 'แผงซับเสียงบุผ้าลายโมโนแกรมแบรนด์ GLP ตัดเสียงก้องได้มากกว่า 65%',
+    flooring: 'พื้นไม้ปาร์เกต์ก้างปลาสีเข้ม หรือพื้นอีพ็อกซี่สีเทาเงามาตรฐานการแข่งขัน',
+    targetDemographic: 'กลุ่มนักเรียน นักศึกษา และบุคคลทั่วไป เหมาะกับพื้นที่ในห้างและอาคารพาณิชย์',
+    recommendedWallpaper: 'white-clean',
+    recommendedFloor: 'wood-parquet'
+  },
+  {
+    id: 'luxury',
+    name: 'Minimal Clean Luxury',
+    badge: 'Premium Lifestyle',
+    badgeType: 'amber',
+    tagline: 'โทนขาว-เทาอ่อน ไฟ Warm White สะอาดตา หรูหรา เรียบหรู',
+    description: 'ดีไซน์สไตล์มินิมอลคาเฟ่ชั้นนำ ผสมผสานวัสดุไม้ธรรมชาติ หินอ่อน และแสงไฟ Warm White อบอุ่น เหมาะกับผู้เล่นระดับพรีเมียม สตรีมเมอร์ และกลุ่มที่ต้องการบรรยากาศผ่อนคลายระดับสูง',
+    coverImage: 'https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&w=1200&q=80',
+    gallery: [
+      {
+        url: 'https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&w=1200&q=80',
+        caption: 'ห้องเกมมิ่งเลานจ์สไตล์ Luxury Minimal แสงไฟธรรมชาติและ Warm White'
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80',
+        caption: 'โซนพักผ่อนและสเตชันเล่นเกมแบบโอ่โถง โปร่งโล่ง สบายตา'
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1200&q=80',
+        caption: 'คาเฟ่บาร์และพื้นที่เสิร์ฟเบเกอรี่/เครื่องดื่มเกรด Specialty'
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=1200&q=80',
+        caption: 'มุมทำงานและเล่นเกมส่วนตัว เน้นความเงียบสงบและเป็นส่วนตัว'
+      }
+    ],
+    palette: [
+      { name: 'Warm White', hex: '#f8fafc' },
+      { name: 'Soft Stone', hex: '#cbd5e1' },
+      { name: 'Amber Wood', hex: '#d97706' },
+      { name: 'Charcoal', hex: '#1e293b' }
+    ],
+    lighting: 'ไฟ Warm White 3000K แบบ Indirect Cove Lighting แสงนุ่มนวลไม่แยงตา',
+    acoustic: 'ระแนงไม้จริงติดผนังพร้อมฉนวนกันเสียงไฟเบอร์กลาส เป็นธรรมชาติและซับเสียงได้ดีเยี่ยม',
+    flooring: 'กระเบื้องหินอ่อนสีขาวเงา Luxury Marble หรือไม้ลามิเนตทนรอยขีดข่วน',
+    targetDemographic: 'กลุ่มคนทำงาน วัยผู้ใหญ่ สตรีมเมอร์ และกลุ่มที่ชื่นชอบความเป็นส่วนตัวสูง',
+    recommendedWallpaper: 'white-clean',
+    recommendedFloor: 'white-marble'
+  },
+  {
+    id: 'stealth',
+    name: 'Stealth Pro Circuit',
+    badge: 'Hardcore Esports',
+    badgeType: 'purple',
+    tagline: 'ดำ-กราไฟต์ ดุดัน ไฟ Linear สีเดียว สไตล์นักกีฬา Pro Circuit',
+    description: 'ดีไซน์สนามแข่งขันระดับโลกสไตล์ Dark Stealth เน้นการควบคุมสมาธิสูงสุด ผนังสีดำด้าน แผงซับเสียงทรงรังผึ้ง และไฟแถบเส้นตรง (Linear Light) ปราศจากแสงสะท้อนรบกวนสายตา',
+    coverImage: 'https://images.unsplash.com/photo-1552824722-ddab1374e622?auto=format&fit=crop&w=1200&q=80',
+    gallery: [
+      {
+        url: 'https://images.unsplash.com/photo-1552824722-ddab1374e622?auto=format&fit=crop&w=1200&q=80',
+        caption: 'ห้องซ้อมและสนามแข่งขัน Dark Stealth บรรยากาศโฟกัสระดับทัวร์นาเมนต์'
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=1200&q=80',
+        caption: 'สเตชันการแข่งทีม 5v5 พร้อมระบบไฟ Linear Sync กับเกม'
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?auto=format&fit=crop&w=1200&q=80',
+        caption: 'ห้อง Private VIP Pod บุโฟมรังผึ้งกันเสียงมาตรฐานบอร์ดคาสต์'
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80',
+        caption: 'ตู้แร็คเซิร์ฟเวอร์และระบบ Diskless 10Gbps โชว์กระจกนิรภัย'
+      }
+    ],
+    palette: [
+      { name: 'Pitch Carbon', hex: '#090d16' },
+      { name: 'Matte Graphite', hex: '#1e293b' },
+      { name: 'Linear Ice', hex: '#38bdf8' },
+      { name: 'Titanium Grey', hex: '#64748b' }
+    ],
+    lighting: 'ไฟ Linear 5000K ชนิด Low-glare ส่องเฉพาะจุดเล่น ไม่เกิดแสงรบกวนบนจอมอนิเตอร์',
+    acoustic: 'โฟมรังผึ้งซับเสียง Hexagon Studio Foam ดูดซับเสียงกรี๊ดและเสียงเชียร์ได้ 80%',
+    flooring: 'พรมดักเสียงสะท้อนมาตรฐานอารีนา หรือพื้นอีพ็อกซี่สีเทาเข้มเนื้อด้าน',
+    targetDemographic: 'นักกีฬาอีสปอร์ต ทีมแข่ง สตรีมเมอร์สายฮาร์ดคอร์ และงานแข่งขัน LAN Final',
+    recommendedWallpaper: 'dark-hex',
+    recommendedFloor: 'grey-epoxy'
+  }
+];
 
 // Wallpapers & Wall Finishes for 3D Studio
 export const WALLPAPERS = [
