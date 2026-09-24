@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Gamepad2, Users, LayoutGrid, Calculator, Menu, X, ArrowRight, PhoneCall, Trophy, Sparkles, Globe } from 'lucide-react';
+import { Gamepad2, Users, LayoutGrid, Calculator, Menu, X, ArrowRight, PhoneCall, Trophy, Sparkles, Globe, Camera } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 
 export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onNavigate }) {
@@ -37,26 +37,34 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
     return LayoutGrid;
   };
 
-  // Active navigation items with clean semantic paths
+  // Active navigation items with clean semantic paths (1.หน้าแรก 2.ทัวร์นาเมนต์ 3.ภาพกิจกรรม 4.เกี่ยวกับเรา)
   const defaultNavItems = [
-    { id: 'nav-arena', label: 'หน้าหลัก', target: 'arena', cleanPath: '/', visible: true },
-    { id: 'nav-events', label: 'งานแข่ง & อีเวนต์', target: 'events', cleanPath: '/events', visible: true },
+    { id: 'nav-arena', label: 'หน้าแรก', target: 'arena', cleanPath: '/', visible: true },
+    { id: 'nav-tournaments', label: 'ทัวร์นาเมนต์', target: 'tournaments', cleanPath: '/tournaments', visible: true },
     { id: 'nav-activities', label: 'ภาพกิจกรรม', target: 'activities', cleanPath: '/activities', visible: true },
-    { id: 'nav-franchise', label: 'ระบบแฟรนไชส์ & แปลนร้าน', target: 'franchise', cleanPath: '/franchise', visible: true, highlight: true, highlightTag: '3D Studio' },
-    { id: 'nav-company', label: 'เกี่ยวกับองค์กร', target: 'company', cleanPath: '/company', visible: true }
+    { id: 'nav-company', label: 'เกี่ยวกับเรา', target: 'company', cleanPath: '/company', visible: true }
   ];
 
   const activeNavItems = (siteData?.navLinks && siteData.navLinks.length > 0)
-    ? siteData.navLinks.filter(item => item.visible !== false).map(item => {
-        let cleanPath = '/';
-        const t = (item.target || '').toLowerCase();
-        if (t === 'franchise' || t === '3d') cleanPath = '/franchise';
-        else if (t === 'company' || t === 'about') cleanPath = '/company';
-        else if (t === 'events' || t === 'tournaments' || t.includes('tournament')) cleanPath = '/events';
-        else if (t === 'activities' || t === 'gallery' || t.includes('activit')) cleanPath = '/activities';
-        else if (t.startsWith('/')) cleanPath = t;
-        return { ...item, cleanPath };
-      })
+    ? siteData.navLinks
+        .filter(item => item.visible !== false && (item.target || '').toLowerCase() !== 'franchise' && (item.target || '').toLowerCase() !== '3d')
+        .map(item => {
+          let cleanPath = '/';
+          const t = (item.target || '').toLowerCase();
+          if (t === 'company' || t === 'about') cleanPath = '/company';
+          else if (t === 'events' || t === 'tournaments' || t.includes('tournament')) cleanPath = '/tournaments';
+          else if (t === 'activities' || t === 'gallery' || t.includes('activit')) cleanPath = '/activities';
+          else if (t.startsWith('/')) cleanPath = t;
+
+          // Standardize display label if it matches default IDs
+          let label = item.label;
+          if (item.id === 'nav-arena' && (label === 'หน้าหลัก' || label === 'หน้าแรก & กิจกรรม')) label = 'หน้าแรก';
+          if (item.id === 'nav-tournaments' && (label === 'ทัวร์นาเมนต์ & แข่งขัน' || label === 'งานแข่ง & อีเวนต์')) label = 'ทัวร์นาเมนต์';
+          if (item.id === 'nav-activities' && (label === 'ภาพกิจกรรม & แกลเลอรี' || label === 'ภาพกิจกรรม')) label = 'ภาพกิจกรรม';
+          if (item.id === 'nav-company' && (label === 'เกี่ยวกับองค์กร' || label === 'ข้อมูลบริษัท & พาร์ตเนอร์')) label = 'เกี่ยวกับเรา';
+
+          return { ...item, label, cleanPath };
+        })
     : defaultNavItems;
 
   const handleNavClick = (target = 'arena', explicitPath = null) => {
@@ -74,7 +82,7 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
     if (!destPath) {
       const t = target.replace(/^#\/?/, '').toLowerCase();
       if (t === 'arena' || t === 'home' || t === '') destPath = '/';
-      else if (t === 'events' || t === 'tournaments') destPath = '/events';
+      else if (t === 'events' || t === 'tournaments') destPath = '/tournaments';
       else if (t === 'activities' || t === 'gallery') destPath = '/activities';
       else if (t === 'franchise' || t === 'planner') destPath = '/franchise';
       else if (t === 'company' || t === 'about') destPath = '/company';
@@ -88,6 +96,8 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
       if (setActiveTab) {
         if (destPath === '/franchise') setActiveTab('franchise');
         else if (destPath === '/company') setActiveTab('company');
+        else if (destPath === '/tournaments' || destPath === '/events') setActiveTab('tournaments');
+        else if (destPath === '/activities' || destPath === '/gallery') setActiveTab('activities');
         else setActiveTab('arena');
       }
       window.history.pushState(null, '', destPath);
@@ -95,10 +105,10 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
     }
   };
 
-  const headerCta = siteData?.headerCta || {
-    text: 'คำนวณราคาเปิดร้าน',
-    target: 'franchise',
-    visible: true
+  const headerCta = {
+    text: (siteData?.headerCta?.text && siteData.headerCta.text !== 'คำนวณราคาเปิดร้าน') ? siteData.headerCta.text : 'สนใจเปิดร้าน',
+    target: siteData?.headerCta?.target || 'franchise',
+    visible: siteData?.headerCta?.visible !== false
   };
 
   return (
@@ -127,7 +137,12 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
             {activeNavItems.map((item) => {
               const Icon = getNavIcon(item.target, item.id);
               const isActive = (item.cleanPath === '/' && (currentPath === '/' || !currentPath)) ||
-                (item.cleanPath && item.cleanPath !== '/' && currentPath.startsWith(item.cleanPath));
+                (item.cleanPath && item.cleanPath !== '/' && (
+                  currentPath === item.cleanPath ||
+                  currentPath.startsWith(item.cleanPath + '/') ||
+                  (item.cleanPath === '/tournaments' && (currentPath === '/events' || currentPath.startsWith('/events/'))) ||
+                  (item.cleanPath === '/activities' && (currentPath === '/gallery' || currentPath.startsWith('/gallery/') || currentPath.startsWith('/news/') || currentPath.startsWith('/article/')))
+                ));
               return (
                 <button
                   key={item.id}
@@ -239,7 +254,7 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
               onClick={() => handleNavClick(headerCta.target || 'franchise')}
             >
               <Calculator size={16} />
-              <span>{headerCta.text || 'เริ่มจัดผังร้าน & คำนวณราคา'}</span>
+              <span>{headerCta.text || 'สนใจเปิดร้าน'}</span>
             </button>
           )}
           <p className="mobile-footer-text">
@@ -254,45 +269,42 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
           id="btn-bottom-nav-arena"
           type="button"
           className={`bottom-nav-item ${activeTab === 'arena' ? 'active' : ''}`}
-          onClick={() => handleNavClick('arena')}
+          onClick={() => handleNavClick('arena', '/')}
         >
           <Gamepad2 size={20} className="bottom-nav-icon" />
-          <span className="bottom-nav-label">หน้าหลัก</span>
+          <span className="bottom-nav-label">หน้าแรก</span>
         </button>
 
         <button 
-          id="btn-bottom-nav-company"
+          id="btn-bottom-nav-tournaments"
           type="button"
-          className={`bottom-nav-item ${activeTab === 'company' ? 'active' : ''}`}
-          onClick={() => handleNavClick('company')}
+          className={`bottom-nav-item ${activeTab === 'tournaments' ? 'active' : ''}`}
+          onClick={() => handleNavClick('tournaments', '/tournaments')}
         >
-          <Users size={20} className="bottom-nav-icon" />
-          <span className="bottom-nav-label">เกี่ยวกับเรา</span>
+          <Trophy size={20} className="bottom-nav-icon" />
+          <span className="bottom-nav-label">ทัวร์นาเมนต์</span>
         </button>
 
         <button 
           id="btn-bottom-nav-franchise"
           type="button"
           className={`bottom-nav-item bottom-nav-featured ${activeTab === 'franchise' ? 'active' : ''}`}
-          onClick={() => handleNavClick('franchise')}
+          onClick={() => handleNavClick('franchise', '/franchise')}
         >
           <div className="bottom-nav-feature-pill">
             <LayoutGrid size={20} className="bottom-nav-icon" />
           </div>
-          <span className="bottom-nav-label">จัดผัง 3D</span>
+          <span className="bottom-nav-label">สนใจเปิดร้าน</span>
         </button>
 
         <button 
-          id="btn-bottom-nav-ai"
+          id="btn-bottom-nav-activities"
           type="button"
-          className="bottom-nav-item"
-          onClick={() => {
-            const aiBtn = document.getElementById('btn-open-ai-chat');
-            if (aiBtn) aiBtn.click();
-          }}
+          className={`bottom-nav-item ${activeTab === 'activities' ? 'active' : ''}`}
+          onClick={() => handleNavClick('activities', '/activities')}
         >
-          <Sparkles size={20} className="bottom-nav-icon text-cyan" />
-          <span className="bottom-nav-label">ผู้ช่วย AI</span>
+          <Camera size={20} className="bottom-nav-icon" />
+          <span className="bottom-nav-label">ภาพกิจกรรม</span>
         </button>
 
         <button 

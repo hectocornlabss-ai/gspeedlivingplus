@@ -14,6 +14,9 @@ const AdminAuthGate = lazy(() => import('./components/AdminAuthGate'));
 const CompanyProfile = lazy(() => import('./components/CompanyProfile'));
 const FranchisePlanner = lazy(() => import('./components/FranchisePlanner'));
 const SingleActivityView = lazy(() => import('./components/SingleActivityView'));
+const SingleTournamentView = lazy(() => import('./components/SingleTournamentView'));
+const TournamentsPage = lazy(() => import('./components/TournamentsPage'));
+const ActivitiesPage = lazy(() => import('./components/ActivitiesPage'));
 
 function PageLoadingSpinner({ label = 'กำลังโหลดข้อมูลระบบ...' }) {
   return (
@@ -74,7 +77,7 @@ function normalizeLegacyHash() {
   if (hash === '#/admin' || hash === '#admin') {
     cleanPath = '/admin';
   } else if (hash.includes('tournament') || hash.includes('event')) {
-    cleanPath = '/events';
+    cleanPath = '/tournaments';
   } else if (hash.includes('franchise') || hash.includes('planner')) {
     cleanPath = '/franchise';
   } else if (hash.includes('company') || hash.includes('about')) {
@@ -115,7 +118,7 @@ function AppContent() {
     const tagParam = searchParams.get('tag') ? decodeURIComponent(searchParams.get('tag')) : null;
     const catParam = searchParams.get('category') ? decodeURIComponent(searchParams.get('category')) : null;
 
-    // 5. Tab selection
+    // 5. Tab selection - Dedicated Pages for Tournaments, Activities, Franchise, Company & Arena
     let tab = 'arena';
     let sectionToScroll = null;
 
@@ -123,12 +126,10 @@ function AppContent() {
       tab = 'franchise';
     } else if (path === '/company' || path === '/about') {
       tab = 'company';
-    } else if (path === '/events' || path === '/tournaments') {
-      tab = 'arena';
-      sectionToScroll = 'tournaments';
+    } else if (path === '/events' || path === '/tournaments' || path.startsWith('/events/') || path.startsWith('/tournaments/')) {
+      tab = 'tournaments';
     } else if (path === '/activities' || path === '/gallery') {
-      tab = 'arena';
-      sectionToScroll = 'activities';
+      tab = 'activities';
     } else {
       tab = 'arena';
     }
@@ -167,7 +168,7 @@ function AppContent() {
     applySEOMetadata(meta);
   }, [routeState.pathname, routeState.eventSlug, routeState.actSlug, siteData]);
 
-  // จัดการ Scroll ไปยังส่วนที่ระบุเมื่อเข้าเส้นทางหมวดหมู่ (/events, /activities)
+  // เลื่อนกลับขึ้นบนสุดเมื่อเปลี่ยนหน้า
   useEffect(() => {
     if (routeState.sectionToScroll && !routeState.actSlug) {
       setTimeout(() => {
@@ -176,7 +177,7 @@ function AppContent() {
           el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       }, 100);
-    } else if (!routeState.sectionToScroll && !routeState.actSlug && !routeState.eventSlug) {
+    } else if (!routeState.sectionToScroll) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [routeState.sectionToScroll, routeState.tab, routeState.actSlug, routeState.eventSlug]);
@@ -187,6 +188,16 @@ function AppContent() {
     ? allArticles.find(item => 
         (item.slug && item.slug.toLowerCase() === routeState.actSlug.toLowerCase()) || 
         item.id === routeState.actSlug
+      )
+    : null;
+
+  // ดึงข้อมูลทัวร์นาเมนต์ปัจจุบันที่ตรงกับ Slug (WordPress-like Permalink)
+  const allTournaments = siteData?.tournaments || [];
+  const matchedTournament = routeState.eventSlug
+    ? allTournaments.find(t => 
+        (t.slug && t.slug.toLowerCase() === routeState.eventSlug.toLowerCase()) || 
+        t.id === routeState.eventSlug ||
+        (t.seo && t.seo.slug && t.seo.slug.toLowerCase() === routeState.eventSlug.toLowerCase())
       )
     : null;
 
@@ -232,7 +243,7 @@ function AppContent() {
                 if (target.startsWith('http://') || target.startsWith('https://')) {
                   window.open(target, '_blank', 'noopener,noreferrer');
                 } else if (target === 'events' || target === 'tournaments') {
-                  navigateTo('/events');
+                  navigateTo('/tournaments');
                 } else if (target === 'activities' || target === 'gallery') {
                   navigateTo('/activities');
                 } else if (target === 'company' || target === 'about') {
@@ -259,7 +270,18 @@ function AppContent() {
       {/* Main Content Areas */}
       <main className="main-content">
         <Suspense fallback={<PageLoadingSpinner />}>
-          {routeState.actSlug ? (
+          {routeState.eventSlug ? (
+            <SingleTournamentView 
+              tournament={matchedTournament}
+              onBack={() => navigateTo('/tournaments')}
+              onNavigateHome={() => navigateTo('/')}
+              onSelectTournament={(tour) => {
+                const slug = tour.slug || tour.seo?.slug || tour.id;
+                navigateTo(`/tournaments/${slug}`);
+              }}
+              onNavigateFranchise={() => navigateTo('/franchise')}
+            />
+          ) : routeState.actSlug ? (
             <SingleActivityView 
               activity={matchedActivity}
               onBack={(target = 'activities', filterParams = null) => {
@@ -293,17 +315,49 @@ function AppContent() {
                   initialTag={routeState.tagParam || 'all'}
                   onSelectTournamentSlug={(slug) => {
                     if (slug) {
-                      navigateTo(`/events/${slug}`);
+                      navigateTo(`/tournaments/${slug}`);
                     } else {
-                      navigateTo('/events');
+                      navigateTo('/tournaments');
                     }
                   }}
                   onSelectActivitySlug={(slug) => {
                     navigateTo(`/activities/${slug}`);
                   }}
+                  onNavigateTournaments={() => {
+                    navigateTo('/tournaments');
+                  }}
+                  onNavigateActivities={() => {
+                    navigateTo('/activities');
+                  }}
                   onNavigateFranchise={() => {
                     navigateTo('/franchise');
                   }} 
+                />
+              )}
+
+              {routeState.tab === 'tournaments' && (
+                <TournamentsPage 
+                  initialTournamentSlug={routeState.eventSlug}
+                  onSelectTournamentSlug={(slug) => {
+                    if (slug) {
+                      navigateTo(`/tournaments/${slug}`);
+                    } else {
+                      navigateTo('/tournaments');
+                    }
+                  }}
+                  onNavigateHome={() => navigateTo('/')}
+                  onNavigateFranchise={() => navigateTo('/franchise')}
+                />
+              )}
+
+              {routeState.tab === 'activities' && (
+                <ActivitiesPage 
+                  initialCategory={routeState.catParam || 'all'}
+                  initialTag={routeState.tagParam || 'all'}
+                  onSelectActivitySlug={(slug) => {
+                    navigateTo(`/activities/${slug}`);
+                  }}
+                  onNavigateHome={() => navigateTo('/')}
                 />
               )}
 

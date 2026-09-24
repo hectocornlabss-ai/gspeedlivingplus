@@ -167,11 +167,12 @@ export const INITIAL_MEDIA_LIBRARY = [
   }
 ];
 
-// Initial Navigation Links
+// Initial Navigation Links: 1.หน้าแรก 2.ทัวร์นาเมนต์ 3.ภาพกิจกรรม 4.เกี่ยวกับเรา
 export const INITIAL_NAV_LINKS = [
-  { id: 'nav-arena', label: 'หน้าแรก & กิจกรรม', target: 'arena', visible: true },
-  { id: 'nav-company', label: 'ข้อมูลบริษัท & พาร์ตเนอร์', target: 'company', visible: true },
-  { id: 'nav-franchise', label: 'จำลองผังร้าน 3D', target: 'franchise', visible: true }
+  { id: 'nav-arena', label: 'หน้าแรก', target: 'arena', visible: true },
+  { id: 'nav-tournaments', label: 'ทัวร์นาเมนต์', target: 'tournaments', visible: true },
+  { id: 'nav-activities', label: 'ภาพกิจกรรม', target: 'activities', visible: true },
+  { id: 'nav-company', label: 'เกี่ยวกับเรา', target: 'company', visible: true }
 ];
 
 // Initial Franchise & Tournament Leads Pipeline Data
@@ -520,7 +521,7 @@ export const DEFAULT_SITE_DATA = {
   tickerLinkText: 'เปิดระบบ 3D',
   tickerLinkVisible: true,
   headerCta: {
-    text: 'คำนวณราคาเปิดร้าน',
+    text: 'สนใจเปิดร้าน',
     target: 'franchise',
     visible: true
   },
@@ -909,23 +910,27 @@ export function SiteDataProvider({ children }) {
         if (!Array.isArray(merged.gallery)) merged.gallery = INITIAL_GALLERY;
         if (!Array.isArray(merged.news)) merged.news = INITIAL_NEWS;
         if (!Array.isArray(merged.catalogItems)) merged.catalogItems = INITIAL_CATALOG;
-        if (!Array.isArray(merged.hardwareTiers)) merged.hardwareTiers = INITIAL_TIERS;
+        if (!merged.hardwareTiers || typeof merged.hardwareTiers !== 'object' || Array.isArray(merged.hardwareTiers)) {
+          merged.hardwareTiers = INITIAL_TIERS;
+        }
         if (!Array.isArray(merged.tournaments)) {
           merged.tournaments = INITIAL_TOURNAMENTS;
         } else {
           merged.tournaments = merged.tournaments.map(t => {
             const def = INITIAL_TOURNAMENTS.find(it => it.id === t.id);
+            const slug = t.slug || t.seo?.slug || (def && def.slug) || (t.title ? t.title.toLowerCase().replace(/[^a-z0-9\u0E00-\u0E7F]+/g, '-').replace(/(^-|-$)/g, '') : t.id);
             if (def) {
               return {
                 ...def,
                 ...t,
+                slug,
                 teams: (t.teams && t.teams.length > 0) ? t.teams : def.teams,
                 bracketMatches: (t.bracketMatches && t.bracketMatches.length > 0) ? t.bracketMatches : (def.bracketMatches || []),
                 galleryPhotos: (t.galleryPhotos && t.galleryPhotos.length > 0) ? t.galleryPhotos : def.galleryPhotos,
                 rules: (t.rules && t.rules.length > 0) ? t.rules : def.rules,
                 prizeDistribution: (t.prizeDistribution && t.prizeDistribution.length > 0) ? t.prizeDistribution : def.prizeDistribution,
                 scheduleTimetable: (t.scheduleTimetable && t.scheduleTimetable.length > 0) ? t.scheduleTimetable : def.scheduleTimetable,
-                seo: (t.seo && t.seo.metaTitle) ? t.seo : def.seo
+                seo: (t.seo && t.seo.metaTitle) ? { ...t.seo, slug: t.seo.slug || slug } : { ...def.seo, slug }
               };
             }
             return {
@@ -935,13 +940,24 @@ export function SiteDataProvider({ children }) {
               rules: [],
               prizeDistribution: [],
               scheduleTimetable: [],
-              seo: {},
+              seo: { slug },
+              slug,
               ...t
             };
           });
         }
         if (!Array.isArray(merged.venueZones)) merged.venueZones = INITIAL_ZONES;
-        if (!Array.isArray(merged.navLinks)) merged.navLinks = INITIAL_NAV_LINKS;
+        if (!Array.isArray(merged.navLinks) || merged.navLinks.some(l => l.target === 'franchise' || l.label === 'หน้าหลัก' || l.label === 'ทัวร์นาเมนต์ & แข่งขัน')) {
+          merged.navLinks = INITIAL_NAV_LINKS;
+        }
+        if (!merged.headerCta || merged.headerCta.text === 'คำนวณราคาเปิดร้าน') {
+          merged.headerCta = {
+            ...(merged.headerCta || {}),
+            text: 'สนใจเปิดร้าน',
+            target: 'franchise',
+            visible: true
+          };
+        }
         if (!Array.isArray(merged.n8nWorkflows)) merged.n8nWorkflows = DEFAULT_SITE_DATA.n8nWorkflows;
         if (!Array.isArray(merged.ragKnowledge)) {
           merged.ragKnowledge = INITIAL_RAG_KNOWLEDGE;
@@ -1376,6 +1392,27 @@ export function SiteDataProvider({ children }) {
     }));
   };
 
+  // PC Hardware Tiers Handlers
+  const updateHardwareTier = (tierKey, updatedFields) => {
+    setSiteData(prev => ({
+      ...prev,
+      hardwareTiers: {
+        ...(prev.hardwareTiers || INITIAL_TIERS),
+        [tierKey]: {
+          ...((prev.hardwareTiers || INITIAL_TIERS)[tierKey] || {}),
+          ...updatedFields
+        }
+      }
+    }));
+  };
+
+  const resetHardwareTiers = () => {
+    setSiteData(prev => ({
+      ...prev,
+      hardwareTiers: INITIAL_TIERS
+    }));
+  };
+
   // OpenRouter & Webhook Handlers
   const updateOpenRouterSettings = (settings) => {
     setSiteData(prev => ({
@@ -1607,16 +1644,31 @@ export function SiteDataProvider({ children }) {
   // Tournament CRUD Handlers
   const addTournament = (newItem) => {
     const id = newItem.id || `tour-${Date.now()}`;
+    const slug = newItem.slug || newItem.seo?.slug || (newItem.title ? newItem.title.toLowerCase().replace(/[^a-z0-9\u0E00-\u0E7F]+/g, '-').replace(/(^-|-$)/g, '') : id);
     setSiteData(prev => ({
       ...prev,
-      tournaments: [...(prev.tournaments || []), { ...newItem, id }]
+      tournaments: [...(prev.tournaments || []), { 
+        ...newItem, 
+        id, 
+        slug,
+        seo: { ...(newItem.seo || {}), slug: newItem.seo?.slug || slug }
+      }]
     }));
   };
 
   const updateTournament = (id, updates) => {
     setSiteData(prev => ({
       ...prev,
-      tournaments: (prev.tournaments || []).map(t => t.id === id ? { ...t, ...updates } : t)
+      tournaments: (prev.tournaments || []).map(t => {
+        if (t.id !== id) return t;
+        const newSlug = updates.slug || updates.seo?.slug || t.slug || t.seo?.slug;
+        return { 
+          ...t, 
+          ...updates, 
+          slug: newSlug,
+          seo: { ...(t.seo || {}), ...(updates.seo || {}), slug: newSlug }
+        };
+      })
     }));
   };
 
@@ -2049,6 +2101,8 @@ export function SiteDataProvider({ children }) {
     updateStationStatus,
     addRMAClaim,
     updateRMAClaim,
+    updateHardwareTier,
+    resetHardwareTiers,
     saveSiteData,
     resetToDefaults
   };
