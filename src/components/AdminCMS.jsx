@@ -632,6 +632,7 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
     addAuditLog,
     clearAuditLogs,
     addTournamentApplication,
+    updateTournamentApplication,
     updateApplicationStatus,
     deleteTournamentApplication,
     updateTournamentBracketMatch,
@@ -1010,6 +1011,101 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
   const [selectedTourneyFilter, setSelectedTourneyFilter] = useState('all');
   const [selectedAppForRosterModal, setSelectedAppForRosterModal] = useState(null);
   const [rejectionNotes, setRejectionNotes] = useState('');
+
+  // Add & Edit Team Application Modal State
+  const [showAddEditTeamModal, setShowAddEditTeamModal] = useState(false);
+  const [editingTeamApp, setEditingTeamApp] = useState(null);
+  const [teamFormDraft, setTeamFormDraft] = useState({
+    tournamentId: '',
+    tournamentTitle: '',
+    teamName: '',
+    teamTag: '',
+    logo: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80',
+    captainName: '',
+    captainPhone: '',
+    captainDiscord: '',
+    captainEmail: '',
+    players: ['', '', '', '', ''],
+    substitutes: [''],
+    status: 'Confirmed'
+  });
+
+  const openCreateTeamModal = () => {
+    const defaultTourney = (siteData.tournaments || [])[0];
+    const curFilterTourney = (siteData.tournaments || []).find(t => t.id === selectedTourneyFilter);
+    const chosenTourney = curFilterTourney || defaultTourney;
+    setEditingTeamApp(null);
+    setTeamFormDraft({
+      tournamentId: chosenTourney?.id || 'tour-1',
+      tournamentTitle: chosenTourney?.title || 'VALORANT CHAMPIONSHIP 2026',
+      teamName: '',
+      teamTag: '',
+      logo: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80',
+      captainName: '',
+      captainPhone: '',
+      captainDiscord: '',
+      captainEmail: '',
+      players: ['', '', '', '', ''],
+      substitutes: [''],
+      status: 'Confirmed'
+    });
+    setShowAddEditTeamModal(true);
+  };
+
+  const openEditTeamModal = (app) => {
+    setEditingTeamApp(app);
+    const rawPlayers = Array.isArray(app.players) ? app.players : [];
+    const playersArr = [0, 1, 2, 3, 4].map(i => {
+      const p = rawPlayers[i];
+      return typeof p === 'string' ? p : (p?.ign || p?.realName || '');
+    });
+    const rawSubs = Array.isArray(app.substitutes) ? app.substitutes : (app.substitute ? [app.substitute] : []);
+    const subsArr = rawSubs.length > 0 ? rawSubs.map(s => typeof s === 'string' ? s : (s?.ign || s?.realName || '')) : [''];
+
+    setTeamFormDraft({
+      tournamentId: app.tournamentId || '',
+      tournamentTitle: app.tournamentTitle || '',
+      teamName: app.teamName || '',
+      teamTag: app.teamTag || '',
+      logo: app.logo || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80',
+      captainName: app.captainName || '',
+      captainPhone: app.captainPhone || '',
+      captainDiscord: app.captainDiscord || '',
+      captainEmail: app.captainEmail || '',
+      players: playersArr,
+      substitutes: subsArr,
+      status: app.status || 'Confirmed'
+    });
+    setShowAddEditTeamModal(true);
+  };
+
+  const handleSaveTeamApp = () => {
+    if (!teamFormDraft.teamName.trim()) {
+      alert('กรุณากรอกชื่อทีม (Team Name)');
+      return;
+    }
+    const selectedT = (siteData.tournaments || []).find(t => t.id === teamFormDraft.tournamentId);
+    const cleanPlayers = teamFormDraft.players.filter(p => p && p.trim().length > 0);
+    const cleanSubs = teamFormDraft.substitutes.filter(s => s && s.trim().length > 0);
+
+    const payload = {
+      ...teamFormDraft,
+      teamName: teamFormDraft.teamName.trim(),
+      teamTag: (teamFormDraft.teamTag || teamFormDraft.teamName.slice(0, 3)).toUpperCase().trim(),
+      tournamentTitle: selectedT?.title || teamFormDraft.tournamentTitle,
+      players: cleanPlayers.length > 0 ? cleanPlayers : [teamFormDraft.captainName || 'Player 1'],
+      substitutes: cleanSubs,
+      substitute: cleanSubs[0] || ''
+    };
+
+    if (editingTeamApp) {
+      updateTournamentApplication(editingTeamApp.id, payload);
+    } else {
+      addTournamentApplication(payload);
+    }
+    setShowAddEditTeamModal(false);
+    triggerSaveToast();
+  };
 
   // AI Revenue Analysis generation state
   const [isAnalyzingRevenue, setIsAnalyzingRevenue] = useState(false);
@@ -8819,6 +8915,14 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   <button 
                     type="button" 
+                    className="btn-primary"
+                    onClick={openCreateTeamModal}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#2563eb', borderColor: '#2563eb' }}
+                  >
+                    <Plus size={15} /> เพิ่มทีมแข่งขันด้วยตนเอง
+                  </button>
+                  <button 
+                    type="button" 
                     className="btn-secondary"
                     onClick={() => {
                       const apps = siteData.tournamentApplications || [];
@@ -9172,6 +9276,16 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
 
                                     <button
                                       type="button"
+                                      className="btn-secondary"
+                                      style={{ padding: '4px 8px', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#eff6ff', color: '#1d4ed8', borderColor: '#bfdbfe' }}
+                                      title="แก้ไขข้อมูลทีม โลโก้ และรายชื่อผู้เล่น"
+                                      onClick={() => openEditTeamModal(app)}
+                                    >
+                                      <Edit3 size={12} /> แก้ไข
+                                    </button>
+
+                                    <button
+                                      type="button"
                                       onClick={() => {
                                         if (confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบใบสมัครทีม "${app.teamName}"?`)) {
                                           deleteTournamentApplication(app.id);
@@ -9285,10 +9399,279 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                         <button
                           type="button"
                           className="btn-secondary"
+                          style={{ fontSize: '0.82rem', display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#eff6ff', color: '#1d4ed8', borderColor: '#bfdbfe' }}
+                          onClick={() => {
+                            const curApp = selectedAppForRosterModal;
+                            setSelectedAppForRosterModal(null);
+                            openEditTeamModal(curApp);
+                          }}
+                        >
+                          <Edit3 size={13} /> แก้ไขข้อมูลทีมนี้
+                        </button>
+                        <button
+                          type="button"
+                          className="btn-secondary"
                           style={{ fontSize: '0.82rem' }}
                           onClick={() => setSelectedAppForRosterModal(null)}
                         >
                           ปิด
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Add / Edit Team Application Modal Dialog */}
+              {showAddEditTeamModal && (
+                <div className="modal-backdrop" onClick={() => setShowAddEditTeamModal(false)} style={{ zIndex: 10030 }}>
+                  <div className="modal-dialog glass-panel" onClick={e => e.stopPropagation()} style={{ maxWidth: '680px', maxHeight: '90vh', overflowY: 'auto', padding: '24px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #e2e8f0', paddingBottom: '14px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb' }}>
+                          <Users size={22} />
+                        </div>
+                        <div>
+                          <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#0f172a' }}>
+                            {editingTeamApp ? `แก้ไขข้อมูลทีม: ${editingTeamApp.teamName}` : 'เพิ่มทีมเข้าแข่งขันด้วยตนเอง (Manual Add Team)'}
+                          </h3>
+                          <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                            {editingTeamApp ? 'ปรับปรุงรายชื่อนักแข่ง โลโก้ และข้อมูลการติดต่อ' : 'กรอกข้อมูลทีมที่ติดต่อผ่าน LINE OA หรือสมัครหน้างาน'}
+                          </span>
+                        </div>
+                      </div>
+                      <button className="btn-icon-close" onClick={() => setShowAddEditTeamModal(false)}>
+                        <X size={18} />
+                      </button>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      {/* Tournament Selection */}
+                      <div className="form-group">
+                        <label style={{ fontWeight: 700, fontSize: '0.82rem', color: '#334155' }}>
+                          🏆 รายการแข่งขันที่ลงสมัคร (Tournament) *
+                        </label>
+                        <select
+                          className="form-input"
+                          value={teamFormDraft.tournamentId}
+                          onChange={e => {
+                            const found = (siteData.tournaments || []).find(t => t.id === e.target.value);
+                            setTeamFormDraft({
+                              ...teamFormDraft,
+                              tournamentId: e.target.value,
+                              tournamentTitle: found ? found.title : teamFormDraft.tournamentTitle
+                            });
+                          }}
+                          style={{ fontWeight: 600 }}
+                        >
+                          {(siteData.tournaments || []).map(t => (
+                            <option key={t.id} value={t.id}>
+                              {t.title} ({t.game})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Team Name & Tag */}
+                      <div className="form-row-2">
+                        <div className="form-group">
+                          <label style={{ fontWeight: 700, fontSize: '0.82rem', color: '#334155' }}>
+                            ชื่อทีมแข่งขัน (Team Name) *
+                          </label>
+                          <input
+                            type="text"
+                            className="form-input"
+                            placeholder="เช่น TALON ESPORTS JR., BACON TIME..."
+                            value={teamFormDraft.teamName}
+                            onChange={e => setTeamFormDraft({ ...teamFormDraft, teamName: e.target.value })}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label style={{ fontWeight: 700, fontSize: '0.82rem', color: '#334155' }}>
+                            แท็กย่อของทีม (Team Tag)
+                          </label>
+                          <input
+                            type="text"
+                            className="form-input"
+                            placeholder="เช่น TLN, BAC, PHX"
+                            maxLength={6}
+                            value={teamFormDraft.teamTag}
+                            onChange={e => setTeamFormDraft({ ...teamFormDraft, teamTag: e.target.value.toUpperCase() })}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Team Logo URL & Quick Presets */}
+                      <div className="form-group" style={{ background: '#f8fafc', padding: '14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                        <label style={{ fontWeight: 700, fontSize: '0.82rem', color: '#334155', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                          <span>🖼️ โลโก้ทีม (Team Logo URL)</span>
+                          <span style={{ fontSize: '0.75rem', color: '#64748b' }}>ขนาดแนะนำ 1:1 หรือ 150x150px</span>
+                        </label>
+                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                          <img
+                            src={teamFormDraft.logo || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80'}
+                            alt=""
+                            style={{ width: '48px', height: '48px', borderRadius: '10px', objectFit: 'cover', border: '1px solid #cbd5e1', background: '#ffffff' }}
+                            onError={e => { e.target.src = 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80'; }}
+                          />
+                          <input
+                            type="text"
+                            className="form-input"
+                            placeholder="วางลิงก์รูปภาพโลโก้ทีม (https://...)"
+                            value={teamFormDraft.logo}
+                            onChange={e => setTeamFormDraft({ ...teamFormDraft, logo: e.target.value })}
+                            style={{ flex: 1 }}
+                          />
+                        </div>
+                        {/* Quick Logo Presets */}
+                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginTop: '10px', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>เลือกโลโก้ตัวอย่าง:</span>
+                          {[
+                            { name: 'Neon Cyber', url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80' },
+                            { name: 'Phoenix Fire', url: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=150&q=80' },
+                            { name: 'Dragon Shield', url: 'https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=150&q=80' },
+                            { name: 'Vortex Blue', url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=150&q=80' }
+                          ].map(ps => (
+                            <button
+                              key={ps.name}
+                              type="button"
+                              onClick={() => setTeamFormDraft({ ...teamFormDraft, logo: ps.url })}
+                              style={{ padding: '3px 8px', fontSize: '0.72rem', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#ffffff', cursor: 'pointer' }}
+                            >
+                              {ps.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Captain Contact Information */}
+                      <div style={{ background: '#f0fdf4', padding: '14px', borderRadius: '10px', border: '1px solid #bbf7d0' }}>
+                        <strong style={{ display: 'block', fontSize: '0.84rem', color: '#166534', marginBottom: '10px' }}>
+                          👑 ข้อมูลกัปตันทีม (Team Captain & Contact)
+                        </strong>
+                        <div className="form-row-2">
+                          <div className="form-group" style={{ marginBottom: '8px' }}>
+                            <label style={{ fontSize: '0.78rem', color: '#334155' }}>ชื่อ-นามสกุล / IGN กัปตัน *</label>
+                            <input
+                              type="text"
+                              className="form-input"
+                              placeholder="เช่น ชานนท์ สิงห์ชัย (Captain Pat)"
+                              value={teamFormDraft.captainName}
+                              onChange={e => setTeamFormDraft({ ...teamFormDraft, captainName: e.target.value })}
+                            />
+                          </div>
+                          <div className="form-group" style={{ marginBottom: '8px' }}>
+                            <label style={{ fontSize: '0.78rem', color: '#334155' }}>เบอร์โทรศัพท์ติดต่อ</label>
+                            <input
+                              type="text"
+                              className="form-input"
+                              placeholder="เช่น 089-445-1289"
+                              value={teamFormDraft.captainPhone}
+                              onChange={e => setTeamFormDraft({ ...teamFormDraft, captainPhone: e.target.value })}
+                            />
+                          </div>
+                        </div>
+                        <div className="form-row-2">
+                          <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label style={{ fontSize: '0.78rem', color: '#334155' }}>Discord Tag</label>
+                            <input
+                              type="text"
+                              className="form-input"
+                              placeholder="เช่น captain#1234"
+                              value={teamFormDraft.captainDiscord}
+                              onChange={e => setTeamFormDraft({ ...teamFormDraft, captainDiscord: e.target.value })}
+                            />
+                          </div>
+                          <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label style={{ fontSize: '0.78rem', color: '#334155' }}>อีเมล</label>
+                            <input
+                              type="email"
+                              className="form-input"
+                              placeholder="เช่น captain@team.gg"
+                              value={teamFormDraft.captainEmail}
+                              onChange={e => setTeamFormDraft({ ...teamFormDraft, captainEmail: e.target.value })}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 5 Starting Players Roster */}
+                      <div className="form-group">
+                        <label style={{ fontWeight: 700, fontSize: '0.82rem', color: '#334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span>🎮 รายชื่อผู้เล่นตัวจริง 5 คน (Starting 5 Players IGN)</span>
+                          <span style={{ fontSize: '0.74rem', color: '#64748b' }}>กรอกชื่อในเกม (In-Game Name)</span>
+                        </label>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px', marginTop: '6px' }}>
+                          {[0, 1, 2, 3, 4].map(idx => (
+                            <div key={idx} style={{ position: 'relative' }}>
+                              <span style={{ position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)', width: '18px', height: '18px', borderRadius: '50%', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 800 }}>
+                                {idx + 1}
+                              </span>
+                              <input
+                                type="text"
+                                className="form-input"
+                                placeholder={`ผู้เล่นคนที่ ${idx + 1}`}
+                                value={teamFormDraft.players[idx] || ''}
+                                onChange={e => {
+                                  const p = [...teamFormDraft.players];
+                                  p[idx] = e.target.value;
+                                  setTeamFormDraft({ ...teamFormDraft, players: p });
+                                }}
+                                style={{ paddingLeft: '32px', fontSize: '0.82rem' }}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Substitutes & Status */}
+                      <div className="form-row-2">
+                        <div className="form-group">
+                          <label style={{ fontWeight: 700, fontSize: '0.82rem', color: '#334155' }}>
+                            🔄 ผู้เล่นสำรอง (Substitute IGN)
+                          </label>
+                          <input
+                            type="text"
+                            className="form-input"
+                            placeholder="เช่น SubPlayer1 (ถ้ามี)"
+                            value={teamFormDraft.substitutes[0] || ''}
+                            onChange={e => setTeamFormDraft({ ...teamFormDraft, substitutes: [e.target.value] })}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label style={{ fontWeight: 700, fontSize: '0.82rem', color: '#334155' }}>
+                            สถานะทีม (Application Status)
+                          </label>
+                          <select
+                            className="form-input"
+                            value={teamFormDraft.status}
+                            onChange={e => setTeamFormDraft({ ...teamFormDraft, status: e.target.value })}
+                            style={{ fontWeight: 700 }}
+                          >
+                            <option value="Confirmed">✓ อนุมัติแล้ว (Confirmed - เข้าสายแข่งทันที)</option>
+                            <option value="Pending">● รอดำเนินการ (Pending)</option>
+                            <option value="Waitlist">⏳ คิวสำรอง (Waitlist)</option>
+                            <option value="Rejected">✕ ปฏิเสธ (Rejected)</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Form Action Buttons */}
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', borderTop: '1px solid #e2e8f0', paddingTop: '16px', marginTop: '6px' }}>
+                        <button
+                          type="button"
+                          className="btn-secondary"
+                          onClick={() => setShowAddEditTeamModal(false)}
+                        >
+                          ยกเลิก
+                        </button>
+                        <button
+                          type="button"
+                          className="btn-primary"
+                          onClick={handleSaveTeamApp}
+                          style={{ background: '#2563eb', borderColor: '#2563eb', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                        >
+                          <Check size={14} /> {editingTeamApp ? 'บันทึกการแก้ไขข้อมูลทีม' : 'บันทึกและเพิ่มทีมเข้าสู่ระบบ'}
                         </button>
                       </div>
                     </div>

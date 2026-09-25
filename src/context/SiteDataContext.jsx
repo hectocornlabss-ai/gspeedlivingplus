@@ -1519,23 +1519,125 @@ export function SiteDataProvider({ children }) {
     const newApp = {
       id: `app-${Date.now()}`,
       submittedAt: timeStr,
-      status: 'Pending',
+      status: applicationData.status || 'Pending',
       ...applicationData
     };
 
-    setSiteData(prev => ({
-      ...prev,
-      tournamentApplications: [newApp, ...(prev.tournamentApplications || [])]
-    }));
+    setSiteData(prev => {
+      let updatedTournaments = prev.tournaments || [];
+      // If manually added as Confirmed, sync into tournament teams immediately
+      if (newApp.status === 'Confirmed' && newApp.tournamentId) {
+        updatedTournaments = updatedTournaments.map(t => {
+          if (t.id === newApp.tournamentId) {
+            const currentTeams = t.teams || [];
+            const newConfirmedTeam = {
+              id: `team-${Date.now()}`,
+              name: newApp.teamName,
+              tag: newApp.teamTag || newApp.teamName.slice(0, 3).toUpperCase(),
+              logo: newApp.logo || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80',
+              seed: currentTeams.length + 1,
+              status: 'Confirmed',
+              captain: `${newApp.captainName || 'Captain'} (กัปตันทีม)`,
+              captainPhone: newApp.captainPhone || '',
+              captainDiscord: newApp.captainDiscord || '',
+              players: (newApp.players || []).map(p => typeof p === 'string' ? p : (p.ign || p.realName || 'Player')),
+              substitutes: (newApp.substitutes || []).map(s => typeof s === 'string' ? s : (s.ign || s.realName || 'Sub')),
+              wins: 0,
+              losses: 0
+            };
+            return {
+              ...t,
+              teams: [...currentTeams, newConfirmedTeam]
+            };
+          }
+          return t;
+        });
+      }
+
+      return {
+        ...prev,
+        tournamentApplications: [newApp, ...(prev.tournamentApplications || [])],
+        tournaments: updatedTournaments
+      };
+    });
 
     addAuditLog({
       action: 'TEAM_REGISTERED',
-      adminUser: 'System',
+      adminUser: 'Admin/System',
       status: 'info',
-      details: `ทีม ${newApp.teamName} (${newApp.teamTag || ''}) ยื่นสมัครแข่งขัน ${newApp.tournamentTitle || ''}`
+      details: `ทีม ${newApp.teamName} (${newApp.teamTag || ''}) ลงทะเบียนแข่งขัน ${newApp.tournamentTitle || ''}`
     });
 
     return newApp;
+  };
+
+  const updateTournamentApplication = (applicationId, updatedData) => {
+    setSiteData(prev => {
+      const apps = prev.tournamentApplications || [];
+      const targetApp = apps.find(a => a.id === applicationId);
+      if (!targetApp) return prev;
+
+      const mergedApp = { ...targetApp, ...updatedData, updatedAt: new Date().toLocaleTimeString('th-TH') };
+      const updatedApps = apps.map(a => a.id === applicationId ? mergedApp : a);
+
+      let updatedTournaments = prev.tournaments || [];
+      if (mergedApp.tournamentId) {
+        updatedTournaments = updatedTournaments.map(t => {
+          if (t.id === mergedApp.tournamentId) {
+            const currentTeams = t.teams || [];
+            // If team already exists in t.teams, update it
+            const existingIdx = currentTeams.findIndex(tm => tm.name.toLowerCase() === targetApp.teamName.toLowerCase() || tm.name.toLowerCase() === mergedApp.teamName.toLowerCase());
+            if (existingIdx !== -1) {
+              const updatedTeams = [...currentTeams];
+              updatedTeams[existingIdx] = {
+                ...updatedTeams[existingIdx],
+                name: mergedApp.teamName,
+                tag: mergedApp.teamTag || mergedApp.teamName.slice(0, 3).toUpperCase(),
+                logo: mergedApp.logo || updatedTeams[existingIdx].logo,
+                captain: `${mergedApp.captainName} (กัปตันทีม)`,
+                captainPhone: mergedApp.captainPhone,
+                captainDiscord: mergedApp.captainDiscord,
+                players: (mergedApp.players || []).map(p => typeof p === 'string' ? p : (p.ign || p.realName || 'Player')),
+                substitutes: (mergedApp.substitutes || []).map(s => typeof s === 'string' ? s : (s.ign || s.realName || 'Sub'))
+              };
+              return { ...t, teams: updatedTeams };
+            } else if (mergedApp.status === 'Confirmed') {
+              // Add to teams if now confirmed and not present
+              const newConfirmedTeam = {
+                id: `team-${Date.now()}`,
+                name: mergedApp.teamName,
+                tag: mergedApp.teamTag || mergedApp.teamName.slice(0, 3).toUpperCase(),
+                logo: mergedApp.logo || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80',
+                seed: currentTeams.length + 1,
+                status: 'Confirmed',
+                captain: `${mergedApp.captainName} (กัปตันทีม)`,
+                captainPhone: mergedApp.captainPhone,
+                captainDiscord: mergedApp.captainDiscord,
+                players: (mergedApp.players || []).map(p => typeof p === 'string' ? p : (p.ign || p.realName || 'Player')),
+                substitutes: (mergedApp.substitutes || []).map(s => typeof s === 'string' ? s : (s.ign || s.realName || 'Sub')),
+                wins: 0,
+                losses: 0
+              };
+              return { ...t, teams: [...currentTeams, newConfirmedTeam] };
+            }
+          }
+          return t;
+        });
+      }
+
+      return {
+        ...prev,
+        tournamentApplications: updatedApps,
+        tournaments: updatedTournaments
+      };
+    });
+
+    addAuditLog({
+      action: 'UPDATE_TEAM_DATA',
+      adminUser: 'Admin',
+      status: 'info',
+      details: `แก้ไขข้อมูลทีม ${updatedData.teamName || applicationId}`
+    });
   };
 
   const updateApplicationStatus = (applicationId, newStatus, adminNotes = '') => {
@@ -2163,6 +2265,7 @@ export function SiteDataProvider({ children }) {
     addAuditLog,
     clearAuditLogs,
     addTournamentApplication,
+    updateTournamentApplication,
     updateApplicationStatus,
     deleteTournamentApplication,
     updateERPData,

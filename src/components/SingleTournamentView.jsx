@@ -173,18 +173,6 @@ export default function SingleTournamentView({
       <div className="tournament-nav-bar">
         <div className="container tournament-nav-inner">
           <div className="tourney-nav-left-group">
-            <button 
-              type="button" 
-              className="btn-back-link" 
-              onClick={onBack}
-              title="ย้อนกลับไปหน้ารายการแข่งขันทั้งหมด"
-            >
-              <ArrowLeft size={16} />
-              <span>หน้ารวมทัวร์นาเมนต์</span>
-            </button>
-
-            <span className="tourney-nav-pipe">|</span>
-
             {/* Breadcrumb Trail */}
             <nav className="tournament-breadcrumbs" aria-label="Breadcrumb">
               <button type="button" onClick={onNavigateHome} className="breadcrumb-step">
@@ -372,10 +360,9 @@ export default function SingleTournamentView({
               </div>
             </div>
 
-            {/* Action Buttons Row - Unified Equal Height Row (Matches Screenshot 2) */}
-            <div className="tournament-hero-actions-row">
-              {/* Primary Action Button */}
-              {isRegistrationOpen ? (
+            {/* Action Buttons Row (Only when open for registration) */}
+            {isRegistrationOpen && (
+              <div className="tournament-hero-actions-row">
                 <a 
                   href={lineOaUrl}
                   target="_blank"
@@ -386,38 +373,8 @@ export default function SingleTournamentView({
                   <span>สมัครแข่งขันผ่าน LINE OA</span>
                   <ExternalLink size={14} style={{ opacity: 0.85 }} />
                 </a>
-              ) : (
-                <button 
-                  type="button" 
-                  onClick={() => setActiveTab('bracket')}
-                  className="hero-action-btn hero-action-btn-royal"
-                >
-                  <Trophy size={16} />
-                  <span>ดูสรุปผลการแข่งขัน & แชมป์</span>
-                </button>
-              )}
-
-              {/* Bracket Button */}
-              <button 
-                type="button" 
-                onClick={() => setActiveTab('bracket')}
-                className="hero-action-btn hero-action-btn-secondary"
-              >
-                <GitBranch size={16} />
-                <span>สายการแข่งขัน & ผลสด</span>
-              </button>
-
-              {/* Share Button */}
-              <button 
-                type="button" 
-                onClick={() => setShareOpen(true)}
-                className="hero-action-btn hero-action-btn-outline"
-                title="แชร์ทัวร์นาเมนต์นี้"
-              >
-                <Share2 size={16} className="text-blue" />
-                <span>แชร์ทัวร์นาเมนต์</span>
-              </button>
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

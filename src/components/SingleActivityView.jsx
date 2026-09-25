@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   ArrowLeft, Calendar, Clock, MapPin, Trophy, Users, Share2, Copy, Check, 
   ExternalLink, Download, Video, ChevronRight, PhoneCall, Sparkles, 
   Image as ImageIcon, ZoomIn, X, ChevronLeft, Gamepad2, Shield, ShieldCheck, Zap, Gift, LayoutGrid, Tag, Globe
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
+import SocialSharePopover from './SocialSharePopover';
 
 export default function SingleActivityView({ 
   activity, 
@@ -19,6 +20,8 @@ export default function SingleActivityView({
 
   // State for share copy feedback
   const [copiedLink, setCopiedLink] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const shareBtnRef = useRef(null);
 
   // State for Photo Lightbox
   const [activePhotoIdx, setActivePhotoIdx] = useState(null);
@@ -245,45 +248,45 @@ export default function SingleActivityView({
   return (
     <div className="single-activity-page">
       {/* Top Breadcrumb & Action Bar */}
-      <div className="activity-nav-bar">
-        <div className="container nav-bar-inner">
-          <button onClick={() => onBack('activities')} className="btn-back-link">
-            <ArrowLeft size={16} />
-            <span>กลับสู่หน้ารวมกิจกรรม</span>
-          </button>
-
-          <div className="breadcrumbs-trail">
-            <a href="#/" onClick={(e) => { e.preventDefault(); onBack('home'); }}>หน้าแรก</a>
-            <ChevronRight size={13} className="bread-divider" />
-            <a href="#activities" onClick={(e) => { e.preventDefault(); onBack('activities'); }}>กิจกรรม & บทความ</a>
-            <ChevronRight size={13} className="bread-divider" />
-            <span className="current-crumb">{activity.title}</span>
+      <div className="tournament-nav-bar">
+        <div className="container tournament-nav-inner">
+          <div className="tourney-nav-left-group">
+            <nav className="tournament-breadcrumbs" aria-label="Breadcrumb">
+              <button type="button" onClick={() => onBack('home')} className="breadcrumb-step">
+                <span>หน้าแรก</span>
+              </button>
+              <span className="breadcrumb-separator">/</span>
+              <button type="button" onClick={() => onBack('activities')} className="breadcrumb-step">
+                <span>กิจกรรม & ข่าวสาร</span>
+              </button>
+              <span className="breadcrumb-separator">/</span>
+              <span className="breadcrumb-current" title={activity.title}>
+                {activity.title}
+              </span>
+            </nav>
           </div>
 
-          <div className="share-actions-group">
-            <button 
-              className={`btn-share-icon ${copiedLink ? 'copied' : ''}`} 
-              onClick={handleCopyLink}
-              title="คัดลอกลิงก์บทความนี้"
+          {/* Compact Social Share Trigger & Popover */}
+          <div className="tourney-share-wrapper">
+            <button
+              ref={shareBtnRef}
+              type="button"
+              className="btn-tourney-share-trigger"
+              onClick={() => setShareOpen(!shareOpen)}
+              title="แชร์บทความนี้ (Facebook, LINE, Messenger, Instagram, คัดลอกลิงก์)"
             >
-              {copiedLink ? <Check size={14} className="text-emerald" /> : <Copy size={14} />}
-              <span>{copiedLink ? 'คัดลอกแล้ว!' : 'คัดลอกลิงก์'}</span>
+              <Share2 size={14} className="text-blue" />
+              <span>แชร์</span>
             </button>
 
-            <button className="btn-share-icon fb" onClick={handleShareFacebook} title="แชร์ลง Facebook">
-              <Share2 size={14} />
-              <span>Facebook</span>
-            </button>
-
-            <button className="btn-share-icon line" onClick={handleShareLine} title="แชร์ไปยัง LINE">
-              <Share2 size={14} />
-              <span>LINE</span>
-            </button>
-
-            <button className="btn-share-icon twitter" onClick={handleShareTwitter} title="แชร์ลง X / Twitter">
-              <Share2 size={14} />
-              <span>X / Twitter</span>
-            </button>
+            <SocialSharePopover
+              url={typeof window !== 'undefined' ? window.location.href : ''}
+              title={activity.title}
+              subtitle={activity.tag || 'GLP NEWS & EVENT'}
+              isOpen={shareOpen}
+              onClose={() => setShareOpen(false)}
+              triggerRef={shareBtnRef}
+            />
           </div>
         </div>
       </div>
