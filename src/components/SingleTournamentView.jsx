@@ -171,8 +171,8 @@ export default function SingleTournamentView({
     <div className="single-tournament-page">
       {/* 1. TOP STICKY NAV BAR */}
       <div className="tournament-nav-bar">
-        <div className="container nav-bar-inner">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+        <div className="container tournament-nav-inner">
+          <div className="tourney-nav-left-group">
             <button 
               type="button" 
               className="btn-back-link" 
@@ -182,6 +182,8 @@ export default function SingleTournamentView({
               <ArrowLeft size={16} />
               <span>หน้ารวมทัวร์นาเมนต์</span>
             </button>
+
+            <span className="tourney-nav-pipe">|</span>
 
             {/* Breadcrumb Trail */}
             <nav className="tournament-breadcrumbs" aria-label="Breadcrumb">
@@ -334,7 +336,7 @@ export default function SingleTournamentView({
               {tournament.title}
             </h1>
 
-            {/* Metadata Info Grid */}
+            {/* Metadata Info Grid - 3 Equal Balanced Columns */}
             <div className="tournament-hero-metrics">
               <div className="hero-metric-card">
                 <div className="metric-icon-wrap" style={{ background: 'rgba(245, 158, 11, 0.25)', color: '#fbbf24', border: '1px solid rgba(245, 158, 11, 0.4)' }}>
@@ -368,68 +370,27 @@ export default function SingleTournamentView({
                   </div>
                 </div>
               </div>
-
-              <div className="hero-metric-card">
-                <div className="metric-icon-wrap" style={{ background: 'rgba(192, 132, 252, 0.2)', color: '#c084fc', border: '1px solid rgba(192, 132, 252, 0.4)' }}>
-                  <Radio size={20} />
-                </div>
-                <div>
-                  <span className="metric-label" style={{ color: '#e9d5ff' }}>ช่องทางถ่ายทอดสด</span>
-                  <div className="metric-value" style={{ fontSize: '0.88rem' }}>
-                    {tournament.streamChannel || 'YouTube & Twitch @GSpeedEsport'}
-                  </div>
-                </div>
-              </div>
             </div>
 
-            {/* Action Buttons with High-Contrast, Gorgeous Styling */}
-            <div style={{ display: 'flex', gap: '14px', alignItems: 'center', flexWrap: 'wrap', marginTop: '24px' }}>
+            {/* Action Buttons Row - Unified Equal Height Row (Matches Screenshot 2) */}
+            <div className="tournament-hero-actions-row">
               {/* Primary Action Button */}
               {isRegistrationOpen ? (
                 <a 
                   href={lineOaUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ 
-                    display: 'inline-flex', 
-                    alignItems: 'center', 
-                    gap: '10px', 
-                    padding: '13px 26px', 
-                    background: 'linear-gradient(135deg, #06c755 0%, #00a843 100%)', 
-                    color: '#ffffff', 
-                    borderRadius: '10px', 
-                    fontWeight: 650, 
-                    fontSize: '1rem',
-                    textDecoration: 'none',
-                    boxShadow: '0 4px 18px rgba(6, 199, 85, 0.45)',
-                    border: '1px solid #34d399',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease'
-                  }}
-                  className="hover-lift"
+                  className="hero-action-btn hero-action-btn-primary"
                 >
                   <MessageCircle size={18} />
                   <span>สมัครแข่งขันผ่าน LINE OA</span>
-                  <ExternalLink size={14} style={{ opacity: 0.8 }} />
+                  <ExternalLink size={14} style={{ opacity: 0.85 }} />
                 </a>
               ) : (
                 <button 
                   type="button" 
                   onClick={() => setActiveTab('bracket')}
-                  style={{ 
-                    display: 'inline-flex', 
-                    alignItems: 'center', 
-                    gap: '8px', 
-                    padding: '13px 24px', 
-                    background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', 
-                    color: '#ffffff', 
-                    borderRadius: '10px', 
-                    fontWeight: 650, 
-                    fontSize: '0.95rem',
-                    boxShadow: '0 4px 16px rgba(37, 99, 235, 0.4)',
-                    border: '1px solid #60a5fa',
-                    cursor: 'pointer'
-                  }}
+                  className="hero-action-btn hero-action-btn-royal"
                 >
                   <Trophy size={16} />
                   <span>ดูสรุปผลการแข่งขัน & แชมป์</span>
@@ -440,20 +401,7 @@ export default function SingleTournamentView({
               <button 
                 type="button" 
                 onClick={() => setActiveTab('bracket')}
-                style={{ 
-                  display: 'inline-flex', 
-                  alignItems: 'center', 
-                  gap: '8px', 
-                  padding: '13px 22px', 
-                  background: '#ffffff', 
-                  color: '#1d4ed8', 
-                  borderRadius: '10px', 
-                  fontWeight: 600, 
-                  fontSize: '0.92rem', 
-                  border: '1px solid #bfdbfe', 
-                  boxShadow: '0 2px 10px rgba(0,0,0,0.15)', 
-                  cursor: 'pointer' 
-                }}
+                className="hero-action-btn hero-action-btn-secondary"
               >
                 <GitBranch size={16} />
                 <span>สายการแข่งขัน & ผลสด</span>
@@ -463,20 +411,8 @@ export default function SingleTournamentView({
               <button 
                 type="button" 
                 onClick={() => setShareOpen(true)}
-                style={{ 
-                  display: 'inline-flex', 
-                  alignItems: 'center', 
-                  gap: '8px', 
-                  padding: '13px 20px', 
-                  background: 'rgba(255, 255, 255, 0.95)', 
-                  color: '#0f172a', 
-                  borderRadius: '10px', 
-                  fontWeight: 600, 
-                  fontSize: '0.92rem', 
-                  border: '1px solid #cbd5e1', 
-                  boxShadow: '0 2px 10px rgba(0,0,0,0.15)', 
-                  cursor: 'pointer' 
-                }}
+                className="hero-action-btn hero-action-btn-outline"
+                title="แชร์ทัวร์นาเมนต์นี้"
               >
                 <Share2 size={16} className="text-blue" />
                 <span>แชร์ทัวร์นาเมนต์</span>
