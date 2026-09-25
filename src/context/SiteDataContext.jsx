@@ -520,7 +520,7 @@ export const DEFAULT_SITE_DATA = {
   tickerLinkTab: 'franchise',
   tickerLinkTarget: 'franchise',
   tickerLinkText: 'เปิดระบบ 3D',
-  tickerLinkVisible: true,
+  tickerLinkVisible: false,
   headerCta: {
     text: 'สนใจเปิดร้าน',
     target: 'franchise',

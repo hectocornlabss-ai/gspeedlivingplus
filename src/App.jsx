@@ -236,27 +236,6 @@ function AppContent() {
           <span className="ticker-text">
             {siteData.tickerText}
           </span>
-          {siteData.tickerLinkVisible !== false && (
-            <button 
-              onClick={() => {
-                const target = siteData.tickerLinkTarget || siteData.tickerLinkTab || 'franchise';
-                if (target.startsWith('http://') || target.startsWith('https://')) {
-                  window.open(target, '_blank', 'noopener,noreferrer');
-                } else if (target === 'events' || target === 'tournaments') {
-                  navigateTo('/tournaments');
-                } else if (target === 'activities' || target === 'gallery') {
-                  navigateTo('/activities');
-                } else if (target === 'company' || target === 'about') {
-                  navigateTo('/company');
-                } else {
-                  navigateTo('/franchise');
-                }
-              }} 
-              className="ticker-link"
-            >
-              {siteData.tickerLinkText || 'เปิดระบบ 3D'}
-            </button>
-          )}
         </div>
       </div>
 
