@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   ArrowLeft, Trophy, Calendar, MapPin, Globe, Copy, Check, Award, 
   Users, Camera, Zap, Clock, Shield, CheckCircle2, 
@@ -8,6 +8,8 @@ import {
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 import { generateDefaultBracket } from '../data/mockData';
+import TournamentOverviewSlider from './TournamentOverviewSlider';
+import SocialSharePopover from './SocialSharePopover';
 
 export default function SingleTournamentView({
   tournament,
@@ -25,6 +27,8 @@ export default function SingleTournamentView({
   const [galleryCategory, setGalleryCategory] = useState('all');
   const [rosterSearch, setRosterSearch] = useState('');
   const [copiedLink, setCopiedLink] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const shareBtnRef = useRef(null);
 
   // Bracket state
   const [bracketViewMode, setBracketViewMode] = useState('tree'); // 'tree' | 'list'
@@ -111,7 +115,7 @@ export default function SingleTournamentView({
       <div className="single-tournament-page container" style={{ padding: '90px 20px', textAlign: 'center' }}>
         <div style={{ maxWidth: '520px', margin: '0 auto', background: '#ffffff', padding: '40px 30px', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 16px rgba(0,0,0,0.04)' }}>
           <AlertCircle size={48} className="text-amber" style={{ margin: '0 auto 16px' }} />
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 650, color: '#0f172a', marginBottom: '8px' }}>
             ไม่พบข้อมูลรายการแข่งขัน
           </h2>
           <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '24px', lineHeight: 1.6 }}>
@@ -196,25 +200,27 @@ export default function SingleTournamentView({
             </nav>
           </div>
 
-          {/* WordPress Clean Permalink Indicator & Copy */}
-          <div className="wordpress-clean-permalink-badge">
-            <Globe size={13} className="text-blue" />
-            <span className="permalink-text">
-              /tournaments/<strong style={{ color: '#1d4ed8' }}>{cleanSlug}</strong>
-            </span>
+          {/* Compact Social Share Trigger & Popover */}
+          <div className="tourney-share-wrapper">
             <button
+              ref={shareBtnRef}
               type="button"
-              className="btn-copy-permalink"
-              onClick={() => {
-                navigator.clipboard.writeText(canonicalUrl);
-                setCopiedLink(true);
-                setTimeout(() => setCopiedLink(false), 2500);
-              }}
-              title="คัดลอก Clean Permalink สำหรับแชร์บนโซเชียล"
+              className="btn-tourney-share-trigger"
+              onClick={() => setShareOpen(!shareOpen)}
+              title="แชร์ทัวร์นาเมนต์นี้ (Facebook, LINE, Messenger, Instagram, คัดลอกลิงก์)"
             >
-              {copiedLink ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
-              <span>{copiedLink ? 'คัดลอกแล้ว ✓' : 'คัดลอกลิงก์'}</span>
+              <Share2 size={14} className="text-blue" />
+              <span>แชร์</span>
             </button>
+
+            <SocialSharePopover
+              url={canonicalUrl}
+              title={tournament.title}
+              subtitle={`${tournament.game} | เงินรางวัล ${tournament.prizePool}`}
+              isOpen={shareOpen}
+              onClose={() => setShareOpen(false)}
+              triggerRef={shareBtnRef}
+            />
           </div>
         </div>
       </div>
@@ -236,7 +242,7 @@ export default function SingleTournamentView({
               <span style={{ 
                 background: 'linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%)', 
                 color: '#ffffff', 
-                fontWeight: 800, 
+                fontWeight: 650, 
                 padding: '6px 14px', 
                 borderRadius: '8px', 
                 fontSize: '0.84rem', 
@@ -268,7 +274,7 @@ export default function SingleTournamentView({
                 <span style={{ 
                   background: 'linear-gradient(135deg, #dc2626, #ef4444)', 
                   color: '#ffffff', 
-                  fontWeight: 800, 
+                  fontWeight: 650, 
                   padding: '6px 14px', 
                   borderRadius: '8px', 
                   fontSize: '0.82rem', 
@@ -284,7 +290,7 @@ export default function SingleTournamentView({
                 <span style={{ 
                   background: 'linear-gradient(135deg, #059669, #10b981)', 
                   color: '#ffffff', 
-                  fontWeight: 800, 
+                  fontWeight: 650, 
                   padding: '6px 14px', 
                   borderRadius: '8px', 
                   fontSize: '0.82rem', 
@@ -300,7 +306,7 @@ export default function SingleTournamentView({
                 <span style={{ 
                   background: '#334155', 
                   color: '#e2e8f0', 
-                  fontWeight: 700, 
+                  fontWeight: 600, 
                   padding: '6px 14px', 
                   borderRadius: '8px', 
                   fontSize: '0.82rem',
@@ -312,7 +318,7 @@ export default function SingleTournamentView({
                 <span style={{ 
                   background: '#d97706', 
                   color: '#fef3c7', 
-                  fontWeight: 800, 
+                  fontWeight: 650, 
                   padding: '6px 14px', 
                   borderRadius: '8px', 
                   fontSize: '0.82rem',
@@ -392,7 +398,7 @@ export default function SingleTournamentView({
                     background: 'linear-gradient(135deg, #06c755 0%, #00a843 100%)', 
                     color: '#ffffff', 
                     borderRadius: '10px', 
-                    fontWeight: 800, 
+                    fontWeight: 650, 
                     fontSize: '1rem',
                     textDecoration: 'none',
                     boxShadow: '0 4px 18px rgba(6, 199, 85, 0.45)',
@@ -418,7 +424,7 @@ export default function SingleTournamentView({
                     background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', 
                     color: '#ffffff', 
                     borderRadius: '10px', 
-                    fontWeight: 800, 
+                    fontWeight: 650, 
                     fontSize: '0.95rem',
                     boxShadow: '0 4px 16px rgba(37, 99, 235, 0.4)',
                     border: '1px solid #60a5fa',
@@ -442,7 +448,7 @@ export default function SingleTournamentView({
                   background: '#ffffff', 
                   color: '#1d4ed8', 
                   borderRadius: '10px', 
-                  fontWeight: 700, 
+                  fontWeight: 600, 
                   fontSize: '0.92rem', 
                   border: '1px solid #bfdbfe', 
                   boxShadow: '0 2px 10px rgba(0,0,0,0.15)', 
@@ -456,11 +462,7 @@ export default function SingleTournamentView({
               {/* Share Button */}
               <button 
                 type="button" 
-                onClick={() => {
-                  navigator.clipboard.writeText(canonicalUrl);
-                  setCopiedLink(true);
-                  setTimeout(() => setCopiedLink(false), 2500);
-                }}
+                onClick={() => setShareOpen(true)}
                 style={{ 
                   display: 'inline-flex', 
                   alignItems: 'center', 
@@ -469,15 +471,15 @@ export default function SingleTournamentView({
                   background: 'rgba(255, 255, 255, 0.95)', 
                   color: '#0f172a', 
                   borderRadius: '10px', 
-                  fontWeight: 700, 
+                  fontWeight: 600, 
                   fontSize: '0.92rem', 
                   border: '1px solid #cbd5e1', 
                   boxShadow: '0 2px 10px rgba(0,0,0,0.15)', 
                   cursor: 'pointer' 
                 }}
               >
-                <Share2 size={16} />
-                <span>{copiedLink ? 'คัดลอกลิงก์แล้ว ✓' : 'แชร์ทัวร์นาเมนต์'}</span>
+                <Share2 size={16} className="text-blue" />
+                <span>แชร์ทัวร์นาเมนต์</span>
               </button>
             </div>
           </div>
@@ -535,10 +537,10 @@ export default function SingleTournamentView({
               }}>
                 <div style={{ flex: 1, minWidth: '280px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                    <span style={{ background: '#06c755', color: '#fff', padding: '3px 10px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 800 }}>
+                    <span style={{ background: '#06c755', color: '#fff', padding: '3px 10px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 600 }}>
                       LINE OFFICIAL
                     </span>
-                    <strong style={{ fontSize: '1.15rem', color: '#14532d' }}>
+                    <strong style={{ fontSize: '1.15rem', color: '#14532d', fontWeight: 650 }}>
                       ช่องทางรับสมัครนักกีฬา & ส่งรายชื่อทีม
                     </strong>
                   </div>
@@ -558,7 +560,7 @@ export default function SingleTournamentView({
                     color: '#ffffff', 
                     padding: '13px 24px', 
                     borderRadius: '10px', 
-                    fontWeight: 800, 
+                    fontWeight: 650, 
                     fontSize: '0.95rem',
                     textDecoration: 'none',
                     boxShadow: '0 4px 14px rgba(6, 199, 85, 0.35)',
@@ -571,6 +573,9 @@ export default function SingleTournamentView({
                 </a>
               </div>
             )}
+
+            {/* 16:9 Showcase Continuous 20-Slide Carousel */}
+            <TournamentOverviewSlider tournament={tournament} />
 
             {/* Story & Description */}
             <div className="tourney-card-box">
@@ -603,9 +608,9 @@ export default function SingleTournamentView({
                     <span className="prize-rank-badge">
                       {idx === 0 ? '🥇 อันดับที่ 1 (CHAMPION)' : idx === 1 ? '🥈 อันดับที่ 2 (RUNNER-UP)' : `🎖️ ${pz.rank}`}
                     </span>
-                    <strong className="prize-reward-text">
+                    <span className="prize-reward-text">
                       {pz.reward}
-                    </strong>
+                    </span>
                   </div>
                 ))}
               </div>
@@ -617,7 +622,7 @@ export default function SingleTournamentView({
                 <span className="badge-pill badge-white" style={{ marginBottom: '8px', display: 'inline-block' }}>
                   OFFICIAL TOURNAMENT SPECS
                 </span>
-                <h4 style={{ margin: '4px 0 6px 0', fontSize: '1.2rem', fontWeight: 800, color: '#ffffff' }}>
+                <h4 style={{ margin: '4px 0 6px 0', fontSize: '1.2rem', fontWeight: 600, color: '#ffffff' }}>
                   มาตรฐานสนามแข่งขันระดับ World Class LAN Arena
                 </h4>
                 <p style={{ margin: 0, fontSize: '0.92rem', color: '#cbd5e1', lineHeight: 1.6 }}>
@@ -652,7 +657,7 @@ export default function SingleTournamentView({
                   'การตัดสินของคณะกรรมการและผู้ตัดสินกลางในสนามถือเป็นที่สิ้นสุดในทุกกรณี'
                 ]).map((rule, rIdx) => (
                   <div key={rIdx} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '12px 14px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                    <div style={{ background: '#2563eb', color: '#ffffff', width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.78rem', fontWeight: 800, flexShrink: 0 }}>
+                    <div style={{ background: '#2563eb', color: '#ffffff', width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.78rem', fontWeight: 650, flexShrink: 0 }}>
                       {rIdx + 1}
                     </div>
                     <span style={{ fontSize: '0.94rem', color: '#334155', lineHeight: 1.6 }}>
@@ -685,7 +690,7 @@ export default function SingleTournamentView({
                   { time: '20:30 - 21:00 น.', stage: 'พิธีมอบถ้วยรางวัล เหรียญรางวัลเกียรติยศ และเงินรางวัลรวม 100,000 บาท' }
                 ]).map((item, idx) => (
                   <div key={idx} style={{ display: 'flex', gap: '16px', alignItems: 'center', background: '#f8fafc', padding: '16px 20px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-                    <div style={{ minWidth: '130px', fontWeight: 800, color: '#1d4ed8', fontSize: '0.95rem' }}>
+                    <div style={{ minWidth: '130px', fontWeight: 650, color: '#1d4ed8', fontSize: '0.95rem' }}>
                       {item.time}
                     </div>
                     <div style={{ width: '2px', height: '24px', background: '#cbd5e1' }} />
@@ -750,13 +755,13 @@ export default function SingleTournamentView({
                 >
                   {/* Match Header */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px' }}>
-                    <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#64748b' }}>
+                    <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748b' }}>
                       {m.roundLabel || m.round || `แมตช์ที่ ${idx + 1}`}
                     </span>
                     <span 
                       style={{ 
                         fontSize: '0.75rem', 
-                        fontWeight: 800, 
+                        fontWeight: 650, 
                         padding: '2px 8px', 
                         borderRadius: '20px',
                         background: m.status === 'LIVE' ? '#fee2e2' : m.status === 'Completed' ? '#dcfce7' : '#f1f5f9',
@@ -928,7 +933,7 @@ export default function SingleTournamentView({
           <div style={{ marginTop: '60px', paddingTop: '40px', borderTop: '1px solid #e2e8f0' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: '0 0 4px 0' }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 650, color: '#0f172a', margin: '0 0 4px 0' }}>
                   รายการแข่งขันอื่นๆ ของทางร้าน (More Tournaments)
                 </h3>
                 <span style={{ fontSize: '0.88rem', color: '#64748b' }}>
@@ -939,7 +944,7 @@ export default function SingleTournamentView({
                 type="button" 
                 onClick={onBack}
                 className="btn-link"
-                style={{ fontSize: '0.88rem', fontWeight: 700, color: '#2563eb', display: 'flex', alignItems: 'center', gap: '4px' }}
+                style={{ fontSize: '0.88rem', fontWeight: 600, color: '#2563eb', display: 'flex', alignItems: 'center', gap: '4px' }}
               >
                 <span>ดูทั้งหมด</span>
                 <ArrowRight size={14} />
@@ -968,11 +973,11 @@ export default function SingleTournamentView({
                     </div>
                   </div>
                   <div style={{ padding: '16px' }}>
-                    <h4 style={{ margin: '0 0 8px 0', fontSize: '0.98rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.4 }}>
+                    <h4 style={{ margin: '0 0 8px 0', fontSize: '0.98rem', fontWeight: 650, color: '#0f172a', lineHeight: 1.4 }}>
                       {relTour.title}
                     </h4>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.82rem' }}>
-                      <span style={{ color: '#b45309', fontWeight: 700 }}>
+                      <span style={{ color: '#b45309', fontWeight: 600 }}>
                         🏆 {relTour.prizePool}
                       </span>
                       <span style={{ color: '#2563eb', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '2px' }}>

@@ -213,7 +213,7 @@ export default function TournamentDetailModal({
 
           {/* Title & Metadata chips */}
           <div style={{ position: 'relative', zIndex: 2 }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '2px 0 10px 0', textShadow: '0 2px 10px rgba(0,0,0,0.7)', color: '#ffffff', letterSpacing: '-0.3px' }}>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 650, margin: '2px 0 10px 0', textShadow: '0 2px 10px rgba(0,0,0,0.7)', color: '#ffffff', letterSpacing: '-0.3px' }}>
               {tournament.title}
             </h2>
             <div className="tourney-meta-chips">
@@ -328,12 +328,12 @@ export default function TournamentDetailModal({
                         gap: '4px'
                       }}
                     >
-                      <span style={{ fontSize: '0.78rem', fontWeight: 800, color: idx === 0 ? '#854d0e' : '#64748b', textTransform: 'uppercase' }}>
+                      <span style={{ fontSize: '0.78rem', fontWeight: 600, color: idx === 0 ? '#854d0e' : '#64748b', textTransform: 'uppercase' }}>
                         {idx === 0 ? '🥇 อันดับที่ 1 (Champion)' : idx === 1 ? '🥈 อันดับที่ 2 (Runner-Up)' : `🎖️ ${pz.rank}`}
                       </span>
-                      <strong style={{ fontSize: '1.05rem', color: idx === 0 ? '#713f12' : '#0f172a' }}>
+                      <span style={{ fontSize: '1.02rem', fontWeight: 600, color: idx === 0 ? '#713f12' : '#0f172a' }}>
                         {pz.reward}
-                      </strong>
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -345,7 +345,7 @@ export default function TournamentDetailModal({
                   <span className="badge-pill badge-white" style={{ marginBottom: '8px', display: 'inline-block' }}>
                     OFFICIAL TOURNAMENT SPECS
                   </span>
-                  <h4 style={{ margin: '4px 0 6px 0', fontSize: '1.08rem', fontWeight: 800, color: '#ffffff' }}>
+                  <h4 style={{ margin: '4px 0 6px 0', fontSize: '1.08rem', fontWeight: 650, color: '#ffffff' }}>
                     มาตรฐานสนามแข่งขันระดับ World Class LAN Arena
                   </h4>
                   <span style={{ fontSize: '0.84rem', color: '#cbd5e1', lineHeight: 1.5, display: 'block' }}>
@@ -361,7 +361,7 @@ export default function TournamentDetailModal({
                   title="คลิกเพื่อลงทะเบียนเข้าร่วมแข่งขัน"
                   style={{ background: '#ffffff', color: '#1d4ed8', border: '1.5px solid #e2e8f0' }}
                 >
-                  <span style={{ color: '#1d4ed8', fontWeight: 800, fontSize: '0.94rem' }}>สมัครลงแข่งรอบนี้</span>
+                  <span style={{ color: '#1d4ed8', fontWeight: 650, fontSize: '0.94rem' }}>สมัครลงแข่งรอบนี้</span>
                   <ArrowRight size={16} color="#1d4ed8" />
                 </button>
               </div>
