@@ -5509,11 +5509,16 @@
 .door-style-pills {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 4px;
+  gap: 6px;
 }
 .door-pill {
-  padding: 6px 4px;
-  font-size: 0.7rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 4px;
+  font-size: 0.68rem;
   font-weight: 600;
   border-radius: 6px;
   border: 1px solid #e2e8f0;
@@ -5521,8 +5526,9 @@
   color: #475569;
   cursor: pointer;
   transition: all 0.12s ease;
-  white-space: nowrap;
+  white-space: normal;
   text-align: center;
+  line-height: 1.25;
 }
 .door-pill:hover {
   background: #f0fdf4;

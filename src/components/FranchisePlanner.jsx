@@ -297,7 +297,7 @@ export default function FranchisePlanner() {
     wall: 'right', // 'front', 'right', 'left', 'back'
     offsetRatio: 0.75, // 0.15 to 0.85
     width: 1.4, // meters
-    style: 'wood', // 'wood', 'glass', 'auto-sliding'
+    style: 'glass-double', // 'glass-double', 'glass-single', 'auto-sliding' (กระจกติดฟิล์มดำ)
     storeName: 'GLP : G SPEED LIVING PLUS',
     signStyle: 'neon-lightbox' // 'neon-lightbox', 'acrylic-gold', 'minimal-dark', 'grand-arch'
   });
@@ -2752,19 +2752,19 @@ export default function FranchisePlanner() {
                         <div className="door-style-pills" style={{ marginTop: '8px' }}>
                           <button 
                             type="button"
-                            className={`door-pill ${doorConfig.style === 'wood' || !doorConfig.style ? 'active' : ''}`}
-                            onClick={() => setDoorConfig({ ...doorConfig, style: 'wood' })}
+                            className={`door-pill ${doorConfig.style === 'glass-single' || doorConfig.style === 'wood' ? 'active' : ''}`}
+                            onClick={() => setDoorConfig({ ...doorConfig, style: 'glass-single' })}
                           >
                             <DoorClosed size={14} />
-                            <span>บานไม้โมเดิร์น</span>
+                            <span>กระจกฟิล์มดำ (บานเดี่ยว)</span>
                           </button>
                           <button 
                             type="button"
-                            className={`door-pill ${doorConfig.style === 'glass' ? 'active' : ''}`}
-                            onClick={() => setDoorConfig({ ...doorConfig, style: 'glass' })}
+                            className={`door-pill ${doorConfig.style === 'glass-double' || doorConfig.style === 'glass' || !doorConfig.style ? 'active' : ''}`}
+                            onClick={() => setDoorConfig({ ...doorConfig, style: 'glass-double' })}
                           >
                             <SplitSquareVertical size={14} />
-                            <span>กระจกใสบานคู่</span>
+                            <span>กระจก 2 บาน (ฟิล์มดำ)</span>
                           </button>
                           <button 
                             type="button"
@@ -2772,7 +2772,7 @@ export default function FranchisePlanner() {
                             onClick={() => setDoorConfig({ ...doorConfig, style: 'auto-sliding' })}
                           >
                             <Sliders size={14} />
-                            <span>บานเลื่อนออโต้</span>
+                            <span>บานเลื่อนออโต้ (ฟิล์มดำ)</span>
                           </button>
                         </div>
                       </div>
@@ -3073,7 +3073,7 @@ export default function FranchisePlanner() {
                                      doorConfig.wall === 'back' ? 'ผนังหลัง' : 'ผนังขวา'} {Math.round((doorConfig.offsetRatio ?? 0.75) * 100)}%
                                   </span>
                                   <span className="installed-tag tag-dim">
-                                    {doorConfig.style === 'glass' ? 'กระจกคู่' : doorConfig.style === 'auto-sliding' ? 'บานเลื่อน' : 'บานไม้'}
+                                    {(doorConfig.style === 'glass-double' || doorConfig.style === 'glass' || !doorConfig.style) ? 'กระจก 2 บาน (ฟิล์มดำ)' : doorConfig.style === 'auto-sliding' ? 'บานเลื่อนออโต้ (ฟิล์มดำ)' : 'กระจกฟิล์มดำ (บานเดี่ยว)'}
                                   </span>
                                 </div>
                               </div>

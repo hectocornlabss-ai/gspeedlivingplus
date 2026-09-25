@@ -855,22 +855,31 @@ export default function Room3DStudio({
     const activeWall = doorConfig?.wall || 'right';
     const doorW = Math.max(1.0, Math.min(2.4, doorConfig?.width || 1.4));
     const doorRatio = Math.max(0.15, Math.min(0.85, doorConfig?.offsetRatio ?? 0.75));
-    const doorStyle = doorConfig?.style || 'wood';
+    const doorStyle = doorConfig?.style || 'glass-double';
     const doorHeight = 2.2;
     const lintelHeight = wallHeight - doorHeight; // 0.6m
 
-    // Materials for Door, Frame, and Entrance Accents
-    const doorFrameMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.35, metalness: 0.2 });
-    const doorWoodMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.55, metalness: 0.05 });
-    const doorGlassMat = new THREE.MeshPhysicalMaterial({
-      color: 0x93c5fd,
-      transmission: 0.92,
-      opacity: 0.4,
+    // Materials for Commercial Esport Storefront Doors
+    // 1. Dark Anodized Aluminum Frame & Clamp Rails
+    const doorFrameMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.35, metalness: 0.4 });
+    const clampRailMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.3, metalness: 0.75 });
+    
+    // 2. Black Tinted Film Glass (กระจกติดฟิล์มดำกรองแสงสะท้อนแสงเงาสำหรับร้านเกมอีสปอร์ต)
+    const doorTintedGlassMat = new THREE.MeshPhysicalMaterial({
+      color: 0x070c14,
+      transmission: 0.62,
+      opacity: 0.94,
       transparent: true,
-      roughness: 0.08,
-      ior: 1.52
+      roughness: 0.03,
+      metalness: 0.25,
+      reflectivity: 0.95,
+      ior: 1.55,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.03
     });
-    const handleMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.85, roughness: 0.15 });
+
+    // 3. Brushed Stainless Steel Long Tubular Pull Handle (มือจับก้านยาวสเตนเลสเกรด 304)
+    const handleMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, metalness: 0.95, roughness: 0.1 });
     const ledThresholdMat = new THREE.MeshBasicMaterial({ color: 0x10b981 }); // Emerald glow
 
     // Entrance textures
@@ -884,7 +893,7 @@ export default function Room3DStudio({
       assembly.position.set(posX, 0, posZ);
       assembly.rotation.y = rotY;
 
-      // 1. Door Frame Jambs and Header
+      // 1. Door Frame Jambs and Header (Black Aluminum Storefront Frame)
       const jambThick = 0.08;
       const jambDepth = wallThick + 0.04;
 
@@ -905,84 +914,171 @@ export default function Room3DStudio({
       thresholdMesh.position.set(0, 0.01, 0);
       assembly.add(thresholdMesh);
 
+      // Shared Decal Material
+      const sharedDecalMat = new THREE.MeshBasicMaterial({
+        map: glassDecalTex,
+        transparent: true,
+        opacity: 0.95,
+        depthWrite: false,
+        side: THREE.DoubleSide
+      });
+
       // 2. Door Panels (Leaves)
-      if (doorStyle === 'wood') {
-        // Single Wood Door open slightly inward (32 deg)
+      if (doorStyle === 'wood' || doorStyle === 'glass-single') {
+        // STYLE 1: กระจกติดฟิล์มดำ (บานเดี่ยว) พร้อมรางหนีบล่าง-บนสีดำและมือจับก้านยาวสเตนเลส
         const leafW = doorW - (jambThick * 2);
         const leafH = doorHeight - jambThick;
-        const woodLeaf = new THREE.Mesh(new THREE.BoxGeometry(leafW, leafH, 0.06), doorWoodMat);
-        woodLeaf.castShadow = true;
+        const glassH = leafH - 0.16;
 
         const hingeGroup = new THREE.Group();
         hingeGroup.position.set(-doorW / 2 + jambThick, 0, 0);
-        woodLeaf.position.set(leafW / 2, leafH / 2, 0);
-        hingeGroup.add(woodLeaf);
 
-        // Stainless steel pull handle
-        const handle = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.45, 0.12), handleMat);
-        handle.position.set(leafW - 0.12, leafH * 0.48, 0);
-        hingeGroup.add(handle);
+        // Black Tinted Glass Panel
+        const glassMesh = new THREE.Mesh(new THREE.BoxGeometry(leafW, glassH, 0.025), doorTintedGlassMat);
+        glassMesh.position.set(leafW / 2, leafH / 2, 0);
+        glassMesh.castShadow = true;
+        hingeGroup.add(glassMesh);
 
-        hingeGroup.rotation.y = 0.55; // Open inward
+        // Top & Bottom Aluminum Clamp Rails (Patch Fittings)
+        const topRail = new THREE.Mesh(new THREE.BoxGeometry(leafW, 0.08, 0.045), clampRailMat);
+        topRail.position.set(leafW / 2, leafH - 0.04, 0);
+        hingeGroup.add(topRail);
+
+        const btmRail = new THREE.Mesh(new THREE.BoxGeometry(leafW, 0.08, 0.045), clampRailMat);
+        btmRail.position.set(leafW / 2, 0.04, 0);
+        hingeGroup.add(btmRail);
+
+        // Long Stainless Steel Pull Handle (Inside & Outside)
+        const handleGroup = new THREE.Group();
+        handleGroup.position.set(leafW - 0.12, leafH * 0.48, 0);
+        
+        const frontBar = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.85, 16), handleMat);
+        frontBar.position.set(0, 0, 0.045);
+        handleGroup.add(frontBar);
+
+        const backBar = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.85, 16), handleMat);
+        backBar.position.set(0, 0, -0.045);
+        handleGroup.add(backBar);
+
+        const topMount = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.10, 12), handleMat);
+        topMount.rotation.x = Math.PI / 2;
+        topMount.position.set(0, 0.32, 0);
+        handleGroup.add(topMount);
+
+        const btmMount = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.10, 12), handleMat);
+        btmMount.rotation.x = Math.PI / 2;
+        btmMount.position.set(0, -0.32, 0);
+        handleGroup.add(btmMount);
+
+        hingeGroup.add(handleGroup);
+
+        // Store Logo / Name Decal Sticker
+        const decalW = Math.min(leafW * 0.75, 0.52);
+        const decalMesh = new THREE.Mesh(new THREE.PlaneGeometry(decalW, decalW), sharedDecalMat);
+        decalMesh.position.set(leafW / 2, leafH * 0.54, 0.015);
+        hingeGroup.add(decalMesh);
+
+        hingeGroup.rotation.y = 0.46; // Open inward into arena
         assembly.add(hingeGroup);
-      } else if (doorStyle === 'glass') {
-        // Frameless Glass Double Door
-        const halfLeafW = (doorW - (jambThick * 2) - 0.04) / 2;
+
+      } else if (doorStyle === 'glass' || doorStyle === 'glass-double') {
+        // STYLE 2: กระจก 2 บาน ติดฟิล์มดำ (บานคู่) พร้อมรางหนีบและมือจับคู่สเตนเลสยาว
+        const halfLeafW = (doorW - (jambThick * 2) - 0.03) / 2;
         const leafH = doorHeight - jambThick;
+        const glassH = leafH - 0.16;
 
-        // Shared Glass Door Sticker Decal Material
-        const decalW = Math.min(halfLeafW * 0.85, 0.42);
-        const decalH = 0.42;
-        const decalGeo = new THREE.PlaneGeometry(decalW, decalH);
-        const decalMat = new THREE.MeshBasicMaterial({
-          map: glassDecalTex,
-          transparent: true,
-          opacity: 0.92,
-          depthWrite: false,
-          side: THREE.DoubleSide
-        });
+        const decalW = Math.min(halfLeafW * 0.82, 0.42);
 
-        // Left Leaf
+        // --- Left Leaf ---
         const leftHinge = new THREE.Group();
         leftHinge.position.set(-doorW / 2 + jambThick, 0, 0);
-        const leftLeaf = new THREE.Mesh(new THREE.BoxGeometry(halfLeafW, leafH, 0.035), doorGlassMat);
-        leftLeaf.position.set(halfLeafW / 2, leafH / 2, 0);
-        leftHinge.add(leftLeaf);
-        const leftHandle = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.65, 12), handleMat);
-        leftHandle.position.set(halfLeafW - 0.08, leafH * 0.48, 0.04);
-        leftHinge.add(leftHandle);
 
-        // Store Logo / Name Decal Sticker on Left Leaf
-        const leftDecal = new THREE.Mesh(decalGeo, decalMat);
-        leftDecal.position.set(halfLeafW / 2, leafH * 0.55, 0.02);
+        const leftGlass = new THREE.Mesh(new THREE.BoxGeometry(halfLeafW, glassH, 0.025), doorTintedGlassMat);
+        leftGlass.position.set(halfLeafW / 2, leafH / 2, 0);
+        leftHinge.add(leftGlass);
+
+        const leftTopRail = new THREE.Mesh(new THREE.BoxGeometry(halfLeafW, 0.08, 0.045), clampRailMat);
+        leftTopRail.position.set(halfLeafW / 2, leafH - 0.04, 0);
+        leftHinge.add(leftTopRail);
+
+        const leftBtmRail = new THREE.Mesh(new THREE.BoxGeometry(halfLeafW, 0.08, 0.045), clampRailMat);
+        leftBtmRail.position.set(halfLeafW / 2, 0.04, 0);
+        leftHinge.add(leftBtmRail);
+
+        // Left Handle Group
+        const leftHandleGroup = new THREE.Group();
+        leftHandleGroup.position.set(halfLeafW - 0.08, leafH * 0.48, 0);
+        const leftFrontBar = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.85, 16), handleMat);
+        leftFrontBar.position.set(0, 0, 0.045);
+        leftHandleGroup.add(leftFrontBar);
+        const leftBackBar = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.85, 16), handleMat);
+        leftBackBar.position.set(0, 0, -0.045);
+        leftHandleGroup.add(leftBackBar);
+        const leftTopMount = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.10, 12), handleMat);
+        leftTopMount.rotation.x = Math.PI / 2;
+        leftTopMount.position.set(0, 0.32, 0);
+        leftHandleGroup.add(leftTopMount);
+        const leftBtmMount = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.10, 12), handleMat);
+        leftBtmMount.rotation.x = Math.PI / 2;
+        leftBtmMount.position.set(0, -0.32, 0);
+        leftHandleGroup.add(leftBtmMount);
+        leftHinge.add(leftHandleGroup);
+
+        const leftDecal = new THREE.Mesh(new THREE.PlaneGeometry(decalW, decalW), sharedDecalMat);
+        leftDecal.position.set(halfLeafW / 2, leafH * 0.54, 0.015);
         leftHinge.add(leftDecal);
 
-        leftHinge.rotation.y = 0.45;
+        leftHinge.rotation.y = 0.40;
         assembly.add(leftHinge);
 
-        // Right Leaf
+        // --- Right Leaf ---
         const rightHinge = new THREE.Group();
         rightHinge.position.set(doorW / 2 - jambThick, 0, 0);
-        const rightLeaf = new THREE.Mesh(new THREE.BoxGeometry(halfLeafW, leafH, 0.035), doorGlassMat);
-        rightLeaf.position.set(-halfLeafW / 2, leafH / 2, 0);
-        rightHinge.add(rightLeaf);
-        const rightHandle = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.65, 12), handleMat);
-        rightHandle.position.set(-halfLeafW + 0.08, leafH * 0.48, 0.04);
-        rightHinge.add(rightHandle);
 
-        // Store Logo / Name Decal Sticker on Right Leaf
-        const rightDecal = new THREE.Mesh(decalGeo, decalMat);
-        rightDecal.position.set(-halfLeafW / 2, leafH * 0.55, 0.02);
+        const rightGlass = new THREE.Mesh(new THREE.BoxGeometry(halfLeafW, glassH, 0.025), doorTintedGlassMat);
+        rightGlass.position.set(-halfLeafW / 2, leafH / 2, 0);
+        rightHinge.add(rightGlass);
+
+        const rightTopRail = new THREE.Mesh(new THREE.BoxGeometry(halfLeafW, 0.08, 0.045), clampRailMat);
+        rightTopRail.position.set(-halfLeafW / 2, leafH - 0.04, 0);
+        rightHinge.add(rightTopRail);
+
+        const rightBtmRail = new THREE.Mesh(new THREE.BoxGeometry(halfLeafW, 0.08, 0.045), clampRailMat);
+        rightBtmRail.position.set(-halfLeafW / 2, 0.04, 0);
+        rightHinge.add(rightBtmRail);
+
+        // Right Handle Group
+        const rightHandleGroup = new THREE.Group();
+        rightHandleGroup.position.set(-halfLeafW + 0.08, leafH * 0.48, 0);
+        const rightFrontBar = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.85, 16), handleMat);
+        rightFrontBar.position.set(0, 0, 0.045);
+        rightHandleGroup.add(rightFrontBar);
+        const rightBackBar = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.85, 16), handleMat);
+        rightBackBar.position.set(0, 0, -0.045);
+        rightHandleGroup.add(rightBackBar);
+        const rightTopMount = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.10, 12), handleMat);
+        rightTopMount.rotation.x = Math.PI / 2;
+        rightTopMount.position.set(0, 0.32, 0);
+        rightHandleGroup.add(rightTopMount);
+        const rightBtmMount = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.10, 12), handleMat);
+        rightBtmMount.rotation.x = Math.PI / 2;
+        rightBtmMount.position.set(0, -0.32, 0);
+        rightHandleGroup.add(rightBtmMount);
+        rightHinge.add(rightHandleGroup);
+
+        const rightDecal = new THREE.Mesh(new THREE.PlaneGeometry(decalW, decalW), sharedDecalMat);
+        rightDecal.position.set(-halfLeafW / 2, leafH * 0.54, 0.015);
         rightHinge.add(rightDecal);
 
-        rightHinge.rotation.y = -0.45;
+        rightHinge.rotation.y = -0.40;
         assembly.add(rightHinge);
+
       } else {
-        // Automatic Sliding Glass Door
+        // STYLE 3: บานเลื่อนอัตโนมัติ (กระจกฟิล์มดำ) พร้อมเซนเซอร์เรดาร์ด้านบน
         const halfLeafW = (doorW - (jambThick * 2)) / 2;
         const leafH = doorHeight - jambThick;
 
-        const sensorBox = new THREE.Mesh(new THREE.BoxGeometry(doorW + 0.2, 0.12, 0.14), doorFrameMat);
+        const sensorBox = new THREE.Mesh(new THREE.BoxGeometry(doorW + 0.25, 0.12, 0.14), doorFrameMat);
         sensorBox.position.set(0, doorHeight + 0.06, 0);
         assembly.add(sensorBox);
 
@@ -990,29 +1086,21 @@ export default function Room3DStudio({
         sensorLed.position.set(0, doorHeight + 0.06, 0);
         assembly.add(sensorLed);
 
-        // Shared Glass Sticker Decal
         const decalW = Math.min(halfLeafW * 0.85, 0.42);
-        const decalH = 0.42;
-        const decalGeo = new THREE.PlaneGeometry(decalW, decalH);
-        const decalMat = new THREE.MeshBasicMaterial({
-          map: glassDecalTex,
-          transparent: true,
-          opacity: 0.92,
-          depthWrite: false,
-          side: THREE.DoubleSide
-        });
 
-        const leftPanel = new THREE.Mesh(new THREE.BoxGeometry(halfLeafW, leafH, 0.03), doorGlassMat);
+        // Left Sliding Tinted Glass Panel (partially slid open)
+        const leftPanel = new THREE.Mesh(new THREE.BoxGeometry(halfLeafW, leafH, 0.025), doorTintedGlassMat);
         leftPanel.position.set(-halfLeafW * 0.75, leafH / 2, 0.02);
-        const leftDecal = new THREE.Mesh(decalGeo, decalMat);
-        leftDecal.position.set(0, 0.05, 0.02);
+        const leftDecal = new THREE.Mesh(new THREE.PlaneGeometry(decalW, decalW), sharedDecalMat);
+        leftDecal.position.set(0, 0.05, 0.015);
         leftPanel.add(leftDecal);
         assembly.add(leftPanel);
 
-        const rightPanel = new THREE.Mesh(new THREE.BoxGeometry(halfLeafW, leafH, 0.03), doorGlassMat);
+        // Right Sliding Tinted Glass Panel (partially slid open)
+        const rightPanel = new THREE.Mesh(new THREE.BoxGeometry(halfLeafW, leafH, 0.025), doorTintedGlassMat);
         rightPanel.position.set(halfLeafW * 0.75, leafH / 2, -0.02);
-        const rightDecal = new THREE.Mesh(decalGeo, decalMat);
-        rightDecal.position.set(0, 0.05, 0.02);
+        const rightDecal = new THREE.Mesh(new THREE.PlaneGeometry(decalW, decalW), sharedDecalMat);
+        rightDecal.position.set(0, 0.05, 0.015);
         rightPanel.add(rightDecal);
         assembly.add(rightPanel);
       }
@@ -2472,19 +2560,19 @@ export default function Room3DStudio({
                 <div className="door-style-row">
                   <button 
                     type="button" 
-                    className={`door-style-btn ${doorConfig?.style === 'wood' || !doorConfig?.style ? 'active' : ''}`}
-                    onClick={() => onChangeDoorConfig({ ...doorConfig, style: 'wood' })}
+                    className={`door-style-btn ${doorConfig?.style === 'glass-single' || doorConfig?.style === 'wood' ? 'active' : ''}`}
+                    onClick={() => onChangeDoorConfig({ ...doorConfig, style: 'glass-single' })}
                   >
                     <DoorClosed size={15} />
-                    <span>บานไม้โมเดิร์น</span>
+                    <span>กระจกติดฟิล์มดำ (บานเดี่ยว)</span>
                   </button>
                   <button 
                     type="button" 
-                    className={`door-style-btn ${doorConfig?.style === 'glass' ? 'active' : ''}`}
-                    onClick={() => onChangeDoorConfig({ ...doorConfig, style: 'glass' })}
+                    className={`door-style-btn ${doorConfig?.style === 'glass-double' || doorConfig?.style === 'glass' || !doorConfig?.style ? 'active' : ''}`}
+                    onClick={() => onChangeDoorConfig({ ...doorConfig, style: 'glass-double' })}
                   >
                     <SplitSquareVertical size={15} />
-                    <span>กระจกใสบานคู่</span>
+                    <span>กระจก 2 บาน (ติดฟิล์มดำ)</span>
                   </button>
                   <button 
                     type="button" 
@@ -2492,7 +2580,7 @@ export default function Room3DStudio({
                     onClick={() => onChangeDoorConfig({ ...doorConfig, style: 'auto-sliding' })}
                   >
                     <Sliders size={15} />
-                    <span>บานเลื่อนออโต้</span>
+                    <span>บานเลื่อนอัตโนมัติ (ฟิล์มดำ)</span>
                   </button>
                 </div>
               </div>
