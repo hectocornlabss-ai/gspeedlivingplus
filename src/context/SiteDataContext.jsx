@@ -1412,27 +1412,6 @@ export function SiteDataProvider({ children }) {
     }));
   };
 
-  // PC Hardware Tiers Handlers
-  const updateHardwareTier = (tierKey, updatedFields) => {
-    setSiteData(prev => ({
-      ...prev,
-      hardwareTiers: {
-        ...(prev.hardwareTiers || INITIAL_TIERS),
-        [tierKey]: {
-          ...((prev.hardwareTiers || INITIAL_TIERS)[tierKey] || {}),
-          ...updatedFields
-        }
-      }
-    }));
-  };
-
-  const resetHardwareTiers = () => {
-    setSiteData(prev => ({
-      ...prev,
-      hardwareTiers: INITIAL_TIERS
-    }));
-  };
-
   // OpenRouter & Webhook Handlers
   const updateOpenRouterSettings = (settings) => {
     setSiteData(prev => ({
@@ -2205,8 +2184,6 @@ export function SiteDataProvider({ children }) {
     updateStationStatus,
     addRMAClaim,
     updateRMAClaim,
-    updateHardwareTier,
-    resetHardwareTiers,
     saveSiteData,
     resetToDefaults
   };
