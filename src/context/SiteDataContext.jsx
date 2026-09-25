@@ -939,13 +939,33 @@ export function SiteDataProvider({ children }) {
           merged.tournaments = merged.tournaments.map(t => {
             const def = INITIAL_TOURNAMENTS.find(it => it.id === t.id);
             const slug = t.slug || t.seo?.slug || (def && def.slug) || (t.title ? t.title.toLowerCase().replace(/[^a-z0-9\u0E00-\u0E7F]+/g, '-').replace(/(^-|-$)/g, '') : t.id);
+            const isOpen = (t.status || (def && def.status)) === 'Open';
+            let currentBracketMatches = (t.bracketMatches && t.bracketMatches.length > 0) ? t.bracketMatches : (def ? (def.bracketMatches || []) : []);
+            let currentTeams = (t.teams && t.teams.length > 0) ? t.teams : (def ? (def.teams || []) : []);
+
+            if (isOpen) {
+              currentBracketMatches = currentBracketMatches.map(m => ({
+                ...m,
+                status: 'Upcoming',
+                teamA: m.teamA ? { ...m.teamA, score: 0, isWinner: false } : null,
+                teamB: m.teamB ? { ...m.teamB, score: 0, isWinner: false } : null,
+                maps: [],
+                mvp: null
+              }));
+              currentTeams = currentTeams.map(tm => ({
+                ...tm,
+                wins: 0,
+                losses: 0
+              }));
+            }
+
             if (def) {
               return {
                 ...def,
                 ...t,
                 slug,
-                teams: (t.teams && t.teams.length > 0) ? t.teams : def.teams,
-                bracketMatches: (t.bracketMatches && t.bracketMatches.length > 0) ? t.bracketMatches : (def.bracketMatches || []),
+                teams: currentTeams,
+                bracketMatches: currentBracketMatches,
                 galleryPhotos: (t.galleryPhotos && t.galleryPhotos.length > 0) ? t.galleryPhotos : def.galleryPhotos,
                 rules: (t.rules && t.rules.length > 0) ? t.rules : def.rules,
                 prizeDistribution: (t.prizeDistribution && t.prizeDistribution.length > 0) ? t.prizeDistribution : def.prizeDistribution,
@@ -954,8 +974,8 @@ export function SiteDataProvider({ children }) {
               };
             }
             return {
-              teams: [],
-              bracketMatches: [],
+              teams: currentTeams,
+              bracketMatches: currentBracketMatches,
               galleryPhotos: [],
               rules: [],
               prizeDistribution: [],

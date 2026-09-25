@@ -1412,13 +1412,13 @@ export default function TournamentDetailModal({
 
           {/* Large Image Container */}
           <div 
-            style={{ position: 'relative', maxWidth: '90vw', maxHeight: '78vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            style={{ position: 'relative', maxWidth: 'min(1280px, 94vw)', maxHeight: 'min(720px, 80vh)', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             onClick={e => e.stopPropagation()}
           >
             <img 
               src={tournament.galleryPhotos[lightboxIndex].url} 
               alt={tournament.galleryPhotos[lightboxIndex].caption}
-              style={{ maxWidth: '100%', maxHeight: '78vh', objectFit: 'contain', borderRadius: '8px', boxShadow: '0 20px 50px rgba(0,0,0,0.8)' }}
+              style={{ maxWidth: '1280px', width: '100%', maxHeight: 'min(720px, 78vh)', objectFit: 'contain', borderRadius: '12px', boxShadow: '0 25px 60px rgba(0,0,0,0.85)', background: '#000000' }}
             />
 
             {/* Prev Button */}

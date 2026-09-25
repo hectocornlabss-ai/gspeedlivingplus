@@ -205,7 +205,7 @@ export const VALORANT_BRACKET_MATCHES = [
     nextMatchId: 'm-sf1',
     nextMatchSlot: 'teamA',
     time: '28 ก.ย. 2026 • 11:00 น.',
-    status: 'Finished',
+    status: 'Upcoming',
     stage: 'Main Stage LAN (Booth A vs B)',
     streamUrl: 'https://twitch.tv/gspeed_esport',
     format: 'Best of 3 (BO3)',
@@ -215,8 +215,8 @@ export const VALORANT_BRACKET_MATCHES = [
       tag: 'TLN',
       logo: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80',
       seed: 1,
-      score: 2,
-      isWinner: true
+      score: 0,
+      isWinner: false
     },
     teamB: {
       id: 'team-8',
@@ -227,16 +227,8 @@ export const VALORANT_BRACKET_MATCHES = [
       score: 0,
       isWinner: false
     },
-    maps: [
-      { mapName: 'Bind', scoreA: 13, scoreB: 8, winner: 'TLN' },
-      { mapName: 'Ascent', scoreA: 13, scoreB: 6, winner: 'TLN' }
-    ],
-    mvp: {
-      name: 'SScary',
-      teamTag: 'TLN',
-      stats: '41 Kills / 16 Deaths • 1.48 Rating',
-      role: 'Controller / IGL'
-    }
+    maps: [],
+    mvp: null
   },
   {
     id: 'm-qf2',
@@ -247,7 +239,7 @@ export const VALORANT_BRACKET_MATCHES = [
     nextMatchId: 'm-sf1',
     nextMatchSlot: 'teamB',
     time: '28 ก.ย. 2026 • 13:30 น.',
-    status: 'Finished',
+    status: 'Upcoming',
     stage: 'Main Stage LAN (Booth A vs B)',
     streamUrl: 'https://twitch.tv/gspeed_esport',
     format: 'Best of 3 (BO3)',
@@ -257,8 +249,8 @@ export const VALORANT_BRACKET_MATCHES = [
       tag: 'MiTH',
       logo: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=150&q=80',
       seed: 4,
-      score: 2,
-      isWinner: true
+      score: 0,
+      isWinner: false
     },
     teamB: {
       id: 'team-5',
@@ -266,20 +258,11 @@ export const VALORANT_BRACKET_MATCHES = [
       tag: 'GLP',
       logo: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=150&q=80',
       seed: 5,
-      score: 1,
+      score: 0,
       isWinner: false
     },
-    maps: [
-      { mapName: 'Haven', scoreA: 13, scoreB: 11, winner: 'MiTH' },
-      { mapName: 'Sunset', scoreA: 9, scoreB: 13, winner: 'GLP' },
-      { mapName: 'Lotus', scoreA: 14, scoreB: 12, winner: 'MiTH' }
-    ],
-    mvp: {
-      name: 'Kadoom',
-      teamTag: 'MiTH',
-      stats: '68 Kills / 42 Deaths • 1.39 Rating',
-      role: 'Duelist (Jett)'
-    }
+    maps: [],
+    mvp: null
   },
   {
     id: 'm-qf3',
@@ -290,7 +273,7 @@ export const VALORANT_BRACKET_MATCHES = [
     nextMatchId: 'm-sf2',
     nextMatchSlot: 'teamA',
     time: '28 ก.ย. 2026 • 16:00 น.',
-    status: 'LIVE',
+    status: 'Upcoming',
     stage: 'Main Stage LAN (Booth A vs B)',
     streamUrl: 'https://twitch.tv/gspeed_esport',
     format: 'Best of 3 (BO3)',
@@ -300,7 +283,7 @@ export const VALORANT_BRACKET_MATCHES = [
       tag: 'FS',
       logo: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=150&q=80',
       seed: 2,
-      score: 1,
+      score: 0,
       isWinner: false
     },
     teamB: {
@@ -309,20 +292,11 @@ export const VALORANT_BRACKET_MATCHES = [
       tag: 'HX',
       logo: 'https://images.unsplash.com/photo-1511882150382-421056c89033?auto=format&fit=crop&w=150&q=80',
       seed: 7,
-      score: 1,
+      score: 0,
       isWinner: false
     },
-    maps: [
-      { mapName: 'Abyss', scoreA: 13, scoreB: 9, winner: 'FS' },
-      { mapName: 'Split', scoreA: 10, scoreB: 13, winner: 'HX' },
-      { mapName: 'Ascent (Decider)', scoreA: 11, scoreB: 10, winner: null, isCurrent: true }
-    ],
-    mvp: {
-      name: 'JohnOlsen',
-      teamTag: 'FS',
-      stats: '49 Kills • กำลังแข่งแมตช์ตัดสิน Map 3',
-      role: 'Initiator'
-    }
+    maps: [],
+    mvp: null
   },
   {
     id: 'm-qf4',
@@ -355,10 +329,7 @@ export const VALORANT_BRACKET_MATCHES = [
       score: 0,
       isWinner: false
     },
-    maps: [
-      { mapName: 'Haven', scoreA: 0, scoreB: 0, winner: null },
-      { mapName: 'Bind', scoreA: 0, scoreB: 0, winner: null }
-    ],
+    maps: [],
     mvp: null
   },
 
@@ -377,20 +348,20 @@ export const VALORANT_BRACKET_MATCHES = [
     streamUrl: 'https://twitch.tv/gspeed_esport',
     format: 'Best of 3 (BO3)',
     teamA: {
-      id: 'team-1',
-      name: 'Talon Academy',
-      tag: 'TLN',
-      logo: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80',
-      seed: 1,
+      id: null,
+      name: 'ผู้ชนะ QF 1',
+      tag: 'TBD',
+      logo: '',
+      seed: null,
       score: 0,
       isWinner: false
     },
     teamB: {
-      id: 'team-4',
-      name: 'Made in Thailand (MiTH)',
-      tag: 'MiTH',
-      logo: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=150&q=80',
-      seed: 4,
+      id: null,
+      name: 'ผู้ชนะ QF 2',
+      tag: 'TBD',
+      logo: '',
+      seed: null,
       score: 0,
       isWinner: false
     },
@@ -412,7 +383,7 @@ export const VALORANT_BRACKET_MATCHES = [
     format: 'Best of 3 (BO3)',
     teamA: {
       id: null,
-      name: 'ผู้ชนะ QF 3 (FS หรือ HX)',
+      name: 'ผู้ชนะ QF 3',
       tag: 'TBD',
       logo: '',
       seed: null,
@@ -421,7 +392,7 @@ export const VALORANT_BRACKET_MATCHES = [
     },
     teamB: {
       id: null,
-      name: 'ผู้ชนะ QF 4 (XIA หรือ RKH)',
+      name: 'ผู้ชนะ QF 4',
       tag: 'TBD',
       logo: '',
       seed: null,
@@ -696,7 +667,7 @@ export const TOURNAMENTS = [
         captainDiscord: 'sscary#0001',
         players: ['SScary', 'Crws', 'JitboyS', 'foxz', 'garnetS'],
         substitutes: ['Governor'],
-        wins: 5,
+        wins: 0,
         losses: 0
       },
       {
@@ -711,8 +682,8 @@ export const TOURNAMENTS = [
         captainDiscord: 'johnolsen#1122',
         players: ['JohnOlsen', 'PTC', 'Leviathan', 'ApeX', 'ChAlalala'],
         substitutes: ['LAMMYSNAX'],
-        wins: 4,
-        losses: 1
+        wins: 0,
+        losses: 0
       },
       {
         id: 'team-3',
@@ -726,8 +697,8 @@ export const TOURNAMENTS = [
         captainDiscord: 'surf#4321',
         players: ['Surf', 'aRoche', 'b3ta', 'Siraphop', 'PPOverdose'],
         substitutes: ['xNova'],
-        wins: 3,
-        losses: 2
+        wins: 0,
+        losses: 0
       },
       {
         id: 'team-4',
@@ -741,8 +712,8 @@ export const TOURNAMENTS = [
         captainDiscord: 'kadoom#9999',
         players: ['Kadoom', 'Delph1x', 'Kongared', 'Wannafly', 'CigaretteS'],
         substitutes: ['ViperX'],
-        wins: 3,
-        losses: 2
+        wins: 0,
+        losses: 0
       },
       {
         id: 'team-5',
@@ -756,8 +727,8 @@ export const TOURNAMENTS = [
         captainDiscord: 'speedy#2026',
         players: ['SpeedyKnight', 'CyberViper', 'NeonPulse', 'PhantomShot', 'Valkyrie99'],
         substitutes: ['GhostAim'],
-        wins: 2,
-        losses: 1
+        wins: 0,
+        losses: 0
       },
       {
         id: 'team-6',
@@ -771,8 +742,8 @@ export const TOURNAMENTS = [
         captainDiscord: 'titan_cap#5555',
         players: ['BangkokBlade', 'ShadowStrike', 'IronShield', 'FrostBite', 'ThunderBolt'],
         substitutes: ['SolarFlare'],
-        wins: 2,
-        losses: 2
+        wins: 0,
+        losses: 0
       },
       {
         id: 'team-7',
@@ -786,8 +757,8 @@ export const TOURNAMENTS = [
         captainDiscord: 'hx_aim#7788',
         players: ['PredatorAim', 'SwiftShot', 'Vortex', 'Blitzkrieg', 'NightHawk'],
         substitutes: ['ShadowX'],
-        wins: 2,
-        losses: 2
+        wins: 0,
+        losses: 0
       },
       {
         id: 'team-8',
@@ -801,8 +772,8 @@ export const TOURNAMENTS = [
         captainDiscord: 'ronin_zero#0088',
         players: ['RoninZero', 'Katana', 'Bushido', 'SilentCut', 'MistWalker'],
         substitutes: ['ShadowRonin'],
-        wins: 1,
-        losses: 3
+        wins: 0,
+        losses: 0
       }
     ],
     bracketMatches: VALORANT_BRACKET_MATCHES,
@@ -1059,10 +1030,10 @@ export const GALLERY_ACTIVITIES = [
       'ทีมชนะเลิศอันดับหนึ่งคว้าเงินรางวัล ฿30,000 พร้อมถ้วยเกียรติยศและเซ็ตเกมมิ่งเกียร์ไร้สายจาก ASUS ROG ไปครอง ทางทีมงานขอแสดงความยินดีกับผู้ชนะทุกทีม และขอบคุณผู้สนับสนุนที่ร่วมสร้างปรากฏการณ์สุดมันส์ในครั้งนี้'
     ],
     galleryPhotos: [
-      { url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80', caption: 'นักกีฬาอีสปอร์ตกำลังขับเคี่ยวอย่างดุเดือดในรอบชิงชนะเลิศ' },
-      { url: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80', caption: 'จอ LED 4K ขนาดยักษ์ถ่ายทอดสดมุมมองผู้เล่นแบบเรียลไทม์' },
-      { url: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80', caption: 'เครื่องคอมพิวเตอร์สเปกแข่งขัน RTX 4080 และจอ 360Hz' },
-      { url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80', caption: 'บรรยากาศกองเชียร์และผู้ร่วมงานแน่นขนัดทั่วทั้งร้าน' }
+      { url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1600&q=85', caption: 'นักกีฬาอีสปอร์ตกำลังขับเคี่ยวอย่างดุเดือดในรอบชิงชนะเลิศ' },
+      { url: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1600&q=85', caption: 'จอ LED 4K ขนาดยักษ์ถ่ายทอดสดมุมมองผู้เล่นแบบเรียลไทม์' },
+      { url: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1600&q=85', caption: 'เครื่องคอมพิวเตอร์สเปกแข่งขัน RTX 4080 และจอ 360Hz' },
+      { url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1600&q=85', caption: 'บรรยากาศกองเชียร์และผู้ร่วมงานแน่นขนัดทั่วทั้งร้าน' }
     ]
   },
   {
@@ -1088,9 +1059,9 @@ export const GALLERY_ACTIVITIES = [
       'การแข่งขันรอบออฟไลน์ไฟนอลดำเนินไปอย่างตื่นเต้นเร้าใจ มีการใช้ระบบ Observer บรอดแคสต์มืออาชีพพร้อมแคสเตอร์ชื่อดังมาพากย์สดในสตูดิโอบาร์ของร้าน ผู้ชนะเลิศได้รับสิทธิ์เป็นตัวแทนประเทศไทยไปลุยต่อในเวทีระดับนานาชาติ'
     ],
     galleryPhotos: [
-      { url: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80', caption: 'เวทีหลักกับการแข่งขันรอบตัดสินชิงตั๋วสู่เอเชีย' },
-      { url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80', caption: 'ผู้เข้าแข่งขันสวมหูฟังตัดเสียงรบกวน วางแผนเอาตัวรอด' },
-      { url: 'https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=800&q=80', caption: 'พิธีมอบถ้วยแชมป์และเงินรางวัลสนับสนุนจาก Predator' }
+      { url: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1600&q=85', caption: 'เวทีหลักกับการแข่งขันรอบตัดสินชิงตั๋วสู่เอเชีย' },
+      { url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1600&q=85', caption: 'ผู้เข้าแข่งขันสวมหูฟังตัดเสียงรบกวน วางแผนเอาตัวรอด' },
+      { url: 'https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=1600&q=85', caption: 'พิธีมอบถ้วยแชมป์และเงินรางวัลสนับสนุนจาก Predator' }
     ]
   },
   {
@@ -1115,8 +1086,8 @@ export const GALLERY_ACTIVITIES = [
       'ผู้ร่วมงานได้ร่วมประลองฝีมือในมินิทัวร์นาเมนต์ 1v1 และ 3v3 แบบกระชับมิตร พร้อมลุ้นรับแรร์ไอเทมและฟิกเกอร์ลิมิเต็ดที่มีเฉพาะในงานนี้เท่านั้น'
     ],
     galleryPhotos: [
-      { url: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80', caption: 'แฟนเกม Zone4 ร่วมทดลองเล่นแพตช์ใหม่ในโซนเครื่อง VIP' },
-      { url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80', caption: 'การแจกของรางวัลสุดพิเศษและของที่ระลึกจากผู้บริหารค่าย' }
+      { url: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1600&q=85', caption: 'แฟนเกม Zone4 ร่วมทดลองเล่นแพตช์ใหม่ในโซนเครื่อง VIP' },
+      { url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1600&q=85', caption: 'การแจกของรางวัลสุดพิเศษและของที่ระลึกจากผู้บริหารค่าย' }
     ]
   },
   {
@@ -1141,8 +1112,8 @@ export const GALLERY_ACTIVITIES = [
       'ร้านเกม G-Speed ได้จัดเตรียมคีย์บอร์ดกลไกสวิตช์ความเร็วสูงและหูฟังตัดเสียง เพื่อให้นักกีฬาได้ยินบีตดนตรีและกดปุ่ม Perfect ได้อย่างแม่นยำที่สุด'
     ],
     galleryPhotos: [
-      { url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80', caption: 'ความเร็วในการรัวปุ่มคีย์บอร์ดระดับเสี้ยววินาที' },
-      { url: 'https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=800&q=80', caption: 'ผู้ได้รับรางวัลชนะเลิศรับมอบมงกุฎและเงินรางวัล' }
+      { url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1600&q=85', caption: 'ความเร็วในการรัวปุ่มคีย์บอร์ดระดับเสี้ยววินาที' },
+      { url: 'https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=1600&q=85', caption: 'ผู้ได้รับรางวัลชนะเลิศรับมอบมงกุฎและเงินรางวัล' }
     ]
   },
   {
@@ -1166,7 +1137,7 @@ export const GALLERY_ACTIVITIES = [
       'การแข่งขันกระชับมิตรประจำเดือนของชุมชนร้านเกม G-Speed ชิงเงินรางวัลและชั่วโมงเล่นเกมฟรี บรรยากาศสนุกสนานและเป็นกันเองตลอดวันหยุดสุดสัปดาห์'
     ],
     galleryPhotos: [
-      { url: 'https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=800&q=80', caption: 'ผู้เข้าแข่งขันและกองเชียร์สนุกสนานร่วมกัน' }
+      { url: 'https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=1600&q=85', caption: 'ผู้เข้าแข่งขันและกองเชียร์สนุกสนานร่วมกัน' }
     ]
   },
   {
@@ -1190,8 +1161,8 @@ export const GALLERY_ACTIVITIES = [
       'เก็บบรรยากาศยามค่ำคืนของ G-Speed Esport Arena ศูนย์รวมเกมเมอร์ที่เปิดให้บริการตลอด 24 ชั่วโมง ไฮไลต์คือช่วงสุดสัปดาห์ที่มีปาร์ตี้เล่นเกมกับกลุ่มเพื่อน เครื่องเต็ม 100% พร้อมบริการสั่งอาหาร เครื่องดื่มร้อน-เย็นจากบาร์เสิร์ฟถึงโต๊ะอย่างรวดเร็ว'
     ],
     galleryPhotos: [
-      { url: 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?auto=format&fit=crop&w=800&q=80', caption: 'บรรยากาศแสงไฟนีออนสลัวสบายตาระหว่างการเล่นเกมรอบดึก' },
-      { url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80', caption: 'ผู้เล่นเพลิดเพลินกับความลื่นไหลของจอ 360Hz และเน็ต 10Gbps' }
+      { url: 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?auto=format&fit=crop&w=1600&q=85', caption: 'บรรยากาศแสงไฟนีออนสลัวสบายตาระหว่างการเล่นเกมรอบดึก' },
+      { url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1600&q=85', caption: 'ผู้เล่นเพลิดเพลินกับความลื่นไหลของจอ 360Hz และเน็ต 10Gbps' }
     ]
   }
 ];

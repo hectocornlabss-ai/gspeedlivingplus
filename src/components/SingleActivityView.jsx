@@ -251,19 +251,39 @@ export default function SingleActivityView({
       <div className="tournament-nav-bar">
         <div className="container tournament-nav-inner">
           <div className="tourney-nav-left-group">
-            <nav className="tournament-breadcrumbs" aria-label="Breadcrumb">
-              <button type="button" onClick={() => onBack('home')} className="breadcrumb-step">
-                <span>หน้าแรก</span>
-              </button>
-              <span className="breadcrumb-separator">/</span>
-              <button type="button" onClick={() => onBack('activities')} className="breadcrumb-step">
-                <span>กิจกรรม & ข่าวสาร</span>
-              </button>
-              <span className="breadcrumb-separator">/</span>
-              <span className="breadcrumb-current" title={activity.title}>
-                {activity.title}
-              </span>
-            </nav>
+            {/* Clean Back Button (Breadcrumbs removed as requested) */}
+            <button 
+              type="button" 
+              onClick={() => onBack('activities')} 
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                color: '#334155',
+                fontSize: '0.86rem',
+                fontWeight: 650,
+                cursor: 'pointer',
+                padding: '6px 14px',
+                borderRadius: '8px',
+                transition: 'all 0.2s ease',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+              }}
+              onMouseEnter={(e) => { 
+                e.currentTarget.style.color = '#0284c7'; 
+                e.currentTarget.style.borderColor = '#bae6fd'; 
+                e.currentTarget.style.background = '#f0f9ff'; 
+              }}
+              onMouseLeave={(e) => { 
+                e.currentTarget.style.color = '#334155'; 
+                e.currentTarget.style.borderColor = '#e2e8f0'; 
+                e.currentTarget.style.background = '#f8fafc'; 
+              }}
+            >
+              <ArrowLeft size={16} />
+              <span>ย้อนกลับไปรวมภาพกิจกรรม</span>
+            </button>
           </div>
 
           {/* Compact Social Share Trigger & Popover */}

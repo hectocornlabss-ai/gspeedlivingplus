@@ -135,12 +135,27 @@ export default function SingleTournamentView({
     );
   }
 
-  const matches = (tournament.bracketMatches && tournament.bracketMatches.length > 0)
+  const isRegistrationOpen = tournament.status === 'Open';
+  const rawMatches = (tournament.bracketMatches && tournament.bracketMatches.length > 0)
     ? tournament.bracketMatches
     : generateDefaultBracket(tournament.teams, tournament.title);
 
-  const liveMatches = matches.filter(m => m.status === 'LIVE');
-  const isRegistrationOpen = tournament.status === 'Open';
+  // If tournament is Open for registration, matches have not happened yet (no finished scores, no live state)
+  const matches = rawMatches.map(m => {
+    if (isRegistrationOpen) {
+      return {
+        ...m,
+        status: 'Upcoming',
+        teamA: m.teamA ? { ...m.teamA, score: 0, isWinner: false } : null,
+        teamB: m.teamB ? { ...m.teamB, score: 0, isWinner: false } : null,
+        maps: [],
+        mvp: null
+      };
+    }
+    return m;
+  });
+
+  const liveMatches = isRegistrationOpen ? [] : matches.filter(m => m.status === 'LIVE' || m.status === 'Live');
   const cleanSlug = tournament.slug || tournament.seo?.slug || tournament.id;
   const canonicalUrl = `${window.location.origin}/tournaments/${cleanSlug}`;
   const lineOaUrl = tournament.regUrl || siteData?.footer?.lineUrl || 'https://line.me/R/ti/p/@gspeed';
@@ -173,21 +188,39 @@ export default function SingleTournamentView({
       <div className="tournament-nav-bar">
         <div className="container tournament-nav-inner">
           <div className="tourney-nav-left-group">
-            {/* Breadcrumb Trail */}
-            <nav className="tournament-breadcrumbs" aria-label="Breadcrumb">
-              <button type="button" onClick={onNavigateHome} className="breadcrumb-step">
-                <Home size={13} style={{ marginRight: '4px' }} />
-                <span>หน้าแรก</span>
-              </button>
-              <span className="breadcrumb-separator">/</span>
-              <button type="button" onClick={onBack} className="breadcrumb-step">
-                <span>ทัวร์นาเมนต์</span>
-              </button>
-              <span className="breadcrumb-separator">/</span>
-              <span className="breadcrumb-current" title={tournament.title}>
-                {tournament.game}
-              </span>
-            </nav>
+            {/* Clean Back Button (Breadcrumbs removed as requested) */}
+            <button 
+              type="button" 
+              onClick={onBack} 
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                color: '#334155',
+                fontSize: '0.86rem',
+                fontWeight: 650,
+                cursor: 'pointer',
+                padding: '6px 14px',
+                borderRadius: '8px',
+                transition: 'all 0.2s ease',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+              }}
+              onMouseEnter={(e) => { 
+                e.currentTarget.style.color = '#0284c7'; 
+                e.currentTarget.style.borderColor = '#bae6fd'; 
+                e.currentTarget.style.background = '#f0f9ff'; 
+              }}
+              onMouseLeave={(e) => { 
+                e.currentTarget.style.color = '#334155'; 
+                e.currentTarget.style.borderColor = '#e2e8f0'; 
+                e.currentTarget.style.background = '#f8fafc'; 
+              }}
+            >
+              <ArrowLeft size={16} />
+              <span>ย้อนกลับไปหน้ารวมทัวร์นาเมนต์</span>
+            </button>
           </div>
 
           {/* Compact Social Share Trigger & Popover */}
@@ -260,23 +293,7 @@ export default function SingleTournamentView({
               )}
 
               {/* Status Badge */}
-              {liveMatches.length > 0 ? (
-                <span style={{ 
-                  background: 'linear-gradient(135deg, #dc2626, #ef4444)', 
-                  color: '#ffffff', 
-                  fontWeight: 650, 
-                  padding: '6px 14px', 
-                  borderRadius: '8px', 
-                  fontSize: '0.82rem', 
-                  display: 'inline-flex', 
-                  alignItems: 'center', 
-                  gap: '6px', 
-                  boxShadow: '0 0 14px rgba(239,68,68,0.5)',
-                  border: '1px solid #f87171'
-                }}>
-                  🔴 กำลังแข่งขันสดในสนาม ({liveMatches.length} คู่)
-                </span>
-              ) : isRegistrationOpen ? (
+              {isRegistrationOpen ? (
                 <span style={{ 
                   background: 'linear-gradient(135deg, #059669, #10b981)', 
                   color: '#ffffff', 
@@ -291,6 +308,22 @@ export default function SingleTournamentView({
                   border: '1px solid #34d399'
                 }}>
                   ✨ เปิดรับสมัคร (รับจำนวนจำกัด)
+                </span>
+              ) : liveMatches.length > 0 ? (
+                <span style={{ 
+                  background: 'linear-gradient(135deg, #dc2626, #ef4444)', 
+                  color: '#ffffff', 
+                  fontWeight: 650, 
+                  padding: '6px 14px', 
+                  borderRadius: '8px', 
+                  fontSize: '0.82rem', 
+                  display: 'inline-flex', 
+                  alignItems: 'center', 
+                  gap: '6px', 
+                  boxShadow: '0 0 14px rgba(239,68,68,0.5)',
+                  border: '1px solid #f87171'
+                }}>
+                  🔴 กำลังแข่งขันสดในสนาม ({liveMatches.length} คู่)
                 </span>
               ) : tournament.status === 'Completed' ? (
                 <span style={{ 
@@ -359,22 +392,6 @@ export default function SingleTournamentView({
                 </div>
               </div>
             </div>
-
-            {/* Action Buttons Row (Only when open for registration) */}
-            {isRegistrationOpen && (
-              <div className="tournament-hero-actions-row">
-                <a 
-                  href={lineOaUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hero-action-btn hero-action-btn-primary"
-                >
-                  <MessageCircle size={18} />
-                  <span>สมัครแข่งขันผ่าน LINE OA</span>
-                  <ExternalLink size={14} style={{ opacity: 0.85 }} />
-                </a>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -387,9 +404,9 @@ export default function SingleTournamentView({
             { id: 'schedule', label: 'กำหนดการ & วันที่', icon: <Calendar size={16} /> },
             { 
               id: 'bracket', 
-              label: liveMatches.length > 0 ? `สายแข่ง & ผลสด (${matches.length}) 🔴 LIVE` : `สายแข่ง & ผลสด (${matches.length})`, 
+              label: (!isRegistrationOpen && liveMatches.length > 0) ? `สายแข่ง & ผลสด (${matches.length}) 🔴 LIVE` : `สายแข่ง & ตารางแข่งขัน (${matches.length})`, 
               icon: <GitBranch size={16} />,
-              highlight: liveMatches.length > 0
+              highlight: !isRegistrationOpen && liveMatches.length > 0
             },
             { id: 'roster', label: `รายชื่อทีม & ไลน์อัป (${teamsList.length})`, icon: <Users size={16} /> },
             { id: 'gallery', label: `คลังภาพกิจกรรม & ไฮไลต์ (${photosList.length})`, icon: <Camera size={16} /> }
@@ -522,18 +539,6 @@ export default function SingleTournamentView({
                   ทุกสเตชันขับเคลื่อนด้วยขุมพลัง Intel Core i9 + NVIDIA GeForce RTX 40 Series, จอเกมมิ่ง BenQ ZOWIE 360Hz Fast-IPS พร้อมระบบ Dedicated Multi-WAN 10Gbps ลื่นไหลไร้อาการหน่วง
                 </p>
               </div>
-              {isRegistrationOpen && (
-                <a 
-                  href={lineOaUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-white-action"
-                  style={{ textDecoration: 'none' }}
-                >
-                  <MessageCircle size={16} />
-                  <span>สมัครผ่าน LINE OA</span>
-                </a>
-              )}
             </div>
 
             {/* Rules & Regulations */}
@@ -630,63 +635,79 @@ export default function SingleTournamentView({
               </div>
             </div>
 
+            {/* Open Registration Notice for Bracket */}
+            {isRegistrationOpen && (
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '12px', color: '#475569', fontSize: '0.9rem' }}>
+                <Clock size={18} className="text-blue" style={{ flexShrink: 0 }} />
+                <span>
+                  <strong>สถานะ: ทัวร์นาเมนต์นี้อยู่ระหว่างเปิดรับสมัคร</strong> ตารางและสายการแข่งขันด้านล่างเป็นการวางผังรอบการแข่งขันเบื้องต้น ผลคะแนนการแข่งขันจะเริ่มอัปเดตสดเมื่อการแข่งขันเริ่มขึ้นในวันแข่งขันจริง ({tournament.date})
+                </span>
+              </div>
+            )}
+
             {/* Matches List or Tree */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
-              {matches.map((m, idx) => (
-                <div 
-                  key={m.id || idx}
-                  style={{ 
-                    background: '#ffffff', 
-                    borderRadius: '12px', 
-                    border: m.status === 'LIVE' ? '2px solid #ef4444' : '1px solid #e2e8f0',
-                    padding: '16px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '12px',
-                    boxShadow: m.status === 'LIVE' ? '0 4px 16px rgba(239, 68, 68, 0.15)' : '0 2px 8px rgba(0,0,0,0.03)'
-                  }}
-                >
-                  {/* Match Header */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px' }}>
-                    <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748b' }}>
-                      {m.roundLabel || m.round || `แมตช์ที่ ${idx + 1}`}
-                    </span>
-                    <span 
-                      style={{ 
-                        fontSize: '0.75rem', 
-                        fontWeight: 650, 
-                        padding: '2px 8px', 
-                        borderRadius: '20px',
-                        background: m.status === 'LIVE' ? '#fee2e2' : m.status === 'Completed' ? '#dcfce7' : '#f1f5f9',
-                        color: m.status === 'LIVE' ? '#dc2626' : m.status === 'Completed' ? '#16a34a' : '#64748b'
-                      }}
-                    >
-                      {m.status === 'LIVE' ? '🔴 กำลังแข่งสด' : m.status === 'Completed' ? '✓ แข่งเสร็จสิ้น' : 'รอแข่งขัน'}
-                    </span>
-                  </div>
+              {matches.map((m, idx) => {
+                const matchIsLive = !isRegistrationOpen && (m.status === 'LIVE' || m.status === 'Live');
+                const matchIsFinished = !isRegistrationOpen && (m.status === 'Completed' || m.status === 'Finished');
+                const teamAWinner = matchIsFinished && Boolean(m.teamA?.isWinner);
+                const teamBWinner = matchIsFinished && Boolean(m.teamB?.isWinner);
 
-                  {/* Team A vs Team B */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {/* Team A */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: m.teamA?.isWinner ? '#f0fdf4' : '#f8fafc', padding: '8px 12px', borderRadius: '8px' }}>
-                      <span style={{ fontWeight: m.teamA?.isWinner ? 800 : 600, color: '#0f172a', fontSize: '0.92rem' }}>
-                        {m.teamA?.name || 'รอผลการประกบคู่'}
+                return (
+                  <div 
+                    key={m.id || idx}
+                    style={{ 
+                      background: '#ffffff', 
+                      borderRadius: '12px', 
+                      border: matchIsLive ? '2px solid #ef4444' : '1px solid #e2e8f0',
+                      padding: '16px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '12px',
+                      boxShadow: matchIsLive ? '0 4px 16px rgba(239, 68, 68, 0.15)' : '0 2px 8px rgba(0,0,0,0.03)'
+                    }}
+                  >
+                    {/* Match Header */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px' }}>
+                      <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748b' }}>
+                        {m.roundLabel || m.round || `แมตช์ที่ ${idx + 1}`}
                       </span>
-                      <strong style={{ fontSize: '1.1rem', color: m.teamA?.isWinner ? '#16a34a' : '#475569' }}>
-                        {m.teamA?.score ?? '-'}
-                      </strong>
+                      <span 
+                        style={{ 
+                          fontSize: '0.75rem', 
+                          fontWeight: 650, 
+                          padding: '2px 8px', 
+                          borderRadius: '20px',
+                          background: matchIsLive ? '#fee2e2' : matchIsFinished ? '#dcfce7' : '#f1f5f9',
+                          color: matchIsLive ? '#dc2626' : matchIsFinished ? '#16a34a' : '#64748b'
+                        }}
+                      >
+                        {matchIsLive ? '🔴 กำลังแข่งสด' : matchIsFinished ? '✓ แข่งเสร็จสิ้น' : 'รอแข่งขัน'}
+                      </span>
                     </div>
 
-                    {/* Team B */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: m.teamB?.isWinner ? '#f0fdf4' : '#f8fafc', padding: '8px 12px', borderRadius: '8px' }}>
-                      <span style={{ fontWeight: m.teamB?.isWinner ? 800 : 600, color: '#0f172a', fontSize: '0.92rem' }}>
-                        {m.teamB?.name || 'รอผลการประกบคู่'}
-                      </span>
-                      <strong style={{ fontSize: '1.1rem', color: m.teamB?.isWinner ? '#16a34a' : '#475569' }}>
-                        {m.teamB?.score ?? '-'}
-                      </strong>
+                    {/* Team A vs Team B */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {/* Team A */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: teamAWinner ? '#f0fdf4' : '#f8fafc', padding: '8px 12px', borderRadius: '8px' }}>
+                        <span style={{ fontWeight: teamAWinner ? 800 : 600, color: '#0f172a', fontSize: '0.92rem' }}>
+                          {m.teamA?.name || 'รอผลการประกบคู่'}
+                        </span>
+                        <strong style={{ fontSize: '1.1rem', color: teamAWinner ? '#16a34a' : '#64748b' }}>
+                          {matchIsFinished || matchIsLive ? (m.teamA?.score ?? 0) : '-'}
+                        </strong>
+                      </div>
+
+                      {/* Team B */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: teamBWinner ? '#f0fdf4' : '#f8fafc', padding: '8px 12px', borderRadius: '8px' }}>
+                        <span style={{ fontWeight: teamBWinner ? 800 : 600, color: '#0f172a', fontSize: '0.92rem' }}>
+                          {m.teamB?.name || 'รอผลการประกบคู่'}
+                        </span>
+                        <strong style={{ fontSize: '1.1rem', color: teamBWinner ? '#16a34a' : '#64748b' }}>
+                          {matchIsFinished || matchIsLive ? (m.teamB?.score ?? 0) : '-'}
+                        </strong>
+                      </div>
                     </div>
-                  </div>
 
                   {/* Match Footer */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: '#64748b' }}>
@@ -694,9 +715,10 @@ export default function SingleTournamentView({
                     <span>{m.format || 'BO3'}</span>
                   </div>
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
+        </div>
         )}
 
         {/* ================= TAB 4: ROSTER & TEAMS ================= */}
@@ -892,21 +914,21 @@ export default function SingleTournamentView({
         <div 
           className="modal-backdrop" 
           onClick={() => setLightboxIndex(null)}
-          style={{ zIndex: 10050, background: 'rgba(0,0,0,0.92)' }}
+          style={{ zIndex: 10050, background: 'rgba(0,0,0,0.94)', backdropFilter: 'blur(12px)' }}
         >
-          <div style={{ position: 'relative', maxWidth: '1000px', width: '92vw', textAlign: 'center' }} onClick={e => e.stopPropagation()}>
+          <div style={{ position: 'relative', maxWidth: '1280px', width: 'min(1280px, 94vw)', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }} onClick={e => e.stopPropagation()}>
             <img 
               src={filteredPhotos[lightboxIndex].url || filteredPhotos[lightboxIndex]} 
               alt="Tournament Lightbox"
-              style={{ maxHeight: '80vh', maxWidth: '100%', objectFit: 'contain', borderRadius: '10px' }}
+              style={{ maxHeight: 'min(720px, 78vh)', maxWidth: '1280px', width: '100%', objectFit: 'contain', borderRadius: '12px', boxShadow: '0 25px 60px rgba(0,0,0,0.85)', background: '#000000' }}
             />
-            <div style={{ color: '#ffffff', marginTop: '12px', fontSize: '0.95rem' }}>
+            <div style={{ color: '#ffffff', marginTop: '14px', fontSize: '0.95rem', fontWeight: 600 }}>
               {filteredPhotos[lightboxIndex].caption || `ภาพที่ ${lightboxIndex + 1}`}
             </div>
             <button 
               type="button" 
               onClick={() => setLightboxIndex(null)}
-              style={{ position: 'absolute', top: '-40px', right: 0, background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '1.5rem' }}
+              style={{ position: 'absolute', top: '-46px', right: 0, background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.25)', color: '#fff', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
             >
               ✕
             </button>
