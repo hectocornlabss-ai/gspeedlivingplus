@@ -2557,30 +2557,22 @@ export default function Room3DStudio({
               {/* Door Style */}
               <div className="door-field-group">
                 <label className="field-lbl">รูปแบบประตู:</label>
-                <div className="door-style-row">
+                <div className="door-style-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
                   <button 
                     type="button" 
                     className={`door-style-btn ${doorConfig?.style === 'glass-single' || doorConfig?.style === 'wood' ? 'active' : ''}`}
                     onClick={() => onChangeDoorConfig({ ...doorConfig, style: 'glass-single' })}
                   >
                     <DoorClosed size={15} />
-                    <span>กระจกติดฟิล์มดำ (บานเดี่ยว)</span>
+                    <span>แบบ 1 บาน (ฟิล์มดำ)</span>
                   </button>
                   <button 
                     type="button" 
-                    className={`door-style-btn ${doorConfig?.style === 'glass-double' || doorConfig?.style === 'glass' || !doorConfig?.style ? 'active' : ''}`}
+                    className={`door-style-btn ${doorConfig?.style === 'glass-double' || doorConfig?.style === 'glass' || !doorConfig?.style || doorConfig?.style === 'auto-sliding' ? 'active' : ''}`}
                     onClick={() => onChangeDoorConfig({ ...doorConfig, style: 'glass-double' })}
                   >
                     <SplitSquareVertical size={15} />
-                    <span>กระจก 2 บาน (ติดฟิล์มดำ)</span>
-                  </button>
-                  <button 
-                    type="button" 
-                    className={`door-style-btn ${doorConfig?.style === 'auto-sliding' ? 'active' : ''}`}
-                    onClick={() => onChangeDoorConfig({ ...doorConfig, style: 'auto-sliding' })}
-                  >
-                    <Sliders size={15} />
-                    <span>บานเลื่อนอัตโนมัติ (ฟิล์มดำ)</span>
+                    <span>แบบ 2 บาน (ฟิล์มดำ)</span>
                   </button>
                 </div>
               </div>

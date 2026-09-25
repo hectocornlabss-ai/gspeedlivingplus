@@ -2755,24 +2755,16 @@ export default function FranchisePlanner() {
                             className={`door-pill ${doorConfig.style === 'glass-single' || doorConfig.style === 'wood' ? 'active' : ''}`}
                             onClick={() => setDoorConfig({ ...doorConfig, style: 'glass-single' })}
                           >
-                            <DoorClosed size={14} />
-                            <span>กระจกฟิล์มดำ (บานเดี่ยว)</span>
+                            <DoorClosed size={16} />
+                            <span>แบบ 1 บาน (ฟิล์มดำ)</span>
                           </button>
                           <button 
                             type="button"
-                            className={`door-pill ${doorConfig.style === 'glass-double' || doorConfig.style === 'glass' || !doorConfig.style ? 'active' : ''}`}
+                            className={`door-pill ${doorConfig.style === 'glass-double' || doorConfig.style === 'glass' || !doorConfig.style || doorConfig.style === 'auto-sliding' ? 'active' : ''}`}
                             onClick={() => setDoorConfig({ ...doorConfig, style: 'glass-double' })}
                           >
-                            <SplitSquareVertical size={14} />
-                            <span>กระจก 2 บาน (ฟิล์มดำ)</span>
-                          </button>
-                          <button 
-                            type="button"
-                            className={`door-pill ${doorConfig.style === 'auto-sliding' ? 'active' : ''}`}
-                            onClick={() => setDoorConfig({ ...doorConfig, style: 'auto-sliding' })}
-                          >
-                            <Sliders size={14} />
-                            <span>บานเลื่อนออโต้ (ฟิล์มดำ)</span>
+                            <SplitSquareVertical size={16} />
+                            <span>แบบ 2 บาน (ฟิล์มดำ)</span>
                           </button>
                         </div>
                       </div>
