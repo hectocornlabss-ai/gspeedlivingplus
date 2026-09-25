@@ -81,90 +81,25 @@ export default function ActivitiesPage({
 
   return (
     <div className="activities-page-wrapper">
-      {/* 1. Breadcrumb Bar */}
-      <div className="page-breadcrumb-bar">
-        <div className="container breadcrumb-container">
-          <button 
-            type="button" 
-            className="breadcrumb-back-btn"
-            onClick={() => onNavigateHome ? onNavigateHome() : (window.history.pushState(null, '', '/'), window.dispatchEvent(new PopStateEvent('popstate')))}
-          >
-            <ArrowLeft size={16} />
-            <span>กลับหน้าหลัก</span>
-          </button>
-          <div className="breadcrumb-trail">
-            <span className="breadcrumb-item" onClick={() => onNavigateHome ? onNavigateHome() : (window.history.pushState(null, '', '/'), window.dispatchEvent(new PopStateEvent('popstate')))}>
-              หน้าหลัก
-            </span>
-            <span className="breadcrumb-separator">/</span>
-            <span className="breadcrumb-item current">ภาพกิจกรรม & แกลเลอรี</span>
-          </div>
-        </div>
-      </div>
-
-      {/* 2. Hero Header Banner */}
-      <section className="activities-hero-header">
-        <div className="container activities-hero-container">
-          <div className="activities-hero-badge">
-            <ImageIcon size={15} className="text-blue pulse-icon" />
-            <span>GLP PHOTO & COMMUNITY GALLERY</span>
-          </div>
-          <h1 className="activities-hero-title">
-            ประมวลภาพกิจกรรม & <span className="text-blue">บรรยากาศความมันส์</span>
-          </h1>
-          <p className="activities-hero-subtitle">
-            ย้อนชมภาพความประทับใจ บรรยากาศการประลองฝีมือของเหล่านักกีฬาอีสปอร์ต งานแถลงข่าวเปิดตัวเกม และงานแฟนมีตติ้งร่วมกับค่ายเกมชั้นนำระดับประเทศ ณ GLP Esport Stadium
-          </p>
-
-          {/* Quick Metrics Bar */}
-          <div className="tournaments-metrics-grid">
-            <div className="metric-card glass-panel">
-              <div className="metric-icon-box blue">
-                <ImageIcon size={20} />
-              </div>
-              <div className="metric-content">
-                <div className="metric-value">52+ อัลบั้ม</div>
-                <div className="metric-label">คลังภาพความละเอียดสูง</div>
-              </div>
-            </div>
-
-            <div className="metric-card glass-panel">
-              <div className="metric-icon-box amber">
-                <Trophy size={20} />
-              </div>
-              <div className="metric-content">
-                <div className="metric-value">LAN Final</div>
-                <div className="metric-label">ภาพงานแข่งระดับประเทศ</div>
-              </div>
-            </div>
-
-            <div className="metric-card glass-panel">
-              <div className="metric-icon-box purple">
-                <Gamepad2 size={20} />
-              </div>
-              <div className="metric-content">
-                <div className="metric-value">Game Launch</div>
-                <div className="metric-label">เปิดตัวเกม & แฟนมีตติ้ง</div>
-              </div>
-            </div>
-
-            <div className="metric-card glass-panel">
-              <div className="metric-icon-box emerald">
-                <Users size={20} />
-              </div>
-              <div className="metric-content">
-                <div className="metric-value">10,000+</div>
-                <div className="metric-label">คอมมูนิตี้ผู้ร่วมงาน</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. Search & Category Filters */}
-      <section className="activities-controls-section">
+      {/* 1. Page Breadcrumb & Interactive Filter Controls Bar */}
+      <div className="page-breadcrumb-bar" style={{ padding: '16px 0 20px 0', borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
         <div className="container">
-          <div className="activities-controls-card glass-panel">
+          <div className="breadcrumb-trail" style={{ marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span 
+              className="breadcrumb-item" 
+              style={{ cursor: 'pointer', color: '#2563eb', fontWeight: 600, fontSize: '0.85rem' }}
+              onClick={() => onNavigateHome ? onNavigateHome() : (window.history.pushState(null, '', '/'), window.dispatchEvent(new PopStateEvent('popstate')))}
+            >
+              หน้าแรก
+            </span>
+            <span className="breadcrumb-separator" style={{ color: '#94a3b8' }}>/</span>
+            <span className="breadcrumb-item current" style={{ color: '#0f172a', fontWeight: 700, fontSize: '0.85rem' }}>
+              ภาพกิจกรรม & แกลเลอรี
+            </span>
+          </div>
+
+          {/* Search & Category Filters */}
+          <div className="activities-controls-card glass-panel" style={{ margin: 0, boxShadow: '0 4px 16px rgba(15, 23, 42, 0.05)' }}>
             {/* Top row: Search Box & Category Pills */}
             <div className="controls-row-top">
               <div className="activity-search-box">
@@ -269,6 +204,22 @@ export default function ActivitiesPage({
               </div>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* 2. Hero Header Banner */}
+      <section className="activities-hero-header" style={{ padding: '36px 0 30px 0' }}>
+        <div className="container activities-hero-container">
+          <div className="activities-hero-badge">
+            <ImageIcon size={15} className="text-blue pulse-icon" />
+            <span>GLP PHOTO & COMMUNITY GALLERY</span>
+          </div>
+          <h1 className="activities-hero-title">
+            ประมวลภาพกิจกรรม & <span className="text-blue">บรรยากาศความมันส์</span>
+          </h1>
+          <p className="activities-hero-subtitle" style={{ marginBottom: 0 }}>
+            ย้อนชมภาพความประทับใจ บรรยากาศการประลองฝีมือของเหล่านักกีฬาอีสปอร์ต งานแถลงข่าวเปิดตัวเกม และงานแฟนมีตติ้งร่วมกับค่ายเกมชั้นนำระดับประเทศ ณ GLP Esport Stadium
+          </p>
         </div>
       </section>
 

@@ -77,89 +77,25 @@ export default function TournamentsPage({
   return (
     <div className="tournaments-page-wrapper">
       {/* 1. Breadcrumb & Top Bar */}
-      <div className="page-breadcrumb-bar">
-        <div className="container breadcrumb-container">
-          <button 
-            type="button" 
-            className="breadcrumb-back-btn"
-            onClick={() => onNavigateHome ? onNavigateHome() : (window.history.pushState(null, '', '/'), window.dispatchEvent(new PopStateEvent('popstate')))}
-          >
-            <ArrowLeft size={16} />
-            <span>กลับหน้าหลัก</span>
-          </button>
-          <div className="breadcrumb-trail">
-            <span className="breadcrumb-item" onClick={() => onNavigateHome ? onNavigateHome() : (window.history.pushState(null, '', '/'), window.dispatchEvent(new PopStateEvent('popstate')))}>
-              หน้าหลัก
-            </span>
-            <span className="breadcrumb-separator">/</span>
-            <span className="breadcrumb-item current">ปฏิทินการแข่งขัน & ทัวร์นาเมนต์</span>
-          </div>
-        </div>
-      </div>
-
-      {/* 2. Hero Header Banner */}
-      <section className="tournaments-hero-header">
-        <div className="container tournaments-hero-container">
-          <div className="tournaments-hero-badge">
-            <Flame size={15} className="text-amber pulse-icon" />
-            <span>GLP ESPORTS LEAGUE & TOURNAMENTS</span>
-          </div>
-          <h1 className="tournaments-hero-title">
-            ปฏิทินการแข่งขัน & <span className="text-blue">ทัวร์นาเมนต์อีสปอร์ต</span>
-          </h1>
-          <p className="tournaments-hero-subtitle">
-            ศูนย์รวมการแข่งขันอีสปอร์ตระดับประเทศ ชิงเงินรางวัลรวมกว่าหลายแสนบาท พิสูจน์ฝีมือบนเวที LAN Final 4K สเปก Intel i9 + RTX 4080 จอ 360Hz พร้อมระบบ Dedicated Server 128-Tick และถ่ายทอดสดเต็มรูปแบบ
-          </p>
-
-          {/* Quick Metrics Bar */}
-          <div className="tournaments-metrics-grid">
-            <div className="metric-card glass-panel">
-              <div className="metric-icon-box amber">
-                <Trophy size={20} />
-              </div>
-              <div className="metric-content">
-                <div className="metric-value">{totalPrizePoolText}</div>
-                <div className="metric-label">เงินรางวัลรวมในปฏิทิน</div>
-              </div>
-            </div>
-
-            <div className="metric-card glass-panel">
-              <div className="metric-icon-box blue">
-                <Gamepad2 size={20} />
-              </div>
-              <div className="metric-content">
-                <div className="metric-value">{tournamentsList.length} รายการ</div>
-                <div className="metric-label">ทัวร์นาเมนต์ระดับทางการ</div>
-              </div>
-            </div>
-
-            <div className="metric-card glass-panel">
-              <div className="metric-icon-box emerald">
-                <Users size={20} />
-              </div>
-              <div className="metric-content">
-                <div className="metric-value">{totalTeams > 0 ? `${totalTeams}+ ทีม` : '100+ ทีม'}</div>
-                <div className="metric-label">ทีมเข้าประลองฝีมือ</div>
-              </div>
-            </div>
-
-            <div className="metric-card glass-panel">
-              <div className="metric-icon-box purple">
-                <Zap size={20} />
-              </div>
-              <div className="metric-content">
-                <div className="metric-value">360Hz / 128-Tick</div>
-                <div className="metric-label">LAN Final Esports Ready</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. Search & Interactive Filter Controls */}
-      <section className="tournaments-controls-section">
+      {/* 1. Page Breadcrumb & Interactive Filter Controls Bar */}
+      <div className="page-breadcrumb-bar" style={{ padding: '16px 0 20px 0', borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
         <div className="container">
-          <div className="tournaments-controls-card glass-panel">
+          <div className="breadcrumb-trail" style={{ marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span 
+              className="breadcrumb-item" 
+              style={{ cursor: 'pointer', color: '#2563eb', fontWeight: 600, fontSize: '0.85rem' }}
+              onClick={() => onNavigateHome ? onNavigateHome() : (window.history.pushState(null, '', '/'), window.dispatchEvent(new PopStateEvent('popstate')))}
+            >
+              หน้าแรก
+            </span>
+            <span className="breadcrumb-separator" style={{ color: '#94a3b8' }}>/</span>
+            <span className="breadcrumb-item current" style={{ color: '#0f172a', fontWeight: 700, fontSize: '0.85rem' }}>
+              ปฏิทินการแข่งขัน & ทัวร์นาเมนต์
+            </span>
+          </div>
+
+          {/* Search & Interactive Filter Controls */}
+          <div className="tournaments-controls-card glass-panel" style={{ margin: 0, boxShadow: '0 4px 16px rgba(15, 23, 42, 0.05)' }}>
             <div className="controls-row-top">
               {/* Search Box */}
               <div className="tournament-search-box">
@@ -251,6 +187,22 @@ export default function TournamentsPage({
               )}
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* 2. Hero Header Banner */}
+      <section className="tournaments-hero-header" style={{ padding: '36px 0 30px 0' }}>
+        <div className="container tournaments-hero-container">
+          <div className="tournaments-hero-badge">
+            <Flame size={15} className="text-amber pulse-icon" />
+            <span>GLP ESPORTS LEAGUE & TOURNAMENTS</span>
+          </div>
+          <h1 className="tournaments-hero-title">
+            ปฏิทินการแข่งขัน & <span className="text-blue">ทัวร์นาเมนต์อีสปอร์ต</span>
+          </h1>
+          <p className="tournaments-hero-subtitle" style={{ marginBottom: 0 }}>
+            ศูนย์รวมการแข่งขันอีสปอร์ตระดับประเทศ ชิงเงินรางวัลรวมกว่าหลายแสนบาท พิสูจน์ฝีมือบนเวที LAN Final 4K สเปก Intel i9 + RTX 4080 จอ 360Hz พร้อมระบบ Dedicated Server 128-Tick และถ่ายทอดสดเต็มรูปแบบ
+          </p>
         </div>
       </section>
 
