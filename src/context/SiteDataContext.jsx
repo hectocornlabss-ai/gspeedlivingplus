@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { 
   CATALOG_ITEMS as INITIAL_CATALOG, 
   HARDWARE_TIERS as INITIAL_TIERS,
+  FIXED_INFRASTRUCTURE as INITIAL_FIXED_INFRASTRUCTURE,
   TOURNAMENTS as INITIAL_TOURNAMENTS,
   GALLERY_ACTIVITIES as INITIAL_GALLERY,
   GAME_NEWS as INITIAL_NEWS,
@@ -624,6 +625,7 @@ export const DEFAULT_SITE_DATA = {
   },
   catalogItems: INITIAL_CATALOG,
   hardwareTiers: INITIAL_TIERS,
+  fixedInfrastructure: INITIAL_FIXED_INFRASTRUCTURE,
   ragKnowledge: INITIAL_RAG_KNOWLEDGE,
   mediaLibrary: INITIAL_MEDIA_LIBRARY,
   openRouterSettings: {
@@ -909,7 +911,27 @@ export function SiteDataProvider({ children }) {
         if (!Array.isArray(merged.gallery)) merged.gallery = INITIAL_GALLERY;
         if (!Array.isArray(merged.news)) merged.news = INITIAL_NEWS;
         if (!Array.isArray(merged.catalogItems)) merged.catalogItems = INITIAL_CATALOG;
-        if (!Array.isArray(merged.hardwareTiers)) merged.hardwareTiers = INITIAL_TIERS;
+        if (!merged.hardwareTiers || typeof merged.hardwareTiers !== 'object' || Array.isArray(merged.hardwareTiers)) {
+          merged.hardwareTiers = INITIAL_TIERS;
+        } else {
+          merged.hardwareTiers = {
+            ...INITIAL_TIERS,
+            ...merged.hardwareTiers
+          };
+          Object.keys(merged.hardwareTiers).forEach(k => {
+            if (merged.hardwareTiers[k]?.chair) {
+              delete merged.hardwareTiers[k].chair;
+            }
+          });
+        }
+        if (!merged.fixedInfrastructure || typeof merged.fixedInfrastructure !== 'object') {
+          merged.fixedInfrastructure = INITIAL_FIXED_INFRASTRUCTURE;
+        } else {
+          merged.fixedInfrastructure = {
+            ...INITIAL_FIXED_INFRASTRUCTURE,
+            ...merged.fixedInfrastructure
+          };
+        }
         if (!Array.isArray(merged.tournaments)) {
           merged.tournaments = INITIAL_TOURNAMENTS;
         } else {
@@ -1979,9 +2001,93 @@ export function SiteDataProvider({ children }) {
     }));
   };
 
+  // Hardware Specs (Tiers) & Infrastructure Pricing Management
+  const updateHardwareTier = (tierId, updates) => {
+    setSiteData(prev => {
+      const currentTiers = prev.hardwareTiers || INITIAL_TIERS;
+      return {
+        ...prev,
+        hardwareTiers: {
+          ...currentTiers,
+          [tierId]: {
+            ...(currentTiers[tierId] || {}),
+            ...updates,
+            id: tierId
+          }
+        }
+      };
+    });
+  };
+
+  const addHardwareTier = (newTier) => {
+    const id = newTier.id || `tier-${Date.now()}`;
+    setSiteData(prev => ({
+      ...prev,
+      hardwareTiers: {
+        ...(prev.hardwareTiers || INITIAL_TIERS),
+        [id]: {
+          ...newTier,
+          id
+        }
+      }
+    }));
+    return id;
+  };
+
+  const deleteHardwareTier = (tierId) => {
+    setSiteData(prev => {
+      const copy = { ...(prev.hardwareTiers || INITIAL_TIERS) };
+      delete copy[tierId];
+      return {
+        ...prev,
+        hardwareTiers: copy
+      };
+    });
+  };
+
+  const resetHardwareTiers = () => {
+    setSiteData(prev => ({
+      ...prev,
+      hardwareTiers: INITIAL_TIERS
+    }));
+  };
+
+  const updateFixedInfrastructure = (updates) => {
+    setSiteData(prev => ({
+      ...prev,
+      fixedInfrastructure: {
+        ...(prev.fixedInfrastructure || INITIAL_FIXED_INFRASTRUCTURE),
+        ...updates
+      }
+    }));
+  };
+
+  const resetFixedInfrastructure = () => {
+    setSiteData(prev => ({
+      ...prev,
+      fixedInfrastructure: INITIAL_FIXED_INFRASTRUCTURE
+    }));
+  };
+
+  const updateCatalogItemCost = (itemId, newCost) => {
+    setSiteData(prev => ({
+      ...prev,
+      catalogItems: (prev.catalogItems || INITIAL_CATALOG).map(item =>
+        item.id === itemId ? { ...item, baseCost: Number(newCost) || 0 } : item
+      )
+    }));
+  };
+
   const value = {
     siteData,
     setSiteData,
+    updateHardwareTier,
+    addHardwareTier,
+    deleteHardwareTier,
+    resetHardwareTiers,
+    updateFixedInfrastructure,
+    resetFixedInfrastructure,
+    updateCatalogItemCost,
     updateTicker,
     updateHero,
     updateFooter,

@@ -263,6 +263,7 @@ export default function FranchisePlanner() {
   const { siteData } = useSiteData();
   const catalogItems = siteData?.catalogItems || CATALOG_ITEMS;
   const hardwareTiers = siteData?.hardwareTiers || HARDWARE_TIERS;
+  const fixedInfrastructure = siteData?.fixedInfrastructure || FIXED_INFRASTRUCTURE;
 
   // Step navigation (1: พื้นที่และทำเล, 2: ออกแบบผัง 3D/2D, 3: เลือกสเปกอุปกรณ์, 4: สรุปงบประมาณ & ROI)
   const [currentStep, setCurrentStep] = useState(1); // Default to Step 1: ข้อมูลพื้นที่ & ทำเล
@@ -317,10 +318,14 @@ export default function FranchisePlanner() {
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [justAddedId, setJustAddedId] = useState(null);
 
-  // Auto-switch to details tab when an item or the door is selected
+  // Auto-switch to appropriate tab when an item or the door is selected
   useEffect(() => {
     if (selectedItemId) {
-      setInspectorTab('details');
+      if (selectedItemId === 'store-door') {
+        setInspectorTab('door');
+      } else {
+        setInspectorTab('details');
+      }
     }
   }, [selectedItemId]);
 
@@ -338,6 +343,8 @@ export default function FranchisePlanner() {
   const [exportedBlueprintModal, setExportedBlueprintModal] = useState(null);
   const [isBlueprintZoomed, setIsBlueprintZoomed] = useState(false);
   const [selectedCatalogModalItem, setSelectedCatalogModalItem] = useState(null);
+  const [expandedQuickItemId, setExpandedQuickItemId] = useState(null);
+  const [itemPendingDelete, setItemPendingDelete] = useState(null);
   const [leadForm, setLeadForm] = useState({
     fullName: '',
     phone: '',
@@ -585,12 +592,12 @@ export default function FranchisePlanner() {
     return acc + (item.catalog?.baseCost || 0);
   }, 0);
 
-  const interiorDecorCost = roomAreaSqM * FIXED_INFRASTRUCTURE.interiorSqMeterCost;
-  const airconCost = roomAreaSqM * FIXED_INFRASTRUCTURE.airconSqMeterCost;
-  const disklessCost = FIXED_INFRASTRUCTURE.disklessServer;
-  const networkCost = FIXED_INFRASTRUCTURE.networkEnterprise;
-  const billingCost = FIXED_INFRASTRUCTURE.billingAndPOS;
-  const franchiseLicenseCost = FIXED_INFRASTRUCTURE.franchiseFee;
+  const interiorDecorCost = roomAreaSqM * (fixedInfrastructure?.interiorSqMeterCost ?? FIXED_INFRASTRUCTURE.interiorSqMeterCost);
+  const airconCost = roomAreaSqM * (fixedInfrastructure?.airconSqMeterCost ?? FIXED_INFRASTRUCTURE.airconSqMeterCost);
+  const disklessCost = fixedInfrastructure?.disklessServer ?? FIXED_INFRASTRUCTURE.disklessServer;
+  const networkCost = fixedInfrastructure?.networkEnterprise ?? FIXED_INFRASTRUCTURE.networkEnterprise;
+  const billingCost = fixedInfrastructure?.billingAndPOS ?? FIXED_INFRASTRUCTURE.billingAndPOS;
+  const franchiseLicenseCost = fixedInfrastructure?.franchiseFee ?? FIXED_INFRASTRUCTURE.franchiseFee;
 
   // Total Estimated Investment
   const totalInvestmentCost = 
@@ -652,6 +659,44 @@ export default function FranchisePlanner() {
   const handleDeleteItem = (id) => {
     setPlacedItems(items => items.filter(item => item.id !== id));
     if (selectedItemId === id) setSelectedItemId(null);
+  };
+
+  const promptDeleteItem = (itemOrId) => {
+    if (!itemOrId) return;
+    const target = typeof itemOrId === 'object' && itemOrId !== null
+      ? itemOrId
+      : placedItems.find(it => it.id === itemOrId);
+    if (target) {
+      setItemPendingDelete(target);
+    }
+  };
+
+  const confirmDeleteItem = () => {
+    if (itemPendingDelete) {
+      handleDeleteItem(itemPendingDelete.id);
+      if (expandedQuickItemId === itemPendingDelete.id) {
+        setExpandedQuickItemId(null);
+      }
+      setItemPendingDelete(null);
+    }
+  };
+
+  const cancelDeleteItem = () => {
+    setItemPendingDelete(null);
+  };
+
+  const renderCatalogItemIcon = (iconName, size = 13) => {
+    switch (iconName) {
+      case 'Coffee': return <Coffee size={size} />;
+      case 'Server': return <Server size={size} />;
+      case 'CreditCard': return <CreditCard size={size} />;
+      case 'Trophy': return <Trophy size={size} />;
+      case 'Shield': return <Shield size={size} />;
+      case 'Armchair': return <Armchair size={size} />;
+      case 'DoorOpen': return <DoorOpen size={size} />;
+      case 'Monitor':
+      default: return <Monitor size={size} />;
+    }
   };
 
   const handleDuplicateItem = (id) => {
@@ -788,7 +833,7 @@ export default function FranchisePlanner() {
         handleRotateItem(selectedItemId);
       } else if (e.key === 'Delete' || e.key === 'Backspace') {
         e.preventDefault();
-        handleDeleteItem(selectedItemId);
+        promptDeleteItem(selectedItemId);
       } else if (e.key === 'Escape') {
         setSelectedItemId(null);
       }
@@ -2571,8 +2616,8 @@ export default function FranchisePlanner() {
                   }}
                   title="ปรับแต่งตำแหน่งประตูทางเข้าร้าน รูปแบบประตู และป้ายชื่อร้าน"
                 >
-                  <DoorOpen size={14} />
-                  <span>ประตูทางเข้า</span>
+                  <DoorOpen size={13} />
+                  <span>ประตูร้าน</span>
                 </button>
 
                 <button 
@@ -2585,8 +2630,8 @@ export default function FranchisePlanner() {
                   }}
                   title="ปรับแต่งวอลเปเปอร์ผนังและวัสดุปูพื้นห้อง"
                 >
-                  <Palette size={14} />
-                  <span>วอลเปเปอร์/พื้น</span>
+                  <Palette size={13} />
+                  <span>ผนัง/พื้น</span>
                 </button>
 
                 <button 
@@ -2599,7 +2644,7 @@ export default function FranchisePlanner() {
                   }}
                   title="เลือกและเพิ่มอุปกรณ์/โต๊ะคอมลงในผัง"
                 >
-                  <PlusCircle size={14} />
+                  <PlusCircle size={13} />
                   <span>เพิ่มอุปกรณ์</span>
                 </button>
               </div>
@@ -2975,7 +3020,7 @@ export default function FranchisePlanner() {
                             type="button"
                             id="btn-sidebar-delete-item"
                             className="btn-spatial-action btn-delete"
-                            onClick={() => handleDeleteItem(selectedItemObject.id)}
+                            onClick={() => promptDeleteItem(selectedItemObject)}
                             title="ลบโมดูลนี้ออกจากผัง (กด Delete)"
                           >
                             <Trash2 size={13} />
@@ -2991,65 +3036,8 @@ export default function FranchisePlanner() {
                     </div>
                   ) : (
                     <div className="no-item-selected-state">
-                      {/* Quick Entrance Door Management Banner */}
-                      <div 
-                        className="entrance-quick-manage-banner"
-                        onClick={() => {
-                          setSelectedItemId('store-door');
-                          setInspectorTab('door');
-                        }}
-                        title="คลิกเพื่อจัดการตำแหน่งและรูปแบบประตูทางเข้าร้าน"
-                      >
-                        {/* Top Header Row */}
-                        <div className="eq-header">
-                          <div className="eq-header-info">
-                            <div className="eq-icon-bubble">
-                              <DoorOpen size={17} />
-                            </div>
-                            <div className="eq-title-group">
-                              <span className="eq-main-title">ประตูทางเข้าร้าน</span>
-                              <span className="eq-sub-title">Store Entrance</span>
-                            </div>
-                          </div>
-                          <span className="eq-wall-badge">
-                            {doorConfig.wall === 'front' ? 'ด้านหน้า' :
-                             doorConfig.wall === 'left' ? 'ผนังซ้าย' :
-                             doorConfig.wall === 'back' ? 'ผนังหลัง' : 'ผนังขวา'} • {Math.round((doorConfig.offsetRatio ?? 0.75) * 100)}%
-                          </span>
-                        </div>
-
-                        {/* Middle Info Chips */}
-                        <div className="eq-info-chips">
-                          <div className="eq-chip">
-                            <span className="eq-chip-lbl">ผนังที่ติดตั้ง</span>
-                            <strong className="eq-chip-val">
-                              {doorConfig.wall === 'front' ? 'ด้านหน้า (Front)' :
-                               doorConfig.wall === 'left' ? 'ผนังซ้าย (Left)' :
-                               doorConfig.wall === 'back' ? 'ผนังหลัง (Back)' : 'ผนังขวา (Right)'}
-                            </strong>
-                          </div>
-                          <div className="eq-chip">
-                            <span className="eq-chip-lbl">รูปแบบประตู</span>
-                            <strong className="eq-chip-val">
-                              {doorConfig.style === 'glass' ? 'กระจกใสบานคู่' :
-                               doorConfig.style === 'auto-sliding' ? 'บานเลื่อนออโต้' : 'บานไม้โมเดิร์น'}
-                            </strong>
-                          </div>
-                        </div>
-
-                        {/* Action Bar */}
-                        <div className="eq-action-bar">
-                          <span className="eq-action-hint">คลิกปรับตำแหน่ง / ดีไซน์</span>
-                          <div className="eq-action-btn">
-                            <Sliders size={12} />
-                            <span>ปรับแต่งประตู</span>
-                            <ChevronRight size={12} />
-                          </div>
-                        </div>
-                      </div>
-
                       {/* Installed Items Section Header */}
-                      <div className="quick-items-card" style={{ marginTop: '14px' }}>
+                      <div className="quick-items-card" style={{ marginTop: 0 }}>
                         <div className="quick-items-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <span className="quick-title" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700 }}>
                             <Layers size={15} className="text-blue" />
@@ -3062,64 +3050,140 @@ export default function FranchisePlanner() {
                             title="ไปที่แท็บเพิ่มอุปกรณ์"
                           >
                             <Plus size={13} />
-                            <span>+ เพิ่มอุปกรณ์</span>
+                            <span>เพิ่มอุปกรณ์</span>
                           </button>
                         </div>
 
                         <div className="quick-items-scrollable">
-                          {/* Store Door always at top of list */}
-                          <button
-                            type="button"
-                            className={`quick-item-select-btn quick-item-door ${selectedItemId === 'store-door' || inspectorTab === 'door' ? 'active' : ''}`}
-                            onClick={() => {
-                              setSelectedItemId('store-door');
-                              setInspectorTab('door');
-                            }}
-                            title="คลิกเพื่อเลือกและจัดตำแหน่งประตูทางเข้าร้าน"
-                            style={{ background: '#ecfdf5', borderColor: '#a7f3d0' }}
-                          >
-                            <span className="quick-item-num" style={{ background: '#10b981', color: '#fff' }}>🚪</span>
-                            <span className="quick-item-name" style={{ color: '#065f46', fontWeight: 600 }}>ประตูทางเข้าร้านหลัก (Entrance)</span>
-                            <span className="quick-item-pill" style={{ background: '#d1fae5', color: '#047857' }}>
-                              {doorConfig.wall === 'front' ? 'ด้านหน้า' :
-                               doorConfig.wall === 'left' ? 'ผนังซ้าย' :
-                               doorConfig.wall === 'back' ? 'ผนังหลัง' : 'ผนังขวา'} {Math.round((doorConfig.offsetRatio ?? 0.75) * 100)}%
-                            </span>
-                          </button>
 
                           {placedItems.length === 0 ? (
                             <div style={{ padding: '24px 10px', textAlign: 'center', color: '#94a3b8', fontSize: '0.84rem' }}>
                               ยังไม่มีอุปกรณ์ในผังร้าน คลิกปุ่ม <strong>"+ เพิ่มอุปกรณ์"</strong> ด้านบนเพื่อเริ่มจัดวาง
                             </div>
                           ) : (
-                            placedItems.map((item, idx) => (
-                              <div key={item.id} className="installed-item-row">
-                                <button
-                                  type="button"
-                                  className={`quick-item-select-btn ${selectedItemId === item.id ? 'active' : ''}`}
-                                  onClick={() => setSelectedItemId(item.id)}
-                                  title="คลิกเพื่อเลือกและจัดตำแหน่งโต๊ะนี้ทันที"
-                                  style={{ flex: 1 }}
+                            placedItems.map((item, idx) => {
+                              const cat = item.catalog || (siteData?.catalogItems || CATALOG_ITEMS).find(c => c.type === item.type) || {};
+                              const isExpanded = expandedQuickItemId === item.id;
+                              const isSelected = selectedItemId === item.id;
+
+                              return (
+                                <div 
+                                  key={item.id} 
+                                  className={`installed-item-card ${isExpanded ? 'expanded' : ''} ${isSelected ? 'selected' : ''}`}
                                 >
-                                  <span className="quick-item-num">#{idx + 1}</span>
-                                  <span className="quick-item-name">{item.catalog?.name || item.type}</span>
-                                  <span className="quick-item-pill">
-                                    {item.catalog?.seats > 0 ? `${item.catalog.seats} PCs` : `${item.catalog?.widthMeters}x${item.catalog?.heightMeters}ม.`}
-                                  </span>
-                                </button>
-                                <button
-                                  type="button"
-                                  className="btn-item-del-mini"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDeleteItem(item.id);
-                                  }}
-                                  title="ลบชิ้นนี้ออกจากผัง"
-                                >
-                                  <Trash2 size={13} />
-                                </button>
-                              </div>
-                            ))
+                                  {/* Header Button: 1:1 Image + 2-line Text + Circular Chevron */}
+                                  <button
+                                    type="button"
+                                    className="quick-item-summary-btn"
+                                    onClick={() => setExpandedQuickItemId(isExpanded ? null : item.id)}
+                                    title={isExpanded ? "คลิกเพื่อย่อข้อมูล" : "คลิกเพื่อดูขนาด ราคา และจัดการอุปกรณ์"}
+                                  >
+                                    <div className="quick-item-img-wrapper">
+                                      {cat.image ? (
+                                        <img 
+                                          src={cat.image} 
+                                          alt={cat.name || item.type} 
+                                          className="quick-item-thumb-1to1" 
+                                          loading="lazy" 
+                                        />
+                                      ) : (
+                                        <div className="quick-item-icon-1to1">
+                                          {renderCatalogItemIcon(cat.icon, 22)}
+                                        </div>
+                                      )}
+                                      <span className="quick-item-idx-floating">#{idx + 1}</span>
+                                    </div>
+
+                                    <div className="quick-item-text-col">
+                                      <div className="quick-item-top-meta">
+                                        <span className="quick-item-type-badge">
+                                          {cat.category === 'stations' ? 'โซนเกมมิ่ง' :
+                                           cat.category === 'facilities' ? 'งานบริการ/ระบบ' :
+                                           cat.category === 'stage' ? 'เวทีแข่งขัน' : 'อุปกรณ์'}
+                                        </span>
+                                        {cat.seats > 0 && (
+                                          <span className="quick-item-seats-badge">
+                                            {cat.seats} ที่นั่ง
+                                          </span>
+                                        )}
+                                      </div>
+                                      <span className="quick-item-name-clean" title={cat.name || item.type}>
+                                        {cat.name || item.type}
+                                      </span>
+                                      <span className="quick-item-sub-hint">
+                                        {isExpanded ? 'คลิกเพื่อย่อรายละเอียด' : 'คลิกเพื่อดูขนาด ราคา & จัดการ'}
+                                      </span>
+                                    </div>
+
+                                    <div className="quick-item-trail">
+                                      <div className={`quick-item-chevron-circle ${isExpanded ? 'rotated' : ''}`}>
+                                        <ChevronDown size={15} />
+                                      </div>
+                                    </div>
+                                  </button>
+
+                                  {/* Expanded details: Revealed ONLY when clicked / tapped */}
+                                  {isExpanded && (
+                                    <div className="quick-item-expanded-body">
+                                      <div className="quick-item-specs-grid">
+                                        <div className="spec-card-box">
+                                          <span className="spec-lbl">
+                                            <Ruler size={11} className="text-blue" />
+                                            <span>ขนาดโมดูล</span>
+                                          </span>
+                                          <strong className="spec-val">
+                                            {cat.seats > 0 
+                                              ? `${cat.seats} ที่นั่ง (${cat.widthMeters}ม.)` 
+                                              : `${cat.widthMeters || 1} × ${cat.heightMeters || 1} ม.`}
+                                          </strong>
+                                        </div>
+                                        <div className="spec-card-box">
+                                          <span className="spec-lbl">
+                                            <DollarSign size={11} className="text-emerald" />
+                                            <span>ราคาประเมิน</span>
+                                          </span>
+                                          <strong className="spec-val price-val">
+                                            ฿{(cat.baseCost || 0).toLocaleString()}
+                                          </strong>
+                                        </div>
+                                      </div>
+
+                                      <div className="quick-item-actions-row">
+                                        <button
+                                          type="button"
+                                          className="btn-quick-item-action btn-select-3d"
+                                          onClick={() => {
+                                            setSelectedItemId(item.id);
+                                          }}
+                                          title="เลือกและปรับตำแหน่งในมุมมอง 3D"
+                                        >
+                                          <Move size={12} />
+                                          <span>ปรับใน 3D</span>
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className="btn-quick-item-action btn-rotate-mini"
+                                          onClick={() => handleRotateItem(item.id)}
+                                          title="หมุน 90 องศา"
+                                        >
+                                          <RotateCw size={12} />
+                                          <span>หมุน</span>
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className="btn-quick-item-action btn-delete-danger"
+                                          onClick={() => promptDeleteItem(item)}
+                                          title="นำอุปกรณ์ชิ้นนี้ออกจากผังร้าน"
+                                        >
+                                          <Trash2 size={12} />
+                                          <span>นำออก</span>
+                                        </button>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })
                           )}
                         </div>
                       </div>
@@ -3559,7 +3623,7 @@ export default function FranchisePlanner() {
                   blueprintOpacity={showBlueprintOverlay ? blueprintOpacity : 0}
                   onRotateItem={handleRotateItem}
                   onDuplicateItem={handleDuplicateItem}
-                  onDeleteItem={handleDeleteItem}
+                  onDeleteItem={promptDeleteItem}
                   onNudgeItem={handleNudgeItem}
                   isPlannerFullscreen={isPlannerFullscreen}
                   onToggleFullscreen={() => setIsPlannerFullscreen(!isPlannerFullscreen)}
@@ -3831,7 +3895,7 @@ export default function FranchisePlanner() {
                                 type="button" 
                                 className="pill-action-btn delete-btn" 
                                 title="ลบออก (กด Delete)"
-                                onClick={() => handleDeleteItem(item.id)}
+                                onClick={() => promptDeleteItem(item)}
                               >
                                 <Trash2 size={12} />
                               </button>
@@ -3906,8 +3970,25 @@ export default function FranchisePlanner() {
               เลือกระดับสเปกคอมพิวเตอร์ <span className="text-blue">สำหรับทั้งร้าน</span>
             </h2>
             <p className="section-subtitle max-w-700">
-              จำนวนเครื่องในผังของคุณปัจจุบันคือ <strong>{totalStations} เครื่อง</strong> สามารถเลือก Tier สเปกที่เหมาะสมกับกลุ่มลูกค้าและงบประมาณลงทุน
+              จำนวนเครื่องในผังของคุณปัจจุบันคือ <strong>{totalStations} เครื่อง</strong> สามารถเลือก Tier สเปกที่เหมาะสมกับกลุ่มลูกค้าและงบประมาณลงทุน (เก้าอี้เกมมิ่งรวมอยู่ในชุดโต๊ะแล้ว)
             </p>
+
+            {/* Admin CMS Quick Shortcut Banner */}
+            <div style={{ margin: '14px auto 0 auto', maxWidth: '780px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '10px 16px', fontSize: '0.82rem', gap: '10px', flexWrap: 'wrap' }}>
+              <span style={{ color: '#64748b' }}>
+                ⚙️ <strong>ผู้ดูแลระบบ:</strong> สามารถเข้าไปปรับแต่งรายละเอียดสเปก เพิ่มโมเดล หรือแก้ไขราคาต่อเครื่องและงานระบบได้ทุกจุด
+              </span>
+              <a 
+                href="/admin" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="btn-secondary"
+                style={{ padding: '4px 10px', fontSize: '0.75rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+              >
+                <Sliders size={13} />
+                <span>เปิดแผงจัดการสเปก & ราคา (Admin CMS)</span>
+              </a>
+            </div>
           </div>
 
           <div className="tiers-grid">
@@ -3965,10 +4046,10 @@ export default function FranchisePlanner() {
                         <strong>Gaming Gear:</strong> {tier.gear}
                       </div>
                     </div>
-                    <div className="tier-spec-item">
-                      <Armchair size={16} className="text-blue" />
-                      <div>
-                        <strong>Chair:</strong> {tier.chair}
+                    <div className="tier-spec-item" style={{ background: '#ecfdf5', borderRadius: '8px', padding: '6px 8px' }}>
+                      <Armchair size={15} className="text-emerald" style={{ flexShrink: 0 }} />
+                      <div style={{ color: '#065f46', fontSize: '0.78rem' }}>
+                        <strong>เก้าอี้เกมมิ่ง:</strong> รวมอยู่ในชุดโต๊ะเกมมิ่งแล้ว
                       </div>
                     </div>
                   </div>
@@ -4073,26 +4154,26 @@ export default function FranchisePlanner() {
                 </div>
 
                 <div className="cb-row">
-                  <strong>1. เครื่องคอมพิวเตอร์ & เกมมิ่งเกียร์</strong>
-                  <span>{totalStations} เครื่อง x ฿{currentTierInfo.unitCost.toLocaleString()} ({currentTierInfo.name.split(':')[1]})</span>
+                  <strong>1. เครื่องคอมพิวเตอร์ & เกมมิ่งเกียร์ (ไม่รวมเก้าอี้)</strong>
+                  <span>{totalStations} เครื่อง x ฿{currentTierInfo.unitCost.toLocaleString()} ({(currentTierInfo.name || '').includes(':') ? currentTierInfo.name.split(':')[1] : currentTierInfo.name})</span>
                   <strong className="text-right">฿{hardwareCost.toLocaleString()}</strong>
                 </div>
 
                 <div className="cb-row">
-                  <strong>2. เฟอร์นิเจอร์ & โซนพิเศษในผัง</strong>
-                  <span>โต๊ะเกมมิ่ง, เก้าอี้, ห้อง VIP, เวที 5v5 ({placedItems.length} รายการ)</span>
+                  <strong>2. ชุดโต๊ะคอมเกมมิ่ง & เก้าอี้ Ergonomic ในผัง</strong>
+                  <span>โต๊ะเกมมิ่งพร้อมเก้าอี้ตามจำนวนที่นั่ง, ห้อง VIP, เวที 5v5 ({placedItems.length} รายการ)</span>
                   <strong className="text-right">฿{furnitureItemsCost.toLocaleString()}</strong>
                 </div>
 
                 <div className="cb-row">
                   <strong>3. ตกแต่งภายใน & ไฟ Linear Modern</strong>
-                  <span>{roomAreaSqM} ตร.ม. x ฿{FIXED_INFRASTRUCTURE.interiorSqMeterCost} (พื้น, ผนังกันเสียง, ไฟ Linear)</span>
+                  <span>{roomAreaSqM} ตร.ม. x ฿{(fixedInfrastructure?.interiorSqMeterCost ?? FIXED_INFRASTRUCTURE.interiorSqMeterCost).toLocaleString()} (พื้น, ผนังกันเสียง, ไฟ Linear)</span>
                   <strong className="text-right">฿{interiorDecorCost.toLocaleString()}</strong>
                 </div>
 
                 <div className="cb-row">
                   <strong>4. งานระบบแอร์ Inverter</strong>
-                  <span>{roomAreaSqM} ตร.ม. x ฿{FIXED_INFRASTRUCTURE.airconSqMeterCost} (แอร์ Cassette 4 ทิศทาง)</span>
+                  <span>{roomAreaSqM} ตร.ม. x ฿{(fixedInfrastructure?.airconSqMeterCost ?? FIXED_INFRASTRUCTURE.airconSqMeterCost).toLocaleString()} (แอร์ Cassette 4 ทิศทาง)</span>
                   <strong className="text-right">฿{airconCost.toLocaleString()}</strong>
                 </div>
 
@@ -4433,7 +4514,7 @@ export default function FranchisePlanner() {
                         <td className="text-center">1</td>
                         <td>
                           <strong>ชุดเครื่องคอมพิวเตอร์เกมมิ่งสเปก {currentTierInfo.name}</strong>
-                          <div className="boq-item-desc">{currentTierInfo.cpu} • {currentTierInfo.gpu} • {currentTierInfo.ram} • จอ {currentTierInfo.monitor}</div>
+                          <div className="boq-item-desc">{currentTierInfo.cpu} • {currentTierInfo.gpu} • {currentTierInfo.ram} • จอ {currentTierInfo.monitor} • เกมมิ่งเกียร์ {currentTierInfo.gear} (ไม่รวมเก้าอี้ - รวมในชุดโต๊ะ)</div>
                         </td>
                         <td className="text-center">{totalStations} เครื่อง</td>
                         <td className="text-right">฿{currentTierInfo.unitCost.toLocaleString()}</td>
@@ -4442,8 +4523,8 @@ export default function FranchisePlanner() {
                       <tr>
                         <td className="text-center">2</td>
                         <td>
-                          <strong>เฟอร์นิเจอร์ โต๊ะเกมมิ่งระดับแข่งขัน เก้าอี้ Ergonomic และโซน VIP</strong>
-                          <div className="boq-item-desc">จัดวางตามผังร้าน {placedItems.length} โมดูล (รวมระบบรางท่อร้อยสายไฟและกล่องเต้ารับคู่ 3 ขา)</div>
+                          <strong>ชุดโต๊ะคอมพิวเตอร์เกมมิ่งพร้อมเก้าอี้ Ergonomic และโซนพิเศษในผัง</strong>
+                          <div className="boq-item-desc">จัดวางตามผังร้าน {placedItems.length} โมดูล (รวมเก้าอี้ Ergonomic ครบตามจำนวนที่นั่ง, รางร้อยสายไฟ, และกล่องเต้ารับคู่ 3 ขา)</div>
                         </td>
                         <td className="text-center">1 ชุด</td>
                         <td className="text-right">-</td>
@@ -4456,7 +4537,7 @@ export default function FranchisePlanner() {
                           <div className="boq-item-desc">งานผนัง Acoustic ซับเสียง, งานพื้น Epoxy/กระเบื้องยาง Heavy-Duty, ป้ายไฟอะคริลิกเรืองแสงโลโก้แบรนด์</div>
                         </td>
                         <td className="text-center">{roomAreaSqM} ตร.ม.</td>
-                        <td className="text-right">฿{FIXED_INFRASTRUCTURE.interiorSqMeterCost.toLocaleString()}</td>
+                        <td className="text-right">฿{(fixedInfrastructure?.interiorSqMeterCost ?? FIXED_INFRASTRUCTURE.interiorSqMeterCost).toLocaleString()}</td>
                         <td className="text-right">฿{interiorDecorCost.toLocaleString()}</td>
                       </tr>
                       <tr>
@@ -4466,7 +4547,7 @@ export default function FranchisePlanner() {
                           <div className="boq-item-desc">เครื่องปรับอากาศฝังฝ้า 4 ทิศทาง พร้อมระบบระบายอากาศ Fresh Air Circulation สำหรับบริการ 24 ชม.</div>
                         </td>
                         <td className="text-center">{roomAreaSqM} ตร.ม.</td>
-                        <td className="text-right">฿{FIXED_INFRASTRUCTURE.airconSqMeterCost.toLocaleString()}</td>
+                        <td className="text-right">฿{(fixedInfrastructure?.airconSqMeterCost ?? FIXED_INFRASTRUCTURE.airconSqMeterCost).toLocaleString()}</td>
                         <td className="text-right">฿{airconCost.toLocaleString()}</td>
                       </tr>
                       <tr>
@@ -4984,6 +5065,94 @@ export default function FranchisePlanner() {
                   <span>บันทึกไฟล์ (Save PNG)</span>
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Item Confirmation Modal */}
+      {itemPendingDelete && (
+        <div 
+          className="delete-confirm-modal-overlay"
+          onClick={cancelDeleteItem}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div 
+            className="delete-confirm-modal-card" 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="del-modal-header">
+              <div className="del-modal-icon-bubble">
+                <Trash2 size={22} />
+              </div>
+              <button 
+                type="button" 
+                className="del-modal-close-btn"
+                onClick={cancelDeleteItem}
+                title="ปิดหน้าต่าง"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="del-modal-content">
+              <h3 className="del-modal-title">ยืนยันนำอุปกรณ์ออกจากผัง?</h3>
+              <p className="del-modal-desc">
+                คุณต้องการนำอุปกรณ์ชิ้นนี้ออกจากแบบจำลองผังร้าน 3D ใช่หรือไม่?
+              </p>
+
+              {/* Item preview card */}
+              <div className="del-modal-item-preview">
+                {itemPendingDelete.catalog?.image ? (
+                  <img 
+                    src={itemPendingDelete.catalog.image} 
+                    alt={itemPendingDelete.catalog?.name} 
+                    className="del-modal-item-img" 
+                  />
+                ) : (
+                  <div className="del-modal-item-icon-fallback">
+                    {renderCatalogItemIcon(itemPendingDelete.catalog?.icon, 20)}
+                  </div>
+                )}
+                <div className="del-modal-item-info">
+                  <h4 className="del-modal-item-name">{itemPendingDelete.catalog?.name || itemPendingDelete.type}</h4>
+                  <div className="del-modal-item-meta">
+                    <span className="del-meta-dim">
+                      <Ruler size={11} />
+                      {itemPendingDelete.catalog?.seats > 0 
+                        ? `${itemPendingDelete.catalog.seats} ที่นั่ง (${itemPendingDelete.catalog.widthMeters}ม.)` 
+                        : `${itemPendingDelete.catalog?.widthMeters || 1} x ${itemPendingDelete.catalog?.heightMeters || 1} ม.`}
+                    </span>
+                    <span className="del-meta-price">
+                      ฿{(itemPendingDelete.catalog?.baseCost || 0).toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <p className="del-modal-subtext">
+                <Info size={13} className="text-blue" />
+                <span>ท่านสามารถเลือกเพิ่มอุปกรณ์ชิ้นนี้กลับเข้ามาใหม่ได้ตลอดเวลาจากแท็บ <strong>"+ เพิ่มอุปกรณ์"</strong></span>
+              </p>
+            </div>
+
+            <div className="del-modal-footer">
+              <button 
+                type="button" 
+                className="btn-del-modal-cancel" 
+                onClick={cancelDeleteItem}
+              >
+                ยกเลิก
+              </button>
+              <button 
+                type="button" 
+                className="btn-del-modal-confirm" 
+                onClick={confirmDeleteItem}
+              >
+                <Trash2 size={14} />
+                <span>ยืนยันนำอุปกรณ์ออก</span>
+              </button>
             </div>
           </div>
         </div>

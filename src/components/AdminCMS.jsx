@@ -20,6 +20,7 @@ import CMSLivePreviewModal from './CMSLivePreviewModal';
 import PhotoshopColorPickerModal from './PhotoshopColorPickerModal';
 import MediaLibraryModal from './MediaLibraryModal';
 import OmnichannelLeadsCMS from './OmnichannelLeadsCMS';
+import HardwarePricingCMS from './HardwarePricingCMS';
 import ArticleBlockEditor from './ArticleBlockEditor';
 import { analyzeProductPhoto, parseSpecSheetText } from '../utils/aiSpecParser';
 
@@ -1464,6 +1465,18 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
             </button>
 
             <button 
+              id="cms-tab-hardware-pricing"
+              className={`admin-nav-item ${activeTab === 'hardware-pricing' ? 'active' : ''}`}
+              onClick={() => setActiveTab('hardware-pricing')}
+            >
+              <Cpu size={18} />
+              <div>
+                <strong>สเปกคอม & ราคาโครงสร้าง</strong>
+                <span>รุ่น 001, RTX 5090, Diskless, โต๊ะ</span>
+              </div>
+            </button>
+
+            <button 
               id="cms-tab-airag"
               className={`admin-nav-item ${activeTab === 'ai-rag' ? 'active' : ''}`}
               onClick={() => setActiveTab('ai-rag')}
@@ -1577,6 +1590,13 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
               ========================================================================= */}
           {activeTab === 'omnichannel-leads' && (
             <OmnichannelLeadsCMS />
+          )}
+
+          {/* =========================================================================
+              TAB: HARDWARE SPECS & INFRASTRUCTURE PRICING
+              ========================================================================= */}
+          {activeTab === 'hardware-pricing' && (
+            <HardwarePricingCMS />
           )}
 
           {/* =========================================================================

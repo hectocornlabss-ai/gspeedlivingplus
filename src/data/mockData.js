@@ -1845,13 +1845,12 @@ export const HARDWARE_TIERS = {
     id: 'standard',
     name: 'Tier 1: Esports Standard',
     tagline: 'คุ้มค่า คืนทุนเร็ว เหมาะสำหรับเล่นเกมยอดนิยมทุกเกม',
-    unitCost: 36500, // THB per PC unit (tower + monitor + peripherals)
+    unitCost: 36500, // THB per PC unit (tower + monitor + peripherals, chairs bundled with desk sets)
     cpu: 'Intel Core i5-14400F / AMD Ryzen 5 7500F',
     gpu: 'NVIDIA GeForce RTX 4060 8GB GDDR6',
     ram: '16GB DDR5 5600MHz (Dual Channel)',
     monitor: '24.5" Fast-IPS 240Hz 0.5ms HDR',
-    gear: 'RGB Mechanical Blue/Red Switch + Gaming Mouse 1000Hz + Headset 7.1',
-    chair: 'G-Speed Pro Racing Gaming Chair (PU Leather, Recline 160°)'
+    gear: 'RGB Mechanical Blue/Red Switch + Gaming Mouse 1000Hz + Headset 7.1'
   },
   pro: {
     id: 'pro',
@@ -1862,8 +1861,7 @@ export const HARDWARE_TIERS = {
     gpu: 'NVIDIA GeForce RTX 4070 SUPER 12GB GDDR6X',
     ram: '32GB DDR5 6000MHz RGB',
     monitor: '27" Fast-IPS 280Hz - 360Hz QHD / FHD DyAc Ready',
-    gear: 'Custom Coiled Keyboard (Hotswap) + Ultralight Wireless Mouse 4K/8K + Studio Headset',
-    chair: 'Ergonomic Esports Mesh Chair (ปรับ Lumbar Support ระบายความร้อน)'
+    gear: 'Custom Coiled Keyboard (Hotswap) + Ultralight Wireless Mouse 4K/8K + Studio Headset'
   },
   ultimate: {
     id: 'ultimate',
@@ -1874,8 +1872,18 @@ export const HARDWARE_TIERS = {
     gpu: 'NVIDIA GeForce RTX 4080 SUPER 16GB GDDR6X',
     ram: '64GB DDR5 6400MHz RGB',
     monitor: 'Main 27" OLED 360Hz-500Hz + 2nd Chat Screen 24" FHD',
-    gear: 'Magnetic Switch Rapid-Trigger Keyboard + Pro Wireless Mouse + Broadcast Shure Mic + 4K Cam',
-    chair: 'Secretlab TITAN Evo 2024 Series (Magnetic Memory Foam Pillow)'
+    gear: 'Magnetic Switch Rapid-Trigger Keyboard + Pro Wireless Mouse + Broadcast Shure Mic + 4K Cam'
+  },
+  model001: {
+    id: 'model001',
+    name: 'สเปกคอมรุ่น 001: Next-Gen Flagship',
+    tagline: 'ขุมพลังเจนใหม่ระดับท็อป 4K Ultra Ray Tracing พร้อมแข่งทัวร์นาเมนต์ระดับโลก',
+    unitCost: 98000,
+    cpu: 'Intel Core i9 Gen 14 (i9-14900K 24 Cores / 32 Threads)',
+    gpu: 'NVIDIA GeForce RTX 5090 16GB GDDR7',
+    ram: '32GB DDR5 6400MHz RGB (Dual Channel)',
+    monitor: '27" Fast-IPS / OLED 360Hz - 540Hz (DyAc 2 Ready 0.3ms)',
+    gear: 'Rapid-Trigger Hall Effect Keyboard + Wireless Mouse 8K + Studio Headset 7.1'
   }
 };
 
