@@ -568,24 +568,7 @@ export default function ArenaHub({
             )}
           </div>
 
-          {/* Bottom CTA Banner to enter dedicated activities page */}
-          <div className="hub-section-bottom-banner glass-panel">
-            <div className="bottom-banner-icon-side">
-              <ImageIcon size={26} className="text-blue" />
-            </div>
-            <div className="bottom-banner-info-side">
-              <h4>สำรวจคลังภาพกิจกรรมและบรรยากาศความมันส์ทั้งหมด</h4>
-              <p>รวมภาพงานแข่ง LAN Final, งานเปิดตัวเกม, มีตติ้ง และคอมมูนิตี้เกมเมอร์ชาวไทยกว่า 50+ รายการความละเอียดสูง</p>
-            </div>
-            <button 
-              type="button"
-              className="btn-bottom-banner-action"
-              onClick={() => onNavigateActivities ? onNavigateActivities() : (window.history.pushState(null, '', '/activities'), window.dispatchEvent(new PopStateEvent('popstate')))}
-            >
-              <span>เข้าสู่หน้าภาพกิจกรรมเต็มรูปแบบ</span>
-              <ArrowRight size={16} />
-            </button>
-          </div>
+
         </div>
       </section>
 
@@ -782,24 +765,7 @@ export default function ArenaHub({
                 })}
               </div>
 
-              {/* Bottom CTA Banner to enter dedicated tournaments page */}
-              <div className="hub-section-bottom-banner glass-panel" style={{ marginTop: '35px' }}>
-                <div className="bottom-banner-icon-side">
-                  <Trophy size={26} className="text-amber" />
-                </div>
-                <div className="bottom-banner-info-side">
-                  <h4>ติดตามปฏิทินการแข่งขัน ตารางสายแข่ง (Brackets) และลงทะเบียนแข่งขัน</h4>
-                  <p>ดูสถานะการรับสมัคร สถิติผลคะแนนสด และเงินรางวัลรวมกว่า 300,000 บาทในหน้าทัวร์นาเมนต์ทางการ</p>
-                </div>
-                <button 
-                  type="button"
-                  className="btn-bottom-banner-action amber-btn"
-                  onClick={() => onNavigateTournaments ? onNavigateTournaments() : (window.history.pushState(null, '', '/tournaments'), window.dispatchEvent(new PopStateEvent('popstate')))}
-                >
-                  <span>เข้าสู่หน้าทัวร์นาเมนต์เต็มรูปแบบ</span>
-                  <ArrowRight size={16} />
-                </button>
-              </div>
+
             </div>
           </section>
         );
