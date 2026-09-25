@@ -11,8 +11,7 @@ import {
   EVENT_CATEGORIES, GAME_NEWS 
 } from '../data/mockData';
 import { useSiteData } from '../context/SiteDataContext';
-import TournamentDetailModal from './TournamentDetailModal';
-import ArenaSeatBookingModal from './ArenaSeatBookingModal';
+import EsportOrganizerModal from './EsportOrganizerModal';
 
 // Helper functions for dynamic theme contrast & color overlays
 function isColorDark(hexColor) {
@@ -43,6 +42,8 @@ export default function ArenaHub({
   initialTournamentSlug, 
   onSelectTournamentSlug, 
   onSelectActivitySlug,
+  onNavigateTournaments,
+  onNavigateActivities,
   initialCategory = 'all',
   initialTag = 'all'
 }) {
@@ -81,42 +82,19 @@ export default function ArenaHub({
   }, [initialTag]);
 
   // Modals state
-  const [selectedTournament, setSelectedTournament] = useState(null);
   const [selectedGalleryItem, setSelectedGalleryItem] = useState(null);
-  const [tourneyModalTab, setTourneyModalTab] = useState('overview'); // 'overview', 'schedule', 'bracket', 'roster', 'gallery', 'register'
 
-  // Arena Live Seat Booking Modal State
-  const [isSeatBookingOpen, setIsSeatBookingOpen] = useState(false);
-  const [bookingInitialZone, setBookingInitialZone] = useState('stage');
+  // Esport Organizer & Venue Rental Modal State
+  const [isOrganizerModalOpen, setIsOrganizerModalOpen] = useState(false);
+  const [selectedOrganizerZone, setSelectedOrganizerZone] = useState('');
 
-  // Sync initialTournamentSlug prop with selectedTournament modal
-  useEffect(() => {
-    if (initialTournamentSlug) {
-      const match = tournamentsList.find(t => 
-        (t.slug && t.slug.toLowerCase() === initialTournamentSlug.toLowerCase()) || 
-        t.id === initialTournamentSlug ||
-        (t.seo && t.seo.slug && t.seo.slug.toLowerCase() === initialTournamentSlug.toLowerCase())
-      );
-      if (match) {
-        setSelectedTournament(match);
-      }
-    } else if (selectedTournament && !initialTournamentSlug) {
-      setSelectedTournament(null);
-    }
-  }, [initialTournamentSlug, tournamentsList]);
-
-  const handleOpenTournament = (tour, tab = 'overview') => {
-    setSelectedTournament(tour);
-    setTourneyModalTab(tab);
+  const handleOpenTournament = (tour) => {
+    const slug = tour.slug || tour.seo?.slug || tour.id;
     if (onSelectTournamentSlug) {
-      onSelectTournamentSlug(tour.slug || tour.id);
-    }
-  };
-
-  const handleCloseTournament = () => {
-    setSelectedTournament(null);
-    if (onSelectTournamentSlug) {
-      onSelectTournamentSlug(null);
+      onSelectTournamentSlug(slug);
+    } else {
+      window.history.pushState(null, '', `/tournaments/${slug}`);
+      window.dispatchEvent(new PopStateEvent('popstate'));
     }
   };
 
@@ -157,7 +135,7 @@ export default function ArenaHub({
 
           <div className="activity-hotline-badge">
             <PhoneCall size={16} className="text-blue pulse-icon" />
-            <span>สายด่วนจองเครื่อง & เวทีแข่ง:</span>
+            <span>สายด่วนติดต่อขอจัดงานแข่ง Esport:</span>
             <a href="tel:0637937704" className="hotline-phone-link">063-793-7704</a>
           </div>
         </div>
@@ -258,10 +236,10 @@ export default function ArenaHub({
 
                 <div className="hero-cta-group">
                   <button 
-                    id="btn-hero-live-seat-booking"
+                    id="btn-hero-organize-esport"
                     onClick={() => {
-                      setBookingInitialZone('stage');
-                      setIsSeatBookingOpen(true);
+                      setSelectedOrganizerZone('Main Stage & Battleground Zone');
+                      setIsOrganizerModalOpen(true);
                     }} 
                     className="btn-primary cta-btn-large"
                     style={{
@@ -269,15 +247,18 @@ export default function ArenaHub({
                       boxShadow: '0 8px 24px rgba(2, 132, 199, 0.35)'
                     }}
                   >
-                    <Gamepad2 size={18} />
-                    <span>จองที่นั่ง Arena ล่วงหน้า (Live Booking)</span>
+                    <Trophy size={18} />
+                    <span>ติดต่อขอจัดงานแข่ง Esport</span>
                   </button>
 
                   <button 
                     onClick={() => {
-                      window.history.pushState(null, '', '/activities');
-                      const el = document.getElementById('activities');
-                      if (el) el.scrollIntoView({ behavior: 'smooth' });
+                      if (onNavigateActivities) {
+                        onNavigateActivities();
+                      } else {
+                        window.history.pushState(null, '', '/activities');
+                        window.dispatchEvent(new PopStateEvent('popstate'));
+                      }
                     }} 
                     className="btn-secondary cta-btn-large"
                     style={isDarkHero ? {
@@ -291,7 +272,34 @@ export default function ArenaHub({
                       color: '#1e293b'
                     }}
                   >
-                    <span>{heroData.primaryCta || heroData.primaryCtaText || 'สำรวจกิจกรรม & ทัวร์นาเมนต์'}</span>
+                    <Camera size={18} className="text-blue" />
+                    <span>{heroData.primaryCta || heroData.primaryCtaText || 'ชมภาพกิจกรรมทั้งหมด'}</span>
+                    <ArrowRight size={18} />
+                  </button>
+
+                  <button 
+                    onClick={() => {
+                      if (onNavigateTournaments) {
+                        onNavigateTournaments();
+                      } else {
+                        window.history.pushState(null, '', '/tournaments');
+                        window.dispatchEvent(new PopStateEvent('popstate'));
+                      }
+                    }} 
+                    className="btn-secondary cta-btn-large"
+                    style={isDarkHero ? {
+                      background: 'rgba(255, 255, 255, 0.12)',
+                      borderColor: 'rgba(255, 255, 255, 0.25)',
+                      color: '#ffffff',
+                      backdropFilter: 'blur(8px)'
+                    } : {
+                      background: 'rgba(255, 255, 255, 0.9)',
+                      borderColor: 'rgba(203, 213, 225, 0.9)',
+                      color: '#1e293b'
+                    }}
+                  >
+                    <Trophy size={18} className="text-amber" />
+                    <span>{heroData.secondaryCtaText || 'ปฏิทินแข่งทัวร์นาเมนต์'}</span>
                     <ArrowRight size={18} />
                   </button>
 
@@ -311,7 +319,7 @@ export default function ArenaHub({
                     }}
                   >
                     <Compass size={18} />
-                    <span>{heroData.secondaryCta || heroData.secondaryCtaText || 'จำลองผังร้าน 3D แฟรนไชส์'}</span>
+                    <span>{heroData.secondaryCta || 'จำลองผังร้าน 3D แฟรนไชส์'}</span>
                   </button>
                 </div>
 
@@ -356,15 +364,22 @@ export default function ArenaHub({
         );
       })()}
 
-      {/* 3. DUAL FEATURE HIGHLIGHT CARDS (BLOG & NEWS vs OUR EVENTS) */}
+      {/* 3. DUAL FEATURE HIGHLIGHT CARDS (OUR EVENTS vs TOURNAMENTS) */}
       <section className="dual-feature-section">
         <div className="container">
           <div className="dual-cards-grid">
-            {/* Left Card: OUR EVENTS */}
-            <a 
-              href={siteData?.featureBanners?.bannerLeft?.linkTarget || '#activities'} 
+            {/* Left Card: OUR EVENTS -> Goes to Dedicated Activities */}
+            <div 
+              onClick={() => {
+                if (onNavigateActivities) onNavigateActivities();
+                else {
+                  window.history.pushState(null, '', '/activities');
+                  window.dispatchEvent(new PopStateEvent('popstate'));
+                }
+              }} 
               className="feature-banner-card events-banner glass-panel"
               style={{ 
+                cursor: 'pointer',
                 background: siteData?.featureBanners?.bannerLeft?.image
                   ? `linear-gradient(180deg, rgba(15, 23, 42, 0.45) 0%, rgba(15, 23, 42, 0.88) 100%), url(${siteData.featureBanners.bannerLeft.image}) center/cover no-repeat`
                   : (siteData?.featureBanners?.bannerLeft?.bgGradient || 'linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%)')
@@ -379,36 +394,43 @@ export default function ArenaHub({
                   {siteData?.featureBanners?.bannerLeft?.desc || 'ภาพงานแข่ง LAN, งานเปิดตัวเกม, มีตติ้ง และพิธีมอบรางวัลชนะเลิศตลอดทั้งปี'}
                 </p>
                 <div className="banner-link-row text-blue">
-                  <span style={{ color: '#60a5fa' }}>{siteData?.featureBanners?.bannerLeft?.linkText || 'สำรวจอัลบั้มภาพกิจกรรม'}</span>
+                  <span style={{ color: '#60a5fa' }}>{siteData?.featureBanners?.bannerLeft?.linkText || 'เข้าสู่หน้ารวมภาพกิจกรรม & แกลเลอรี'}</span>
                   <ArrowRight size={18} color="#60a5fa" />
                 </div>
               </div>
-            </a>
+            </div>
 
-            {/* Right Card: BLOG & NEWS */}
-            <a 
-              href={siteData?.featureBanners?.bannerRight?.linkTarget || '#news'} 
+            {/* Right Card: TOURNAMENTS -> Goes to Dedicated Tournaments */}
+            <div 
+              onClick={() => {
+                if (onNavigateTournaments) onNavigateTournaments();
+                else {
+                  window.history.pushState(null, '', '/tournaments');
+                  window.dispatchEvent(new PopStateEvent('popstate'));
+                }
+              }} 
               className="feature-banner-card blog-banner glass-panel"
               style={{ 
+                cursor: 'pointer',
                 background: siteData?.featureBanners?.bannerRight?.image
                   ? `linear-gradient(180deg, rgba(15, 23, 42, 0.45) 0%, rgba(15, 23, 42, 0.88) 100%), url(${siteData.featureBanners.bannerRight.image}) center/cover no-repeat`
                   : (siteData?.featureBanners?.bannerRight?.bgGradient || 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)')
               }}
             >
               <div className="banner-content">
-                <span className="badge-pill badge-white">{siteData?.featureBanners?.bannerRight?.badge || 'GLP BLOG & NEWS'}</span>
+                <span className="badge-pill badge-white">{siteData?.featureBanners?.bannerRight?.badge || 'GLP TOURNAMENTS'}</span>
                 <h3 className="banner-title" style={{ color: '#ffffff' }}>
-                  {siteData?.featureBanners?.bannerRight?.title || 'บทความ ข่าวสาร & ไฮไลต์เกม'}
+                  {siteData?.featureBanners?.bannerRight?.title || 'ปฏิทินแข่ง & ชิงรางวัล LAN'}
                 </h3>
                 <p className="banner-desc" style={{ color: '#cbd5e1' }}>
-                  {siteData?.featureBanners?.bannerRight?.desc || 'เกาะติดผลการแข่งขัน ทริกการเล่น สเปกอุปกรณ์ใหม่ และประกาศจากทางร้าน'}
+                  {siteData?.featureBanners?.bannerRight?.desc || 'เกาะติดผลการแข่งขัน สายแข่งสด (Brackets) และลงทะเบียนประลองฝีมือระดับประเทศ'}
                 </p>
                 <div className="banner-link-row text-blue">
-                  <span style={{ color: '#60a5fa' }}>{siteData?.featureBanners?.bannerRight?.linkText || 'อ่านบทความล่าสุด'}</span>
+                  <span style={{ color: '#60a5fa' }}>{siteData?.featureBanners?.bannerRight?.linkText || 'เข้าสู่หน้าปฏิทินทัวร์นาเมนต์ทั้งหมด'}</span>
                   <ArrowRight size={18} color="#60a5fa" />
                 </div>
               </div>
-            </a>
+            </div>
           </div>
         </div>
       </section>
@@ -427,6 +449,19 @@ export default function ArenaHub({
             <p className="section-subtitle max-w-700">
               ย้อนชมภาพความประทับใจ การประลองฝีมือของเหล่านักกีฬาอีสปอร์ต และงานอีเวนต์ร่วมกับค่ายเกมชั้นนำ ณ GLP Esports
             </p>
+
+            {/* CTA Button to enter dedicated Activities Page */}
+            <div className="section-enter-cta-row" style={{ marginTop: '14px', marginBottom: '8px', display: 'flex', justifyContent: 'center' }}>
+              <button 
+                type="button" 
+                className="btn-enter-dedicated-page"
+                onClick={() => onNavigateActivities ? onNavigateActivities() : (window.history.pushState(null, '', '/activities'), window.dispatchEvent(new PopStateEvent('popstate')))}
+              >
+                <Camera size={16} className="text-blue" />
+                <span>เข้าสู่หน้ารวมภาพกิจกรรม & แกลเลอรีทั้งหมด ({galleryList.length} รายการ)</span>
+                <ArrowRight size={16} />
+              </button>
+            </div>
 
             {/* Category Filter Tabs */}
             <div className="category-filter-pills">
@@ -532,6 +567,25 @@ export default function ArenaHub({
               </div>
             )}
           </div>
+
+          {/* Bottom CTA Banner to enter dedicated activities page */}
+          <div className="hub-section-bottom-banner glass-panel">
+            <div className="bottom-banner-icon-side">
+              <ImageIcon size={26} className="text-blue" />
+            </div>
+            <div className="bottom-banner-info-side">
+              <h4>สำรวจคลังภาพกิจกรรมและบรรยากาศความมันส์ทั้งหมด</h4>
+              <p>รวมภาพงานแข่ง LAN Final, งานเปิดตัวเกม, มีตติ้ง และคอมมูนิตี้เกมเมอร์ชาวไทยกว่า 50+ รายการความละเอียดสูง</p>
+            </div>
+            <button 
+              type="button"
+              className="btn-bottom-banner-action"
+              onClick={() => onNavigateActivities ? onNavigateActivities() : (window.history.pushState(null, '', '/activities'), window.dispatchEvent(new PopStateEvent('popstate')))}
+            >
+              <span>เข้าสู่หน้าภาพกิจกรรมเต็มรูปแบบ</span>
+              <ArrowRight size={16} />
+            </button>
+          </div>
         </div>
       </section>
 
@@ -555,12 +609,25 @@ export default function ArenaHub({
                   <Flame size={14} />
                   <span>{siteData?.tournamentsSection?.badge || 'TOURNAMENTS & COMMUNITY EVENTS'}</span>
                 </div>
-                <h2 className="section-title" style={{ color: siteData?.tournamentsSection?.titleColor || (isDarkTour ? '#ffffff' : '#0f172a') }}>
-                  {siteData?.tournamentsSection?.title || 'ปฏิทินการแข่งขัน อีสปอร์ตประจำเดือน'}
-                </h2>
-                <p className="section-subtitle" style={{ color: siteData?.tournamentsSection?.subtitleColor || (isDarkTour ? '#cbd5e1' : '#475569') }}>
-                  {siteData?.tournamentsSection?.subtitle || 'ร่วมชิงเงินรางวัลรวมกว่าหลายแสนบาท พิสูจน์ฝีมือบนเวที LAN Final ถ่ายทอดสดสู่สายตาแฟนเกมทั่วประเทศ'}
-                </p>
+                <div className="section-header-row-flex" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+                  <div style={{ flex: '1 1 500px' }}>
+                    <h2 className="section-title" style={{ color: siteData?.tournamentsSection?.titleColor || (isDarkTour ? '#ffffff' : '#0f172a'), margin: 0 }}>
+                      {siteData?.tournamentsSection?.title || 'ปฏิทินการแข่งขัน อีสปอร์ตประจำเดือน'}
+                    </h2>
+                    <p className="section-subtitle" style={{ color: siteData?.tournamentsSection?.subtitleColor || (isDarkTour ? '#cbd5e1' : '#475569'), marginTop: '8px', marginBottom: 0 }}>
+                      {siteData?.tournamentsSection?.subtitle || 'ร่วมชิงเงินรางวัลรวมกว่าหลายแสนบาท พิสูจน์ฝีมือบนเวที LAN Final ถ่ายทอดสดสู่สายตาแฟนเกมทั่วประเทศ'}
+                    </p>
+                  </div>
+                  <button 
+                    type="button" 
+                    className="btn-enter-dedicated-page amber-theme"
+                    onClick={() => onNavigateTournaments ? onNavigateTournaments() : (window.history.pushState(null, '', '/tournaments'), window.dispatchEvent(new PopStateEvent('popstate')))}
+                  >
+                    <Trophy size={16} className="text-amber" />
+                    <span>เข้าสู่หน้าทัวร์นาเมนต์ & สายแข่งทั้งหมด</span>
+                    <ArrowRight size={16} />
+                  </button>
+                </div>
               </div>
 
               <div className="tournaments-grid">
@@ -714,6 +781,25 @@ export default function ArenaHub({
                   );
                 })}
               </div>
+
+              {/* Bottom CTA Banner to enter dedicated tournaments page */}
+              <div className="hub-section-bottom-banner glass-panel" style={{ marginTop: '35px' }}>
+                <div className="bottom-banner-icon-side">
+                  <Trophy size={26} className="text-amber" />
+                </div>
+                <div className="bottom-banner-info-side">
+                  <h4>ติดตามปฏิทินการแข่งขัน ตารางสายแข่ง (Brackets) และลงทะเบียนแข่งขัน</h4>
+                  <p>ดูสถานะการรับสมัคร สถิติผลคะแนนสด และเงินรางวัลรวมกว่า 300,000 บาทในหน้าทัวร์นาเมนต์ทางการ</p>
+                </div>
+                <button 
+                  type="button"
+                  className="btn-bottom-banner-action amber-btn"
+                  onClick={() => onNavigateTournaments ? onNavigateTournaments() : (window.history.pushState(null, '', '/tournaments'), window.dispatchEvent(new PopStateEvent('popstate')))}
+                >
+                  <span>เข้าสู่หน้าทัวร์นาเมนต์เต็มรูปแบบ</span>
+                  <ArrowRight size={16} />
+                </button>
+              </div>
             </div>
           </section>
         );
@@ -801,14 +887,14 @@ export default function ArenaHub({
                   <div className="zone-action-bar" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                     <button 
                       onClick={() => {
-                        setBookingInitialZone(currentZoneData.id);
-                        setIsSeatBookingOpen(true);
+                        setSelectedOrganizerZone(currentZoneData.name);
+                        setIsOrganizerModalOpen(true);
                       }} 
                       className="btn-primary"
                       style={{ background: 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)' }}
                     >
-                      <Monitor size={16} />
-                      <span>จองที่นั่งโซนนี้ล่วงหน้า (Live Booking)</span>
+                      <Trophy size={16} />
+                      <span>ติดต่อขอจัดงานแข่งในโซนนี้</span>
                     </button>
                     <button 
                       onClick={onNavigateFranchise} 
@@ -974,43 +1060,13 @@ export default function ArenaHub({
         </div>
       )}
 
-      {/* =========================================================================
-          GRAND ESPORTS TOURNAMENT HUB MODAL (DEDICATED COMPONENT)
-          ========================================================================= */}
-      {selectedTournament && (
-        <TournamentDetailModal
-          tournament={selectedTournament}
-          initialTab={tourneyModalTab}
-          onClose={handleCloseTournament}
-          onNavigateHome={() => {
-            handleCloseTournament();
-            window.history.pushState(null, '', '/');
-            window.dispatchEvent(new PopStateEvent('popstate'));
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-          onNavigateTournaments={() => {
-            handleCloseTournament();
-            window.history.pushState(null, '', '/events');
-            window.dispatchEvent(new PopStateEvent('popstate'));
-            const el = document.getElementById('tournaments');
-            if (el) el.scrollIntoView({ behavior: 'smooth' });
-          }}
-          onRegisterTeam={(tournamentId, newTeam) => {
-            const currentTourney = tournamentsList.find(t => t.id === tournamentId) || selectedTournament;
-            const updatedTeams = [...(currentTourney.teams || []), newTeam];
-            if (updateTournament) {
-              updateTournament(tournamentId, { teams: updatedTeams });
-            }
-            setSelectedTournament({ ...currentTourney, teams: updatedTeams });
-          }}
-        />
-      )}
 
-      {/* Arena Live Seat Booking Modal */}
-      <ArenaSeatBookingModal
-        isOpen={isSeatBookingOpen}
-        onClose={() => setIsSeatBookingOpen(false)}
-        initialZoneId={bookingInitialZone}
+
+      {/* Esport Tournament Organizer & Venue Rental Modal */}
+      <EsportOrganizerModal
+        isOpen={isOrganizerModalOpen}
+        onClose={() => setIsOrganizerModalOpen(false)}
+        initialZoneName={selectedOrganizerZone}
       />
     </div>
   );

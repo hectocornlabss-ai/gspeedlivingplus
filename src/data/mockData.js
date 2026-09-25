@@ -642,6 +642,7 @@ export function generateDefaultBracket(teams = [], tournamentTitle = 'Tournament
 export const TOURNAMENTS = [
   {
     id: 'tour-1',
+    slug: 'gspeed-valorant-championship-2026',
     title: 'G-SPEED VALORANT CHAMPIONSHIP 2026',
     game: 'VALORANT',
     gameCategory: 'Tactical 5v5 FPS',
@@ -815,6 +816,7 @@ export const TOURNAMENTS = [
   },
   {
     id: 'tour-2',
+    slug: 'rov-university-battle-league-2026',
     title: 'ROV UNIVERSITY BATTLE LEAGUE',
     game: 'Arena of Valor (RoV)',
     gameCategory: '5v5 Mobile MOBA',
@@ -926,6 +928,7 @@ export const TOURNAMENTS = [
   },
   {
     id: 'tour-3',
+    slug: 'cs2-bangkok-showdown-invitational-2026',
     title: 'CS2 BANGKOK SHOWDOWN INVITATIONAL',
     game: 'Counter-Strike 2',
     gameCategory: 'Tactical 5v5 FPS',

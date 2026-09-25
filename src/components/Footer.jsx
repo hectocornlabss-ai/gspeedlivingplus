@@ -22,6 +22,8 @@ export default function Footer({ setActiveTab, onNavigate }) {
       if (setActiveTab) {
         if (path === '/franchise') setActiveTab('franchise');
         else if (path === '/company') setActiveTab('company');
+        else if (path === '/tournaments' || path === '/events') setActiveTab('tournaments');
+        else if (path === '/activities' || path === '/gallery') setActiveTab('activities');
         else setActiveTab('arena');
       }
       window.scrollTo(0, 0);
@@ -55,27 +57,27 @@ export default function Footer({ setActiveTab, onNavigate }) {
             <ul className="footer-links">
               <li>
                 <button onClick={() => handleLink('/')}>
-                  หน้าหลัก & สนามแข่งขัน
+                  หน้าแรก
                 </button>
               </li>
               <li>
-                <button onClick={() => handleLink('/events')}>
-                  ปฏิทินการแข่งขันอีสปอร์ต
+                <button onClick={() => handleLink('/tournaments')}>
+                  ทัวร์นาเมนต์
                 </button>
               </li>
               <li>
                 <button onClick={() => handleLink('/activities')}>
-                  ภาพกิจกรรม & แกลเลอรี
+                  ภาพกิจกรรม
                 </button>
               </li>
               <li>
                 <button onClick={() => handleLink('/company')}>
-                  ประวัติองค์กร & วิสัยทัศน์ผู้บริหาร
+                  เกี่ยวกับเรา
                 </button>
               </li>
               <li>
                 <button onClick={() => handleLink('/franchise')} className="text-blue">
-                  ระบบออกแบบผังร้าน & คำนวณราคาแฟรนไชส์ 3D
+                  สนใจเปิดร้าน (แฟรนไชส์ & จำลองผังร้าน 3D)
                 </button>
               </li>
             </ul>

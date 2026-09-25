@@ -2070,9 +2070,6 @@ export default function FranchisePlanner() {
                     <span>พื้นที่ใช้สอยรวม: <strong>{roomAreaSqM} ตารางเมตร</strong></span>
                     <span>(รองรับได้ประมาณ <strong>{idealMaxPCs} เครื่อง</strong> แบบไม่อึดอัด)</span>
                   </div>
-
-
-
                   {/* Switch to Blueprint Mode Suggestion */}
                   <div 
                     style={{ 
@@ -2218,7 +2215,6 @@ export default function FranchisePlanner() {
 
                         <div className="area-summary-pill" style={{ marginTop: '8px' }}>
                           <span>พื้นที่ใช้สอยรวม: <strong>{roomAreaSqM} ตารางเมตร</strong></span>
-                          <span>(สเกลมาตราส่วน: <strong>1:{Math.round(pixelsPerMeter)}</strong>)</span>
                         </div>
                       </div>
 
@@ -3055,6 +3051,37 @@ export default function FranchisePlanner() {
                         </div>
 
                         <div className="quick-items-scrollable">
+                          {/* Store Door always at top of list */}
+                          <div 
+                            className={`installed-item-card door-item-card ${selectedItemId === 'store-door' ? 'active' : ''}`}
+                            onClick={() => {
+                              setSelectedItemId('store-door');
+                              setInspectorTab('door');
+                            }}
+                            title="คลิกเพื่อเลือกและปรับตำแหน่งประตูทางเข้าร้าน"
+                          >
+                            <div className="installed-item-left">
+                              <div className="installed-item-badge door-badge">
+                                <DoorOpen size={14} />
+                              </div>
+                              <div className="installed-item-info">
+                                <span className="installed-item-title">ประตูทางเข้าร้านหลัก</span>
+                                <div className="installed-item-meta">
+                                  <span className="installed-tag tag-emerald">
+                                    {doorConfig.wall === 'front' ? 'ด้านหน้า' :
+                                     doorConfig.wall === 'left' ? 'ผนังซ้าย' :
+                                     doorConfig.wall === 'back' ? 'ผนังหลัง' : 'ผนังขวา'} {Math.round((doorConfig.offsetRatio ?? 0.75) * 100)}%
+                                  </span>
+                                  <span className="installed-tag tag-dim">
+                                    {doorConfig.style === 'glass' ? 'กระจกคู่' : doorConfig.style === 'auto-sliding' ? 'บานเลื่อน' : 'บานไม้'}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="installed-item-right">
+                              <span className="badge-door-edit">ตั้งค่า</span>
+                            </div>
+                          </div>
 
                           {placedItems.length === 0 ? (
                             <div style={{ padding: '24px 10px', textAlign: 'center', color: '#94a3b8', fontSize: '0.84rem' }}>

@@ -2132,8 +2132,8 @@ export default function Room3DStudio({
       {/* 1. TOP BAR: Standard 3D Toolbar OR Sleek Gaming HUD */}
       {activeCamPreset !== 'walk' ? (
         <div className="studio-3d-topbar">
-          {/* Camera Views Selector */}
-          <div className="camera-view-btns">
+          {/* Camera Views Scroll Group (Left) */}
+          <div className="camera-views-scroll-group">
             {/* Quick Door Entrance Position Popover Button */}
             <button 
               type="button" 
@@ -2146,7 +2146,7 @@ export default function Room3DStudio({
               }}
               title="กำหนดตำแหน่งและรูปแบบประตูทางเข้าร้าน"
             >
-              <DoorOpen size={15} className={isDoorPopoverOpen || selectedItemId === 'store-door' ? 'text-white' : 'text-emerald'} />
+              <DoorOpen size={14} className={isDoorPopoverOpen || selectedItemId === 'store-door' ? 'text-white' : 'text-emerald'} />
               <span>🚪 ทางเข้า: {
                 doorConfig?.wall === 'front' ? 'ด้านหน้า' :
                 doorConfig?.wall === 'left' ? 'ผนังซ้าย' :
@@ -2160,55 +2160,54 @@ export default function Room3DStudio({
               <button 
                 className={`btn-cam-view ${activeCamPreset === 'iso' ? 'active' : ''}`}
                 onClick={() => setCameraView('iso')}
-                title="มุมมอง 3D Isometric (สไตล์ตัวอย่าง)"
+                title="มุมมอง 3D Isometric (45°)"
               >
-                <Eye size={15} />
-                <span>3D Isometric (45°)</span>
+                <Eye size={14} />
+                <span>3D Isometric</span>
               </button>
               <button 
                 className={`btn-cam-view btn-cam-storefront ${activeCamPreset === 'storefront' ? 'active' : ''}`}
                 onClick={() => setCameraView('storefront')}
-                title="หมุนกล้องไปส่องป้ายและสติ๊กเกอร์หน้าร้านตรงประตูทางเข้า"
+                title="มุมมองหน้าร้าน ส่องป้ายไฟและสติ๊กเกอร์ประตูทางเข้า (Storefront)"
               >
-                <Sparkles size={15} className="text-emerald" />
-                <span>หน้าร้าน (Storefront)</span>
+                <Sparkles size={14} className="text-emerald" />
+                <span>หน้าร้าน</span>
               </button>
               <button 
                 className={`btn-cam-view ${activeCamPreset === 'walk' ? 'active' : ''}`}
                 onClick={() => setCameraView('walk')}
-                title="มุมมองระดับสายตาคนเดินชมในร้าน (Eye-Level Walk)"
+                title="มุมมองระดับสายตาคนเดินชมในร้าน (Walk-through Mode)"
               >
-                <Footprints size={15} />
-                <span>เดินชมในร้าน</span>
+                <Footprints size={14} />
+                <span>เดินชมร้าน</span>
               </button>
               <button 
                 className={`btn-cam-view ${activeCamPreset === 'top' ? 'active' : ''}`}
                 onClick={() => setCameraView('top')}
-                title="มุมมองแปลนด้านบน (Top-Down)"
+                title="มุมมองแปลนด้านบน 2D Top-Down"
               >
-                <Layers size={15} />
-                <span>Top-Down (แปลน)</span>
+                <Layers size={14} />
+                <span>แปลน 2D</span>
               </button>
             </div>
+          </div>
 
-            <div className="cam-zoom-divider"></div>
-
-            <div className="camera-tools-cluster">
-              <button className="btn-cam-mini" onClick={() => handleZoom(1)} title="ซูมเข้า">
-                <ZoomIn size={15} />
-              </button>
-              <button className="btn-cam-mini" onClick={() => handleZoom(-1)} title="ซูมออก">
-                <ZoomOut size={15} />
-              </button>
-              <button 
-                type="button" 
-                className="btn-cam-mini"
-                onClick={handleExport3DSnapshot}
-                title="ถ่ายภาพเรนเดอร์ 3D (PNG)"
-              >
-                <Camera size={15} />
-              </button>
-            </div>
+          {/* Right Camera Tools Cluster - Fixed & Pinned */}
+          <div className="camera-tools-cluster">
+            <button className="btn-cam-mini" onClick={() => handleZoom(1)} title="ซูมเข้า (+)">
+              <ZoomIn size={15} />
+            </button>
+            <button className="btn-cam-mini" onClick={() => handleZoom(-1)} title="ซูมออก (-)">
+              <ZoomOut size={15} />
+            </button>
+            <button 
+              type="button" 
+              className="btn-cam-mini btn-cam-snapshot"
+              onClick={handleExport3DSnapshot}
+              title="ถ่ายภาพเรนเดอร์ 3D (PNG Snapshot)"
+            >
+              <Camera size={15} />
+            </button>
           </div>
         </div>
       ) : (
