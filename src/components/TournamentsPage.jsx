@@ -3,7 +3,7 @@ import {
   Trophy, Calendar, Users, Zap, Flame, Camera, 
   Search, X, ArrowLeft, ArrowRight, CheckCircle2, 
   Sparkles, Award, Shield, PhoneCall, ChevronRight,
-  Filter, Play, ExternalLink, Gamepad2, Layers
+  Filter, Play, ExternalLink, Gamepad2, Layers, Tag
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 import { TOURNAMENTS } from '../data/mockData';
@@ -52,12 +52,9 @@ export default function TournamentsPage({
         matchStatus = t.status === 'Completed' || t.status === 'Closed' || (t.badge && (t.badge.includes('จบ') || t.badge.includes('เต็ม')));
       }
 
-      // 3. Game Filter
-      const matchGame = gameFilter === 'all' || t.game === gameFilter;
-
-      return matchSearch && matchStatus && matchGame;
+      return matchSearch && matchStatus;
     });
-  }, [tournamentsList, searchQuery, statusFilter, gameFilter]);
+  }, [tournamentsList, searchQuery, statusFilter]);
 
   // Aggregate stats
   const totalPrizePoolText = '฿300,000+';
@@ -146,45 +143,6 @@ export default function TournamentsPage({
                   เต็มแล้ว / จบแล้ว
                 </button>
               </div>
-            </div>
-
-            {/* Game Chips Row */}
-            <div className="controls-row-games">
-              <span className="game-chips-label">
-                <Filter size={14} className="text-blue" />
-                <span>คัดกรองตามเกม:</span>
-              </span>
-              <button 
-                type="button"
-                className={`game-chip-btn ${gameFilter === 'all' ? 'active' : ''}`}
-                onClick={() => setGameFilter('all')}
-              >
-                ทุกเกม
-              </button>
-              {uniqueGames.map(game => (
-                <button 
-                  key={game}
-                  type="button"
-                  className={`game-chip-btn ${gameFilter === game ? 'active' : ''}`}
-                  onClick={() => setGameFilter(game)}
-                >
-                  {game}
-                </button>
-              ))}
-
-              {(searchQuery || statusFilter !== 'all' || gameFilter !== 'all') && (
-                <button 
-                  type="button"
-                  className="btn-reset-filters"
-                  onClick={() => {
-                    setSearchQuery('');
-                    setStatusFilter('all');
-                    setGameFilter('all');
-                  }}
-                >
-                  ล้างตัวกรอง
-                </button>
-              )}
             </div>
           </div>
         </div>

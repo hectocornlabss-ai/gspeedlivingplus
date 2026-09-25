@@ -36,33 +36,41 @@ export default function ActivitiesPage({
     }
   }, [initialTag]);
 
-  // Extract all unique tags
+  // Extract all unique tags (merge from activities and siteData.articleTags)
   const allUniqueTags = useMemo(() => {
     const set = new Set();
+    if (Array.isArray(siteData?.articleTags)) {
+      siteData.articleTags.forEach(t => {
+        if (t && t.trim()) set.add(t.replace(/^#/, '').trim());
+      });
+    }
     galleryList.forEach(item => {
       if (Array.isArray(item.tags)) {
-        item.tags.forEach(t => set.add(t));
-      } else if (item.tag) {
-        set.add(item.tag);
+        item.tags.forEach(t => {
+          if (t && t.trim()) set.add(t.replace(/^#/, '').trim());
+        });
+      } else if (item.tag && item.tag.trim()) {
+        set.add(item.tag.replace(/^#/, '').trim());
       }
     });
     return Array.from(set);
-  }, [galleryList]);
+  }, [galleryList, siteData?.articleTags]);
 
   // Filtered activities
   const filteredActivities = useMemo(() => {
     return galleryList.filter(item => {
       const matchCategory = selectedCategory === 'all' || item.category === selectedCategory;
       const matchTag = selectedTag === 'all' || 
-        (Array.isArray(item.tags) && item.tags.some(t => t.toLowerCase() === selectedTag.toLowerCase())) ||
-        (item.tag && item.tag.toLowerCase() === selectedTag.toLowerCase());
+        (Array.isArray(item.tags) && item.tags.some(t => t.replace(/^#/, '').toLowerCase() === selectedTag.replace(/^#/, '').toLowerCase())) ||
+        (item.tag && item.tag.replace(/^#/, '').toLowerCase() === selectedTag.replace(/^#/, '').toLowerCase());
 
       const q = searchQuery.trim().toLowerCase();
+      const cleanQ = q.replace(/^#/, '');
       const matchSearch = !q || 
         item.title.toLowerCase().includes(q) || 
         item.desc.toLowerCase().includes(q) ||
         (item.partner && item.partner.toLowerCase().includes(q)) ||
-        (Array.isArray(item.tags) && item.tags.some(t => t.toLowerCase().includes(q))) ||
+        (Array.isArray(item.tags) && item.tags.some(t => t.toLowerCase().includes(q) || t.replace(/^#/, '').toLowerCase().includes(cleanQ))) ||
         (item.tag && item.tag.toLowerCase().includes(q));
 
       return matchCategory && matchTag && matchSearch;
@@ -141,68 +149,6 @@ export default function ActivitiesPage({
                 })}
               </div>
             </div>
-
-            {/* Bottom Row: Tags Row */}
-            {allUniqueTags.length > 0 && (
-              <div className="controls-row-tags">
-                <span className="tags-label">
-                  <Tag size={13} className="text-blue" />
-                  <span>แท็กยอดนิยม:</span>
-                </span>
-                <button 
-                  type="button"
-                  className={`tag-chip-btn ${selectedTag === 'all' ? 'active' : ''}`}
-                  onClick={() => setSelectedTag('all')}
-                >
-                  ทั้งหมด
-                </button>
-                {allUniqueTags.map(tag => (
-                  <button 
-                    key={tag}
-                    type="button"
-                    className={`tag-chip-btn ${selectedTag === tag ? 'active' : ''}`}
-                    onClick={() => setSelectedTag(tag)}
-                  >
-                    #{tag}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Active Filters Summary */}
-            {(selectedCategory !== 'all' || selectedTag !== 'all' || searchQuery) && (
-              <div className="hub-active-filters-summary">
-                <div className="summary-tags-group">
-                  <span className="summary-title">กำลังกรองข้อมูล:</span>
-                  {selectedCategory !== 'all' && (
-                    <span className="summary-pill category">
-                      หมวด: <strong>{categories.find(c => c.id === selectedCategory)?.label || selectedCategory}</strong>
-                      <X size={12} className="btn-x-clear" onClick={() => setSelectedCategory('all')} />
-                    </span>
-                  )}
-                  {selectedTag !== 'all' && (
-                    <span className="summary-pill tag">
-                      แท็ก: <strong>#{selectedTag}</strong>
-                      <X size={12} className="btn-x-clear" onClick={() => setSelectedTag('all')} />
-                    </span>
-                  )}
-                  {searchQuery && (
-                    <span className="summary-pill search">
-                      คำค้น: "{searchQuery}"
-                      <X size={12} className="btn-x-clear" onClick={() => setSearchQuery('')} />
-                    </span>
-                  )}
-                  <span className="summary-count">({filteredActivities.length} รายการ)</span>
-                </div>
-                <button 
-                  type="button" 
-                  className="btn-clear-all-filters"
-                  onClick={() => { setSelectedCategory('all'); setSelectedTag('all'); setSearchQuery(''); }}
-                >
-                  ล้างตัวกรองทั้งหมด
-                </button>
-              </div>
-            )}
           </div>
         </div>
       </div>

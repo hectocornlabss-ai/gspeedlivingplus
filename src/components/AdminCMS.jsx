@@ -763,6 +763,7 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
       badge: 'เปิดรับสมัคร',
       badgeType: 'magenta',
       status: 'Open',
+      tags: ['#VALORANT', '#LANFinal', '#EsportsThailand'],
       venue: 'G-Speed Esport Arena รามคำแหง 53 (Main Stage & Battleground Zone)',
       streamChannel: 'Twitch.tv/gspeed_esport & YouTube Live',
       desc: 'การแข่งขันอีสปอร์ตระดับประเทศ ชิงเงินรางวัลรวมกว่า ฿100,000 รวบรวมยอดฝีมือทั่วประเทศมาดวลความแม่นยำบนเวที LAN Final ณ G-Speed Arena รามคำแหง 53',
@@ -820,6 +821,7 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
     setActiveTournamentDraft({
       ...t,
       gameCategory: t.gameCategory || 'Esports Tournament',
+      tags: Array.isArray(t.tags) ? t.tags : [],
       bannerImage: t.bannerImage || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
       venue: t.venue || 'G-Speed Esport Arena รามคำแหง 53 (Main Stage)',
       streamChannel: t.streamChannel || 'Twitch & YouTube Live',
@@ -6333,6 +6335,73 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                                 value={activeTournamentDraft.gameCategory || ''}
                                 onChange={e => setActiveTournamentDraft({ ...activeTournamentDraft, gameCategory: e.target.value })}
                               />
+                            </div>
+                          </div>
+
+                          {/* Tournament Tags Input & Presets */}
+                          <div className="form-group" style={{ background: '#f8fafc', padding: '12px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '16px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                              <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 650, color: '#0f172a', margin: 0 }}>
+                                <Tag size={14} className="text-blue" />
+                                <span>แท็กทัวร์นาเมนต์ (Tournament Tags - ใช้สำหรับค้นหาและคัดกรอง)</span>
+                              </label>
+                              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                                เลือกแล้ว: {(activeTournamentDraft.tags || []).length} แท็ก
+                              </span>
+                            </div>
+
+                            <input 
+                              type="text" 
+                              className="form-input"
+                              placeholder="พิมพ์แท็กคั่นด้วยจุลภาค เช่น #LANFinal, #VALORANT, #EsportsThailand"
+                              value={Array.isArray(activeTournamentDraft.tags) ? activeTournamentDraft.tags.join(', ') : (activeTournamentDraft.tags || '')}
+                              onChange={e => {
+                                const raw = e.target.value;
+                                const tagsArr = raw.split(',').map(s => s.trim()).filter(Boolean);
+                                setActiveTournamentDraft({ ...activeTournamentDraft, tags: tagsArr });
+                              }}
+                              style={{ marginBottom: '8px' }}
+                            />
+
+                            {/* Quick Tag Presets Chips */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>แท็กแนะนำ:</span>
+                              {['#LANFinal', '#OnlineQualifier', '#EsportsThailand', '#PrizePool100K', '#VALORANT', '#RoV', '#CS2', '#PUBG', '#360Hz', '#Bootcamp'].map(preset => {
+                                const currentTags = Array.isArray(activeTournamentDraft.tags) ? activeTournamentDraft.tags : [];
+                                const isSelected = currentTags.some(t => t.toLowerCase() === preset.toLowerCase());
+                                return (
+                                  <button
+                                    key={preset}
+                                    type="button"
+                                    onClick={() => {
+                                      if (isSelected) {
+                                        setActiveTournamentDraft({
+                                          ...activeTournamentDraft,
+                                          tags: currentTags.filter(t => t.toLowerCase() !== preset.toLowerCase())
+                                        });
+                                      } else {
+                                        setActiveTournamentDraft({
+                                          ...activeTournamentDraft,
+                                          tags: [...currentTags, preset]
+                                        });
+                                      }
+                                    }}
+                                    style={{
+                                      padding: '2px 8px',
+                                      borderRadius: '12px',
+                                      fontSize: '0.72rem',
+                                      fontWeight: 600,
+                                      cursor: 'pointer',
+                                      border: isSelected ? '1px solid #2563eb' : '1px solid #cbd5e1',
+                                      background: isSelected ? '#eff6ff' : '#ffffff',
+                                      color: isSelected ? '#1d4ed8' : '#64748b',
+                                      transition: 'all 0.15s ease'
+                                    }}
+                                  >
+                                    {preset} {isSelected ? '✓' : '+'}
+                                  </button>
+                                );
+                              })}
                             </div>
                           </div>
 
