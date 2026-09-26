@@ -31,6 +31,7 @@ export default function ThreeProductViewer({
   const [bgMode, setBgMode] = useState('studio'); // 'studio' (#f8fafc), 'dark' (#0a0f1d), 'transparent'
   const [capturedFeedback, setCapturedFeedback] = useState(false);
   const [setAsImageFeedback, setSetAsImageFeedback] = useState(false);
+  const [webGlSupported, setWebGlSupported] = useState(true);
 
   // Procedural Glowing Gaming Screen Texture
   const createScreenTexture = useCallback((accentHex = '#38bdf8') => {
@@ -91,40 +92,45 @@ export default function ThreeProductViewer({
     const container = mountRef.current;
     if (!container) return;
 
-    const width = container.clientWidth || 600;
-    const hNum = parseInt(height, 10) || 360;
+    let renderer = null;
+    let controls = null;
+    let handleResize = null;
 
-    // 1. Scene
-    const scene = new THREE.Scene();
-    if (bgMode === 'studio') {
-      scene.background = new THREE.Color(0xf8fafc);
-    } else if (bgMode === 'dark') {
-      scene.background = new THREE.Color(0x0a0f1d);
-    } else {
-      scene.background = null;
-    }
-    sceneRef.current = scene;
+    try {
+      const width = container.clientWidth || 600;
+      const hNum = parseInt(height, 10) || 360;
 
-    // 2. Camera
-    const camera = new THREE.PerspectiveCamera(40, width / hNum, 0.1, 100);
-    camera.position.set(4.2, 3.2, 4.2);
-    cameraRef.current = camera;
+      // 1. Scene
+      const scene = new THREE.Scene();
+      if (bgMode === 'studio') {
+        scene.background = new THREE.Color(0xf8fafc);
+      } else if (bgMode === 'dark') {
+        scene.background = new THREE.Color(0x0a0f1d);
+      } else {
+        scene.background = null;
+      }
+      sceneRef.current = scene;
 
-    // 3. Renderer with preserveDrawingBuffer for high-res PNG export
-    const renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      alpha: true,
-      preserveDrawingBuffer: true,
-      powerPreference: 'high-performance'
-    });
-    renderer.setSize(width, hNum);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2.5));
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    container.innerHTML = '';
-    container.appendChild(renderer.domElement);
-    rendererRef.current = renderer;
+      // 2. Camera
+      const camera = new THREE.PerspectiveCamera(40, width / hNum, 0.1, 100);
+      camera.position.set(4.2, 3.2, 4.2);
+      cameraRef.current = camera;
+
+      // 3. Renderer with preserveDrawingBuffer for high-res PNG export
+      renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true,
+        preserveDrawingBuffer: true,
+        powerPreference: 'high-performance'
+      });
+      renderer.setSize(width, hNum);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2.5));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      container.innerHTML = '';
+      container.appendChild(renderer.domElement);
+      rendererRef.current = renderer;
 
     // 4. Orbit Controls
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -203,7 +209,7 @@ export default function ThreeProductViewer({
     animate();
 
     // 8. Resize Observer
-    const handleResize = () => {
+    handleResize = () => {
       if (!container || !renderer || !camera) return;
       const w = container.clientWidth;
       const h = container.clientHeight || hNum;
@@ -213,11 +219,18 @@ export default function ThreeProductViewer({
     };
     window.addEventListener('resize', handleResize);
 
+    } catch (err) {
+      console.warn('WebGL context creation failed, falling back to 2D view', err);
+      setWebGlSupported(false);
+      return;
+    }
+
     return () => {
-      window.removeEventListener('resize', handleResize);
+      if (handleResize) window.removeEventListener('resize', handleResize);
       if (animationFrameIdRef.current) cancelAnimationFrame(animationFrameIdRef.current);
-      controls.dispose();
-      renderer.dispose();
+      if (controls) controls.dispose();
+      if (renderer) renderer.dispose();
+      if (container) container.innerHTML = '';
     };
   }, [bgMode, height]);
 
@@ -886,15 +899,40 @@ export default function ThreeProductViewer({
 
   return (
     <div className={`three-product-viewer-container ${className}`}>
-      {/* 3D WebGL Canvas Mount */}
-      <div 
-        ref={mountRef} 
-        className="three-canvas-mount"
-        style={{ height, width: '100%', borderRadius: '12px', overflow: 'hidden' }}
-      />
+      {/* 3D WebGL Canvas Mount or 2D Fallback */}
+      {!webGlSupported ? (
+        <div style={{
+          height,
+          width: '100%',
+          borderRadius: '12px',
+          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '24px',
+          textAlign: 'center',
+          color: '#f8fafc',
+          border: '1px solid rgba(255,255,255,0.1)'
+        }}>
+          {productData?.image ? (
+            <img src={productData.image} alt={productData.name} style={{ maxHeight: '160px', maxWidth: '80%', objectFit: 'contain', marginBottom: '14px' }} />
+          ) : (
+            <Box size={40} style={{ color: '#38bdf8', marginBottom: '12px' }} />
+          )}
+          <strong style={{ fontSize: '1rem', marginBottom: '4px' }}>{productData?.name || '3D Product Model'}</strong>
+          <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>แสดงผลในโหมดประหยัดพลังงาน 2D (WebGL Offline)</span>
+        </div>
+      ) : (
+        <div 
+          ref={mountRef} 
+          className="three-canvas-mount"
+          style={{ height, width: '100%', borderRadius: '12px', overflow: 'hidden' }}
+        />
+      )}
 
       {/* 3D Studio Bottom Controls Bar - Situated cleanly below the 3D canvas */}
-      {showControls && (
+      {showControls && webGlSupported && (
         <div className="three-bottom-controls-bar">
           <div className="controls-group-left">
             <button

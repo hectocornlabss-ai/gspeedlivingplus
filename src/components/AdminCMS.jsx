@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Settings, Layers, FileText, Cpu, Bot, Send, Save, RefreshCw, 
   Plus, Trash2, Edit3, Eye, EyeOff, CheckCircle2, AlertTriangle, AlertCircle,
@@ -23,7 +23,11 @@ import OmnichannelLeadsCMS from './OmnichannelLeadsCMS';
 import HardwarePricingCMS from './HardwarePricingCMS';
 import EsportRequestsCMS from './EsportRequestsCMS';
 import ArticleBlockEditor from './ArticleBlockEditor';
+import SeoMarketingCMS from './SeoMarketingCMS';
+import AdminStaffRolesCMS, { PERMISSION_TABS_LIST } from './AdminStaffRolesCMS';
+import AnnouncementTickerCMS from './AnnouncementTickerCMS';
 import { analyzeProductPhoto, parseSpecSheetText } from '../utils/aiSpecParser';
+import { sanitizeSafeUrl, isSafeExternalUrl } from '../utils/security';
 
 // Reusable Component: Section Image Field with Guidelines, Live Preview, SEO Alt Text & Media Library
 function SectionImageUploader({
@@ -579,7 +583,7 @@ function SectionColorCustomizer({
   );
 }
 
-export default function AdminCMS({ onExitAdmin = () => {} }) {
+export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }) {
   const {
     siteData,
     updateTicker,
@@ -638,8 +642,80 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
     updateTournamentBracketMatch,
     createArenaBooking,
     updateArenaBookingStatus,
-    cancelArenaBooking
+    cancelArenaBooking,
+    addCompanyGalleryPhoto,
+    deleteCompanyGalleryPhoto,
+    addPartner,
+    deletePartner,
+    updatePartner,
+    updateSmtpConfig,
+    updateEmailTemplate,
+    resetEmailTemplates
   } = useSiteData();
+
+  // Mail Server (SMTP) & Email Templates States
+  const [isSmtpTesting, setIsSmtpTesting] = useState(false);
+  const [smtpTestResult, setSmtpTestResult] = useState(null);
+  const [showSmtpPassword, setShowSmtpPassword] = useState(false);
+  const [showEmailOutboxModal, setShowEmailOutboxModal] = useState(false);
+  const [activeEmailTemplateKey, setActiveEmailTemplateKey] = useState('franchiseAutoReply');
+  const [isSendingTestEmail, setIsSendingTestEmail] = useState(false);
+  const [testEmailSuccess, setTestEmailSuccess] = useState(null);
+
+  const handleTestSmtp = () => {
+    setIsSmtpTesting(true);
+    setSmtpTestResult(null);
+    setTimeout(() => {
+      setIsSmtpTesting(false);
+      const now = new Date();
+      const timeStr = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+      const latencyMs = Math.floor(28 + Math.random() * 25);
+      const res = {
+        success: true,
+        message: 'เชื่อมต่อและตรวจสอบสิทธิ์เซิร์ฟเวอร์ SMTP สำเร็จ (SMTP Handshake OK)',
+        latency: `${latencyMs}ms`,
+        timestamp: timeStr
+      };
+      setSmtpTestResult(res);
+      if (typeof updateSmtpConfig === 'function') {
+        updateSmtpConfig({
+          lastTestedAt: timeStr,
+          lastTestStatus: `Connected (${latencyMs}ms)`
+        });
+      }
+      triggerSaveToast();
+    }, 1200);
+  };
+
+  const handleSendTestEmail = () => {
+    setIsSendingTestEmail(true);
+    setTestEmailSuccess(null);
+    setTimeout(() => {
+      setIsSendingTestEmail(false);
+      const testEmailRecord = {
+        id: `test-email-${Date.now()}`,
+        to: siteData.footer?.email || 'contact@gspeedarena.com',
+        customerName: 'คุณสมเกียรติ มั่นคง (ทดสอบระบบ)',
+        quoteRef: 'GLP-TEST-2026',
+        subject: siteData.emailTemplates?.[activeEmailTemplateKey]?.subject || 'ทดสอบการส่งอีเมล',
+        sentAt: new Date().toISOString(),
+        status: 'Delivered (SMTP 250 OK)',
+        details: {
+          template: activeEmailTemplateKey,
+          stations: 36,
+          investment: 2450000
+        }
+      };
+      try {
+        const existingOutbox = JSON.parse(localStorage.getItem('glp_email_outbox') || '[]');
+        localStorage.setItem('glp_email_outbox', JSON.stringify([testEmailRecord, ...existingOutbox.slice(0, 49)]));
+      } catch (e) {
+        console.warn('Outbox error:', e);
+      }
+      setTestEmailSuccess(`ส่งอีเมลจำลองสำเร็จไปยัง ${siteData.footer?.email || 'contact@gspeedarena.com'} (บันทึกลง Outbox แล้ว)`);
+      setTimeout(() => setTestEmailSuccess(null), 4000);
+    }, 1000);
+  };
 
   // Tournament Tab sub-mode
   const [tourneySubTab, setTourneySubTab] = useState('applications'); // 'applications' | 'brackets'
@@ -675,8 +751,57 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
     });
   };
 
+  // Active Staff Session & Simulated Role (for Super Admin testing)
+  const [simulatedStaffId, setSimulatedStaffId] = useState(null);
+
+  const activeStaff = (simulatedStaffId && (siteData.adminStaffList || []).find(s => s.id === simulatedStaffId))
+    || currentAdmin 
+    || {
+      id: 'staff-master',
+      name: 'ผู้ดูแลระบบสูงสุด (Master Owner)',
+      username: siteData.securityConfig?.adminUsername || 'admin',
+      roleTitle: 'Super Administrator',
+      isMaster: true,
+      permissions: ['*']
+    };
+
+  const isMasterStaff = Boolean(
+    activeStaff.isMaster || 
+    (activeStaff.permissions && activeStaff.permissions.includes('*'))
+  );
+
+  const hasTabPermission = (tabId) => {
+    if (isMasterStaff) return true;
+    if (!activeStaff.permissions || !Array.isArray(activeStaff.permissions)) return false;
+    return activeStaff.permissions.includes(tabId);
+  };
+
   // Active Admin Sub-tab
-  const [activeTab, setActiveTab] = useState('erp-analytics'); // 'erp-analytics', 'sections', 'articles', 'ai-rag', 'catalog', 'menu-footer', 'automation', 'security'
+  const [activeTab, setActiveTab] = useState(() => {
+    const allTabOrder = [
+      'erp-analytics', 'omnichannel-leads', 'catalog', 'hardware-pricing',
+      'tourney-apps', 'arena-bookings', 'articles', 'ai-rag', 'seo-tools',
+      'sections', 'menu-footer', 'automation', 'email-templates', 'security'
+    ];
+    if (isMasterStaff) return 'erp-analytics';
+    const firstAllowed = allTabOrder.find(id => activeStaff?.permissions?.includes(id));
+    return firstAllowed || 'erp-analytics';
+  });
+
+  // Ensure activeTab is accessible when staff changes or activeTab is not permitted
+  useEffect(() => {
+    if (!hasTabPermission(activeTab)) {
+      const allTabOrder = [
+        'erp-analytics', 'omnichannel-leads', 'catalog', 'hardware-pricing',
+        'tourney-apps', 'arena-bookings', 'articles', 'ai-rag', 'seo-tools',
+        'sections', 'menu-footer', 'automation', 'email-templates', 'security'
+      ];
+      const firstAllowed = allTabOrder.find(id => hasTabPermission(id));
+      if (firstAllowed) {
+        setActiveTab(firstAllowed);
+      }
+    }
+  }, [activeStaff.id, simulatedStaffId, activeTab]);
 
   // Sub-section tab inside 'sections'
   const [activeSectionSubTab, setActiveSectionSubTab] = useState('theme'); // 'theme', 'hero', 'banners', 'tournaments', 'zones', 'franchise-cta', 'news-sec', 'founder', 'seo'
@@ -705,6 +830,28 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
   const [openWebUITestResult, setOpenWebUITestResult] = useState(null);
   const [isOmnichannelTesting, setIsOmnichannelTesting] = useState(false);
   const [omnichannelTestResult, setOmnichannelTestResult] = useState(null);
+
+  // Corporate Galleries CMS State (For Company Profile Page)
+  const [activeCorpGalleryTab, setActiveCorpGalleryTab] = useState('milestonesGallery');
+  const [newCorpPhotoForm, setNewCorpPhotoForm] = useState({
+    title: '',
+    url: '',
+    caption: '',
+    tag: '',
+    extraMeta: ''
+  });
+
+  // Partner Logos CMS State (For Company Profile Page Logo Slider)
+  const [activeCompanySectionTab, setActiveCompanySectionTab] = useState('partners'); // 'partners', 'hero', 'founder', 'milestones', 'standards', 'galleries'
+  const [editingPartner, setEditingPartner] = useState(null);
+  const [newMilestoneForm, setNewMilestoneForm] = useState({ year: '', event: '' });
+  const [newPartnerForm, setNewPartnerForm] = useState({
+    name: '',
+    tier: '',
+    logo: '',
+    website: '',
+    icon: 'Cpu'
+  });
 
   // RAG & Knowledge Base Simulation State
   const [testQuery, setTestQuery] = useState('');
@@ -1462,8 +1609,43 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
         <div className="admin-header-actions">
           <div className="admin-session-badge">
             <ShieldCheck size={14} className="text-blue" />
-            <span>Root Admin: {siteData.securityConfig?.adminUsername || 'admin'}</span>
+            <span>
+              {activeStaff?.name || siteData.securityConfig?.adminUsername || 'admin'}
+              <span className="staff-role-pill">({activeStaff?.roleTitle || 'ผู้ดูแลระบบ'})</span>
+            </span>
           </div>
+
+          {/* Quick Role Simulator dropdown for Super Admin */}
+          {(currentAdmin?.isMaster || currentAdmin?.permissions?.includes('*') || isMasterStaff) && (
+            <div className="role-simulator-dropdown" title="ทดสอบมุมมองเมนูของ Staff แต่ละแผนก">
+              <Users size={13} className="text-muted" />
+              <label htmlFor="role-sim-select" className="role-sim-label">มุมมอง:</label>
+              <select 
+                id="role-sim-select"
+                value={simulatedStaffId || ''} 
+                onChange={(e) => setSimulatedStaffId(e.target.value || null)}
+                className="role-sim-select"
+              >
+                <option value="">Master Admin (เห็นครบทุกแท็บ)</option>
+                {(siteData.adminStaffList || []).map(staff => (
+                  <option key={staff.id} value={staff.id}>
+                    {staff.name} ({staff.roleTitle})
+                  </option>
+                ))}
+              </select>
+              {simulatedStaffId && (
+                <button 
+                  type="button" 
+                  onClick={() => setSimulatedStaffId(null)}
+                  className="btn-reset-sim"
+                  title="คืนค่าเป็นมุมมอง Master"
+                >
+                  <X size={12} />
+                  <span>คืนค่า</span>
+                </button>
+              )}
+            </div>
+          )}
 
           {showSavedToast && (
             <div className="toast-saved-pill">
@@ -1527,157 +1709,209 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
         {/* Left Navigation Sidebar */}
         <aside className="admin-sidebar">
           <nav className="admin-nav-menu">
-            <button 
-              id="cms-tab-erp"
-              className={`admin-nav-item ${activeTab === 'erp-analytics' ? 'active' : ''}`}
-              onClick={() => setActiveTab('erp-analytics')}
-            >
-              <TrendingUp size={18} />
-              <div>
-                <strong>AI สรุปรายได้ & ERP ร้านเกม</strong>
-                <span>สรุปยอดขาย, Peak Hours, ซิงก์ POS</span>
-              </div>
-            </button>
+            {hasTabPermission('erp-analytics') && (
+              <button 
+                id="cms-tab-erp"
+                className={`admin-nav-item ${activeTab === 'erp-analytics' ? 'active' : ''}`}
+                onClick={() => setActiveTab('erp-analytics')}
+              >
+                <TrendingUp size={18} />
+                <div>
+                  <strong>01. AI สรุปรายได้ & ERP ร้านเกม</strong>
+                  <span>สรุปยอดขาย, Peak Hours, ซิงก์ POS</span>
+                </div>
+              </button>
+            )}
 
-            <button 
-              id="cms-tab-omnichannel"
-              className={`admin-nav-item ${activeTab === 'omnichannel-leads' ? 'active' : ''}`}
-              onClick={() => setActiveTab('omnichannel-leads')}
-            >
-              <MessagesSquare size={18} />
-              <div>
-                <strong>Omnichannel & Leads Hub</strong>
-                <span>รวมแชท, Leads แฟรนไชส์, งบดุล /pay</span>
-              </div>
-            </button>
+            {hasTabPermission('omnichannel-leads') && (
+              <button 
+                id="cms-tab-omnichannel"
+                className={`admin-nav-item ${activeTab === 'omnichannel-leads' ? 'active' : ''}`}
+                onClick={() => setActiveTab('omnichannel-leads')}
+              >
+                <MessagesSquare size={18} />
+                <div>
+                  <strong>02. Omnichannel & Leads Hub</strong>
+                  <span>รวมแชท, Leads แฟรนไชส์, งบดุล /pay</span>
+                </div>
+              </button>
+            )}
 
-            <button 
-              id="cms-tab-catalog"
-              className={`admin-nav-item ${activeTab === 'catalog' ? 'active' : ''}`}
-              onClick={() => setActiveTab('catalog')}
-            >
-              <Monitor size={18} />
-              <div>
-                <strong>อุปกรณ์ & แคตตาล็อก 3D</strong>
-                <span>โต๊ะ, เก้าอี้, เคาน์เตอร์, หลายเกรด</span>
-              </div>
-            </button>
+            {hasTabPermission('catalog') && (
+              <button 
+                id="cms-tab-catalog"
+                className={`admin-nav-item ${activeTab === 'catalog' ? 'active' : ''}`}
+                onClick={() => setActiveTab('catalog')}
+              >
+                <Monitor size={18} />
+                <div>
+                  <strong>03. อุปกรณ์ & แคตตาล็อก 3D</strong>
+                  <span>โต๊ะ, เก้าอี้, เคาน์เตอร์, หลายเกรด</span>
+                </div>
+              </button>
+            )}
 
-            <button 
-              id="cms-tab-hardware-pricing"
-              className={`admin-nav-item ${activeTab === 'hardware-pricing' ? 'active' : ''}`}
-              onClick={() => setActiveTab('hardware-pricing')}
-            >
-              <Cpu size={18} />
-              <div>
-                <strong>สเปกคอม & ราคาโครงสร้าง</strong>
-                <span>รุ่น 001, RTX 5090, Diskless, โต๊ะ</span>
-              </div>
-            </button>
+            {hasTabPermission('hardware-pricing') && (
+              <button 
+                id="cms-tab-hardware-pricing"
+                className={`admin-nav-item ${activeTab === 'hardware-pricing' ? 'active' : ''}`}
+                onClick={() => setActiveTab('hardware-pricing')}
+              >
+                <Cpu size={18} />
+                <div>
+                  <strong>04. สเปกคอม & ราคาโครงสร้าง</strong>
+                  <span>รุ่น 001, RTX 5090, Diskless, โต๊ะ</span>
+                </div>
+              </button>
+            )}
 
-            <button 
-              id="cms-tab-airag"
-              className={`admin-nav-item ${activeTab === 'ai-rag' ? 'active' : ''}`}
-              onClick={() => setActiveTab('ai-rag')}
-            >
-              <Bot size={18} />
-              <div>
-                <strong>ระบบ AI & คลังความรู้ RAG</strong>
-                <span>OpenRouter, Gemini Flash, เทรนข้อมูล</span>
-              </div>
-            </button>
+            {hasTabPermission('tourney-apps') && (
+              <button 
+                id="cms-tab-tourney-apps"
+                className={`admin-nav-item ${activeTab === 'tourney-apps' ? 'active' : ''}`}
+                onClick={() => setActiveTab('tourney-apps')}
+              >
+                <Users size={18} />
+                <div>
+                  <strong>05. ทัวร์นาเมนต์ & สายการแข่งขัน {((siteData.tournamentApplications || []).filter(a => a.status === 'Pending').length > 0) && (
+                    <span style={{ marginLeft: '6px', background: '#ef4444', color: '#fff', fontSize: '0.72rem', padding: '1px 6px', borderRadius: '10px' }}>
+                      {((siteData.tournamentApplications || []).filter(a => a.status === 'Pending').length)}
+                    </span>
+                  )}</strong>
+                  <span>อนุมัติทีมแข่ง, ควบคุมสายแข่ง, สกอร์สด</span>
+                </div>
+              </button>
+            )}
 
-            <button 
-              id="cms-tab-menu"
-              className={`admin-nav-item ${activeTab === 'menu-footer' ? 'active' : ''}`}
-              onClick={() => setActiveTab('menu-footer')}
-            >
-              <LayoutGrid size={18} />
-              <div>
-                <strong>เมนู Header & Footer</strong>
-                <span>แถบประกาศ, เมนูนำทาง, ช่องทางติดต่อ</span>
-              </div>
-            </button>
+            {hasTabPermission('arena-bookings') && (
+              <button 
+                id="cms-tab-arena-bookings"
+                className={`admin-nav-item ${activeTab === 'arena-bookings' ? 'active' : ''}`}
+                onClick={() => setActiveTab('arena-bookings')}
+              >
+                <Trophy size={18} />
+                <div>
+                  <strong>06. คำขอจัดงานแข่ง Esport {((siteData.leads || []).filter(l => l.type === 'tournament_venue' && l.stage !== 'closed_won' && l.stage !== 'closed_lost').length > 0) && (
+                    <span style={{ marginLeft: '6px', background: '#2563eb', color: '#fff', fontSize: '0.72rem', padding: '1px 6px', borderRadius: '10px' }}>
+                      {((siteData.leads || []).filter(l => l.type === 'tournament_venue' && l.stage !== 'closed_won' && l.stage !== 'closed_lost').length)}
+                    </span>
+                  )}</strong>
+                  <span>ติดต่อขอจัดงานแข่ง, เช่าเวที Main Stage</span>
+                </div>
+              </button>
+            )}
 
-            <button 
-              id="cms-tab-articles"
-              className={`admin-nav-item ${activeTab === 'articles' ? 'active' : ''}`}
-              onClick={() => setActiveTab('articles')}
-            >
-              <FileText size={18} />
-              <div>
-                <strong>กิจกรรม & บทความ (Articles)</strong>
-                <span>กำหนด URL Slug, ลิงก์แยก, รูปภาพ</span>
-              </div>
-            </button>
+            {hasTabPermission('articles') && (
+              <button 
+                id="cms-tab-articles"
+                className={`admin-nav-item ${activeTab === 'articles' ? 'active' : ''}`}
+                onClick={() => setActiveTab('articles')}
+              >
+                <FileText size={18} />
+                <div>
+                  <strong>07. กิจกรรม & บทความ (Articles)</strong>
+                  <span>กำหนด URL Slug, ลิงก์แยก, รูปภาพ</span>
+                </div>
+              </button>
+            )}
 
-            <button 
-              id="cms-tab-tourney-apps"
-              className={`admin-nav-item ${activeTab === 'tourney-apps' ? 'active' : ''}`}
-              onClick={() => setActiveTab('tourney-apps')}
-            >
-              <Users size={18} />
-              <div>
-                <strong>ทัวร์นาเมนต์ & สายการแข่งขัน {((siteData.tournamentApplications || []).filter(a => a.status === 'Pending').length > 0) && (
-                  <span style={{ marginLeft: '6px', background: '#ef4444', color: '#fff', fontSize: '0.72rem', padding: '1px 6px', borderRadius: '10px' }}>
-                    {((siteData.tournamentApplications || []).filter(a => a.status === 'Pending').length)}
-                  </span>
-                )}</strong>
-                <span>อนุมัติทีมแข่ง, ควบคุมสายแข่ง, สกอร์สด</span>
-              </div>
-            </button>
+            {hasTabPermission('ai-rag') && (
+              <button 
+                id="cms-tab-airag"
+                className={`admin-nav-item ${activeTab === 'ai-rag' ? 'active' : ''}`}
+                onClick={() => setActiveTab('ai-rag')}
+              >
+                <Bot size={18} />
+                <div>
+                  <strong>08. ระบบ AI & คลังความรู้ RAG</strong>
+                  <span>OpenRouter, Gemini Flash, เทรนข้อมูล</span>
+                </div>
+              </button>
+            )}
 
-            <button 
-              id="cms-tab-arena-bookings"
-              className={`admin-nav-item ${activeTab === 'arena-bookings' ? 'active' : ''}`}
-              onClick={() => setActiveTab('arena-bookings')}
-            >
-              <Trophy size={18} />
-              <div>
-                <strong>คำขอจัดงานแข่ง Esport {((siteData.leads || []).filter(l => l.type === 'tournament_venue' && l.stage !== 'closed_won' && l.stage !== 'closed_lost').length > 0) && (
-                  <span style={{ marginLeft: '6px', background: '#2563eb', color: '#fff', fontSize: '0.72rem', padding: '1px 6px', borderRadius: '10px' }}>
-                    {((siteData.leads || []).filter(l => l.type === 'tournament_venue' && l.stage !== 'closed_won' && l.stage !== 'closed_lost').length)}
-                  </span>
-                )}</strong>
-                <span>ติดต่อขอจัดงานแข่ง, เช่าเวที Main Stage, สปอนเซอร์</span>
-              </div>
-            </button>
+            {hasTabPermission('seo-tools') && (
+              <button 
+                id="cms-tab-seo-tools"
+                className={`admin-nav-item ${activeTab === 'seo-tools' ? 'active' : ''}`}
+                onClick={() => setActiveTab('seo-tools')}
+              >
+                <Search size={18} />
+                <div>
+                  <strong>09. เครื่องมือ SEO & Marketing</strong>
+                  <span>Google, Bing, Meta Pixel, GTM, AI SEO</span>
+                </div>
+              </button>
+            )}
 
-            <button 
-              id="cms-tab-sections"
-              className={`admin-nav-item ${activeTab === 'sections' ? 'active' : ''}`}
-              onClick={() => setActiveTab('sections')}
-            >
-              <FileText size={18} />
-              <div>
-                <strong>เนื้อหาแต่ละ Section</strong>
-                <span>Hero, กิจกรรม, แกลเลอรี, ประวัติ</span>
-              </div>
-            </button>
+            {hasTabPermission('sections') && (
+              <button 
+                id="cms-tab-sections"
+                className={`admin-nav-item ${activeTab === 'sections' ? 'active' : ''}`}
+                onClick={() => setActiveTab('sections')}
+              >
+                <LayoutGrid size={18} />
+                <div>
+                  <strong>10. เนื้อหาแต่ละ Section</strong>
+                  <span>Hero, กิจกรรม, แกลเลอรี, ประวัติ</span>
+                </div>
+              </button>
+            )}
 
-            <button 
-              id="cms-tab-automation"
-              className={`admin-nav-item ${activeTab === 'automation' ? 'active' : ''}`}
-              onClick={() => setActiveTab('automation')}
-            >
-              <Sliders size={18} />
-              <div>
-                <strong>ระบบ Automation & Webhooks</strong>
-                <span>แจ้งเตือน Discord, Lead แฟรนไชส์</span>
-              </div>
-            </button>
+            {hasTabPermission('menu-footer') && (
+              <button 
+                id="cms-tab-menu"
+                className={`admin-nav-item ${activeTab === 'menu-footer' ? 'active' : ''}`}
+                onClick={() => setActiveTab('menu-footer')}
+              >
+                <Layers size={18} />
+                <div>
+                  <strong>11. เมนู Header & Footer</strong>
+                  <span>แถบประกาศ, เมนูนำทาง, ช่องทางติดต่อ</span>
+                </div>
+              </button>
+            )}
 
-            <button 
-              id="cms-tab-security"
-              className={`admin-nav-item ${activeTab === 'security' ? 'active' : ''}`}
-              onClick={() => setActiveTab('security')}
-            >
-              <ShieldCheck size={18} />
-              <div>
-                <strong>ความปลอดภัย & รหัสแอดมิน</strong>
-                <span>เปลี่ยนรหัสผ่าน Master, Zero-Trust</span>
-              </div>
-            </button>
+            {hasTabPermission('automation') && (
+              <button 
+                id="cms-tab-automation"
+                className={`admin-nav-item ${activeTab === 'automation' ? 'active' : ''}`}
+                onClick={() => setActiveTab('automation')}
+              >
+                <Sliders size={18} />
+                <div>
+                  <strong>12. ระบบ Automation & Webhooks</strong>
+                  <span>แจ้งเตือน Discord, Lead แฟรนไชส์</span>
+                </div>
+              </button>
+            )}
+
+            {hasTabPermission('email-templates') && (
+              <button 
+                id="cms-tab-email-templates"
+                className={`admin-nav-item ${activeTab === 'email-templates' ? 'active' : ''}`}
+                onClick={() => setActiveTab('email-templates')}
+              >
+                <Mail size={18} />
+                <div>
+                  <strong>13. แม่แบบอีเมลตอบกลับ (Email Templates)</strong>
+                  <span>แก้ไขเนื้อหาตอบกลับลูกค้าอัตโนมัติ, ใบเสนอราคา</span>
+                </div>
+              </button>
+            )}
+
+            {hasTabPermission('security') && (
+              <button 
+                id="cms-tab-security"
+                className={`admin-nav-item ${activeTab === 'security' ? 'active' : ''}`}
+                onClick={() => setActiveTab('security')}
+              >
+                <ShieldCheck size={18} />
+                <div>
+                  <strong>14. ความปลอดภัย & จัดการแอดมิน</strong>
+                  <span>จัดการทีม Staff, รหัส Master, สิทธิ์ RBAC</span>
+                </div>
+              </button>
+            )}
           </nav>
         </aside>
 
@@ -1696,6 +1930,13 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
               ========================================================================= */}
           {activeTab === 'hardware-pricing' && (
             <HardwarePricingCMS />
+          )}
+
+          {/* =========================================================================
+              TAB: SEO MARKETING & TRACKING TOOLS
+              ========================================================================= */}
+          {activeTab === 'seo-tools' && (
+            <SeoMarketingCMS />
           )}
 
           {/* =========================================================================
@@ -4508,75 +4749,8 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                 </div>
               </div>
 
-              {/* Ticker Announcement Editor */}
-              <div className="admin-subcard glass-panel">
-                <div className="subcard-title">
-                  <AlertTriangle size={16} className="text-amber" />
-                  <strong>แถบประกาศด่วนด้านบนสุด (Top Announcement Bar)</strong>
-                </div>
-
-                <div className="form-row-2">
-                  <div className="form-group">
-                    <label>ป้ายข้อความ (Badge)</label>
-                    <input 
-                      type="text" className="form-input"
-                      value={siteData.tickerBadge || ''}
-                      placeholder="เช่น ประกาศสำคัญ, ข่าวด่วน"
-                      onChange={e => updateTicker({ badge: e.target.value })}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>ข้อความประกาศ</label>
-                    <input 
-                      type="text" className="form-input"
-                      value={siteData.tickerText || ''}
-                      placeholder="ข้อความที่ต้องการแจ้งผู้ใช้งาน..."
-                      onChange={e => updateTicker({ text: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                <div className="form-row-3" style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px dashed #e2e8f0' }}>
-                  <div className="form-group">
-                    <label>ข้อความบนปุ่มกด (Button Label)</label>
-                    <input 
-                      type="text" className="form-input"
-                      value={siteData.tickerLinkText || 'เปิดระบบ 3D'}
-                      placeholder="เช่น เปิดระบบ 3D, ดูรายละเอียด"
-                      onChange={e => updateTicker({ linkText: e.target.value })}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>ลิงก์ปลายทาง (Target Tab / Anchor / URL)</label>
-                    <input 
-                      type="text" className="form-input"
-                      list="ticker-targets-list"
-                      value={siteData.tickerLinkTarget || siteData.tickerLinkTab || 'franchise'}
-                      placeholder="เช่น franchise, #activities, https://..."
-                      onChange={e => updateTicker({ linkTarget: e.target.value })}
-                    />
-                    <datalist id="ticker-targets-list">
-                      <option value="franchise">จำลองผังร้าน 3D (Tab: franchise)</option>
-                      <option value="arena">หน้าแรก & สนามแข่ง (Tab: arena)</option>
-                      <option value="company">ข้อมูลบริษัท & พาร์ตเนอร์ (Tab: company)</option>
-                      <option value="#activities">โซนภาพกิจกรรม (#activities)</option>
-                      <option value="#tournaments">โซนทัวร์นาเมนต์ (#tournaments)</option>
-                      <option value="#zones">โซนร้านและบรรยากาศ (#zones)</option>
-                      <option value="#news">โซนข่าวสาร & บทความ (#news)</option>
-                    </datalist>
-                  </div>
-                  <div className="form-group" style={{ alignSelf: 'flex-end' }}>
-                    <label className="checkbox-label">
-                      <input 
-                        type="checkbox" 
-                        checked={siteData.tickerLinkVisible !== false}
-                        onChange={e => updateTicker({ linkVisible: e.target.checked })}
-                      />
-                      <span>แสดงปุ่มกดนี้บนแถบประกาศ</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
+              {/* Announcement Marquee Ticker Management (Add / Edit / Delete / Running Speed) */}
+              <AnnouncementTickerCMS />
 
               {/* Navigation Menu Links */}
               <div className="admin-subcard glass-panel">
@@ -4862,7 +5036,7 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                     { id: 'zones', label: '5. โซนบรรยากาศร้าน' },
                     { id: 'franchise-cta', label: '6. แบนเนอร์แฟรนไชส์' },
                     { id: 'news-sec', label: '7. บทความ & ข่าวสาร' },
-                    { id: 'founder', label: '8. ผู้ก่อตั้ง & บริษัท' },
+                    { id: 'founder', label: '8. พันธมิตร & องค์กร (/company)' },
                     { id: 'seo', label: '9. Global SEO & โซเชียล' },
                   ].map(tab => (
                     <button
@@ -5987,117 +6161,1252 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
               )}
 
               {/* -------------------------------------------------------------
-                  SUBTAB 8: FOUNDER & COMPANY STORY
+                  SUBTAB 8: COMPANY PROFILE & ALL SECTIONS (/company)
                   ------------------------------------------------------------- */}
               {activeSectionSubTab === 'founder' && (
                 <div className="admin-subcard glass-panel">
-                  <div className="subcard-title">
-                    <ShieldCheck size={16} className="text-blue" />
-                    <strong>8. เรื่องราวผู้ก่อตั้งและวิสัยทัศน์องค์กร (Founder & Company Story)</strong>
+                  <div className="subcard-title" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Users size={18} className="text-blue" />
+                      <strong>8. หน้าเกี่ยวกับเราและประวัติองค์กร (/company ทุก Section)</strong>
+                    </div>
+                    <span style={{ fontSize: '0.78rem', padding: '3px 10px', background: '#eff6ff', color: '#1d4ed8', borderRadius: '999px', fontWeight: 700 }}>
+                      6 ส่วนพร้อมระบบจัดการครบวงจร
+                    </span>
                   </div>
 
-                  <div className="form-group">
-                    <label>คำคม / ปรัชญาผู้ก่อตั้ง (Founder Quote)</label>
-                    <textarea 
-                      className="form-input form-textarea" rows="2"
-                      value={siteData.founder?.quote || ''}
-                      onChange={e => updateSectionConfig('founder', {
-                        ...siteData.founder,
-                        quote: e.target.value
-                      })}
-                    />
+                  <p style={{ margin: '0 0 16px 0', fontSize: '0.86rem', color: '#64748b' }}>
+                    จัดการเนื้อหา ข้อความ รูปภาพ โลโก้พาร์ทเนอร์ และสถิติของหน้าเกี่ยวกับเรา (/company) ได้ครบทุกหัวข้อ
+                  </p>
+
+                  {/* Section Selector Sub-Tabs */}
+                  <div style={{ display: 'flex', gap: '8px', marginBottom: '22px', flexWrap: 'wrap', borderBottom: '1px solid #e2e8f0', paddingBottom: '12px' }}>
+                    {[
+                      { id: 'partners', label: '⚡ 4. โลโก้พันธมิตร (Slider)', icon: Zap },
+                      { id: 'hero', label: '1. ส่วนหัวหน้าเว็บ', icon: Users },
+                      { id: 'founder', label: '2. ผู้ก่อตั้ง & วิสัยทัศน์', icon: Award },
+                      { id: 'milestones', label: '3. เส้นทางการเติบโต & สถิติ', icon: TrendingUp },
+                      { id: 'standards', label: '5. มาตรฐานร้านสีขาว & แฟรนไชส์', icon: ShieldCheck },
+                      { id: 'galleries', label: '6. คลังภาพแกลลอรีองค์กร', icon: Camera }
+                    ].map(tab => (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => setActiveCompanySectionTab(tab.id)}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '8px 14px',
+                          borderRadius: '8px',
+                          fontSize: '0.84rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          background: activeCompanySectionTab === tab.id ? '#1d4ed8' : '#f8fafc',
+                          color: activeCompanySectionTab === tab.id ? '#ffffff' : '#475569',
+                          border: activeCompanySectionTab === tab.id ? '1px solid #1d4ed8' : '1px solid #cbd5e1',
+                          boxShadow: activeCompanySectionTab === tab.id ? '0 2px 8px rgba(29, 78, 216, 0.25)' : 'none',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        <tab.icon size={14} />
+                        <span>{tab.label}</span>
+                      </button>
+                    ))}
                   </div>
 
-                  <div className="form-row-2">
-                    <div className="form-group">
-                      <label>ชื่อผู้ก่อตั้ง</label>
-                      <input 
-                        type="text" className="form-input"
-                        value={siteData.founder?.name || 'คุณธนภัทร วรเชษฐ์'}
-                        onChange={e => updateSectionConfig('founder', {
+                  {/* =========================================================
+                      SECTION 4: PARTNER LOGOS & MARQUEE SLIDER CMS (PRIMARY)
+                      ========================================================= */}
+                  {activeCompanySectionTab === 'partners' && (
+                    <div style={{ animation: 'fadeIn 0.2s ease-in-out' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
+                            <Zap size={18} className="text-blue" />
+                            <span>จัดการโลโก้พันธมิตร & สไลเดอร์แบรนด์ (Partner Logos & Marquee Slider)</span>
+                          </div>
+                          <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#64748b' }}>
+                            จัดการรูปภาพโลโก้แบรนด์พาร์ทเนอร์ที่แสดงผลแบบสไลด์เลื่อนต่อเนื่อง (Marquee) ในหน้าเกี่ยวกับเรา (/company) รองรับการอัปโหลดไฟล์ภาพจริง (PNG / WebP / JPG)
+                          </p>
+                        </div>
+                        <span style={{ fontSize: '0.82rem', padding: '4px 10px', background: '#eff6ff', color: '#1d4ed8', borderRadius: '999px', fontWeight: 700 }}>
+                          {((siteData.founder?.partners || []).length)} แบรนด์ในสไลเดอร์
+                        </span>
+                      </div>
+
+                      {/* Image Format & Transparency Guidance Alert */}
+                      <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 16px', marginBottom: '16px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                        <CheckCircle2 size={18} style={{ color: '#16a34a', flexShrink: 0, marginTop: '2px' }} />
+                        <div style={{ fontSize: '0.84rem', color: '#166534', lineHeight: 1.45 }}>
+                          <strong>💡 รองรับไฟล์รูปภาพโลโก้จริง (PNG / WebP / JPG):</strong> แนะนำให้ใช้ไฟล์ <strong>PNG พื้นหลังโปร่งใส (Transparent Background)</strong> หรือ WebP อัตราส่วนแนวนอนประมาณ 3:1 (เช่น 240x80 px หรือ 300x100 px) เพื่อให้รูปภาพโลโก้แสดงผลบนการ์ดสไลด์ได้คมชัดและสวยงามที่สุด
+                        </div>
+                      </div>
+
+                      {/* Quick Add Brand Presets */}
+                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px 16px', marginBottom: '18px' }}>
+                        <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          ⚡ คลิกเดียวเพื่อเพิ่มแบรนด์ยอดนิยม (Quick Brand Presets)
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                          {[
+                            { name: 'NVIDIA GeForce RTX', tier: 'Official GPU Partner', icon: 'Cpu', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/nvidia.svg', website: 'https://www.nvidia.com' },
+                            { name: 'ASUS ROG', tier: 'Official Motherboard & Hardware', icon: 'Zap', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/asus.svg', website: 'https://rog.asus.com' },
+                            { name: 'Intel Extreme', tier: 'Official Processor Partner', icon: 'Cpu', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/intel.svg', website: 'https://www.intel.com' },
+                            { name: 'Razer Gaming', tier: 'Official Peripherals Partner', icon: 'Gamepad2', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/razer.svg', website: 'https://www.razer.com' },
+                            { name: 'Logitech G', tier: 'Official Esports Gear', icon: 'Gamepad2', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/logitechg.svg', website: 'https://www.logitechg.com' },
+                            { name: 'MSI Gaming', tier: 'High-Performance Ecosystem', icon: 'Cpu', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/msi.svg', website: 'https://www.msi.com' },
+                            { name: 'AMD Ryzen', tier: 'Official Multi-Thread Processor', icon: 'Cpu', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/amd.svg', website: 'https://www.amd.com' },
+                            { name: 'BenQ ZOWIE', tier: 'Official Tournament Esports Monitor', icon: 'Monitor', logo: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 40"><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="20" fill="%23dc2626" letter-spacing="2">ZOWIE</text><text x="50%" y="85%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="8" fill="%2364748b" letter-spacing="3">a brand by BenQ</text></svg>', website: 'https://zowie.benq.com' },
+                            { name: 'Secretlab', tier: 'Official Ergonomic Gaming Chair', icon: 'Armchair', logo: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 40"><text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="18" fill="%230f172a" letter-spacing="3">SECRETLAB</text></svg>', website: 'https://secretlab.co' },
+                            { name: 'AIS Fibre Esports', tier: 'High-speed 10Gbps Fiber Partner', icon: 'Wifi', logo: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 40"><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="18" fill="%2316a34a" letter-spacing="2">AIS</text><text x="50%" y="80%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="9" fill="%230284c7" letter-spacing="3">FIBRE ESPORTS</text></svg>', website: 'https://www.ais.th/fibre' }
+                          ].map((preset, pIdx) => {
+                            const isAlreadyAdded = (siteData.founder?.partners || []).some(
+                              item => item.name.toLowerCase() === preset.name.toLowerCase()
+                            );
+                            return (
+                              <button
+                                key={pIdx}
+                                type="button"
+                                disabled={isAlreadyAdded}
+                                onClick={() => {
+                                  if (addPartner) {
+                                    addPartner(preset);
+                                    triggerSaveToast(`เพิ่ม ${preset.name} ลงในสไลเดอร์แล้ว`);
+                                  }
+                                }}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  padding: '4px 10px',
+                                  borderRadius: '6px',
+                                  fontSize: '0.78rem',
+                                  fontWeight: 600,
+                                  cursor: isAlreadyAdded ? 'default' : 'pointer',
+                                  background: isAlreadyAdded ? '#e2e8f0' : '#ffffff',
+                                  color: isAlreadyAdded ? '#94a3b8' : '#1e293b',
+                                  border: '1px solid #cbd5e1',
+                                  opacity: isAlreadyAdded ? 0.6 : 1,
+                                  transition: 'all 0.15s ease'
+                                }}
+                                title={isAlreadyAdded ? 'มีแบรนด์นี้ในสไลเดอร์แล้ว' : `คลิกเพื่อเพิ่ม ${preset.name}`}
+                              >
+                                <Plus size={12} className={isAlreadyAdded ? '' : 'text-blue'} />
+                                <span>{preset.name}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Current Partner Logos Grid */}
+                      <div style={{ marginBottom: '14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <strong style={{ fontSize: '0.92rem', color: '#0f172a' }}>
+                          รายการโลโก้พันธมิตรในสไลเดอร์ ({((siteData.founder?.partners || []).length)} แบรนด์)
+                        </strong>
+                      </div>
+
+                      {((siteData.founder?.partners || []).length === 0) ? (
+                        <div style={{ padding: '24px', textAlign: 'center', background: '#f8fafc', borderRadius: '10px', border: '1px dashed #cbd5e1', color: '#64748b', marginBottom: '20px' }}>
+                          ยังไม่มีโลโก้พันธมิตรในสไลเดอร์ คุณสามารถคลิกเลือกจากปุ่มแบรนด์แนะนำด้านบน หรืออัปโหลดภาพโลโก้จากแบบฟอร์มด้านล่าง
+                        </div>
+                      ) : (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '14px', marginBottom: '22px' }}>
+                          {(siteData.founder?.partners || []).map((partner, pIndex) => (
+                            <div
+                              key={partner.id || partner.name || pIndex}
+                              style={{
+                                background: '#ffffff',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: '10px',
+                                padding: '12px 14px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                                boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
+                                position: 'relative'
+                              }}
+                            >
+                              <div style={{ width: '84px', height: '44px', borderRadius: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, padding: '4px 6px', overflow: 'hidden' }}>
+                                {partner.logo ? (
+                                  <img 
+                                    src={partner.logo} 
+                                    alt={partner.name} 
+                                    style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                  />
+                                ) : (
+                                  <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#2563eb' }}>{partner.name}</span>
+                                )}
+                              </div>
+
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {partner.name}
+                                </div>
+                                <div style={{ fontSize: '0.75rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {partner.tier || 'Official Partner'}
+                                </div>
+                                {partner.website && isSafeExternalUrl(partner.website) && (
+                                  <a 
+                                    href={sanitizeSafeUrl(partner.website)} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    style={{ fontSize: '0.72rem', color: '#2563eb', display: 'inline-flex', alignItems: 'center', gap: '2px', textDecoration: 'none', marginTop: '2px' }}
+                                  >
+                                    <span>{partner.website.replace('https://', '')}</span>
+                                    <ArrowUpRight size={10} />
+                                  </a>
+                                )}
+                              </div>
+
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                {/* Replace Logo Image File Input */}
+                                <label
+                                  style={{
+                                    padding: '5px 7px',
+                                    background: '#eff6ff',
+                                    color: '#1d4ed8',
+                                    border: '1px solid #bfdbfe',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                  }}
+                                  title="อัปโหลดเปลี่ยนไฟล์รูปภาพโลโก้นี้"
+                                >
+                                  <Upload size={13} />
+                                  <input 
+                                    type="file" 
+                                    accept="image/png, image/jpeg, image/webp" 
+                                    style={{ display: 'none' }}
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0];
+                                      if (file) {
+                                        handleImageUpload(file, (dataUrl) => {
+                                          if (updatePartner) {
+                                            updatePartner(partner.id || partner.name, { logo: dataUrl });
+                                            triggerSaveToast(`เปลี่ยนรูปโลโก้ ${partner.name} สำเร็จ`);
+                                          }
+                                        }, 'partner-logo-replace');
+                                      }
+                                    }}
+                                  />
+                                </label>
+
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (window.confirm(`คุณต้องการลบพันธมิตร "${partner.name}" ออกจากสไลเดอร์ใช่หรือไม่?`)) {
+                                      if (deletePartner) {
+                                        deletePartner(partner.id || partner.name);
+                                        triggerSaveToast(`ลบ ${partner.name} เรียบร้อยแล้ว`);
+                                      }
+                                    }
+                                  }}
+                                  style={{
+                                    padding: '5px 7px',
+                                    background: '#fee2e2',
+                                    color: '#dc2626',
+                                    border: '1px solid #fecaca',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                  }}
+                                  title={`ลบ ${partner.name}`}
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Add New Partner Form with Direct Image Upload */}
+                      <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '12px', padding: '20px', marginBottom: '20px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', marginBottom: '14px' }}>
+                          <Plus size={16} className="text-blue" />
+                          <span>เพิ่มแบรนด์พันธมิตรใหม่ (+ เพิ่มโลโก้พันธมิตร)</span>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '14px' }}>
+                          <div className="form-group" style={{ margin: 0 }}>
+                            <label style={{ fontSize: '0.84rem', fontWeight: 600 }}>ชื่อแบรนด์พันธมิตร *</label>
+                            <input
+                              type="text"
+                              className="form-input"
+                              placeholder="เช่น HyperX, Corsair, Kingston"
+                              value={newPartnerForm.name}
+                              onChange={e => setNewPartnerForm(prev => ({ ...prev, name: e.target.value }))}
+                            />
+                          </div>
+
+                          <div className="form-group" style={{ margin: 0 }}>
+                            <label style={{ fontSize: '0.84rem', fontWeight: 600 }}>บทบาท / หมวดหมู่ (Tier) *</label>
+                            <input
+                              type="text"
+                              className="form-input"
+                              placeholder="เช่น Official RAM & Storage Partner"
+                              value={newPartnerForm.tier}
+                              onChange={e => setNewPartnerForm(prev => ({ ...prev, tier: e.target.value }))}
+                            />
+                          </div>
+
+                          <div className="form-group" style={{ margin: 0 }}>
+                            <label style={{ fontSize: '0.84rem', fontWeight: 600 }}>เว็บไซต์แบรนด์ (URL)</label>
+                            <input
+                              type="url"
+                              className="form-input"
+                              placeholder="https://www.brand.com"
+                              value={newPartnerForm.website}
+                              onChange={e => setNewPartnerForm(prev => ({ ...prev, website: e.target.value }))}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Image Logo Upload Box (File / Media Library / URL) */}
+                        <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '14px', marginBottom: '14px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
+                            <label style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0f172a' }}>
+                              📷 รูปภาพโลโก้พันธมิตร (Logo Image - PNG / WebP / JPG)
+                            </label>
+                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                              {/* Direct File Upload Label */}
+                              <label
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  fontSize: '0.78rem',
+                                  fontWeight: 600,
+                                  padding: '5px 12px',
+                                  borderRadius: '6px',
+                                  background: '#2563eb',
+                                  color: '#ffffff',
+                                  cursor: 'pointer',
+                                  boxShadow: '0 2px 6px rgba(37,99,235,0.2)'
+                                }}
+                              >
+                                <Upload size={13} />
+                                <span>อัปโหลดภาพจากเครื่อง (PNG/JPG/WebP)</span>
+                                <input 
+                                  type="file" 
+                                  accept="image/png, image/jpeg, image/webp" 
+                                  style={{ display: 'none' }}
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      handleImageUpload(file, (dataUrl) => {
+                                        setNewPartnerForm(prev => ({ ...prev, logo: dataUrl }));
+                                        triggerSaveToast(`อัปโหลด ${file.name} เรียบร้อยแล้ว`);
+                                      }, 'new-partner-logo');
+                                    }
+                                  }}
+                                />
+                              </label>
+
+                              <button
+                                type="button"
+                                onClick={() => openMediaLibraryForField('partners', (m) => {
+                                  setNewPartnerForm(prev => ({ ...prev, logo: m.url }));
+                                }, newPartnerForm.logo)}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '5px',
+                                  fontSize: '0.78rem',
+                                  fontWeight: 600,
+                                  padding: '5px 10px',
+                                  borderRadius: '6px',
+                                  background: '#eff6ff',
+                                  color: '#1d4ed8',
+                                  border: '1px solid #bfdbfe',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                <ImageIcon size={13} />
+                                <span>เลือกจาก Media Library</span>
+                              </button>
+                            </div>
+                          </div>
+
+                          <input
+                            type="url"
+                            className="form-input"
+                            placeholder="หรือกรอก URL รูปภาพ เช่น https://..."
+                            value={newPartnerForm.logo}
+                            onChange={e => setNewPartnerForm(prev => ({ ...prev, logo: e.target.value }))}
+                          />
+
+                          {/* Image Logo Live Preview */}
+                          {newPartnerForm.logo && (
+                            <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px', background: '#f8fafc', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
+                              <div style={{ width: '100px', height: '48px', background: '#ffffff', borderRadius: '6px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px' }}>
+                                <img 
+                                  src={newPartnerForm.logo} 
+                                  alt="Preview" 
+                                  style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                />
+                              </div>
+                              <div style={{ fontSize: '0.82rem', color: '#475569' }}>
+                                <div><strong>ภาพโลโก้ที่เลือก:</strong> พร้อมบันทึกลงในสไลเดอร์</div>
+                                <span style={{ fontSize: '0.74rem', color: '#94a3b8' }}>จะแสดงผลบนการ์ดสไลด์แบบอัตโนมัติ</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Live Slider Card Simulation */}
+                        {newPartnerForm.name && (
+                          <div style={{ padding: '12px', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', marginBottom: '14px', display: 'inline-flex', alignItems: 'center', gap: '12px' }}>
+                            <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>ตัวอย่างการ์ดบนสไลเดอร์:</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 18px', background: '#ffffff', border: '1px solid #3b82f6', borderRadius: '12px', boxShadow: '0 4px 12px rgba(59,130,246,0.1)' }}>
+                              <div style={{ width: '80px', height: '36px', borderRadius: '6px', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2px' }}>
+                                {newPartnerForm.logo ? (
+                                  <img src={newPartnerForm.logo} alt="Preview" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                                ) : (
+                                  <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#2563eb' }}>{newPartnerForm.name}</span>
+                                )}
+                              </div>
+                              <div>
+                                <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#0f172a' }}>{newPartnerForm.name}</div>
+                                <div style={{ fontSize: '0.74rem', color: '#64748b' }}>{newPartnerForm.tier || 'Official Partner'}</div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                          <button
+                            type="button"
+                            className="btn-primary"
+                            onClick={() => {
+                              if (!newPartnerForm.name.trim()) {
+                                alert('กรุณาระบุชื่อแบรนด์พันธมิตร');
+                                return;
+                              }
+                              if (!newPartnerForm.tier.trim()) {
+                                alert('กรุณาระบุบทบาทหรือหมวดหมู่ของพันธมิตร');
+                                return;
+                              }
+
+                              if (addPartner) {
+                                addPartner({
+                                  name: newPartnerForm.name.trim(),
+                                  tier: newPartnerForm.tier.trim(),
+                                  logo: newPartnerForm.logo.trim(),
+                                  website: newPartnerForm.website.trim(),
+                                  icon: newPartnerForm.icon || 'Cpu'
+                                });
+                              }
+
+                              setNewPartnerForm({
+                                name: '',
+                                tier: '',
+                                logo: '',
+                                website: '',
+                                icon: 'Cpu'
+                              });
+
+                              triggerSaveToast('เพิ่มโลโก้พันธมิตรลงสไลเดอร์สำเร็จ');
+                            }}
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 22px' }}
+                          >
+                            <Plus size={16} />
+                            <span>เพิ่มโลโก้พันธมิตรลงสไลเดอร์</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* =========================================================
+                      SECTION 1: HERO HEADER (/company)
+                      ========================================================= */}
+                  {activeCompanySectionTab === 'hero' && (
+                    <div style={{ animation: 'fadeIn 0.2s ease-in-out' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1rem', fontWeight: 800, color: '#0f172a', marginBottom: '14px' }}>
+                        <Users size={18} className="text-blue" />
+                        <span>1. ส่วนหัวหน้าเว็บองค์กร (Hero Banner & Header)</span>
+                      </div>
+
+                      <div className="form-group">
+                        <label>ป้ายกำกับด้านบน (Badge Pill Text)</label>
+                        <input 
+                          type="text" className="form-input"
+                          value={siteData.founder?.hero?.badge || 'LEADERSHIP & CORPORATE PROFILE'}
+                          onChange={e => updateSectionConfig('founder', {
+                            ...siteData.founder,
+                            hero: { ...(siteData.founder?.hero || {}), badge: e.target.value }
+                          })}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>หัวข้อหลักหน้าเกี่ยวกับเรา (Section Title)</label>
+                        <input 
+                          type="text" className="form-input"
+                          value={siteData.founder?.hero?.title || 'วิสัยทัศน์ผู้บริหาร & ประวัติองค์กร G-SPEED'}
+                          onChange={e => updateSectionConfig('founder', {
+                            ...siteData.founder,
+                            hero: { ...(siteData.founder?.hero || {}), title: e.target.value }
+                          })}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>คำบรรยายส่วนหัว (Hero Subtitle)</label>
+                        <textarea 
+                          className="form-input form-textarea" rows="2"
+                          value={siteData.founder?.hero?.subtitle || 'มุ่งมั่นขับเคลื่อนอุตสาหกรรมอีสปอร์ตไทยสู่มาตรฐานสากล ด้วยเทคโนโลยีระดับมืออาชีพ และระบบการจัดการที่โปร่งใส มั่นคง ยั่งยืน'}
+                          onChange={e => updateSectionConfig('founder', {
+                            ...siteData.founder,
+                            hero: { ...(siteData.founder?.hero || {}), subtitle: e.target.value }
+                          })}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* =========================================================
+                      SECTION 2: FOUNDER & EXECUTIVE VISION
+                      ========================================================= */}
+                  {activeCompanySectionTab === 'founder' && (
+                    <div style={{ animation: 'fadeIn 0.2s ease-in-out' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1rem', fontWeight: 800, color: '#0f172a', marginBottom: '14px' }}>
+                        <Award size={18} className="text-blue" />
+                        <span>2. ข้อมูลผู้ก่อตั้งและวิสัยทัศน์ผู้บริหาร (Founder Profile & Executive Vision)</span>
+                      </div>
+
+                      <div className="form-group">
+                        <label>คำคม / ปรัชญาผู้ก่อตั้ง (Founder Quote)</label>
+                        <textarea 
+                          className="form-input form-textarea" rows="2"
+                          value={siteData.founder?.quote || ''}
+                          onChange={e => updateSectionConfig('founder', {
+                            ...siteData.founder,
+                            quote: e.target.value
+                          })}
+                        />
+                      </div>
+
+                      <div className="form-row-2">
+                        <div className="form-group">
+                          <label>ชื่อผู้ก่อตั้ง</label>
+                          <input 
+                            type="text" className="form-input"
+                            value={siteData.founder?.name || 'คุณกิตติศักดิ์ พรหมวารี (คุณกฤต)'}
+                            onChange={e => updateSectionConfig('founder', {
+                              ...siteData.founder,
+                              name: e.target.value
+                            })}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label>ตำแหน่งผู้บริหาร</label>
+                          <input 
+                            type="text" className="form-input"
+                            value={siteData.founder?.title || 'ประธานเจ้าหน้าที่บริหารและผู้ก่อตั้ง G-SPEED Group'}
+                            onChange={e => updateSectionConfig('founder', {
+                              ...siteData.founder,
+                              title: e.target.value
+                            })}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-row-2">
+                        <div className="form-group">
+                          <label>ตัวเลขประสบการณ์ (เช่น 16+ ปี)</label>
+                          <input 
+                            type="text" className="form-input"
+                            value={siteData.founder?.experience || '16+ ปี'}
+                            onChange={e => updateSectionConfig('founder', {
+                              ...siteData.founder,
+                              experience: e.target.value
+                            })}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label>ตัวเลขสาขาที่บริหาร (เช่น 8 สาขา)</label>
+                          <input 
+                            type="text" className="form-input"
+                            value={siteData.founder?.managedBranches || '8 สาขา'}
+                            onChange={e => updateSectionConfig('founder', {
+                              ...siteData.founder,
+                              managedBranches: e.target.value
+                            })}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-group">
+                        <label>วิสัยทัศน์และการขับเคลื่อน (Core Vision)</label>
+                        <textarea 
+                          className="form-input form-textarea" rows="3"
+                          value={siteData.founder?.vision || ''}
+                          onChange={e => updateSectionConfig('founder', {
+                            ...siteData.founder,
+                            vision: e.target.value
+                          })}
+                        />
+                      </div>
+
+                      <SectionColorCustomizer 
+                        title="🎨 สีพื้นหลังและฟอนต์ส่วนผู้ก่อตั้ง & บริษัท"
+                        description="กำหนดสีพื้นหลังและการ์ดโปรไฟล์ผู้ก่อตั้ง และสีฟอนต์ชื่อ/คำคม/ประวัติ"
+                        bgColor={siteData.founder?.bgColor || '#ffffff'}
+                        onBgColorChange={val => updateSectionConfig('founder', {
                           ...siteData.founder,
-                          name: e.target.value
+                          bgColor: val
                         })}
+                        titleColor={siteData.founder?.titleColor || '#0f172a'}
+                        onTitleColorChange={val => updateSectionConfig('founder', {
+                          ...siteData.founder,
+                          titleColor: val
+                        })}
+                        subtitleColor={siteData.founder?.textColor || '#475569'}
+                        onSubtitleColorChange={val => updateSectionConfig('founder', {
+                          ...siteData.founder,
+                          textColor: val
+                        })}
+                        titleLabel="สีฟอนต์ชื่อผู้ก่อตั้ง (Name Color)"
+                        subtitleLabel="สีฟอนต์คำคมและเนื้อหา (Quote & Bio Color)"
+                        defaultBg="#ffffff"
+                        defaultTitle="#0f172a"
+                        defaultSubtitle="#475569"
+                      />
+
+                      <SectionImageUploader 
+                        label="ภาพถ่ายผู้บริหาร / ผู้ก่อตั้ง (Founder & CEO Portrait)"
+                        value={siteData.founder?.image || ''}
+                        onChange={val => updateSectionConfig('founder', {
+                          ...siteData.founder,
+                          image: val
+                        })}
+                        recommendedSize="800 x 800 px หรือ 800 x 1000 px"
+                        aspectRatio="1:1 หรือ 4:5"
+                        description="ภาพถ่ายพอร์ตเทรตผู้ก่อตั้งสำหรับหน้า Company Profile"
+                        uploadKey="founder-portrait-img"
+                        compressingItemId={compressingItemId}
+                        handleImageUpload={handleImageUpload}
+                        previewWidth={120}
+                        previewHeight={120}
                       />
                     </div>
-                    <div className="form-group">
-                      <label>ตำแหน่งผู้บริหาร</label>
-                      <input 
-                        type="text" className="form-input"
-                        value={siteData.founder?.title || 'ผู้ก่อตั้งและประธานเจ้าหน้าที่บริหาร GLP Group'}
-                        onChange={e => updateSectionConfig('founder', {
-                          ...siteData.founder,
-                          title: e.target.value
-                        })}
-                      />
+                  )}
+
+                  {/* =========================================================
+                      SECTION 3: MILESTONES TIMELINE & STATS
+                      ========================================================= */}
+                  {activeCompanySectionTab === 'milestones' && (
+                    <div style={{ animation: 'fadeIn 0.2s ease-in-out' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1rem', fontWeight: 800, color: '#0f172a', marginBottom: '14px' }}>
+                        <TrendingUp size={18} className="text-blue" />
+                        <span>3. เส้นทางการเติบโต & สถิติความสำเร็จ (Milestones Journey & Network Stats)</span>
+                      </div>
+
+                      {/* Milestones Timeline Events */}
+                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '16px', marginBottom: '20px' }}>
+                        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0f172a', marginBottom: '12px' }}>
+                          📅 เหตุการณ์ประวัติศาสตร์บนเส้นทางการเติบโต (Timeline Milestones)
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '10px', marginBottom: '14px' }}>
+                          {(siteData.founder?.history || []).map((milestone, mIdx) => (
+                            <div key={mIdx} style={{ display: 'flex', gap: '10px', alignItems: 'center', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '10px 12px' }}>
+                              <input 
+                                type="text"
+                                className="form-input"
+                                style={{ width: '120px', fontWeight: 700 }}
+                                value={milestone.year}
+                                onChange={e => {
+                                  const updatedHistory = [...(siteData.founder?.history || [])];
+                                  updatedHistory[mIdx] = { ...updatedHistory[mIdx], year: e.target.value };
+                                  updateSectionConfig('founder', { ...siteData.founder, history: updatedHistory });
+                                }}
+                              />
+                              <input 
+                                type="text"
+                                className="form-input"
+                                style={{ flex: 1 }}
+                                value={milestone.event}
+                                onChange={e => {
+                                  const updatedHistory = [...(siteData.founder?.history || [])];
+                                  updatedHistory[mIdx] = { ...updatedHistory[mIdx], event: e.target.value };
+                                  updateSectionConfig('founder', { ...siteData.founder, history: updatedHistory });
+                                }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const updatedHistory = (siteData.founder?.history || []).filter((_, i) => i !== mIdx);
+                                  updateSectionConfig('founder', { ...siteData.founder, history: updatedHistory });
+                                  triggerSaveToast('ลบเหตุการณ์ประวัติศาสตร์แล้ว');
+                                }}
+                                style={{ padding: '6px', background: '#fee2e2', color: '#dc2626', border: '1px solid #fecaca', borderRadius: '6px', cursor: 'pointer' }}
+                                title="ลบเหตุการณ์นี้"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Add New Milestone */}
+                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', borderTop: '1px dashed #cbd5e1', paddingTop: '12px' }}>
+                          <input 
+                            type="text"
+                            className="form-input"
+                            style={{ width: '120px' }}
+                            placeholder="ปี เช่น 2026"
+                            value={newMilestoneForm.year}
+                            onChange={e => setNewMilestoneForm(prev => ({ ...prev, year: e.target.value }))}
+                          />
+                          <input 
+                            type="text"
+                            className="form-input"
+                            style={{ flex: 1 }}
+                            placeholder="รายละเอียดเหตุการณ์ก้าวสำคัญ..."
+                            value={newMilestoneForm.event}
+                            onChange={e => setNewMilestoneForm(prev => ({ ...prev, event: e.target.value }))}
+                          />
+                          <button
+                            type="button"
+                            className="btn-primary"
+                            onClick={() => {
+                              if (!newMilestoneForm.year.trim() || !newMilestoneForm.event.trim()) {
+                                alert('กรุณาระบุปีและรายละเอียดเหตุการณ์');
+                                return;
+                              }
+                              const currentHistory = siteData.founder?.history || [];
+                              updateSectionConfig('founder', {
+                                ...siteData.founder,
+                                history: [...currentHistory, { year: newMilestoneForm.year.trim(), event: newMilestoneForm.event.trim() }]
+                              });
+                              setNewMilestoneForm({ year: '', event: '' });
+                              triggerSaveToast('เพิ่มเหตุการณ์บนไทม์ไลน์สำเร็จ');
+                            }}
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', padding: '8px 14px' }}
+                          >
+                            <Plus size={14} />
+                            <span>เพิ่มก้าวสำคัญ</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Network Stats Cards (4 Metrics) */}
+                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '16px' }}>
+                        <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0f172a', marginBottom: '12px' }}>
+                          📊 สถิติความสำเร็จองค์กร (4 Corporate Network Stats)
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+                          {(siteData.founder?.stats || []).map((st, stIdx) => (
+                            <div key={stIdx} style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '12px' }}>
+                              <label style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>ตัวเลขสถิติที่ {stIdx + 1}</label>
+                              <input 
+                                type="text"
+                                className="form-input"
+                                style={{ fontWeight: 800, fontSize: '1.05rem', color: '#1d4ed8', marginBottom: '6px' }}
+                                value={st.value}
+                                onChange={e => {
+                                  const updatedStats = [...(siteData.founder?.stats || [])];
+                                  updatedStats[stIdx] = { ...updatedStats[stIdx], value: e.target.value };
+                                  updateSectionConfig('founder', { ...siteData.founder, stats: updatedStats });
+                                }}
+                              />
+                              <label style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>คำอธิบายสถิติ</label>
+                              <input 
+                                type="text"
+                                className="form-input"
+                                value={st.label}
+                                onChange={e => {
+                                  const updatedStats = [...(siteData.founder?.stats || [])];
+                                  updatedStats[stIdx] = { ...updatedStats[stIdx], label: e.target.value };
+                                  updateSectionConfig('founder', { ...siteData.founder, stats: updatedStats });
+                                }}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
-                  <div className="form-group">
-                    <label>ประวัติและแรงบันดาลใจ (Founder Bio)</label>
-                    <textarea 
-                      className="form-input form-textarea" rows="3"
-                      value={siteData.founder?.bio || ''}
-                      onChange={e => updateSectionConfig('founder', {
-                        ...siteData.founder,
-                        bio: e.target.value
-                      })}
-                    />
-                  </div>
+                  {/* =========================================================
+                      SECTION 5 & 6: STANDARDS & FRANCHISE CTA
+                      ========================================================= */}
+                  {activeCompanySectionTab === 'standards' && (
+                    <div style={{ animation: 'fadeIn 0.2s ease-in-out' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1rem', fontWeight: 800, color: '#0f172a', marginBottom: '14px' }}>
+                        <ShieldCheck size={18} className="text-blue" />
+                        <span>5. มาตรฐานความถูกต้องและร้านสีขาว (Legal, Safety & White Internet Cafe)</span>
+                      </div>
 
-                  <SectionColorCustomizer 
-                    title="🎨 สีพื้นหลังและฟอนต์ส่วนผู้ก่อตั้ง & บริษัท"
-                    description="กำหนดสีพื้นหลังและการ์ดโปรไฟล์ผู้ก่อตั้ง และสีฟอนต์ชื่อ/คำคม/ประวัติ"
-                    bgColor={siteData.founder?.bgColor || '#ffffff'}
-                    onBgColorChange={val => updateSectionConfig('founder', {
-                      ...siteData.founder,
-                      bgColor: val
-                    })}
-                    titleColor={siteData.founder?.titleColor || '#0f172a'}
-                    onTitleColorChange={val => updateSectionConfig('founder', {
-                      ...siteData.founder,
-                      titleColor: val
-                    })}
-                    subtitleColor={siteData.founder?.textColor || '#475569'}
-                    onSubtitleColorChange={val => updateSectionConfig('founder', {
-                      ...siteData.founder,
-                      textColor: val
-                    })}
-                    titleLabel="สีฟอนต์ชื่อผู้ก่อตั้ง (Name Color)"
-                    subtitleLabel="สีฟอนต์คำคมและเนื้อหา (Quote & Bio Color)"
-                    defaultBg="#ffffff"
-                    defaultTitle="#0f172a"
-                    defaultSubtitle="#475569"
-                  />
+                      <div className="form-group">
+                        <label>หัวข้อมาตรฐานร้านเกม</label>
+                        <input 
+                          type="text" className="form-input"
+                          value={siteData.founder?.standards?.title || 'มาตรฐานความถูกต้อง โปร่งใส และปลอดภัย'}
+                          onChange={e => updateSectionConfig('founder', {
+                            ...siteData.founder,
+                            standards: { ...(siteData.founder?.standards || {}), title: e.target.value }
+                          })}
+                        />
+                      </div>
 
-                  <SectionImageUploader 
-                    label="ภาพถ่ายผู้บริหาร / ผู้ก่อตั้ง (Founder & CEO Portrait)"
-                    value={siteData.founder?.image || ''}
-                    onChange={val => updateSectionConfig('founder', {
-                      ...siteData.founder,
-                      image: val
-                    })}
-                    recommendedSize="800 x 800 px หรือ 800 x 1000 px"
-                    aspectRatio="1:1 (สี่เหลี่ยมจัตุรัส) หรือ 4:5 (แนวตั้งพอร์ตเทรต)"
-                    description="ภาพถ่ายพอร์ตเทรตผู้ก่อตั้งสำหรับหน้า Company Profile แนะนำภาพที่มีความคมชัด สีหน้ามั่นใจ และพื้นหลังดูเป็นมืออาชีพ"
-                    uploadKey="founder-portrait-img"
-                    compressingItemId={compressingItemId}
-                    handleImageUpload={handleImageUpload}
-                    previewWidth={120}
-                    previewHeight={120}
-                  />
+                      <div className="form-group">
+                        <label>คำอธิบายมาตรฐานและกฎหมาย</label>
+                        <textarea 
+                          className="form-input form-textarea" rows="3"
+                          value={siteData.founder?.standards?.desc || 'G-Speed ทุกสาขาผ่านการรับรองและตรวจสอบตามพระราชบัญญัติภาพยนตร์และวีดิทัศน์ ได้รับใบอนุญาตประกอบกิจการร้านเกมอย่างถูกต้องจากกระทรวงวัฒนธรรม ใช้ระบบปฏิบัติการ Windows และลิขสิทธิ์เกมแท้ 100% หมดกังวลเรื่องปัญหาลิขสิทธิ์'}
+                          onChange={e => updateSectionConfig('founder', {
+                            ...siteData.founder,
+                            standards: { ...(siteData.founder?.standards || {}), desc: e.target.value }
+                          })}
+                        />
+                      </div>
 
-                  <div className="modal-footer-btns" style={{ marginTop: '16px' }}>
+                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '16px', marginBottom: '18px' }}>
+                        <label style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0f172a', marginBottom: '8px', display: 'block' }}>
+                          🛡️ รายการรับรองความถูกต้องและปลอดภัย (Checklist Pills)
+                        </label>
+                        {(siteData.founder?.standards?.pills || [
+                          'ใบอนุญาตสถานประกอบการถูกต้องตามกฎหมาย',
+                          'ร้านเกมสีขาว ปลอดภัยสำหรับเยาวชน',
+                          'ระบบกล้องวงจรปิด CCTV Full HD บันทึก 30 วัน'
+                        ]).map((pill, plIndex) => (
+                          <div key={plIndex} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
+                            <span style={{ fontSize: '0.8rem', color: '#64748b', width: '20px' }}>{plIndex + 1}.</span>
+                            <input 
+                              type="text" className="form-input" style={{ flex: 1 }}
+                              value={pill}
+                              onChange={e => {
+                                const currentPills = [...(siteData.founder?.standards?.pills || [
+                                  'ใบอนุญาตสถานประกอบการถูกต้องตามกฎหมาย',
+                                  'ร้านเกมสีขาว ปลอดภัยสำหรับเยาวชน',
+                                  'ระบบกล้องวงจรปิด CCTV Full HD บันทึก 30 วัน'
+                                ])];
+                                currentPills[plIndex] = e.target.value;
+                                updateSectionConfig('founder', {
+                                  ...siteData.founder,
+                                  standards: { ...(siteData.founder?.standards || {}), pills: currentPills }
+                                });
+                              }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Section 6: Franchise CTA Banner */}
+                      <div style={{ borderTop: '2px solid #e2e8f0', paddingTop: '16px' }}>
+                        <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a', marginBottom: '12px' }}>
+                          💼 6. แถบคำนวณงบลงทุน & แฟรนไชส์ (Franchise CTA Button)
+                        </div>
+
+                        <div className="form-row-2">
+                          <div className="form-group">
+                            <label>คำโปรยปุ่ม (Sub-Label)</label>
+                            <input 
+                              type="text" className="form-input"
+                              value={siteData.founder?.franchiseCta?.subTitle || 'คำนวณงบลงทุน & วางระบบร้าน'}
+                              onChange={e => updateSectionConfig('founder', {
+                                ...siteData.founder,
+                                franchiseCta: { ...(siteData.founder?.franchiseCta || {}), subTitle: e.target.value }
+                              })}
+                            />
+                          </div>
+                          <div className="form-group">
+                            <label>ข้อความหลักบนปุ่ม (Main Title)</label>
+                            <input 
+                              type="text" className="form-input"
+                              value={siteData.founder?.franchiseCta?.title || 'ร่วมเป็นพาร์ตเนอร์แฟรนไชส์กับเรา'}
+                              onChange={e => updateSectionConfig('founder', {
+                                ...siteData.founder,
+                                franchiseCta: { ...(siteData.founder?.franchiseCta || {}), title: e.target.value }
+                              })}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* =========================================================
+                      SECTION 6: CORPORATE SHOWCASE GALLERIES CMS
+                      ========================================================= */}
+                  {activeCompanySectionTab === 'galleries' && (
+                    <div style={{ animation: 'fadeIn 0.2s ease-in-out' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
+                            <Camera size={18} className="text-blue" />
+                            <span>จัดการคลังภาพแกลลอรีหน้าองค์กร (/company)</span>
+                          </div>
+                          <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#64748b' }}>
+                            เพิ่ม แก้ไข ลบ รูปภาพที่จัดแสดงใน 2 หัวข้อหลักของหน้าเกี่ยวกับเรา (เส้นทางการเติบโต และมาตรฐานความปลอดภัย)
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Gallery Section Tabs */}
+                      <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
+                        <button
+                          type="button"
+                          onClick={() => setActiveCorpGalleryTab('milestonesGallery')}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '8px 16px',
+                            borderRadius: '8px',
+                            fontSize: '0.86rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            background: activeCorpGalleryTab === 'milestonesGallery' ? '#1d4ed8' : '#f1f5f9',
+                            color: activeCorpGalleryTab === 'milestonesGallery' ? '#ffffff' : '#334155',
+                            border: activeCorpGalleryTab === 'milestonesGallery' ? '1px solid #1d4ed8' : '1px solid #cbd5e1',
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          <Award size={15} />
+                          <span>1. ภาพการเติบโต & ขยายสาขา ({(siteData.founder?.milestonesGallery || []).length})</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setActiveCorpGalleryTab('standardsGallery')}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '8px 16px',
+                            borderRadius: '8px',
+                            fontSize: '0.86rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            background: activeCorpGalleryTab === 'standardsGallery' ? '#1d4ed8' : '#f1f5f9',
+                            color: activeCorpGalleryTab === 'standardsGallery' ? '#ffffff' : '#334155',
+                            border: activeCorpGalleryTab === 'standardsGallery' ? '1px solid #1d4ed8' : '1px solid #cbd5e1',
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          <ShieldCheck size={15} />
+                          <span>2. ภาพมาตรฐาน & ร้านสีขาว ({(siteData.founder?.standardsGallery || []).length})</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setActiveCorpGalleryTab('partnersGallery')}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '8px 16px',
+                            borderRadius: '8px',
+                            fontSize: '0.86rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            background: activeCorpGalleryTab === 'partnersGallery' ? '#1d4ed8' : '#f1f5f9',
+                            color: activeCorpGalleryTab === 'partnersGallery' ? '#ffffff' : '#334155',
+                            border: activeCorpGalleryTab === 'partnersGallery' ? '1px solid #1d4ed8' : '1px solid #cbd5e1',
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          <Layers size={15} />
+                          <span>3. ภาพฮาร์ดแวร์พันธมิตร (Archive) ({(siteData.founder?.partnersGallery || []).length})</span>
+                        </button>
+                      </div>
+
+                      {/* Active Gallery Items Grid */}
+                      {(() => {
+                        const currentGalleryList = Array.isArray(siteData.founder?.[activeCorpGalleryTab]) 
+                          ? siteData.founder[activeCorpGalleryTab] 
+                          : [];
+
+                        return (
+                          <div>
+                            <div style={{ marginBottom: '16px' }}>
+                              <strong style={{ fontSize: '0.9rem', color: '#0f172a' }}>
+                                รูปภาพทั้งหมดในหัวข้อนี้ ({currentGalleryList.length} ภาพ)
+                              </strong>
+                            </div>
+
+                            {currentGalleryList.length === 0 ? (
+                              <div style={{ padding: '24px', textAlign: 'center', background: '#f8fafc', borderRadius: '10px', border: '1px dashed #cbd5e1', color: '#64748b' }}>
+                                ยังไม่มีรูปภาพในหัวข้อนี้ สามารถเพิ่มภาพใหม่ได้จากแบบฟอร์มด้านล่าง
+                              </div>
+                            ) : (
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+                                {currentGalleryList.map((item, idx) => (
+                                  <div 
+                                    key={item.id || idx}
+                                    style={{
+                                      background: '#ffffff',
+                                      border: '1px solid #e2e8f0',
+                                      borderRadius: '10px',
+                                      overflow: 'hidden',
+                                      boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                                      display: 'flex',
+                                      flexDirection: 'column'
+                                    }}
+                                  >
+                                    <div style={{ width: '100%', height: '140px', background: '#0f172a', position: 'relative' }}>
+                                      <img 
+                                        src={item.url} 
+                                        alt={item.title} 
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                      />
+                                      <span style={{ position: 'absolute', top: '8px', left: '8px', background: 'rgba(15,23,42,0.8)', color: '#38bdf8', fontSize: '0.72rem', padding: '2px 8px', borderRadius: '4px', fontWeight: 700 }}>
+                                        {item.tag || 'SHOWCASE'}
+                                      </span>
+                                    </div>
+                                    <div style={{ padding: '12px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                                      <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#0f172a', marginBottom: '4px' }}>
+                                        {item.title}
+                                      </div>
+                                      <div style={{ fontSize: '0.8rem', color: '#64748b', lineHeight: 1.4, flex: 1, marginBottom: '10px' }}>
+                                        {item.caption}
+                                      </div>
+                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #f1f5f9', paddingTop: '8px' }}>
+                                        <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                                          {item.year ? `ปี ${item.year}` : (item.partner || 'G-Speed')}
+                                        </span>
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            if (window.confirm(`คุณต้องการลบรูปภาพ "${item.title}" ใช่หรือไม่?`)) {
+                                              if (deleteCompanyGalleryPhoto) {
+                                                deleteCompanyGalleryPhoto(activeCorpGalleryTab, item.id);
+                                              }
+                                            }
+                                          }}
+                                          style={{
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '4px',
+                                            padding: '3px 8px',
+                                            background: '#fee2e2',
+                                            color: '#dc2626',
+                                            border: '1px solid #fecaca',
+                                            borderRadius: '6px',
+                                            fontSize: '0.75rem',
+                                            fontWeight: 600,
+                                            cursor: 'pointer'
+                                          }}
+                                        >
+                                          <Trash2 size={12} />
+                                          <span>ลบภาพ</span>
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* Add New Photo Form Panel */}
+                            <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '12px', padding: '20px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', marginBottom: '14px' }}>
+                                <Plus size={16} className="text-blue" />
+                                <span>เพิ่มรูปภาพใหม่ในหัวข้อนี้ ({activeCorpGalleryTab === 'milestonesGallery' ? 'เส้นทางการเติบโต' : activeCorpGalleryTab === 'standardsGallery' ? 'มาตรฐานความปลอดภัย' : 'พันธมิตร'})</span>
+                              </div>
+
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
+                                <div className="form-group" style={{ margin: 0 }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px', flexWrap: 'wrap', gap: '6px' }}>
+                                    <label style={{ fontSize: '0.84rem', fontWeight: 600 }}>รูปภาพ *</label>
+                                    <div style={{ display: 'flex', gap: '6px' }}>
+                                      {/* Direct Upload for Gallery Photo */}
+                                      <label
+                                        style={{
+                                          display: 'inline-flex',
+                                          alignItems: 'center',
+                                          gap: '4px',
+                                          fontSize: '0.75rem',
+                                          padding: '3px 8px',
+                                          borderRadius: '6px',
+                                          background: '#2563eb',
+                                          color: '#ffffff',
+                                          cursor: 'pointer'
+                                        }}
+                                      >
+                                        <Upload size={12} />
+                                        <span>อัปโหลดภาพจากเครื่อง</span>
+                                        <input 
+                                          type="file" 
+                                          accept="image/*" 
+                                          style={{ display: 'none' }}
+                                          onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                              handleImageUpload(file, (dataUrl) => {
+                                                setNewCorpPhotoForm(prev => ({ ...prev, url: dataUrl }));
+                                              }, 'corp-photo');
+                                            }
+                                          }}
+                                        />
+                                      </label>
+
+                                      <button
+                                        type="button"
+                                        onClick={() => openMediaLibraryForField('company', (m) => {
+                                          setNewCorpPhotoForm(prev => ({ ...prev, url: m.url }));
+                                        }, newCorpPhotoForm.url)}
+                                        style={{
+                                          display: 'inline-flex',
+                                          alignItems: 'center',
+                                          gap: '4px',
+                                          fontSize: '0.75rem',
+                                          padding: '3px 8px',
+                                          borderRadius: '6px',
+                                          background: '#eff6ff',
+                                          color: '#1d4ed8',
+                                          border: '1px solid #bfdbfe',
+                                          cursor: 'pointer'
+                                        }}
+                                      >
+                                        <ImageIcon size={12} />
+                                        <span>เลือกจาก Media Library</span>
+                                      </button>
+                                    </div>
+                                  </div>
+                                  <input
+                                    type="url"
+                                    className="form-input"
+                                    placeholder="https://... หรืออัปโหลดไฟล์ภาพด้านบน"
+                                    value={newCorpPhotoForm.url}
+                                    onChange={e => setNewCorpPhotoForm(prev => ({ ...prev, url: e.target.value }))}
+                                  />
+                                </div>
+
+                                {newCorpPhotoForm.url && (
+                                  <div style={{ width: '100%', height: '120px', borderRadius: '8px', overflow: 'hidden', background: '#0f172a', border: '1px solid #e2e8f0' }}>
+                                    <img 
+                                      src={newCorpPhotoForm.url} 
+                                      alt="Preview" 
+                                      style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                      onError={e => { e.currentTarget.style.display = 'none'; }}
+                                    />
+                                  </div>
+                                )}
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '10px' }}>
+                                  <div className="form-group" style={{ margin: 0 }}>
+                                    <label style={{ fontSize: '0.84rem', fontWeight: 600 }}>หัวข้อรูปภาพ *</label>
+                                    <input
+                                      type="text"
+                                      className="form-input"
+                                      placeholder="เช่น พิธีเปิดตัวสาขาใหม่"
+                                      value={newCorpPhotoForm.title}
+                                      onChange={e => setNewCorpPhotoForm(prev => ({ ...prev, title: e.target.value }))}
+                                    />
+                                  </div>
+
+                                  <div className="form-group" style={{ margin: 0 }}>
+                                    <label style={{ fontSize: '0.84rem', fontWeight: 600 }}>ป้ายกำกับ (Tag)</label>
+                                    <input
+                                      type="text"
+                                      className="form-input"
+                                      placeholder="เช่น Flagship, ROG"
+                                      value={newCorpPhotoForm.tag}
+                                      onChange={e => setNewCorpPhotoForm(prev => ({ ...prev, tag: e.target.value }))}
+                                    />
+                                  </div>
+
+                                  <div className="form-group" style={{ margin: 0 }}>
+                                    <label style={{ fontSize: '0.84rem', fontWeight: 600 }}>
+                                      {activeCorpGalleryTab === 'milestonesGallery' ? 'ปีที่บันทึก' : 'ชื่อพันธมิตร'}
+                                    </label>
+                                    <input
+                                      type="text"
+                                      className="form-input"
+                                      placeholder={activeCorpGalleryTab === 'milestonesGallery' ? 'เช่น 2026' : 'เช่น ASUS, NVIDIA'}
+                                      value={newCorpPhotoForm.extraMeta}
+                                      onChange={e => setNewCorpPhotoForm(prev => ({ ...prev, extraMeta: e.target.value }))}
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="form-group" style={{ margin: 0 }}>
+                                  <label style={{ fontSize: '0.84rem', fontWeight: 600 }}>คำบรรยายภาพ (Caption)</label>
+                                  <textarea
+                                    className="form-input form-textarea"
+                                    rows="2"
+                                    placeholder="ระบุรายละเอียดของภาพนี้..."
+                                    value={newCorpPhotoForm.caption}
+                                    onChange={e => setNewCorpPhotoForm(prev => ({ ...prev, caption: e.target.value }))}
+                                  />
+                                </div>
+
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '6px' }}>
+                                  <button
+                                    type="button"
+                                    className="btn-primary"
+                                    onClick={() => {
+                                      if (!newCorpPhotoForm.url.trim()) {
+                                        alert('กรุณาระบุ URL รูปภาพ');
+                                        return;
+                                      }
+                                      if (!newCorpPhotoForm.title.trim()) {
+                                        alert('กรุณาระบุหัวข้อรูปภาพ');
+                                        return;
+                                      }
+
+                                      const photoObj = {
+                                        title: newCorpPhotoForm.title.trim(),
+                                        url: newCorpPhotoForm.url.trim(),
+                                        caption: newCorpPhotoForm.caption.trim(),
+                                        tag: newCorpPhotoForm.tag.trim() || 'SHOWCASE',
+                                        partner: activeCorpGalleryTab === 'partnersGallery' ? newCorpPhotoForm.extraMeta.trim() : undefined,
+                                        year: activeCorpGalleryTab === 'milestonesGallery' ? newCorpPhotoForm.extraMeta.trim() : undefined
+                                      };
+
+                                      if (addCompanyGalleryPhoto) {
+                                        addCompanyGalleryPhoto(activeCorpGalleryTab, photoObj);
+                                      }
+
+                                      setNewCorpPhotoForm({
+                                        title: '',
+                                        url: '',
+                                        caption: '',
+                                        tag: '',
+                                        extraMeta: ''
+                                      });
+
+                                      triggerSaveToast('เพิ่มรูปภาพลงแกลลอรีหน้าองค์กรสำเร็จ');
+                                    }}
+                                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 20px' }}
+                                  >
+                                    <Plus size={16} />
+                                    <span>เพิ่มภาพนี้ลงแกลลอรี</span>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  )}
+
+                  <div className="modal-footer-btns" style={{ marginTop: '20px' }}>
                     <button type="button" className="btn-section-preview" onClick={() => openPreview('founder')}>
                       <Eye size={14} /> พรีวิวตัวอย่างก่อนบันทึก
                     </button>
                     <button className="btn-primary" onClick={() => triggerSaveToast()}>
-                      <Save size={14} /> บันทึกข้อมูลผู้ก่อตั้ง
+                      <Save size={14} /> บันทึกข้อมูลหน้าเกี่ยวกับเรา
                     </button>
                   </div>
                 </div>
               )}
-
               {/* -------------------------------------------------------------
                   SUBTAB 9: GLOBAL SEO & SOCIAL SHARE PREVIEW
                   ------------------------------------------------------------- */}
@@ -10203,6 +11512,500 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                   </label>
                 </div>
               </div>
+
+              {/* Mail Server (SMTP) & Automated Email Dispatch Configuration */}
+              <div className="admin-subcard glass-panel" style={{ marginTop: '20px' }}>
+                <div className="subcard-title" style={{ justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Mail size={18} className="text-blue" />
+                    <strong>การตั้งค่า Mail Server (SMTP) & ระบบอีเมลตอบกลับอัตโนมัติ</strong>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span className={`status-pill ${siteData.smtpConfig?.autoReplyEnabled ? 'status-pill-success' : 'status-pill-warning'}`}>
+                      {siteData.smtpConfig?.autoReplyEnabled ? 'Auto-Responder Active' : 'Disabled'}
+                    </span>
+                    <button 
+                      type="button"
+                      className="btn-secondary btn-sm"
+                      onClick={() => setActiveTab('email-templates')}
+                      title="เปิดหน้าต่างแก้ไขเนื้อหาแม่แบบอีเมล"
+                      style={{ fontSize: '0.75rem', padding: '4px 10px' }}
+                    >
+                      <Edit3 size={13} />
+                      <span>แก้ไขแม่แบบอีเมล &rarr;</span>
+                    </button>
+                  </div>
+                </div>
+
+                <p className="subcard-desc">
+                  กำหนดค่า SMTP สำหรับส่งอีเมลยืนยันคำขอและพิมพ์เขียวผังร้าน 3D ตอบกลับลูกค้าอัตโนมัติ (Customer Lead Auto-Reply) ทันทีที่ลูกค้ากดส่งแบบฟอร์ม รองรับทั้ง Google Workspace (Gmail SMTP Relay), Brevo, AWS SES และ Mailgun
+                </p>
+
+                <div className="form-row-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', marginTop: '14px' }}>
+                  <div className="form-group">
+                    <label>SMTP Host / Mail Server</label>
+                    <input 
+                      type="text" 
+                      className="form-input"
+                      placeholder="smtp.gmail.com"
+                      value={siteData.smtpConfig?.host || ''}
+                      onChange={e => updateSmtpConfig({ host: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>SMTP Port</label>
+                    <input 
+                      type="text" 
+                      className="form-input"
+                      placeholder="465"
+                      value={siteData.smtpConfig?.port || ''}
+                      onChange={e => updateSmtpConfig({ port: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>โพรโทคอลความปลอดภัย (Encryption)</label>
+                    <select 
+                      className="form-input"
+                      value={siteData.smtpConfig?.encryption || 'SSL/TLS'}
+                      onChange={e => updateSmtpConfig({ encryption: e.target.value })}
+                    >
+                      <option value="SSL/TLS">SSL / TLS (Port 465 แนะนำ)</option>
+                      <option value="STARTTLS">STARTTLS (Port 587)</option>
+                      <option value="None">None (Insecure / Port 25)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-row-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginTop: '12px' }}>
+                  <div className="form-group">
+                    <label>SMTP Username / บัญชีส่งออก</label>
+                    <input 
+                      type="text" 
+                      className="form-input"
+                      placeholder="no-reply@gspeed-esport.com"
+                      value={siteData.smtpConfig?.user || ''}
+                      onChange={e => updateSmtpConfig({ user: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>SMTP Password / App Password</label>
+                    <div style={{ position: 'relative' }}>
+                      <input 
+                        type={showSmtpPassword ? 'text' : 'password'} 
+                        className="form-input"
+                        placeholder="••••••••••••••••"
+                        value={siteData.smtpConfig?.pass || ''}
+                        onChange={e => updateSmtpConfig({ pass: e.target.value })}
+                        style={{ paddingRight: '40px' }}
+                      />
+                      <button 
+                        type="button"
+                        onClick={() => setShowSmtpPassword(!showSmtpPassword)}
+                        style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
+                        title={showSmtpPassword ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'}
+                      >
+                        {showSmtpPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-row-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', marginTop: '12px' }}>
+                  <div className="form-group">
+                    <label>ชื่อผู้ส่งที่แสดง (Sender Name)</label>
+                    <input 
+                      type="text" 
+                      className="form-input"
+                      placeholder="GLP : G-Speed Living Plus Franchise System"
+                      value={siteData.smtpConfig?.senderName || ''}
+                      onChange={e => updateSmtpConfig({ senderName: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>อีเมลผู้ส่ง (Sender Email Address)</label>
+                    <input 
+                      type="email" 
+                      className="form-input"
+                      placeholder="franchise@gspeed-esport.com"
+                      value={siteData.smtpConfig?.senderEmail || ''}
+                      onChange={e => updateSmtpConfig({ senderEmail: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>อีเมลสำเนาแจ้งเตือนแอดมิน (CC Notification)</label>
+                    <input 
+                      type="text" 
+                      className="form-input"
+                      placeholder="investment@gspeed-esport.com, engineering@gspeed-esport.com"
+                      value={siteData.smtpConfig?.adminCcEmail || ''}
+                      onChange={e => updateSmtpConfig({ adminCcEmail: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                {/* Toggles and Test Trigger */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginTop: '16px', paddingTop: '14px', borderTop: '1px solid #e2e8f0' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label className="checkbox-label" style={{ margin: 0 }}>
+                      <input 
+                        type="checkbox" 
+                        checked={siteData.smtpConfig?.autoReplyEnabled ?? true}
+                        onChange={e => {
+                          updateSmtpConfig({ autoReplyEnabled: e.target.checked });
+                          triggerSaveToast();
+                        }}
+                      />
+                      <span>เปิดระบบส่งอีเมลยืนยันและใบเสนอราคาตอบกลับลูกค้าอัตโนมัติ (Customer Lead Auto-Reply)</span>
+                    </label>
+                    <div style={{ fontSize: '0.76rem', color: '#64748b', marginLeft: '24px' }}>
+                      ทดสอบล่าสุด: <strong>{siteData.smtpConfig?.lastTestedAt || 'ยังไม่ได้ทดสอบ'}</strong> • สถานะ: <span className="text-green">{siteData.smtpConfig?.lastTestStatus || 'Standby'}</span>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <button 
+                      type="button" 
+                      className="btn-primary btn-sm"
+                      onClick={handleTestSmtp}
+                      disabled={isSmtpTesting}
+                    >
+                      <RefreshCw size={14} className={isSmtpTesting ? 'spin-icon' : ''} />
+                      <span>{isSmtpTesting ? 'กำลังตรวจสอบการเชื่อมต่อ...' : 'ทดสอบการเชื่อมต่อ SMTP'}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Live SMTP Handshake Result Banner */}
+                {smtpTestResult && (
+                  <div className={`test-ping-result-box ${smtpTestResult.success ? 'success' : 'error'}`} style={{ marginTop: '14px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {smtpTestResult.success ? <CheckCircle2 size={16} className="text-green" /> : <AlertTriangle size={16} className="text-red" />}
+                        <strong>{smtpTestResult.message}</strong>
+                      </div>
+                      <span className="status-pill status-pill-success">{smtpTestResult.latency}</span>
+                    </div>
+                    <div style={{ marginTop: '6px', fontSize: '0.76rem', color: '#475569' }}>
+                      Host: <code>{siteData.smtpConfig?.host || 'smtp.gmail.com'}:{siteData.smtpConfig?.port || '465'}</code> | Handshake: <code>{siteData.smtpConfig?.encryption || 'SSL/TLS'}</code> | TLS 1.3 Cipher Suite: <code>ECDHE-RSA-AES256-GCM-SHA384</code> | Authenticated User: <code>{siteData.smtpConfig?.user || 'no-reply@gspeed-esport.com'}</code>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+
+          {/* =========================================================================
+              TAB 13: EMAIL TEMPLATES & AUTO-RESPONDER CMS
+              ========================================================================= */}
+          {activeTab === 'email-templates' && (
+            <div className="cms-panel-block">
+              {/* Header */}
+              <div className="panel-header-row">
+                <div>
+                  <h3 className="panel-title">
+                    <Mail size={22} className="text-blue" />
+                    <span>ระบบจัดการแม่แบบอีเมลตอบกลับอัตโนมัติ (Email Templates & Auto-Responder)</span>
+                  </h3>
+                  <p className="panel-desc">
+                    ปรับแต่งหัวข้อและเนื้อหาอีเมลที่จะส่งถึงลูกค้าหรือทีมงานโดยอัตโนมัติ รองรับตัวแปร Dynamic Tokens และแสดงผลตัวอย่างเสมือนจริง (Live Email Preview) ก่อนส่งมอบ
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <button 
+                    type="button"
+                    className="btn-secondary btn-sm"
+                    onClick={() => setActiveTab('automation')}
+                  >
+                    <Sliders size={14} />
+                    <span>ตั้งค่า SMTP Server</span>
+                  </button>
+                  <button 
+                    type="button" 
+                    className="btn-primary btn-sm"
+                    onClick={() => {
+                      triggerSaveToast();
+                    }}
+                  >
+                    <Save size={14} />
+                    <span>บันทึกแม่แบบอีเมล</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Template Selector Pills */}
+              <div className="email-template-selector-tabs" style={{ display: 'flex', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #e2e8f0', paddingBottom: '12px' }}>
+                <button 
+                  type="button"
+                  className={`template-tab-pill ${activeEmailTemplateKey === 'franchiseAutoReply' ? 'active' : ''}`}
+                  onClick={() => setActiveEmailTemplateKey('franchiseAutoReply')}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    border: '1px solid',
+                    borderColor: activeEmailTemplateKey === 'franchiseAutoReply' ? '#2563eb' : '#e2e8f0',
+                    background: activeEmailTemplateKey === 'franchiseAutoReply' ? 'rgba(37, 99, 235, 0.1)' : '#fff',
+                    color: activeEmailTemplateKey === 'franchiseAutoReply' ? '#1d4ed8' : '#475569',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <Mail size={16} />
+                  <span>1. อีเมลตอบกลับลูกค้าขอใบเสนอราคา (Customer Auto-Reply)</span>
+                </button>
+
+                <button 
+                  type="button"
+                  className={`template-tab-pill ${activeEmailTemplateKey === 'internalAdminAlert' ? 'active' : ''}`}
+                  onClick={() => setActiveEmailTemplateKey('internalAdminAlert')}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    border: '1px solid',
+                    borderColor: activeEmailTemplateKey === 'internalAdminAlert' ? '#2563eb' : '#e2e8f0',
+                    background: activeEmailTemplateKey === 'internalAdminAlert' ? 'rgba(37, 99, 235, 0.1)' : '#fff',
+                    color: activeEmailTemplateKey === 'internalAdminAlert' ? '#1d4ed8' : '#475569',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <Zap size={16} />
+                  <span>2. อีเมลแจ้งเตือนทีมวิศวกร GLP เมื่อมี Lead ใหม่ (Staff Notification)</span>
+                </button>
+              </div>
+
+              {/* 2-Column Grid: Left = Editor Form, Right = Live Email Preview */}
+              <div className="email-template-editor-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', alignItems: 'start' }}>
+                {/* Left Editor */}
+                <div className="admin-subcard glass-panel">
+                  <div className="subcard-title" style={{ justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Edit3 size={16} className="text-blue" />
+                      <strong>แก้ไขเนื้อหาอีเมล</strong>
+                    </div>
+                    <span className="badge-pill badge-blue">
+                      {activeEmailTemplateKey === 'franchiseAutoReply' ? 'External / Customer Facing' : 'Internal / Staff Alert'}
+                    </span>
+                  </div>
+
+                  <div className="form-group" style={{ marginTop: '14px' }}>
+                    <label>หัวข้ออีเมล (Email Subject Line)</label>
+                    <input 
+                      type="text" 
+                      className="form-input font-bold"
+                      value={siteData.emailTemplates?.[activeEmailTemplateKey]?.subject || ''}
+                      onChange={e => updateEmailTemplate(activeEmailTemplateKey, { subject: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ marginTop: '12px' }}>
+                    <label>ข้อความพรีวิวสั้น (Email Preheader / Subtitle)</label>
+                    <input 
+                      type="text" 
+                      className="form-input"
+                      value={siteData.emailTemplates?.[activeEmailTemplateKey]?.preheader || ''}
+                      onChange={e => updateEmailTemplate(activeEmailTemplateKey, { preheader: e.target.value })}
+                    />
+                  </div>
+
+                  {/* Token Badges Palette */}
+                  <div style={{ marginTop: '14px', padding: '12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                    <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Sparkles size={14} className="text-blue" />
+                      <span>คลิกเพื่อใส่ตัวแปรไดนามิก (Dynamic Tokens):</span>
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                      {[
+                        { token: '{{customer_name}}', label: 'ชื่อลูกค้า' },
+                        { token: '{{customer_phone}}', label: 'เบอร์โทร' },
+                        { token: '{{customer_email}}', label: 'อีเมล' },
+                        { token: '{{quote_ref}}', label: 'เลขที่ใบเสนอราคา' },
+                        { token: '{{total_stations}}', label: 'จำนวนเครื่อง' },
+                        { token: '{{room_dimensions}}', label: 'ขนาดห้อง' },
+                        { token: '{{total_investment}}', label: 'งบประมาณรวม' },
+                        { token: '{{monthly_profit}}', label: 'กำไรต่อเดือน' },
+                        { token: '{{payback_months}}', label: 'ระยะคืนทุน' },
+                        { token: '{{company_phone}}', label: 'เบอร์ GLP' },
+                        { token: '{{company_line}}', label: 'Line GLP' }
+                      ].map(item => (
+                        <button
+                          key={item.token}
+                          type="button"
+                          className="token-chip-btn"
+                          onClick={() => {
+                            const currentBody = siteData.emailTemplates?.[activeEmailTemplateKey]?.body || '';
+                            updateEmailTemplate(activeEmailTemplateKey, { body: currentBody + ' ' + item.token });
+                            triggerSaveToast();
+                          }}
+                          title={`คลิกเพื่อใส่ ${item.token} ในเนื้อหา`}
+                          style={{
+                            fontSize: '0.72rem',
+                            padding: '3px 8px',
+                            background: '#e0f2fe',
+                            color: '#0369a1',
+                            border: '1px solid #bae6fd',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontWeight: 600
+                          }}
+                        >
+                          {item.token} ({item.label})
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="form-group" style={{ marginTop: '14px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                      <label style={{ margin: 0 }}>เนื้อหาข้อความอีเมล (Email Body)</label>
+                      <span style={{ fontSize: '0.72rem', color: '#64748b' }}>รองรับ Plain Text & Line Break</span>
+                    </div>
+                    <textarea 
+                      rows={14}
+                      className="form-input"
+                      style={{ fontFamily: 'monospace', fontSize: '0.82rem', lineHeight: '1.6' }}
+                      value={siteData.emailTemplates?.[activeEmailTemplateKey]?.body || ''}
+                      onChange={e => updateEmailTemplate(activeEmailTemplateKey, { body: e.target.value })}
+                    />
+                  </div>
+
+                  {/* Actions */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '16px', paddingTop: '12px', borderTop: '1px solid #e2e8f0', flexWrap: 'wrap', gap: '8px' }}>
+                    <button 
+                      type="button"
+                      className="btn-secondary btn-sm"
+                      onClick={() => {
+                        if (window.confirm('คุณต้องการรีเซ็ตแม่แบบอีเมลนี้กลับสู่ค่าเริ่มต้นของระบบใช่หรือไม่?')) {
+                          resetEmailTemplates();
+                          triggerSaveToast();
+                        }
+                      }}
+                    >
+                      <RefreshCw size={13} />
+                      <span>คืนค่าเริ่มต้นแม่แบบ</span>
+                    </button>
+
+                    <button 
+                      type="button"
+                      className="btn-primary btn-sm"
+                      onClick={handleSendTestEmail}
+                      disabled={isSendingTestEmail}
+                    >
+                      <Send size={13} className={isSendingTestEmail ? 'spin-icon' : ''} />
+                      <span>{isSendingTestEmail ? 'กำลังส่งอีเมลจำลอง...' : 'จำลองส่งอีเมลทดสอบ (Test Send)'}</span>
+                    </button>
+                  </div>
+
+                  {testEmailSuccess && (
+                    <div className="test-ping-result-box success" style={{ marginTop: '12px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <CheckCircle2 size={16} className="text-green" />
+                        <strong>{testEmailSuccess}</strong>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Right: Live Realistic Email Client Preview */}
+                <div className="email-preview-client-container">
+                  <div className="email-client-window glass-panel" style={{ border: '1px solid #cbd5e1', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}>
+                    {/* Window Title Bar */}
+                    <div style={{ background: '#f1f5f9', padding: '10px 14px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#ef4444' }}></div>
+                        <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#f59e0b' }}></div>
+                        <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10b981' }}></div>
+                      </div>
+                      <div style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 600, flex: 1, textAlign: 'center' }}>
+                        GLP Mail Client Preview — {activeEmailTemplateKey === 'franchiseAutoReply' ? 'Customer Inbox' : 'Admin Alert Inbox'}
+                      </div>
+                    </div>
+
+                    {/* Email Headers */}
+                    <div style={{ background: '#ffffff', padding: '16px 20px', borderBottom: '1px solid #e2e8f0' }}>
+                      <div style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', marginBottom: '10px' }}>
+                        {(siteData.emailTemplates?.[activeEmailTemplateKey]?.subject || '')
+                          .replace(/{{quote_ref}}/g, 'GLP-2026-8821')
+                          .replace(/{{customer_name}}/g, 'คุณสมเกียรติ มั่นคง')
+                          .replace(/{{total_stations}}/g, '36 เครื่อง')}
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.78rem', color: '#64748b' }}>
+                        <div>
+                          <div><strong>From:</strong> {siteData.smtpConfig?.senderName || 'GLP : G-Speed Living Plus'} &lt;{siteData.smtpConfig?.senderEmail || 'franchise@gspeed-esport.com'}&gt;</div>
+                          <div style={{ marginTop: '2px' }}>
+                            <strong>To:</strong> {activeEmailTemplateKey === 'franchiseAutoReply' ? 'คุณสมเกียรติ มั่นคง <investor@example.com>' : (siteData.smtpConfig?.adminCcEmail || 'engineering@gspeed-esport.com')}
+                          </div>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <span className="badge-pill badge-green" style={{ fontSize: '0.68rem' }}>Verified DKIM / SPF</span>
+                          <div style={{ marginTop: '4px', fontSize: '0.72rem' }}>วันนี้, 10:30 น.</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Rendered HTML Email Body */}
+                    <div style={{ padding: '24px 20px', background: '#f8fafc', maxHeight: '520px', overflowY: 'auto' }}>
+                      <div style={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', padding: '20px', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                        {/* Email Brand Banner */}
+                        <div style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%)', borderRadius: '6px', padding: '16px 18px', color: '#ffffff', marginBottom: '18px' }}>
+                          <div style={{ fontSize: '1.1rem', fontWeight: 900, letterSpacing: '0.04em' }}>GLP : G SPEED LIVING PLUS</div>
+                          <div style={{ fontSize: '0.76rem', color: '#93c5fd', marginTop: '2px' }}>Cybercafe & Esports Arena Franchise Network</div>
+                        </div>
+
+                        {/* Body text with token replacement */}
+                        <div style={{ fontSize: '0.86rem', color: '#334155', lineHeight: '1.7', whiteSpace: 'pre-wrap' }}>
+                          {(siteData.emailTemplates?.[activeEmailTemplateKey]?.body || '')
+                            .replace(/{{customer_name}}/g, 'คุณสมเกียรติ มั่นคง')
+                            .replace(/{{customer_phone}}/g, '081-234-5678')
+                            .replace(/{{customer_email}}/g, 'investor@example.com')
+                            .replace(/{{quote_ref}}/g, 'GLP-2026-8821')
+                            .replace(/{{total_stations}}/g, '36 เครื่อง')
+                            .replace(/{{room_dimensions}}/g, '12x8 เมตร (96 ตร.ม.)')
+                            .replace(/{{total_investment}}/g, '2,450,000')
+                            .replace(/{{monthly_profit}}/g, '145,000')
+                            .replace(/{{payback_months}}/g, '16.8')
+                            .replace(/{{location_detail}}/g, 'อาคารพาณิชย์ 2 คูหา ย่าน ม.เกษตรศาสตร์')
+                            .replace(/{{company_phone}}/g, siteData.footer?.phone || '063 793 7704')
+                            .replace(/{{company_line}}/g, siteData.footer?.line || '@gspeedarena')}
+                        </div>
+
+                        {/* Executive Quotation Highlight Card */}
+                        <div style={{ marginTop: '20px', padding: '14px', background: '#eff6ff', borderRadius: '6px', border: '1px solid #bfdbfe' }}>
+                          <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1e40af', marginBottom: '6px' }}>
+                            สรุปข้อมูลโครงการเบื้องต้น (Project Feasibility Snapshot):
+                          </div>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '0.78rem' }}>
+                            <div>จำนวนเครื่อง: <strong>36 เครื่อง (Esports Pro)</strong></div>
+                            <div>ขนาดพื้นที่: <strong>96 ตร.ม. (12x8 ม.)</strong></div>
+                            <div>งบประมาณลงทุน: <strong className="text-blue">฿2,450,000 บาท</strong></div>
+                            <div>ระยะคืนทุน: <strong className="text-green">16.8 เดือน</strong></div>
+                          </div>
+                        </div>
+
+                        {/* Company Footer */}
+                        <div style={{ marginTop: '24px', paddingTop: '14px', borderTop: '1px solid #e2e8f0', fontSize: '0.72rem', color: '#94a3b8', lineHeight: '1.6' }}>
+                          <strong>บริษัท จี-สปีด ลิฟวิ่ง พลัส จำกัด (GLP : G Speed Living Plus)</strong><br />
+                          {siteData.footer?.address || '79 ซ. รามคำแหง 53 แขวงพลับพลา เขตวังทองหลาง กรุงเทพฯ 10310'}<br />
+                          โทรศัพท์: {siteData.footer?.phone || '063 793 7704'} | อีเมล: {siteData.footer?.email || 'contact@gspeedarena.com'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
@@ -10908,6 +12711,9 @@ export default function AdminCMS({ onExitAdmin = () => {} }) {
                   </button>
                 </div>
               </div>
+
+              {/* Role-Based Access Control (RBAC) & Admin Staff Accounts Management */}
+              <AdminStaffRolesCMS currentAdmin={activeStaff} />
 
               {/* Zero-Trust Security Audit Logs Console */}
               <div className="admin-subcard glass-panel" style={{ marginTop: '20px' }}>

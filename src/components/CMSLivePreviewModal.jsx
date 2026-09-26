@@ -243,8 +243,8 @@ export default function CMSLivePreviewModal({
                         <ArrowRight size={17} />
                       </button>
                       <button className="btn-secondary" style={{ padding: '12px 22px', fontSize: '0.9rem', background: isDarkHero ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.9)', color: isDarkHero ? '#fff' : '#1e293b', border: isDarkHero ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(203,213,225,0.9)' }}>
-                        <Trophy size={17} />
-                        <span>{siteData?.hero?.secondaryCta || 'ปฏิทินแข่งขัน & สมัครทัวร์นาเมนต์'}</span>
+                        <Compass size={17} />
+                        <span>{siteData?.hero?.secondaryCta || 'ติดต่อเปิดร้านเกมของคุณ'}</span>
                       </button>
                     </div>
                   </div>
@@ -587,6 +587,25 @@ export default function CMSLivePreviewModal({
                     <p style={{ fontSize: '0.84rem', color: siteData?.founder?.textColor || '#475569', lineHeight: '1.6', margin: 0 }}>
                       {siteData?.founder?.bio || 'มุ่งมั่นขับเคลื่อนอุตสาหกรรมอีสปอร์ตไทยสู่มาตรฐานสากล ด้วยเทคโนโลยีระดับมืออาชีพ และระบบการจัดการที่โปร่งใส มั่นคง ยั่งยืน'}
                     </p>
+
+                    {/* Partner Logos Preview in Modal */}
+                    {siteData?.founder?.partners && siteData.founder.partners.length > 0 && (
+                      <div style={{ marginTop: '18px', paddingTop: '14px', borderTop: '1px solid #e2e8f0' }}>
+                        <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
+                          ⚡ โลโก้พันธมิตรในสไลเดอร์ ({siteData.founder.partners.length} แบรนด์):
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                          {siteData.founder.partners.map((p, pIdx) => (
+                            <div key={pIdx} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 10px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
+                              {p.logo ? (
+                                <img src={p.logo} alt={p.name} style={{ height: '18px', maxWidth: '50px', objectFit: 'contain' }} />
+                              ) : null}
+                              <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#1e293b' }}>{p.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

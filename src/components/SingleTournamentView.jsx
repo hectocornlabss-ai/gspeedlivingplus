@@ -182,44 +182,43 @@ export default function SingleTournamentView({
   // Related Tournaments
   const relatedTournaments = allTournaments.filter(t => t.id !== tournament.id);
 
+  // Bottom Social Share State & Handlers
+  const [bottomShareOpen, setBottomShareOpen] = useState(false);
+  const bottomShareBtnRef = useRef(null);
+
+  const handleShareFacebook = () => {
+    const url = encodeURIComponent(canonicalUrl);
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'width=600,height=400');
+  };
+
+  const handleShareLine = () => {
+    const url = encodeURIComponent(canonicalUrl);
+    const title = encodeURIComponent(tournament.title);
+    window.open(`https://social-plugins.line.me/lineit/share?url=${url}&text=${title}`, '_blank', 'width=600,height=400');
+  };
+
+  const handleShareTwitter = () => {
+    const url = encodeURIComponent(canonicalUrl);
+    const text = encodeURIComponent(`${tournament.title} | GLP : G Speed Living Plus`);
+    window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank', 'width=600,height=400');
+  };
+
   return (
     <div className="single-tournament-page">
       {/* 1. TOP STICKY NAV BAR */}
       <div className="tournament-nav-bar">
         <div className="container tournament-nav-inner">
           <div className="tourney-nav-left-group">
-            {/* Clean Back Button (Breadcrumbs removed as requested) */}
+            {/* Clean Back Button */}
             <button 
               type="button" 
               onClick={onBack} 
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                color: '#334155',
-                fontSize: '0.86rem',
-                fontWeight: 650,
-                cursor: 'pointer',
-                padding: '6px 14px',
-                borderRadius: '8px',
-                transition: 'all 0.2s ease',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
-              }}
-              onMouseEnter={(e) => { 
-                e.currentTarget.style.color = '#0284c7'; 
-                e.currentTarget.style.borderColor = '#bae6fd'; 
-                e.currentTarget.style.background = '#f0f9ff'; 
-              }}
-              onMouseLeave={(e) => { 
-                e.currentTarget.style.color = '#334155'; 
-                e.currentTarget.style.borderColor = '#e2e8f0'; 
-                e.currentTarget.style.background = '#f8fafc'; 
-              }}
+              className="btn-tourney-back"
+              title="ย้อนกลับไปหน้ารวมทัวร์นาเมนต์"
             >
-              <ArrowLeft size={16} />
-              <span>ย้อนกลับไปหน้ารวมทัวร์นาเมนต์</span>
+              <ArrowLeft size={15} />
+              <span className="back-btn-text-full">ย้อนกลับไปหน้ารวมทัวร์นาเมนต์</span>
+              <span className="back-btn-text-short">ย้อนกลับ</span>
             </button>
           </div>
 
@@ -400,21 +399,26 @@ export default function SingleTournamentView({
       <div className="tournament-tabs-bar">
         <div className="container tabs-inner-scroll">
           {[
-            { id: 'overview', label: 'ภาพรวม & กติกา & รางวัล', icon: <Award size={16} /> },
-            { id: 'schedule', label: 'กำหนดการ & วันที่', icon: <Calendar size={16} /> },
+            { id: 'overview', label: 'ภาพรวม & กติกา', icon: <Award size={14} /> },
+            { id: 'schedule', label: 'กำหนดการ & วันที่', icon: <Calendar size={14} /> },
             { 
               id: 'bracket', 
-              label: (!isRegistrationOpen && liveMatches.length > 0) ? `สายแข่ง & ผลสด (${matches.length}) 🔴 LIVE` : `สายแข่ง & ตารางแข่งขัน (${matches.length})`, 
-              icon: <GitBranch size={16} />,
+              label: (!isRegistrationOpen && liveMatches.length > 0) ? `สายแข่ง (${matches.length}) 🔴 LIVE` : `สายแข่ง & ตาราง (${matches.length})`, 
+              icon: <GitBranch size={14} />,
               highlight: !isRegistrationOpen && liveMatches.length > 0
             },
-            { id: 'roster', label: `รายชื่อทีม & ไลน์อัป (${teamsList.length})`, icon: <Users size={16} /> },
-            { id: 'gallery', label: `คลังภาพกิจกรรม & ไฮไลต์ (${photosList.length})`, icon: <Camera size={16} /> }
+            { id: 'roster', label: `รายชื่อทีม (${teamsList.length})`, icon: <Users size={14} /> },
+            { id: 'gallery', label: `ภาพกิจกรรม (${photosList.length})`, icon: <Camera size={14} /> }
           ].map(tab => (
             <button 
               key={tab.id}
               type="button"
-              onClick={() => setActiveTab(tab.id)}
+              onClick={(e) => {
+                setActiveTab(tab.id);
+                try {
+                  e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                } catch (err) {}
+              }}
               className={`tourney-tab-item ${activeTab === tab.id ? 'active' : ''} ${tab.highlight ? 'highlight' : ''}`}
             >
               {tab.icon}
@@ -425,7 +429,7 @@ export default function SingleTournamentView({
       </div>
 
       {/* 4. MAIN BODY CONTAINER */}
-      <div className="container" style={{ padding: '36px 20px 60px' }}>
+      <div className="container tourney-body-container">
         
         {/* ================= TAB 1: OVERVIEW & RULES ================= */}
         {activeTab === 'overview' && (
@@ -563,6 +567,83 @@ export default function SingleTournamentView({
                     </span>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* Compact & Sleek Social Share Strip */}
+            <div className="article-share-strip glass-panel" style={{ marginTop: '16px' }}>
+              <div className="share-strip-header">
+                <div className="share-strip-title-row">
+                  <Share2 size={16} className="text-blue" />
+                  <span className="share-strip-title">แชร์ทัวร์นาเมนต์นี้</span>
+                </div>
+                <span className="share-strip-subtitle">ร่วมส่งต่อความมันส์และไฮไลต์การแข่งขันให้เพื่อนและคอมมูนิตี้</span>
+              </div>
+
+              <div className="share-strip-actions">
+                <div className="share-buttons-row">
+                  {/* Facebook */}
+                  <button 
+                    type="button"
+                    onClick={handleShareFacebook}
+                    className="share-pill-btn fb"
+                    title="แชร์ลง Facebook"
+                  >
+                    <svg className="social-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                    <span>Facebook</span>
+                  </button>
+
+                  {/* LINE */}
+                  <button 
+                    type="button"
+                    onClick={handleShareLine}
+                    className="share-pill-btn line"
+                    title="แชร์ไปยัง LINE"
+                  >
+                    <svg className="social-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 4.269 8.846 10.019 9.607.391.084.922.258 1.057.592.121.303.079.778.039 1.085l-.171 1.027c-.053.303-.242 1.186 1.039.646 1.281-.54 6.915-4.072 9.434-6.973 1.796-1.999 2.583-4.024 2.583-5.382z"/>
+                    </svg>
+                    <span>LINE</span>
+                  </button>
+
+                  {/* X (Twitter) */}
+                  <button 
+                    type="button"
+                    onClick={handleShareTwitter}
+                    className="share-pill-btn x-twitter"
+                    title="แชร์ลง X (Twitter)"
+                  >
+                    <svg className="social-icon-svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
+                    <span>X</span>
+                  </button>
+
+                  {/* Compact Share Trigger Icon Button & Popover */}
+                  <div className="share-btn-relative-wrapper">
+                    <button 
+                      ref={bottomShareBtnRef}
+                      type="button"
+                      onClick={() => setBottomShareOpen(!bottomShareOpen)}
+                      className={`share-pill-btn share-icon-btn ${bottomShareOpen ? 'active' : ''}`}
+                      title="แชร์ทัวร์นาเมนต์และคัดลอกลิงก์ (Messenger, Instagram, และแอปอื่นๆ)"
+                      aria-label="แชร์ทัวร์นาเมนต์นี้"
+                    >
+                      <Share2 size={15} className="text-blue" />
+                    </button>
+
+                    <SocialSharePopover
+                      url={canonicalUrl}
+                      title={tournament.title}
+                      subtitle={`${tournament.game} | เงินรางวัล ${tournament.prizePool}`}
+                      isOpen={bottomShareOpen}
+                      onClose={() => setBottomShareOpen(false)}
+                      triggerRef={bottomShareBtnRef}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 

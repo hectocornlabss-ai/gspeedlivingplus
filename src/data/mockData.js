@@ -1276,6 +1276,29 @@ export const FOUNDER_INFO = {
   experience: '16+ ปีในอุตสาหกรรม Gaming & Esports ในประเทศไทย',
   quote: '"เราไม่ได้มองว่าร้านเกมเป็นแค่ที่เล่นเกม แต่คือสนามกีฬาของคนรุ่นใหม่ เป็นพื้นที่สานฝันและสร้างนักกีฬาอีสปอร์ตไทยสู่ระดับโลก"',
   vision: 'ยกระดับมาตรฐานร้านอินเทอร์เน็ตคาเฟ่ในไทยให้เทียบเท่าสนามแข่งระดับโลก ด้วยระบบฮาร์ดแวร์ที่ดีที่สุด บรรยากาศที่ปลอดภัย สะอาด และระบบการบริหารจัดการที่สร้างผลตอบแทนยั่งยืนแก่ผู้ร่วมลงทุน',
+  hero: {
+    badge: 'LEADERSHIP & CORPORATE PROFILE',
+    title: 'วิสัยทัศน์ผู้บริหาร & ประวัติองค์กร G-SPEED',
+    subtitle: 'มุ่งมั่นขับเคลื่อนอุตสาหกรรมอีสปอร์ตไทยสู่มาตรฐานสากล ด้วยเทคโนโลยีระดับมืออาชีพ และระบบการจัดการที่โปร่งใส มั่นคง ยั่งยืน'
+  },
+  philosophies: [
+    { id: 'phil-1', title: 'เทคโนโลยีต้องดีที่สุด', desc: 'ลงทุนในฮาร์ดแวร์ระดับทัวร์นาเมนต์ จอ 360Hz และระบบเน็ตเวิร์กที่แข่งขันได้จริง' },
+    { id: 'phil-2', title: 'สิ่งแวดล้อมปลอดภัยและได้มาตรฐาน', desc: 'ยึดหลักร้านเกมสีขาว ได้รับใบอนุญาตถูกต้อง 100% ปลอดบุหรี่และโปร่งใส' },
+    { id: 'phil-3', title: 'คืนทุนไว พาร์ตเนอร์เติบโตยั่งยืน', desc: 'ระบบแฟรนไชส์ออกแบบโดยคำนึงถึงผลตอบแทนของผู้ลงทุน ควบคุมต้นทุนได้จริง' }
+  ],
+  standards: {
+    title: 'มาตรฐานความถูกต้อง โปร่งใส และปลอดภัย',
+    desc: 'G-Speed ทุกสาขาผ่านการรับรองและตรวจสอบตามพระราชบัญญัติภาพยนตร์และวีดิทัศน์ ได้รับใบอนุญาตประกอบกิจการร้านเกมอย่างถูกต้องจากกระทรวงวัฒนธรรม ใช้ระบบปฏิบัติการ Windows และลิขสิทธิ์เกมแท้ 100% หมดกังวลเรื่องปัญหาลิขสิทธิ์',
+    pills: [
+      'ใบอนุญาตสถานประกอบการถูกต้องตามกฎหมาย',
+      'ร้านเกมสีขาว ปลอดภัยสำหรับเยาวชน',
+      'ระบบกล้องวงจรปิด CCTV Full HD บันทึก 30 วัน'
+    ]
+  },
+  franchiseCta: {
+    subTitle: 'คำนวณงบลงทุน & วางระบบร้าน',
+    title: 'ร่วมเป็นพาร์ตเนอร์แฟรนไชส์กับเรา'
+  },
   history: [
     { year: '2010', event: 'เปิดตัวสาขาแรกในย่านมหาวิทยาลัย นำระบบ Diskless Server มาตรฐานใหม่มาใช้เป็นเจ้าแรกๆ' },
     { year: '2016', event: 'ขยายธุรกิจสู่ Esport Arena เต็มรูปแบบ รองรับการจัดแข่งขันระดับประเทศร่วมกับค่ายเกมใหญ่' },
@@ -1289,12 +1312,114 @@ export const FOUNDER_INFO = {
     { label: 'ทัวร์นาเมนต์ที่จัดแล้ว', value: '180+ รายการ' }
   ],
   partners: [
-    { name: 'NVIDIA GeForce RTX', tier: 'Official GPU Partner', icon: 'Cpu' },
-    { name: 'ASUS ROG', tier: 'Official Hardware & Motherboard', icon: 'Zap' },
-    { name: 'Intel Extreme', tier: 'Official Processor Partner', icon: 'Cpu' },
-    { name: 'Secretlab', tier: 'Official Ergonomic Gaming Chair', icon: 'Armchair' },
-    { name: 'BenQ ZOWIE', tier: 'Official Tournament Esports Monitor', icon: 'Monitor' },
-    { name: 'AIS Fibre Esports', tier: 'High-speed 10Gbps Fiber Partner', icon: 'Wifi' }
+    { id: 'part-1', name: 'NVIDIA GeForce RTX', tier: 'Official GPU Partner', icon: 'Cpu', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/nvidia.svg', website: 'https://www.nvidia.com' },
+    { id: 'part-2', name: 'ASUS ROG', tier: 'Official Motherboard & Hardware', icon: 'Zap', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/asus.svg', website: 'https://rog.asus.com' },
+    { id: 'part-3', name: 'Intel Extreme', tier: 'Official Processor Partner', icon: 'Cpu', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/intel.svg', website: 'https://www.intel.com' },
+    { id: 'part-4', name: 'Razer Gaming', tier: 'Official Peripherals Partner', icon: 'Gamepad2', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/razer.svg', website: 'https://www.razer.com' },
+    { id: 'part-5', name: 'Logitech G', tier: 'Official Esports Gear', icon: 'Gamepad2', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/logitechg.svg', website: 'https://www.logitechg.com' },
+    { id: 'part-6', name: 'MSI Gaming', tier: 'High-Performance Ecosystem', icon: 'Cpu', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/msi.svg', website: 'https://www.msi.com' },
+    { id: 'part-7', name: 'AMD Ryzen', tier: 'Official Multi-Thread Processor', icon: 'Cpu', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/amd.svg', website: 'https://www.amd.com' },
+    { id: 'part-8', name: 'BenQ ZOWIE', tier: 'Official Tournament Esports Monitor', icon: 'Monitor', logo: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 40"><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="20" fill="%23dc2626" letter-spacing="2">ZOWIE</text><text x="50%" y="85%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="8" fill="%2364748b" letter-spacing="3">a brand by BenQ</text></svg>', website: 'https://zowie.benq.com' },
+    { id: 'part-9', name: 'Secretlab', tier: 'Official Ergonomic Gaming Chair', icon: 'Armchair', logo: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 40"><text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="18" fill="%230f172a" letter-spacing="3">SECRETLAB</text></svg>', website: 'https://secretlab.co' },
+    { id: 'part-10', name: 'AIS Fibre Esports', tier: 'High-speed 10Gbps Fiber Partner', icon: 'Wifi', logo: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 40"><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="18" fill="%2316a34a" letter-spacing="2">AIS</text><text x="50%" y="80%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="9" fill="%230284c7" letter-spacing="3">FIBRE ESPORTS</text></svg>', website: 'https://www.ais.th/fibre' }
+  ],
+  milestonesGallery: [
+    {
+      id: 'mg-1',
+      title: 'พิธีเปิดตัว GLP Flagship Arena รามคำแหง 53',
+      year: '2024',
+      tag: 'Flagship Arena',
+      caption: 'ศูนย์กีฬาอีสปอร์ตสาขาเรือธงมาตรฐานสากล รองรับเวทีแข่งขัน 5v5 สเปก RTX 4080 SUPER และจอ 360Hz',
+      url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80'
+    },
+    {
+      id: 'mg-2',
+      title: 'เปิดตัวระบบ Cloud Diskless & Franchise Model',
+      year: '2020',
+      tag: 'Cloud Innovation',
+      caption: 'บุกเบิกระบบเซิร์ฟเวอร์แบบไร้ฮาร์ดดิสก์ความเร็ว 10Gbps พร้อมระบบควบคุมบัญชีและสต๊อกคลาวด์',
+      url: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200&q=80'
+    },
+    {
+      id: 'mg-3',
+      title: 'พัฒนาการสู่ Full Esport Arena มาตรฐานทัวร์นาเมนต์',
+      year: '2016',
+      tag: 'Esport Arena',
+      caption: 'ปรับเปลี่ยนโครงสร้างร้านอินเทอร์เน็ตคาเฟ่เดิมสู่สนามประลองเกมพร้อมโซนสตรีมเมอร์และเวทีแข่งขัน',
+      url: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1200&q=80'
+    },
+    {
+      id: 'mg-4',
+      title: 'การขยายตัวสู่เครือข่าย 8 สาขา และสมาชิกกว่า 52,000 คน',
+      year: '2024-ปัจจุบัน',
+      tag: 'Branch Network',
+      caption: 'ขยายสาขาครอบคลุมย่านสถาบันการศึกษาและศูนย์การค้า พร้อมให้บริการเกมเมอร์ตลอด 24 ชั่วโมง',
+      url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200&q=80'
+    }
+  ],
+  partnersGallery: [
+    {
+      id: 'pg-1',
+      title: 'NVIDIA GeForce RTX Official Partner Station',
+      partner: 'NVIDIA GeForce',
+      tag: 'Official GPU',
+      caption: 'ร่วมมือกับ NVIDIA Thailand ในการติดตั้งการ์ดจอ GeForce RTX 40 Series สำหรับสนามแข่งมาตรฐาน',
+      url: 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=1200&q=80'
+    },
+    {
+      id: 'pg-2',
+      title: 'ASUS ROG Arena Experience & Gaming Gear',
+      partner: 'ASUS ROG',
+      tag: 'Gaming Gear',
+      caption: 'ชุดอุปกรณ์เมนบอร์ดและการ์ดจอ ASUS ROG มอบความเสถียรสูงสุดตลอดการแข่งขันยาวนาน 24 ชม.',
+      url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80'
+    },
+    {
+      id: 'pg-3',
+      title: 'Secretlab Titan Evo Official Pro Gaming Chair',
+      partner: 'Secretlab',
+      tag: 'Ergonomic Seat',
+      caption: 'ติดตั้งเก้าอี้เกมมิ่งสรีรศาสตร์ Secretlab Titan Evo รองรับสรีระนักกีฬาอีสปอร์ตทุกตำแหน่งที่นั่ง',
+      url: 'https://images.unsplash.com/photo-1598550476439-6847785fcea6?auto=format&fit=crop&w=1200&q=80'
+    },
+    {
+      id: 'pg-4',
+      title: 'AIS Fibre Dedicated 10Gbps Multi-WAN Network',
+      partner: 'AIS Fibre',
+      tag: '10Gbps Fiber',
+      caption: 'เชื่อมต่อโครงข่ายเคเบิลใยแก้วนำแสงความเร็วสูง 10Gbps พร้อมระบบเราเตอร์สำรอง Ping ต่ำกว่า 2ms',
+      url: 'https://images.unsplash.com/photo-1544652478-6653e09f18a2?auto=format&fit=crop&w=1200&q=80'
+    }
+  ],
+  standardsGallery: [
+    {
+      id: 'sg-1',
+      title: 'ตรวจรับรองมาตรฐานร้านเกมสีขาวจากหน่วยงานภาครัฐ',
+      tag: 'White Cyber Cafe',
+      caption: 'ผ่านการตรวจเยี่ยมและรับรองมาตรฐานสถานประกอบกิจการตาม พ.ร.บ. ภาพยนตร์และวีดิทัศน์',
+      url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80'
+    },
+    {
+      id: 'sg-2',
+      title: 'ศูนย์ควบคุมกล้องวงจรปิด CCTV Full HD 24 ชม.',
+      tag: '24/7 CCTV',
+      caption: 'ระบบกล้องวงจรปิดครอบคลุมทุกจุดภายในและภายนอกร้าน จัดเก็บข้อมูลย้อนหลัง 30 วันเพื่อความปลอดภัยสูงสุด',
+      url: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=80'
+    },
+    {
+      id: 'sg-3',
+      title: 'โซนปลอดบุหรี่ & ระบบอากาศ Clean Air Circulation',
+      tag: 'Clean Air',
+      caption: 'ร้านเกมปลอดบุหรี่ 100% พร้อมระบบฟอกอากาศและระบายอากาศหมุนเวียนมาตรฐานสากล',
+      url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80'
+    },
+    {
+      id: 'sg-4',
+      title: 'การคัดกรองเวลาและดูแลเยาวชนตามกฎหมาย',
+      tag: 'Legal Protection',
+      caption: 'ระบบแคชเชียร์และพนักงานคัดกรองเวลาให้บริการเยาวชนอย่างเคร่งครัดตามกรอบกฎหมาย',
+      url: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=1200&q=80'
+    }
   ]
 };
 

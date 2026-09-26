@@ -17,44 +17,47 @@ export default function TournamentsPage({
   const { siteData, updateTournament } = useSiteData();
   const tournamentsList = siteData?.tournaments || TOURNAMENTS;
 
-  // Search & Filter States
+  // Search & Game Filter States
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'open', 'ongoing', 'completed'
   const [gameFilter, setGameFilter] = useState('all');
 
-  // Unique games list for filter
-  const uniqueGames = useMemo(() => {
-    const set = new Set();
+  // Dynamic unique games list with counts
+  const gamesWithCount = useMemo(() => {
+    const counts = {};
     tournamentsList.forEach(t => {
-      if (t.game) set.add(t.game);
+      const g = (t.game || 'ทั่วไป').trim();
+      counts[g] = (counts[g] || 0) + 1;
     });
-    return Array.from(set);
+    return Object.entries(counts).map(([name, count]) => ({ name, count }));
   }, [tournamentsList]);
 
-  // Filtered Tournaments
+  // Filtered and Sorted Tournaments (New / Open tournaments sorted automatically to the front)
   const filteredTournaments = useMemo(() => {
-    return tournamentsList.filter(t => {
-      // 1. Search Query
-      const q = searchQuery.trim().toLowerCase();
-      const matchSearch = !q || 
-        t.title.toLowerCase().includes(q) || 
-        t.game.toLowerCase().includes(q) ||
-        (t.gameCategory && t.gameCategory.toLowerCase().includes(q)) ||
-        (t.desc && t.desc.toLowerCase().includes(q));
+    return tournamentsList
+      .filter(t => {
+        // 1. Search Query
+        const q = searchQuery.trim().toLowerCase();
+        const matchSearch = !q || 
+          t.title.toLowerCase().includes(q) || 
+          t.game.toLowerCase().includes(q) ||
+          (t.gameCategory && t.gameCategory.toLowerCase().includes(q)) ||
+          (t.desc && t.desc.toLowerCase().includes(q));
 
-      // 2. Status Filter
-      let matchStatus = true;
-      if (statusFilter === 'open') {
-        matchStatus = t.status === 'Open';
-      } else if (statusFilter === 'ongoing') {
-        matchStatus = t.status === 'Ongoing' || t.badgeType === 'magenta' || (t.badge && t.badge.includes('กำลัง'));
-      } else if (statusFilter === 'completed') {
-        matchStatus = t.status === 'Completed' || t.status === 'Closed' || (t.badge && (t.badge.includes('จบ') || t.badge.includes('เต็ม')));
-      }
+        // 2. Game Filter
+        const matchGame = gameFilter === 'all' || 
+          (t.game && t.game.toLowerCase() === gameFilter.toLowerCase());
 
-      return matchSearch && matchStatus;
-    });
-  }, [tournamentsList, searchQuery, statusFilter]);
+        return matchSearch && matchGame;
+      })
+      .sort((a, b) => {
+        // รายการที่เปิดรับสมัคร หรือเป็นทัวร์ใหม่ ให้แสดงผลขึ้นมาก่อนอัตโนมัติ
+        const aIsOpen = a.status === 'Open';
+        const bIsOpen = b.status === 'Open';
+        if (aIsOpen && !bIsOpen) return -1;
+        if (!aIsOpen && bIsOpen) return 1;
+        return 0;
+      });
+  }, [tournamentsList, searchQuery, gameFilter]);
 
   // Aggregate stats
   const totalPrizePoolText = '฿300,000+';
@@ -111,37 +114,39 @@ export default function TournamentsPage({
                 )}
               </div>
 
-              {/* Status Filter Tabs */}
-              <div className="status-filter-pills">
-                <button 
-                  type="button"
-                  className={`status-pill ${statusFilter === 'all' ? 'active' : ''}`}
-                  onClick={() => setStatusFilter('all')}
-                >
-                  ทั้งหมด ({tournamentsList.length})
-                </button>
-                <button 
-                  type="button"
-                  className={`status-pill pill-open ${statusFilter === 'open' ? 'active' : ''}`}
-                  onClick={() => setStatusFilter('open')}
-                >
-                  <span className="dot-pulse-green"></span>
-                  เปิดรับสมัคร ({openCount})
-                </button>
-                <button 
-                  type="button"
-                  className={`status-pill ${statusFilter === 'ongoing' ? 'active' : ''}`}
-                  onClick={() => setStatusFilter('ongoing')}
-                >
-                  กำลังแข่งขัน
-                </button>
-                <button 
-                  type="button"
-                  className={`status-pill ${statusFilter === 'completed' ? 'active' : ''}`}
-                  onClick={() => setStatusFilter('completed')}
-                >
-                  เต็มแล้ว / จบแล้ว
-                </button>
+              {/* Game Category Filter Tabs (Single Row & Touch Swipeable) */}
+              <div className="status-scroll-wrapper">
+                <div className="status-filter-pills">
+                  <button 
+                    type="button"
+                    className={`status-pill ${gameFilter === 'all' ? 'active' : ''}`}
+                    onClick={(e) => {
+                      setGameFilter('all');
+                      try {
+                        e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                      } catch (err) {}
+                    }}
+                  >
+                    <Trophy size={14} />
+                    <span>ทั้งหมด ({tournamentsList.length})</span>
+                  </button>
+                  {gamesWithCount.map(({ name, count }) => (
+                    <button 
+                      key={name}
+                      type="button"
+                      className={`status-pill ${gameFilter.toLowerCase() === name.toLowerCase() ? 'active' : ''}`}
+                      onClick={(e) => {
+                        setGameFilter(name);
+                        try {
+                          e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                        } catch (err) {}
+                      }}
+                    >
+                      <Gamepad2 size={14} />
+                      <span>{name} ({count})</span>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -169,8 +174,8 @@ export default function TournamentsPage({
         <div className="container">
           <div className="tournaments-count-heading">
             <span>พบทั้งหมด <strong>{filteredTournaments.length}</strong> รายการแข่งขัน</span>
-            {statusFilter === 'open' && (
-              <span className="open-notice-tag">🔥 กำลังเปิดรับสมัครทีมเข้าแข่งขัน สมัครได้ทันที</span>
+            {openCount > 0 && (
+              <span className="open-notice-tag">🔥 เปิดรับสมัคร ({openCount}) รายการ พร้อมประลองฝีมือ</span>
             )}
           </div>
 

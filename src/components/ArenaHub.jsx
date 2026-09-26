@@ -319,7 +319,7 @@ export default function ArenaHub({
                     }}
                   >
                     <Compass size={18} />
-                    <span>{heroData.secondaryCta || 'จำลองผังร้าน 3D แฟรนไชส์'}</span>
+                    <span>{(heroData.secondaryCta && !heroData.secondaryCta.includes('จำลองผังร้าน')) ? heroData.secondaryCta : 'ติดต่อเปิดร้านเกมของคุณ'}</span>
                   </button>
                 </div>
 
@@ -463,26 +463,33 @@ export default function ArenaHub({
               </button>
             </div>
 
-            {/* Category Filter Tabs */}
-            <div className="category-filter-pills">
-              {categories.map(cat => {
-                let CategoryIcon = LayoutGrid;
-                if (cat.id === 'tournament') CategoryIcon = Trophy;
-                if (cat.id === 'publisher') CategoryIcon = Gamepad2;
-                if (cat.id === 'community') CategoryIcon = Gift;
-                if (cat.id === 'venue') CategoryIcon = Zap;
+            {/* Category Filter Tabs (Single Row & Touch Swipeable) */}
+            <div className="category-scroll-wrapper" style={{ width: '100%', margin: '20px 0 0 0' }}>
+              <div className="category-filter-pills">
+                {categories.map(cat => {
+                  let CategoryIcon = LayoutGrid;
+                  if (cat.id === 'tournament') CategoryIcon = Trophy;
+                  if (cat.id === 'publisher') CategoryIcon = Gamepad2;
+                  if (cat.id === 'community') CategoryIcon = Gift;
+                  if (cat.id === 'venue') CategoryIcon = Zap;
 
-                return (
-                  <button
-                    key={cat.id}
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`cat-pill-btn ${selectedCategory === cat.id ? 'active' : ''}`}
-                  >
-                    <CategoryIcon size={16} />
-                    <span>{cat.label}</span>
-                  </button>
-                );
-              })}
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={(e) => {
+                        setSelectedCategory(cat.id);
+                        try {
+                          e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                        } catch (err) {}
+                      }}
+                      className={`cat-pill-btn ${selectedCategory === cat.id ? 'active' : ''}`}
+                    >
+                      <CategoryIcon size={15} />
+                      <span>{cat.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Active Filter Summary Banner */}

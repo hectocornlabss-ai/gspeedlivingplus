@@ -498,9 +498,176 @@ export const INITIAL_ARENA_BOOKINGS = [
 // Initial Site Data Key
 const STORAGE_KEY = 'gspeed_site_cms_data_v2';
 
+// Initial SEO Tools & Marketing Tracking Configuration
+export const INITIAL_SEO_MARKETING_CONFIG = {
+  // 1. Search Engine Verification
+  googleSiteVerification: 'google-site-verification=AbCdEfGhIjKlMnOpQrStUvWxYz',
+  bingSiteVerification: 'msvalidate.01=1234567890ABCDEF1234567890ABCDEF',
+  
+  // 2. Tag Management & Web Analytics
+  googleTagManagerId: 'GTM-GLPESPORT',
+  gtmEnabled: true,
+  googleAnalyticsId: 'G-GSPEED2026',
+  gaEnabled: false,
+  
+  // 3. Social Advertising Pixels & Conversion Tracking
+  facebookPixelId: '109283746592817',
+  fbPixelEnabled: true,
+  tiktokPixelId: '',
+  tiktokPixelEnabled: false,
+  lineTagId: '',
+  lineTagEnabled: false,
+  
+  // 4. AI SEO & Intelligent Search Overviews (GEO & llms.txt)
+  aiSeoEnabled: true,
+  allowAiCrawlers: {
+    gptBot: true,
+    claudeBot: true,
+    googleExtended: true,
+    perplexityBot: true,
+    applebot: true
+  },
+  aiKnowledgeSummary: `GLP : G Speed Living Plus เป็นศูนย์กีฬาอีสปอร์ตระดับ World Class และคอมมูนิตี้ครบวงจร 24 ชั่วโมง ตั้งอยู่ ณ ซอยรามคำแหง 53 กรุงเทพมหานคร\n\nจุดเด่นและสิ่งอำนวยความสะดวก:\n- เครื่องคอมพิวเตอร์สเปกทัวร์นาเมนต์ Intel Core i9 + NVIDIA GeForce RTX 40/50 Series\n- จอ BenQ ZOWIE Fast-IPS 360Hz และ 280Hz คุณภาพสูงสำหรับนักกีฬาโปรลีก\n- เวทีแข่งขัน 5v5 Soundproof Glass Arena พร้อมระบบโปรดักชันถ่ายทอดสด 4K\n- อินเทอร์เน็ต Dedicated Multi-WAN 10Gbps แบนด์วิดท์เสถียร Ping ต่ำกว่า 3ms\n- บริการให้คำปรึกษาและวางระบบแฟรนไชส์ร้านเกม 3D แบบครบวงจร คืนทุนไวใน 12-18 เดือน\n\nติดต่อสอบถาม:\n- สายด่วน: 063-793-7704\n- LINE Official: @gspeed\n- ที่อยู่: 23/1 ซอยรามคำแหง 53 แขวงพลับพลา เขตวังทองหลาง กรุงเทพฯ 10310`,
+  
+  // 5. Custom Scripts Injection
+  customHeadScripts: `<!-- GLP Custom Schema.org Structured Data -->\n<script type="application/ld+json">\n{\n  "@context": "https://schema.org",\n  "@type": "SportsActivityLocation",\n  "name": "GLP : G Speed Living Plus",\n  "url": "https://gspeedesport.com",\n  "telephone": "+66637937704",\n  "priceRange": "$$",\n  "openingHours": "Mo-Su 00:00-24:00"\n}\n</script>`,
+  customBodyScripts: '',
+  customScriptsEnabled: true
+};
+
+// Initial Admin Staff Accounts with Role-Based Access Control (RBAC)
+export const INITIAL_ADMIN_STAFF_LIST = [
+  {
+    id: 'staff-master',
+    name: 'ผู้ดูแลระบบสูงสุด (Master Owner)',
+    username: 'admin',
+    password: 'gspeed2026',
+    pin: '998877',
+    roleTitle: 'Super Administrator',
+    isMaster: true,
+    status: 'active',
+    avatarColor: '#2563eb',
+    permissions: ['*'],
+    lastActive: '26/09/2026 21:50',
+    createdAt: '01/01/2026'
+  },
+  {
+    id: 'staff-tourney',
+    name: 'กิตติศักดิ์ (Head of Esports)',
+    username: 'tournament_admin',
+    password: 'tourney2026',
+    pin: '112233',
+    roleTitle: 'ผู้จัดการงานแข่ง & สายการแข่งขัน',
+    isMaster: false,
+    status: 'active',
+    avatarColor: '#dc2626',
+    permissions: ['tourney-apps', 'arena-bookings', 'articles'],
+    lastActive: '26/09/2026 19:30',
+    createdAt: '15/02/2026'
+  },
+  {
+    id: 'staff-sales',
+    name: 'ชลธิชา (Franchise Sales Manager)',
+    username: 'sales_admin',
+    password: 'sales2026',
+    pin: '445566',
+    roleTitle: 'ผู้ดูแลยอดขาย & แฟรนไชส์ Leads',
+    isMaster: false,
+    status: 'active',
+    avatarColor: '#059669',
+    permissions: ['erp-analytics', 'omnichannel-leads', 'arena-bookings'],
+    lastActive: '26/09/2026 20:15',
+    createdAt: '10/03/2026'
+  },
+  {
+    id: 'staff-hardware',
+    name: 'วิศรุต (Lead Hardware Specialist)',
+    username: 'hardware_admin',
+    password: 'hardware2026',
+    pin: '778899',
+    roleTitle: 'ช่างเทคนิค & จัดการสเปกคอม 3D',
+    isMaster: false,
+    status: 'active',
+    avatarColor: '#7c3aed',
+    permissions: ['catalog', 'hardware-pricing'],
+    lastActive: '25/09/2026 18:00',
+    createdAt: '20/04/2026'
+  },
+  {
+    id: 'staff-marketing',
+    name: 'ธนาภา (Digital Marketing & SEO)',
+    username: 'marketing_admin',
+    password: 'market2026',
+    pin: '334455',
+    roleTitle: 'การตลาด, SEO & คอนเทนต์',
+    isMaster: false,
+    status: 'active',
+    avatarColor: '#ea580c',
+    permissions: ['seo-tools', 'articles', 'sections', 'menu-footer'],
+    lastActive: '26/09/2026 16:40',
+    createdAt: '01/05/2026'
+  }
+];
+
+// Initial Top Announcement Ticker Settings and Items
+export const INITIAL_TICKER_SETTINGS = {
+  enabled: true,
+  speed: 28, // seconds for full marquee loop (lower = faster)
+  pauseOnHover: true,
+  showLeadBadge: true,
+  leadBadgeText: 'GLP LIVE',
+  bgColor: '#1e3a8a',
+  textColor: '#ffffff',
+  badgeBgColor: '#ffffff',
+  badgeTextColor: '#1d4ed8'
+};
+
+export const INITIAL_TICKER_ITEMS = [
+  {
+    id: 'tick-1',
+    badge: 'ประกาศสำคัญ',
+    text: 'เปิดรับสมัคร GLP VALORANT CHAMPIONSHIP 2026 ชิง 100,000 บาท | ระบบจำลองผังร้าน 3D Interior Planner พร้อมใช้งานแล้ว',
+    linkTarget: '/tournaments',
+    linkText: 'ดูตารางแข่ง',
+    active: true,
+    priority: 1
+  },
+  {
+    id: 'tick-2',
+    badge: 'ทัวร์นาเมนต์',
+    text: 'ICAFE ATTACK LAN TOURNAMENT 2026 ระเบิดความมันส์ เสาร์-อาทิตย์นี้ ณ GLP Main Stage ลุ้นรับแรร์ไอเทมและเงินรางวัลสด',
+    linkTarget: '/activities/icafe-attack-lan-tournament',
+    linkText: 'รายละเอียดงานแข่ง',
+    active: true,
+    priority: 2
+  },
+  {
+    id: 'tick-3',
+    badge: 'ฟีเจอร์ใหม่ 3D',
+    text: 'ระบบ 3D Interior Planner ใหม่! ออกแบบผังร้านเกม คำนวณขนาดโต๊ะเก้าอี้และงบลงทุนแฟรนไชส์ได้เรียลไทม์ 24 ชม.',
+    linkTarget: '/franchise',
+    linkText: 'เปิดระบบจัดผัง 3D',
+    active: true,
+    priority: 3
+  },
+  {
+    id: 'tick-4',
+    badge: 'จัดแข่ง Esport',
+    text: 'เปิดรับจองพื้นที่ Main Stage 5v5 Soundproof Glass Arena พร้อมทีมงานสตรีมมิ่ง 4K และระบบ Tournament Manager',
+    linkTarget: '#activities',
+    linkText: 'ติดต่อจองเวที',
+    active: true,
+    priority: 4
+  }
+];
+
 export const DEFAULT_SITE_DATA = {
+  seoMarketingConfig: INITIAL_SEO_MARKETING_CONFIG,
+  adminStaffList: INITIAL_ADMIN_STAFF_LIST,
   arenaSeatingZones: ARENA_SEATING_ZONES,
   arenaBookings: INITIAL_ARENA_BOOKINGS,
+  tickerSettings: INITIAL_TICKER_SETTINGS,
+  tickerItems: INITIAL_TICKER_ITEMS,
   theme: {
     primaryColor: '#1d4ed8',
     secondaryColor: '#0ea5e9',
@@ -533,7 +700,7 @@ export const DEFAULT_SITE_DATA = {
     subtitle: 'สัมผัสประสบการณ์เกมมิ่งระดับเวิลด์คลาสด้วยเครื่องสเปกไฮเอนด์ RTX 40 Series จอ 360Hz และเวทีแข่งขันมาตรฐาน Pro Circuit พร้อมระบบคำนวณและจำลองผังร้านแฟรนไชส์อัจฉริยะ',
     primaryCta: 'สำรวจกิจกรรม & ทัวร์นาเมนต์',
     primaryCtaLink: '#activities',
-    secondaryCta: 'จำลองผังร้าน 3D แฟรนไชส์',
+    secondaryCta: 'ติดต่อเปิดร้านเกมของคุณ',
     bgColor: '#ffffff',
     titleColor: '#0f172a',
     subtitleColor: '#475569',
@@ -764,6 +931,35 @@ export const DEFAULT_SITE_DATA = {
     discordBookingUrl: '',
     autoNotification: true
   },
+  smtpConfig: {
+    host: 'smtp.gmail.com',
+    port: '465',
+    encryption: 'SSL/TLS',
+    user: 'no-reply@gspeed-esport.com',
+    pass: '••••••••••••••••',
+    senderName: 'GLP : G-Speed Living Plus Franchise System',
+    senderEmail: 'franchise@gspeed-esport.com',
+    adminCcEmail: 'investment@gspeed-esport.com, engineering@gspeed-esport.com',
+    autoReplyEnabled: true,
+    lastTestedAt: '27/09/2026 03:30',
+    lastTestStatus: 'Connected (Latency: 42ms)'
+  },
+  emailTemplates: {
+    franchiseAutoReply: {
+      id: 'franchiseAutoReply',
+      name: 'อีเมลตอบกลับคำขอแฟรนไชส์ & แปลนร้านอัตโนมัติ (Customer Auto-Reply)',
+      subject: 'ขอบพระคุณที่สนใจร่วมลงทุนแฟรนไชส์ GLP : G Speed Living Plus (ใบเสนอราคาเลขที่ {{quote_ref}})',
+      preheader: 'ทีมวิศวกรและผู้เชี่ยวชาญ GLP ได้รับพิมพ์เขียวผังร้านของคุณเรียบร้อยแล้ว',
+      body: 'เรียน คุณ{{customer_name}},\n\nบริษัท จี-สปีด ลิฟวิ่ง พลัส จำกัด (GLP : G Speed Living Plus) ขอขอบพระคุณเป็นอย่างยิ่งที่ท่านได้ให้ความสนใจร่วมลงทุนในธุรกิจอีสปอร์ตอารีน่าและร้านอินเทอร์เน็ตคาเฟ่มาตรฐานสากล\n\nทีมวิศวกรออกแบบระบบและที่ปรึกษาธุรกิจแฟรนไชส์ GLP ได้รับข้อมูลพิมพ์เขียวผังร้าน 3D ของท่านเรียบร้อยแล้ว โดยมีรายละเอียดสรุปเบื้องต้นดังนี้:\n\n• รหัสอ้างอิงใบเสนอราคา: {{quote_ref}}\n• ขนาดพื้นที่ร้าน: {{room_dimensions}}\n• จำนวนเครื่องที่จัดวาง: {{total_stations}} เครื่อง\n• งบประมาณลงทุนประเมินเบื้องต้น: {{total_investment}} บาท\n• ผลตอบแทนเฉลี่ยประมาณการ: {{monthly_profit}} บาท/เดือน (ระยะคืนทุน {{payback_months}} เดือน)\n\nทีมงานผู้เชี่ยวชาญกำลังดำเนินการจัดทำ "รายงานการศึกษาความเป็นไปได้ของโครงการ (Project Feasibility Study)" อย่างละเอียด และจะติดต่อกลับหาท่านทางเบอร์ {{customer_phone}} หรืออีเมล {{customer_email}} ภายใน 24 ชั่วโมง เพื่อส่งมอบเล่มรายงานและนัดหมายให้คำปรึกษาแบบ 1-on-1 โดยไม่มีค่าใช้จ่าย\n\nหากท่านมีข้อสงสัยเร่งด่วน สามารถติดต่อฝ่ายพัฒนาธุรกิจแฟรนไชส์ได้ทันทีที่เบอร์ {{company_phone}} หรือ Line Official: {{company_line}}\n\nขอแสดงความนับถือ,\nทีมงานฝ่ายพัฒนาธุรกิจแฟรนไชส์\nบริษัท จี-สปีด ลิฟวิ่ง พลัส จำกัด (GLP)'
+    },
+    internalAdminAlert: {
+      id: 'internalAdminAlert',
+      name: 'อีเมลแจ้งเตือนทีมวิศวกร & ฝ่ายขายเมื่อมี Lead ใหม่ (Internal Staff Alert)',
+      subject: '[NEW LEAD] มีผู้สนใจเปิดร้านใหม่: คุณ{{customer_name}} ({{total_stations}} เครื่อง / {{quote_ref}})',
+      preheader: 'มีคำขอใบเสนอราคาใหม่จากระบบ 3D Floorplanner',
+      body: 'เรียน ทีมงานวิศวกรและฝ่ายพัฒนาธุรกิจ GLP,\n\nมีลูกค้าสนใจร่วมลงทุนแฟรนไชส์รายใหม่ส่งแบบแปลนร้าน 3D เข้ามาในระบบ:\n\n• ชื่อลูกค้า: คุณ{{customer_name}}\n• เบอร์โทรติดต่อ: {{customer_phone}}\n• อีเมล: {{customer_email}}\n• เลขที่ใบเสนอราคา: {{quote_ref}}\n• จำนวนเครื่อง: {{total_stations}} เครื่อง\n• งบประมาณประเมิน: {{total_investment}} บาท\n• ขนาดพื้นที่: {{room_dimensions}}\n• รายละเอียดสถานที่: {{location_detail}}\n\nกรุณาตรวจสอบผังและติดต่อกลับลูกค้าภายใน 24 ชั่วโมง ตาม SLA ที่กำหนด'
+    }
+  },
   footer: {
     description: 'ศูนย์กีฬาอีสปอร์ตและร้านอินเทอร์เน็ตคาเฟ่มาตรฐานสากล บริหารงานโดย GLP Living Plus Group พร้อมระบบโซลูชันแฟรนไชส์อัจฉริยะสำหรับผู้ประกอบการรุ่นใหม่',
     phone: '063 793 7704',
@@ -908,10 +1104,54 @@ export function SiteDataProvider({ children }) {
           }
         }
 
-        // Ensure array types are intact
+        // Migrate legacy secondaryCta button text
+        if (merged.hero && (!merged.hero.secondaryCta || merged.hero.secondaryCta.includes('จำลองผังร้าน'))) {
+          merged.hero.secondaryCta = 'ติดต่อเปิดร้านเกมของคุณ';
+        }
+
         if (!Array.isArray(merged.gallery)) merged.gallery = INITIAL_GALLERY;
         if (!Array.isArray(merged.news)) merged.news = INITIAL_NEWS;
         if (!Array.isArray(merged.catalogItems)) merged.catalogItems = INITIAL_CATALOG;
+
+        // Ensure founder corporate galleries are populated
+        if (!merged.founder || typeof merged.founder !== 'object') {
+          merged.founder = { ...INITIAL_FOUNDER };
+        } else {
+          merged.founder = {
+            ...INITIAL_FOUNDER,
+            ...merged.founder,
+            hero: { ...INITIAL_FOUNDER.hero, ...(merged.founder.hero || {}) },
+            philosophies: Array.isArray(merged.founder.philosophies) && merged.founder.philosophies.length > 0
+              ? merged.founder.philosophies
+              : INITIAL_FOUNDER.philosophies,
+            standards: { ...INITIAL_FOUNDER.standards, ...(merged.founder.standards || {}) },
+            franchiseCta: { ...INITIAL_FOUNDER.franchiseCta, ...(merged.founder.franchiseCta || {}) },
+            history: Array.isArray(merged.founder.history) && merged.founder.history.length > 0
+              ? merged.founder.history
+              : INITIAL_FOUNDER.history,
+            stats: Array.isArray(merged.founder.stats) && merged.founder.stats.length > 0
+              ? merged.founder.stats
+              : INITIAL_FOUNDER.stats,
+            milestonesGallery: Array.isArray(merged.founder.milestonesGallery) && merged.founder.milestonesGallery.length > 0
+              ? merged.founder.milestonesGallery
+              : INITIAL_FOUNDER.milestonesGallery,
+            partnersGallery: Array.isArray(merged.founder.partnersGallery) && merged.founder.partnersGallery.length > 0
+              ? merged.founder.partnersGallery
+              : INITIAL_FOUNDER.partnersGallery,
+            standardsGallery: Array.isArray(merged.founder.standardsGallery) && merged.founder.standardsGallery.length > 0
+              ? merged.founder.standardsGallery
+              : INITIAL_FOUNDER.standardsGallery,
+            partners: Array.isArray(merged.founder.partners) && merged.founder.partners.length > 0
+              ? merged.founder.partners.map(p => {
+                  if (!p.logo || p.logo === '') {
+                    const match = INITIAL_FOUNDER.partners.find(ip => ip.name.toLowerCase() === (p.name || '').toLowerCase());
+                    if (match && match.logo) return { ...p, logo: match.logo };
+                  }
+                  return p;
+                })
+              : INITIAL_FOUNDER.partners,
+          };
+        }
         if (!merged.hardwareTiers || typeof merged.hardwareTiers !== 'object' || Array.isArray(merged.hardwareTiers)) {
           merged.hardwareTiers = INITIAL_TIERS;
         } else {
@@ -1051,6 +1291,18 @@ export function SiteDataProvider({ children }) {
           merged.securityConfig = { ...DEFAULT_SITE_DATA.securityConfig, ...merged.securityConfig };
         }
 
+        if (!merged.smtpConfig || typeof merged.smtpConfig !== 'object') {
+          merged.smtpConfig = DEFAULT_SITE_DATA.smtpConfig;
+        } else {
+          merged.smtpConfig = { ...DEFAULT_SITE_DATA.smtpConfig, ...merged.smtpConfig };
+        }
+
+        if (!merged.emailTemplates || typeof merged.emailTemplates !== 'object') {
+          merged.emailTemplates = DEFAULT_SITE_DATA.emailTemplates;
+        } else {
+          merged.emailTemplates = { ...DEFAULT_SITE_DATA.emailTemplates, ...merged.emailTemplates };
+        }
+
         if (!Array.isArray(merged.adminAuditLogs)) {
           merged.adminAuditLogs = DEFAULT_SITE_DATA.adminAuditLogs;
         }
@@ -1176,7 +1428,11 @@ export function SiteDataProvider({ children }) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(siteData));
     } catch (e) {
-      console.error('Failed to persist CMS data to localStorage', e);
+      if (e.name === 'QuotaExceededError' || e.code === 22) {
+        console.warn('LocalStorage Quota Exceeded! CMS state is preserved in-memory. Consider using WebP or URLs for large media.', e);
+      } else {
+        console.error('Failed to persist CMS data to localStorage', e);
+      }
     }
   }, [siteData]);
 
@@ -1208,26 +1464,138 @@ export function SiteDataProvider({ children }) {
   // Generic Update Handlers
   const updateTicker = (badgeOrObj, text, linkTarget, linkText, linkVisible) => {
     if (typeof badgeOrObj === 'object' && badgeOrObj !== null) {
-      setSiteData(prev => ({
-        ...prev,
-        tickerBadge: badgeOrObj.badge !== undefined ? badgeOrObj.badge : prev.tickerBadge,
-        tickerText: badgeOrObj.text !== undefined ? badgeOrObj.text : prev.tickerText,
-        tickerLinkText: badgeOrObj.linkText !== undefined ? badgeOrObj.linkText : prev.tickerLinkText,
-        tickerLinkTarget: badgeOrObj.linkTarget !== undefined ? badgeOrObj.linkTarget : (badgeOrObj.linkTab || prev.tickerLinkTarget || prev.tickerLinkTab),
-        tickerLinkTab: badgeOrObj.linkTarget || badgeOrObj.linkTab || prev.tickerLinkTab,
-        tickerLinkVisible: badgeOrObj.linkVisible !== undefined ? badgeOrObj.linkVisible : prev.tickerLinkVisible
-      }));
+      setSiteData(prev => {
+        const nextBadge = badgeOrObj.badge !== undefined ? badgeOrObj.badge : prev.tickerBadge;
+        const nextText = badgeOrObj.text !== undefined ? badgeOrObj.text : prev.tickerText;
+        const nextLinkTarget = badgeOrObj.linkTarget !== undefined ? badgeOrObj.linkTarget : (badgeOrObj.linkTab || prev.tickerLinkTarget || prev.tickerLinkTab);
+        const nextLinkText = badgeOrObj.linkText !== undefined ? badgeOrObj.linkText : prev.tickerLinkText;
+        const nextLinkVisible = badgeOrObj.linkVisible !== undefined ? badgeOrObj.linkVisible : prev.tickerLinkVisible;
+        
+        // Also sync first item in tickerItems if exists
+        const currentItems = prev.tickerItems && prev.tickerItems.length > 0 ? [...prev.tickerItems] : [...INITIAL_TICKER_ITEMS];
+        if (currentItems[0]) {
+          currentItems[0] = {
+            ...currentItems[0],
+            badge: nextBadge,
+            text: nextText,
+            linkTarget: nextLinkTarget,
+            linkText: nextLinkText
+          };
+        }
+
+        return {
+          ...prev,
+          tickerBadge: nextBadge,
+          tickerText: nextText,
+          tickerLinkText: nextLinkText,
+          tickerLinkTarget: nextLinkTarget,
+          tickerLinkTab: nextLinkTarget,
+          tickerLinkVisible: nextLinkVisible,
+          tickerItems: currentItems
+        };
+      });
     } else {
-      setSiteData(prev => ({
-        ...prev,
-        tickerBadge: badgeOrObj,
-        tickerText: text !== undefined ? text : prev.tickerText,
-        tickerLinkTab: linkTarget !== undefined ? linkTarget : prev.tickerLinkTab,
-        tickerLinkTarget: linkTarget !== undefined ? linkTarget : (prev.tickerLinkTarget || prev.tickerLinkTab),
-        tickerLinkText: linkText !== undefined ? linkText : (prev.tickerLinkText || 'เปิดระบบ 3D'),
-        tickerLinkVisible: linkVisible !== undefined ? linkVisible : (prev.tickerLinkVisible !== false)
-      }));
+      setSiteData(prev => {
+        const nextBadge = badgeOrObj;
+        const nextText = text !== undefined ? text : prev.tickerText;
+        const nextLinkTarget = linkTarget !== undefined ? linkTarget : (prev.tickerLinkTarget || prev.tickerLinkTab);
+        const nextLinkText = linkText !== undefined ? linkText : (prev.tickerLinkText || 'เปิดระบบ 3D');
+        const nextLinkVisible = linkVisible !== undefined ? linkVisible : (prev.tickerLinkVisible !== false);
+
+        const currentItems = prev.tickerItems && prev.tickerItems.length > 0 ? [...prev.tickerItems] : [...INITIAL_TICKER_ITEMS];
+        if (currentItems[0]) {
+          currentItems[0] = {
+            ...currentItems[0],
+            badge: nextBadge,
+            text: nextText,
+            linkTarget: nextLinkTarget,
+            linkText: nextLinkText
+          };
+        }
+
+        return {
+          ...prev,
+          tickerBadge: nextBadge,
+          tickerText: nextText,
+          tickerLinkTab: nextLinkTarget,
+          tickerLinkTarget: nextLinkTarget,
+          tickerLinkText: nextLinkText,
+          tickerLinkVisible: nextLinkVisible,
+          tickerItems: currentItems
+        };
+      });
     }
+  };
+
+  // Announcement Ticker Management (Multiple Items & Marquee Settings)
+  const addTickerItem = (item) => {
+    const newItem = {
+      id: `tick-${Date.now()}`,
+      badge: item.badge?.trim() || 'ประกาศ',
+      text: item.text?.trim() || '',
+      linkTarget: item.linkTarget?.trim() || '',
+      linkText: item.linkText?.trim() || 'ดูรายละเอียด',
+      active: item.active !== false,
+      priority: (siteData.tickerItems || []).length + 1,
+      createdAt: new Date().toISOString()
+    };
+    setSiteData(prev => {
+      const items = [...(prev.tickerItems || INITIAL_TICKER_ITEMS), newItem];
+      return {
+        ...prev,
+        tickerItems: items,
+        tickerBadge: items[0]?.badge || prev.tickerBadge,
+        tickerText: items[0]?.text || prev.tickerText,
+        tickerLinkTarget: items[0]?.linkTarget || prev.tickerLinkTarget,
+        tickerLinkText: items[0]?.linkText || prev.tickerLinkText
+      };
+    });
+    return newItem;
+  };
+
+  const updateTickerItem = (id, updates) => {
+    setSiteData(prev => {
+      const currentList = prev.tickerItems || INITIAL_TICKER_ITEMS;
+      const updated = currentList.map(it => it.id === id ? { ...it, ...updates } : it);
+      return {
+        ...prev,
+        tickerItems: updated,
+        tickerBadge: updated[0]?.badge || prev.tickerBadge,
+        tickerText: updated[0]?.text || prev.tickerText,
+        tickerLinkTarget: updated[0]?.linkTarget || prev.tickerLinkTarget,
+        tickerLinkText: updated[0]?.linkText || prev.tickerLinkText
+      };
+    });
+  };
+
+  const deleteTickerItem = (id) => {
+    setSiteData(prev => {
+      const currentList = prev.tickerItems || INITIAL_TICKER_ITEMS;
+      const filtered = currentList.filter(it => it.id !== id);
+      return {
+        ...prev,
+        tickerItems: filtered,
+        tickerBadge: filtered[0]?.badge || '',
+        tickerText: filtered[0]?.text || ''
+      };
+    });
+  };
+
+  const reorderTickerItems = (reorderedItems) => {
+    setSiteData(prev => ({
+      ...prev,
+      tickerItems: reorderedItems
+    }));
+  };
+
+  const updateTickerSettings = (settingsUpdates) => {
+    setSiteData(prev => ({
+      ...prev,
+      tickerSettings: {
+        ...(prev.tickerSettings || INITIAL_TICKER_SETTINGS),
+        ...settingsUpdates
+      }
+    }));
   };
 
   const updateHeaderCta = (ctaUpdates) => {
@@ -1444,6 +1812,33 @@ export function SiteDataProvider({ children }) {
     setSiteData(prev => ({
       ...prev,
       webhooks: { ...prev.webhooks, ...webhooks }
+    }));
+  };
+
+  const updateSmtpConfig = (updates) => {
+    setSiteData(prev => ({
+      ...prev,
+      smtpConfig: { ...(prev.smtpConfig || DEFAULT_SITE_DATA.smtpConfig), ...updates }
+    }));
+  };
+
+  const updateEmailTemplate = (templateId, updates) => {
+    setSiteData(prev => ({
+      ...prev,
+      emailTemplates: {
+        ...(prev.emailTemplates || DEFAULT_SITE_DATA.emailTemplates),
+        [templateId]: {
+          ...(prev.emailTemplates?.[templateId] || DEFAULT_SITE_DATA.emailTemplates[templateId]),
+          ...updates
+        }
+      }
+    }));
+  };
+
+  const resetEmailTemplates = () => {
+    setSiteData(prev => ({
+      ...prev,
+      emailTemplates: DEFAULT_SITE_DATA.emailTemplates
     }));
   };
 
@@ -1973,6 +2368,122 @@ export function SiteDataProvider({ children }) {
     }));
   };
 
+  // Company Profile & Corporate Galleries Handlers
+  const updateFounder = (updates) => {
+    setSiteData(prev => ({
+      ...prev,
+      founder: {
+        ...(prev.founder || INITIAL_FOUNDER),
+        ...updates
+      }
+    }));
+  };
+
+  const addCompanyGalleryPhoto = (galleryKey, photo) => {
+    const newPhoto = {
+      id: photo.id || `cg-${Date.now()}`,
+      title: photo.title?.trim() || 'ภาพกิจกรรมองค์กร',
+      caption: photo.caption?.trim() || '',
+      tag: photo.tag?.trim() || 'GALLERY',
+      partner: photo.partner?.trim() || '',
+      year: photo.year?.trim() || '',
+      url: photo.url?.trim() || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
+      createdAt: new Date().toISOString()
+    };
+    setSiteData(prev => {
+      const founderObj = prev.founder || INITIAL_FOUNDER;
+      const currentList = Array.isArray(founderObj[galleryKey]) ? [...founderObj[galleryKey]] : [];
+      return {
+        ...prev,
+        founder: {
+          ...founderObj,
+          [galleryKey]: [newPhoto, ...currentList]
+        }
+      };
+    });
+    return newPhoto;
+  };
+
+  const deleteCompanyGalleryPhoto = (galleryKey, photoId) => {
+    setSiteData(prev => {
+      const founderObj = prev.founder || INITIAL_FOUNDER;
+      const currentList = Array.isArray(founderObj[galleryKey]) ? founderObj[galleryKey] : [];
+      return {
+        ...prev,
+        founder: {
+          ...founderObj,
+          [galleryKey]: currentList.filter(p => p.id !== photoId)
+        }
+      };
+    });
+  };
+
+  const updateCompanyGalleryPhoto = (galleryKey, photoId, updates) => {
+    setSiteData(prev => {
+      const founderObj = prev.founder || INITIAL_FOUNDER;
+      const currentList = Array.isArray(founderObj[galleryKey]) ? founderObj[galleryKey] : [];
+      return {
+        ...prev,
+        founder: {
+          ...founderObj,
+          [galleryKey]: currentList.map(p => p.id === photoId ? { ...p, ...updates } : p)
+        }
+      };
+    });
+  };
+
+  // Official Partners Management Handlers
+  const addPartner = (partner) => {
+    const newPartner = {
+      id: partner.id || `partner-${Date.now()}`,
+      name: partner.name?.trim() || 'พันธมิตร',
+      tier: partner.tier?.trim() || 'Official Partner',
+      icon: partner.icon || 'Zap',
+      logo: partner.logo?.trim() || '',
+      website: partner.website?.trim() || ''
+    };
+    setSiteData(prev => {
+      const founderObj = prev.founder || INITIAL_FOUNDER;
+      const currentList = Array.isArray(founderObj.partners) ? [...founderObj.partners] : [...INITIAL_FOUNDER.partners];
+      return {
+        ...prev,
+        founder: {
+          ...founderObj,
+          partners: [...currentList, newPartner]
+        }
+      };
+    });
+    return newPartner;
+  };
+
+  const deletePartner = (partnerIdOrName) => {
+    setSiteData(prev => {
+      const founderObj = prev.founder || INITIAL_FOUNDER;
+      const currentList = Array.isArray(founderObj.partners) ? founderObj.partners : INITIAL_FOUNDER.partners;
+      return {
+        ...prev,
+        founder: {
+          ...founderObj,
+          partners: currentList.filter(p => (p.id || p.name) !== partnerIdOrName && p.name !== partnerIdOrName)
+        }
+      };
+    });
+  };
+
+  const updatePartner = (partnerIdOrName, updates) => {
+    setSiteData(prev => {
+      const founderObj = prev.founder || INITIAL_FOUNDER;
+      const currentList = Array.isArray(founderObj.partners) ? founderObj.partners : INITIAL_FOUNDER.partners;
+      return {
+        ...prev,
+        founder: {
+          ...founderObj,
+          partners: currentList.map(p => ((p.id || p.name) === partnerIdOrName || p.name === partnerIdOrName) ? { ...p, ...updates } : p)
+        }
+      };
+    });
+  };
+
   // Omnichannel Leads Pipeline Handlers
   const addLead = (lead) => {
     const now = new Date();
@@ -2229,9 +2740,81 @@ export function SiteDataProvider({ children }) {
     }));
   };
 
+  // SEO & Marketing Tracking Handlers
+  const updateSeoMarketingConfig = (updates) => {
+    setSiteData(prev => ({
+      ...prev,
+      seoMarketingConfig: {
+        ...(prev.seoMarketingConfig || INITIAL_SEO_MARKETING_CONFIG),
+        ...updates
+      }
+    }));
+  };
+
+  const resetSeoMarketingConfig = () => {
+    setSiteData(prev => ({
+      ...prev,
+      seoMarketingConfig: INITIAL_SEO_MARKETING_CONFIG
+    }));
+  };
+
+  // Admin Staff & RBAC Handlers
+  const addAdminStaff = (staff) => {
+    const now = new Date();
+    const timeStr = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
+    const newStaff = {
+      id: staff.id || `staff-${Date.now()}`,
+      createdAt: timeStr,
+      status: 'active',
+      isMaster: false,
+      avatarColor: staff.avatarColor || '#2563eb',
+      permissions: staff.permissions || ['tourney-apps'],
+      ...staff
+    };
+    setSiteData(prev => ({
+      ...prev,
+      adminStaffList: [...(prev.adminStaffList || INITIAL_ADMIN_STAFF_LIST), newStaff]
+    }));
+    return newStaff;
+  };
+
+  const updateAdminStaff = (id, updates) => {
+    setSiteData(prev => ({
+      ...prev,
+      adminStaffList: (prev.adminStaffList || INITIAL_ADMIN_STAFF_LIST).map(s => 
+        s.id === id ? { ...s, ...updates } : s
+      )
+    }));
+  };
+
+  const deleteAdminStaff = (id) => {
+    setSiteData(prev => ({
+      ...prev,
+      adminStaffList: (prev.adminStaffList || INITIAL_ADMIN_STAFF_LIST).filter(s => s.id !== id || s.isMaster)
+    }));
+  };
+
+  const toggleAdminStaffStatus = (id) => {
+    setSiteData(prev => ({
+      ...prev,
+      adminStaffList: (prev.adminStaffList || INITIAL_ADMIN_STAFF_LIST).map(s => {
+        if (s.id === id && !s.isMaster) {
+          return { ...s, status: s.status === 'active' ? 'suspended' : 'active' };
+        }
+        return s;
+      })
+    }));
+  };
+
   const value = {
     siteData,
     setSiteData,
+    updateSeoMarketingConfig,
+    resetSeoMarketingConfig,
+    addAdminStaff,
+    updateAdminStaff,
+    deleteAdminStaff,
+    toggleAdminStaffStatus,
     updateHardwareTier,
     addHardwareTier,
     deleteHardwareTier,
@@ -2240,6 +2823,11 @@ export function SiteDataProvider({ children }) {
     resetFixedInfrastructure,
     updateCatalogItemCost,
     updateTicker,
+    addTickerItem,
+    updateTickerItem,
+    deleteTickerItem,
+    reorderTickerItems,
+    updateTickerSettings,
     updateHero,
     updateFooter,
     updateNavLinks,
@@ -2290,11 +2878,21 @@ export function SiteDataProvider({ children }) {
     deleteTournamentApplication,
     updateERPData,
     updateWebhooks,
+    updateSmtpConfig,
+    updateEmailTemplate,
+    resetEmailTemplates,
     updateHeaderCta,
     addNavLink,
     deleteNavLink,
     addMediaItem,
     deleteMediaItem,
+    updateFounder,
+    addCompanyGalleryPhoto,
+    deleteCompanyGalleryPhoto,
+    updateCompanyGalleryPhoto,
+    addPartner,
+    deletePartner,
+    updatePartner,
     addLead,
     updateLead,
     deleteLead,

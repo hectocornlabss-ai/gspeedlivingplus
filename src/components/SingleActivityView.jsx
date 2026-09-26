@@ -22,6 +22,8 @@ export default function SingleActivityView({
   const [copiedLink, setCopiedLink] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const shareBtnRef = useRef(null);
+  const [bottomShareOpen, setBottomShareOpen] = useState(false);
+  const bottomShareBtnRef = useRef(null);
 
   // State for Photo Lightbox
   const [activePhotoIdx, setActivePhotoIdx] = useState(null);
@@ -247,42 +249,20 @@ export default function SingleActivityView({
 
   return (
     <div className="single-activity-page">
-      {/* Top Breadcrumb & Action Bar */}
-      <div className="tournament-nav-bar">
+      {/* Top Floating Action Bar (Sticky Under Menu on Scroll) */}
+      <div className="activity-floating-nav-bar">
         <div className="container tournament-nav-inner">
           <div className="tourney-nav-left-group">
-            {/* Clean Back Button (Breadcrumbs removed as requested) */}
+            {/* Responsive Floating Pill Back Button */}
             <button 
               type="button" 
               onClick={() => onBack('activities')} 
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                color: '#334155',
-                fontSize: '0.86rem',
-                fontWeight: 650,
-                cursor: 'pointer',
-                padding: '6px 14px',
-                borderRadius: '8px',
-                transition: 'all 0.2s ease',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
-              }}
-              onMouseEnter={(e) => { 
-                e.currentTarget.style.color = '#0284c7'; 
-                e.currentTarget.style.borderColor = '#bae6fd'; 
-                e.currentTarget.style.background = '#f0f9ff'; 
-              }}
-              onMouseLeave={(e) => { 
-                e.currentTarget.style.color = '#334155'; 
-                e.currentTarget.style.borderColor = '#e2e8f0'; 
-                e.currentTarget.style.background = '#f8fafc'; 
-              }}
+              className="btn-tourney-back"
+              title="ย้อนกลับไปรวมภาพกิจกรรม"
             >
-              <ArrowLeft size={16} />
-              <span>ย้อนกลับไปรวมภาพกิจกรรม</span>
+              <ArrowLeft size={15} />
+              <span className="back-btn-text-full">ย้อนกลับไปรวมภาพกิจกรรม</span>
+              <span className="back-btn-text-short">ย้อนกลับ</span>
             </button>
           </div>
 
@@ -628,6 +608,7 @@ export default function SingleActivityView({
                 <div className="share-buttons-row">
                   {/* Facebook */}
                   <button 
+                    type="button"
                     onClick={handleShareFacebook}
                     className="share-pill-btn fb"
                     title="แชร์ลง Facebook"
@@ -640,6 +621,7 @@ export default function SingleActivityView({
 
                   {/* LINE */}
                   <button 
+                    type="button"
                     onClick={handleShareLine}
                     className="share-pill-btn line"
                     title="แชร์ไปยัง LINE"
@@ -652,6 +634,7 @@ export default function SingleActivityView({
 
                   {/* X (Twitter) */}
                   <button 
+                    type="button"
                     onClick={handleShareTwitter}
                     className="share-pill-btn x-twitter"
                     title="แชร์ลง X (Twitter)"
@@ -662,35 +645,28 @@ export default function SingleActivityView({
                     <span>X</span>
                   </button>
 
-                  {/* Copy Link */}
-                  <button 
-                    onClick={handleCopyLink}
-                    className={`share-pill-btn copy ${copiedLink ? 'copied' : ''}`}
-                    title="คัดลอกลิงก์บทความนี้"
-                  >
-                    {copiedLink ? <Check size={14} className="text-emerald" /> : <Copy size={14} />}
-                    <span>{copiedLink ? 'คัดลอกแล้ว!' : 'คัดลอกลิงก์'}</span>
-                  </button>
-                </div>
+                  {/* Compact Share Trigger Icon Button & Popover */}
+                  <div className="share-btn-relative-wrapper">
+                    <button 
+                      ref={bottomShareBtnRef}
+                      type="button"
+                      onClick={() => setBottomShareOpen(!bottomShareOpen)}
+                      className={`share-pill-btn share-icon-btn ${bottomShareOpen ? 'active' : ''}`}
+                      title="แชร์บทความและคัดลอกลิงก์ (Messenger, Instagram, และแอปอื่นๆ)"
+                      aria-label="แชร์บทความนี้"
+                    >
+                      <Share2 size={15} className="text-blue" />
+                    </button>
 
-                {/* Direct URL Inline Field */}
-                <div className="share-url-inline-pill">
-                  <Globe size={14} className="url-globe-icon" />
-                  <input 
-                    type="text" 
-                    readOnly 
-                    value={typeof window !== 'undefined' ? window.location.href : ''} 
-                    onClick={(e) => e.target.select()}
-                    className="share-url-input-slim"
-                    title="คลิกเพื่อเลือก URL ทั้งหมด"
-                  />
-                  <button 
-                    onClick={handleCopyLink} 
-                    className={`btn-url-copy-icon ${copiedLink ? 'copied' : ''}`}
-                    title="คลิกเพื่อคัดลอก URL"
-                  >
-                    {copiedLink ? <Check size={13} /> : <Copy size={13} />}
-                  </button>
+                    <SocialSharePopover
+                      url={typeof window !== 'undefined' ? window.location.href : ''}
+                      title={activity.title}
+                      subtitle={activity.tag || 'GLP NEWS & EVENT'}
+                      isOpen={bottomShareOpen}
+                      onClose={() => setBottomShareOpen(false)}
+                      triggerRef={bottomShareBtnRef}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -796,30 +772,6 @@ export default function SingleActivityView({
                   <span>อีเมล: partner@gspeedarena.com</span>
                 </a>
               </div>
-            </div>
-
-            {/* Social Share / SEO Live Preview Card */}
-            <div className="social-og-preview-card glass-panel">
-              <div className="og-preview-header">
-                <Globe size={16} className="text-blue" />
-                <h5>ตัวอย่างการแสดงผลบนโซเชียล (Social Card)</h5>
-              </div>
-              <div className="og-card-frame">
-                <div className="og-card-image-wrap">
-                  <img src={activity.image} alt={activity.imageAlt || activity.title} />
-                  <span className="og-domain-badge">gspeedarena.com</span>
-                </div>
-                <div className="og-card-meta">
-                  <h6>{activity.title}</h6>
-                  <p>{activity.desc || activity.excerpt}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* URL Slug Info Badge */}
-            <div className="slug-info-box">
-              <span className="slug-lbl">Permanent Article URL:</span>
-              <code>#/activity/{activity.slug || activity.id}</code>
             </div>
           </aside>
         </div>

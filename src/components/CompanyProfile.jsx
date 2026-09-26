@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Users, Award, Cpu, Zap, Armchair, Monitor, 
-  Wifi, ShieldCheck, CheckCircle2, TrendingUp, Mail, Phone, MapPin, Quote, Calculator, ArrowRight
+  Wifi, ShieldCheck, CheckCircle2, TrendingUp, Mail, Phone, MapPin, Quote, Calculator, ArrowRight,
+  Camera, ZoomIn, ChevronLeft, ChevronRight, X, Layers
 } from 'lucide-react';
 import { FOUNDER_INFO } from '../data/mockData';
 import { useSiteData } from '../context/SiteDataContext';
+import { sanitizeSafeUrl, isSafeExternalUrl } from '../utils/security';
 
 function isColorDark(hexColor) {
   if (!hexColor || typeof hexColor !== 'string') return false;
@@ -24,6 +26,61 @@ export default function CompanyProfile({ onNavigateFranchise }) {
   const founderBg = founder.bgColor || '#ffffff';
   const isDarkFounder = isColorDark(founderBg);
 
+  // Gallery datasets with fallback to mock data
+  const milestonesList = (Array.isArray(founder.milestonesGallery) && founder.milestonesGallery.length > 0)
+    ? founder.milestonesGallery
+    : (FOUNDER_INFO.milestonesGallery || []);
+
+  const currentPartners = (Array.isArray(founder.partners) && founder.partners.length > 0)
+    ? founder.partners
+    : (FOUNDER_INFO.partners || []);
+
+  const repeatFactor = currentPartners.length < 5 ? 4 : (currentPartners.length < 10 ? 3 : 2);
+  const partnerLogosRepeated = Array.from({ length: repeatFactor }).flatMap(() => currentPartners);
+
+  const standardsList = (Array.isArray(founder.standardsGallery) && founder.standardsGallery.length > 0)
+    ? founder.standardsGallery
+    : (FOUNDER_INFO.standardsGallery || []);
+
+  // Lightbox Modal State for Public Visitors
+  const [lightboxData, setLightboxData] = useState(null); // { list: [], index: 0 }
+
+  // Keyboard navigation for lightbox
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!lightboxData) return;
+      if (e.key === 'Escape') {
+        setLightboxData(null);
+      } else if (e.key === 'ArrowLeft') {
+        handlePrevPhoto();
+      } else if (e.key === 'ArrowRight') {
+        handleNextPhoto();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [lightboxData]);
+
+  const openLightbox = (list, index) => {
+    setLightboxData({ list, index });
+  };
+
+  const handlePrevPhoto = () => {
+    if (!lightboxData) return;
+    setLightboxData(prev => ({
+      ...prev,
+      index: (prev.index - 1 + prev.list.length) % prev.list.length
+    }));
+  };
+
+  const handleNextPhoto = () => {
+    if (!lightboxData) return;
+    setLightboxData(prev => ({
+      ...prev,
+      index: (prev.index + 1) % prev.list.length
+    }));
+  };
+
   return (
     <div className="company-profile-page">
       {/* 1. Header Banner */}
@@ -32,13 +89,17 @@ export default function CompanyProfile({ onNavigateFranchise }) {
           <div className="section-header-center">
             <div className="badge-pill badge-cyan">
               <Users size={14} />
-              <span>LEADERSHIP & CORPORATE PROFILE</span>
+              <span>{founder.hero?.badge || 'LEADERSHIP & CORPORATE PROFILE'}</span>
             </div>
             <h1 className="section-title">
-              วิสัยทัศน์ผู้บริหาร & <span className="text-blue">ประวัติองค์กร G-SPEED</span>
+              {founder.hero?.title ? (
+                founder.hero.title
+              ) : (
+                <>วิสัยทัศน์ผู้บริหาร & <span className="text-blue">ประวัติองค์กร G-SPEED</span></>
+              )}
             </h1>
             <p className="section-subtitle max-w-700">
-              มุ่งมั่นขับเคลื่อนอุตสาหกรรมอีสปอร์ตไทยสู่มาตรฐานสากล ด้วยเทคโนโลยีระดับมืออาชีพ และระบบการจัดการที่โปร่งใส มั่นคง ยั่งยืน
+              {founder.hero?.subtitle || 'มุ่งมั่นขับเคลื่อนอุตสาหกรรมอีสปอร์ตไทยสู่มาตรฐานสากล ด้วยเทคโนโลยีระดับมืออาชีพ และระบบการจัดการที่โปร่งใส มั่นคง ยั่งยืน'}
             </p>
           </div>
         </div>
@@ -76,11 +137,11 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                 </div>
                 <div className="founder-quick-metrics">
                   <div className="founder-m-item">
-                    <span className="m-val text-blue">16+ ปี</span>
+                    <span className="m-val text-blue">{founder.experience || '16+ ปี'}</span>
                     <span className="m-lbl">ประสบการณ์ในอุตสาหกรรม</span>
                   </div>
                   <div className="founder-m-item">
-                    <span className="m-val text-blue">8 สาขา</span>
+                    <span className="m-val text-blue">{founder.managedBranches || '8 สาขา'}</span>
                     <span className="m-lbl">อารีนาที่บริหารจัดการ</span>
                   </div>
                 </div>
@@ -109,24 +170,21 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                 </div>
 
                 <div className="founder-philosophy-list">
-                  <div className="philosophy-item">
-                    <CheckCircle2 size={18} className="text-blue" />
-                    <div>
-                      <strong>เทคโนโลยีต้องดีที่สุด:</strong> ลงทุนในฮาร์ดแวร์ระดับทัวร์นาเมนต์ จอ 360Hz และระบบเน็ตเวิร์กที่แข่งขันได้จริง
+                  {(founder.philosophies && founder.philosophies.length > 0 
+                    ? founder.philosophies 
+                    : [
+                        { title: 'เทคโนโลยีต้องดีที่สุด', desc: 'ลงทุนในฮาร์ดแวร์ระดับทัวร์นาเมนต์ จอ 360Hz และระบบเน็ตเวิร์กที่แข่งขันได้จริง' },
+                        { title: 'สิ่งแวดล้อมปลอดภัยและได้มาตรฐาน', desc: 'ยึดหลักร้านเกมสีขาว ได้รับใบอนุญาตถูกต้อง 100% ปลอดบุหรี่และโปร่งใส' },
+                        { title: 'คืนทุนไว พาร์ตเนอร์เติบโตยั่งยืน', desc: 'ระบบแฟรนไชส์ออกแบบโดยคำนึงถึงผลตอบแทนของผู้ลงทุน ควบคุมต้นทุนได้จริง' }
+                      ]
+                  ).map((phil, pIdx) => (
+                    <div key={phil.id || pIdx} className="philosophy-item">
+                      <CheckCircle2 size={18} className="text-blue" />
+                      <div>
+                        <strong>{phil.title}:</strong> {phil.desc}
+                      </div>
                     </div>
-                  </div>
-                  <div className="philosophy-item">
-                    <CheckCircle2 size={18} className="text-blue" />
-                    <div>
-                      <strong>สิ่งแวดล้อมปลอดภัยและได้มาตรฐาน:</strong> ยึดหลักร้านเกมสีขาว ได้รับใบอนุญาตถูกต้อง 100% ปลอดบุหรี่และโปร่งใส
-                    </div>
-                  </div>
-                  <div className="philosophy-item">
-                    <CheckCircle2 size={18} className="text-blue" />
-                    <div>
-                      <strong>คืนทุนไว พาร์ตเนอร์เติบโตยั่งยืน:</strong> ระบบแฟรนไชส์ออกแบบโดยคำนึงถึงผลตอบแทนของผู้ลงทุน ควบคุมต้นทุนได้จริง
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -171,6 +229,60 @@ export default function CompanyProfile({ onNavigateFranchise }) {
               ))}
             </div>
           </div>
+
+          {/* GALLERY 1: ใต้เส้นทางการเติบโต (Milestones & Growth Showcase) */}
+          <div className="company-gallery-block">
+            <div className="company-gallery-header-row">
+              <div className="company-gallery-header-text">
+                <div className="badge-pill badge-amber">
+                  <Camera size={14} />
+                  <span>GROWTH & MILESTONES SHOWCASE</span>
+                </div>
+                <h3 className="company-gallery-title">
+                  อัลบั้มภาพความสำเร็จ & การเติบโตของสาขา
+                </h3>
+                <p className="company-gallery-subtitle">
+                  ภาพบันทึกความทรงจำการเปิดสาขาใหม่ วิวัฒนาการจากร้านอินเทอร์เน็ตสู่ Esport Arena เต็มรูปแบบ และการขยายเครือข่ายครอบคลุมทั่วประเทศ
+                </p>
+              </div>
+            </div>
+
+            <div className="company-gallery-grid">
+              {milestonesList.map((item, idx) => (
+                <div 
+                  key={item.id || idx} 
+                  className="company-gallery-card"
+                  onClick={() => openLightbox(milestonesList, idx)}
+                >
+                  <div className="company-gallery-thumb-box">
+                    <img 
+                      src={item.url} 
+                      alt={item.title} 
+                      className="company-gallery-img" 
+                      loading="lazy" 
+                    />
+                    <div className="company-gallery-tag-pill">
+                      {item.tag || item.year || 'GROWTH'}
+                    </div>
+                    <div className="company-gallery-overlay">
+                      <span className="company-gallery-zoom-badge">
+                        <ZoomIn size={14} />
+                        <span>ดูภาพขนาดเต็ม</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="company-gallery-body">
+                    <div className="company-gallery-item-title">{item.title}</div>
+                    <p className="company-gallery-item-caption">{item.caption}</p>
+                    <div className="company-gallery-card-footer">
+                      <span className="company-gallery-submeta">{item.year ? `ปี ${item.year}` : 'G-Speed Group'}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
@@ -190,20 +302,58 @@ export default function CompanyProfile({ onNavigateFranchise }) {
             </p>
           </div>
 
-          <div className="partners-grid">
-            {FOUNDER_INFO.partners.map((p, idx) => (
-              <div key={idx} className="partner-card glass-panel">
-                <div className="partner-icon-box">
-                  {p.icon === 'Cpu' && <Cpu size={28} className="text-blue" />}
-                  {p.icon === 'Zap' && <Zap size={28} className="text-blue" />}
-                  {p.icon === 'Armchair' && <Armchair size={28} className="text-blue" />}
-                  {p.icon === 'Monitor' && <Monitor size={28} className="text-blue" />}
-                  {p.icon === 'Wifi' && <Wifi size={28} className="text-blue" />}
+          {/* Partner Logo Slider / Infinite Marquee */}
+          <div className="partner-logo-slider-container">
+            <div className="partner-logo-track">
+              {partnerLogosRepeated.map((p, idx) => (
+                <div 
+                  key={`${p.id || p.name}-${idx}`} 
+                  className={`partner-logo-item-card ${p.website && isSafeExternalUrl(p.website) ? 'clickable' : ''}`}
+                  onClick={() => {
+                    if (p.website && isSafeExternalUrl(p.website)) {
+                      window.open(sanitizeSafeUrl(p.website), '_blank', 'noopener,noreferrer');
+                    }
+                  }}
+                  title={p.website ? `คลิกเพื่อเข้าสู่เว็บไซต์ ${p.name}` : p.name}
+                  role={p.website ? 'link' : 'article'}
+                  tabIndex={p.website ? 0 : undefined}
+                >
+                  <div className="partner-logo-img-wrapper">
+                    {p.logo ? (
+                      <img 
+                        src={p.logo} 
+                        alt={p.name} 
+                        className="partner-logo-img"
+                        loading="lazy" 
+                        decoding="async"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          const fallback = e.currentTarget.parentElement?.querySelector('.partner-logo-text-placeholder');
+                          if (fallback) fallback.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <div 
+                      className="partner-logo-text-placeholder" 
+                      style={{ display: p.logo ? 'none' : 'flex' }}
+                    >
+                      <span className="partner-placeholder-brand">{p.name}</span>
+                    </div>
+                  </div>
+
+                  <div className="partner-logo-info">
+                    <span className="partner-logo-brand">{p.name}</span>
+                    <span className="partner-logo-tier">{p.tier || 'Official Partner'}</span>
+                  </div>
+
+                  {p.website && (
+                    <div className="partner-logo-external-icon" title="เปิดลิงก์ภายนอก">
+                      <ArrowRight size={13} />
+                    </div>
+                  )}
                 </div>
-                <h3 className="partner-name">{p.name}</h3>
-                <div className="partner-tier">{p.tier}</div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -217,15 +367,24 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                 <ShieldCheck size={14} />
                 <span>LEGAL & STANDARD CERTIFICATION</span>
               </div>
-              <h3 className="standards-title">มาตรฐานความถูกต้อง โปร่งใส และปลอดภัย</h3>
+              <h3 className="standards-title">{founder.standards?.title || 'มาตรฐานความถูกต้อง โปร่งใส และปลอดภัย'}</h3>
               <p className="standards-desc">
-                G-Speed ทุกสาขาผ่านการรับรองและตรวจสอบตามพระราชบัญญัติภาพยนตร์และวีดิทัศน์ ได้รับใบอนุญาตประกอบกิจการร้านเกมอย่างถูกต้องจากกระทรวงวัฒนธรรม ใช้ระบบปฏิบัติการ Windows และลิขสิทธิ์เกมแท้ 100% หมดกังวลเรื่องปัญหาลิขสิทธิ์
+                {founder.standards?.desc || 'G-Speed ทุกสาขาผ่านการรับรองและตรวจสอบตามพระราชบัญญัติภาพยนตร์และวีดิทัศน์ ได้รับใบอนุญาตประกอบกิจการร้านเกมอย่างถูกต้องจากกระทรวงวัฒนธรรม ใช้ระบบปฏิบัติการ Windows และลิขสิทธิ์เกมแท้ 100% หมดกังวลเรื่องปัญหาลิขสิทธิ์'}
               </p>
 
               <div className="standards-pills">
-                <span className="std-pill"><CheckCircle2 size={16} className="text-blue" /> ใบอนุญาตสถานประกอบการถูกต้องตามกฎหมาย</span>
-                <span className="std-pill"><CheckCircle2 size={16} className="text-blue" /> ร้านเกมสีขาว ปลอดภัยสำหรับเยาวชน</span>
-                <span className="std-pill"><CheckCircle2 size={16} className="text-blue" /> ระบบกล้องวงจรปิด CCTV Full HD บันทึก 30 วัน</span>
+                {(founder.standards?.pills && founder.standards.pills.length > 0
+                  ? founder.standards.pills
+                  : [
+                      'ใบอนุญาตสถานประกอบการถูกต้องตามกฎหมาย',
+                      'ร้านเกมสีขาว ปลอดภัยสำหรับเยาวชน',
+                      'ระบบกล้องวงจรปิด CCTV Full HD บันทึก 30 วัน'
+                    ]
+                ).map((pill, plIdx) => (
+                  <span key={plIdx} className="std-pill">
+                    <CheckCircle2 size={16} className="text-blue" /> {pill}
+                  </span>
+                ))}
               </div>
             </div>
 
@@ -240,15 +399,137 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                   <Calculator size={20} />
                 </div>
                 <div className="btn-partner-text-stack">
-                  <span className="btn-partner-tier-sub">คำนวณงบลงทุน & วางระบบร้าน</span>
-                  <span className="btn-partner-tier-main">ร่วมเป็นพาร์ตเนอร์แฟรนไชส์กับเรา</span>
+                  <span className="btn-partner-tier-sub">{founder.franchiseCta?.subTitle || 'คำนวณงบลงทุน & วางระบบร้าน'}</span>
+                  <span className="btn-partner-tier-main">{founder.franchiseCta?.title || 'ร่วมเป็นพาร์ตเนอร์แฟรนไชส์กับเรา'}</span>
                 </div>
                 <ArrowRight size={18} className="btn-partner-arrow" />
               </button>
             </div>
           </div>
+
+          {/* GALLERY 3: ใต้มาตรฐานความถูกต้อง (Compliance & Standards Showcase) */}
+          <div className="company-gallery-block">
+            <div className="company-gallery-header-row">
+              <div className="company-gallery-header-text">
+                <div className="badge-pill badge-blue">
+                  <ShieldCheck size={14} />
+                  <span>SAFETY & STANDARDS SHOWCASE</span>
+                </div>
+                <h3 className="company-gallery-title">
+                  ภาพการตรวจสอบมาตรฐาน & สภาพแวดล้อมร้านเกมสีขาว
+                </h3>
+                <p className="company-gallery-subtitle">
+                  ความโปร่งใส ปลอดภัย ตรวจสอบได้จริงตามมาตรฐานกระทรวงวัฒนธรรม ร้านเกมสีขาว และระบบดูแลความปลอดภัยตลอด 24 ชั่วโมง
+                </p>
+              </div>
+            </div>
+
+            <div className="company-gallery-grid">
+              {standardsList.map((item, idx) => (
+                <div 
+                  key={item.id || idx} 
+                  className="company-gallery-card"
+                  onClick={() => openLightbox(standardsList, idx)}
+                >
+                  <div className="company-gallery-thumb-box">
+                    <img 
+                      src={item.url} 
+                      alt={item.title} 
+                      className="company-gallery-img" 
+                      loading="lazy" 
+                    />
+                    <div className="company-gallery-tag-pill" style={{ color: '#60a5fa' }}>
+                      {item.tag || 'CERTIFIED'}
+                    </div>
+                    <div className="company-gallery-overlay">
+                      <span className="company-gallery-zoom-badge">
+                        <ZoomIn size={14} />
+                        <span>ดูภาพขนาดเต็ม</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="company-gallery-body">
+                    <div className="company-gallery-item-title">{item.title}</div>
+                    <p className="company-gallery-item-caption">{item.caption}</p>
+                    <div className="company-gallery-card-footer">
+                      <span className="company-gallery-submeta">{item.tag || 'มาตรฐานความปลอดภัย'}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
+
+      {/* LIGHTBOX MODAL: FULL PHOTO VIEWER (FOR PUBLIC VISITORS) */}
+      {lightboxData && lightboxData.list[lightboxData.index] && (() => {
+        const curPhoto = lightboxData.list[lightboxData.index];
+        return (
+          <div 
+            className="company-lightbox-backdrop"
+            onClick={() => setLightboxData(null)}
+          >
+            <div 
+              className="company-lightbox-panel"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button 
+                type="button" 
+                className="lightbox-close-btn"
+                onClick={() => setLightboxData(null)}
+                title="ปิด (Esc)"
+              >
+                <X size={20} />
+              </button>
+
+              <div className="company-lightbox-img-wrap">
+                <img 
+                  src={curPhoto.url} 
+                  alt={curPhoto.title} 
+                  className="company-lightbox-img" 
+                />
+
+                {lightboxData.list.length > 1 && (
+                  <>
+                    <button 
+                      type="button" 
+                      className="lightbox-nav-btn prev"
+                      onClick={handlePrevPhoto}
+                      title="ภาพก่อนหน้า (ลูกศรซ้าย)"
+                    >
+                      <ChevronLeft size={24} />
+                    </button>
+                    <button 
+                      type="button" 
+                      className="lightbox-nav-btn next"
+                      onClick={handleNextPhoto}
+                      title="ภาพถัดไป (ลูกศรขวา)"
+                    >
+                      <ChevronRight size={24} />
+                    </button>
+                  </>
+                )}
+              </div>
+
+              <div className="company-lightbox-footer">
+                <div className="lightbox-meta-info">
+                  <div className="lightbox-tag-row">
+                    <span className="lightbox-tag">{curPhoto.tag || curPhoto.year || curPhoto.partner || 'SHOWCASE'}</span>
+                  </div>
+                  <h4 className="lightbox-title">{curPhoto.title}</h4>
+                  <p className="lightbox-caption">{curPhoto.caption}</p>
+                </div>
+
+                <div className="lightbox-counter">
+                  {lightboxData.index + 1} / {lightboxData.list.length}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

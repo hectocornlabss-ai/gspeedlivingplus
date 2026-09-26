@@ -3,10 +3,11 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ArenaHub from './components/ArenaHub';
 import AIChatWidget from './components/AIChatWidget';
+import AnnouncementTicker from './components/AnnouncementTicker';
 import ErrorBoundary from './components/ErrorBoundary';
 import { SiteDataProvider, useSiteData } from './context/SiteDataContext';
 import { getRouteMetadata } from './data/routesConfig';
-import { applySEOMetadata } from './utils/seoManager';
+import { applySEOMetadata, applyTrackingAndVerificationScripts } from './utils/seoManager';
 import './App.css';
 
 // Code Splitting: Lazy load heavy modules for lightning fast initial load
@@ -166,6 +167,9 @@ function AppContent() {
       news: siteData?.news
     });
     applySEOMetadata(meta);
+    if (siteData?.seoMarketingConfig) {
+      applyTrackingAndVerificationScripts(siteData.seoMarketingConfig);
+    }
   }, [routeState.pathname, routeState.eventSlug, routeState.actSlug, siteData]);
 
   // เลื่อนกลับขึ้นบนสุดเมื่อเปลี่ยนหน้า
@@ -229,15 +233,8 @@ function AppContent() {
 
   return (
     <div className="app-layout" style={themeStyles}>
-      {/* Top Announcement Bar */}
-      <div className="top-announcement-bar">
-        <div className="container ticker-container">
-          <span className="ticker-badge">{siteData.tickerBadge || 'ประกาศ'}</span>
-          <span className="ticker-text">
-            {siteData.tickerText}
-          </span>
-        </div>
-      </div>
+      {/* Top Announcement Bar (Animated Marquee & Multi-Announcements) */}
+      <AnnouncementTicker onNavigate={navigateTo} />
 
       {/* Main Header / Navigation (Clean Path URLs) */}
       <Navbar 

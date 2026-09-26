@@ -77,7 +77,7 @@ export default function Footer({ setActiveTab, onNavigate }) {
               </li>
               <li>
                 <button onClick={() => handleLink('/franchise')} className="text-blue">
-                  สนใจเปิดร้าน (แฟรนไชส์ & จำลองผังร้าน 3D)
+                  ติดต่อเปิดร้านเกมของคุณ
                 </button>
               </li>
             </ul>

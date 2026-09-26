@@ -191,24 +191,33 @@ export default function TournamentDetailModal({
               </span>
             </nav>
 
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', background: 'rgba(0,0,0,0.5)', padding: '3px 10px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.15)' }}>
-              <Globe size={12} className="text-cyan" />
-              <span style={{ fontFamily: 'monospace', color: '#93c5fd' }}>/events/{tournament.slug || tournament.id}</span>
-              <button
-                type="button"
-                onClick={() => {
-                  const cleanUrl = `${window.location.origin}/events/${tournament.slug || tournament.id}`;
-                  navigator.clipboard.writeText(cleanUrl);
-                  setCopiedLink(true);
-                  setTimeout(() => setCopiedLink(false), 2500);
-                }}
-                style={{ background: copiedLink ? '#10b981' : 'rgba(255,255,255,0.2)', border: 'none', color: '#fff', padding: '2px 8px', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.72rem', fontWeight: 600 }}
-                title="คัดลอก Clean URL สำหรับแชร์บน Facebook, LINE, Discord"
-              >
-                {copiedLink ? <Check size={11} /> : <Copy size={11} />}
-                <span>{copiedLink ? 'คัดลอกแล้ว ✓' : 'คัดลอก Clean Link'}</span>
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => {
+                const cleanUrl = `${window.location.origin}/events/${tournament.slug || tournament.id}`;
+                navigator.clipboard.writeText(cleanUrl);
+                setCopiedLink(true);
+                setTimeout(() => setCopiedLink(false), 2500);
+              }}
+              style={{
+                background: copiedLink ? '#10b981' : 'rgba(255,255,255,0.15)',
+                border: '1px solid rgba(255,255,255,0.25)',
+                color: '#ffffff',
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s ease',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+              }}
+              title={copiedLink ? "คัดลอกลิงก์ทัวร์นาเมนต์แล้ว!" : "แชร์ / คัดลอกลิงก์ทัวร์นาเมนต์"}
+              aria-label="แชร์ทัวร์นาเมนต์"
+            >
+              {copiedLink ? <Check size={14} /> : <Share2 size={14} />}
+            </button>
           </div>
 
           {/* Title & Metadata chips */}

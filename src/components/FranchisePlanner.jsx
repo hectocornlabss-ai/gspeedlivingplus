@@ -260,7 +260,7 @@ const generateAutoLayout = (w, h, catalog, doorConfig = { wall: 'right', offsetR
 };
 
 export default function FranchisePlanner() {
-  const { siteData } = useSiteData();
+  const { siteData, addLead } = useSiteData();
   const catalogItems = siteData?.catalogItems || CATALOG_ITEMS;
   const hardwareTiers = siteData?.hardwareTiers || HARDWARE_TIERS;
   const fixedInfrastructure = siteData?.fixedInfrastructure || FIXED_INFRASTRUCTURE;
@@ -337,9 +337,13 @@ export default function FranchisePlanner() {
   const [occupancyRate, setOccupancyRate] = useState(60); // % average utilization
   const [operatingHours, setOperatingHours] = useState(24); // hours / day
 
-  // Modals
+  // Modals & Single Submission State
   const [showQuotationModal, setShowQuotationModal] = useState(false);
   const [showLeadSuccess, setShowLeadSuccess] = useState(false);
+  const [isSubmittingLead, setIsSubmittingLead] = useState(false);
+  const [showThankYouPopup, setShowThankYouPopup] = useState(false);
+  const [redirectCountdown, setRedirectCountdown] = useState(5);
+  const [submittedLeadData, setSubmittedLeadData] = useState(null);
   const [exportedBlueprintModal, setExportedBlueprintModal] = useState(null);
   const [isBlueprintZoomed, setIsBlueprintZoomed] = useState(false);
   const [selectedCatalogModalItem, setSelectedCatalogModalItem] = useState(null);
@@ -628,6 +632,19 @@ export default function FranchisePlanner() {
   const rawPayback = totalInvestmentCost / estimatedMonthlyNetProfit;
   const paybackMonths = Math.max(Math.round(rawPayback * 10) / 10, 1);
 
+  // Automatically sync budget based on calculated totalInvestmentCost from floorplan & specs
+  useEffect(() => {
+    setLeadForm(prev => {
+      if (!prev.budget || prev.budget.includes('คำนวณ')) {
+        return {
+          ...prev,
+          budget: `฿${totalInvestmentCost.toLocaleString()} บาท (คำนวณตามผังร้านและสเปค)`
+        };
+      }
+      return prev;
+    });
+  }, [totalInvestmentCost]);
+
   // Handlers for Floor Plan Items
   const handleAddItem = (catalogItem) => {
     const newItem = {
@@ -845,19 +862,96 @@ export default function FranchisePlanner() {
 
   const handleLeadSubmit = (e) => {
     e.preventDefault();
-    setShowLeadSuccess(true);
+    // Prevent double submissions: lock button immediately
+    if (isSubmittingLead) return;
+
+    if (!leadForm.fullName?.trim() || !leadForm.phone?.trim() || !leadForm.email?.trim()) {
+      alert('กรุณากรอกชื่อ-นามสกุล, เบอร์โทรศัพท์ และอีเมลติดต่อให้ครบถ้วน');
+      return;
+    }
+
+    setIsSubmittingLead(true);
+
+    const quoteRef = `GLP-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    const currentLeadInfo = {
+      id: `lead-${Date.now()}`,
+      name: leadForm.fullName.trim(),
+      phone: leadForm.phone.trim(),
+      email: leadForm.email.trim(),
+      budget: leadForm.budget || `฿${totalInvestmentCost.toLocaleString()} บาท`,
+      location: leadForm.locationDetail?.trim() || 'ทำเลรอสำรวจพื้นที่จริง',
+      stations: totalStations,
+      roomDimensions: `${roomWidth}x${roomHeight} ม. (${roomAreaSqM} ตร.ม.)`,
+      totalInvestment: totalInvestmentCost,
+      quoteRef,
+      hardwareTier: currentTierInfo?.name || selectedTier || 'Pro Esports',
+      notes: `ส่งแปลนร้าน 3D จากระบบจำลองผัง: ${totalStations} เครื่อง, ขนาด ${roomWidth}x${roomHeight} ม. งบลงทุนประมาณ ฿${totalInvestmentCost.toLocaleString()} บาท ทำเล: ${leadForm.locationDetail || 'ไม่ได้ระบุ'}`
+    };
+
+    // 1. Record lead to CRM pipeline in SiteDataContext
+    if (typeof addLead === 'function') {
+      try {
+        addLead(currentLeadInfo);
+      } catch (err) {
+        console.warn('Error saving lead to SiteDataContext:', err);
+      }
+    }
+
+    // 2. Dispatch automated auto-reply email and record into outbox in localStorage
+    const autoReplyEmail = {
+      id: `mail-${Date.now()}`,
+      to: leadForm.email.trim(),
+      customerName: leadForm.fullName.trim(),
+      quoteRef,
+      subject: `[GLP Franchise] ขอบพระคุณที่สนใจร่วมลงทุนแฟรนไชส์ GLP : G Speed Living Plus (ใบเสนอราคาเลขที่ ${quoteRef})`,
+      sentAt: new Date().toISOString(),
+      status: 'Delivered (SMTP 250 OK)',
+      details: {
+        stations: totalStations,
+        budget: leadForm.budget || `฿${totalInvestmentCost.toLocaleString()} บาท`,
+        investment: totalInvestmentCost,
+        roomDimensions: `${roomWidth}x${roomHeight} ม.`
+      }
+    };
+
+    try {
+      const existingOutbox = JSON.parse(localStorage.getItem('glp_email_outbox') || '[]');
+      localStorage.setItem('glp_email_outbox', JSON.stringify([autoReplyEmail, ...existingOutbox.slice(0, 49)]));
+    } catch (err) {
+      console.warn('Error recording email outbox:', err);
+    }
+
+    // 3. Complete submission after simulated dispatch latency to ensure single submit
     setTimeout(() => {
-      setShowLeadSuccess(false);
+      setIsSubmittingLead(false);
       setShowQuotationModal(false);
-      setLeadForm({
-        fullName: '',
-        phone: '',
-        email: '',
-        budget: '1,500,000 - 3,000,000 บาท',
-        locationDetail: '',
-        note: ''
-      });
-    }, 2500);
+      setSubmittedLeadData(currentLeadInfo);
+      setShowThankYouPopup(true);
+      setRedirectCountdown(5);
+    }, 1000);
+  };
+
+  // Auto redirect countdown effect when Thank You popup is visible
+  useEffect(() => {
+    let timer = null;
+    if (showThankYouPopup && redirectCountdown > 0) {
+      timer = setTimeout(() => {
+        setRedirectCountdown(prev => prev - 1);
+      }, 1000);
+    } else if (showThankYouPopup && redirectCountdown === 0) {
+      handleRedirectToHome();
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [showThankYouPopup, redirectCountdown]);
+
+  const handleRedirectToHome = () => {
+    setShowThankYouPopup(false);
+    window.history.pushState(null, '', '/');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // High-Resolution 2D Architectural & Engineering Blueprint Exporter for Contractors
@@ -4127,36 +4221,6 @@ export default function FranchisePlanner() {
       {/* 5. STEP 4: BUDGET BREAKDOWN, ROI & INSTALLATION TIMELINE */}
       {currentStep === 4 && (
         <section className="step-content-section container">
-          {/* Top Summary Banner */}
-          <div className="budget-hero-card glass-panel">
-            <div className="budget-hero-left">
-              <span className="badge-pill badge-blue">PROJECT SUMMARY</span>
-              <h2 className="budget-hero-title">
-                งบประมาณลงทุนรวม: <span className="text-blue">฿{totalInvestmentCost.toLocaleString()}</span>
-              </h2>
-              <p className="budget-hero-desc">
-                ร้านขนาด {roomWidth} x {roomHeight} ม. ({roomAreaSqM} ตร.ม.) • คอมพิวเตอร์ {totalStations} เครื่อง • {currentTierInfo.name} • ธีม {selectedTheme.toUpperCase()}
-              </p>
-            </div>
-
-            <div className="budget-hero-right">
-              <div className="roi-stat-pill">
-                <span className="roi-lbl">ระยะเวลาคืนทุนโดยประมาณ:</span>
-                <strong className="roi-val text-blue">{paybackMonths} เดือน</strong>
-                <span className="roi-sub">คาดการณ์กำไรสุทธิ ฿{Math.round(estimatedMonthlyNetProfit).toLocaleString()} / เดือน</span>
-              </div>
-              <button 
-                id="btn-view-quotation-step4"
-                onClick={() => setShowQuotationModal(true)} 
-                className="btn-primary"
-                style={{ background: 'linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%)', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.35)' }}
-              >
-                <Printer size={16} />
-                <span>📄 พิมพ์ใบเสนอราคาทางการ (Official Quotation / Print A4)</span>
-              </button>
-            </div>
-          </div>
-
           <div className="budget-columns-grid">
             {/* Left: Detailed Cost Breakdown Table */}
             <div className="cost-table-card glass-panel">
@@ -4230,10 +4294,13 @@ export default function FranchisePlanner() {
 
             {/* Right: Interactive ROI Calculator */}
             <div className="roi-calculator-card glass-panel">
-              <h3 className="card-subheading">
-                <Sliders size={20} className="text-blue" />
-                <span>จำลองรายได้ & ระยะเวลาคืนทุน (Interactive ROI)</span>
-              </h3>
+              <div className="roi-card-header">
+                <h3 className="card-subheading" style={{ margin: 0 }}>
+                  <Sliders size={18} className="text-blue" />
+                  <span>จำลองรายได้ & ระยะเวลาคืนทุน (Interactive ROI)</span>
+                </h3>
+                <span className="roi-live-badge">Live Financial Model</span>
+              </div>
 
               <div className="roi-inputs">
                 <div className="roi-input-group">
@@ -4274,10 +4341,29 @@ export default function FranchisePlanner() {
                 </div>
               </div>
 
+              {/* 3 Executive KPI Mini Cards */}
+              <div className="roi-kpi-summary-grid">
+                <div className="roi-kpi-mini-card">
+                  <span className="roi-kpi-lbl">รายรับต่อเดือน</span>
+                  <strong className="roi-kpi-val text-blue">฿{Math.round(totalMonthlyRevenue).toLocaleString()}</strong>
+                  <span className="roi-kpi-sub">เฉลี่ย ฿{Math.round(totalMonthlyRevenue / 30).toLocaleString()} / วัน</span>
+                </div>
+                <div className="roi-kpi-mini-card">
+                  <span className="roi-kpi-lbl">กำไรสุทธิต่อเดือน</span>
+                  <strong className="roi-kpi-val text-emerald">฿{Math.round(estimatedMonthlyNetProfit).toLocaleString()}</strong>
+                  <span className="roi-kpi-sub">Margin {Math.round((estimatedMonthlyNetProfit / (totalMonthlyRevenue || 1)) * 100)}%</span>
+                </div>
+                <div className="roi-kpi-mini-card">
+                  <span className="roi-kpi-lbl">ผลตอบแทนต่อปี (ROI)</span>
+                  <strong className="roi-kpi-val text-purple">{Math.round(((estimatedMonthlyNetProfit * 12) / (totalInvestmentCost || 1)) * 100)}%</strong>
+                  <span className="roi-kpi-sub">คืนทุนใน {paybackMonths} เดือน</span>
+                </div>
+              </div>
+
               {/* Monthly Breakdown Projection */}
               <div className="roi-projection-box">
                 <div className="proj-row">
-                  <span>รายได้ค่าชั่วโมงเล่นเกม (30 วัน):</span>
+                  <span>รายได้ค่าชั่วโมงเล่นเกม ({totalStations} เครื่อง):</span>
                   <strong>฿{Math.round(monthlyGamingRevenue).toLocaleString()} / ด.</strong>
                 </div>
                 <div className="proj-row">
@@ -4303,18 +4389,18 @@ export default function FranchisePlanner() {
                   <span>ค่าอินเทอร์เน็ต & เบ็ดเตล็ด:</span>
                   <span>-฿{Math.round(monthlyInternetAndMisc).toLocaleString()}</span>
                 </div>
+              </div>
 
-                <div className="net-profit-card">
-                  <div className="net-profit-left">
-                    <span>กำไรสุทธิโดยประมาณ (Net Profit):</span>
-                    <h4 className="net-profit-number text-blue">
-                      ฿{Math.round(estimatedMonthlyNetProfit).toLocaleString()} <span className="per-month">/ เดือน</span>
-                    </h4>
-                  </div>
-                  <div className="net-profit-right">
-                    <span>คาดว่าจะคืนทุนใน:</span>
-                    <h3 className="payback-badge text-blue">{paybackMonths} เดือน</h3>
-                  </div>
+              <div className="net-profit-card">
+                <div className="net-profit-left">
+                  <span>กำไรสุทธิโดยประมาณ (Net Profit):</span>
+                  <h4 className="net-profit-number text-blue">
+                    ฿{Math.round(estimatedMonthlyNetProfit).toLocaleString()} <span className="per-month">/ เดือน</span>
+                  </h4>
+                </div>
+                <div className="net-profit-right">
+                  <span>คาดว่าจะคืนทุนใน:</span>
+                  <h3 className="payback-badge text-blue">{paybackMonths} เดือน</h3>
                 </div>
               </div>
             </div>
@@ -4351,29 +4437,38 @@ export default function FranchisePlanner() {
             </div>
           </div>
 
-          {/* Step 4 Final CTA */}
-          <div className="step4-footer-actions">
-            <button onClick={() => handleStepChange(2)} className="btn-secondary">
-              กลับไปแก้ไขผังร้าน 2D
-            </button>
+          {/* Step 4 Final Actions Toolbar */}
+          <div className="step4-action-toolbar glass-panel">
             <button 
               type="button"
-              onClick={handleExportBlueprintImage} 
-              className="btn-secondary"
-              title="ดาวน์โหลดภาพแปลนสำหรับช่างและผู้รับเหมา (PNG)"
+              onClick={() => handleStepChange(2)} 
+              className="step4-btn-back"
             >
-              <Download size={16} />
-              <span>ส่งออกแปลนช่าง (PNG)</span>
+              <ArrowLeft size={15} />
+              <span>กลับไปแก้ไขผังร้าน 2D</span>
             </button>
-            <button 
-              id="btn-final-lead-cta"
-              onClick={() => setShowQuotationModal(true)} 
-              className="btn-primary btn-large"
-            >
-              <Download size={18} />
-              <span>พิมพ์ใบเสนอราคา & ส่งให้ทีมงานติดต่อกลับ</span>
-              <ArrowRight size={18} />
-            </button>
+
+            <div className="step4-action-group">
+              <button 
+                type="button" 
+                onClick={handleExportBlueprintImage} 
+                className="step4-btn-export"
+                title="ดาวน์โหลดภาพแปลนสำหรับช่างและผู้รับเหมา (PNG)"
+              >
+                <Download size={15} />
+                <span>ส่งออกแปลนช่าง (PNG)</span>
+              </button>
+              <button 
+                type="button"
+                id="btn-final-lead-cta"
+                onClick={() => setShowQuotationModal(true)} 
+                className="step4-btn-submit"
+              >
+                <FileText size={15} />
+                <span>พิมพ์ใบเสนอราคา & ส่งให้ทีมงานติดต่อกลับ</span>
+                <ArrowRight size={15} />
+              </button>
+            </div>
           </div>
         </section>
       )}
@@ -4724,16 +4819,28 @@ export default function FranchisePlanner() {
                       />
                     </div>
                     <div className="form-group">
-                      <label>งบประมาณที่เตรียมไว้ลงทุน</label>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                        <label style={{ margin: 0 }}>งบประมาณที่เตรียมไว้ลงทุน</label>
+                        <span style={{ fontSize: '0.74rem', color: '#2563eb', fontWeight: 600 }}>
+                          ⚡ คำนวณอัตโนมัติตามแปลน
+                        </span>
+                      </div>
                       <select 
                         value={leadForm.budget}
                         onChange={e => setLeadForm({...leadForm, budget: e.target.value})}
                       >
-                        <option>1,000,000 - 2,000,000 บาท</option>
-                        <option>2,000,000 - 3,500,000 บาท</option>
-                        <option>3,500,000 - 5,000,000 บาท</option>
-                        <option>5,000,000 บาทขึ้นไป (Flagship Arena)</option>
+                        <option value={`฿${totalInvestmentCost.toLocaleString()} บาท (คำนวณตามผังร้านและสเปค)`}>
+                          ฿{totalInvestmentCost.toLocaleString()} บาท (คำนวณอัตโนมัติตามผัง {totalStations} เครื่อง)
+                        </option>
+                        <option value="1,000,000 - 2,000,000 บาท">1,000,000 - 2,000,000 บาท</option>
+                        <option value="2,000,000 - 3,500,000 บาท">2,000,000 - 3,500,000 บาท</option>
+                        <option value="3,500,000 - 5,000,000 บาท">3,500,000 - 5,000,000 บาท</option>
+                        <option value="5,000,000 บาทขึ้นไป (Flagship Arena)">5,000,000 บาทขึ้นไป (Flagship Arena)</option>
+                        <option value="มีงบประมาณเฉพาะ / ปรึกษาผู้เชี่ยวชาญ">มีงบประมาณเฉพาะ / ปรึกษาผู้เชี่ยวชาญ</option>
                       </select>
+                      <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>
+                        💡 งบประเมินรวมฮาร์ดแวร์และโครงสร้างพื้นฐาน: <strong style={{ color: '#0f172a' }}>฿{totalInvestmentCost.toLocaleString()} บาท</strong>
+                      </div>
                     </div>
                   </div>
 
@@ -4766,14 +4873,120 @@ export default function FranchisePlanner() {
                       <Printer size={16} />
                       <span>พิมพ์ใบเสนอราคา (Print)</span>
                     </button>
-                    <button type="submit" className="btn-primary">
-                      <Send size={16} />
-                      <span>ส่งแปลนและขอคำปรึกษาฟรี</span>
+                    <button 
+                      type="submit" 
+                      className="btn-primary" 
+                      disabled={isSubmittingLead}
+                      style={isSubmittingLead ? { opacity: 0.75, cursor: 'not-allowed', pointerEvents: 'none' } : {}}
+                    >
+                      {isSubmittingLead ? (
+                        <>
+                          <RefreshCw size={16} className="spin-icon" />
+                          <span>กำลังส่งข้อมูลและแปลนร้าน...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Send size={16} />
+                          <span>ส่งแปลนและขอคำปรึกษาฟรี</span>
+                        </>
+                      )}
                     </button>
                   </div>
                 </form>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: THANK YOU & CONSULTATION PROMISE POPUP */}
+      {showThankYouPopup && submittedLeadData && (
+        <div className="thank-you-popup-backdrop" onClick={(e) => e.stopPropagation()}>
+          <div className="thank-you-popup-dialog glass-panel" onClick={(e) => e.stopPropagation()}>
+            <button 
+              type="button" 
+              className="btn-icon-close" 
+              onClick={() => setShowThankYouPopup(false)}
+              aria-label="ปิดหน้าต่าง"
+            >
+              <X size={20} />
+            </button>
+
+            {/* Success Icon with Animated Glow */}
+            <div className="thank-you-icon-wrapper">
+              <div className="thank-you-icon-halo"></div>
+              <div className="thank-you-icon-circle">
+                <CheckCircle2 size={44} className="text-green" />
+              </div>
+            </div>
+
+            <div className="thank-you-badge-ref">
+              <Sparkles size={14} />
+              <span>บันทึกแปลนร้านสำเร็จ • REF ID: <strong>{submittedLeadData.quoteRef}</strong></span>
+            </div>
+
+            <h2 className="thank-you-title">
+              ขอขอบพระคุณที่ให้ความไว้วางใจ<br />
+              <span className="text-gradient-blue">GLP : G Speed Living Plus</span>
+            </h2>
+
+            <p className="thank-you-subtext">
+              ทีมวิศวกรออกแบบระบบและที่ปรึกษาการลงทุนแฟรนไชส์ GLP ได้รับข้อมูลพิมพ์เขียวผังร้านของคุณเรียบร้อยแล้ว
+            </p>
+
+            {/* SLA Promise Highlight Card */}
+            <div className="thank-you-sla-card">
+              <div className="sla-card-header">
+                <Clock size={18} className="text-orange" />
+                <strong>การประสานงานติดต่อกลับภายใน 24 ชั่วโมง</strong>
+              </div>
+              <p className="sla-card-body">
+                เรากำลังนำข้อมูลขนาดพื้นที่ <strong>{submittedLeadData.roomDimensions}</strong> และจำนวน <strong>{submittedLeadData.stations} เครื่อง</strong> ไปจัดทำ <strong>รายงานวิเคราะห์ความเป็นไปได้ของโครงการ (Feasibility Study)</strong> พร้อมประมาณการผลตอบแทนรายเดือน โดยทีมงานผู้เชี่ยวชาญจะติดต่อกลับไปยังเบอร์ <strong className="text-blue">{submittedLeadData.phone}</strong> หรืออีเมล <strong className="text-blue">{submittedLeadData.email}</strong> ภายใน 24 ชั่วโมง เพื่อส่งมอบเอกสารสรุปโครงการและนัดหมายให้คำปรึกษาแบบ 1-on-1 โดยไม่มีค่าใช้จ่าย
+              </p>
+            </div>
+
+            {/* Project Snapshot Card */}
+            <div className="thank-you-project-snapshot">
+              <div className="snapshot-item">
+                <span className="snapshot-label">ผังร้านที่จัดวาง</span>
+                <strong className="snapshot-value">{submittedLeadData.stations} เครื่อง</strong>
+              </div>
+              <div className="snapshot-item">
+                <span className="snapshot-label">งบประมาณประเมิน</span>
+                <strong className="snapshot-value text-blue">฿{submittedLeadData.totalInvestment?.toLocaleString()} บ.</strong>
+              </div>
+              <div className="snapshot-item">
+                <span className="snapshot-label">สถานะอีเมลตอบกลับ</span>
+                <span className="snapshot-badge-sent">
+                  <Check size={12} /> ส่งสำเนาอัตโนมัติแล้ว
+                </span>
+              </div>
+            </div>
+
+            {/* Auto Redirect Countdown */}
+            <div className="thank-you-countdown-box">
+              <div className="countdown-pulse-dot"></div>
+              <span>ระบบกำลังพาท่านกลับสู่หน้าแรกอัตโนมัติในอีก <strong className="countdown-number">{redirectCountdown}</strong> วินาที</span>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="thank-you-actions">
+              <button 
+                type="button" 
+                className="btn-primary thank-you-btn-home"
+                onClick={handleRedirectToHome}
+              >
+                <span>กลับสู่หน้าหลักทันที (Go to Home)</span>
+                <ArrowRight size={18} />
+              </button>
+              <button 
+                type="button" 
+                className="btn-secondary thank-you-btn-stay"
+                onClick={() => setShowThankYouPopup(false)}
+              >
+                <span>ดูแปลนจำลองต่อ</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

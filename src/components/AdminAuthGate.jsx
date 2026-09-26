@@ -29,8 +29,23 @@ export default function AdminAuthGate({ onExitToPublic = () => {} }) {
     return Boolean(sessionStorage.getItem(SESSION_TOKEN_KEY));
   });
 
-  const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('gspeed2026');
+  const [currentAdmin, setCurrentAdmin] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem('gspeed_active_admin_session');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return {
+      id: 'staff-master',
+      name: 'ผู้ดูแลระบบสูงสุด (Master Owner)',
+      username: 'admin',
+      roleTitle: 'Super Administrator',
+      isMaster: true,
+      permissions: ['*']
+    };
+  });
+
+  const [username, setUsername] = useState(import.meta.env.DEV ? 'admin' : '');
+  const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -97,12 +112,43 @@ export default function AdminAuthGate({ onExitToPublic = () => {} }) {
     e.preventDefault();
     if (lockoutRemaining > 0) return;
 
+    const inputUser = username.trim();
+    const inputPass = password.trim();
+
     const targetUsername = siteData?.securityConfig?.adminUsername || 'admin';
     const targetPassword = siteData?.securityConfig?.adminPassword || 'gspeed2026';
+    const targetPin = siteData?.securityConfig?.quickPin || '998877';
 
-    if (username.trim() === targetUsername && password.trim() === targetPassword) {
+    let matchedAdmin = null;
+
+    if (
+      (inputUser.toLowerCase() === targetUsername.toLowerCase() && inputPass === targetPassword) ||
+      (inputUser.toLowerCase() === targetUsername.toLowerCase() && inputPass === targetPin)
+    ) {
+      matchedAdmin = {
+        id: 'staff-master',
+        name: 'ผู้ดูแลระบบสูงสุด (Master Owner)',
+        username: targetUsername,
+        roleTitle: 'Super Administrator',
+        isMaster: true,
+        permissions: ['*']
+      };
+    } else {
+      // Check in staff list
+      const staffList = siteData?.adminStaffList || [];
+      const found = staffList.find(s => 
+        s.status === 'active' &&
+        s.username.toLowerCase() === inputUser.toLowerCase() &&
+        (s.password === inputPass || (s.pin && s.pin === inputPass))
+      );
+      if (found) {
+        matchedAdmin = { ...found };
+      }
+    }
+
+    if (matchedAdmin) {
       // Successful Auth
-      const token = btoa(`gspeed_root_${Date.now()}`);
+      const token = btoa(`gspeed_${matchedAdmin.username}_${Date.now()}`);
       
       if (rememberMe) {
         const durationDays = siteData?.securityConfig?.rememberMeDurationDays || 7;
@@ -116,6 +162,8 @@ export default function AdminAuthGate({ onExitToPublic = () => {} }) {
         localStorage.removeItem(PERSISTENT_EXPIRES_KEY);
       }
 
+      sessionStorage.setItem('gspeed_active_admin_session', JSON.stringify(matchedAdmin));
+      setCurrentAdmin(matchedAdmin);
       sessionStorage.removeItem(FAILED_COUNT_KEY);
       sessionStorage.removeItem(LOCKOUT_TIME_KEY);
       setErrorMsg('');
@@ -123,16 +171,16 @@ export default function AdminAuthGate({ onExitToPublic = () => {} }) {
       
       const now = new Date();
       const timeStr = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-      if (typeof updateSecurityConfig === 'function') {
+      if (typeof updateSecurityConfig === 'function' && matchedAdmin.isMaster) {
         updateSecurityConfig({ lastLogin: timeStr });
       }
 
       if (typeof addAuditLog === 'function') {
         addAuditLog({
           action: 'LOGIN_SUCCESS',
-          adminUser: username.trim(),
+          adminUser: matchedAdmin.username,
           status: 'success',
-          details: `เข้าสู่ระบบสำเร็จ (${rememberMe ? 'จดจำการเข้าสู่ระบบ 7 วัน' : 'เซสชันชั่วคราว'})`
+          details: `เข้าสู่ระบบสำเร็จในบทบาท "${matchedAdmin.roleTitle}" (${rememberMe ? 'จดจำการเข้าสู่ระบบ 7 วัน' : 'เซสชันชั่วคราว'})`
         });
       }
     } else {
@@ -165,6 +213,7 @@ export default function AdminAuthGate({ onExitToPublic = () => {} }) {
   const handleLogout = (reason = 'USER_LOGOUT') => {
     try {
       sessionStorage.removeItem(SESSION_TOKEN_KEY);
+      sessionStorage.removeItem('gspeed_active_admin_session');
       localStorage.removeItem(PERSISTENT_TOKEN_KEY);
       localStorage.removeItem(PERSISTENT_EXPIRES_KEY);
       localStorage.removeItem(LAST_ACTIVITY_KEY);
@@ -175,7 +224,7 @@ export default function AdminAuthGate({ onExitToPublic = () => {} }) {
     if (typeof addAuditLog === 'function') {
       addAuditLog({
         action: reason === 'SESSION_TIMEOUT' ? 'SESSION_TIMEOUT' : 'LOGOUT',
-        adminUser: username.trim() || 'admin',
+        adminUser: currentAdmin?.username || username.trim() || 'admin',
         status: reason === 'SESSION_TIMEOUT' ? 'warning' : 'info',
         details: reason === 'SESSION_TIMEOUT' ? 'ตัดสิทธิ์การใช้งานอัตโนมัติเนื่องจากไม่มีการใช้งานเกิน 30 นาที' : 'ออกจากระบบโดยผู้ดูแล'
       });
@@ -192,7 +241,10 @@ export default function AdminAuthGate({ onExitToPublic = () => {} }) {
   if (isAuthenticated) {
     return (
       <ErrorBoundary>
-        <AdminCMS onExitAdmin={() => handleLogout('USER_LOGOUT')} />
+        <AdminCMS 
+          onExitAdmin={() => handleLogout('USER_LOGOUT')} 
+          currentAdmin={currentAdmin} 
+        />
       </ErrorBoundary>
     );
   }
@@ -278,21 +330,41 @@ export default function AdminAuthGate({ onExitToPublic = () => {} }) {
             </div>
           </div>
 
-          {/* Quick Credential Hint */}
-          <div style={{
-            fontSize: '0.75rem',
-            color: '#64748b',
-            background: 'rgba(255, 255, 255, 0.04)',
-            border: '1px dashed rgba(255, 255, 255, 0.15)',
-            borderRadius: '6px',
-            padding: '6px 10px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}>
-            <span>🔑 ข้อมูลเข้าสู่ระบบเริ่มต้น:</span>
-            <code style={{ color: '#93c5fd', fontWeight: 600 }}>admin / gspeed2026</code>
-          </div>
+          {/* Quick Credential Helper (Development Mode Only) */}
+          {import.meta.env.DEV && (
+            <div style={{
+              fontSize: '0.75rem',
+              color: '#94a3b8',
+              background: 'rgba(255, 255, 255, 0.04)',
+              border: '1px dashed rgba(255, 255, 255, 0.15)',
+              borderRadius: '6px',
+              padding: '6px 10px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <span>🛠️ โหมดทดสอบ (Dev):</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setUsername('admin');
+                  setPassword('gspeed2026');
+                }}
+                style={{
+                  background: 'rgba(59, 130, 246, 0.2)',
+                  border: '1px solid rgba(59, 130, 246, 0.4)',
+                  borderRadius: '4px',
+                  color: '#93c5fd',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  padding: '2px 8px',
+                  fontSize: '0.72rem'
+                }}
+              >
+                ใส่ข้อมูลทดสอบ (admin/gspeed2026)
+              </button>
+            </div>
+          )}
 
           {/* Remember Me Option */}
           <div className="auth-remember-row" style={{
