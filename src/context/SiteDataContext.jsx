@@ -33,15 +33,15 @@ export const INITIAL_RAG_KNOWLEDGE = [
     id: 'rag-hours',
     category: 'general',
     title: 'เวลาเปิด-ปิด และการเดินทาง พิกัดร้าน',
-    tags: ['เวลาเปิด', '24ชั่วโมง', 'เปิดกี่โมง', 'ที่อยู่', 'อยู่ที่ไหน', 'พิกัด', 'แผนที่', 'เบอร์โทร', 'รามคำแหง 53', 'วังทองหลาง'],
-    content: 'G-Speed Esport Arena เปิดให้บริการตลอด 24 ชั่วโมง ทุกวัน ตลอดทั้งปี ไม่มีวันหยุด (24/7) ที่ตั้ง: 79 ซ. รามคำแหง 53 แขวงพลับพลา เขตวังทองหลาง กรุงเทพมหานคร 10310 แผนที่ Google Maps: https://share.google/Fj1DmZjpx1cBNBVTf โทรศัพท์: 063 793 7704 มีที่จอดรถสะดวกสบายทั้งรถยนต์และมอเตอร์ไซค์ แอร์เย็นฉ่ำ 24 ชม. พร้อมระบบกรองอากาศ PM2.5 และระบบเน็ตเวิร์กความเร็วสูง 10Gbps Dual Fiber'
+    tags: ['เวลาเปิด', '24ชั่วโมง', 'เปิดกี่โมง', 'ที่อยู่', 'อยู่ที่ไหน', 'พิกัด', 'แผนที่', 'เบอร์โทร', 'ลาดพร้าว 112', 'รามคำแหง 53', 'วังทองหลาง'],
+    content: 'G-Speed Esport Arena เปิดให้บริการตลอด 24 ชั่วโมง ทุกวัน ตลอดทั้งปี ไม่มีวันหยุด (24/7) ที่ตั้ง: 79 ซอย ลาดพร้าว 112 แขวงพลับพลา เขตวังทองหลาง กรุงเทพมหานคร 10310 (เข้าออกได้ทั้งทางซอยลาดพร้าว 112 และซอยรามคำแหง 53) แผนที่ Google Maps: https://maps.google.com/?q=79+ซอย+ลาดพร้าว+112+แขวงพลับพลา+เขตวังทองหลาง+กรุงเทพมหานคร+10310 โทรศัพท์: 063-793-7704 อีเมล: gspeedlivingplus35@gmail.com มีที่จอดรถสะดวกสบายทั้งรถยนต์และมอเตอร์ไซค์ แอร์เย็นฉ่ำ 24 ชม. พร้อมระบบกรองอากาศ PM2.5 และระบบเน็ตเวิร์กความเร็วสูง 10Gbps Dual Fiber'
   },
   {
     id: 'rag-services-overview',
     category: 'services',
     title: 'บริการหลักของศูนย์ G-Speed Esport Arena',
     tags: ['บริการ', 'บริการของเรา', 'มีอะไรบ้าง', 'ร้านเกม', 'เช่าจัดแข่ง', 'ติดตั้งระบบ', 'บริการร้าน'],
-    content: 'บริการหลักของ G-Speed Esport Arena ได้แก่: 1. ร้านเกมคอมพิวเตอร์สเปกแข่งขันอีสปอร์ต 24 ชม. (RTX 40 Series, จอ 360Hz/240Hz, โซนทั่วไปและ VIP) 2. เปิดให้เช่าร้านจัดแข่งอีสปอร์ต (เวที 5v5 Stage, จอ LED Wall ขนาดยักษ์, ระบบ Live Streaming, โต๊ะพากย์) 3. รับติดตั้งและวางระบบร้านเกมครบวงจร (Diskless Server, เน็ต 10Gbps Multi-WAN, ระบบ POS บัญชีคลาวด์ และออกแบบผังร้าน 2D/3D) ที่ตั้ง 79 ซ. รามคำแหง 53 โทร 063 793 7704'
+    content: 'บริการหลักของ G-Speed Esport Arena ได้แก่: 1. ร้านเกมคอมพิวเตอร์สเปกแข่งขันอีสปอร์ต 24 ชม. (RTX 40 Series, จอ 360Hz/240Hz, โซนทั่วไปและ VIP) 2. เปิดให้เช่าร้านจัดแข่งอีสปอร์ต (เวที 5v5 Stage, จอ LED Wall ขนาดยักษ์, ระบบ Live Streaming, โต๊ะพากย์) 3. รับติดตั้งและวางระบบร้านเกมครบวงจร (Diskless Server, เน็ต 10Gbps Multi-WAN, ระบบ POS บัญชีคลาวด์ และออกแบบผังร้าน 2D/3D) ที่ตั้ง 79 ซอย ลาดพร้าว 112 แขวงพลับพลา เขตวังทองหลาง กทม. โทร 063-793-7704'
   },
   {
     id: 'rag-food',
@@ -168,12 +168,13 @@ export const INITIAL_MEDIA_LIBRARY = [
   }
 ];
 
-// Initial Navigation Links: 1.หน้าแรก 2.ทัวร์นาเมนต์ 3.ภาพกิจกรรม 4.เกี่ยวกับเรา
+// Initial Navigation Links: 1.หน้าแรก 2.ทัวร์นาเมนต์ 3.ภาพกิจกรรม 4.เกี่ยวกับเรา 5.ติดต่อเรา
 export const INITIAL_NAV_LINKS = [
   { id: 'nav-arena', label: 'หน้าแรก', target: 'arena', visible: true },
   { id: 'nav-tournaments', label: 'ทัวร์นาเมนต์', target: 'tournaments', visible: true },
   { id: 'nav-activities', label: 'ภาพกิจกรรม', target: 'activities', visible: true },
-  { id: 'nav-company', label: 'เกี่ยวกับเรา', target: 'company', visible: true }
+  { id: 'nav-company', label: 'เกี่ยวกับเรา', target: 'company', visible: true },
+  { id: 'nav-contact', label: 'ติดต่อเรา', target: 'contact', visible: true }
 ];
 
 // Initial Franchise & Tournament Leads Pipeline Data
@@ -661,6 +662,63 @@ export const INITIAL_TICKER_ITEMS = [
   }
 ];
 
+export const INITIAL_CONTACT_PAGE = {
+  heroBadge: 'CONTACT & STORE LOCATION • 24/7 OPEN',
+  heroTitle: 'ติดต่อเรา & แผนที่ร้าน GLP',
+  heroDesc: 'ศูนย์กีฬาอีสปอร์ตและร้านอินเทอร์เน็ตคาเฟ่มาตรฐานสากล GLP : G Speed Living Plus พร้อมต้อนรับนักกีฬาอีสปอร์ต เกมเมอร์ และผู้สนใจร่วมลงทุนแฟรนไชส์ตลอด 24 ชั่วโมง',
+  storeName: 'GLP : G Speed Living Plus',
+  storeAddress: '79 ซอย ลาดพร้าว 112 แขวงพลับพลา เขตวังทองหลาง กรุงเทพมหานคร 10310',
+  storePhone: '063-793-7704',
+  storeEmail: 'gspeedlivingplus35@gmail.com',
+  lineId: '@gspeedarena',
+  locationHint: '(ทำเลศักยภาพ เชื่อมต่อระหว่าง ซอยลาดพร้าว 112 และ ซอยรามคำแหง 53 มีที่จอดรถยนต์และจักรยานยนต์)',
+  googleMapsEmbedUrl: 'https://maps.google.com/maps?q=79%20%E0%B8%8B%E0%B8%AD%E0%B8%A2%20%E0%B8%A5%E0%B8%B2%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B9%89%E0%B8%B2%E0%B8%A7%20112%20%E0%B9%81%E0%B8%82%E0%B8%A7%E0%B8%87%E0%B8%9E%E0%B8%A5%E0%B8%B1%E0%B8%9A%E0%B8%9E%E0%B8%A5%E0%B8%B2%20%E0%B9%80%E0%B8%82%E0%B8%85%E0%B8%A7%E0%B8%B1%E0%B8%87%E0%B8%97%E0%B8%AD%E0%B8%87%E0%B8%AB%E0%B8%A5%E0%B8%B2%E0%B8%87%20%E0%B8%81%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B9%80%E0%B8%97%E0%B8%9E%E0%B8%A1%E0%B8%AB%E0%B8%B2%E0%B8%99%E0%B8%84%E0%B8%A3%2010310&t=&z=16&ie=UTF8&iwloc=&output=embed',
+  googleMapsDirectUrl: 'https://www.google.com/maps/search/?api=1&query=79%20%E0%B8%8B%E0%B8%AD%E0%B8%A2%20%E0%B8%A5%E0%B8%B2%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B9%89%E0%B8%B2%E0%B8%A7%20112%20%E0%B9%81%E0%B8%82%E0%B8%A7%E0%B8%87%E0%B8%9E%E0%B8%A5%E0%B8%B1%E0%B8%9A%E0%B8%9E%E0%B8%A5%E0%B8%B2%20%E0%B9%80%E0%B8%82%E0%B8%85%E0%B8%A7%E0%B8%B1%E0%B8%87%E0%B8%97%E0%B8%AD%E0%B8%87%E0%B8%AB%E0%B8%A5%E0%B8%B2%E0%B8%87%20%E0%B8%81%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B9%80%E0%B8%97%E0%B8%9E%E0%B8%A1%E0%B8%AB%E0%B8%B2%E0%B8%99%E0%B8%84%E0%B8%A3%2010310',
+  socialLinks: {
+    facebook: 'https://www.facebook.com/gspeedlivingplus',
+    tiktok: 'https://www.tiktok.com/@gspeedlivingplus',
+    instagram: 'https://www.instagram.com/gspeedlivingplus',
+    discord: 'https://discord.gg/gspeed',
+    youtube: 'https://youtube.com/@gspeedarena',
+    steam: 'https://steamcommunity.com/groups/gspeed'
+  },
+  transportation: [
+    {
+      id: 'trans-1',
+      type: 'train',
+      title: 'รถไฟฟ้า MRT',
+      desc: 'สายสีเหลือง: ลงสถานีลาดพร้าว 83 หรือ สถานีลาดพร้าว 101 จากนั้นต่อวินมอเตอร์ไซค์เข้าซอยลาดพร้าว 112 (ประมาณ 5 นาทีถึงหน้าร้าน)',
+      tag: 'แนะนำสำหรับผู้ใช้รถไฟฟ้า',
+      theme: 'yellow',
+      visible: true
+    },
+    {
+      id: 'trans-2',
+      type: 'car',
+      title: 'รถยนต์ส่วนบุคคล',
+      desc: 'เข้าได้จาก ถ.ลาดพร้าว (ซอย 112) หรือจาก ถ.รามคำแหง (ซอย 53) มีลานจอดรถยนต์กว้างขวาง ปลอดภัย พร้อมกล้อง CCTV ตลอด 24 ชม.',
+      tag: 'มีที่จอดรถรองรับ',
+      theme: 'blue',
+      visible: true
+    },
+    {
+      id: 'trans-3',
+      type: 'bus',
+      title: 'รถโดยสารประจำทาง',
+      desc: 'ฝั่งลาดพร้าว: สาย 8, 27, 44, 73, 96, 137, 145, 502, 514 | ฝั่งรามคำแหง: สาย 60, 71, 92, 93, 113, 168, 501',
+      tag: 'เดินทางประหยัด',
+      theme: 'purple',
+      visible: true
+    }
+  ],
+  perks: [
+    { id: 'perk-1', text: 'เปิดบริการ 24 ชั่วโมง 365 วัน ไม่มีวันหยุด', visible: true },
+    { id: 'perk-2', text: 'เวทีแข่งขัน 5v5 Stage และจอ LED Wall ระดับสากล', visible: true },
+    { id: 'perk-3', text: 'ระบบ Diskless Server & เน็ตเวิร์ก 10Gbps แข่งขันระดับโปร', visible: true },
+    { id: 'perk-4', text: 'ระบบความปลอดภัย CCTV 24 ชม. ปลอดบุหรี่ 100%', visible: true }
+  ]
+};
+
 export const DEFAULT_SITE_DATA = {
   seoMarketingConfig: INITIAL_SEO_MARKETING_CONFIG,
   adminStaffList: INITIAL_ADMIN_STAFF_LIST,
@@ -962,19 +1020,22 @@ export const DEFAULT_SITE_DATA = {
   },
   footer: {
     description: 'ศูนย์กีฬาอีสปอร์ตและร้านอินเทอร์เน็ตคาเฟ่มาตรฐานสากล บริหารงานโดย GLP Living Plus Group พร้อมระบบโซลูชันแฟรนไชส์อัจฉริยะสำหรับผู้ประกอบการรุ่นใหม่',
-    phone: '063 793 7704',
-    email: 'contact@gspeedarena.com',
+    phone: '063-793-7704',
+    email: 'gspeedlivingplus35@gmail.com',
     line: '@gspeedarena',
-    address: '79 ซ. รามคำแหง 53 แขวงพลับพลา เขตวังทองหลาง กรุงเทพมหานคร 10310',
-    googleMapUrl: 'https://share.google/Fj1DmZjpx1cBNBVTf',
-    copyright: '© 2026 GLP : G Speed Living Plus. All Rights Reserved.',
+    address: '79 ซอย ลาดพร้าว 112 แขวงพลับพลา เขตวังทองหลาง กรุงเทพมหานคร 10310',
+    googleMapUrl: 'https://maps.google.com/?q=79+ซอย+ลาดพร้าว+112+แขวงพลับพลา+เขตวังทองหลาง+กรุงเทพมหานคร+10310',
+    copyright: '2026 GLP : G Speed Living Plus. All Rights Reserved.',
     socialLinks: {
-      facebook: 'https://facebook.com/gspeedesport',
+      facebook: 'https://www.facebook.com/gspeedlivingplus',
+      tiktok: 'https://www.tiktok.com/@gspeedlivingplus',
+      instagram: 'https://www.instagram.com/gspeedlivingplus',
       discord: 'https://discord.gg/gspeed',
       youtube: 'https://youtube.com/@gspeedarena',
       steam: 'https://steamcommunity.com/groups/gspeed'
     }
   },
+  contactPage: INITIAL_CONTACT_PAGE,
   leads: INITIAL_LEADS,
   pettyCashExpenses: INITIAL_PETTY_CASH,
   omnichannelChats: INITIAL_OMNICHANNEL_CHATS,
@@ -1093,14 +1154,28 @@ export function SiteDataProvider({ children }) {
 
         // Update default address/phone if old placeholder address exists
         if (merged.footer) {
-          if (!merged.footer.phone || merged.footer.phone.includes('02-888-9999')) {
+          if (!merged.footer.phone || merged.footer.phone.includes('02-888-9999') || merged.footer.phone.includes('02-999-8888') || merged.footer.phone === '063 793 7704') {
             merged.footer.phone = DEFAULT_SITE_DATA.footer.phone;
           }
-          if (!merged.footer.address || merged.footer.address.includes('รามคำแหง 24')) {
+          if (!merged.footer.address || !merged.footer.address.includes('ลาดพร้าว 112')) {
             merged.footer.address = DEFAULT_SITE_DATA.footer.address;
           }
-          if (!merged.footer.googleMapUrl) {
+          if (!merged.footer.email || merged.footer.email.includes('contact@gspeedarena.com') || merged.footer.email.includes('franchise@gspeed-arena.com')) {
+            merged.footer.email = DEFAULT_SITE_DATA.footer.email;
+          }
+          if (!merged.footer.googleMapUrl || merged.footer.googleMapUrl.includes('share.google/Fj1DmZjpx1cBNBVTf')) {
             merged.footer.googleMapUrl = DEFAULT_SITE_DATA.footer.googleMapUrl;
+          }
+          if (merged.footer.copyright) {
+            merged.footer.copyright = merged.footer.copyright.replace(/^©\s*/, '');
+          }
+          if (!merged.footer.socialLinks) {
+            merged.footer.socialLinks = DEFAULT_SITE_DATA.footer.socialLinks;
+          } else {
+            merged.footer.socialLinks = {
+              ...DEFAULT_SITE_DATA.footer.socialLinks,
+              ...merged.footer.socialLinks
+            };
           }
         }
 
@@ -1227,7 +1302,7 @@ export function SiteDataProvider({ children }) {
           });
         }
         if (!Array.isArray(merged.venueZones)) merged.venueZones = INITIAL_ZONES;
-        if (!Array.isArray(merged.navLinks) || merged.navLinks.some(l => l.target === 'franchise' || l.label === 'หน้าหลัก' || l.label === 'ทัวร์นาเมนต์ & แข่งขัน')) {
+        if (!Array.isArray(merged.navLinks) || merged.navLinks.some(l => l.target === 'franchise' || l.label === 'หน้าหลัก' || l.label === 'ทัวร์นาเมนต์ & แข่งขัน') || !merged.navLinks.some(l => l.target === 'contact' || l.id === 'nav-contact')) {
           merged.navLinks = INITIAL_NAV_LINKS;
         }
         if (!merged.headerCta || merged.headerCta.text === 'คำนวณราคาเปิดร้าน') {
@@ -1301,6 +1376,22 @@ export function SiteDataProvider({ children }) {
           merged.emailTemplates = DEFAULT_SITE_DATA.emailTemplates;
         } else {
           merged.emailTemplates = { ...DEFAULT_SITE_DATA.emailTemplates, ...merged.emailTemplates };
+        }
+
+        if (!merged.contactPage || typeof merged.contactPage !== 'object') {
+          merged.contactPage = INITIAL_CONTACT_PAGE;
+        } else {
+          merged.contactPage = {
+            ...INITIAL_CONTACT_PAGE,
+            ...merged.contactPage,
+            socialLinks: { ...INITIAL_CONTACT_PAGE.socialLinks, ...(merged.contactPage.socialLinks || {}) },
+            transportation: Array.isArray(merged.contactPage.transportation) && merged.contactPage.transportation.length > 0
+              ? merged.contactPage.transportation
+              : INITIAL_CONTACT_PAGE.transportation,
+            perks: Array.isArray(merged.contactPage.perks) && merged.contactPage.perks.length > 0
+              ? merged.contactPage.perks
+              : INITIAL_CONTACT_PAGE.perks
+          };
         }
 
         if (!Array.isArray(merged.adminAuditLogs)) {
@@ -1840,6 +1931,122 @@ export function SiteDataProvider({ children }) {
       ...prev,
       emailTemplates: DEFAULT_SITE_DATA.emailTemplates
     }));
+  };
+
+  // Contact Page & Store Location Handlers
+  const updateContactPage = (updates) => {
+    setSiteData(prev => ({
+      ...prev,
+      contactPage: {
+        ...(prev.contactPage || INITIAL_CONTACT_PAGE),
+        ...updates
+      }
+    }));
+  };
+
+  const addTransportationItem = (item) => {
+    const newItem = {
+      id: item.id || `trans-${Date.now()}`,
+      visible: true,
+      ...item
+    };
+    setSiteData(prev => {
+      const current = prev.contactPage?.transportation || INITIAL_CONTACT_PAGE.transportation;
+      return {
+        ...prev,
+        contactPage: {
+          ...(prev.contactPage || INITIAL_CONTACT_PAGE),
+          transportation: [...current, newItem]
+        }
+      };
+    });
+    return newItem;
+  };
+
+  const updateTransportationItem = (id, updates) => {
+    setSiteData(prev => {
+      const current = prev.contactPage?.transportation || INITIAL_CONTACT_PAGE.transportation;
+      return {
+        ...prev,
+        contactPage: {
+          ...(prev.contactPage || INITIAL_CONTACT_PAGE),
+          transportation: current.map(item => item.id === id ? { ...item, ...updates } : item)
+        }
+      };
+    });
+  };
+
+  const deleteTransportationItem = (id) => {
+    setSiteData(prev => {
+      const current = prev.contactPage?.transportation || INITIAL_CONTACT_PAGE.transportation;
+      return {
+        ...prev,
+        contactPage: {
+          ...(prev.contactPage || INITIAL_CONTACT_PAGE),
+          transportation: current.filter(item => item.id !== id)
+        }
+      };
+    });
+  };
+
+  const reorderTransportationItems = (startIndex, endIndex) => {
+    setSiteData(prev => {
+      const current = [...(prev.contactPage?.transportation || INITIAL_CONTACT_PAGE.transportation)];
+      const [removed] = current.splice(startIndex, 1);
+      current.splice(endIndex, 0, removed);
+      return {
+        ...prev,
+        contactPage: {
+          ...(prev.contactPage || INITIAL_CONTACT_PAGE),
+          transportation: current
+        }
+      };
+    });
+  };
+
+  const addContactPerk = (perk) => {
+    const newPerk = {
+      id: perk.id || `perk-${Date.now()}`,
+      visible: true,
+      text: typeof perk === 'string' ? perk : (perk.text || '')
+    };
+    setSiteData(prev => {
+      const current = prev.contactPage?.perks || INITIAL_CONTACT_PAGE.perks;
+      return {
+        ...prev,
+        contactPage: {
+          ...(prev.contactPage || INITIAL_CONTACT_PAGE),
+          perks: [...current, newPerk]
+        }
+      };
+    });
+    return newPerk;
+  };
+
+  const updateContactPerk = (id, updates) => {
+    setSiteData(prev => {
+      const current = prev.contactPage?.perks || INITIAL_CONTACT_PAGE.perks;
+      return {
+        ...prev,
+        contactPage: {
+          ...(prev.contactPage || INITIAL_CONTACT_PAGE),
+          perks: current.map(p => p.id === id ? { ...p, ...(typeof updates === 'string' ? { text: updates } : updates) } : p)
+        }
+      };
+    });
+  };
+
+  const deleteContactPerk = (id) => {
+    setSiteData(prev => {
+      const current = prev.contactPage?.perks || INITIAL_CONTACT_PAGE.perks;
+      return {
+        ...prev,
+        contactPage: {
+          ...(prev.contactPage || INITIAL_CONTACT_PAGE),
+          perks: current.filter(p => p.id !== id)
+        }
+      };
+    });
   };
 
   // AI Guardrails & Pending Questions Handlers
@@ -2881,6 +3088,14 @@ export function SiteDataProvider({ children }) {
     updateSmtpConfig,
     updateEmailTemplate,
     resetEmailTemplates,
+    updateContactPage,
+    addTransportationItem,
+    updateTransportationItem,
+    deleteTransportationItem,
+    reorderTransportationItems,
+    addContactPerk,
+    updateContactPerk,
+    deleteContactPerk,
     updateHeaderCta,
     addNavLink,
     deleteNavLink,

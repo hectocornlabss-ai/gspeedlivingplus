@@ -4,7 +4,7 @@ import {
   Check, X, Eye, EyeOff, Lock, UserCheck, UserX, AlertTriangle,
   Save, CheckSquare, Square, Crown, Sliders, CheckCircle2,
   TrendingUp, MessagesSquare, Monitor, Cpu, Bot, LayoutGrid,
-  FileText, Trophy, Search, Activity, Mail
+  FileText, Trophy, Search, Activity, Mail, MapPin
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 
@@ -23,7 +23,8 @@ export const PERMISSION_TABS_LIST = [
   { id: 'menu-footer', label: '11. เมนู Header & Footer', icon: LayoutGrid, color: '#64748b', desc: 'แถบประกาศ, เมนูนำทาง, ช่องทางติดต่อ' },
   { id: 'automation', label: '12. ระบบ Automation & Webhooks', icon: Sliders, color: '#475569', desc: 'แจ้งเตือน Discord, Lead แฟรนไชส์, ตั้งค่า SMTP' },
   { id: 'email-templates', label: '13. แม่แบบอีเมลตอบกลับ (Email Templates)', icon: Mail, color: '#0284c7', desc: 'แก้ไขข้อความตอบกลับลูกค้า, ใบเสนอราคาอัตโนมัติ' },
-  { id: 'security', label: '14. ความปลอดภัย & จัดการแอดมิน', icon: ShieldCheck, color: '#be123c', desc: 'จัดการ Staff Roles, สิทธิ์เข้าถึง, รหัส Master' }
+  { id: 'security', label: '14. ความปลอดภัย & จัดการแอดมิน', icon: ShieldCheck, color: '#be123c', desc: 'จัดการ Staff Roles, สิทธิ์เข้าถึง, รหัส Master' },
+  { id: 'contact-page', label: '15. ข้อมูลติดต่อ & แผนที่ร้าน', icon: MapPin, color: '#0ea5e9', desc: 'ข้อมูลร้าน, แผนที่ Google Maps, วิธีเดินทาง (เพิ่ม/ลบ), ไฮไลต์ (เพิ่ม/ลบ), และข้อความติดต่อ' }
 ];
 
 // Preset Roles for Fast Selection
@@ -51,7 +52,7 @@ export const ROLE_PRESETS = [
   {
     name: 'การตลาด, SEO & คอนเทนต์',
     desc: 'จัดการเครื่องมือ SEO, Meta Tags, กิจกรรมบทความ และเนื้อหาหน้าเว็บ',
-    permissions: ['seo-tools', 'articles', 'sections', 'menu-footer']
+    permissions: ['seo-tools', 'articles', 'sections', 'menu-footer', 'contact-page']
   },
   {
     name: 'Custom Role (กำหนดสิทธิ์เอง)',

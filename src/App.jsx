@@ -18,6 +18,7 @@ const SingleActivityView = lazy(() => import('./components/SingleActivityView'))
 const SingleTournamentView = lazy(() => import('./components/SingleTournamentView'));
 const TournamentsPage = lazy(() => import('./components/TournamentsPage'));
 const ActivitiesPage = lazy(() => import('./components/ActivitiesPage'));
+const ContactPage = lazy(() => import('./components/ContactPage'));
 
 function PageLoadingSpinner({ label = 'กำลังโหลดข้อมูลระบบ...' }) {
   return (
@@ -86,6 +87,8 @@ function normalizeLegacyHash() {
   } else if (hash.includes('activity') || hash.includes('gallery') || hash.includes('news')) {
     const m = hash.match(/#(?:activity|activities|news)\/([^/?#]+)/i);
     cleanPath = m ? `/activities/${m[1]}` : '/activities';
+  } else if (hash.includes('contact') || hash.includes('location') || hash.includes('map')) {
+    cleanPath = '/contact';
   }
 
   // ล้าง hash ออกจาก address bar ของเบราว์เซอร์ทันที
@@ -119,7 +122,7 @@ function AppContent() {
     const tagParam = searchParams.get('tag') ? decodeURIComponent(searchParams.get('tag')) : null;
     const catParam = searchParams.get('category') ? decodeURIComponent(searchParams.get('category')) : null;
 
-    // 5. Tab selection - Dedicated Pages for Tournaments, Activities, Franchise, Company & Arena
+    // 5. Tab selection - Dedicated Pages for Tournaments, Activities, Franchise, Company, Contact & Arena
     let tab = 'arena';
     let sectionToScroll = null;
 
@@ -131,6 +134,8 @@ function AppContent() {
       tab = 'tournaments';
     } else if (path === '/activities' || path === '/gallery') {
       tab = 'activities';
+    } else if (path === '/contact' || path === '/contact-us' || path === '/location' || path === '/map') {
+      tab = 'contact';
     } else {
       tab = 'arena';
     }
@@ -347,6 +352,13 @@ function AppContent() {
 
               {routeState.tab === 'franchise' && (
                 <FranchisePlanner />
+              )}
+
+              {routeState.tab === 'contact' && (
+                <ContactPage 
+                  onNavigateHome={() => navigateTo('/')}
+                  onNavigateFranchise={() => navigateTo('/franchise')}
+                />
               )}
             </>
           )}

@@ -26,6 +26,7 @@ import ArticleBlockEditor from './ArticleBlockEditor';
 import SeoMarketingCMS from './SeoMarketingCMS';
 import AdminStaffRolesCMS, { PERMISSION_TABS_LIST } from './AdminStaffRolesCMS';
 import AnnouncementTickerCMS from './AnnouncementTickerCMS';
+import ContactPageCMS from './ContactPageCMS';
 import { analyzeProductPhoto, parseSpecSheetText } from '../utils/aiSpecParser';
 import { sanitizeSafeUrl, isSafeExternalUrl } from '../utils/security';
 
@@ -1912,11 +1913,32 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                 </div>
               </button>
             )}
+
+            {hasTabPermission('contact-page') && (
+              <button 
+                id="cms-tab-contact-page"
+                className={`admin-nav-item ${activeTab === 'contact-page' ? 'active' : ''}`}
+                onClick={() => setActiveTab('contact-page')}
+              >
+                <MapPin size={18} className="text-blue" />
+                <div>
+                  <strong>15. ข้อมูลติดต่อ & แผนที่ร้าน</strong>
+                  <span>ที่อยู่, แผนที่, วิธีเดินทาง (เพิ่ม/ลบ), ข้อความติดต่อ</span>
+                </div>
+              </button>
+            )}
           </nav>
         </aside>
 
         {/* Right Editor Area */}
         <main className="admin-content-area">
+
+          {/* =========================================================================
+              TAB: CONTACT PAGE & STORE LOCATION CMS
+              ========================================================================= */}
+          {activeTab === 'contact-page' && (
+            <ContactPageCMS onNavigateToContact={() => openPreview('contact')} />
+          )}
 
           {/* =========================================================================
               TAB: OMNICHANNEL LEADS & DAILY CASHFLOW HUB
@@ -4746,6 +4768,33 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                   <p className="panel-desc">
                     ปรับแต่งลิงก์เมนูนำทางด้านบน ข้อความข่าววิ่งด้านบนสุด และข้อมูลการติดต่อท้ายหน้าเว็บ
                   </p>
+                </div>
+              </div>
+
+              {/* Shortcut Banner to Contact & Location CMS */}
+              <div className="admin-subcard glass-panel" style={{ background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)', border: '1px solid #bfdbfe', padding: '20px 24px', marginBottom: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                    <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#2563eb', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <MapPin size={22} />
+                    </div>
+                    <div>
+                      <strong style={{ color: '#1e40af', fontSize: '1.05rem', display: 'block' }}>
+                        ระบบจัดการหน้าติดต่อเรา & แผนที่ร้านแบบละเอียด (Contact & Location CMS)
+                      </strong>
+                      <p style={{ margin: '3px 0 0', fontSize: '0.86rem', color: '#1e3a8a' }}>
+                        จัดการคู่มือการเดินทาง (เพิ่ม/ลบ/แก้ไข), ไฮไลต์บริการ (เพิ่ม/ลบ), แผนที่สด Google Maps และกล่องข้อความติดต่อจากลูกค้า
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn-primary"
+                    onClick={() => setActiveTab('contact-page')}
+                    style={{ whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <span>เปิดหน้าจัดการ Contact CMS &gt;</span>
+                  </button>
                 </div>
               </div>
 

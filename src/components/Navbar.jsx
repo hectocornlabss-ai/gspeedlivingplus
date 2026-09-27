@@ -33,16 +33,18 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
     if (key.includes('franchise') || key.includes('3d') || key.includes('plan')) return LayoutGrid;
     if (key.includes('tournament') || key.includes('event')) return Trophy;
     if (key.includes('activit') || key.includes('gallery')) return Sparkles;
+    if (key.includes('contact') || key.includes('location') || key.includes('phone') || key.includes('map')) return PhoneCall;
     if (key.includes('http')) return Globe;
     return LayoutGrid;
   };
 
-  // Active navigation items with clean semantic paths (1.หน้าแรก 2.ทัวร์นาเมนต์ 3.ภาพกิจกรรม 4.เกี่ยวกับเรา)
+  // Active navigation items with clean semantic paths (1.หน้าแรก 2.ทัวร์นาเมนต์ 3.ภาพกิจกรรม 4.เกี่ยวกับเรา 5.ติดต่อเรา)
   const defaultNavItems = [
     { id: 'nav-arena', label: 'หน้าแรก', target: 'arena', cleanPath: '/', visible: true },
     { id: 'nav-tournaments', label: 'ทัวร์นาเมนต์', target: 'tournaments', cleanPath: '/tournaments', visible: true },
     { id: 'nav-activities', label: 'ภาพกิจกรรม', target: 'activities', cleanPath: '/activities', visible: true },
-    { id: 'nav-company', label: 'เกี่ยวกับเรา', target: 'company', cleanPath: '/company', visible: true }
+    { id: 'nav-company', label: 'เกี่ยวกับเรา', target: 'company', cleanPath: '/company', visible: true },
+    { id: 'nav-contact', label: 'ติดต่อเรา', target: 'contact', cleanPath: '/contact', visible: true }
   ];
 
   const activeNavItems = (siteData?.navLinks && siteData.navLinks.length > 0)
@@ -54,6 +56,7 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
           if (t === 'company' || t === 'about') cleanPath = '/company';
           else if (t === 'events' || t === 'tournaments' || t.includes('tournament')) cleanPath = '/tournaments';
           else if (t === 'activities' || t === 'gallery' || t.includes('activit')) cleanPath = '/activities';
+          else if (t === 'contact' || t.includes('contact') || t === 'location' || t === 'map') cleanPath = '/contact';
           else if (t.startsWith('/')) cleanPath = t;
 
           // Standardize display label if it matches default IDs
@@ -62,6 +65,7 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
           if (item.id === 'nav-tournaments' && (label === 'ทัวร์นาเมนต์ & แข่งขัน' || label === 'งานแข่ง & อีเวนต์')) label = 'ทัวร์นาเมนต์';
           if (item.id === 'nav-activities' && (label === 'ภาพกิจกรรม & แกลเลอรี' || label === 'ภาพกิจกรรม')) label = 'ภาพกิจกรรม';
           if (item.id === 'nav-company' && (label === 'เกี่ยวกับองค์กร' || label === 'ข้อมูลบริษัท & พาร์ตเนอร์')) label = 'เกี่ยวกับเรา';
+          if (item.id === 'nav-contact' && (label === 'ติดต่อเรา & แผนที่' || label === 'ติดต่อสาขา')) label = 'ติดต่อเรา';
 
           return { ...item, label, cleanPath };
         })
@@ -86,6 +90,7 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
       else if (t === 'activities' || t === 'gallery') destPath = '/activities';
       else if (t === 'franchise' || t === 'planner') destPath = '/franchise';
       else if (t === 'company' || t === 'about') destPath = '/company';
+      else if (t === 'contact' || t === 'location' || t === 'map') destPath = '/contact';
       else if (t === 'admin' || t === 'cms') destPath = '/admin';
       else destPath = `/${t}`;
     }
@@ -98,6 +103,7 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
         else if (destPath === '/company') setActiveTab('company');
         else if (destPath === '/tournaments' || destPath === '/events') setActiveTab('tournaments');
         else if (destPath === '/activities' || destPath === '/gallery') setActiveTab('activities');
+        else if (destPath === '/contact' || destPath === '/contact-us') setActiveTab('contact');
         else setActiveTab('arena');
       }
       window.history.pushState(null, '', destPath);

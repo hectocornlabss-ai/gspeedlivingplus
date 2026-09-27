@@ -87,7 +87,24 @@ export const ROUTES_CONFIG = {
     ]
   },
 
-  // 6. ระบบหลังบ้าน (Master CMS Administration)
+  // 6. หน้าติดต่อเรา & แผนที่ร้าน (Contact Us & Store Location)
+  contact: {
+    path: '/contact',
+    aliasPaths: ['/contact-us', '/location', '/map'],
+    name: 'ติดต่อเรา & แผนที่ร้าน',
+    sectionTitle: 'ช่องทางการติดต่อ & พิกัดแผนที่ร้าน GLP : G Speed Living Plus',
+    badge: 'CONTACT & LOCATION',
+    metaTitle: 'ติดต่อเรา & แผนที่ร้าน | GLP : G Speed Living Plus',
+    metaDesc: 'ช่องทางการติดต่อและแผนที่ร้าน GLP : G Speed Living Plus ซอยลาดพร้าว 112 แขวงพลับพลา เขตวังทองหลาง กทม. โทร 063-793-7704 อีเมล gspeedlivingplus35@gmail.com เปิดตลอด 24 ชม.',
+    keywords: 'ติดต่อ GLP, แผนที่ G Speed Living Plus, เบอร์โทร GLP, ร้านเกมลาดพร้าว 112, ร้านเกมรามคำแหง, ที่ตั้งร้าน GLP, gspeedlivingplus',
+    ogImage: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
+    breadcrumbs: [
+      { label: 'หน้าหลัก', path: '/' },
+      { label: 'ติดต่อเรา & แผนที่ร้าน', path: '/contact' }
+    ]
+  },
+
+  // 7. ระบบหลังบ้าน (Master CMS Administration)
   admin: {
     path: '/admin',
     aliasPaths: ['/cms'],
@@ -202,6 +219,9 @@ export function getRouteMetadata(pathname = '/', extraData = {}) {
   }
   if (cleanPath === '/activities' || cleanPath === '/gallery') {
     return { ...ROUTES_CONFIG.activities, type: 'activities', canonical: `${SITE_BASE_URL}/activities` };
+  }
+  if (cleanPath === '/contact' || cleanPath === '/contact-us' || cleanPath === '/location' || cleanPath === '/map') {
+    return { ...ROUTES_CONFIG.contact, type: 'contact', canonical: `${SITE_BASE_URL}/contact` };
   }
 
   // Default: Home
