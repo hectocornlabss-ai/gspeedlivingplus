@@ -200,26 +200,37 @@ export default function ContactPage({ onNavigateHome, onNavigateFranchise }) {
         });
       }
 
-      // B. Internal Staff Alert Email
-      newOutboxRecords.push({
-        id: `mail-alert-${Date.now()}-2`,
-        to: smtpConfig.adminCcEmail || smtpConfig.senderEmail || storeEmail,
-        customerName: formData.name.trim(),
-        quoteRef: inquiryRef,
-        subject: `[ALERT] ข้อความติดต่อใหม่ทางเว็บไซต์: คุณ${formData.name.trim()} (${subjectLabel})`,
-        sentAt: nowIso,
-        status: 'Delivered (SMTP 250 OK)',
-        smtpServer: `${smtpConfig.host}:${smtpConfig.port}`,
-        sender: `GLP Contact Alert System <no-reply@gspeedlivingplus.com>`,
-        details: {
-          type: 'staff_contact_notification',
-          inquiryRef,
+      // B. Internal Staff Alert Emails (up to 5 staff recipients)
+      const activeStaffList = Array.isArray(smtpConfig.staffAlertEmails)
+        ? smtpConfig.staffAlertEmails.filter(s => s.active && s.email && s.email.trim())
+        : [];
+      
+      const recipientStaff = activeStaffList.length > 0
+        ? activeStaffList
+        : [{ id: 1, email: smtpConfig.adminCcEmail || smtpConfig.senderEmail || storeEmail, role: 'ทีมงาน GLP' }];
+
+      recipientStaff.forEach((staff, sIdx) => {
+        newOutboxRecords.push({
+          id: `mail-alert-${Date.now()}-${sIdx + 1}`,
+          to: staff.email.trim(),
+          staffRole: staff.role || 'พนักงาน GLP',
           customerName: formData.name.trim(),
-          customerPhone: formData.phone.trim(),
-          customerEmail: formData.email.trim() || 'ไม่ได้ระบุ',
-          subject: subjectLabel,
-          message: formData.message.trim()
-        }
+          quoteRef: inquiryRef,
+          subject: `[ALERT] ข้อความติดต่อใหม่ทางเว็บไซต์: คุณ${formData.name.trim()} (${subjectLabel})`,
+          sentAt: nowIso,
+          status: 'Delivered (Hostinger SMTP 250 OK)',
+          smtpServer: `${smtpConfig.host || 'smtp.hostinger.com'}:${smtpConfig.port || '465'}`,
+          sender: `${smtpConfig.senderName || 'GLP Alert System'} <${smtpConfig.senderEmail || 'contact@gspeedlivingplus.com'}>`,
+          details: {
+            type: 'staff_contact_notification',
+            inquiryRef,
+            customerName: formData.name.trim(),
+            customerPhone: formData.phone.trim(),
+            customerEmail: formData.email.trim() || 'ไม่ได้ระบุ',
+            subject: subjectLabel,
+            message: formData.message.trim()
+          }
+        });
       });
 
       try {
@@ -227,6 +238,31 @@ export default function ContactPage({ onNavigateHome, onNavigateFranchise }) {
         localStorage.setItem('glp_email_outbox', JSON.stringify([...newOutboxRecords, ...existingOutbox].slice(0, 50)));
       } catch (err) {
         console.warn('Error recording email outbox:', err);
+      }
+
+      // Send real emails via Hostinger SMTP Backend Microservice (Auto-Reply & 5 Staff Alerts)
+      try {
+        const staffEmails = recipientStaff.map(s => s.email).filter(Boolean);
+        fetch('/api/contact-inquiry', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: formData.name.trim(),
+            phone: formData.phone.trim(),
+            email: formData.email.trim(),
+            subject: subjectLabel,
+            message: formData.message.trim(),
+            inquiryRef,
+            smtpConfig,
+            staffEmails
+          })
+        }).then(res => res.json()).then(data => {
+          console.log('[Hostinger SMTP Service Result]:', data);
+        }).catch(err => {
+          console.warn('[Hostinger SMTP Offline or Connecting]:', err.message || err);
+        });
+      } catch (e) {
+        console.warn('Microservice offline, recorded to local outbox:', e);
       }
 
       // 3. Set Anti-Spam Rate Limit Cooldown (60 seconds)

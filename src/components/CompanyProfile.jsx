@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Users, Award, Cpu, Zap, Armchair, Monitor, 
   Wifi, ShieldCheck, CheckCircle2, TrendingUp, Mail, Phone, MapPin, Quote, Calculator, ArrowRight,
-  Camera, ZoomIn, ChevronLeft, ChevronRight, X, Layers
+  Camera, ZoomIn, ChevronLeft, ChevronRight, X, Layers, Building2
 } from 'lucide-react';
 import { FOUNDER_INFO } from '../data/mockData';
 import { useSiteData } from '../context/SiteDataContext';
@@ -25,6 +25,25 @@ export default function CompanyProfile({ onNavigateFranchise }) {
   const founder = siteData?.founder || FOUNDER_INFO;
   const founderBg = founder.bgColor || '#ffffff';
   const isDarkFounder = isColorDark(founderBg);
+
+  // Clean metrics values to ensure symmetrical, balanced layout
+  const cleanExp = (() => {
+    const raw = (founder.experience || '16+ ปี').trim();
+    if (raw.includes('ในอุตสาหกรรม') || raw.length > 15) {
+      const match = raw.match(/^(\d+\+?\s*ปี)/);
+      return match ? match[1] : '16+ ปี';
+    }
+    return raw;
+  })();
+
+  const cleanBranches = (() => {
+    const raw = (founder.managedBranches || '8 สาขา').trim();
+    if (raw.includes('ที่บริหาร') || raw.length > 15) {
+      const match = raw.match(/^(\d+\+?\s*(?:สาขา|แห่ง)?)/);
+      return match ? match[1] : '8 สาขา';
+    }
+    return raw;
+  })();
 
   // Gallery datasets with fallback to mock data
   const milestonesList = (Array.isArray(founder.milestonesGallery) && founder.milestonesGallery.length > 0)
@@ -136,12 +155,18 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                   </div>
                 </div>
                 <div className="founder-quick-metrics">
-                  <div className="founder-m-item">
-                    <span className="m-val text-blue">{founder.experience || '16+ ปี'}</span>
+                  <div className={`founder-m-item ${isDarkFounder ? 'dark-founder' : ''}`}>
+                    <div className="founder-m-icon-wrap">
+                      <Award size={18} />
+                    </div>
+                    <span className="m-val text-blue">{cleanExp}</span>
                     <span className="m-lbl">ประสบการณ์ในอุตสาหกรรม</span>
                   </div>
-                  <div className="founder-m-item">
-                    <span className="m-val text-blue">{founder.managedBranches || '8 สาขา'}</span>
+                  <div className={`founder-m-item ${isDarkFounder ? 'dark-founder' : ''}`}>
+                    <div className="founder-m-icon-wrap">
+                      <Building2 size={18} />
+                    </div>
+                    <span className="m-val text-blue">{cleanBranches}</span>
                     <span className="m-lbl">อารีนาที่บริหารจัดการ</span>
                   </div>
                 </div>
@@ -302,55 +327,35 @@ export default function CompanyProfile({ onNavigateFranchise }) {
             </p>
           </div>
 
-          {/* Partner Logo Slider / Infinite Marquee */}
-          <div className="partner-logo-slider-container">
+          {/* Partner Logo Slider / Infinite Marquee - Minimalist Monochrome Black Edition */}
+          <div className="partner-logo-slider-container partner-marquee-clean">
             <div className="partner-logo-track">
               {partnerLogosRepeated.map((p, idx) => (
                 <div 
                   key={`${p.id || p.name}-${idx}`} 
-                  className={`partner-logo-item-card ${p.website && isSafeExternalUrl(p.website) ? 'clickable' : ''}`}
+                  className={`partner-clean-item ${isDarkFounder ? 'dark-mode' : ''} ${p.website && isSafeExternalUrl(p.website) ? 'clickable' : ''}`}
                   onClick={() => {
                     if (p.website && isSafeExternalUrl(p.website)) {
                       window.open(sanitizeSafeUrl(p.website), '_blank', 'noopener,noreferrer');
                     }
                   }}
-                  title={p.website ? `คลิกเพื่อเข้าสู่เว็บไซต์ ${p.name}` : p.name}
+                  title={p.website ? `เข้าสู่เว็บไซต์ ${p.name}` : p.name}
                   role={p.website ? 'link' : 'article'}
                   tabIndex={p.website ? 0 : undefined}
                 >
-                  <div className="partner-logo-img-wrapper">
-                    {p.logo ? (
-                      <img 
-                        src={p.logo} 
-                        alt={p.name} 
-                        className="partner-logo-img"
-                        loading="lazy" 
-                        decoding="async"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                          const fallback = e.currentTarget.parentElement?.querySelector('.partner-logo-text-placeholder');
-                          if (fallback) fallback.style.display = 'flex';
-                        }}
-                      />
-                    ) : null}
-                    <div 
-                      className="partner-logo-text-placeholder" 
-                      style={{ display: p.logo ? 'none' : 'flex' }}
-                    >
-                      <span className="partner-placeholder-brand">{p.name}</span>
-                    </div>
-                  </div>
-
-                  <div className="partner-logo-info">
-                    <span className="partner-logo-brand">{p.name}</span>
-                    <span className="partner-logo-tier">{p.tier || 'Official Partner'}</span>
-                  </div>
-
-                  {p.website && (
-                    <div className="partner-logo-external-icon" title="เปิดลิงก์ภายนอก">
-                      <ArrowRight size={13} />
-                    </div>
+                  {p.logo && (
+                    <img 
+                      src={p.logo} 
+                      alt={p.name} 
+                      className="partner-clean-logo"
+                      loading="lazy" 
+                      decoding="async"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
                   )}
+                  <span className="partner-clean-name">{p.name}</span>
                 </div>
               ))}
             </div>

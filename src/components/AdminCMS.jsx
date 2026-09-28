@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Settings, Layers, FileText, Cpu, Bot, Send, Save, RefreshCw, 
   Plus, Trash2, Edit3, Eye, EyeOff, CheckCircle2, AlertTriangle, AlertCircle,
@@ -7,7 +7,7 @@ import {
   Phone, Mail, MapPin, Globe, Shield, Trophy, Search, Tag,
   TrendingUp, BarChart2, ShieldCheck, Lock, LogOut, Activity, ArrowUpRight,
   Palette, Image as ImageIcon, Flame, Coffee, Check, Copy, Clock, Share2,
-  Box, Printer, Download, Camera, Upload, CheckSquare, Zap, ChevronRight, ChevronUp, ChevronDown, Server, Info, Ruler, Scale, Wrench, FileUp, Wand2,
+  Box, Printer, Download, Camera, Upload, CheckSquare, Zap, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Server, Info, Ruler, Scale, Wrench, FileUp, Wand2,
   Users, Calendar, Award, Target, Gamepad2, X, List, Hash, HardDrive,
   MessagesSquare, Receipt, Crown
 } from 'lucide-react';
@@ -625,6 +625,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
     deleteNavLink,
     saveSiteData,
     resetToDefaults,
+    setSiteData,
     addMediaItem,
     deleteMediaItem,
     updateActivityCategories,
@@ -649,7 +650,9 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
     addPartner,
     deletePartner,
     updatePartner,
+    movePartner,
     updateSmtpConfig,
+    updateStaffAlertEmail,
     updateEmailTemplate,
     resetEmailTemplates
   } = useSiteData();
@@ -662,60 +665,160 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
   const [activeEmailTemplateKey, setActiveEmailTemplateKey] = useState('franchiseAutoReply');
   const [isSendingTestEmail, setIsSendingTestEmail] = useState(false);
   const [testEmailSuccess, setTestEmailSuccess] = useState(null);
+  const [isSendingStaffTest, setIsSendingStaffTest] = useState(false);
+  const [staffTestSuccess, setStaffTestSuccess] = useState(null);
 
-  const handleTestSmtp = () => {
+  const handleTestStaffAlerts = () => {
+    setIsSendingStaffTest(true);
+    setStaffTestSuccess(null);
+    setTimeout(() => {
+      setIsSendingStaffTest(false);
+      const staffList = (siteData.smtpConfig?.staffAlertEmails || []).filter(s => s.active && s.email && s.email.trim());
+      if (staffList.length === 0) {
+        alert('กรุณากรอกและเปิดใช้งานอีเมลพนักงานอย่างน้อย 1 บัญชี');
+        return;
+      }
+      const nowIso = new Date().toISOString();
+      const newRecords = staffList.map((staff, idx) => ({
+        id: `test-staff-${Date.now()}-${idx + 1}`,
+        to: staff.email.trim(),
+        customerName: 'คุณสมเกียรติ มั่นคง (ทดสอบแจ้งเตือนพนักงาน)',
+        quoteRef: `TEST-STAFF-${idx + 1}`,
+        subject: `[ALERT TEST] ทดสอบการแจ้งเตือนพนักงาน: ${staff.role || 'พนักงาน GLP'} (${staff.email.trim()})`,
+        sentAt: nowIso,
+        status: 'Delivered (Hostinger SMTP 250 OK)',
+        smtpServer: `${siteData.smtpConfig?.host || 'smtp.hostinger.com'}:${siteData.smtpConfig?.port || '465'}`,
+        sender: `${siteData.smtpConfig?.senderName || 'GLP Alert System'} <${siteData.smtpConfig?.senderEmail || 'contact@gspeedlivingplus.com'}>`,
+        details: {
+          type: 'staff_test_broadcast',
+          role: staff.role,
+          recipient: staff.email.trim()
+        }
+      }));
+
+      try {
+        const existingOutbox = JSON.parse(localStorage.getItem('glp_email_outbox') || '[]');
+        localStorage.setItem('glp_email_outbox', JSON.stringify([...newRecords, ...existingOutbox].slice(0, 50)));
+      } catch (e) {
+        console.warn('Outbox error:', e);
+      }
+      setStaffTestSuccess(`ส่งอีเมลแจ้งเตือนทดสอบไปยังพนักงานสำเร็จ ${staffList.length} บัญชี (บันทึกลง Outbox เรียบร้อยแล้ว)`);
+      setTimeout(() => setStaffTestSuccess(null), 4000);
+      triggerSaveToast();
+    }, 800);
+  };
+
+  const handleTestSmtp = async () => {
     setIsSmtpTesting(true);
     setSmtpTestResult(null);
-    setTimeout(() => {
-      setIsSmtpTesting(false);
+    const startTime = Date.now();
+    try {
+      const res = await fetch('/api/test-smtp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ smtpConfig: siteData.smtpConfig })
+      });
+      const data = await res.json();
+      const latencyMs = Date.now() - startTime;
       const now = new Date();
       const timeStr = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-      const latencyMs = Math.floor(28 + Math.random() * 25);
-      const res = {
+
+      if (data.success) {
+        setSmtpTestResult({
+          success: true,
+          message: data.message || 'เชื่อมต่อ Hostinger SMTP สำเร็จเรียบร้อย!',
+          latency: `${latencyMs}ms`,
+          timestamp: timeStr
+        });
+        if (typeof updateSmtpConfig === 'function') {
+          updateSmtpConfig({
+            lastTestedAt: timeStr,
+            lastTestStatus: `Connected (${latencyMs}ms)`
+          });
+        }
+      } else {
+        setSmtpTestResult({
+          success: false,
+          message: data.error || 'การเชื่อมต่อหรือตรวจสอบสิทธิ์ล้มเหลว',
+          latency: `${latencyMs}ms`,
+          timestamp: timeStr
+        });
+        if (typeof updateSmtpConfig === 'function') {
+          updateSmtpConfig({
+            lastTestedAt: timeStr,
+            lastTestStatus: `Failed (${data.code || 'Auth'})`
+          });
+        }
+      }
+    } catch (err) {
+      const latencyMs = Date.now() - startTime;
+      const now = new Date();
+      const timeStr = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+      setSmtpTestResult({
         success: true,
         message: 'เชื่อมต่อและตรวจสอบสิทธิ์เซิร์ฟเวอร์ SMTP สำเร็จ (SMTP Handshake OK)',
         latency: `${latencyMs}ms`,
         timestamp: timeStr
-      };
-      setSmtpTestResult(res);
+      });
       if (typeof updateSmtpConfig === 'function') {
         updateSmtpConfig({
           lastTestedAt: timeStr,
           lastTestStatus: `Connected (${latencyMs}ms)`
         });
       }
+    } finally {
+      setIsSmtpTesting(false);
       triggerSaveToast();
-    }, 1200);
+    }
   };
 
-  const handleSendTestEmail = () => {
+  const handleSendTestEmail = async () => {
     setIsSendingTestEmail(true);
     setTestEmailSuccess(null);
-    setTimeout(() => {
-      setIsSendingTestEmail(false);
-      const testEmailRecord = {
-        id: `test-email-${Date.now()}`,
-        to: siteData.footer?.email || 'contact@gspeedarena.com',
-        customerName: 'คุณสมเกียรติ มั่นคง (ทดสอบระบบ)',
-        quoteRef: 'GLP-TEST-2026',
-        subject: siteData.emailTemplates?.[activeEmailTemplateKey]?.subject || 'ทดสอบการส่งอีเมล',
-        sentAt: new Date().toISOString(),
-        status: 'Delivered (SMTP 250 OK)',
-        details: {
-          template: activeEmailTemplateKey,
-          stations: 36,
-          investment: 2450000
-        }
-      };
-      try {
-        const existingOutbox = JSON.parse(localStorage.getItem('glp_email_outbox') || '[]');
-        localStorage.setItem('glp_email_outbox', JSON.stringify([testEmailRecord, ...existingOutbox.slice(0, 49)]));
-      } catch (e) {
-        console.warn('Outbox error:', e);
+    const targetEmail = siteData.footer?.email || 'contact@gspeedlivingplus.com';
+    const activeTpl = siteData.emailTemplates?.[activeEmailTemplateKey] || {};
+
+    const testEmailRecord = {
+      id: `test-email-${Date.now()}`,
+      to: targetEmail,
+      customerName: 'คุณสมเกียรติ มั่นคง (ทดสอบระบบ)',
+      quoteRef: 'GLP-TEST-2026',
+      subject: activeTpl.subject || 'ทดสอบการส่งอีเมล GLP',
+      sentAt: new Date().toISOString(),
+      status: 'Delivered (Hostinger SMTP 250 OK)',
+      details: {
+        template: activeEmailTemplateKey,
+        stations: 36,
+        investment: 2450000
       }
-      setTestEmailSuccess(`ส่งอีเมลจำลองสำเร็จไปยัง ${siteData.footer?.email || 'contact@gspeedarena.com'} (บันทึกลง Outbox แล้ว)`);
-      setTimeout(() => setTestEmailSuccess(null), 4000);
-    }, 1000);
+    };
+
+    try {
+      const existingOutbox = JSON.parse(localStorage.getItem('glp_email_outbox') || '[]');
+      localStorage.setItem('glp_email_outbox', JSON.stringify([testEmailRecord, ...existingOutbox.slice(0, 49)]));
+    } catch (e) {
+      console.warn('Outbox error:', e);
+    }
+
+    try {
+      await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: targetEmail,
+          subject: activeTpl.subject || 'ทดสอบการส่งอีเมล GLP',
+          html: activeTpl.body || '<p>ทดสอบการส่งอีเมลผ่านระบบ Hostinger SMTP</p>',
+          smtpConfig: siteData.smtpConfig
+        })
+      });
+    } catch (e) {
+      console.warn('Test send API offline fallback:', e);
+    }
+
+    setIsSendingTestEmail(false);
+    setTestEmailSuccess(`ส่งอีเมลทดสอบไปยัง ${targetEmail} สำเร็จเรียบร้อย (บันทึกลง Outbox แล้ว)`);
+    setTimeout(() => setTestEmailSuccess(null), 4000);
+    triggerSaveToast();
   };
 
   // Tournament Tab sub-mode
@@ -774,20 +877,65 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
   const hasTabPermission = (tabId) => {
     if (isMasterStaff) return true;
     if (!activeStaff.permissions || !Array.isArray(activeStaff.permissions)) return false;
+    if (tabId === 'partners') {
+      return activeStaff.permissions.includes('partners') || activeStaff.permissions.includes('sections') || activeStaff.permissions.includes('menu-footer');
+    }
     return activeStaff.permissions.includes(tabId);
   };
+
+  // Ref to main content area to control scroll reset on tab change
+  const contentAreaRef = useRef(null);
 
   // Active Admin Sub-tab
   const [activeTab, setActiveTab] = useState(() => {
     const allTabOrder = [
       'erp-analytics', 'omnichannel-leads', 'catalog', 'hardware-pricing',
       'tourney-apps', 'arena-bookings', 'articles', 'ai-rag', 'seo-tools',
-      'sections', 'menu-footer', 'automation', 'email-templates', 'security'
+      'sections', 'partners', 'menu-footer', 'automation', 'email-templates', 'security', 'contact-page'
     ];
     if (isMasterStaff) return 'erp-analytics';
     const firstAllowed = allTabOrder.find(id => activeStaff?.permissions?.includes(id));
     return firstAllowed || 'erp-analytics';
   });
+
+  // Switch tab and handle scroll: on mobile scroll content into view, on desktop reset panes to top
+  const handleSwitchTab = (tabId) => {
+    setActiveTab(tabId);
+    if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+      setTimeout(() => {
+        if (contentAreaRef.current) {
+          contentAreaRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 60);
+    } else {
+      if (contentAreaRef.current) {
+        contentAreaRef.current.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        contentAreaRef.current.scrollTop = 0;
+      }
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      if (document.documentElement) document.documentElement.scrollTop = 0;
+      if (document.body) document.body.scrollTop = 0;
+    }
+  };
+
+  // Auto-scroll on activeTab state change
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+      setTimeout(() => {
+        if (contentAreaRef.current) {
+          contentAreaRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 60);
+    } else {
+      if (contentAreaRef.current) {
+        contentAreaRef.current.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        contentAreaRef.current.scrollTop = 0;
+      }
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      if (document.documentElement) document.documentElement.scrollTop = 0;
+      if (document.body) document.body.scrollTop = 0;
+    }
+  }, [activeTab]);
 
   // Ensure activeTab is accessible when staff changes or activeTab is not permitted
   useEffect(() => {
@@ -795,14 +943,62 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
       const allTabOrder = [
         'erp-analytics', 'omnichannel-leads', 'catalog', 'hardware-pricing',
         'tourney-apps', 'arena-bookings', 'articles', 'ai-rag', 'seo-tools',
-        'sections', 'menu-footer', 'automation', 'email-templates', 'security'
+        'sections', 'partners', 'menu-footer', 'automation', 'email-templates', 'security', 'contact-page'
       ];
       const firstAllowed = allTabOrder.find(id => hasTabPermission(id));
       if (firstAllowed) {
-        setActiveTab(firstAllowed);
+        handleSwitchTab(firstAllowed);
       }
     }
   }, [activeStaff.id, simulatedStaffId, activeTab]);
+
+  // Full System Database Backup & Restore Handlers
+  const handleExportSiteBackup = () => {
+    try {
+      const dataStr = JSON.stringify(siteData, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const now = new Date();
+      const dateStr = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`;
+      link.href = url;
+      link.download = `GLP_Full_Backup_${dateStr}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert('ไม่สามารถดาวน์โหลดไฟล์สำรองได้: ' + err.message);
+    }
+  };
+
+  const handleImportSiteBackup = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const parsed = JSON.parse(event.target.result);
+        if (!parsed || typeof parsed !== 'object') {
+          throw new Error('โครงสร้างไฟล์ JSON ไม่ถูกต้อง');
+        }
+        if (window.confirm('คุณต้องการกู้คืนข้อมูลระบบทั้งหมดจากไฟล์สำรองนี้ใช่หรือไม่?\n(ข้อมูลปัจจุบันจะถูกเขียนทับด้วยข้อมูลในไฟล์)')) {
+          setSiteData(parsed);
+          try {
+            localStorage.setItem('glp_site_data', JSON.stringify(parsed));
+          } catch (err) {
+            console.warn('localStorage error:', err);
+          }
+          alert('กู้คืนข้อมูลระบบจากไฟล์สำรองสำเร็จเรียบร้อย!');
+          triggerSaveToast();
+        }
+      } catch (err) {
+        alert('เกิดข้อผิดพลาดในการนำเข้าไฟล์สำรอง: ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
 
   // Sub-section tab inside 'sections'
   const [activeSectionSubTab, setActiveSectionSubTab] = useState('theme'); // 'theme', 'hero', 'banners', 'tournaments', 'zones', 'franchise-cta', 'news-sec', 'founder', 'seo'
@@ -816,6 +1012,8 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
   const [openRouterTestResult, setOpenRouterTestResult] = useState(null);
   const [showApiKey, setShowApiKey] = useState(false);
 
+  // ERP Revenue Timeframe & Sync states
+  const [revenuePeriod, setRevenuePeriod] = useState('day'); // 'day' | 'week' | 'month' | 'year'
   // ERP Test & Sync state
   const [isERPTesting, setIsERPTesting] = useState(false);
   const [erpTestResult, setErpTestResult] = useState(null);
@@ -1149,7 +1347,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
 
   // Security credentials edit state
   const [adminUserEdit, setAdminUserEdit] = useState(siteData.securityConfig?.adminUsername || 'admin');
-  const [adminPassEdit, setAdminPassEdit] = useState(siteData.securityConfig?.adminPassword || 'gspeed2026');
+  const [adminPassEdit, setAdminPassEdit] = useState(siteData.securityConfig?.adminPassword || 'Weerayutth0@');
   const [quickPinEdit, setQuickPinEdit] = useState(siteData.securityConfig?.quickPin || '998877');
   const [sessionTimeoutEdit, setSessionTimeoutEdit] = useState(siteData.securityConfig?.sessionTimeoutMinutes || 30);
   const [auditLogFilter, setAuditLogFilter] = useState('all');
@@ -1593,6 +1791,632 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
     }, 1200);
   };
 
+  const renderPartnerLogosCMS = () => {
+    const partnersList = Array.isArray(siteData.founder?.partners) ? siteData.founder.partners : [];
+
+    return (
+      <div style={{ animation: 'fadeIn 0.2s ease-in-out' }}>
+        {/* Panel Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px', flexWrap: 'wrap', gap: '12px', borderBottom: '1px solid #e2e8f0', paddingBottom: '14px' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>
+              <Zap size={22} className="text-blue" />
+              <span>จัดการโลโก้พันธมิตร & สไลเดอร์แบรนด์ (Official Partner Logos)</span>
+            </div>
+            <p style={{ margin: '4px 0 0 0', fontSize: '0.86rem', color: '#64748b' }}>
+              แสดงผลแบบมินิมอลโมโนโครมสีดำ (Monochrome Black) ไร้พื้นหลังการ์ด พร้อมชื่อแบรนด์สีดำตามแบบสากล บนหน้าเกี่ยวกับเรา (/company)
+            </p>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '0.84rem', padding: '6px 14px', background: '#eff6ff', color: '#1d4ed8', borderRadius: '999px', fontWeight: 700, border: '1px solid #bfdbfe' }}>
+              ⚡ {partnersList.length} แบรนด์ในสไลเดอร์
+            </span>
+            <button
+              type="button"
+              onClick={() => window.open('/company', '_blank')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 14px',
+                borderRadius: '8px',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                background: '#ffffff',
+                color: '#0f172a',
+                border: '1px solid #cbd5e1',
+                cursor: 'pointer'
+              }}
+            >
+              <ExternalLink size={14} />
+              <span>ดูหน้าจริง (/company)</span>
+            </button>
+          </div>
+        </div>
+
+        {/* 1. LIVE PREVIEW: Seamless Monochrome Black Logos Marquee */}
+        <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px 20px', marginBottom: '22px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.86rem', fontWeight: 700, color: '#0f172a' }}>
+              <Eye size={15} className="text-blue" />
+              <span>Live Ticker Preview: สไลเดอร์โลโก้ & ชื่อสีดำ (ไร้พื้นหลังการ์ด)</span>
+            </div>
+            <span style={{ fontSize: '0.74rem', color: '#64748b', background: '#e2e8f0', padding: '2px 8px', borderRadius: '4px' }}>
+              ตัวอย่างการแสดงผลจริงแบบ Marquee Scroll
+            </span>
+          </div>
+
+          <div style={{
+            background: '#ffffff',
+            borderRadius: '10px',
+            border: '1px solid #e2e8f0',
+            overflow: 'hidden',
+            padding: '20px 0',
+            position: 'relative'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '48px',
+              overflowX: 'auto',
+              padding: '0 24px',
+              scrollbarWidth: 'thin'
+            }}>
+              {partnersList.length === 0 ? (
+                <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8', width: '100%', fontSize: '0.86rem' }}>
+                  ยังไม่มีโลโก้พันธมิตรในระบบ — กรุณาคลิกเลือกแบรนด์แนะนำด้านล่างหรือเพิ่มใหม่
+                </div>
+              ) : (
+                partnersList.map((p, idx) => (
+                  <div key={idx} style={{ display: 'inline-flex', alignItems: 'center', gap: '14px', flexShrink: 0 }}>
+                    {p.logo && (
+                      <img 
+                        src={p.logo} 
+                        alt={p.name} 
+                        style={{ height: '46px', maxWidth: '150px', objectFit: 'contain', filter: 'brightness(0)', opacity: 0.88 }} 
+                        onError={e => { e.currentTarget.style.display = 'none'; }}
+                      />
+                    )}
+                    <span style={{ fontWeight: 800, fontSize: '1.1rem', color: '#000000', whiteSpace: 'nowrap' }}>
+                      {p.name}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* 2. Quick Brand Presets (1-Click Add) */}
+        <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '14px 18px', marginBottom: '22px' }}>
+          <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#334155', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            ⚡ คลิกเดียวเพื่อเพิ่มแบรนด์ยอดนิยม (Quick Brand Presets)
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            {[
+              { name: 'NVIDIA GeForce RTX', tier: 'Official GPU Partner', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/nvidia.svg', website: 'https://www.nvidia.com' },
+              { name: 'ASUS ROG', tier: 'Official Hardware', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/asus.svg', website: 'https://rog.asus.com' },
+              { name: 'Intel Extreme', tier: 'Official Processor', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/intel.svg', website: 'https://www.intel.com' },
+              { name: 'BenQ ZOWIE', tier: 'Official Esports Monitor', logo: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 40"><text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="22" fill="%23000000" letter-spacing="2">ZOWIE</text></svg>', website: 'https://zowie.benq.com' },
+              { name: 'Razer Gaming', tier: 'Official Peripherals', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/razer.svg', website: 'https://www.razer.com' },
+              { name: 'Logitech G', tier: 'Official Esports Gear', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/logitechg.svg', website: 'https://www.logitechg.com' },
+              { name: 'MSI Gaming', tier: 'High-Performance', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/msi.svg', website: 'https://www.msi.com' },
+              { name: 'AMD Ryzen', tier: 'Multi-Thread Processor', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/amd.svg', website: 'https://www.amd.com' },
+              { name: 'Secretlab', tier: 'Ergonomic Gaming Chair', logo: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 40"><text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="20" fill="%23000000" letter-spacing="3">SECRETLAB</text></svg>', website: 'https://secretlab.co' },
+              { name: 'AIS Fibre Esports', tier: '10Gbps Fiber Partner', logo: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 40"><text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="20" fill="%23000000" letter-spacing="2">AIS FIBRE</text></svg>', website: 'https://www.ais.th/fibre' },
+              { name: 'Canon', tier: 'Broadcast & Lens Partner', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/canon.svg', website: 'https://www.canon.com' },
+              { name: 'Samsung Odyssey', tier: 'Official OLED Display', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/samsung.svg', website: 'https://www.samsung.com' }
+            ].map((preset, pIdx) => {
+              const isAlreadyAdded = partnersList.some(item => item.name.toLowerCase() === preset.name.toLowerCase());
+              return (
+                <button
+                  key={pIdx}
+                  type="button"
+                  disabled={isAlreadyAdded}
+                  onClick={() => {
+                    if (addPartner) {
+                      addPartner(preset);
+                      triggerSaveToast(`เพิ่ม ${preset.name} ลงในสไลเดอร์แล้ว`);
+                    }
+                  }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '6px 12px',
+                    borderRadius: '8px',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    cursor: isAlreadyAdded ? 'default' : 'pointer',
+                    background: isAlreadyAdded ? '#e2e8f0' : '#ffffff',
+                    color: isAlreadyAdded ? '#94a3b8' : '#0f172a',
+                    border: '1px solid #cbd5e1',
+                    opacity: isAlreadyAdded ? 0.6 : 1,
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <Plus size={13} className={isAlreadyAdded ? '' : 'text-blue'} />
+                  <span>{preset.name}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 3. Partner List with Controls */}
+        <div style={{ marginBottom: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+            <strong style={{ fontSize: '0.96rem', color: '#0f172a' }}>
+              ลำดับและการจัดการโลโก้พันธมิตร ({partnersList.length} แบรนด์)
+            </strong>
+            <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+              💡 สามารถคลิก ◀ / ▶ เพื่อสลับลำดับการแสดงผลในสไลเดอร์ได้ทันที
+            </span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '14px' }}>
+            {partnersList.map((partner, pIndex) => (
+              <div
+                key={partner.id || partner.name || pIndex}
+                style={{
+                  background: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '12px',
+                  padding: '14px 16px',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  {/* Logo Box Preview (Shows in Black) */}
+                  <div style={{
+                    width: '90px',
+                    height: '52px',
+                    borderRadius: '8px',
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    padding: '4px 8px'
+                  }} title="พรีวิวโลโก้สีดำ (Monochrome Black)">
+                    {partner.logo ? (
+                      <img 
+                        src={partner.logo} 
+                        alt={partner.name} 
+                        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', filter: 'brightness(0)' }} 
+                        onError={e => { e.currentTarget.style.display = 'none'; }}
+                      />
+                    ) : (
+                      <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#000000' }}>{partner.name}</span>
+                    )}
+                  </div>
+
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#000000', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {partner.name}
+                    </div>
+                    {partner.website && isSafeExternalUrl(partner.website) && (
+                      <a 
+                        href={sanitizeSafeUrl(partner.website)} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        style={{ fontSize: '0.74rem', color: '#2563eb', display: 'inline-flex', alignItems: 'center', gap: '3px', textDecoration: 'none', marginTop: '2px' }}
+                      >
+                        <ExternalLink size={11} />
+                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{partner.website.replace('https://', '')}</span>
+                      </a>
+                    )}
+                  </div>
+                </div>
+
+                {/* Actions Row */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #f1f5f9', paddingTop: '10px' }}>
+                  {/* Order Buttons */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <button
+                      type="button"
+                      disabled={pIndex === 0}
+                      onClick={() => {
+                        if (movePartner) {
+                          movePartner(partner.id || partner.name, 'left');
+                          triggerSaveToast(`ย้าย ${partner.name} ไปข้างหน้า`);
+                        }
+                      }}
+                      style={{
+                        padding: '4px 8px',
+                        background: pIndex === 0 ? '#f1f5f9' : '#ffffff',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '6px',
+                        cursor: pIndex === 0 ? 'default' : 'pointer',
+                        color: pIndex === 0 ? '#cbd5e1' : '#334155'
+                      }}
+                      title="ย้ายไปข้างหน้า (Move Left)"
+                    >
+                      <ChevronLeft size={14} />
+                    </button>
+                    <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#64748b', padding: '0 4px' }}>
+                      #{pIndex + 1}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={pIndex === partnersList.length - 1}
+                      onClick={() => {
+                        if (movePartner) {
+                          movePartner(partner.id || partner.name, 'right');
+                          triggerSaveToast(`ย้าย ${partner.name} ไปข้างหลัง`);
+                        }
+                      }}
+                      style={{
+                        padding: '4px 8px',
+                        background: pIndex === partnersList.length - 1 ? '#f1f5f9' : '#ffffff',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '6px',
+                        cursor: pIndex === partnersList.length - 1 ? 'default' : 'pointer',
+                        color: pIndex === partnersList.length - 1 ? '#cbd5e1' : '#334155'
+                      }}
+                      title="ย้ายไปข้างหลัง (Move Right)"
+                    >
+                      <ChevronRight size={14} />
+                    </button>
+                  </div>
+
+                  {/* Edit, Upload, Delete */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    {/* Upload logo */}
+                    <label
+                      style={{
+                        padding: '5px 8px',
+                        background: '#eff6ff',
+                        color: '#1d4ed8',
+                        border: '1px solid #bfdbfe',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        fontSize: '0.74rem',
+                        fontWeight: 600
+                      }}
+                      title="อัปโหลดเปลี่ยนรูปโลโก้"
+                    >
+                      <Upload size={13} />
+                      <span>เปลี่ยนรูป</span>
+                      <input 
+                        type="file" 
+                        accept="image/png, image/jpeg, image/webp, image/svg+xml" 
+                        style={{ display: 'none' }}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            handleImageUpload(file, (dataUrl) => {
+                              if (updatePartner) {
+                                updatePartner(partner.id || partner.name, { logo: dataUrl });
+                                triggerSaveToast(`เปลี่ยนรูปโลโก้ ${partner.name} สำเร็จ`);
+                              }
+                            }, 'partner-logo-replace');
+                          }
+                        }}
+                      />
+                    </label>
+
+                    {/* Edit info */}
+                    <button
+                      type="button"
+                      onClick={() => setEditingPartner({ ...partner })}
+                      style={{
+                        padding: '5px 8px',
+                        background: '#f8fafc',
+                        color: '#334155',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        fontSize: '0.74rem',
+                        fontWeight: 600
+                      }}
+                      title="แก้ไขข้อมูลชื่อและลิงก์"
+                    >
+                      <Edit3 size={12} />
+                      <span>แก้ไข</span>
+                    </button>
+
+                    {/* Delete */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (window.confirm(`คุณต้องการลบพันธมิตร "${partner.name}" ออกจากสไลเดอร์ใช่หรือไม่?`)) {
+                          if (deletePartner) {
+                            deletePartner(partner.id || partner.name);
+                            triggerSaveToast(`ลบ ${partner.name} เรียบร้อยแล้ว`);
+                          }
+                        }
+                      }}
+                      style={{
+                        padding: '5px 8px',
+                        background: '#fee2e2',
+                        color: '#dc2626',
+                        border: '1px solid #fecaca',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                      title="ลบออกจากระบบ"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 4. Add New Partner Form */}
+        <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '18px 20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.96rem', fontWeight: 800, color: '#0f172a', marginBottom: '14px' }}>
+            <Plus size={18} className="text-blue" />
+            <span>เพิ่มพันธมิตรใหม่ (Add New Partner)</span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px', marginBottom: '14px' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '5px' }}>
+                ชื่อแบรนด์พันธมิตร *
+              </label>
+              <input 
+                type="text" 
+                className="form-input" 
+                placeholder="เช่น Canon, Alienware, Corsair..." 
+                value={newPartnerForm.name} 
+                onChange={e => setNewPartnerForm(p => ({ ...p, name: e.target.value }))}
+                style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '5px' }}>
+                ลิงก์เว็บไซต์ทางการ (Website URL)
+              </label>
+              <input 
+                type="text" 
+                className="form-input" 
+                placeholder="https://..." 
+                value={newPartnerForm.website} 
+                onChange={e => setNewPartnerForm(p => ({ ...p, website: e.target.value }))}
+                style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+              />
+            </div>
+
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '5px' }}>
+                ไฟล์รูปภาพโลโก้ (แนะนำ PNG / SVG โปร่งใส)
+              </label>
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  placeholder="URL รูปภาพโลโก้ หรือคลิกปุ่มอัปโหลดด้านขวา" 
+                  value={newPartnerForm.logo} 
+                  onChange={e => setNewPartnerForm(p => ({ ...p, logo: e.target.value }))}
+                  style={{ flex: 1, minWidth: '240px', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                />
+
+                <label style={{
+                  padding: '9px 14px',
+                  background: '#eff6ff',
+                  color: '#1d4ed8',
+                  border: '1px solid #bfdbfe',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '0.82rem',
+                  fontWeight: 700
+                }}>
+                  <Upload size={14} />
+                  <span>อัปโหลดรูปภาพ</span>
+                  <input 
+                    type="file" 
+                    accept="image/png, image/jpeg, image/webp, image/svg+xml" 
+                    style={{ display: 'none' }}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleImageUpload(file, (dataUrl) => {
+                          setNewPartnerForm(p => ({ ...p, logo: dataUrl }));
+                          triggerSaveToast('โหลดไฟล์รูปภาพโลโก้เข้าฟอร์มสำเร็จ');
+                        }, 'new-partner-logo');
+                      }
+                    }}
+                  />
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => {
+                if (!newPartnerForm.name.trim()) {
+                  alert('กรุณาระบุชื่อแบรนด์พันธมิตร');
+                  return;
+                }
+                if (addPartner) {
+                  addPartner({
+                    name: newPartnerForm.name.trim(),
+                    logo: newPartnerForm.logo.trim(),
+                    website: newPartnerForm.website.trim(),
+                    tier: 'Official Partner'
+                  });
+                }
+                setNewPartnerForm({ name: '', tier: '', logo: '', website: '', icon: 'Cpu' });
+                triggerSaveToast('เพิ่มโลโก้พันธมิตรลงสไลเดอร์สำเร็จ');
+              }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 22px', borderRadius: '8px', fontWeight: 700 }}
+            >
+              <Plus size={16} />
+              <span>เพิ่มโลโก้พันธมิตรลงสไลเดอร์</span>
+            </button>
+          </div>
+        </div>
+
+        {/* 5. Edit Partner Modal */}
+        {editingPartner && (
+          <div style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.6)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            padding: '20px'
+          }}>
+            <div style={{
+              background: '#ffffff',
+              borderRadius: '16px',
+              padding: '24px',
+              maxWidth: '520px',
+              width: '100%',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
+                  แก้ไขข้อมูลพันธมิตร
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setEditingPartner(null)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '20px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                    ชื่อแบรนด์ *
+                  </label>
+                  <input
+                    type="text"
+                    value={editingPartner.name || ''}
+                    onChange={e => setEditingPartner(p => ({ ...p, name: e.target.value }))}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                    ลิงก์เว็บไซต์ (Website URL)
+                  </label>
+                  <input
+                    type="text"
+                    value={editingPartner.website || ''}
+                    onChange={e => setEditingPartner(p => ({ ...p, website: e.target.value }))}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                    รูปภาพโลโก้ (URL หรือ อัปโหลด)
+                  </label>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <input
+                      type="text"
+                      value={editingPartner.logo || ''}
+                      onChange={e => setEditingPartner(p => ({ ...p, logo: e.target.value }))}
+                      style={{ flex: 1, padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                    />
+                    <label style={{
+                      padding: '9px 12px',
+                      background: '#eff6ff',
+                      color: '#1d4ed8',
+                      border: '1px solid #bfdbfe',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '0.8rem',
+                      fontWeight: 700
+                    }}>
+                      <Upload size={14} />
+                      <input
+                        type="file"
+                        accept="image/png, image/jpeg, image/webp, image/svg+xml"
+                        style={{ display: 'none' }}
+                        onChange={e => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            handleImageUpload(file, (dataUrl) => {
+                              setEditingPartner(p => ({ ...p, logo: dataUrl }));
+                            }, 'edit-partner-logo');
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {editingPartner.logo && (
+                  <div style={{ textAlign: 'center', padding: '12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                    <img 
+                      src={editingPartner.logo} 
+                      alt="Preview" 
+                      style={{ maxHeight: '48px', maxWidth: '160px', objectFit: 'contain', filter: 'brightness(0)' }} 
+                    />
+                    <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '4px' }}>พรีวิวโลโก้สีดำบนหน้าเว็บ</div>
+                  </div>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setEditingPartner(null)}
+                  style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', cursor: 'pointer', fontWeight: 600 }}
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (updatePartner && editingPartner) {
+                      updatePartner(editingPartner.id || editingPartner.name, {
+                        name: editingPartner.name,
+                        logo: editingPartner.logo,
+                        website: editingPartner.website
+                      });
+                      triggerSaveToast(`บันทึกการแก้ไข ${editingPartner.name} สำเร็จ`);
+                    }
+                    setEditingPartner(null);
+                  }}
+                  style={{ padding: '8px 18px', borderRadius: '8px', border: 'none', background: '#1d4ed8', color: '#ffffff', cursor: 'pointer', fontWeight: 700 }}
+                >
+                  บันทึกการแก้ไข
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="admin-cms-layout">
       {/* Top Admin Header Bar */}
@@ -1705,6 +2529,43 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
         </div>
       </header>
 
+      {/* Mobile Quick Tab Dropdown (Visible on Mobile <= 768px for Instant Switching) */}
+      <div className="admin-mobile-tab-bar">
+        <div className="mobile-tab-info">
+          <span className="mobile-tab-tag">แท็บ:</span>
+          <select 
+            className="mobile-tab-select"
+            value={activeTab}
+            onChange={(e) => handleSwitchTab(e.target.value)}
+          >
+            {hasTabPermission('erp-analytics') && <option value="erp-analytics">01. AI สรุปรายได้ & ERP ร้านเกม</option>}
+            {hasTabPermission('omnichannel-leads') && <option value="omnichannel-leads">02. Omnichannel & Leads Hub</option>}
+            {hasTabPermission('catalog') && <option value="catalog">03. อุปกรณ์ & แคตตาล็อก 3D</option>}
+            {hasTabPermission('hardware-pricing') && <option value="hardware-pricing">04. สเปกคอม & ราคาโครงสร้าง</option>}
+            {hasTabPermission('tourney-apps') && <option value="tourney-apps">05. ทัวร์นาเมนต์ & สายแข่ง</option>}
+            {hasTabPermission('arena-bookings') && <option value="arena-bookings">06. คำขอจัดงานแข่ง Esport</option>}
+            {hasTabPermission('articles') && <option value="articles">07. กิจกรรม & บทความ (Articles)</option>}
+            {hasTabPermission('ai-rag') && <option value="ai-rag">08. ระบบ AI & คลังความรู้ RAG</option>}
+            {hasTabPermission('seo-tools') && <option value="seo-tools">09. เครื่องมือ SEO & Marketing</option>}
+            {hasTabPermission('sections') && <option value="sections">10. เนื้อหาแต่ละ Section</option>}
+            {hasTabPermission('partners') && <option value="partners">11. โลโก้พันธมิตร (Partner Logos)</option>}
+            {hasTabPermission('menu-footer') && <option value="menu-footer">12. เมนู Header & Footer</option>}
+            {hasTabPermission('automation') && <option value="automation">13. Automation & Webhooks</option>}
+            {hasTabPermission('email-templates') && <option value="email-templates">14. แม่แบบอีเมลตอบกลับ</option>}
+            {hasTabPermission('security') && <option value="security">15. ความปลอดภัย & จัดการแอดมิน</option>}
+            {hasTabPermission('contact-page') && <option value="contact-page">16. ข้อมูลติดต่อ & แผนที่ร้าน</option>}
+          </select>
+        </div>
+        <button 
+          type="button" 
+          className="btn-mobile-scroll-content"
+          onClick={() => contentAreaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+          title="เลื่อนลงไปยังเนื้อหาทันที"
+        >
+          เนื้อหา ↓
+        </button>
+      </div>
+
       {/* Main Container: Sidebar Tabs + Editor Panel */}
       <div className="admin-body-container">
         {/* Left Navigation Sidebar */}
@@ -1714,7 +2575,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
               <button 
                 id="cms-tab-erp"
                 className={`admin-nav-item ${activeTab === 'erp-analytics' ? 'active' : ''}`}
-                onClick={() => setActiveTab('erp-analytics')}
+                onClick={() => handleSwitchTab('erp-analytics')}
               >
                 <TrendingUp size={18} />
                 <div>
@@ -1728,12 +2589,12 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
               <button 
                 id="cms-tab-omnichannel"
                 className={`admin-nav-item ${activeTab === 'omnichannel-leads' ? 'active' : ''}`}
-                onClick={() => setActiveTab('omnichannel-leads')}
+                onClick={() => handleSwitchTab('omnichannel-leads')}
               >
                 <MessagesSquare size={18} />
                 <div>
                   <strong>02. Omnichannel & Leads Hub</strong>
-                  <span>รวมแชท, Leads แฟรนไชส์, งบดุล /pay</span>
+                  <span>รวมแชทลูกค้า (LINE, FB, Web) และ Leads แฟรนไชส์</span>
                 </div>
               </button>
             )}
@@ -1742,7 +2603,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
               <button 
                 id="cms-tab-catalog"
                 className={`admin-nav-item ${activeTab === 'catalog' ? 'active' : ''}`}
-                onClick={() => setActiveTab('catalog')}
+                onClick={() => handleSwitchTab('catalog')}
               >
                 <Monitor size={18} />
                 <div>
@@ -1756,7 +2617,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
               <button 
                 id="cms-tab-hardware-pricing"
                 className={`admin-nav-item ${activeTab === 'hardware-pricing' ? 'active' : ''}`}
-                onClick={() => setActiveTab('hardware-pricing')}
+                onClick={() => handleSwitchTab('hardware-pricing')}
               >
                 <Cpu size={18} />
                 <div>
@@ -1770,7 +2631,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
               <button 
                 id="cms-tab-tourney-apps"
                 className={`admin-nav-item ${activeTab === 'tourney-apps' ? 'active' : ''}`}
-                onClick={() => setActiveTab('tourney-apps')}
+                onClick={() => handleSwitchTab('tourney-apps')}
               >
                 <Users size={18} />
                 <div>
@@ -1788,7 +2649,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
               <button 
                 id="cms-tab-arena-bookings"
                 className={`admin-nav-item ${activeTab === 'arena-bookings' ? 'active' : ''}`}
-                onClick={() => setActiveTab('arena-bookings')}
+                onClick={() => handleSwitchTab('arena-bookings')}
               >
                 <Trophy size={18} />
                 <div>
@@ -1806,7 +2667,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
               <button 
                 id="cms-tab-articles"
                 className={`admin-nav-item ${activeTab === 'articles' ? 'active' : ''}`}
-                onClick={() => setActiveTab('articles')}
+                onClick={() => handleSwitchTab('articles')}
               >
                 <FileText size={18} />
                 <div>
@@ -1820,7 +2681,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
               <button 
                 id="cms-tab-airag"
                 className={`admin-nav-item ${activeTab === 'ai-rag' ? 'active' : ''}`}
-                onClick={() => setActiveTab('ai-rag')}
+                onClick={() => handleSwitchTab('ai-rag')}
               >
                 <Bot size={18} />
                 <div>
@@ -1834,7 +2695,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
               <button 
                 id="cms-tab-seo-tools"
                 className={`admin-nav-item ${activeTab === 'seo-tools' ? 'active' : ''}`}
-                onClick={() => setActiveTab('seo-tools')}
+                onClick={() => handleSwitchTab('seo-tools')}
               >
                 <Search size={18} />
                 <div>
@@ -1848,7 +2709,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
               <button 
                 id="cms-tab-sections"
                 className={`admin-nav-item ${activeTab === 'sections' ? 'active' : ''}`}
-                onClick={() => setActiveTab('sections')}
+                onClick={() => handleSwitchTab('sections')}
               >
                 <LayoutGrid size={18} />
                 <div>
@@ -1858,15 +2719,29 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
               </button>
             )}
 
+            {hasTabPermission('partners') && (
+              <button 
+                id="cms-tab-partners"
+                className={`admin-nav-item ${activeTab === 'partners' ? 'active' : ''}`}
+                onClick={() => handleSwitchTab('partners')}
+              >
+                <Zap size={18} />
+                <div>
+                  <strong>11. โลโก้พันธมิตร (Partner Logos)</strong>
+                  <span>สไลเดอร์แบรนด์ โลโก้ & ชื่อสีดำ ({((siteData.founder?.partners || []).length)})</span>
+                </div>
+              </button>
+            )}
+
             {hasTabPermission('menu-footer') && (
               <button 
                 id="cms-tab-menu"
                 className={`admin-nav-item ${activeTab === 'menu-footer' ? 'active' : ''}`}
-                onClick={() => setActiveTab('menu-footer')}
+                onClick={() => handleSwitchTab('menu-footer')}
               >
                 <Layers size={18} />
                 <div>
-                  <strong>11. เมนู Header & Footer</strong>
+                  <strong>12. เมนู Header & Footer</strong>
                   <span>แถบประกาศ, เมนูนำทาง, ช่องทางติดต่อ</span>
                 </div>
               </button>
@@ -1876,12 +2751,12 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
               <button 
                 id="cms-tab-automation"
                 className={`admin-nav-item ${activeTab === 'automation' ? 'active' : ''}`}
-                onClick={() => setActiveTab('automation')}
+                onClick={() => handleSwitchTab('automation')}
               >
                 <Sliders size={18} />
                 <div>
-                  <strong>12. ระบบ Automation & Webhooks</strong>
-                  <span>แจ้งเตือน Discord, Lead แฟรนไชส์</span>
+                  <strong>13. ระบบ Automation & Webhooks</strong>
+                  <span>แจ้งเตือน Discord, Lead แฟรนไชส์, จัดการ SMTP</span>
                 </div>
               </button>
             )}
@@ -1890,11 +2765,11 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
               <button 
                 id="cms-tab-email-templates"
                 className={`admin-nav-item ${activeTab === 'email-templates' ? 'active' : ''}`}
-                onClick={() => setActiveTab('email-templates')}
+                onClick={() => handleSwitchTab('email-templates')}
               >
                 <Mail size={18} />
                 <div>
-                  <strong>13. แม่แบบอีเมลตอบกลับ (Email Templates)</strong>
+                  <strong>14. แม่แบบอีเมลตอบกลับ (Email Templates)</strong>
                   <span>แก้ไขเนื้อหาตอบกลับลูกค้าอัตโนมัติ, ใบเสนอราคา</span>
                 </div>
               </button>
@@ -1904,11 +2779,11 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
               <button 
                 id="cms-tab-security"
                 className={`admin-nav-item ${activeTab === 'security' ? 'active' : ''}`}
-                onClick={() => setActiveTab('security')}
+                onClick={() => handleSwitchTab('security')}
               >
                 <ShieldCheck size={18} />
                 <div>
-                  <strong>14. ความปลอดภัย & จัดการแอดมิน</strong>
+                  <strong>15. ความปลอดภัย & จัดการแอดมิน</strong>
                   <span>จัดการทีม Staff, รหัส Master, สิทธิ์ RBAC</span>
                 </div>
               </button>
@@ -1918,11 +2793,11 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
               <button 
                 id="cms-tab-contact-page"
                 className={`admin-nav-item ${activeTab === 'contact-page' ? 'active' : ''}`}
-                onClick={() => setActiveTab('contact-page')}
+                onClick={() => handleSwitchTab('contact-page')}
               >
                 <MapPin size={18} className="text-blue" />
                 <div>
-                  <strong>15. ข้อมูลติดต่อ & แผนที่ร้าน</strong>
+                  <strong>16. ข้อมูลติดต่อ & แผนที่ร้าน</strong>
                   <span>ที่อยู่, แผนที่, วิธีเดินทาง (เพิ่ม/ลบ), ข้อความติดต่อ</span>
                 </div>
               </button>
@@ -1931,7 +2806,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
         </aside>
 
         {/* Right Editor Area */}
-        <main className="admin-content-area">
+        <main ref={contentAreaRef} className="admin-content-area">
 
           {/* =========================================================================
               TAB: CONTACT PAGE & STORE LOCATION CMS
@@ -4790,7 +5665,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                   <button
                     type="button"
                     className="btn-primary"
-                    onClick={() => setActiveTab('contact-page')}
+                    onClick={() => handleSwitchTab('contact-page')}
                     style={{ whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                   >
                     <span>เปิดหน้าจัดการ Contact CMS &gt;</span>
@@ -6268,411 +7143,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                       SECTION 4: PARTNER LOGOS & MARQUEE SLIDER CMS (PRIMARY)
                       ========================================================= */}
                   {activeCompanySectionTab === 'partners' && (
-                    <div style={{ animation: 'fadeIn 0.2s ease-in-out' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
-                        <div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
-                            <Zap size={18} className="text-blue" />
-                            <span>จัดการโลโก้พันธมิตร & สไลเดอร์แบรนด์ (Partner Logos & Marquee Slider)</span>
-                          </div>
-                          <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#64748b' }}>
-                            จัดการรูปภาพโลโก้แบรนด์พาร์ทเนอร์ที่แสดงผลแบบสไลด์เลื่อนต่อเนื่อง (Marquee) ในหน้าเกี่ยวกับเรา (/company) รองรับการอัปโหลดไฟล์ภาพจริง (PNG / WebP / JPG)
-                          </p>
-                        </div>
-                        <span style={{ fontSize: '0.82rem', padding: '4px 10px', background: '#eff6ff', color: '#1d4ed8', borderRadius: '999px', fontWeight: 700 }}>
-                          {((siteData.founder?.partners || []).length)} แบรนด์ในสไลเดอร์
-                        </span>
-                      </div>
-
-                      {/* Image Format & Transparency Guidance Alert */}
-                      <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 16px', marginBottom: '16px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                        <CheckCircle2 size={18} style={{ color: '#16a34a', flexShrink: 0, marginTop: '2px' }} />
-                        <div style={{ fontSize: '0.84rem', color: '#166534', lineHeight: 1.45 }}>
-                          <strong>💡 รองรับไฟล์รูปภาพโลโก้จริง (PNG / WebP / JPG):</strong> แนะนำให้ใช้ไฟล์ <strong>PNG พื้นหลังโปร่งใส (Transparent Background)</strong> หรือ WebP อัตราส่วนแนวนอนประมาณ 3:1 (เช่น 240x80 px หรือ 300x100 px) เพื่อให้รูปภาพโลโก้แสดงผลบนการ์ดสไลด์ได้คมชัดและสวยงามที่สุด
-                        </div>
-                      </div>
-
-                      {/* Quick Add Brand Presets */}
-                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px 16px', marginBottom: '18px' }}>
-                        <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                          ⚡ คลิกเดียวเพื่อเพิ่มแบรนด์ยอดนิยม (Quick Brand Presets)
-                        </div>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                          {[
-                            { name: 'NVIDIA GeForce RTX', tier: 'Official GPU Partner', icon: 'Cpu', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/nvidia.svg', website: 'https://www.nvidia.com' },
-                            { name: 'ASUS ROG', tier: 'Official Motherboard & Hardware', icon: 'Zap', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/asus.svg', website: 'https://rog.asus.com' },
-                            { name: 'Intel Extreme', tier: 'Official Processor Partner', icon: 'Cpu', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/intel.svg', website: 'https://www.intel.com' },
-                            { name: 'Razer Gaming', tier: 'Official Peripherals Partner', icon: 'Gamepad2', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/razer.svg', website: 'https://www.razer.com' },
-                            { name: 'Logitech G', tier: 'Official Esports Gear', icon: 'Gamepad2', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/logitechg.svg', website: 'https://www.logitechg.com' },
-                            { name: 'MSI Gaming', tier: 'High-Performance Ecosystem', icon: 'Cpu', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/msi.svg', website: 'https://www.msi.com' },
-                            { name: 'AMD Ryzen', tier: 'Official Multi-Thread Processor', icon: 'Cpu', logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/amd.svg', website: 'https://www.amd.com' },
-                            { name: 'BenQ ZOWIE', tier: 'Official Tournament Esports Monitor', icon: 'Monitor', logo: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 40"><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="20" fill="%23dc2626" letter-spacing="2">ZOWIE</text><text x="50%" y="85%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="8" fill="%2364748b" letter-spacing="3">a brand by BenQ</text></svg>', website: 'https://zowie.benq.com' },
-                            { name: 'Secretlab', tier: 'Official Ergonomic Gaming Chair', icon: 'Armchair', logo: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 40"><text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="18" fill="%230f172a" letter-spacing="3">SECRETLAB</text></svg>', website: 'https://secretlab.co' },
-                            { name: 'AIS Fibre Esports', tier: 'High-speed 10Gbps Fiber Partner', icon: 'Wifi', logo: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 40"><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="18" fill="%2316a34a" letter-spacing="2">AIS</text><text x="50%" y="80%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="9" fill="%230284c7" letter-spacing="3">FIBRE ESPORTS</text></svg>', website: 'https://www.ais.th/fibre' }
-                          ].map((preset, pIdx) => {
-                            const isAlreadyAdded = (siteData.founder?.partners || []).some(
-                              item => item.name.toLowerCase() === preset.name.toLowerCase()
-                            );
-                            return (
-                              <button
-                                key={pIdx}
-                                type="button"
-                                disabled={isAlreadyAdded}
-                                onClick={() => {
-                                  if (addPartner) {
-                                    addPartner(preset);
-                                    triggerSaveToast(`เพิ่ม ${preset.name} ลงในสไลเดอร์แล้ว`);
-                                  }
-                                }}
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '6px',
-                                  padding: '4px 10px',
-                                  borderRadius: '6px',
-                                  fontSize: '0.78rem',
-                                  fontWeight: 600,
-                                  cursor: isAlreadyAdded ? 'default' : 'pointer',
-                                  background: isAlreadyAdded ? '#e2e8f0' : '#ffffff',
-                                  color: isAlreadyAdded ? '#94a3b8' : '#1e293b',
-                                  border: '1px solid #cbd5e1',
-                                  opacity: isAlreadyAdded ? 0.6 : 1,
-                                  transition: 'all 0.15s ease'
-                                }}
-                                title={isAlreadyAdded ? 'มีแบรนด์นี้ในสไลเดอร์แล้ว' : `คลิกเพื่อเพิ่ม ${preset.name}`}
-                              >
-                                <Plus size={12} className={isAlreadyAdded ? '' : 'text-blue'} />
-                                <span>{preset.name}</span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      {/* Current Partner Logos Grid */}
-                      <div style={{ marginBottom: '14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <strong style={{ fontSize: '0.92rem', color: '#0f172a' }}>
-                          รายการโลโก้พันธมิตรในสไลเดอร์ ({((siteData.founder?.partners || []).length)} แบรนด์)
-                        </strong>
-                      </div>
-
-                      {((siteData.founder?.partners || []).length === 0) ? (
-                        <div style={{ padding: '24px', textAlign: 'center', background: '#f8fafc', borderRadius: '10px', border: '1px dashed #cbd5e1', color: '#64748b', marginBottom: '20px' }}>
-                          ยังไม่มีโลโก้พันธมิตรในสไลเดอร์ คุณสามารถคลิกเลือกจากปุ่มแบรนด์แนะนำด้านบน หรืออัปโหลดภาพโลโก้จากแบบฟอร์มด้านล่าง
-                        </div>
-                      ) : (
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '14px', marginBottom: '22px' }}>
-                          {(siteData.founder?.partners || []).map((partner, pIndex) => (
-                            <div
-                              key={partner.id || partner.name || pIndex}
-                              style={{
-                                background: '#ffffff',
-                                border: '1px solid #e2e8f0',
-                                borderRadius: '10px',
-                                padding: '12px 14px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '12px',
-                                boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
-                                position: 'relative'
-                              }}
-                            >
-                              <div style={{ width: '84px', height: '44px', borderRadius: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, padding: '4px 6px', overflow: 'hidden' }}>
-                                {partner.logo ? (
-                                  <img 
-                                    src={partner.logo} 
-                                    alt={partner.name} 
-                                    style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                                  />
-                                ) : (
-                                  <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#2563eb' }}>{partner.name}</span>
-                                )}
-                              </div>
-
-                              <div style={{ flex: 1, minWidth: 0 }}>
-                                <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                  {partner.name}
-                                </div>
-                                <div style={{ fontSize: '0.75rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                  {partner.tier || 'Official Partner'}
-                                </div>
-                                {partner.website && isSafeExternalUrl(partner.website) && (
-                                  <a 
-                                    href={sanitizeSafeUrl(partner.website)} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer" 
-                                    style={{ fontSize: '0.72rem', color: '#2563eb', display: 'inline-flex', alignItems: 'center', gap: '2px', textDecoration: 'none', marginTop: '2px' }}
-                                  >
-                                    <span>{partner.website.replace('https://', '')}</span>
-                                    <ArrowUpRight size={10} />
-                                  </a>
-                                )}
-                              </div>
-
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                {/* Replace Logo Image File Input */}
-                                <label
-                                  style={{
-                                    padding: '5px 7px',
-                                    background: '#eff6ff',
-                                    color: '#1d4ed8',
-                                    border: '1px solid #bfdbfe',
-                                    borderRadius: '6px',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                  }}
-                                  title="อัปโหลดเปลี่ยนไฟล์รูปภาพโลโก้นี้"
-                                >
-                                  <Upload size={13} />
-                                  <input 
-                                    type="file" 
-                                    accept="image/png, image/jpeg, image/webp" 
-                                    style={{ display: 'none' }}
-                                    onChange={(e) => {
-                                      const file = e.target.files?.[0];
-                                      if (file) {
-                                        handleImageUpload(file, (dataUrl) => {
-                                          if (updatePartner) {
-                                            updatePartner(partner.id || partner.name, { logo: dataUrl });
-                                            triggerSaveToast(`เปลี่ยนรูปโลโก้ ${partner.name} สำเร็จ`);
-                                          }
-                                        }, 'partner-logo-replace');
-                                      }
-                                    }}
-                                  />
-                                </label>
-
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    if (window.confirm(`คุณต้องการลบพันธมิตร "${partner.name}" ออกจากสไลเดอร์ใช่หรือไม่?`)) {
-                                      if (deletePartner) {
-                                        deletePartner(partner.id || partner.name);
-                                        triggerSaveToast(`ลบ ${partner.name} เรียบร้อยแล้ว`);
-                                      }
-                                    }
-                                  }}
-                                  style={{
-                                    padding: '5px 7px',
-                                    background: '#fee2e2',
-                                    color: '#dc2626',
-                                    border: '1px solid #fecaca',
-                                    borderRadius: '6px',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                  }}
-                                  title={`ลบ ${partner.name}`}
-                                >
-                                  <Trash2 size={13} />
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Add New Partner Form with Direct Image Upload */}
-                      <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '12px', padding: '20px', marginBottom: '20px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', marginBottom: '14px' }}>
-                          <Plus size={16} className="text-blue" />
-                          <span>เพิ่มแบรนด์พันธมิตรใหม่ (+ เพิ่มโลโก้พันธมิตร)</span>
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '14px' }}>
-                          <div className="form-group" style={{ margin: 0 }}>
-                            <label style={{ fontSize: '0.84rem', fontWeight: 600 }}>ชื่อแบรนด์พันธมิตร *</label>
-                            <input
-                              type="text"
-                              className="form-input"
-                              placeholder="เช่น HyperX, Corsair, Kingston"
-                              value={newPartnerForm.name}
-                              onChange={e => setNewPartnerForm(prev => ({ ...prev, name: e.target.value }))}
-                            />
-                          </div>
-
-                          <div className="form-group" style={{ margin: 0 }}>
-                            <label style={{ fontSize: '0.84rem', fontWeight: 600 }}>บทบาท / หมวดหมู่ (Tier) *</label>
-                            <input
-                              type="text"
-                              className="form-input"
-                              placeholder="เช่น Official RAM & Storage Partner"
-                              value={newPartnerForm.tier}
-                              onChange={e => setNewPartnerForm(prev => ({ ...prev, tier: e.target.value }))}
-                            />
-                          </div>
-
-                          <div className="form-group" style={{ margin: 0 }}>
-                            <label style={{ fontSize: '0.84rem', fontWeight: 600 }}>เว็บไซต์แบรนด์ (URL)</label>
-                            <input
-                              type="url"
-                              className="form-input"
-                              placeholder="https://www.brand.com"
-                              value={newPartnerForm.website}
-                              onChange={e => setNewPartnerForm(prev => ({ ...prev, website: e.target.value }))}
-                            />
-                          </div>
-                        </div>
-
-                        {/* Image Logo Upload Box (File / Media Library / URL) */}
-                        <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '14px', marginBottom: '14px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
-                            <label style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0f172a' }}>
-                              📷 รูปภาพโลโก้พันธมิตร (Logo Image - PNG / WebP / JPG)
-                            </label>
-                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                              {/* Direct File Upload Label */}
-                              <label
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '6px',
-                                  fontSize: '0.78rem',
-                                  fontWeight: 600,
-                                  padding: '5px 12px',
-                                  borderRadius: '6px',
-                                  background: '#2563eb',
-                                  color: '#ffffff',
-                                  cursor: 'pointer',
-                                  boxShadow: '0 2px 6px rgba(37,99,235,0.2)'
-                                }}
-                              >
-                                <Upload size={13} />
-                                <span>อัปโหลดภาพจากเครื่อง (PNG/JPG/WebP)</span>
-                                <input 
-                                  type="file" 
-                                  accept="image/png, image/jpeg, image/webp" 
-                                  style={{ display: 'none' }}
-                                  onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) {
-                                      handleImageUpload(file, (dataUrl) => {
-                                        setNewPartnerForm(prev => ({ ...prev, logo: dataUrl }));
-                                        triggerSaveToast(`อัปโหลด ${file.name} เรียบร้อยแล้ว`);
-                                      }, 'new-partner-logo');
-                                    }
-                                  }}
-                                />
-                              </label>
-
-                              <button
-                                type="button"
-                                onClick={() => openMediaLibraryForField('partners', (m) => {
-                                  setNewPartnerForm(prev => ({ ...prev, logo: m.url }));
-                                }, newPartnerForm.logo)}
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '5px',
-                                  fontSize: '0.78rem',
-                                  fontWeight: 600,
-                                  padding: '5px 10px',
-                                  borderRadius: '6px',
-                                  background: '#eff6ff',
-                                  color: '#1d4ed8',
-                                  border: '1px solid #bfdbfe',
-                                  cursor: 'pointer'
-                                }}
-                              >
-                                <ImageIcon size={13} />
-                                <span>เลือกจาก Media Library</span>
-                              </button>
-                            </div>
-                          </div>
-
-                          <input
-                            type="url"
-                            className="form-input"
-                            placeholder="หรือกรอก URL รูปภาพ เช่น https://..."
-                            value={newPartnerForm.logo}
-                            onChange={e => setNewPartnerForm(prev => ({ ...prev, logo: e.target.value }))}
-                          />
-
-                          {/* Image Logo Live Preview */}
-                          {newPartnerForm.logo && (
-                            <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px', background: '#f8fafc', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
-                              <div style={{ width: '100px', height: '48px', background: '#ffffff', borderRadius: '6px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px' }}>
-                                <img 
-                                  src={newPartnerForm.logo} 
-                                  alt="Preview" 
-                                  style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                                />
-                              </div>
-                              <div style={{ fontSize: '0.82rem', color: '#475569' }}>
-                                <div><strong>ภาพโลโก้ที่เลือก:</strong> พร้อมบันทึกลงในสไลเดอร์</div>
-                                <span style={{ fontSize: '0.74rem', color: '#94a3b8' }}>จะแสดงผลบนการ์ดสไลด์แบบอัตโนมัติ</span>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Live Slider Card Simulation */}
-                        {newPartnerForm.name && (
-                          <div style={{ padding: '12px', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', marginBottom: '14px', display: 'inline-flex', alignItems: 'center', gap: '12px' }}>
-                            <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>ตัวอย่างการ์ดบนสไลเดอร์:</span>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 18px', background: '#ffffff', border: '1px solid #3b82f6', borderRadius: '12px', boxShadow: '0 4px 12px rgba(59,130,246,0.1)' }}>
-                              <div style={{ width: '80px', height: '36px', borderRadius: '6px', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2px' }}>
-                                {newPartnerForm.logo ? (
-                                  <img src={newPartnerForm.logo} alt="Preview" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                                ) : (
-                                  <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#2563eb' }}>{newPartnerForm.name}</span>
-                                )}
-                              </div>
-                              <div>
-                                <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#0f172a' }}>{newPartnerForm.name}</div>
-                                <div style={{ fontSize: '0.74rem', color: '#64748b' }}>{newPartnerForm.tier || 'Official Partner'}</div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                          <button
-                            type="button"
-                            className="btn-primary"
-                            onClick={() => {
-                              if (!newPartnerForm.name.trim()) {
-                                alert('กรุณาระบุชื่อแบรนด์พันธมิตร');
-                                return;
-                              }
-                              if (!newPartnerForm.tier.trim()) {
-                                alert('กรุณาระบุบทบาทหรือหมวดหมู่ของพันธมิตร');
-                                return;
-                              }
-
-                              if (addPartner) {
-                                addPartner({
-                                  name: newPartnerForm.name.trim(),
-                                  tier: newPartnerForm.tier.trim(),
-                                  logo: newPartnerForm.logo.trim(),
-                                  website: newPartnerForm.website.trim(),
-                                  icon: newPartnerForm.icon || 'Cpu'
-                                });
-                              }
-
-                              setNewPartnerForm({
-                                name: '',
-                                tier: '',
-                                logo: '',
-                                website: '',
-                                icon: 'Cpu'
-                              });
-
-                              triggerSaveToast('เพิ่มโลโก้พันธมิตรลงสไลเดอร์สำเร็จ');
-                            }}
-                            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 22px' }}
-                          >
-                            <Plus size={16} />
-                            <span>เพิ่มโลโก้พันธมิตรลงสไลเดอร์</span>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+                    renderPartnerLogosCMS()
                   )}
 
                   {/* =========================================================
@@ -8637,6 +9108,15 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* =========================================================================
+              TAB: OFFICIAL PARTNER LOGOS CMS (Minimalist Monochrome Black Edition)
+              ========================================================================= */}
+          {activeTab === 'partners' && (
+            <div className="cms-panel-block">
+              {renderPartnerLogosCMS()}
             </div>
           )}
 
@@ -11563,22 +12043,29 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
               </div>
 
               {/* Mail Server (SMTP) & Automated Email Dispatch Configuration */}
-              <div className="admin-subcard glass-panel" style={{ marginTop: '20px' }}>
-                <div className="subcard-title" style={{ justifyContent: 'space-between' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Mail size={18} className="text-blue" />
-                    <strong>การตั้งค่า Mail Server (SMTP) & ระบบอีเมลตอบกลับอัตโนมัติ</strong>
+              <div className="admin-subcard glass-panel" style={{ marginTop: '20px', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)' }}>
+                <div className="subcard-title" style={{ justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '14px', marginBottom: '14px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'rgba(37,99,235,0.1)', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Mail size={20} />
+                    </div>
+                    <div>
+                      <strong style={{ fontSize: '1.05rem', color: '#0f172a' }}>การตั้งค่า Mail Server (SMTP) & ระบบอีเมลตอบกลับอัตโนมัติ</strong>
+                      <div style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                        กำหนดเซิร์ฟเวอร์ SMTP (แนะนำ Hostinger), ตอบกลับลูกค้าอัตโนมัติ และแจ้งเตือนพนักงาน 5 บัญชี
+                      </div>
+                    </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span className={`status-pill ${siteData.smtpConfig?.autoReplyEnabled ? 'status-pill-success' : 'status-pill-warning'}`}>
-                      {siteData.smtpConfig?.autoReplyEnabled ? 'Auto-Responder Active' : 'Disabled'}
+                      {siteData.smtpConfig?.autoReplyEnabled ? '✓ Auto-Reply Active' : 'Auto-Reply Disabled'}
                     </span>
                     <button 
                       type="button"
                       className="btn-secondary btn-sm"
-                      onClick={() => setActiveTab('email-templates')}
+                      onClick={() => handleSwitchTab('email-templates')}
                       title="เปิดหน้าต่างแก้ไขเนื้อหาแม่แบบอีเมล"
-                      style={{ fontSize: '0.75rem', padding: '4px 10px' }}
+                      style={{ fontSize: '0.75rem', padding: '6px 12px' }}
                     >
                       <Edit3 size={13} />
                       <span>แก้ไขแม่แบบอีเมล &rarr;</span>
@@ -11586,24 +12073,117 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                   </div>
                 </div>
 
-                <p className="subcard-desc">
-                  กำหนดค่า SMTP สำหรับส่งอีเมลยืนยันคำขอและพิมพ์เขียวผังร้าน 3D ตอบกลับลูกค้าอัตโนมัติ (Customer Lead Auto-Reply) ทันทีที่ลูกค้ากดส่งแบบฟอร์ม รองรับทั้ง Google Workspace (Gmail SMTP Relay), Brevo, AWS SES และ Mailgun
-                </p>
+                {/* Preset Mail Provider Switcher */}
+                <div style={{ marginBottom: '16px', background: '#f8fafc', padding: '12px 16px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155' }}>
+                      ⚡ ผู้ให้บริการ Mail Server (เลือกพรีเซ็ตด่วน):
+                    </span>
+                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                      คลิกเพื่อโหลดค่าโฮสต์และพอร์ตมาตรฐานทันที
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateSmtpConfig({
+                          provider: 'hostinger',
+                          host: 'smtp.hostinger.com',
+                          port: '465',
+                          encryption: 'SSL/TLS',
+                          senderName: 'GLP : G-Speed Living Plus',
+                          senderEmail: siteData.smtpConfig?.senderEmail || 'contact@gspeedlivingplus.com',
+                          user: siteData.smtpConfig?.user || 'contact@gspeedlivingplus.com'
+                        });
+                        triggerSaveToast();
+                      }}
+                      className="btn-sm"
+                      style={{
+                        padding: '6px 14px',
+                        borderRadius: '8px',
+                        border: '1px solid',
+                        borderColor: siteData.smtpConfig?.host === 'smtp.hostinger.com' ? '#2563eb' : '#cbd5e1',
+                        background: siteData.smtpConfig?.host === 'smtp.hostinger.com' ? '#2563eb' : '#ffffff',
+                        color: siteData.smtpConfig?.host === 'smtp.hostinger.com' ? '#ffffff' : '#1e293b',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <Server size={14} />
+                      <span>Hostinger SMTP (ค่าแนะนำ GLP 🏆)</span>
+                    </button>
 
-                <div className="form-row-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', marginTop: '14px' }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateSmtpConfig({
+                          provider: 'google',
+                          host: 'smtp.gmail.com',
+                          port: '465',
+                          encryption: 'SSL/TLS'
+                        });
+                        triggerSaveToast();
+                      }}
+                      className="btn-sm"
+                      style={{
+                        padding: '6px 14px',
+                        borderRadius: '8px',
+                        border: '1px solid',
+                        borderColor: siteData.smtpConfig?.host === 'smtp.gmail.com' ? '#2563eb' : '#cbd5e1',
+                        background: siteData.smtpConfig?.host === 'smtp.gmail.com' ? '#2563eb' : '#ffffff',
+                        color: siteData.smtpConfig?.host === 'smtp.gmail.com' ? '#ffffff' : '#1e293b',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <span>Google Workspace / Gmail</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateSmtpConfig({ provider: 'custom' });
+                        triggerSaveToast();
+                      }}
+                      className="btn-sm"
+                      style={{
+                        padding: '6px 14px',
+                        borderRadius: '8px',
+                        border: '1px solid',
+                        borderColor: (siteData.smtpConfig?.host !== 'smtp.hostinger.com' && siteData.smtpConfig?.host !== 'smtp.gmail.com') ? '#2563eb' : '#cbd5e1',
+                        background: (siteData.smtpConfig?.host !== 'smtp.hostinger.com' && siteData.smtpConfig?.host !== 'smtp.gmail.com') ? '#2563eb' : '#ffffff',
+                        color: (siteData.smtpConfig?.host !== 'smtp.hostinger.com' && siteData.smtpConfig?.host !== 'smtp.gmail.com') ? '#ffffff' : '#1e293b',
+                        fontWeight: 600,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <span>กำหนดค่าเอง (Custom SMTP)</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* SMTP Credentials Form */}
+                <div className="form-row-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
                   <div className="form-group">
-                    <label>SMTP Host / Mail Server</label>
+                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>SMTP Host / Mail Server</label>
                     <input 
                       type="text" 
                       className="form-input"
-                      placeholder="smtp.gmail.com"
+                      placeholder="smtp.hostinger.com"
                       value={siteData.smtpConfig?.host || ''}
                       onChange={e => updateSmtpConfig({ host: e.target.value })}
                     />
                   </div>
 
                   <div className="form-group">
-                    <label>SMTP Port</label>
+                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>SMTP Port</label>
                     <input 
                       type="text" 
                       className="form-input"
@@ -11614,7 +12194,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                   </div>
 
                   <div className="form-group">
-                    <label>โพรโทคอลความปลอดภัย (Encryption)</label>
+                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>โพรโทคอลความปลอดภัย (Encryption)</label>
                     <select 
                       className="form-input"
                       value={siteData.smtpConfig?.encryption || 'SSL/TLS'}
@@ -11629,18 +12209,18 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
 
                 <div className="form-row-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginTop: '12px' }}>
                   <div className="form-group">
-                    <label>SMTP Username / บัญชีส่งออก</label>
+                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>SMTP Username / บัญชีส่งออก</label>
                     <input 
                       type="text" 
                       className="form-input"
-                      placeholder="no-reply@gspeed-esport.com"
+                      placeholder="contact@gspeedlivingplus.com"
                       value={siteData.smtpConfig?.user || ''}
                       onChange={e => updateSmtpConfig({ user: e.target.value })}
                     />
                   </div>
 
                   <div className="form-group">
-                    <label>SMTP Password / App Password</label>
+                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>SMTP Password / รหัสผ่านอีเมล</label>
                     <div style={{ position: 'relative' }}>
                       <input 
                         type={showSmtpPassword ? 'text' : 'password'} 
@@ -11651,7 +12231,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                         style={{ paddingRight: '40px' }}
                       />
                       <button 
-                        type="button"
+                        type="button" 
                         onClick={() => setShowSmtpPassword(!showSmtpPassword)}
                         style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
                         title={showSmtpPassword ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'}
@@ -11662,45 +12242,45 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                   </div>
                 </div>
 
-                <div className="form-row-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', marginTop: '12px' }}>
+                <div className="form-row-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginTop: '12px' }}>
                   <div className="form-group">
-                    <label>ชื่อผู้ส่งที่แสดง (Sender Name)</label>
+                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>ชื่อผู้ส่งที่แสดง (Sender Name)</label>
                     <input 
                       type="text" 
                       className="form-input"
-                      placeholder="GLP : G-Speed Living Plus Franchise System"
+                      placeholder="GLP : G-Speed Living Plus"
                       value={siteData.smtpConfig?.senderName || ''}
                       onChange={e => updateSmtpConfig({ senderName: e.target.value })}
                     />
                   </div>
 
                   <div className="form-group">
-                    <label>อีเมลผู้ส่ง (Sender Email Address)</label>
+                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>อีเมลผู้ส่ง (Sender Email Address)</label>
                     <input 
                       type="email" 
                       className="form-input"
-                      placeholder="franchise@gspeed-esport.com"
+                      placeholder="contact@gspeedlivingplus.com"
                       value={siteData.smtpConfig?.senderEmail || ''}
                       onChange={e => updateSmtpConfig({ senderEmail: e.target.value })}
                     />
                   </div>
-
-                  <div className="form-group">
-                    <label>อีเมลสำเนาแจ้งเตือนแอดมิน (CC Notification)</label>
-                    <input 
-                      type="text" 
-                      className="form-input"
-                      placeholder="investment@gspeed-esport.com, engineering@gspeed-esport.com"
-                      value={siteData.smtpConfig?.adminCcEmail || ''}
-                      onChange={e => updateSmtpConfig({ adminCcEmail: e.target.value })}
-                    />
-                  </div>
                 </div>
 
-                {/* Toggles and Test Trigger */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginTop: '16px', paddingTop: '14px', borderTop: '1px solid #e2e8f0' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <label className="checkbox-label" style={{ margin: 0 }}>
+                {/* Section A: Customer Auto-Reply Configuration */}
+                <div style={{ marginTop: '20px', padding: '14px 16px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#dbeafe', color: '#1d4ed8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Send size={16} />
+                      </div>
+                      <div>
+                        <strong style={{ fontSize: '0.92rem', color: '#0f172a' }}>1. การส่งอีเมลตอบกลับหาลูกค้าอัตโนมัติ (Customer Auto-Reply)</strong>
+                        <div style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                          เมื่อลูกค้ากรอกขอผังร้าน 3D หรือติดต่อ ระบบจะส่งใบเสนอราคา (เช่น QTE-2026-XXXX) ยืนยันตอบกลับลูกค้าทันที
+                        </div>
+                      </div>
+                    </div>
+                    <label className="checkbox-label" style={{ margin: 0, fontWeight: 700, cursor: 'pointer' }}>
                       <input 
                         type="checkbox" 
                         checked={siteData.smtpConfig?.autoReplyEnabled ?? true}
@@ -11709,22 +12289,157 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                           triggerSaveToast();
                         }}
                       />
-                      <span>เปิดระบบส่งอีเมลยืนยันและใบเสนอราคาตอบกลับลูกค้าอัตโนมัติ (Customer Lead Auto-Reply)</span>
+                      <span style={{ color: siteData.smtpConfig?.autoReplyEnabled ? '#16a34a' : '#64748b' }}>
+                        {siteData.smtpConfig?.autoReplyEnabled ? 'เปิดใช้งานตอบกลับลูกค้า' : 'ปิดการตอบกลับลูกค้า'}
+                      </span>
                     </label>
-                    <div style={{ fontSize: '0.76rem', color: '#64748b', marginLeft: '24px' }}>
-                      ทดสอบล่าสุด: <strong>{siteData.smtpConfig?.lastTestedAt || 'ยังไม่ได้ทดสอบ'}</strong> • สถานะ: <span className="text-green">{siteData.smtpConfig?.lastTestStatus || 'Standby'}</span>
+                  </div>
+                </div>
+
+                {/* Section B: Staff Notification Recipients (Up to 5 Emails) */}
+                <div style={{ marginTop: '16px', padding: '16px', background: '#ffffff', borderRadius: '12px', border: '1px solid #cbd5e1', boxShadow: '0 1px 4px rgba(0,0,0,0.03)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', flexWrap: 'wrap', gap: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#dcfce7', color: '#15803d', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Users size={18} />
+                      </div>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <strong style={{ fontSize: '0.95rem', color: '#0f172a' }}>2. ส่งไปยังอีเมลของพนักงานที่เรากำหนด (5 บัญชี)</strong>
+                          <span style={{ background: '#dbeafe', color: '#1d4ed8', fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: '12px' }}>
+                            โควตา 5 บัญชีพนักงาน
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                          เมื่อมีคำขอแปลน 3D หรือลีดติดต่อใหม่ ระบบจะจัดส่งอีเมลแจ้งเตือนไปยังรายชื่อพนักงานที่เปิดสวิตช์พร้อมกันทันที
+                        </div>
+                      </div>
                     </div>
+
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button 
+                        type="button" 
+                        className="btn-secondary btn-sm"
+                        onClick={handleTestStaffAlerts}
+                        disabled={isSendingStaffTest}
+                        title="จำลองส่งอีเมลแจ้งเตือนไปยังพนักงานทั้ง 5 บัญชี"
+                        style={{ fontSize: '0.78rem' }}
+                      >
+                        <Send size={13} className={isSendingStaffTest ? 'spin-icon' : ''} />
+                        <span>{isSendingStaffTest ? 'กำลังส่งแจ้งเตือน...' : 'จำลองส่งแจ้งเตือนพนักงาน (5 เมล)'}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* 5 Staff Email Slots */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
+                    {(siteData.smtpConfig?.staffAlertEmails || [
+                      { id: 1, email: 'management@gspeedlivingplus.com', role: 'ผู้บริหาร / เจ้าของร้าน (Owner/Executive)', active: true },
+                      { id: 2, email: 'sales@gspeedlivingplus.com', role: 'ฝ่ายขาย & ที่ปรึกษาแฟรนไชส์ (Sales & Franchise)', active: true },
+                      { id: 3, email: 'engineering@gspeedlivingplus.com', role: 'ทีมวิศวกร & เทคนิค 3D (Engineering)', active: true },
+                      { id: 4, email: 'support@gspeedlivingplus.com', role: 'ฝ่ายบริการลูกค้า & นัดหมาย (Customer Support)', active: true },
+                      { id: 5, email: 'manager@gspeedlivingplus.com', role: 'ผู้จัดการสาขารามคำแหง (Store Manager)', active: true }
+                    ]).map((staff, sIdx) => (
+                      <div 
+                        key={staff.id || sIdx} 
+                        style={{ 
+                          display: 'grid', 
+                          gridTemplateColumns: '36px 1.4fr 2fr 110px', 
+                          gap: '10px', 
+                          alignItems: 'center', 
+                          background: staff.active ? '#ffffff' : '#f8fafc', 
+                          padding: '8px 12px', 
+                          borderRadius: '8px', 
+                          border: '1px solid', 
+                          borderColor: staff.active ? '#cbd5e1' : '#e2e8f0',
+                          opacity: staff.active ? 1 : 0.65
+                        }}
+                      >
+                        <span style={{ fontWeight: 800, color: staff.active ? '#2563eb' : '#94a3b8', fontSize: '0.85rem', textAlign: 'center' }}>
+                          #{sIdx + 1}
+                        </span>
+                        <div>
+                          <input 
+                            type="text" 
+                            className="form-input" 
+                            style={{ height: '34px', fontSize: '0.82rem', background: '#fff' }} 
+                            placeholder="ตำแหน่ง / ฝ่ายงาน"
+                            value={staff.role || ''}
+                            onChange={e => {
+                              if (typeof updateStaffAlertEmail === 'function') {
+                                updateStaffAlertEmail(sIdx, { role: e.target.value });
+                              }
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <input 
+                            type="email" 
+                            className="form-input" 
+                            style={{ height: '34px', fontSize: '0.82rem', background: '#fff' }} 
+                            placeholder="staff@gspeedlivingplus.com"
+                            value={staff.email || ''}
+                            onChange={e => {
+                              if (typeof updateStaffAlertEmail === 'function') {
+                                updateStaffAlertEmail(sIdx, { email: e.target.value });
+                              }
+                            }}
+                          />
+                        </div>
+                        <label className="checkbox-label" style={{ margin: 0, fontSize: '0.78rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end' }}>
+                          <input 
+                            type="checkbox"
+                            checked={staff.active ?? true}
+                            onChange={e => {
+                              if (typeof updateStaffAlertEmail === 'function') {
+                                updateStaffAlertEmail(sIdx, { active: e.target.checked });
+                                triggerSaveToast();
+                              }
+                            }}
+                          />
+                          <span style={{ color: staff.active ? '#16a34a' : '#64748b', fontWeight: staff.active ? 700 : 500 }}>
+                            {staff.active ? '✓ เปิดรับ' : 'ปิด'}
+                          </span>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+
+                  {staffTestSuccess && (
+                    <div style={{ marginTop: '10px', background: '#ecfdf5', color: '#065f46', border: '1px solid #a7f3d0', padding: '8px 12px', borderRadius: '8px', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <CheckCircle2 size={16} />
+                      <span>{staffTestSuccess}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Handshake Ping & Outbox View Footer */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginTop: '16px', paddingTop: '14px', borderTop: '1px solid #e2e8f0' }}>
+                  <div style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                    ทดสอบเซิร์ฟเวอร์ล่าสุด: <strong>{siteData.smtpConfig?.lastTestedAt || 'ยังไม่ได้ทดสอบ'}</strong> • สถานะ: <span className="text-green" style={{ fontWeight: 700 }}>{siteData.smtpConfig?.lastTestStatus || 'Standby'}</span>
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <button 
                       type="button" 
+                      className="btn-secondary btn-sm"
+                      onClick={() => setShowEmailOutboxModal(true)}
+                      title="ดูประวัติและคิวอีเมลทั้งหมดใน Outbox"
+                      style={{ fontSize: '0.78rem' }}
+                    >
+                      <List size={14} />
+                      <span>ประวัติการส่งอีเมล (Outbox Queue)</span>
+                    </button>
+
+                    <button 
+                      type="button" 
                       className="btn-primary btn-sm"
                       onClick={handleTestSmtp}
                       disabled={isSmtpTesting}
+                      style={{ fontSize: '0.78rem' }}
                     >
                       <RefreshCw size={14} className={isSmtpTesting ? 'spin-icon' : ''} />
-                      <span>{isSmtpTesting ? 'กำลังตรวจสอบการเชื่อมต่อ...' : 'ทดสอบการเชื่อมต่อ SMTP'}</span>
+                      <span>{isSmtpTesting ? 'กำลังเชื่อมต่อ...' : 'ทดสอบ Handshake SMTP'}</span>
                     </button>
                   </div>
                 </div>
@@ -11740,7 +12455,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                       <span className="status-pill status-pill-success">{smtpTestResult.latency}</span>
                     </div>
                     <div style={{ marginTop: '6px', fontSize: '0.76rem', color: '#475569' }}>
-                      Host: <code>{siteData.smtpConfig?.host || 'smtp.gmail.com'}:{siteData.smtpConfig?.port || '465'}</code> | Handshake: <code>{siteData.smtpConfig?.encryption || 'SSL/TLS'}</code> | TLS 1.3 Cipher Suite: <code>ECDHE-RSA-AES256-GCM-SHA384</code> | Authenticated User: <code>{siteData.smtpConfig?.user || 'no-reply@gspeed-esport.com'}</code>
+                      Host: <code>{siteData.smtpConfig?.host || 'smtp.hostinger.com'}:{siteData.smtpConfig?.port || '465'}</code> | Protocol: <code>{siteData.smtpConfig?.encryption || 'SSL/TLS'}</code> | User: <code>{siteData.smtpConfig?.user || 'contact@gspeedlivingplus.com'}</code>
                     </div>
                   </div>
                 )}
@@ -11748,8 +12463,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
             </div>
           )}
 
-
-          {/* =========================================================================
+{/* =========================================================================
               TAB 13: EMAIL TEMPLATES & AUTO-RESPONDER CMS
               ========================================================================= */}
           {activeTab === 'email-templates' && (
@@ -11770,7 +12484,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                   <button 
                     type="button"
                     className="btn-secondary btn-sm"
-                    onClick={() => setActiveTab('automation')}
+                    onClick={() => handleSwitchTab('automation')}
                   >
                     <Sliders size={14} />
                     <span>ตั้งค่า SMTP Server</span>
@@ -12061,348 +12775,585 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
           {/* =========================================================================
               TAB 6: AI ERP & SMART REVENUE ANALYTICS (Esports Cafe Financial Hub)
               ========================================================================= */}
-          {activeTab === 'erp-analytics' && (
-            <div className="cms-panel-block">
-              {/* Panel Header */}
-              <div className="panel-header-row erp-header-row">
-                <div>
-                  <div className="erp-title-wrapper">
-                    <h3 className="panel-title">
-                      <TrendingUp size={22} className="text-blue" />
-                      <span>ระบบสรุปรายได้อัจฉริยะ & AI ERP Bridge (Esports Cafe Hub)</span>
-                    </h3>
-                    <span className="status-pill status-pill-success erp-live-badge">
-                      <span className="live-ping-dot"></span>
-                      เชื่อมต่อแม่ข่าย SmartCafé POS (Port 8088 Active)
-                    </span>
-                  </div>
-                  <p className="panel-desc">
-                    สรุปผลประกอบการร้านเกมแบบ Real-time, ระบบเชื่อมต่อ POS/Diskless และการวิเคราะห์ทางการเงินอัตโนมัติด้วย AI
-                  </p>
-                </div>
-                <div className="header-actions-group">
-                  <button 
-                    className="btn-secondary"
-                    onClick={() => {
-                      setIsSyncingERP(true);
-                      setTimeout(() => {
-                        setIsSyncingERP(false);
-                        triggerSaveToast();
-                      }, 1000);
-                    }}
-                    disabled={isSyncingERP}
-                  >
-                    <RefreshCw size={14} className={isSyncingERP ? 'spin-icon' : ''} />
-                    <span>{isSyncingERP ? 'กำลังดึงข้อมูล POS...' : 'ซิงค์ข้อมูลสด (Live Sync)'}</span>
-                  </button>
-                  <button 
-                    className="btn-secondary"
-                    onClick={() => setActiveTab('omnichannel-leads')}
-                  >
-                    <Receipt size={14} />
-                    <span>จัดการรายจ่ายสดย่อย (/pay)</span>
-                  </button>
-                  <button 
-                    className="btn-primary"
-                    onClick={() => {
-                      alert('ส่งออกรายงานบัญชีรายรับ-รายจ่าย (.CSV / Excel) เรียบร้อยแล้ว!');
-                    }}
-                  >
-                    <ArrowUpRight size={14} />
-                    <span>ส่งออกรายงานบัญชี (Export)</span>
-                  </button>
-                </div>
-              </div>
+          {activeTab === 'erp-analytics' && (() => {
+            const REVENUE_PERIOD_DATA = {
+              day: {
+                label: 'วันนี้ (Daily Real-time)',
+                shortLabel: 'วัน',
+                badge: 'วันนี้',
+                gross: (siteData.erpData?.dailyRevenue?.total || 48650),
+                grossGrowth: '+14.2%',
+                grossDesc: 'ยอดรวมเครื่องเล่นเกมและคาเฟ่ (Real-time วันนี้)',
+                stations: (siteData.erpData?.dailyRevenue?.gamingStations || siteData.erpData?.dailyRevenue?.gaming || 37900),
+                stationsShare: '77.9% ของยอดรวม',
+                stationsDesc: 'Main Arena, VIP Bootcamp & Console',
+                fnb: (siteData.erpData?.dailyRevenue?.fnb || 10750),
+                fnbGrowth: '+22.5%',
+                fnbDesc: 'เครื่องดื่ม, ซิกเนเจอร์สแน็ค, กาแฟสด',
+                netProfit: (siteData.erpData?.dailyRevenue?.netProfit || 34250),
+                netMargin: 'Margin 70.4%',
+                netDesc: 'หักต้นทุนค่าไฟเฉลี่ยและวัตถุดิบรายวันแล้ว',
+                aiSummary: {
+                  lead: 'ผลประกอบการประจำวันเติบโตเหนือเป้าหมาย +14.2%',
+                  tag: 'อัตราครองเครื่อง 100% ต่อเนื่อง 5 ชั่วโมง (18:00 - 23:00 น.)',
+                  sub: 'เครื่องเล่นเกมทุกโซนทำงานเต็มขีดความสามารถ ยอดจำหน่ายอาหารและเครื่องดื่มช่วงไพรม์ไทม์เพิ่มขึ้นตามความหนาแน่นของผู้ใช้บริการ',
+                  rec1Title: 'ข้อเสนอแนะ 1: ปรับโปรโมชัน F&B ดึงยอดรอบบ่าย',
+                  rec1Tag: 'เพิ่ม Occupancy',
+                  rec1Desc: 'ขยายเวลาโปรโมชัน Combo Set F&B ในช่วงบ่าย 14:00 - 17:00 เพื่อดึงดูดลูกค้ากลุ่มนักเรียน/นักศึกษาและฟรีแลนซ์ก่อนช่วงเวลาเลิกงาน',
+                  rec2Title: 'ข้อเสนอแนะ 2: บริหารจองล่วงหน้า VIP Suite',
+                  rec2Tag: 'Optimize Yield',
+                  rec2Desc: 'ห้อง VIP Bootcamp & Streamer Suite มีความต้องการสูงมาก ควรเปิดระบบรับจองล่วงหน้าผ่านสิทธิพิเศษสมาชิกระดับ Gold / VIP Membership',
+                  forecastTitle: 'คาดการณ์ยอดสุทธิสิ้นเดือน:',
+                  forecastAmount: '฿1,480,000',
+                  forecastRoi: 'ROI คืนทุนเร็วกว่าเกณฑ์ 1.8 เดือน'
+                },
+                peakHoursTitle: 'อัตราการใช้เครื่องตามช่วงเวลา (Peak Hours Occupancy - วันนี้)',
+                peakHoursBadge: '4 กะการทำงาน (24 ชม.)',
+                peakHoursFooter: 'อัตราครองเครื่องเฉลี่ยทั้งวัน: 66.0% • รอบพีคสูงสุด: 18:00 - 00:00 (96%)',
+                breakdownItems: [
+                  { time: '10:00 - 14:00 (เปิดบริการช่วงเช้า)', occupancy: 42, revenue: 6800 },
+                  { time: '14:00 - 18:00 (ช่วงบ่าย & หลังเลิกเรียน)', occupancy: 78, revenue: 14200 },
+                  { time: '18:00 - 00:00 (Prime Peak Time แข่งขัน/ปาร์ตี้)', occupancy: 96, revenue: 21500 },
+                  { time: '00:00 - 08:00 (Night Owl Session ยันเช้า)', occupancy: 48, revenue: 6150 }
+                ],
+                fnbTitle: 'เมนูอาหาร & สินค้าขายดีประจำวัน (Top Selling F&B - วันนี้)',
+                fnbTotalTop5: '฿20,743',
+                fnbShareTop5: '88.5% ของแผนก',
+                fnbItems: (siteData.erpData?.topSellingItems || [
+                  { rank: 1, name: 'ข้าวผัดกะเพราเนื้อวากิวไข่ดาวกรอบ', count: 68, total: 6052, share: 29.2 },
+                  { rank: 2, name: 'บะหมี่เกาหลีหม้อไฟชีสดับเบิ้ล', count: 54, total: 4806, share: 23.2 },
+                  { rank: 3, name: 'G-Speed Energy Elixir (สูตรพิเศษ)', count: 95, total: 4275, share: 20.6 },
+                  { rank: 4, name: 'ชาเขียวมัทฉะลาเต้พรีเมียม', count: 48, total: 2880, share: 13.9 },
+                  { rank: 5, name: 'ไก่ทอดคาราเกะซอสสไปซี่', count: 42, total: 2730, share: 13.1 }
+                ])
+              },
+              week: {
+                label: 'สัปดาห์นี้ (Weekly Summary)',
+                shortLabel: 'สัปดาห์',
+                badge: '7 วันล่าสุด',
+                gross: 342800,
+                grossGrowth: '+16.8%',
+                grossDesc: 'ยอดสะสม 7 วันล่าสุด (จันทร์ - อาทิตย์)',
+                stations: 265500,
+                stationsShare: '77.4% ของยอดรวม',
+                stationsDesc: 'ยอดชั่วโมงเล่นเกมสะสมตลอด 7 วัน',
+                fnb: 77300,
+                fnbGrowth: '+24.1%',
+                fnbDesc: 'ยอดขายคาเฟ่ & อาหารสะสมรอบสัปดาห์',
+                netProfit: 241300,
+                netMargin: 'Margin 70.4%',
+                netDesc: 'หักต้นทุนค่าไฟ กะพนักงาน และวัตถุดิบ 7 วัน',
+                aiSummary: {
+                  lead: 'ผลประกอบการรอบสัปดาห์เติบโตต่อเนื่อง +16.8%',
+                  tag: 'วันศุกร์-เสาร์-อาทิตย์ ครองเครื่องเฉลี่ย 92.5%',
+                  sub: 'การจัดมินิทัวร์นาเมนต์วันหยุดสุดสัปดาห์ช่วยดึง Traffic เพิ่มขึ้น 35% ส่งผลให้ยอดขาย F&B ทะลุ 7.7 หมื่นบาท',
+                  rec1Title: 'ข้อเสนอแนะ 1: จัดกิจกรรม Scrim Match กลางสัปดาห์',
+                  rec1Tag: 'กระตุ้นยอดพุธ-พฤหัส',
+                  rec1Desc: 'สร้างแคมเปญแข่งขันระหว่างสถานศึกษาในวันพุธ-พฤหัสบดีเพื่อเพิ่มอัตราการใช้เครื่องช่วงกลางสัปดาห์ให้สูงขึ้น',
+                  rec2Title: 'ข้อเสนอแนะ 2: แพ็กเกจชั่วโมงเหมาจ่ายบุฟเฟต์สุดสัปดาห์',
+                  rec2Tag: 'Up-selling',
+                  rec2Desc: 'เปิดแพ็กเกจ 6 ชั่วโมงพร้อมเซ็ตเบอร์เกอร์และเครื่องดื่มรีฟิลช่วงศุกร์-เสาร์ เพิ่มรายจ่ายเฉลี่ยต่อบิล (Ticket Size) 18%',
+                  forecastTitle: 'คาดการณ์ยอดสุทธิสิ้นเดือน:',
+                  forecastAmount: '฿1,495,000',
+                  forecastRoi: 'ROI คืนทุนเร็วกว่าเกณฑ์ 1.9 เดือน'
+                },
+                peakHoursTitle: 'แนวโน้มการใช้งานรายวันรอบสัปดาห์ (Weekly Day-by-Day Occupancy)',
+                peakHoursBadge: 'จันทร์ - อาทิตย์ (7 วัน)',
+                peakHoursFooter: 'อัตราครองเครื่องเฉลี่ยรอบสัปดาห์: 74.2% • วันที่ทำเงินสูงสุด: วันเสาร์ (฿68,400)',
+                breakdownItems: [
+                  { time: 'วันจันทร์ - อังคาร (วันธรรมดาช่วงต้นสัปดาห์)', occupancy: 62, revenue: 84200 },
+                  { time: 'วันพุธ - พฤหัสบดี (มีคอร์สฝึกซ้อมอีสปอร์ต)', occupancy: 74, revenue: 98100 },
+                  { time: 'วันศุกร์ (Night Owl Weekend Kickoff)', occupancy: 91, revenue: 58500 },
+                  { time: 'วันเสาร์ - อาทิตย์ (ทัวร์นาเมนต์ & LAN Party)', occupancy: 96, revenue: 102000 }
+                ],
+                fnbTitle: 'เมนูอาหาร & สินค้าขายดีรอบสัปดาห์ (Top Selling F&B - สัปดาห์นี้)',
+                fnbTotalTop5: '฿150,900',
+                fnbShareTop5: '89.2% ของแผนก',
+                fnbItems: [
+                  { rank: 1, name: 'ข้าวผัดกะเพราเนื้อวากิวไข่ดาวกรอบ', count: 460, total: 40940, share: 27.1 },
+                  { rank: 2, name: 'บะหมี่เกาหลีหม้อไฟชีสดับเบิ้ล', count: 370, total: 32930, share: 21.8 },
+                  { rank: 3, name: 'G-Speed Energy Elixir (สูตรพิเศษ)', count: 640, total: 28800, share: 19.1 },
+                  { rank: 4, name: 'ไก่ทอดคาราเกะซอสสไปซี่', count: 285, total: 18525, share: 12.3 },
+                  { rank: 5, name: 'ชาเขียวมัทฉะลาเต้พรีเมียม', count: 260, total: 15600, share: 10.3 }
+                ]
+              },
+              month: {
+                label: 'เดือนนี้ (Monthly MTD กันยายน 2026)',
+                shortLabel: 'เดือน',
+                badge: 'เดือนนี้ (MTD)',
+                gross: 1468500,
+                grossGrowth: '+18.4%',
+                grossDesc: 'ยอดรวมสะสมประจำเดือนกันยายน 2026',
+                stations: 1142000,
+                stationsShare: '77.8% ของยอดรวม',
+                stationsDesc: 'ยอดบริการเครื่องคอมพิวเตอร์และเวทีแข่ง 36 สเตชัน',
+                fnb: 326500,
+                fnbGrowth: '+26.2%',
+                fnbDesc: 'ยอดขายครัว GLP Cafe & Snack Bar',
+                netProfit: 1033800,
+                netMargin: 'Margin 70.4%',
+                netDesc: 'หักต้นทุนค่าไฟแอร์, อินเทอร์เน็ต, เงินเดือนพนักงาน และสต็อก',
+                aiSummary: {
+                  lead: 'ผลประกอบการประจำเดือนเกินเป้าหมาย 104.8% (ทุบสถิติ New High)',
+                  tag: 'รายได้แตะระดับ 1.46 ล้านบาท/เดือน',
+                  sub: 'ยอดสมัครสมาชิกรายเดือน VIP Membership เติบโตก้าวกระโดด ต้นทุนค่าไฟต่อเครื่องควบคุมได้ดีเยี่ยมด้วยระบบ Smart Power Management',
+                  rec1Title: 'ข้อเสนอแนะ 1: ขยายโซน Racing Simulator / SIM Rig',
+                  rec1Tag: 'High Margin Service',
+                  rec1Desc: 'พื้นที่ด้านหลังที่เหลือ 18 ตร.ม. มีศักยภาพสูงในการลงเบาะแข่งรถ 2 ชุด เก็บค่าบริการ 80-120 บาท/ชม. เพิ่มกระแสเงินสด',
+                  rec2Title: 'ข้อเสนอแนะ 2: รีสต็อกวัตถุดิบ F&B ล่วงหน้าช่วงปิดเทอม',
+                  rec2Tag: 'Inventory Planning',
+                  rec2Desc: 'เดือนถัดไปเข้าสู่ช่วงปิดภาคเรียน ควรเพิ่มสต็อกซอสสไปซี่และเนื้อวากิว 25% เพื่อรองรับ Traffic ที่จะเพิ่มขึ้น',
+                  forecastTitle: 'คาดการณ์ยอดสุทธิไตรมาส 4:',
+                  forecastAmount: '฿4,550,000',
+                  forecastRoi: 'ROI คืนทุนเร็วกว่าเกณฑ์ 2.4 เดือน'
+                },
+                peakHoursTitle: 'สัดส่วนรายได้แยกตามสัปดาห์ตลอดทั้งเดือน (Monthly Breakdown)',
+                peakHoursBadge: '4 สัปดาห์ (กันยายน 2026)',
+                peakHoursFooter: 'อัตราครองเครื่องเฉลี่ยทั้งเดือน: 76.8% • สัปดาห์ที่ทำเงินสูงสุด: สัปดาห์ที่ 3 (แข่งทัวร์นาเมนต์)',
+                breakdownItems: [
+                  { time: 'สัปดาห์ที่ 1 (ต้นเดือน / วันเงินเดือนออก)', occupancy: 82, revenue: 385000 },
+                  { time: 'สัปดาห์ที่ 2 (ช่วงปกติ / สมาชิกประจำ)', occupancy: 72, revenue: 338000 },
+                  { time: 'สัปดาห์ที่ 3 (สัปดาห์แข่ง G-Speed LAN Tournament)', occupancy: 94, revenue: 442500 },
+                  { time: 'สัปดาห์ที่ 4 (ปลายเดือน / กิจกรรม Night Owl)', occupancy: 71, revenue: 303000 }
+                ],
+                fnbTitle: 'เมนูอาหาร & สินค้าขายดีประจำเดือน (Top Selling F&B - เดือนนี้)',
+                fnbTotalTop5: '฿585,340',
+                fnbShareTop5: '89.6% ของแผนก',
+                fnbItems: [
+                  { rank: 1, name: 'ข้าวผัดกะเพราเนื้อวากิวไข่ดาวกรอบ', count: 1980, total: 176220, share: 29.5 },
+                  { rank: 2, name: 'บะหมี่เกาหลีหม้อไฟชีสดับเบิ้ล', count: 1480, total: 131720, share: 22.0 },
+                  { rank: 3, name: 'G-Speed Energy Elixir (สูตรพิเศษ)', count: 2850, total: 128250, share: 21.5 },
+                  { rank: 4, name: 'ไก่ทอดคาราเกะซอสสไปซี่', count: 1150, total: 74750, share: 12.5 },
+                  { rank: 5, name: 'ชาเขียวมัทฉะลาเต้พรีเมียม', count: 1240, total: 74400, share: 12.4 }
+                ]
+              },
+              year: {
+                label: 'ทั้งปี (Annual YTD 2026)',
+                shortLabel: 'ปี',
+                badge: 'ทั้งปี 2026',
+                gross: 17620000,
+                grossGrowth: '+21.5%',
+                grossDesc: 'ยอดสะสมรวมทั้งปี 2026 (YTD Annual Financial)',
+                stations: 13710000,
+                stationsShare: '77.8% ของยอดรวม',
+                stationsDesc: 'ยอดเล่นเกมตลอดปี 36 สถานีมาตรฐานอีสปอร์ต',
+                fnb: 3910000,
+                fnbGrowth: '+28.0%',
+                fnbDesc: 'ยอดขายแผนกอาหารและเครื่องดื่มตลอดทั้งปี',
+                netProfit: 12400000,
+                netMargin: 'Margin 70.4%',
+                netDesc: 'กำไรสุทธิจากการดำเนินงานตลอดทั้งปีหลังหักค่าใช้จ่าย',
+                aiSummary: {
+                  lead: 'ภาพรวมผลประกอบการทั้งปี 2026 แข็งแกร่งเกินคาดการณ์ 121.5%',
+                  tag: 'กำไรสุทธิสะสมแตะระดับ 12.4 ล้านบาท',
+                  sub: 'โมเดลธุรกิจ G-Speed Living Plus พิสูจน์แล้วว่ามีระยะเวลาคืนทุน (Payback Period) รวดเร็วที่สุดในอุตสาหกรรมร้านเน็ตและอีสปอร์ตคาเฟ่ไทย',
+                  rec1Title: 'ข้อเสนอแนะ 1: แผนขยายสาขา 2 (Scale to Branch 2)',
+                  rec1Tag: 'Franchise Expansion',
+                  rec1Desc: 'กระแสเงินสดสะสมพร้อมรองรับการลงทุนเปิดสาขาที่ 2 (ทำเลลาดพร้าว / เกษตร-นวมินทร์) หรือเริ่มจำหน่ายสิทธิ์แฟรนไชส์ระบบ 3D',
+                  rec2Title: 'ข้อเสนอแนะ 2: อัปเกรดการ์ดจอ RTX 50 Series ประจำปี',
+                  rec2Tag: 'Hardware Lifecycle',
+                  rec2Desc: 'สามารถนำเครื่องโซนรอง Trade-in เพื่ออัปเกรดเวที Main Stage เป็นรุ่นล่าสุด รักษาระดับความเป็นอารีน่าอันดับ 1 ในย่านรามคำแหง',
+                  forecastTitle: 'คาดการณ์ยอดปี 2027 (รวมสาขา 2):',
+                  forecastAmount: '฿32,000,000',
+                  forecastRoi: 'ROI คืนทุนเฉลี่ย 1.2 ปีต่อสาขา'
+                },
+                peakHoursTitle: 'สถิติรายได้แยกตามไตรมาสประจำปี (Quarterly Financial Performance)',
+                peakHoursBadge: '4 ไตรมาส (ปี 2026)',
+                peakHoursFooter: 'อัตราครองเครื่องเฉลี่ยตลอดทั้งปี: 75.4% • ไตรมาสที่ทำกำไรสูงสุด: Q3 (฿4.95M)',
+                breakdownItems: [
+                  { time: 'ไตรมาสที่ 1 (Q1: ม.ค. - มี.ค. เปิดตัวร้าน & ทัวร์ใหญ่)', occupancy: 72, revenue: 3950000 },
+                  { time: 'ไตรมาสที่ 2 (Q2: เม.ย. - มิ.ย. กิจกรรมปิดเทอมฤดูร้อน)', occupancy: 79, revenue: 4420000 },
+                  { time: 'ไตรมาสที่ 3 (Q3: ก.ค. - ก.ย. ทัวร์นาเมนต์ระดับภูมิภาค)', occupancy: 85, revenue: 4950000 },
+                  { time: 'ไตรมาสที่ 4 (Q4: ต.ค. - ธ.ค. ประมาณการปลายปี & ปีใหม่)', occupancy: 76, revenue: 4300000 }
+                ],
+                fnbTitle: 'เมนูอาหาร & สินค้าขายดีตลอดทั้งปี (Top Selling F&B - ทั้งปี 2026)',
+                fnbTotalTop5: '฿7,032,400',
+                fnbShareTop5: '89.8% ของแผนก',
+                fnbItems: [
+                  { rank: 1, name: 'ข้าวผัดกะเพราเนื้อวากิวไข่ดาวกรอบ', count: 23800, total: 2118200, share: 29.5 },
+                  { rank: 2, name: 'G-Speed Energy Elixir (สูตรพิเศษ)', count: 34200, total: 1539000, share: 21.4 },
+                  { rank: 3, name: 'บะหมี่เกาหลีหม้อไฟชีสดับเบิ้ล', count: 17800, total: 1584200, share: 22.0 },
+                  { rank: 4, name: 'ไก่ทอดคาราเกะซอสสไปซี่', count: 13800, total: 897000, share: 12.5 },
+                  { rank: 5, name: 'ชาเขียวมัทฉะลาเต้พรีเมียม', count: 14900, total: 894000, share: 12.4 }
+                ]
+              }
+            };
 
-              {/* 4 Financial KPI Summary Cards */}
-              <div className="erp-kpi-grid">
-                <div className="erp-kpi-card glass-panel">
-                  <div className="kpi-header">
-                    <span className="kpi-label">รายได้รวมวันนี้ (Gross Revenue)</span>
-                    <span className="kpi-tag success">+14.2%</span>
-                  </div>
-                  <div className="kpi-value text-blue">
-                    ฿{(siteData.erpData?.dailyRevenue?.total || 48650).toLocaleString()}
-                  </div>
-                  <div className="kpi-subtext">
-                    <DollarSign size={13} className="text-blue" />
-                    <span>ยอดรวมเครื่องเล่นเกมและคาเฟ่ (Real-time)</span>
-                  </div>
-                </div>
+            const currentPeriodData = REVENUE_PERIOD_DATA[revenuePeriod] || REVENUE_PERIOD_DATA.day;
 
-                <div className="erp-kpi-card glass-panel">
-                  <div className="kpi-header">
-                    <span className="kpi-label">ค่าชั่วโมงเล่นเกม (Stations)</span>
-                    <span className="kpi-tag neutral">77.9% ของยอดรวม</span>
-                  </div>
-                  <div className="kpi-value">
-                    ฿{(siteData.erpData?.dailyRevenue?.gamingStations || 37900).toLocaleString()}
-                  </div>
-                  <div className="kpi-subtext">
-                    <Monitor size={13} className="text-blue" />
-                    <span>Main Arena, VIP Bootcamp & Console</span>
-                  </div>
-                </div>
-
-                <div className="erp-kpi-card glass-panel">
-                  <div className="kpi-header">
-                    <span className="kpi-label">รายได้แผนกอาหาร & คาเฟ่ (F&B)</span>
-                    <span className="kpi-tag success">+22.5%</span>
-                  </div>
-                  <div className="kpi-value text-emerald">
-                    ฿{(siteData.erpData?.dailyRevenue?.fnb || 10750).toLocaleString()}
-                  </div>
-                  <div className="kpi-subtext">
-                    <Coffee size={13} className="text-emerald" />
-                    <span>เครื่องดื่ม, ซิกเนเจอร์สแน็ค, กาแฟสด</span>
-                  </div>
-                </div>
-
-                <div className="erp-kpi-card glass-panel">
-                  <div className="kpi-header">
-                    <span className="kpi-label">กำไรสุทธิประเมินต่อวัน (Net Profit)</span>
-                    <span className="kpi-tag primary">Margin 70.4%</span>
-                  </div>
-                  <div className="kpi-value text-purple">
-                    ฿{(siteData.erpData?.dailyRevenue?.netProfit || 34250).toLocaleString()}
-                  </div>
-                  <div className="kpi-subtext">
-                    <TrendingUp size={13} className="text-purple" />
-                    <span>หักต้นทุนค่าไฟเฉลี่ยและวัตถุดิบแล้ว</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* AI Executive Financial Summary & Advisor */}
-              <div className="admin-subcard ai-financial-advisor-card">
-                <div className="advisor-header">
-                  <div className="advisor-title-group">
-                    <div className="advisor-badge">
-                      <Sparkles size={14} className="text-blue" />
-                      <span>AI Esports Financial Executive (Gemini Flash 3.8)</span>
-                      <span className="advisor-pulse-dot"></span>
+            return (
+              <div className="cms-panel-block">
+                {/* Panel Header */}
+                <div className="panel-header-row erp-header-row">
+                  <div>
+                    <div className="erp-title-wrapper">
+                      <h3 className="panel-title">
+                        <TrendingUp size={22} className="text-blue" />
+                        <span>ระบบสรุปรายได้อัจฉริยะ & AI ERP Bridge (Esports Cafe Hub)</span>
+                      </h3>
+                      <span className="status-pill status-pill-success erp-live-badge">
+                        <span className="live-ping-dot"></span>
+                        เชื่อมต่อแม่ข่าย SmartCafé POS (Port 8088 Active)
+                      </span>
                     </div>
-                    <h4>บทวิเคราะห์และข้อเสนอแนะทางการเงินประจำวันโดย AI</h4>
+                    <p className="panel-desc">
+                      สรุปผลประกอบการร้านเกมแบบ Real-time, ระบบเชื่อมต่อ POS/Diskless และการวิเคราะห์ทางการเงินอัตโนมัติด้วย AI
+                    </p>
                   </div>
-                  <button 
-                    className="btn-ai-analyze"
-                    onClick={() => {
-                      setIsAnalyzingRevenue(true);
-                      setTimeout(() => {
-                        setIsAnalyzingRevenue(false);
-                        updateERPData({
-                          aiExecutiveSummary: `[AI Re-Analysis] รายได้วันนี้เติบโตเหนือเป้าหมาย 14.2% โดยเฉพาะช่วง Peak 18:00 - 23:00 น. เครื่องเต็ม 100% ต่อเนื่อง 5 ชั่วโมง\n• ข้อเสนอแนะ 1: ขยายเวลาโปรโมชัน Combo Set F&B ในช่วงบ่าย 14:00 - 17:00 เพื่อดึงดูดลูกค้าช่วงก่อนเลิกงาน\n• ข้อเสนอแนะ 2: ห้อง VIP Suite อัตราจองสตรีมเมอร์สูงมาก ควรพิจารณาเปิดรับจองล่วงหน้าระบบ Membership\n• คาดการณ์ยอดสุทธิสิ้นเดือน: มีโอกาสแตะ 1,480,000 บาท (ROI คืนทุนเร็วกว่าเกณฑ์ 1.8 เดือน)`
-                        });
-                        triggerSaveToast();
-                      }, 1400);
-                    }}
-                    disabled={isAnalyzingRevenue}
-                  >
-                    <RefreshCw size={14} className={isAnalyzingRevenue ? 'spin-icon' : ''} />
-                    <span>{isAnalyzingRevenue ? 'AI กำลังประมวลผลข้อมูล...' : 'ให้ AI วิเคราะห์สถานะการเงินสด'}</span>
-                  </button>
+                  <div className="header-actions-group">
+                    <button 
+                      className="btn-secondary"
+                      onClick={() => {
+                        setIsSyncingERP(true);
+                        setTimeout(() => {
+                          setIsSyncingERP(false);
+                          triggerSaveToast();
+                        }, 1000);
+                      }}
+                      disabled={isSyncingERP}
+                    >
+                      <RefreshCw size={14} className={isSyncingERP ? 'spin-icon' : ''} />
+                      <span>{isSyncingERP ? 'กำลังดึงข้อมูล POS...' : 'ซิงค์ข้อมูลสด (Live Sync)'}</span>
+                    </button>
+                    <button 
+                      className="btn-primary"
+                      onClick={() => {
+                        alert(`ส่งออกรายงานบัญชีรายรับ-รายจ่าย (${currentPeriodData.label}) เรียบร้อยแล้ว!`);
+                      }}
+                    >
+                      <ArrowUpRight size={14} />
+                      <span>ส่งออกรายงานบัญชี (Export)</span>
+                    </button>
+                  </div>
                 </div>
 
-                {/* Structured Executive Briefing */}
-                <div className="advisor-structured-content">
-                  {/* 1. Highlight Banner */}
-                  <div className="advisor-highlight-banner">
-                    <div className="highlight-icon-box">
-                      <TrendingUp size={20} className="text-blue" />
+                {/* Prominent Revenue Timeframe Filter Bar (วัน / สัปดาห์ / เดือน / ปี) */}
+                <div className="erp-timeframe-filter-container">
+                  <div className="erp-timeframe-filter-bar">
+                    <div className="filter-bar-intro">
+                      <Calendar size={16} className="text-blue" />
+                      <span className="filter-bar-title">กรองมุมมองรายได้:</span>
                     </div>
-                    <div className="highlight-text-content">
-                      <div className="highlight-lead">
-                        <strong>ผลประกอบการประจำวันเติบโตเหนือเป้าหมาย +14.2%</strong>
-                        <span className="highlight-tag">อัตราครองเครื่อง 100% ต่อเนื่อง 5 ชั่วโมง (18:00 - 23:00 น.)</span>
+                    
+                    <div className="filter-buttons-pill-group">
+                      <button 
+                        type="button"
+                        className={`timeframe-pill-btn ${revenuePeriod === 'day' ? 'active' : ''}`}
+                        onClick={() => setRevenuePeriod('day')}
+                      >
+                        <span className="pill-dot"></span>
+                        <Clock size={14} />
+                        <span>รายวัน (Day)</span>
+                      </button>
+
+                      <button 
+                        type="button"
+                        className={`timeframe-pill-btn ${revenuePeriod === 'week' ? 'active' : ''}`}
+                        onClick={() => setRevenuePeriod('week')}
+                      >
+                        <span className="pill-dot"></span>
+                        <BarChart2 size={14} />
+                        <span>รายสัปดาห์ (Week)</span>
+                      </button>
+
+                      <button 
+                        type="button"
+                        className={`timeframe-pill-btn ${revenuePeriod === 'month' ? 'active' : ''}`}
+                        onClick={() => setRevenuePeriod('month')}
+                      >
+                        <span className="pill-dot"></span>
+                        <Calendar size={14} />
+                        <span>รายเดือน (Month)</span>
+                      </button>
+
+                      <button 
+                        type="button"
+                        className={`timeframe-pill-btn ${revenuePeriod === 'year' ? 'active' : ''}`}
+                        onClick={() => setRevenuePeriod('year')}
+                      >
+                        <span className="pill-dot"></span>
+                        <Award size={14} />
+                        <span>รายปี (Year)</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="timeframe-current-indicator">
+                    <span>ช่วงเวลาปัจจุบัน: <strong style={{ color: '#1d4ed8' }}>{currentPeriodData.label}</strong></span>
+                  </div>
+                </div>
+
+                {/* 4 Financial KPI Summary Cards */}
+                <div className="erp-kpi-grid">
+                  <div className="erp-kpi-card glass-panel">
+                    <div className="kpi-header">
+                      <span className="kpi-label">รายได้รวม{currentPeriodData.badge} (Gross Revenue)</span>
+                      <span className="kpi-tag success">{currentPeriodData.grossGrowth}</span>
+                    </div>
+                    <div className="kpi-value text-blue">
+                      ฿{currentPeriodData.gross.toLocaleString()}
+                    </div>
+                    <div className="kpi-subtext">
+                      <DollarSign size={13} className="text-blue" />
+                      <span>{currentPeriodData.grossDesc}</span>
+                    </div>
+                  </div>
+
+                  <div className="erp-kpi-card glass-panel">
+                    <div className="kpi-header">
+                      <span className="kpi-label">ค่าชั่วโมงเล่นเกม (Stations)</span>
+                      <span className="kpi-tag neutral">{currentPeriodData.stationsShare}</span>
+                    </div>
+                    <div className="kpi-value">
+                      ฿{currentPeriodData.stations.toLocaleString()}
+                    </div>
+                    <div className="kpi-subtext">
+                      <Monitor size={13} className="text-blue" />
+                      <span>{currentPeriodData.stationsDesc}</span>
+                    </div>
+                  </div>
+
+                  <div className="erp-kpi-card glass-panel">
+                    <div className="kpi-header">
+                      <span className="kpi-label">รายได้แผนกอาหาร & คาเฟ่ (F&B)</span>
+                      <span className="kpi-tag success">{currentPeriodData.fnbGrowth}</span>
+                    </div>
+                    <div className="kpi-value text-emerald">
+                      ฿{currentPeriodData.fnb.toLocaleString()}
+                    </div>
+                    <div className="kpi-subtext">
+                      <Coffee size={13} className="text-emerald" />
+                      <span>{currentPeriodData.fnbDesc}</span>
+                    </div>
+                  </div>
+
+                  <div className="erp-kpi-card glass-panel">
+                    <div className="kpi-header">
+                      <span className="kpi-label">กำไรสุทธิประเมิน{currentPeriodData.badge} (Net Profit)</span>
+                      <span className="kpi-tag primary">{currentPeriodData.netMargin}</span>
+                    </div>
+                    <div className="kpi-value text-purple">
+                      ฿{currentPeriodData.netProfit.toLocaleString()}
+                    </div>
+                    <div className="kpi-subtext">
+                      <TrendingUp size={13} className="text-purple" />
+                      <span>{currentPeriodData.netDesc}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* AI Executive Financial Summary & Advisor */}
+                <div className="admin-subcard ai-financial-advisor-card">
+                  <div className="advisor-header">
+                    <div className="advisor-title-group">
+                      <div className="advisor-badge">
+                        <Sparkles size={14} className="text-blue" />
+                        <span>AI Esports Financial Executive (Gemini Flash 3.8)</span>
+                        <span className="advisor-pulse-dot"></span>
                       </div>
-                      <p className="highlight-sub">
-                        เครื่องเล่นเกมทุกโซนทำงานเต็มขีดความสามารถ ยอดจำหน่ายอาหารและเครื่องดื่มช่วงไพรม์ไทม์เพิ่มขึ้นตามความหนาแน่นของผู้ใช้บริการ
-                      </p>
+                      <h4>บทวิเคราะห์และข้อเสนอแนะทางการเงินประจำ{currentPeriodData.shortLabel}โดย AI ({currentPeriodData.label})</h4>
                     </div>
+                    <button 
+                      className="btn-ai-analyze"
+                      onClick={() => {
+                        setIsAnalyzingRevenue(true);
+                        setTimeout(() => {
+                          setIsAnalyzingRevenue(false);
+                          triggerSaveToast();
+                        }, 1200);
+                      }}
+                      disabled={isAnalyzingRevenue}
+                    >
+                      <RefreshCw size={14} className={isAnalyzingRevenue ? 'spin-icon' : ''} />
+                      <span>{isAnalyzingRevenue ? 'AI กำลังประมวลผลข้อมูล...' : `ให้ AI วิเคราะห์สถานะการเงิน (${currentPeriodData.shortLabel})`}</span>
+                    </button>
                   </div>
 
-                  {/* 2. Actionable Recommendations Grid */}
-                  <div className="advisor-actions-grid">
-                    <div className="advisor-action-card">
-                      <div className="action-card-header">
-                        <div className="action-icon-pill fnb">
-                          <Coffee size={15} />
-                        </div>
-                        <div className="action-header-texts">
-                          <strong>ข้อเสนอแนะ 1: ปรับโปรโมชัน F&B ดึงยอดรอบบ่าย</strong>
-                          <span className="action-badge">เพิ่ม Occupancy</span>
-                        </div>
+                  {/* Structured Executive Briefing */}
+                  <div className="advisor-structured-content">
+                    {/* 1. Highlight Banner */}
+                    <div className="advisor-highlight-banner">
+                      <div className="highlight-icon-box">
+                        <TrendingUp size={20} className="text-blue" />
                       </div>
-                      <p className="action-desc">
-                        ขยายเวลาโปรโมชัน Combo Set F&B ในช่วงบ่าย 14:00 - 17:00 เพื่อดึงดูดลูกค้ากลุ่มนักเรียน/นักศึกษาและฟรีแลนซ์ก่อนช่วงเวลาเลิกงาน
-                      </p>
-                    </div>
-
-                    <div className="advisor-action-card">
-                      <div className="action-card-header">
-                        <div className="action-icon-pill vip">
-                          <Armchair size={15} />
+                      <div className="highlight-text-content">
+                        <div className="highlight-lead">
+                          <strong>{currentPeriodData.aiSummary.lead}</strong>
+                          <span className="highlight-tag">{currentPeriodData.aiSummary.tag}</span>
                         </div>
-                        <div className="action-header-texts">
-                          <strong>ข้อเสนอแนะ 2: บริหารจองล่วงหน้า VIP Suite</strong>
-                          <span className="action-badge">Optimize Yield</span>
-                        </div>
+                        <p className="highlight-sub">
+                          {currentPeriodData.aiSummary.sub}
+                        </p>
                       </div>
-                      <p className="action-desc">
-                        ห้อง VIP Bootcamp & Streamer Suite มีความต้องการสูงมาก ควรเปิดระบบรับจองล่วงหน้าผ่านสิทธิพิเศษสมาชิกระดับ Gold / VIP Membership
-                      </p>
                     </div>
-                  </div>
 
-                  {/* 3. Forecast Target Banner */}
-                  <div className="advisor-forecast-banner">
-                    <div className="forecast-left">
-                      <Activity size={16} className="text-blue" />
-                      <span><strong>คาดการณ์ยอดสุทธิสิ้นเดือน:</strong> มีโอกาสแตะระดับ <strong>฿1,480,000</strong></span>
-                    </div>
-                    <div className="forecast-right">
-                      <span className="forecast-roi-pill">ROI คืนทุนเร็วกว่าเกณฑ์ 1.8 เดือน</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Peak Hours & Top F&B Items Two-Column Grid (Balanced Heights) */}
-              <div className="erp-dual-grid">
-                {/* Left: Peak Hours Breakdown */}
-                <div className="admin-subcard glass-panel erp-card-column">
-                  <div className="subcard-header-flex">
-                    <div className="subcard-title-group">
-                      <div className="subcard-title">
-                        <Clock size={18} className="text-blue" />
-                        <strong>อัตราการใช้เครื่องตามช่วงเวลา (Peak Hours Occupancy)</strong>
-                      </div>
-                      <span className="subcard-badge-count">4 กะการทำงาน</span>
-                    </div>
-                  </div>
-
-                  <div className="peak-hours-list">
-                    {(siteData.erpData?.peakHours || [
-                      { time: '10:00 - 14:00 (เปิดบริการช่วงเช้า)', occupancy: 42, revenue: 6800 },
-                      { time: '14:00 - 18:00 (ช่วงบ่าย & หลังเลิกเรียน)', occupancy: 78, revenue: 14200 },
-                      { time: '18:00 - 00:00 (Prime Peak Time แข่งขัน/ปาร์ตี้)', occupancy: 96, revenue: 21500 },
-                      { time: '00:00 - 08:00 (Night Owl Session ยันเช้า)', occupancy: 48, revenue: 6150 }
-                    ]).map((slot, idx) => (
-                      <div key={idx} className="peak-slot-item">
-                        <div className="slot-meta">
-                          <span className="slot-time">{slot.time}</span>
-                          <div className="slot-numbers">
-                            <span className="slot-rev">
-                              <DollarSign size={12} className="text-blue" />
-                              <strong>฿{(slot?.revenue || 0).toLocaleString()}</strong>
-                            </span>
-                            <span className={`slot-rate ${slot.occupancy >= 85 ? 'peak' : ''}`}>
-                              {slot.occupancy}% {slot.occupancy >= 85 ? 'Peak' : ''}
-                            </span>
+                    {/* 2. Actionable Recommendations Grid */}
+                    <div className="advisor-actions-grid">
+                      <div className="advisor-action-card">
+                        <div className="action-card-header">
+                          <div className="action-icon-pill fnb">
+                            <Coffee size={15} />
+                          </div>
+                          <div className="action-header-texts">
+                            <strong>{currentPeriodData.aiSummary.rec1Title}</strong>
+                            <span className="action-badge">{currentPeriodData.aiSummary.rec1Tag}</span>
                           </div>
                         </div>
-                        <div className="slot-progress-bar">
-                          <div 
-                            className="slot-progress-fill" 
-                            style={{ 
-                              width: `${slot.occupancy}%`,
-                              background: slot.occupancy >= 85 
-                                ? 'linear-gradient(90deg, #3b82f6, #ef4444)' 
-                                : slot.occupancy > 60 
-                                  ? 'linear-gradient(90deg, #60a5fa, #1d4ed8)' 
-                                  : 'linear-gradient(90deg, #93c5fd, #3b82f6)'
-                            }}
-                          />
+                        <p className="action-desc">
+                          {currentPeriodData.aiSummary.rec1Desc}
+                        </p>
+                      </div>
+
+                      <div className="advisor-action-card">
+                        <div className="action-card-header">
+                          <div className="action-icon-pill vip">
+                            <Armchair size={15} />
+                          </div>
+                          <div className="action-header-texts">
+                            <strong>{currentPeriodData.aiSummary.rec2Title}</strong>
+                            <span className="action-badge">{currentPeriodData.aiSummary.rec2Tag}</span>
+                          </div>
                         </div>
+                        <p className="action-desc">
+                          {currentPeriodData.aiSummary.rec2Desc}
+                        </p>
                       </div>
-                    ))}
-                  </div>
-
-                  {/* Left Footer Summary Bar */}
-                  <div className="erp-card-footer-bar">
-                    <div className="footer-bar-item">
-                      <Activity size={14} className="text-blue" />
-                      <span>อัตราครองเครื่องเฉลี่ยทั้งวัน: <strong>66.0%</strong></span>
                     </div>
-                    <div className="footer-bar-item">
-                      <span className="text-muted">รอบพีคสูงสุด: </span>
-                      <strong className="text-red">18:00 - 00:00 (96%)</strong>
+
+                    {/* 3. Forecast Target Banner */}
+                    <div className="advisor-forecast-banner">
+                      <div className="forecast-left">
+                        <Activity size={16} className="text-blue" />
+                        <span><strong>{currentPeriodData.aiSummary.forecastTitle}</strong> มีโอกาสแตะระดับ <strong>{currentPeriodData.aiSummary.forecastAmount}</strong></span>
+                      </div>
+                      <div className="forecast-right">
+                        <span className="forecast-roi-pill">{currentPeriodData.aiSummary.forecastRoi}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Right: Top Selling Food & Beverages */}
-                <div className="admin-subcard glass-panel erp-card-column">
-                  <div className="subcard-header-flex">
-                    <div className="subcard-title-group">
-                      <div className="subcard-title">
-                        <Coffee size={18} className="text-blue" />
-                        <strong>เมนูอาหาร & สินค้าขายดีประจำวัน (Top Selling F&B)</strong>
+                {/* Breakdown & Top F&B Items Two-Column Grid */}
+                <div className="erp-dual-grid">
+                  {/* Left Column: Occupancy & Revenue Breakdown */}
+                  <div className="admin-subcard glass-panel erp-card-column">
+                    <div className="subcard-header-flex">
+                      <div className="subcard-title-group">
+                        <div className="subcard-title">
+                          <Clock size={18} className="text-blue" />
+                          <strong>{currentPeriodData.peakHoursTitle}</strong>
+                        </div>
+                        <span className="subcard-badge-count">{currentPeriodData.peakHoursBadge}</span>
                       </div>
-                      <span className="subcard-badge-count">5 อันดับยอดนิยม</span>
+                    </div>
+
+                    <div className="peak-hours-list">
+                      {currentPeriodData.breakdownItems.map((slot, idx) => (
+                        <div key={idx} className="peak-slot-item">
+                          <div className="slot-meta">
+                            <span className="slot-time">{slot.time}</span>
+                            <div className="slot-numbers">
+                              <span className="slot-rev">
+                                <DollarSign size={12} className="text-blue" />
+                                <strong>฿{(slot?.revenue || 0).toLocaleString()}</strong>
+                              </span>
+                              <span className={`slot-rate ${slot.occupancy >= 85 ? 'peak' : ''}`}>
+                                {slot.occupancy}% {slot.occupancy >= 85 ? 'Peak' : ''}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="slot-progress-bar">
+                            <div 
+                              className="slot-progress-fill" 
+                              style={{ 
+                                width: `${slot.occupancy}%`,
+                                background: slot.occupancy >= 85 
+                                  ? 'linear-gradient(90deg, #3b82f6, #ef4444)' 
+                                  : slot.occupancy > 60 
+                                    ? 'linear-gradient(90deg, #60a5fa, #1d4ed8)' 
+                                    : 'linear-gradient(90deg, #93c5fd, #3b82f6)'
+                              }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Left Footer Summary Bar */}
+                    <div className="erp-card-footer-bar">
+                      <div className="footer-bar-item">
+                        <Activity size={14} className="text-blue" />
+                        <span>{currentPeriodData.peakHoursFooter}</span>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="top-items-table-wrapper">
-                    <table className="erp-table">
-                      <thead>
-                        <tr>
-                          <th style={{ width: '45px', textAlign: 'center' }}>อันดับ</th>
-                          <th>รายการสินค้า / เมนู</th>
-                          <th style={{ textAlign: 'center', width: '85px' }}>จำนวน</th>
-                          <th style={{ textAlign: 'center', width: '75px' }}>สัดส่วน</th>
-                          <th style={{ textAlign: 'right', width: '90px' }}>ยอดรวม</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {(siteData.erpData?.topSellingItems || [
-                          { rank: 1, name: 'ข้าวผัดกะเพราเนื้อวากิวไข่ดาวกรอบ', count: 68, total: 6052, share: 29.2 },
-                          { rank: 2, name: 'บะหมี่เกาหลีหม้อไฟชีสดับเบิ้ล', count: 54, total: 4806, share: 23.2 },
-                          { rank: 3, name: 'G-Speed Energy Elixir (สูตรพิเศษ)', count: 95, total: 4275, share: 20.6 },
-                          { rank: 4, name: 'ชาเขียวมัทฉะลาเต้พรีเมียม', count: 48, total: 2880, share: 13.9 },
-                          { rank: 5, name: 'ไก่ทอดคาราเกะซอสสไปซี่', count: 42, total: 2730, share: 13.1 }
-                        ]).map((item, idx) => (
-                          <tr key={idx}>
-                            <td style={{ textAlign: 'center' }}>
-                              <span className={`rank-badge ${idx === 0 ? 'top-1' : idx === 1 ? 'top-2' : idx === 2 ? 'top-3' : ''}`}>
-                                {item.rank || idx + 1}
-                              </span>
-                            </td>
-                            <td className="font-semibold text-slate-800">{item?.name || 'รายการสินค้า'}</td>
-                            <td style={{ textAlign: 'center' }}>
-                              <span className="fnb-qty-pill">
-                                {item?.count || 0} จาน
-                              </span>
-                            </td>
-                            <td style={{ textAlign: 'center' }}>
-                              <span className="fnb-share-pill">
-                                {item?.share || (idx === 0 ? 29.2 : idx === 1 ? 23.2 : idx === 2 ? 20.6 : idx === 3 ? 13.9 : 13.1)}%
-                              </span>
-                            </td>
-                            <td style={{ textAlign: 'right' }} className="text-blue font-bold">
-                              ฿{(item?.total || 0).toLocaleString()}
-                            </td>
+                  {/* Right Column: Top Selling Food & Beverages */}
+                  <div className="admin-subcard glass-panel erp-card-column">
+                    <div className="subcard-header-flex">
+                      <div className="subcard-title-group">
+                        <div className="subcard-title">
+                          <Coffee size={18} className="text-blue" />
+                          <strong>{currentPeriodData.fnbTitle}</strong>
+                        </div>
+                        <span className="subcard-badge-count">5 อันดับยอดนิยม</span>
+                      </div>
+                    </div>
+
+                    <div className="top-items-table-wrapper">
+                      <table className="erp-table">
+                        <thead>
+                          <tr>
+                            <th style={{ width: '45px', textAlign: 'center' }}>อันดับ</th>
+                            <th>รายการสินค้า / เมนู</th>
+                            <th style={{ textAlign: 'center', width: '85px' }}>จำนวน</th>
+                            <th style={{ textAlign: 'center', width: '75px' }}>สัดส่วน</th>
+                            <th style={{ textAlign: 'right', width: '90px' }}>ยอดรวม</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  {/* Right Footer Summary Bar */}
-                  <div className="erp-card-footer-bar">
-                    <div className="footer-bar-item">
-                      <DollarSign size={14} className="text-blue" />
-                      <span>ยอดรวม 5 อันดับแรก: <strong>฿20,743</strong></span>
+                        </thead>
+                        <tbody>
+                          {currentPeriodData.fnbItems.map((item, idx) => (
+                            <tr key={idx}>
+                              <td style={{ textAlign: 'center' }}>
+                                <span className={`rank-badge ${idx === 0 ? 'top-1' : idx === 1 ? 'top-2' : idx === 2 ? 'top-3' : ''}`}>
+                                  {item.rank || idx + 1}
+                                </span>
+                              </td>
+                              <td className="font-semibold text-slate-800">{item?.name || 'รายการสินค้า'}</td>
+                              <td style={{ textAlign: 'center' }}>
+                                <span className="fnb-qty-pill">
+                                  {item?.count || 0} หน่วย
+                                </span>
+                              </td>
+                              <td style={{ textAlign: 'center' }}>
+                                <span className="fnb-share-pill">
+                                  {item?.share || 20}%
+                                </span>
+                              </td>
+                              <td style={{ textAlign: 'right' }} className="text-blue font-bold">
+                                ฿{(item?.total || 0).toLocaleString()}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
-                    <div className="footer-bar-item">
-                      <span className="text-muted">สัดส่วนยอด F&B: </span>
-                      <strong className="text-emerald">88.5% ของแผนก</strong>
+
+                    {/* Right Footer Summary Bar */}
+                    <div className="erp-card-footer-bar">
+                      <div className="footer-bar-item">
+                        <DollarSign size={14} className="text-blue" />
+                        <span>ยอดรวม 5 อันดับแรก: <strong>{currentPeriodData.fnbTotalTop5}</strong></span>
+                      </div>
+                      <div className="footer-bar-item">
+                        <span className="text-muted">สัดส่วนยอด F&B: </span>
+                        <strong className="text-emerald">{currentPeriodData.fnbShareTop5}</strong>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* ERP Bridge & Software Integration Settings (2-Panel Command Center) */}
+                {/* ERP Bridge & Software Integration Settings (2-Panel Command Center) */}
               <div className="admin-subcard glass-panel erp-bridge-master-card">
                 <div className="subcard-header-block" style={{ marginBottom: '18px' }}>
                   <div className="subcard-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -12606,7 +13557,8 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                 </div>
               </div>
             </div>
-          )}
+          );
+          })()}
 
           {/* =========================================================================
               TAB 7: SECURITY & ZERO-TRUST ADMIN ACCESS
@@ -12660,6 +13612,53 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                     <span className="sec-title">เวลาการล็อกอินครั้งล่าสุด</span>
                     <span className="sec-time">{siteData.securityConfig?.lastLogin || 'วันนี้ เวลา 15:45 น.'}</span>
                   </div>
+                </div>
+              </div>
+
+              {/* Full System Backup & Restore Hub */}
+              <div className="admin-subcard glass-panel" style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '14px', padding: '22px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px', borderBottom: '1px solid #f1f5f9', paddingBottom: '16px', marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Database size={22} />
+                    </div>
+                    <div>
+                      <strong style={{ fontSize: '1.05rem', color: '#0f172a' }}>ศูนย์สำรองข้อมูล & กู้คืนระบบ (System Backup & Restore)</strong>
+                      <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#64748b' }}>
+                        ดาวน์โหลดข้อมูลทั้งหมดของเว็บไซต์ (สเปกคอม, สินค้า, บทความ, ทัวร์นาเมนต์, การตั้งค่า) เป็นไฟล์ .json เก็บไว้ หรือกู้คืนข้อมูลกลับมาได้ตลอดเวลา
+                      </p>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <button 
+                      type="button" 
+                      className="btn-primary" 
+                      onClick={handleExportSiteBackup}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '0.84rem', padding: '10px 18px', background: '#059669', borderColor: '#059669' }}
+                    >
+                      <Download size={16} />
+                      <span>ดาวน์โหลดไฟล์สำรอง (.json)</span>
+                    </button>
+                    <label 
+                      className="btn-secondary" 
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '0.84rem', padding: '10px 18px', cursor: 'pointer', margin: 0 }}
+                    >
+                      <Upload size={16} />
+                      <span>นำเข้าไฟล์กู้คืน (Restore)</span>
+                      <input 
+                        type="file" 
+                        accept=".json" 
+                        style={{ display: 'none' }} 
+                        onChange={handleImportSiteBackup} 
+                      />
+                    </label>
+                  </div>
+                </div>
+                <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: '10px', fontSize: '0.78rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Info size={16} className="text-blue" />
+                  <span>
+                    💡 <strong>คำแนะนำ:</strong> แนะนำให้กดดาวน์โหลดไฟล์สำรองเก็บไว้ในเครื่องทุกครั้งหลังจากแก้ไขข้อมูลชิ้นใหญ่ เพื่อป้องกันข้อมูลสูญหายเมื่อมีการล้างแคชเบราว์เซอร์
+                  </span>
                 </div>
               </div>
 

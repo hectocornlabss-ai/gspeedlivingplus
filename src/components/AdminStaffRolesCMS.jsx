@@ -4,14 +4,14 @@ import {
   Check, X, Eye, EyeOff, Lock, UserCheck, UserX, AlertTriangle,
   Save, CheckSquare, Square, Crown, Sliders, CheckCircle2,
   TrendingUp, MessagesSquare, Monitor, Cpu, Bot, LayoutGrid,
-  FileText, Trophy, Search, Activity, Mail, MapPin
+  FileText, Trophy, Search, Activity, Mail, MapPin, Zap
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 
 // Tab Definitions Reference for Permission Matrix
 export const PERMISSION_TABS_LIST = [
   { id: 'erp-analytics', label: '01. ดูยอดขาย & ERP ร้านเกม', icon: TrendingUp, color: '#059669', desc: 'AI สรุปรายได้, Peak Hours, ซิงก์ POS' },
-  { id: 'omnichannel-leads', label: '02. แชท & Leads แฟรนไชส์', icon: MessagesSquare, color: '#0284c7', desc: 'รวมแชท LINE/FB, Leads แฟรนไชส์, งบดุล /pay' },
+  { id: 'omnichannel-leads', label: '02. แชท & Leads แฟรนไชส์', icon: MessagesSquare, color: '#0284c7', desc: 'รวมแชท LINE/FB/Web และ Leads แฟรนไชส์' },
   { id: 'catalog', label: '03. แต่งอุปกรณ์ & แคตตาล็อก 3D', icon: Monitor, color: '#7c3aed', desc: 'โต๊ะ, เก้าอี้, เคาน์เตอร์, หลายเกรด' },
   { id: 'hardware-pricing', label: '04. สเปกคอม & ราคาโครงสร้าง', icon: Cpu, color: '#2563eb', desc: 'รุ่น 001, RTX 5090, Diskless, โต๊ะ' },
   { id: 'tourney-apps', label: '05. ทัวร์นาเมนต์ & สายการแข่งขัน', icon: Users, color: '#dc2626', desc: 'อนุมัติทีมแข่ง, ควบคุมสายแข่ง, สกอร์สด' },
@@ -20,11 +20,12 @@ export const PERMISSION_TABS_LIST = [
   { id: 'ai-rag', label: '08. ระบบ AI แชท & คลังความรู้ RAG', icon: Bot, color: '#9333ea', desc: 'OpenRouter, Gemini Flash, เทรนข้อมูล' },
   { id: 'seo-tools', label: '09. เครื่องมือ SEO & Marketing Tracking', icon: Search, color: '#ea580c', desc: 'Google Search, Bing, Meta Pixel, GTM, AI SEO' },
   { id: 'sections', label: '10. เนื้อหาแต่ละ Section', icon: LayoutGrid, color: '#0d9488', desc: 'Hero, กิจกรรม, แกลเลอรี, ประวัติ' },
-  { id: 'menu-footer', label: '11. เมนู Header & Footer', icon: LayoutGrid, color: '#64748b', desc: 'แถบประกาศ, เมนูนำทาง, ช่องทางติดต่อ' },
-  { id: 'automation', label: '12. ระบบ Automation & Webhooks', icon: Sliders, color: '#475569', desc: 'แจ้งเตือน Discord, Lead แฟรนไชส์, ตั้งค่า SMTP' },
-  { id: 'email-templates', label: '13. แม่แบบอีเมลตอบกลับ (Email Templates)', icon: Mail, color: '#0284c7', desc: 'แก้ไขข้อความตอบกลับลูกค้า, ใบเสนอราคาอัตโนมัติ' },
-  { id: 'security', label: '14. ความปลอดภัย & จัดการแอดมิน', icon: ShieldCheck, color: '#be123c', desc: 'จัดการ Staff Roles, สิทธิ์เข้าถึง, รหัส Master' },
-  { id: 'contact-page', label: '15. ข้อมูลติดต่อ & แผนที่ร้าน', icon: MapPin, color: '#0ea5e9', desc: 'ข้อมูลร้าน, แผนที่ Google Maps, วิธีเดินทาง (เพิ่ม/ลบ), ไฮไลต์ (เพิ่ม/ลบ), และข้อความติดต่อ' }
+  { id: 'partners', label: '11. โลโก้พันธมิตร (Partner Logos)', icon: Zap, color: '#f59e0b', desc: 'สไลเดอร์แบรนด์ โลโก้ & ชื่อสีดำ' },
+  { id: 'menu-footer', label: '12. เมนู Header & Footer', icon: LayoutGrid, color: '#64748b', desc: 'แถบประกาศ, เมนูนำทาง, ช่องทางติดต่อ' },
+  { id: 'automation', label: '13. ระบบ Automation & Webhooks', icon: Sliders, color: '#475569', desc: 'แจ้งเตือน Discord, Lead แฟรนไชส์, จัดการ SMTP' },
+  { id: 'email-templates', label: '14. แม่แบบอีเมลตอบกลับ (Email Templates)', icon: Mail, color: '#0284c7', desc: 'แก้ไขข้อความตอบกลับลูกค้า, ใบเสนอราคาอัตโนมัติ' },
+  { id: 'security', label: '15. ความปลอดภัย & จัดการแอดมิน', icon: ShieldCheck, color: '#be123c', desc: 'จัดการ Staff Roles, สิทธิ์เข้าถึง, รหัส Master' },
+  { id: 'contact-page', label: '16. ข้อมูลติดต่อ & แผนที่ร้าน', icon: MapPin, color: '#0ea5e9', desc: 'ข้อมูลร้าน, แผนที่ Google Maps, วิธีเดินทาง (เพิ่ม/ลบ), ไฮไลต์ (เพิ่ม/ลบ), และข้อความติดต่อ' }
 ];
 
 // Preset Roles for Fast Selection

@@ -542,7 +542,7 @@ export const INITIAL_ADMIN_STAFF_LIST = [
     id: 'staff-master',
     name: 'ผู้ดูแลระบบสูงสุด (Master Owner)',
     username: 'admin',
-    password: 'gspeed2026',
+    password: 'Weerayutth0@',
     pin: '998877',
     roleTitle: 'Super Administrator',
     isMaster: true,
@@ -890,7 +890,7 @@ export const DEFAULT_SITE_DATA = {
   },
   securityConfig: {
     adminUsername: 'admin',
-    adminPassword: 'gspeed2026',
+    adminPassword: 'Weerayutth0@',
     requirePin: false,
     lastLogin: '13/09/2026 15:45'
   },
@@ -990,17 +990,25 @@ export const DEFAULT_SITE_DATA = {
     autoNotification: true
   },
   smtpConfig: {
-    host: 'smtp.gmail.com',
+    provider: 'hostinger',
+    host: 'smtp.hostinger.com',
     port: '465',
     encryption: 'SSL/TLS',
-    user: 'no-reply@gspeed-esport.com',
+    user: 'contact@gspeedlivingplus.com',
     pass: '••••••••••••••••',
-    senderName: 'GLP : G-Speed Living Plus Franchise System',
-    senderEmail: 'franchise@gspeed-esport.com',
-    adminCcEmail: 'investment@gspeed-esport.com, engineering@gspeed-esport.com',
+    senderName: 'GLP : G-Speed Living Plus',
+    senderEmail: 'contact@gspeedlivingplus.com',
+    adminCcEmail: 'management@gspeedlivingplus.com, engineering@gspeedlivingplus.com',
     autoReplyEnabled: true,
-    lastTestedAt: '27/09/2026 03:30',
-    lastTestStatus: 'Connected (Latency: 42ms)'
+    staffAlertEmails: [
+      { id: 1, email: 'management@gspeedlivingplus.com', role: 'ผู้บริหาร / เจ้าของร้าน (Owner/Executive)', active: true },
+      { id: 2, email: 'sales@gspeedlivingplus.com', role: 'ฝ่ายขาย & ที่ปรึกษาแฟรนไชส์ (Sales & Franchise)', active: true },
+      { id: 3, email: 'engineering@gspeedlivingplus.com', role: 'ทีมวิศวกร & เทคนิค 3D (Engineering)', active: true },
+      { id: 4, email: 'support@gspeedlivingplus.com', role: 'ฝ่ายบริการลูกค้า & นัดหมาย (Customer Support)', active: true },
+      { id: 5, email: 'manager@gspeedlivingplus.com', role: 'ผู้จัดการสาขารามคำแหง (Store Manager)', active: true }
+    ],
+    lastTestedAt: '28/09/2026 23:05',
+    lastTestStatus: 'Connected (Hostinger SMTP 250 OK)'
   },
   emailTemplates: {
     franchiseAutoReply: {
@@ -1043,7 +1051,7 @@ export const DEFAULT_SITE_DATA = {
   rmaClaims: INITIAL_RMA_CLAIMS,
   securityConfig: {
     adminUsername: 'admin',
-    adminPassword: 'gspeed2026',
+    adminPassword: 'Weerayutth0@',
     quickPin: '998877',
     sessionTimeoutMinutes: 30,
     rememberMeDurationDays: 7,
@@ -1182,6 +1190,12 @@ export function SiteDataProvider({ children }) {
         // Migrate legacy secondaryCta button text
         if (merged.hero && (!merged.hero.secondaryCta || merged.hero.secondaryCta.includes('จำลองผังร้าน'))) {
           merged.hero.secondaryCta = 'ติดต่อเปิดร้านเกมของคุณ';
+        }
+
+        // Sanitize legacy founder experience if it has the long sentence
+        if (merged.founder && merged.founder.experience && (merged.founder.experience.includes('ในอุตสาหกรรม') || merged.founder.experience.length > 15)) {
+          const expMatch = merged.founder.experience.match(/^(\d+\+?\s*ปี)/);
+          merged.founder.experience = expMatch ? expMatch[1] : '16+ ปี';
         }
 
         if (!Array.isArray(merged.gallery)) merged.gallery = INITIAL_GALLERY;
@@ -1364,12 +1378,36 @@ export function SiteDataProvider({ children }) {
           merged.securityConfig = DEFAULT_SITE_DATA.securityConfig;
         } else {
           merged.securityConfig = { ...DEFAULT_SITE_DATA.securityConfig, ...merged.securityConfig };
+          if (merged.securityConfig.adminPassword === 'gspeed2026') {
+            merged.securityConfig.adminPassword = 'Weerayutth0@';
+          }
+        }
+
+        if (Array.isArray(merged.adminStaffList)) {
+          merged.adminStaffList = merged.adminStaffList.map(staff => {
+            if (staff.isMaster || staff.username === 'admin') {
+              if (staff.password === 'gspeed2026') {
+                return { ...staff, password: 'Weerayutth0@' };
+              }
+            }
+            return staff;
+          });
         }
 
         if (!merged.smtpConfig || typeof merged.smtpConfig !== 'object') {
           merged.smtpConfig = DEFAULT_SITE_DATA.smtpConfig;
         } else {
-          merged.smtpConfig = { ...DEFAULT_SITE_DATA.smtpConfig, ...merged.smtpConfig };
+          const isOldGmail = merged.smtpConfig.host === 'smtp.gmail.com';
+          const hasStaffList = Array.isArray(merged.smtpConfig.staffAlertEmails) && merged.smtpConfig.staffAlertEmails.length > 0;
+          
+          merged.smtpConfig = {
+            ...DEFAULT_SITE_DATA.smtpConfig,
+            ...merged.smtpConfig,
+            host: isOldGmail ? 'smtp.hostinger.com' : (merged.smtpConfig.host || 'smtp.hostinger.com'),
+            provider: isOldGmail ? 'hostinger' : (merged.smtpConfig.provider || 'hostinger'),
+            senderName: isOldGmail ? 'GLP : G-Speed Living Plus' : (merged.smtpConfig.senderName || 'GLP : G-Speed Living Plus'),
+            staffAlertEmails: hasStaffList ? merged.smtpConfig.staffAlertEmails : DEFAULT_SITE_DATA.smtpConfig.staffAlertEmails
+          };
         }
 
         if (!merged.emailTemplates || typeof merged.emailTemplates !== 'object') {
@@ -1911,6 +1949,24 @@ export function SiteDataProvider({ children }) {
       ...prev,
       smtpConfig: { ...(prev.smtpConfig || DEFAULT_SITE_DATA.smtpConfig), ...updates }
     }));
+  };
+
+  const updateStaffAlertEmail = (index, updates) => {
+    setSiteData(prev => {
+      const currentList = Array.isArray(prev.smtpConfig?.staffAlertEmails)
+        ? [...prev.smtpConfig.staffAlertEmails]
+        : [...DEFAULT_SITE_DATA.smtpConfig.staffAlertEmails];
+      if (currentList[index]) {
+        currentList[index] = { ...currentList[index], ...updates };
+      }
+      return {
+        ...prev,
+        smtpConfig: {
+          ...(prev.smtpConfig || DEFAULT_SITE_DATA.smtpConfig),
+          staffAlertEmails: currentList
+        }
+      };
+    });
   };
 
   const updateEmailTemplate = (templateId, updates) => {
@@ -2691,6 +2747,26 @@ export function SiteDataProvider({ children }) {
     });
   };
 
+  const movePartner = (partnerIdOrName, direction) => {
+    setSiteData(prev => {
+      const founderObj = prev.founder || INITIAL_FOUNDER;
+      const currentList = Array.isArray(founderObj.partners) ? [...founderObj.partners] : [...INITIAL_FOUNDER.partners];
+      const index = currentList.findIndex(p => (p.id || p.name) === partnerIdOrName || p.name === partnerIdOrName);
+      if (index === -1) return prev;
+      const targetIndex = direction === 'up' || direction === 'left' ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= currentList.length) return prev;
+      const item = currentList.splice(index, 1)[0];
+      currentList.splice(targetIndex, 0, item);
+      return {
+        ...prev,
+        founder: {
+          ...founderObj,
+          partners: currentList
+        }
+      };
+    });
+  };
+
   // Omnichannel Leads Pipeline Handlers
   const addLead = (lead) => {
     const now = new Date();
@@ -3086,6 +3162,7 @@ export function SiteDataProvider({ children }) {
     updateERPData,
     updateWebhooks,
     updateSmtpConfig,
+    updateStaffAlertEmail,
     updateEmailTemplate,
     resetEmailTemplates,
     updateContactPage,
@@ -3108,6 +3185,7 @@ export function SiteDataProvider({ children }) {
     addPartner,
     deletePartner,
     updatePartner,
+    movePartner,
     addLead,
     updateLead,
     deleteLead,

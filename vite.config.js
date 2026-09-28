@@ -108,7 +108,14 @@ export default defineConfig({
   plugins: [react(), downloadServerPlugin()],
   server: {
     port: 5899,
-    host: true
+    host: true,
+    proxy: {
+      '/api/send-email': 'http://localhost:3001',
+      '/api/test-smtp': 'http://localhost:3001',
+      '/api/contact-inquiry': 'http://localhost:3001',
+      '/api/franchise-quote': 'http://localhost:3001',
+      '/api/health': 'http://localhost:3001'
+    }
   },
   build: {
     rollupOptions: {

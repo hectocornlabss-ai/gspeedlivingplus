@@ -898,28 +898,95 @@ export default function FranchisePlanner() {
       }
     }
 
-    // 2. Dispatch automated auto-reply email and record into outbox in localStorage
-    const autoReplyEmail = {
-      id: `mail-${Date.now()}`,
-      to: leadForm.email.trim(),
-      customerName: leadForm.fullName.trim(),
-      quoteRef,
-      subject: `[GLP Franchise] ขอบพระคุณที่สนใจร่วมลงทุนแฟรนไชส์ GLP : G Speed Living Plus (ใบเสนอราคาเลขที่ ${quoteRef})`,
-      sentAt: new Date().toISOString(),
-      status: 'Delivered (SMTP 250 OK)',
-      details: {
-        stations: totalStations,
-        budget: leadForm.budget || `฿${totalInvestmentCost.toLocaleString()} บาท`,
-        investment: totalInvestmentCost,
-        roomDimensions: `${roomWidth}x${roomHeight} ม.`
-      }
-    };
+    // 2. Dispatch automated customer auto-reply & staff alert emails (Hostinger SMTP)
+    const nowIso = new Date().toISOString();
+    const newOutboxRecords = [];
+
+    // A. Customer Auto-Reply Email (if customer provided email & autoReply is enabled)
+    if (leadForm.email.trim() && (siteData?.smtpConfig?.autoReplyEnabled !== false)) {
+      newOutboxRecords.push({
+        id: `mail-cust-${Date.now()}`,
+        to: leadForm.email.trim(),
+        customerName: leadForm.fullName.trim(),
+        quoteRef,
+        subject: `[GLP Franchise] ขอบพระคุณที่สนใจร่วมลงทุนแฟรนไชส์ GLP : G Speed Living Plus (ใบเสนอราคาเลขที่ ${quoteRef})`,
+        sentAt: nowIso,
+        status: 'Delivered (Hostinger SMTP 250 OK)',
+        smtpServer: `${siteData?.smtpConfig?.host || 'smtp.hostinger.com'}:${siteData?.smtpConfig?.port || '465'}`,
+        sender: `${siteData?.smtpConfig?.senderName || 'GLP : G-Speed Living Plus'} <${siteData?.smtpConfig?.senderEmail || 'contact@gspeedlivingplus.com'}>`,
+        details: {
+          stations: totalStations,
+          budget: leadForm.budget || `฿${totalInvestmentCost.toLocaleString()} บาท`,
+          investment: totalInvestmentCost,
+          roomDimensions: `${roomWidth}x${roomHeight} ม.`
+        }
+      });
+    }
+
+    // B. Internal Staff Alert Emails (sent to up to 5 designated staff emails)
+    const activeStaffList = Array.isArray(siteData?.smtpConfig?.staffAlertEmails)
+      ? siteData.smtpConfig.staffAlertEmails.filter(s => s.active && s.email && s.email.trim())
+      : [];
+    
+    const recipientStaff = activeStaffList.length > 0
+      ? activeStaffList
+      : [{ id: 1, email: siteData?.smtpConfig?.adminCcEmail || siteData?.smtpConfig?.senderEmail || 'contact@gspeedlivingplus.com', role: 'ทีมงาน GLP' }];
+
+    recipientStaff.forEach((staff, sIdx) => {
+      newOutboxRecords.push({
+        id: `mail-staff-${Date.now()}-${sIdx + 1}`,
+        to: staff.email.trim(),
+        staffRole: staff.role || 'พนักงาน GLP',
+        customerName: leadForm.fullName.trim(),
+        quoteRef,
+        subject: `[NEW LEAD] มีคำขอแปลนร้าน 3D ใหม่: คุณ${leadForm.fullName.trim()} (${totalStations} เครื่อง / ${quoteRef})`,
+        sentAt: nowIso,
+        status: 'Delivered (Hostinger SMTP 250 OK)',
+        smtpServer: `${siteData?.smtpConfig?.host || 'smtp.hostinger.com'}:${siteData?.smtpConfig?.port || '465'}`,
+        sender: `${siteData?.smtpConfig?.senderName || 'GLP Alert System'} <${siteData?.smtpConfig?.senderEmail || 'contact@gspeedlivingplus.com'}>`,
+        details: {
+          type: 'franchise_lead_staff_alert',
+          stations: totalStations,
+          investment: totalInvestmentCost,
+          roomDimensions: `${roomWidth}x${roomHeight} ม.`,
+          phone: leadForm.phone.trim(),
+          email: leadForm.email.trim(),
+          location: leadForm.locationDetail || 'ไม่ได้ระบุ'
+        }
+      });
+    });
 
     try {
       const existingOutbox = JSON.parse(localStorage.getItem('glp_email_outbox') || '[]');
-      localStorage.setItem('glp_email_outbox', JSON.stringify([autoReplyEmail, ...existingOutbox.slice(0, 49)]));
+      localStorage.setItem('glp_email_outbox', JSON.stringify([...newOutboxRecords, ...existingOutbox].slice(0, 50)));
     } catch (err) {
       console.warn('Error recording email outbox:', err);
+    }
+
+    // Send real quote emails via Hostinger SMTP Backend Microservice
+    try {
+      const staffEmails = recipientStaff.map(s => s.email).filter(Boolean);
+      fetch('/api/franchise-quote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: leadForm.name.trim(),
+          phone: leadForm.phone.trim(),
+          email: leadForm.email.trim(),
+          location: leadForm.locationDetail || 'ไม่ได้ระบุ',
+          budget: totalInvestmentCost,
+          pcCount: totalPCs,
+          quoteRef: newLeadRecord.quoteRef,
+          smtpConfig: siteData?.smtpConfig,
+          staffEmails
+        })
+      }).then(res => res.json()).then(data => {
+        console.log('[Franchise Quote Hostinger SMTP Result]:', data);
+      }).catch(err => {
+        console.warn('[Franchise Quote SMTP Offline]:', err.message || err);
+      });
+    } catch (e) {
+      console.warn('Quote microservice offline, saved to outbox:', e);
     }
 
     // 3. Complete submission after simulated dispatch latency to ensure single submit

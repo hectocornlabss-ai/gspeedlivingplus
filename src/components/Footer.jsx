@@ -209,14 +209,6 @@ export default function Footer({ setActiveTab, onNavigate }) {
             <a href="#privacy">นโยบายความเป็นส่วนตัว</a>
             <span>•</span>
             <a href="#franchise-terms">ข้อกำหนดการลงทุนแฟรนไชส์</a>
-            <span>•</span>
-            <button 
-              onClick={() => handleLink('/admin')}
-              style={{ background: 'none', border: 'none', color: 'inherit', font: 'inherit', cursor: 'pointer', padding: 0, textDecoration: 'none' }}
-              title="ระบบจัดการเว็บไซต์ & ทัวร์นาเมนต์ (CMS)"
-            >
-              🔒 ระบบหลังบ้าน (CMS)
-            </button>
           </div>
         </div>
       </div>

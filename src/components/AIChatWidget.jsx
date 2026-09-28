@@ -82,7 +82,7 @@ const FormattedChatMessage = ({ text, onNavigate }) => {
               target={targetUrl.startsWith('tel:') || isInternal ? '_self' : '_blank'} 
               rel="noopener noreferrer"
               className="chat-bubble-link"
-              style={isInternal ? { fontWeight: 700, textDecoration: 'underline', color: '#38bdf8' } : {}}
+              style={isInternal ? { fontWeight: 700, textDecoration: 'underline', color: '#1d4ed8' } : {}}
             >
               {match[1]}
             </a>
@@ -770,16 +770,17 @@ ${contextText}
                   ) && (
                     <div style={{
                       marginTop: '12px',
-                      padding: '12px 14px',
-                      background: 'rgba(30, 58, 138, 0.25)',
-                      border: '1px solid rgba(59, 130, 246, 0.4)',
-                      borderRadius: '10px'
+                      padding: '14px 16px',
+                      background: 'linear-gradient(135deg, #f0f7ff 0%, #e0f2fe 100%)',
+                      border: '1px solid #bfdbfe',
+                      borderRadius: '12px',
+                      boxShadow: '0 2px 8px rgba(37, 99, 235, 0.08)'
                     }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#60a5fa', fontSize: '0.84rem', fontWeight: 700, marginBottom: '4px' }}>
-                        <Compass size={15} />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#1d4ed8', fontSize: '0.86rem', fontWeight: 700, marginBottom: '6px' }}>
+                        <Compass size={16} color="#1d4ed8" />
                         <span>ระบบจำลองผังร้าน 3D & คำนวณงบประมาณ</span>
                       </div>
-                      <p style={{ fontSize: '0.78rem', color: '#cbd5e1', margin: '0 0 10px 0', lineHeight: 1.45 }}>
+                      <p style={{ fontSize: '0.82rem', color: '#0f172a', margin: '0 0 12px 0', lineHeight: 1.5, fontWeight: 500 }}>
                         ทดลองใส่ขนาดพื้นที่ห้อง กว้าง x ยาว จัดวางเครื่อง สเปกคอม และคำนวณงบลงทุน ROI ได้ทันที
                       </p>
                       <button

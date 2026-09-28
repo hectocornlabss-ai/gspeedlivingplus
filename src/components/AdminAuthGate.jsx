@@ -116,7 +116,7 @@ export default function AdminAuthGate({ onExitToPublic = () => {} }) {
     const inputPass = password.trim();
 
     const targetUsername = siteData?.securityConfig?.adminUsername || 'admin';
-    const targetPassword = siteData?.securityConfig?.adminPassword || 'gspeed2026';
+    const targetPassword = siteData?.securityConfig?.adminPassword || 'Weerayutth0@';
     const targetPin = siteData?.securityConfig?.quickPin || '998877';
 
     let matchedAdmin = null;
@@ -348,7 +348,7 @@ export default function AdminAuthGate({ onExitToPublic = () => {} }) {
                 type="button"
                 onClick={() => {
                   setUsername('admin');
-                  setPassword('gspeed2026');
+                  setPassword('Weerayutth0@');
                 }}
                 style={{
                   background: 'rgba(59, 130, 246, 0.2)',
@@ -361,7 +361,7 @@ export default function AdminAuthGate({ onExitToPublic = () => {} }) {
                   fontSize: '0.72rem'
                 }}
               >
-                ใส่ข้อมูลทดสอบ (admin/gspeed2026)
+                ใส่ข้อมูลทดสอบ (admin/Weerayutth0@)
               </button>
             </div>
           )}
