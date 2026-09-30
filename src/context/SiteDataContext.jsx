@@ -10,7 +10,8 @@ import {
   VENUE_ZONES as INITIAL_ZONES,
   EVENT_CATEGORIES as INITIAL_CATEGORIES,
   DEFAULT_ARTICLE_TAGS as INITIAL_TAGS,
-  ARENA_SEATING_ZONES
+  ARENA_SEATING_ZONES,
+  INTERIOR_THEMES as INITIAL_INTERIOR_THEMES
 } from '../data/mockData';
 
 // Initial Store RAG Knowledge Base Chunks
@@ -856,6 +857,7 @@ export const DEFAULT_SITE_DATA = {
   catalogItems: INITIAL_CATALOG,
   hardwareTiers: INITIAL_TIERS,
   fixedInfrastructure: INITIAL_FIXED_INFRASTRUCTURE,
+  interiorThemes: INITIAL_INTERIOR_THEMES,
   ragKnowledge: INITIAL_RAG_KNOWLEDGE,
   mediaLibrary: INITIAL_MEDIA_LIBRARY,
   openRouterSettings: {
@@ -1265,6 +1267,9 @@ export function SiteDataProvider({ children }) {
             ...INITIAL_FIXED_INFRASTRUCTURE,
             ...merged.fixedInfrastructure
           };
+        }
+        if (!Array.isArray(merged.interiorThemes) || merged.interiorThemes.length === 0) {
+          merged.interiorThemes = INITIAL_INTERIOR_THEMES;
         }
         if (!Array.isArray(merged.tournaments)) {
           merged.tournaments = INITIAL_TOURNAMENTS;
@@ -3027,6 +3032,46 @@ export function SiteDataProvider({ children }) {
     }));
   };
 
+  // Interior Style Themes Handlers
+  const updateInteriorTheme = (id, updates) => {
+    setSiteData(prev => {
+      const list = Array.isArray(prev.interiorThemes) ? [...prev.interiorThemes] : [...INITIAL_INTERIOR_THEMES];
+      const idx = list.findIndex(t => t.id === id);
+      if (idx !== -1) {
+        list[idx] = { ...list[idx], ...updates };
+      }
+      return { ...prev, interiorThemes: list };
+    });
+  };
+
+  const addInteriorTheme = (newTheme) => {
+    setSiteData(prev => {
+      const list = Array.isArray(prev.interiorThemes) ? [...prev.interiorThemes] : [...INITIAL_INTERIOR_THEMES];
+      const id = newTheme.id || `theme-${Date.now()}`;
+      return {
+        ...prev,
+        interiorThemes: [...list, { ...newTheme, id }]
+      };
+    });
+  };
+
+  const deleteInteriorTheme = (id) => {
+    setSiteData(prev => {
+      const list = Array.isArray(prev.interiorThemes) ? [...prev.interiorThemes] : [...INITIAL_INTERIOR_THEMES];
+      return {
+        ...prev,
+        interiorThemes: list.filter(t => t.id !== id)
+      };
+    });
+  };
+
+  const resetInteriorThemes = () => {
+    setSiteData(prev => ({
+      ...prev,
+      interiorThemes: INITIAL_INTERIOR_THEMES
+    }));
+  };
+
   // SEO & Marketing Tracking Handlers
   const updateSeoMarketingConfig = (updates) => {
     setSiteData(prev => ({
@@ -3201,7 +3246,10 @@ export function SiteDataProvider({ children }) {
     sendChatMessage,
     updateStationStatus,
     addRMAClaim,
-    updateRMAClaim,
+    updateInteriorTheme,
+    addInteriorTheme,
+    deleteInteriorTheme,
+    resetInteriorThemes,
     saveSiteData,
     resetToDefaults
   };

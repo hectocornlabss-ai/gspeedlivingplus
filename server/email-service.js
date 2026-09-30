@@ -446,7 +446,12 @@ app.post('/api/franchise-quote', async (req, res) => {
       budget,
       pcCount,
       quoteRef = `GLP-Q2026-${Date.now().toString().slice(-6)}`,
-      itemsSummary = [],
+      storeType,
+      roomDimensions,
+      themeName,
+      themeDesc,
+      costBreakdown,
+      placedModulesCount,
       smtpConfig,
       staffEmails = []
     } = req.body || {};
@@ -466,6 +471,54 @@ app.post('/api/franchise-quote', async (req, res) => {
     let customerSent = false;
     let staffSentCount = 0;
 
+    // Helper to format currency
+    const fmtTHB = (val) => val ? `฿${Number(val).toLocaleString()} บาท` : '-';
+
+    // Build Cost Breakdown HTML Table
+    const breakdownTableHtml = costBreakdown ? `
+      <div style="margin: 20px 0; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden;">
+        <div style="background: #f1f5f9; padding: 10px 14px; font-weight: 700; color: #1e293b; font-size: 13px; border-bottom: 1px solid #cbd5e1;">
+          📋 สรุปประมาณการงบประมาณลงทุนแยกตามหมวด (BOQ Breakdown)
+        </div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <tbody>
+            <tr style="border-bottom: 1px solid #f1f5f9;">
+              <td style="padding: 9px 14px; color: #475569;">1. เครื่องคอมพิวเตอร์ & มอนิเตอร์เกมมิ่ง (${pcCount || '-'} เครื่อง)</td>
+              <td style="padding: 9px 14px; text-align: right; font-weight: 600; color: #0f172a;">${fmtTHB(costBreakdown.hardware)}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f1f5f9; background: #fafafa;">
+              <td style="padding: 9px 14px; color: #475569;">2. ชุดโต๊ะคอม & เก้าอี้เกมมิ่ง Ergonomic (${placedModulesCount ? placedModulesCount + ' โมดูล' : 'ครบชุด'})</td>
+              <td style="padding: 9px 14px; text-align: right; font-weight: 600; color: #0f172a;">${fmtTHB(costBreakdown.furniture)}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f1f5f9;">
+              <td style="padding: 9px 14px; color: #475569;">3. ตกแต่งภายใน ระบบฝ้า แสงสี & Acoustic (${themeName || 'ตามธีมที่เลือก'})</td>
+              <td style="padding: 9px 14px; text-align: right; font-weight: 600; color: #0f172a;">${fmtTHB(costBreakdown.interiorDecor)}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f1f5f9; background: #fafafa;">
+              <td style="padding: 9px 14px; color: #475569;">4. ระบบปรับอากาศ Inverter Cassette Type</td>
+              <td style="padding: 9px 14px; text-align: right; font-weight: 600; color: #0f172a;">${fmtTHB(costBreakdown.aircon)}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f1f5f9;">
+              <td style="padding: 9px 14px; color: #475569;">5. เซิร์ฟเวอร์แม่ข่าย Diskless Enterprise & เน็ตเวิร์ก 10G Dual Fiber</td>
+              <td style="padding: 9px 14px; text-align: right; font-weight: 600; color: #0f172a;">${fmtTHB(Number(costBreakdown.diskless || 0) + Number(costBreakdown.network || 0))}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f1f5f9; background: #fafafa;">
+              <td style="padding: 9px 14px; color: #475569;">6. ระบบ POS บัญชีคลาวด์ & กล้องวงจรปิด CCTV</td>
+              <td style="padding: 9px 14px; text-align: right; font-weight: 600; color: #0f172a;">${fmtTHB(costBreakdown.billing)}</td>
+            </tr>
+            <tr style="border-bottom: 2px solid #2563eb;">
+              <td style="padding: 9px 14px; color: #475569;">7. ลิขสิทธิ์แฟรนไชส์ GLP แบรนดิ้ง & อบรมบริหารจัดการ</td>
+              <td style="padding: 9px 14px; text-align: right; font-weight: 600; color: #0f172a;">${fmtTHB(costBreakdown.franchiseFee)}</td>
+            </tr>
+            <tr style="background: #eff6ff;">
+              <td style="padding: 12px 14px; font-weight: 800; color: #1e3a8a; font-size: 14px;">รวมงบประมาณลงทุนเบื้องต้นทั้งสิ้น</td>
+              <td style="padding: 12px 14px; text-align: right; font-weight: 800; color: #1d4ed8; font-size: 16px;">${fmtTHB(costBreakdown.totalInvestment || budget)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    ` : '';
+
     // Customer Quotation Email
     if (email && email.includes('@')) {
       const customerHtml = wrapHtmlEmail({
@@ -473,8 +526,8 @@ app.post('/api/franchise-quote', async (req, res) => {
         preheader: `สรุปสเปกและแพ็กเกจแฟรนไชส์ GLP Esport Arena สำหรับคุณ ${name}`,
         contentHtml: `
           <h2 style="color: #0f172a; margin-top: 0;">เรียน คุณ${name},</h2>
-          <p>ขอบพระคุณที่ร่วมวางแผนและจำลองผังร้านแฟรนไชส์อีสปอร์ตผ่านระบบ <strong>GLP 3D Studio & Planner</strong></p>
-          <p>สรุปรายละเอียดการประเมินราคาและสเปกโครงสร้างเบื้องต้นของคุณมีดังนี้:</p>
+          <p>ขอบพระคุณเป็นอย่างยิ่งที่ท่านได้ร่วมวางแผนและจำลองผังร้านแฟรนไชส์อีสปอร์ตผ่านระบบ <strong>GLP 3D Studio & Planner</strong></p>
+          <p>ทีมวิศวกรและที่ปรึกษาการลงทุนแฟรนไชส์ GLP ได้รับข้อมูลสเปกผังร้านของท่านเรียบร้อยแล้ว โดยมีรายละเอียดสรุปเบื้องต้นดังนี้:</p>
 
           <div class="info-card">
             <div class="info-row">
@@ -482,21 +535,36 @@ app.post('/api/franchise-quote', async (req, res) => {
               <span class="info-value" style="color: #2563eb; font-size: 16px;">${quoteRef}</span>
             </div>
             <div class="info-row">
-              <span class="info-label">จำนวนเครื่องคอมพิวเตอร์:</span>
-              <span class="info-value">${pcCount || 'ตามที่กำหนด'} เครื่อง</span>
+              <span class="info-label">ธีมการตกแต่งร้านที่เลือก:</span>
+              <span class="info-value" style="color: #0f172a;">${themeName || 'G-Speed Royal Modern'}</span>
+            </div>
+            ${themeDesc ? `<div style="font-size: 12px; color: #64748b; margin: -4px 0 8px 0; text-align: right;">${themeDesc}</div>` : ''}
+            <div class="info-row">
+              <span class="info-label">ขนาดห้องและพื้นที่:</span>
+              <span class="info-value">${roomDimensions || 'ตามที่กำหนดในระบบ'}</span>
             </div>
             <div class="info-row">
-              <span class="info-label">ทำเล / จังหวัดที่ตั้ง:</span>
+              <span class="info-label">ประเภทอาคาร:</span>
+              <span class="info-value">${storeType || 'อาคารพาณิชย์'}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">จำนวนเครื่องคอมพิวเตอร์:</span>
+              <span class="info-value" style="color: #10b981; font-size: 15px;">${pcCount || '-'} เครื่อง</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">ทำเล / จังหวัดที่ตั้งเป้าหมาย:</span>
               <span class="info-value">${location || 'ไม่ระบุ'}</span>
             </div>
             <div class="info-row">
-              <span class="info-label">งบประมาณที่วางไว้:</span>
-              <span class="info-value">${budget ? Number(budget).toLocaleString() + ' บาท' : 'ตามสเปก'}</span>
+              <span class="info-label">ประมาณการงบลงทุนรวม:</span>
+              <span class="info-value" style="color: #1d4ed8; font-size: 16px;">${fmtTHB(budget)}</span>
             </div>
           </div>
 
-          <p>ทีมงานที่ปรึกษาการลงทุนแฟรนไชส์ GLP จะทำการวิเคราะห์จุดคืนทุน (ROI) และเตรียมเอกสารแผนธุรกิจฉบับเต็มเพื่อนำเสนอแก่ท่านในขั้นตอนถัดไปครับ</p>
-          <p style="margin-top: 24px;">ขอแสดงความนับถือ,<br><strong>ทีมงานฝ่ายพัฒนาธุรกิจแฟรนไชส์ GLP</strong></p>
+          ${breakdownTableHtml}
+
+          <p><strong>ขั้นตอนถัดไป:</strong> ทีมงานฝ่ายพัฒนาธุรกิจแฟรนไชส์ GLP กำลังจัดทำรายงานศึกษาความเป็นไปได้ (Feasibility Study) และจะติดต่อกลับหาคุณ ${name} ที่เบอร์ <strong style="color: #2563eb;">${phone}</strong> ภายใน 24 ชั่วโมง เพื่อให้คำปรึกษาเชิงลึกและส่งมอบเอกสารแผนธุรกิจฉบับสมบูรณ์ครับ</p>
+          <p style="margin-top: 24px;">ขอแสดงความนับถือ,<br><strong>ทีมงานฝ่ายพัฒนาธุรกิจแฟรนไชส์ GLP : G Speed Living Plus</strong></p>
         `
       });
 
@@ -525,39 +593,61 @@ app.post('/api/franchise-quote', async (req, res) => {
     if (alertRecipients.length > 0) {
       const staffHtml = wrapHtmlEmail({
         title: `🔥 [LEAD แฟรนไชส์ใหม่] คุณ${name} ขอใบเสนอราคา ${quoteRef}`,
-        preheader: `มีลีดแฟรนไชส์ใหม่: คุณ ${name} (${phone}) ทำเล ${location || 'ไม่ระบุ'}`,
+        preheader: `มีลีดแฟรนไชส์ใหม่: คุณ ${name} (${phone}) ทำเล ${location || 'ไม่ระบุ'} - ${pcCount || 'ผัง 3D'} เครื่อง`,
         contentHtml: `
           <h2 style="color: #d97706; margin-top: 0;">🔥 มีผู้สนใจลงทุนแฟรนไชส์กดขอใบเสนอราคาใหม่!</h2>
-          <p>รายละเอียดลีดและสเปกที่ลูกค้าจำลองไว้ใน 3D Studio:</p>
+          <p>รายละเอียดลีดและสเปกที่ลูกค้าได้จำลองไว้ผ่านระบบ 3D Floorplanner บนเว็บไซต์:</p>
 
           <div class="info-card" style="border-left-color: #d97706;">
             <div class="info-row">
-              <span class="info-label">เลขอ้างอิง:</span>
-              <span class="info-value">${quoteRef}</span>
+              <span class="info-label">เลขอ้างอิงใบเสนอราคา:</span>
+              <span class="info-value" style="color: #d97706; font-size: 16px;">${quoteRef}</span>
             </div>
             <div class="info-row">
               <span class="info-label">ชื่อผู้ขอใบเสนอราคา:</span>
-              <span class="info-value">${name}</span>
+              <span class="info-value" style="font-size: 16px;">${name}</span>
             </div>
             <div class="info-row">
-              <span class="info-label">เบอร์โทรศัพท์:</span>
-              <span class="info-value"><a href="tel:${phone}" style="color: #2563eb; font-size: 16px;">${phone}</a></span>
+              <span class="info-label">เบอร์โทรศัพท์ (กดโทรได้เลย):</span>
+              <span class="info-value"><a href="tel:${phone}" style="color: #2563eb; font-size: 16px; font-weight: 800;">${phone}</a></span>
             </div>
             <div class="info-row">
-              <span class="info-label">อีเมล:</span>
-              <span class="info-value">${email || 'ไม่ได้ระบุ'}</span>
+              <span class="info-label">อีเมลลูกค้า:</span>
+              <span class="info-value"><a href="mailto:${email || ''}" style="color: #2563eb;">${email || 'ไม่ได้ระบุ'}</a></span>
             </div>
             <div class="info-row">
               <span class="info-label">ทำเลเป้าหมาย:</span>
               <span class="info-value">${location || 'ไม่ระบุ'}</span>
             </div>
             <div class="info-row">
-              <span class="info-label">จำนวนเครื่อง:</span>
-              <span class="info-value">${pcCount || '-'} เครื่อง</span>
+              <span class="info-label">ประเภทอาคาร:</span>
+              <span class="info-value">${storeType || 'อาคารพาณิชย์'}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">ขนาดห้องและพื้นที่:</span>
+              <span class="info-value">${roomDimensions || '-'}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">ธีมการตกแต่งร้านที่ลูกค้าเลือก:</span>
+              <span class="info-value" style="color: #2563eb;">${themeName || 'G-Speed Royal Modern'}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">จำนวนเครื่องคอมพิวเตอร์:</span>
+              <span class="info-value" style="color: #10b981; font-size: 15px;">${pcCount || '-'} เครื่อง</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">งบประมาณที่ลูกค้าประเมิน:</span>
+              <span class="info-value" style="color: #1d4ed8; font-size: 16px;">${fmtTHB(budget)}</span>
             </div>
           </div>
 
-          <p style="font-size: 14px; font-weight: 700; color: #dc2626;">* กรุณาโทรติดต่อกลับเพื่อแนะนำแพ็กเกจและนัดหมายดูทำเลจริง</p>
+          ${breakdownTableHtml}
+
+          <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px 16px; margin-top: 16px;">
+            <p style="margin: 0; font-size: 14px; font-weight: 700; color: #dc2626;">
+              ⚡ ข้อปฏิบัติทีมงาน (SLA 24 ชม.): กรุณาโทรติดต่อคุณ ${name} ที่เบอร์ <a href="tel:${phone}" style="color: #dc2626; text-decoration: underline;">${phone}</a> เพื่อแนะนำแพ็กเกจและนัดหมายวิเคราะห์ทำเลจริง
+            </p>
+          </div>
         `
       });
 
@@ -568,7 +658,7 @@ app.post('/api/franchise-quote', async (req, res) => {
             await transporter.sendMail({
               from: fromAddress,
               to: staffEmail,
-              subject: `[LEAD แฟรนไชส์] คุณ${name} (${phone}) - ${pcCount || 'ผัง 3D'} เครื่อง`,
+              subject: `[LEAD แฟรนไชส์] คุณ${name} (${phone}) - ${pcCount || 'ผัง 3D'} เครื่อง (${themeName || 'Royal'})`,
               html: staffHtml
             });
             staffSentCount++;

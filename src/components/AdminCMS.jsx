@@ -2622,7 +2622,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                 <Cpu size={18} />
                 <div>
                   <strong>04. สเปกคอม & ราคาโครงสร้าง</strong>
-                  <span>รุ่น 001, RTX 5090, Diskless, โต๊ะ</span>
+                  <span>สเปกคอม, Diskless, ธีมตกแต่งร้าน, โต๊ะ</span>
                 </div>
               </button>
             )}

@@ -12,7 +12,7 @@ import Room3DStudio from './Room3DStudio';
 import { 
   CATALOG_ITEMS, HARDWARE_TIERS, FIXED_INFRASTRUCTURE, 
   PRESET_ROOMS, INSTALLATION_TIMELINE,
-  WALLPAPERS, FLOOR_MATERIALS
+  WALLPAPERS, FLOOR_MATERIALS, INTERIOR_THEMES
 } from '../data/mockData';
 import { useSiteData } from '../context/SiteDataContext';
 import { compressAndConvertToWebP, formatBytes } from '../utils/imageOptimizer';
@@ -290,7 +290,9 @@ export default function FranchisePlanner() {
   const [storeType, setStoreType] = useState('อาคารพาณิชย์ (Commercial Building)');
   const [roomWidth, setRoomWidth] = useState(12); // meters
   const [roomHeight, setRoomHeight] = useState(10); // meters
-  const [selectedTheme, setSelectedTheme] = useState('royal'); // royal, luxury, stealth
+  const availableThemes = siteData?.interiorThemes || INTERIOR_THEMES;
+  const [selectedTheme, setSelectedTheme] = useState('royal');
+  const selectedThemeObj = availableThemes.find(t => t.id === selectedTheme) || availableThemes[0];
 
   // Store Entrance & Door Configuration State
   const [doorConfig, setDoorConfig] = useState({
@@ -970,13 +972,29 @@ export default function FranchisePlanner() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: leadForm.name.trim(),
-          phone: leadForm.phone.trim(),
-          email: leadForm.email.trim(),
-          location: leadForm.locationDetail || 'ไม่ได้ระบุ',
+          name: (leadForm.fullName || '').trim(),
+          phone: (leadForm.phone || '').trim(),
+          email: (leadForm.email || '').trim(),
+          location: leadForm.locationDetail || storeLocation || 'ไม่ได้ระบุ',
           budget: totalInvestmentCost,
-          pcCount: totalPCs,
+          pcCount: totalStations,
           quoteRef: newLeadRecord.quoteRef,
+          storeType,
+          roomDimensions: `${roomWidth} x ${roomHeight} ม. (${roomAreaSqM} ตร.ม.)`,
+          themeName: selectedThemeObj ? selectedThemeObj.name : selectedTheme,
+          themeDesc: selectedThemeObj ? (selectedThemeObj.tagline || selectedThemeObj.description) : '',
+          costBreakdown: {
+            hardware: hardwareCost,
+            furniture: furnitureItemsCost,
+            interiorDecor: interiorDecorCost,
+            aircon: airconCost,
+            diskless: disklessCost,
+            network: networkCost,
+            billing: billingCost,
+            franchiseFee: franchiseLicenseCost,
+            totalInvestment: totalInvestmentCost
+          },
+          placedModulesCount: placedItems.length,
           smtpConfig: siteData?.smtpConfig,
           staffEmails
         })
@@ -2589,32 +2607,41 @@ export default function FranchisePlanner() {
               <div className="form-group">
                 <label className="form-label">ธีมการตกแต่งร้าน (Interior Style)</label>
                 <div className="theme-options-grid">
-                  <div 
-                    className={`theme-option ${selectedTheme === 'royal' ? 'active' : ''}`}
-                    onClick={() => setSelectedTheme('royal')}
-                  >
-                    <div className="theme-color-bar royal-bar"></div>
-                    <strong>G-Speed Royal Modern</strong>
-                    <span>โทนขาว-น้ำเงิน มาตรฐานแบรนด์ GLP สว่าง สบายตา ทันสมัย</span>
-                  </div>
+                  {availableThemes.map((theme) => {
+                    const primaryColor = theme.palette?.[0]?.hex || (theme.id === 'royal' ? '#1d4ed8' : theme.id === 'luxury' ? '#f59e0b' : '#10b981');
+                    const isSelected = selectedTheme === theme.id;
 
-                  <div 
-                    className={`theme-option ${selectedTheme === 'luxury' ? 'active' : ''}`}
-                    onClick={() => setSelectedTheme('luxury')}
-                  >
-                    <div className="theme-color-bar luxury-bar"></div>
-                    <strong>Minimal Clean Luxury</strong>
-                    <span>โทนขาว-เทาอ่อน ไฟ Warm White สะอาดตา หรูหรา เรียบหรู</span>
-                  </div>
-
-                  <div 
-                    className={`theme-option ${selectedTheme === 'stealth' ? 'active' : ''}`}
-                    onClick={() => setSelectedTheme('stealth')}
-                  >
-                    <div className="theme-color-bar stealth-bar"></div>
-                    <strong>Stealth Pro Circuit</strong>
-                    <span>ดำ-กราไฟต์ ดุดัน ไฟ Linear สีเดียว สไตล์นักกีฬา Pro Circuit</span>
-                  </div>
+                    return (
+                      <div 
+                        key={theme.id}
+                        className={`theme-option ${isSelected ? 'active' : ''}`}
+                        onClick={() => setSelectedTheme(theme.id)}
+                      >
+                        <div 
+                          className="theme-color-bar" 
+                          style={{ background: primaryColor }}
+                        />
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '8px', flexWrap: 'wrap' }}>
+                          <strong>{theme.name}</strong>
+                          {theme.badge && (
+                            <span style={{ 
+                              fontSize: '0.68rem', 
+                              fontWeight: 700, 
+                              padding: '1px 7px', 
+                              borderRadius: '999px',
+                              background: primaryColor + '18',
+                              color: primaryColor,
+                              border: `1px solid ${primaryColor}33`,
+                              display: 'inline-block'
+                            }}>
+                              {theme.badge}
+                            </span>
+                          )}
+                        </div>
+                        <span>{theme.tagline || theme.description}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -4726,7 +4753,7 @@ export default function FranchisePlanner() {
                       <tr>
                         <td className="text-center">3</td>
                         <td>
-                          <strong>งานตกแต่งภายใน ระบบฝ้า ผนังกันเสียง & ไฟ Linear Modern ({selectedTheme})</strong>
+                          <strong>งานตกแต่งภายใน ระบบฝ้า ผนังกันเสียง & ไฟ Linear Modern ({selectedThemeObj?.name || selectedTheme})</strong>
                           <div className="boq-item-desc">งานผนัง Acoustic ซับเสียง, งานพื้น Epoxy/กระเบื้องยาง Heavy-Duty, ป้ายไฟอะคริลิกเรืองแสงโลโก้แบรนด์</div>
                         </td>
                         <td className="text-center">{roomAreaSqM} ตร.ม.</td>

@@ -3,10 +3,14 @@ import {
   Cpu, Zap, Layers, Monitor, Gamepad2, Plus, Trash2, Edit3, 
   Save, RefreshCw, CheckCircle2, Server, Network, 
   CreditCard, Award, Info, 
-  Armchair, Sparkles, Sliders
+  Armchair, Sparkles, Sliders, Palette, X, Check
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
-import { HARDWARE_TIERS as DEFAULT_TIERS, FIXED_INFRASTRUCTURE as DEFAULT_INFRA } from '../data/mockData';
+import { 
+  HARDWARE_TIERS as DEFAULT_TIERS, 
+  FIXED_INFRASTRUCTURE as DEFAULT_INFRA,
+  INTERIOR_THEMES as DEFAULT_THEMES 
+} from '../data/mockData';
 
 export default function HardwarePricingCMS() {
   const { 
@@ -17,10 +21,14 @@ export default function HardwarePricingCMS() {
     resetHardwareTiers, 
     updateFixedInfrastructure, 
     resetFixedInfrastructure, 
-    updateCatalogItemCost 
+    updateCatalogItemCost,
+    updateInteriorTheme,
+    addInteriorTheme,
+    deleteInteriorTheme,
+    resetInteriorThemes
   } = useSiteData();
 
-  const [activeSubTab, setActiveSubTab] = useState('specs'); // 'specs' | 'infrastructure' | 'desks'
+  const [activeSubTab, setActiveSubTab] = useState('specs'); // 'specs' | 'infrastructure' | 'desks' | 'themes'
   const [successToast, setSuccessToast] = useState(null);
 
   const showToast = (msg) => {
@@ -159,6 +167,108 @@ export default function HardwarePricingCMS() {
     if (cost !== undefined) {
       updateCatalogItemCost(id, cost);
       showToast('อัปเดตราคาชุดโต๊ะคอม/โมดูลเรียบร้อยแล้ว');
+    }
+  };
+
+  // ---------------------------------------------------------------------------
+  // 4. INTERIOR STYLE THEMES (DECORATION THEMES)
+  // ---------------------------------------------------------------------------
+  const interiorThemes = siteData?.interiorThemes || DEFAULT_THEMES;
+  const [editingThemeId, setEditingThemeId] = useState(null);
+  const [themeEditForm, setThemeEditForm] = useState({});
+  const [showAddThemeModal, setShowAddThemeModal] = useState(false);
+  const [newThemeForm, setNewThemeForm] = useState({
+    id: '',
+    name: '',
+    badge: 'Official Standard',
+    badgeType: 'blue',
+    tagline: '',
+    description: '',
+    lighting: '',
+    acoustic: '',
+    primaryColor: '#1d4ed8'
+  });
+
+  const handleStartEditTheme = (theme) => {
+    setEditingThemeId(theme.id);
+    setThemeEditForm({
+      name: theme.name || '',
+      badge: theme.badge || '',
+      badgeType: theme.badgeType || 'blue',
+      tagline: theme.tagline || '',
+      description: theme.description || '',
+      lighting: theme.lighting || '',
+      acoustic: theme.acoustic || '',
+      primaryColor: theme.palette?.[0]?.hex || '#1d4ed8'
+    });
+  };
+
+  const handleSaveTheme = (id) => {
+    const currentTheme = interiorThemes.find(t => t.id === id);
+    const newPalette = currentTheme?.palette && currentTheme.palette.length > 0 
+      ? [...currentTheme.palette] 
+      : [{ name: 'Primary Accent', hex: themeEditForm.primaryColor }];
+    if (newPalette[0]) {
+      newPalette[0] = { ...newPalette[0], hex: themeEditForm.primaryColor };
+    }
+    updateInteriorTheme(id, {
+      ...themeEditForm,
+      palette: newPalette
+    });
+    setEditingThemeId(null);
+    showToast(`อัปเดตธีม "${themeEditForm.name}" เรียบร้อยแล้ว`);
+  };
+
+  const handleCreateTheme = (e) => {
+    e.preventDefault();
+    if (!newThemeForm.name.trim()) return;
+    const id = (newThemeForm.id.trim() || `theme-${Date.now()}`).toLowerCase().replace(/[^a-z0-9_-]/g, '-');
+    const createdTheme = {
+      id,
+      name: newThemeForm.name.trim(),
+      badge: newThemeForm.badge || 'Custom Style',
+      badgeType: newThemeForm.badgeType || 'blue',
+      tagline: newThemeForm.tagline || '',
+      description: newThemeForm.description || '',
+      lighting: newThemeForm.lighting || 'ไฟ LED แบรนด์ GLP Dual-Tone สบายตา',
+      acoustic: newThemeForm.acoustic || 'แผงซับเสียง Acoustic Foam ตัดเสียงก้อง 65%',
+      palette: [
+        { name: 'Primary Color', hex: newThemeForm.primaryColor || '#1d4ed8' },
+        { name: 'Pure White', hex: '#ffffff' },
+        { name: 'Dark Slate', hex: '#0f172a' }
+      ]
+    };
+    addInteriorTheme(createdTheme);
+    setShowAddThemeModal(false);
+    setNewThemeForm({
+      id: '',
+      name: '',
+      badge: 'Official Standard',
+      badgeType: 'blue',
+      tagline: '',
+      description: '',
+      lighting: '',
+      acoustic: '',
+      primaryColor: '#1d4ed8'
+    });
+    showToast(`เพิ่มธีม "${createdTheme.name}" เรียบร้อยแล้ว`);
+  };
+
+  const handleDeleteTheme = (theme) => {
+    if (interiorThemes.length <= 1) {
+      alert('ต้องมีธีมตกแต่งร้านอย่างน้อย 1 แบบในระบบ');
+      return;
+    }
+    if (window.confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบธีม "${theme.name}"?`)) {
+      deleteInteriorTheme(theme.id);
+      showToast(`ลบธีม "${theme.name}" เรียบร้อยแล้ว`);
+    }
+  };
+
+  const handleResetThemes = () => {
+    if (window.confirm('คุณต้องการรีเซ็ตธีมตกแต่งร้านทั้งหมดกลับเป็นค่ามาตรฐาน GLP หรือไม่?')) {
+      resetInteriorThemes();
+      showToast('รีเซ็ตธีมตกแต่งร้านเป็นค่ามาตรฐานเรียบร้อย');
     }
   };
 
@@ -328,6 +438,28 @@ export default function HardwarePricingCMS() {
         >
           <Armchair size={15} />
           <span>3. ราคาชุดโต๊ะคอม & เฟอร์นิเจอร์ (รวมเก้าอี้)</span>
+        </button>
+
+        <button
+          type="button"
+          className={`hp-subtab-btn ${activeSubTab === 'themes' ? 'active' : ''}`}
+          onClick={() => setActiveSubTab('themes')}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '8px 14px',
+            borderRadius: '8px',
+            border: 'none',
+            background: activeSubTab === 'themes' ? '#2563eb' : '#f1f5f9',
+            color: activeSubTab === 'themes' ? '#ffffff' : '#475569',
+            fontWeight: 700,
+            fontSize: '0.84rem',
+            cursor: 'pointer'
+          }}
+        >
+          <Palette size={15} />
+          <span>4. ธีมการตกแต่งร้าน ({interiorThemes.length} แบบ)</span>
         </button>
       </div>
 
@@ -1020,6 +1152,421 @@ export default function HardwarePricingCMS() {
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          SUBTAB 4: INTERIOR STYLE THEMES MANAGEMENT
+          ========================================================================= */}
+      {activeSubTab === 'themes' && (
+        <div className="subtab-content themes-subtab">
+          {/* Header & Actions */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '10px' }}>
+            <div>
+              <h4 style={{ margin: '0 0 4px 0', fontSize: '1.05rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Palette size={18} className="text-blue" />
+                <span>จัดการธีมการตกแต่งร้าน (Interior Style Themes)</span>
+              </h4>
+              <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b' }}>
+                ธีมเหล่านี้จะปรากฏในขั้นตอนที่ 1 ของระบบวางผังร้าน (Franchise Planner) และถูกแนบไปในใบเสนอราคา BOQ อัตโนมัติ
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={handleResetThemes}
+                style={{ fontSize: '0.8rem', padding: '6px 12px' }}
+              >
+                <RefreshCw size={13} />
+                <span>คืนค่ามาตรฐาน</span>
+              </button>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={() => setShowAddThemeModal(true)}
+                style={{ fontSize: '0.8rem', padding: '6px 14px' }}
+              >
+                <Plus size={14} />
+                <span>เพิ่มธีมตกแต่งใหม่</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Themes Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
+            {interiorThemes.map((theme) => {
+              const primaryHex = theme.palette?.[0]?.hex || (theme.id === 'royal' ? '#1d4ed8' : theme.id === 'luxury' ? '#f59e0b' : '#10b981');
+
+              return (
+                <div 
+                  key={theme.id}
+                  className="glass-panel"
+                  style={{
+                    position: 'relative',
+                    background: '#ffffff',
+                    border: '1.5px solid #e2e8f0',
+                    borderRadius: '14px',
+                    padding: '18px 20px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  {/* Left accent strip */}
+                  <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '6px', background: primaryHex }} />
+
+                  <div>
+                    {/* Header info */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', marginBottom: '8px' }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                          <span style={{ 
+                            fontSize: '0.72rem', 
+                            fontWeight: 700, 
+                            padding: '2px 8px', 
+                            borderRadius: '999px',
+                            background: primaryHex + '22',
+                            color: primaryHex,
+                            border: `1px solid ${primaryHex}44`
+                          }}>
+                            {theme.badge || 'Official'}
+                          </span>
+                          <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>ID: {theme.id}</span>
+                        </div>
+                        <h5 style={{ margin: 0, fontSize: '1.05rem', color: '#0f172a', fontWeight: 800 }}>
+                          {theme.name}
+                        </h5>
+                      </div>
+                      
+                      <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: primaryHex, border: '2px solid #fff', boxShadow: '0 0 6px rgba(0,0,0,0.15)' }} title={`สีหลัก: ${primaryHex}`} />
+                    </div>
+
+                    {/* Tagline */}
+                    <div style={{ 
+                      fontSize: '0.82rem', 
+                      fontWeight: 600, 
+                      color: '#2563eb', 
+                      background: '#f8fafc', 
+                      padding: '8px 12px', 
+                      borderRadius: '8px', 
+                      border: '1px solid #e2e8f0',
+                      marginBottom: '10px'
+                    }}>
+                      {theme.tagline || 'ไม่มีคำอธิบายย่อ'}
+                    </div>
+
+                    {/* Description */}
+                    <p style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: 1.5, margin: '0 0 12px 0' }}>
+                      {theme.description}
+                    </p>
+
+                    {/* Specs Details */}
+                    <div style={{ fontSize: '0.74rem', color: '#475569', display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '14px' }}>
+                      {theme.lighting && (
+                        <div><strong>ระบบไฟ:</strong> {theme.lighting}</div>
+                      )}
+                      {theme.acoustic && (
+                        <div><strong>ซับเสียง:</strong> {theme.acoustic}</div>
+                      )}
+                    </div>
+
+                    {/* Palette swatches */}
+                    {theme.palette && theme.palette.length > 0 && (
+                      <div style={{ marginBottom: '14px' }}>
+                        <span style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>พาเลทสีประจำธีม:</span>
+                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                          {theme.palette.map((c, cIdx) => (
+                            <div 
+                              key={cIdx} 
+                              style={{ 
+                                display: 'inline-flex', 
+                                alignItems: 'center', 
+                                gap: '4px', 
+                                fontSize: '0.7rem', 
+                                background: '#f1f5f9', 
+                                padding: '2px 8px', 
+                                borderRadius: '6px', 
+                                border: '1px solid #e2e8f0' 
+                              }}
+                            >
+                              <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: c.hex, display: 'inline-block' }} />
+                              <span>{c.name || c.hex}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', borderTop: '1px solid #f1f5f9', paddingTop: '10px', marginTop: '10px' }}>
+                    <button
+                      type="button"
+                      className="btn-secondary"
+                      onClick={() => handleStartEditTheme(theme)}
+                      style={{ fontSize: '0.75rem', padding: '5px 12px' }}
+                    >
+                      <Edit3 size={12} />
+                      <span>แก้ไขธีม</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-secondary"
+                      onClick={() => handleDeleteTheme(theme)}
+                      style={{ fontSize: '0.75rem', padding: '5px 10px', color: '#ef4444' }}
+                      title="ลบธีมนี้"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Modal: Edit Theme */}
+          {editingThemeId && (
+            <div className="cms-modal-backdrop" style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000, padding: '20px' }}>
+              <div className="cms-modal-content glass-panel" style={{ background: '#ffffff', borderRadius: '16px', maxWidth: '580px', width: '100%', padding: '24px', boxShadow: '0 20px 40px rgba(0,0,0,0.25)', maxHeight: '90vh', overflowY: 'auto' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
+                  <h4 style={{ margin: 0, fontSize: '1.15rem', color: '#0f172a', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Edit3 size={18} className="text-blue" />
+                    <span>แก้ไขธีมการตกแต่งร้าน</span>
+                  </h4>
+                  <button type="button" onClick={() => setEditingThemeId(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}>
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div className="form-group">
+                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>ชื่อธีม (Theme Name)</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={themeEditForm.name || ''}
+                      onChange={e => setThemeEditForm({ ...themeEditForm, name: e.target.value })}
+                      placeholder="เช่น G-Speed Royal Modern"
+                    />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div className="form-group">
+                      <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>ป้ายกำกับ (Badge)</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={themeEditForm.badge || ''}
+                        onChange={e => setThemeEditForm({ ...themeEditForm, badge: e.target.value })}
+                        placeholder="เช่น Official Standard"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>สีประจำธีม (Primary Color)</label>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <input
+                          type="color"
+                          value={themeEditForm.primaryColor || '#1d4ed8'}
+                          onChange={e => setThemeEditForm({ ...themeEditForm, primaryColor: e.target.value })}
+                          style={{ width: '40px', height: '36px', padding: '2px', border: '1px solid #cbd5e1', borderRadius: '6px', cursor: 'pointer' }}
+                        />
+                        <input
+                          type="text"
+                          className="form-input"
+                          value={themeEditForm.primaryColor || '#1d4ed8'}
+                          onChange={e => setThemeEditForm({ ...themeEditForm, primaryColor: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>คำอธิบายย่อ (Tagline - แสดงใต้ชื่อธีมในหน้าร้าน)</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={themeEditForm.tagline || ''}
+                      onChange={e => setThemeEditForm({ ...themeEditForm, tagline: e.target.value })}
+                      placeholder="เช่น โทนขาว-น้ำเงิน มาตรฐานแบรนด์ GLP สว่าง สบายตา ทันสมัย"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>คำอธิบายฉบับเต็ม (Description)</label>
+                    <textarea
+                      rows={3}
+                      className="form-input"
+                      value={themeEditForm.description || ''}
+                      onChange={e => setThemeEditForm({ ...themeEditForm, description: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>ระบบแสงไฟ (Lighting Spec)</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={themeEditForm.lighting || ''}
+                      onChange={e => setThemeEditForm({ ...themeEditForm, lighting: e.target.value })}
+                      placeholder="เช่น ไฟ Dual-tone 4000K Natural White ผสานเส้นสายไฟซ่อน LED strip"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>ระบบซับเสียง (Acoustic Spec)</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={themeEditForm.acoustic || ''}
+                      onChange={e => setThemeEditForm({ ...themeEditForm, acoustic: e.target.value })}
+                      placeholder="เช่น แผงซับเสียงบุผ้าลายโมโนแกรม ตัดเสียงก้อง 65%"
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px', borderTop: '1px solid #f1f5f9', paddingTop: '14px' }}>
+                  <button type="button" className="btn-secondary" onClick={() => setEditingThemeId(null)}>
+                    ยกเลิก
+                  </button>
+                  <button type="button" className="btn-primary" onClick={() => handleSaveTheme(editingThemeId)}>
+                    <Save size={14} />
+                    <span>บันทึกการแก้ไข</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Modal: Add New Theme */}
+          {showAddThemeModal && (
+            <div className="cms-modal-backdrop" style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000, padding: '20px' }}>
+              <div className="cms-modal-content glass-panel" style={{ background: '#ffffff', borderRadius: '16px', maxWidth: '580px', width: '100%', padding: '24px', boxShadow: '0 20px 40px rgba(0,0,0,0.25)', maxHeight: '90vh', overflowY: 'auto' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
+                  <h4 style={{ margin: 0, fontSize: '1.15rem', color: '#0f172a', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Plus size={18} className="text-blue" />
+                    <span>เพิ่มธีมการตกแต่งร้านแบบใหม่</span>
+                  </h4>
+                  <button type="button" onClick={() => setShowAddThemeModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}>
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <form onSubmit={handleCreateTheme} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div className="form-group">
+                      <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>รหัสธีม (ID ภาษาอังกฤษ)</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={newThemeForm.id}
+                        onChange={e => setNewThemeForm({ ...newThemeForm, id: e.target.value })}
+                        placeholder="เช่น cyberpunk, neon-tokyo"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>ป้ายกำกับ (Badge)</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={newThemeForm.badge}
+                        onChange={e => setNewThemeForm({ ...newThemeForm, badge: e.target.value })}
+                        placeholder="เช่น Next-Gen Esports"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>ชื่อธีม (Theme Name) *</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      required
+                      value={newThemeForm.name}
+                      onChange={e => setNewThemeForm({ ...newThemeForm, name: e.target.value })}
+                      placeholder="เช่น Cyberpunk Neo-Tokyo Edition"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>สีประจำธีม (Primary Color)</label>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <input
+                        type="color"
+                        value={newThemeForm.primaryColor}
+                        onChange={e => setNewThemeForm({ ...newThemeForm, primaryColor: e.target.value })}
+                        style={{ width: '40px', height: '36px', padding: '2px', border: '1px solid #cbd5e1', borderRadius: '6px', cursor: 'pointer' }}
+                      />
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={newThemeForm.primaryColor}
+                        onChange={e => setNewThemeForm({ ...newThemeForm, primaryColor: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>คำอธิบายย่อ (Tagline) *</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      required
+                      value={newThemeForm.tagline}
+                      onChange={e => setNewThemeForm({ ...newThemeForm, tagline: e.target.value })}
+                      placeholder="เช่น โทนสีนีออนม่วง-ฟ้า ล้ำยุค แสงไฟ Cyberpunk สำหรับสายสตรีมเมอร์"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>คำอธิบายฉบับเต็ม (Description)</label>
+                    <textarea
+                      rows={3}
+                      className="form-input"
+                      value={newThemeForm.description}
+                      onChange={e => setNewThemeForm({ ...newThemeForm, description: e.target.value })}
+                      placeholder="รายละเอียดการออกแบบ วัสดุ และบรรยากาศโดยรวม..."
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>ระบบแสงไฟ (Lighting Spec)</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={newThemeForm.lighting}
+                      onChange={e => setNewThemeForm({ ...newThemeForm, lighting: e.target.value })}
+                      placeholder="เช่น ไฟ RGB Addressable Sync อัตโนมัติ"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>ระบบซับเสียง (Acoustic Spec)</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={newThemeForm.acoustic}
+                      onChange={e => setNewThemeForm({ ...newThemeForm, acoustic: e.target.value })}
+                      placeholder="เช่น โฟม Acoustic ลายรังผึ้งความหนาแน่นสูง"
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '16px', borderTop: '1px solid #f1f5f9', paddingTop: '14px' }}>
+                    <button type="button" className="btn-secondary" onClick={() => setShowAddThemeModal(false)}>
+                      ยกเลิก
+                    </button>
+                    <button type="submit" className="btn-primary">
+                      <Plus size={14} />
+                      <span>บันทึกและเพิ่มธีม</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
