@@ -2507,7 +2507,7 @@ export default function FranchisePlanner() {
                           onClick={handleApplyAutoLayout}
                         >
                           <Sparkles size={18} />
-                          <span>จัดวางผังร้านและโต๊ะคอมลงบนแปลนนี้ให้อัตโนมัติ</span>
+                          <span>จัดวางผังร้านอัตโนมัติ</span>
                           <ArrowRight size={18} />
                         </button>
                         <button 
@@ -2517,7 +2517,7 @@ export default function FranchisePlanner() {
                           style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                         >
                           <Ruler size={15} />
-                          <span>นำแปลนไปจัดวางด้วยตนเอง</span>
+                          <span>จัดวางผังด้วยตนเอง</span>
                         </button>
                       </div>
                     </div>
@@ -2651,7 +2651,7 @@ export default function FranchisePlanner() {
                   onClick={() => handleStepChange(2)} 
                   className="btn-primary full-width"
                 >
-                  <span>ไปที่ขั้นตอนถัดไป: จัดวางผังร้าน 2D</span>
+                  <span>ถัดไป: จัดผังร้าน</span>
                   <ArrowRight size={18} />
                 </button>
               </div>
@@ -3505,7 +3505,7 @@ export default function FranchisePlanner() {
                       className="btn-primary full-width"
                       style={{ padding: '13px 16px', fontSize: '0.96rem', fontWeight: 700 }}
                     >
-                      <span>เลือกสเปกคอมพิวเตอร์ ({totalStations} เครื่อง)</span>
+                      <span>ถัดไป: เลือกสเปก ({totalStations} เครื่อง)</span>
                       <ArrowRight size={16} />
                     </button>
                     <button 
@@ -3513,7 +3513,7 @@ export default function FranchisePlanner() {
                       className="btn-secondary full-width"
                       style={{ marginTop: '6px' }}
                     >
-                      ย้อนกลับไปตั้งขนาด
+                      ย้อนกลับ
                     </button>
                   </div>
                 </div>
@@ -4149,31 +4149,6 @@ export default function FranchisePlanner() {
               </div>
             </div>
           </div>
-
-          {/* Bottom Step Navigation Bar - Placed cleanly at the bottom */}
-          <div className="planner-bottom-nav-bar glass-panel">
-            <div className="bottom-nav-left-info">
-              <Info size={16} className="text-blue" style={{ flexShrink: 0 }} />
-              <span className="bottom-nav-info-text">
-                <strong>สรุปผัง:</strong> {roomWidth}x{roomHeight} ม. ({roomAreaSqM} ตร.ม.) • วาง <strong>{totalStations} เครื่อง</strong> • งบประมาณ <strong>฿{totalInvestmentCost.toLocaleString()}</strong>
-              </span>
-            </div>
-            <div className="bottom-nav-right-actions">
-              <button onClick={() => handleStepChange(1)} className="btn-secondary">
-                <span className="hide-mobile">ย้อนกลับไปตั้งขนาด</span>
-                <span className="show-mobile">ย้อนกลับ</span>
-              </button>
-              <button 
-                id="btn-step2-to-step3"
-                onClick={() => handleStepChange(3)} 
-                className="btn-primary"
-              >
-                <span className="hide-mobile">เลือกสเปกคอมพิวเตอร์ ({totalStations} เครื่อง)</span>
-                <span className="show-mobile">เลือกสเปก ({totalStations} เครื่อง)</span>
-                <ArrowRight size={16} />
-              </button>
-            </div>
-          </div>
         </section>
       )}
 
@@ -4316,7 +4291,7 @@ export default function FranchisePlanner() {
                 onClick={() => handleStepChange(4)} 
                 className="btn-primary"
               >
-                <span>สรุปรายการ</span>
+                <span>ถัดไป: สรุปงบ</span>
                 <ArrowRight size={16} />
               </button>
             </div>
@@ -4547,11 +4522,11 @@ export default function FranchisePlanner() {
           <div className="step4-action-toolbar glass-panel">
             <button 
               type="button"
-              onClick={() => handleStepChange(2)} 
+              onClick={() => handleStepChange(3)} 
               className="step4-btn-back"
             >
               <ArrowLeft size={15} />
-              <span>กลับไปแก้ไขผังร้าน 2D</span>
+              <span>ย้อนกลับ</span>
             </button>
 
             <div className="step4-action-group">
@@ -4562,7 +4537,7 @@ export default function FranchisePlanner() {
                 title="ดาวน์โหลดภาพแปลนสำหรับช่างและผู้รับเหมา (PNG)"
               >
                 <Download size={15} />
-                <span>ส่งออกแปลนช่าง (PNG)</span>
+                <span>แปลนช่าง (PNG)</span>
               </button>
               <button 
                 type="button"
@@ -4571,13 +4546,115 @@ export default function FranchisePlanner() {
                 className="step4-btn-submit"
               >
                 <FileText size={15} />
-                <span>พิมพ์ใบเสนอราคา & ส่งให้ทีมงานติดต่อกลับ</span>
+                <span>ขอใบเสนอราคา</span>
                 <ArrowRight size={15} />
               </button>
             </div>
           </div>
         </section>
       )}
+
+      {/* UNIVERSAL STICKY BOTTOM NAVIGATION BAR (UNIFIED ACROSS ALL STEPS 1-4) */}
+      <div className="planner-bottom-nav-bar glass-panel" id="planner-sticky-bottom-bar">
+        <div className="bottom-nav-left-info">
+          <Info size={16} className="text-blue flex-shrink-0 hide-mobile" />
+          <span className="bottom-nav-info-text">
+            {currentStep === 1 && (
+              <>
+                <strong>ขนาดร้าน:</strong> {roomWidth}x{roomHeight} ม. ({roomAreaSqM} ตร.ม.) • แนะนำ ~{blueprintFeasibility?.recommendedStations || Math.round(roomAreaSqM / 2.5)} เครื่อง
+              </>
+            )}
+            {currentStep === 2 && (
+              <>
+                <strong>ผังร้าน:</strong> {totalStations} เครื่อง • {roomAreaSqM} ตร.ม. • ฿{totalInvestmentCost.toLocaleString()}
+              </>
+            )}
+            {currentStep === 3 && (
+              <>
+                <strong>สเปก:</strong> {currentTierInfo.name} • {totalStations} เครื่อง • ฿{totalInvestmentCost.toLocaleString()}
+              </>
+            )}
+            {currentStep === 4 && (
+              <>
+                <strong>งบรวม:</strong> ฿{totalInvestmentCost.toLocaleString()} • คืนทุน ~{paybackMonths} ด.
+              </>
+            )}
+          </span>
+        </div>
+
+        <div className="bottom-nav-right-actions">
+          {currentStep > 1 && (
+            <button 
+              type="button"
+              onClick={() => handleStepChange(currentStep - 1)} 
+              className="btn-secondary btn-nav-back"
+            >
+              <ArrowLeft size={16} />
+              <span>ย้อนกลับ</span>
+            </button>
+          )}
+
+          {currentStep === 1 && (
+            <button 
+              type="button" 
+              id="btn-sticky-step1-to-step2"
+              onClick={() => handleStepChange(2)} 
+              className="btn-primary btn-nav-next"
+            >
+              <span>ถัดไป: จัดผังร้าน</span>
+              <ArrowRight size={16} />
+            </button>
+          )}
+
+          {currentStep === 2 && (
+            <button 
+              type="button" 
+              id="btn-sticky-step2-to-step3"
+              onClick={() => handleStepChange(3)} 
+              className="btn-primary btn-nav-next"
+            >
+              <span>ถัดไป: เลือกสเปก</span>
+              <ArrowRight size={16} />
+            </button>
+          )}
+
+          {currentStep === 3 && (
+            <button 
+              type="button" 
+              id="btn-sticky-step3-to-step4"
+              onClick={() => handleStepChange(4)} 
+              className="btn-primary btn-nav-next"
+            >
+              <span>ถัดไป: สรุปงบ</span>
+              <ArrowRight size={16} />
+            </button>
+          )}
+
+          {currentStep === 4 && (
+            <>
+              <button 
+                type="button"
+                onClick={handleExportBlueprintImage} 
+                className="btn-secondary btn-export-quick hide-mobile"
+                title="ส่งออกแปลนสำหรับช่าง (PNG)"
+              >
+                <Download size={15} />
+                <span>แปลนช่าง (PNG)</span>
+              </button>
+              <button 
+                type="button"
+                id="btn-sticky-final-lead-cta"
+                onClick={() => setShowQuotationModal(true)} 
+                className="btn-primary btn-nav-next"
+              >
+                <FileText size={15} />
+                <span>ขอใบเสนอราคา</span>
+                <ArrowRight size={16} />
+              </button>
+            </>
+          )}
+        </div>
+      </div>
 
       {/* MODAL: QUOTATION & PRINT PREVIEW & LEAD GENERATION */}
       {showQuotationModal && (
@@ -4613,7 +4690,7 @@ export default function FranchisePlanner() {
                     title="สั่งพิมพ์ใบเสนอราคา หรือบันทึกเป็น PDF (Print to PDF)"
                   >
                     <Printer size={16} />
-                    <span>พิมพ์ใบเสนอราคา (Print)</span>
+                    <span>พิมพ์ใบเสนอราคา</span>
                   </button>
                   <button 
                     type="button" 
@@ -4623,7 +4700,7 @@ export default function FranchisePlanner() {
                     title="ส่งออกภาพแปลนสถาปัตยกรรมและระบบไฟฟ้าสำหรับช่าง (PNG 2400x1600)"
                   >
                     <Download size={16} />
-                    <span>ส่งออกแปลนสำหรับช่าง (PNG)</span>
+                    <span>ส่งออกแปลน (PNG)</span>
                   </button>
                 </div>
 
@@ -4960,43 +5037,45 @@ export default function FranchisePlanner() {
                     />
                   </div>
 
-                  <div className="modal-footer">
-                    <button 
-                      type="button" 
-                      className="btn-secondary" 
-                      onClick={handleExportBlueprintImage}
-                      title="ดาวน์โหลดภาพแปลนสถาปัตยกรรมสำหรับช่าง (PNG)"
-                    >
-                      <Download size={16} />
-                      <span>ดาวน์โหลดแปลนช่าง (PNG)</span>
-                    </button>
-                    <button 
-                      type="button" 
-                      className="btn-secondary" 
-                      onClick={() => window.print()}
-                      title="พิมพ์ใบเสนอราคา (Print หรือ Save PDF)"
-                    >
-                      <Printer size={16} />
-                      <span>พิมพ์ใบเสนอราคา (Print)</span>
-                    </button>
+                  <div className="lead-form-modal-footer">
                     <button 
                       type="submit" 
-                      className="btn-primary" 
+                      className="btn-lead-submit btn-primary" 
                       disabled={isSubmittingLead}
                       style={isSubmittingLead ? { opacity: 0.75, cursor: 'not-allowed', pointerEvents: 'none' } : {}}
                     >
                       {isSubmittingLead ? (
                         <>
                           <RefreshCw size={16} className="spin-icon" />
-                          <span>กำลังส่งข้อมูลและแปลนร้าน...</span>
+                          <span>กำลังส่งข้อมูล...</span>
                         </>
                       ) : (
                         <>
                           <Send size={16} />
-                          <span>ส่งแปลนและขอคำปรึกษาฟรี</span>
+                          <span>ส่งแปลนขอคำปรึกษา</span>
                         </>
                       )}
                     </button>
+                    <div className="lead-form-secondary-actions">
+                      <button 
+                        type="button" 
+                        className="btn-secondary" 
+                        onClick={handleExportBlueprintImage}
+                        title="ดาวน์โหลดแปลนสำหรับช่าง (PNG)"
+                      >
+                        <Download size={15} />
+                        <span>ดาวน์โหลดแปลน (PNG)</span>
+                      </button>
+                      <button 
+                        type="button" 
+                        className="btn-secondary" 
+                        onClick={() => window.print()}
+                        title="พิมพ์ใบเสนอราคา (Print หรือ Save PDF)"
+                      >
+                        <Printer size={15} />
+                        <span>พิมพ์ใบเสนอราคา</span>
+                      </button>
+                    </div>
                   </div>
                 </form>
               </div>
@@ -5369,39 +5448,41 @@ export default function FranchisePlanner() {
               <div className="bp-modal-btns">
                 <button 
                   type="button"
-                  className="btn-secondary"
-                  style={{ 
-                    background: isBlueprintZoomed ? '#2563eb' : '#eff6ff', 
-                    color: isBlueprintZoomed ? '#ffffff' : '#1d4ed8', 
-                    borderColor: '#2563eb', 
-                    fontWeight: 700 
-                  }}
-                  onClick={() => setIsBlueprintZoomed(prev => !prev)}
-                >
-                  <ZoomIn size={16} />
-                  <span>{isBlueprintZoomed ? 'ย่อมุมมองรวม' : '🔍 ขยายดูอุปกรณ์ 100%'}</span>
-                </button>
-                <button 
-                  type="button"
-                  className="btn-secondary" 
-                  onClick={() => {
-                    const win = window.open();
-                    if (win) {
-                      win.document.write(`<!DOCTYPE html><html><head><title>${exportedBlueprintModal.filename}</title><style>body{margin:0;background:#0f172a;display:flex;align-items:center;justify-content:center;min-height:100vh;}img{max-width:98%;max-height:98vh;border-radius:6px;box-shadow:0 10px 40px rgba(0,0,0,0.5);}</style></head><body><img src="${exportedBlueprintModal.dataUrl}" alt="Blueprint" /></body></html>`);
-                    }
-                  }}
-                >
-                  <Eye size={16} />
-                  <span>เปิดภาพในแท็บใหม่</span>
-                </button>
-                <button 
-                  type="button"
-                  className="btn-primary" 
+                  className="btn-primary bp-btn-save" 
                   onClick={() => downloadFile(exportedBlueprintModal.dataUrl, exportedBlueprintModal.filename, 'image/png')}
                 >
                   <Download size={16} />
-                  <span>บันทึกไฟล์ (Save PNG)</span>
+                  <span>บันทึกไฟล์ (PNG)</span>
                 </button>
+                <div className="bp-modal-sub-btns">
+                  <button 
+                    type="button"
+                    className="btn-secondary"
+                    style={{ 
+                      background: isBlueprintZoomed ? '#2563eb' : '#eff6ff', 
+                      color: isBlueprintZoomed ? '#ffffff' : '#1d4ed8', 
+                      borderColor: '#2563eb', 
+                      fontWeight: 700 
+                    }}
+                    onClick={() => setIsBlueprintZoomed(prev => !prev)}
+                  >
+                    <ZoomIn size={15} />
+                    <span>{isBlueprintZoomed ? 'ย่อมุมมอง' : 'ซูม 100%'}</span>
+                  </button>
+                  <button 
+                    type="button"
+                    className="btn-secondary" 
+                    onClick={() => {
+                      const win = window.open();
+                      if (win) {
+                        win.document.write(`<!DOCTYPE html><html><head><title>${exportedBlueprintModal.filename}</title><style>body{margin:0;background:#0f172a;display:flex;align-items:center;justify-content:center;min-height:100vh;}img{max-width:98%;max-height:98vh;border-radius:6px;box-shadow:0 10px 40px rgba(0,0,0,0.5);}</style></head><body><img src="${exportedBlueprintModal.dataUrl}" alt="Blueprint" /></body></html>`);
+                      }
+                    }}
+                  >
+                    <Eye size={15} />
+                    <span>เปิดแท็บใหม่</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
