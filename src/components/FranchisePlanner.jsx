@@ -2144,7 +2144,7 @@ export default function FranchisePlanner() {
                   onClick={() => setSetupMethod('preset')}
                 >
                   <LayoutGrid size={16} />
-                  <span>เลือกโมเดลสำเร็จรูป / กำหนดเอง</span>
+                  <span>กำหนดค่า</span>
                   <span className="badge-preset-default">ค่าเริ่มต้น</span>
                 </button>
                 <button 
@@ -2154,7 +2154,7 @@ export default function FranchisePlanner() {
                   onClick={() => setSetupMethod('blueprint')}
                 >
                   <UploadCloud size={16} />
-                  <span>อัปโหลดแปลนอาคาร & คำนวณผัง</span>
+                  <span>อัปโหลดแปลนอาคาร</span>
                   <span className="badge-optional-choice">ตัวเลือกเสริม AI</span>
                 </button>
               </div>
@@ -4270,14 +4270,14 @@ export default function FranchisePlanner() {
 
             <div className="step3-nav-actions">
               <button onClick={() => handleStepChange(2)} className="btn-secondary">
-                ย้อนกลับไปจัดผังร้าน
+                ย้อนกลับ
               </button>
               <button 
                 id="btn-step3-to-step4"
                 onClick={() => handleStepChange(4)} 
                 className="btn-primary"
               >
-                <span>ดูสรุปงบประมาณและระยะเวลาคืนทุน (ROI)</span>
+                <span>สรุปรายการ</span>
                 <ArrowRight size={16} />
               </button>
             </div>

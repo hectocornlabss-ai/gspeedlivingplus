@@ -199,16 +199,25 @@ export default function Footer({ setActiveTab, onNavigate }) {
           <div className="footer-legal-links">
             <button 
               onClick={() => handleLink('/contact')}
-              style={{ background: 'none', border: 'none', color: 'inherit', font: 'inherit', cursor: 'pointer', padding: 0 }}
+              className="footer-legal-item"
             >
               ติดต่อเรา
             </button>
-            <span>•</span>
-            <a href="#terms">เงื่อนไขการใช้บริการ</a>
-            <span>•</span>
-            <a href="#privacy">นโยบายความเป็นส่วนตัว</a>
-            <span>•</span>
-            <a href="#franchise-terms">ข้อกำหนดการลงทุนแฟรนไชส์</a>
+            <span className="footer-legal-sep">•</span>
+            <a href="#terms" className="footer-legal-item">
+              <span className="hide-mobile">เงื่อนไขการใช้บริการ</span>
+              <span className="show-mobile">เงื่อนไขบริการ</span>
+            </a>
+            <span className="footer-legal-sep">•</span>
+            <a href="#privacy" className="footer-legal-item">
+              <span className="hide-mobile">นโยบายความเป็นส่วนตัว</span>
+              <span className="show-mobile">นโยบายส่วนตัว</span>
+            </a>
+            <span className="footer-legal-sep">•</span>
+            <a href="#franchise-terms" className="footer-legal-item">
+              <span className="hide-mobile">ข้อกำหนดการลงทุนแฟรนไชส์</span>
+              <span className="show-mobile">ข้อกำหนดแฟรนไชส์</span>
+            </a>
           </div>
         </div>
       </div>

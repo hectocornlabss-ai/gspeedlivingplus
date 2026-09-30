@@ -381,6 +381,26 @@ export default function AIChatWidget() {
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
+  const widgetRef = useRef(null);
+
+  // Auto collapse / minimize when clicking outside the widget
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleClickOutside = (event) => {
+      if (widgetRef.current && !widgetRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [isOpen]);
 
   // Auto scroll to bottom
   useEffect(() => {
@@ -693,7 +713,7 @@ ${contextText}
   };
 
   return (
-    <div className="ai-chat-widget-container">
+    <div ref={widgetRef} className="ai-chat-widget-container">
       {/* Floating Trigger Button */}
       {!isOpen && (
         <button 
