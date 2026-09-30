@@ -4,7 +4,7 @@ import {
   Users, Camera, Zap, Clock, Shield, CheckCircle2, 
   ArrowRight, ChevronLeft, ChevronRight, Home,
   GitBranch, ExternalLink, Radio, Search, Share2, 
-  AlertCircle, MessageCircle, Sparkles
+  AlertCircle, MessageCircle, Sparkles, PhoneCall, Layers
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 import { generateDefaultBracket } from '../data/mockData';
@@ -983,6 +983,50 @@ export default function SingleTournamentView({
           </div>
         )}
 
+        {/* ORGANIZER & PUBLISHER CALLOUT */}
+        <section className="tournaments-organizer-callout" style={{ marginTop: '40px' }}>
+          <div className="tournaments-organizer-box glass-panel">
+            <div className="organizer-left">
+              <div className="badge-pill badge-blue">
+                <Layers size={14} />
+                <span>FOR TOURNAMENT ORGANIZERS & PUBLISHERS</span>
+              </div>
+              <h3 className="organizer-title">
+                ต้องการจัดแข่งทัวร์นาเมนต์ หรือเช่าเวทีแข่งขันอีสปอร์ตที่ GLP?
+              </h3>
+              <p className="organizer-desc">
+                GLP Esport Stadium พร้อมสนับสนุนค่ายเกม แบรนด์สปอนเซอร์ และออร์แกไนเซอร์ ด้วยเวทีแข่งขัน 5v5 มาตรฐานสากล, ระบบสตรีมมิ่ง 4K, ห้องพากย์แคสเตอร์เก็บเสียง, ระบบเซิร์ฟเวอร์ LAN 128-Tick และทีมงานเทคนิคอีสปอร์ตมืออาชีพ
+              </p>
+              <div className="organizer-specs-chips">
+                <span className="spec-chip">✓ เวทีแข่งขัน 5v5 Main Stage</span>
+                <span className="spec-chip">✓ เครื่องแข่ง i9 + RTX 4080 จอ 360Hz</span>
+                <span className="spec-chip">✓ ระบบถ่ายทอดสด 4K Streaming Rig</span>
+                <span className="spec-chip">✓ ห้องนักพากย์ Caster Studio</span>
+              </div>
+            </div>
+
+            <div className="organizer-right">
+              <div className="organizer-contact-card">
+                <div className="contact-card-title">ติดต่อฝ่ายบริหารงานแข่งขัน</div>
+                <div className="contact-hotline">
+                  <PhoneCall size={18} className="text-blue pulse-icon" />
+                  <a href="tel:0637937704">063-793-7704</a>
+                </div>
+                <p className="contact-subtext">เปิดบริการให้คำปรึกษาและจองคิวจัดงานทุกวัน</p>
+                {onNavigateFranchise && (
+                  <button 
+                    type="button" 
+                    className="btn-organizer-plan"
+                    onClick={onNavigateFranchise}
+                  >
+                    <span>ติดต่อขอเปิดแฟรนไชส์</span>
+                    <ArrowRight size={14} />
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
 
       {/* Lightbox Modal for Gallery */}

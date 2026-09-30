@@ -10,6 +10,7 @@ import { GALLERY_ACTIVITIES, EVENT_CATEGORIES, GAME_NEWS } from '../data/mockDat
 export default function ActivitiesPage({
   onSelectActivitySlug,
   onNavigateHome,
+  onNavigateFranchise,
   initialCategory = 'all',
   initialTag = 'all'
 }) {
@@ -269,6 +270,16 @@ export default function ActivitiesPage({
                   <a href="tel:0637937704">063-793-7704</a>
                 </div>
                 <p className="contact-subtext">ยินดีต้อนรับค่ายเกม แบรนด์เกมมิ่งเกียร์ และคอมมูนิตี้ทุกกลุ่ม</p>
+                {onNavigateFranchise && (
+                  <button 
+                    type="button" 
+                    className="btn-organizer-plan"
+                    onClick={onNavigateFranchise}
+                  >
+                    <span>ติดต่อขอเปิดแฟรนไชส์</span>
+                    <ArrowRight size={14} />
+                  </button>
+                )}
               </div>
             </div>
           </div>

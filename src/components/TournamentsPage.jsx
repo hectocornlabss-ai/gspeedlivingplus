@@ -392,7 +392,7 @@ export default function TournamentsPage({
                     className="btn-organizer-plan"
                     onClick={onNavigateFranchise}
                   >
-                    <span>ดูบริการระบบสนาม & แฟรนไชส์</span>
+                    <span>ติดต่อขอเปิดแฟรนไชส์</span>
                     <ArrowRight size={14} />
                   </button>
                 )}

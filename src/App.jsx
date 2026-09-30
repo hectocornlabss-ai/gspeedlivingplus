@@ -339,6 +339,7 @@ function AppContent() {
                     navigateTo(`/activities/${slug}`);
                   }}
                   onNavigateHome={() => navigateTo('/')}
+                  onNavigateFranchise={() => navigateTo('/franchise')}
                 />
               )}
 
