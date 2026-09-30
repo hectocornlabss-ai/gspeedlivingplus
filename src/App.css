@@ -2077,14 +2077,31 @@
   box-shadow: 0 12px 36px -8px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.04);
   align-items: start;
   transition: all 0.3s ease;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 @media (max-width: 992px) {
   .zone-showcase-panel {
-    grid-template-columns: 1fr;
-    gap: 24px;
-    padding: 20px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+    padding: 18px;
     border-radius: 20px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+}
+
+@media (max-width: 640px) {
+  .zone-showcase-panel {
+    padding: 12px;
+    border-radius: 16px;
+    gap: 16px;
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06);
   }
 }
 
@@ -2094,18 +2111,31 @@
   flex-direction: column;
   gap: 12px;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .zone-slider-viewport {
   position: relative;
   width: 100%;
+  max-width: 100%;
   aspect-ratio: 16 / 9;
   border-radius: 16px;
   overflow: hidden;
-  background: #0f172a;
-  box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.15);
+  background: #090d16;
+  box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.18);
   touch-action: pan-y;
   user-select: none;
+  box-sizing: border-box;
+}
+
+@media (max-width: 640px) {
+  .zone-slider-viewport {
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  }
 }
 
 .zone-feature-img {
@@ -2114,11 +2144,11 @@
   aspect-ratio: 16 / 9;
   object-fit: cover;
   display: block;
-  animation: zoneFadeIn 0.35s ease;
+  animation: zoneFadeIn 0.3s ease;
 }
 
 @keyframes zoneFadeIn {
-  from { opacity: 0.7; transform: scale(1.02); }
+  from { opacity: 0.75; transform: scale(1.01); }
   to { opacity: 1; transform: scale(1); }
 }
 
@@ -2126,21 +2156,33 @@
   position: absolute;
   top: 14px;
   left: 14px;
-  z-index: 2;
+  z-index: 3;
+}
+
+@media (max-width: 640px) {
+  .zone-badge-overlay {
+    top: 8px;
+    left: 8px;
+  }
+  .zone-badge-overlay .badge-pill {
+    font-size: 0.68rem;
+    padding: 3px 8px;
+    letter-spacing: 0.3px;
+  }
 }
 
 .zone-counter-overlay {
   position: absolute;
   top: 14px;
   right: 14px;
-  z-index: 2;
+  z-index: 3;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  background: rgba(15, 23, 42, 0.75);
+  background: rgba(15, 23, 42, 0.78);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 9999px;
   color: #ffffff;
   font-size: 0.78rem;
@@ -2149,14 +2191,28 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
+@media (max-width: 640px) {
+  .zone-counter-overlay {
+    top: 8px;
+    right: 8px;
+    padding: 3px 8px;
+    font-size: 0.68rem;
+    gap: 4px;
+  }
+  .zone-counter-overlay svg {
+    width: 11px;
+    height: 11px;
+  }
+}
+
 .zone-slider-nav-btn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  background: rgba(15, 23, 42, 0.65);
+  background: rgba(15, 23, 42, 0.72);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.25);
   color: #ffffff;
@@ -2164,36 +2220,38 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 3;
+  z-index: 4;
   transition: all 0.2s ease;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
 }
 
 .zone-slider-nav-btn:hover {
-  background: rgba(37, 99, 235, 0.9);
-  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(37, 99, 235, 0.95);
+  border-color: rgba(255, 255, 255, 0.5);
   transform: translateY(-50%) scale(1.08);
 }
 
 .zone-slider-nav-btn:active {
-  transform: translateY(-50%) scale(0.95);
+  transform: translateY(-50%) scale(0.94);
 }
 
 .zone-slider-nav-btn.prev {
-  left: 14px;
+  left: 12px;
 }
 
 .zone-slider-nav-btn.next {
-  right: 14px;
+  right: 12px;
 }
 
 @media (max-width: 768px) {
   .zone-slider-nav-btn {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
+    background: rgba(15, 23, 42, 0.85);
   }
-  .zone-slider-nav-btn.prev { left: 8px; }
-  .zone-slider-nav-btn.next { right: 8px; }
+  .zone-slider-nav-btn.prev { left: 6px; }
+  .zone-slider-nav-btn.next { right: 6px; }
+  .zone-slider-nav-btn svg { width: 16px; height: 16px; }
 }
 
 .zone-caption-scrim {
@@ -2201,24 +2259,30 @@
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 32px 18px 12px;
-  background: linear-gradient(to top, rgba(15, 23, 42, 0.88) 0%, rgba(15, 23, 42, 0.5) 60%, transparent 100%);
+  padding: 30px 16px 10px;
+  background: linear-gradient(to top, rgba(15, 23, 42, 0.92) 0%, rgba(15, 23, 42, 0.5) 65%, transparent 100%);
   z-index: 2;
   pointer-events: none;
 }
 
 .zone-caption-text {
   color: #f1f5f9;
-  font-size: 0.88rem;
-  line-height: 1.4;
+  font-size: 0.85rem;
+  line-height: 1.35;
   margin: 0;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 640px) {
+  .zone-caption-scrim {
+    padding: 20px 10px 6px;
+  }
   .zone-caption-text {
-    font-size: 0.8rem;
+    font-size: 0.72rem;
   }
 }
 
@@ -2226,12 +2290,17 @@
 .zone-thumbnails-strip {
   display: flex;
   gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   overflow-x: auto;
-  padding: 6px 2px 8px;
+  padding: 4px 2px 8px;
   scrollbar-width: thin;
   scrollbar-color: #94a3b8 #f1f5f9;
   -webkit-overflow-scrolling: touch;
   border-radius: 10px;
+  scroll-snap-type: x mandatory;
 }
 
 .zone-thumbnails-strip::-webkit-scrollbar {
@@ -2259,8 +2328,10 @@
   padding: 0;
   background: #0f172a;
   cursor: pointer;
-  opacity: 0.6;
+  opacity: 0.55;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  scroll-snap-align: center;
+  flex-shrink: 0;
 }
 
 .zone-thumb-btn:hover {
@@ -2285,45 +2356,60 @@
 .zone-thumb-num {
   position: absolute;
   bottom: 2px;
-  right: 3px;
+  right: 2px;
+  background: rgba(15, 23, 42, 0.8);
+  color: #ffffff;
   font-size: 0.65rem;
   font-weight: 700;
-  color: #ffffff;
-  background: rgba(0, 0, 0, 0.65);
-  border-radius: 3px;
-  padding: 1px 3px;
+  padding: 1px 4px;
+  border-radius: 4px;
   line-height: 1;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 640px) {
+  .zone-thumbnails-strip {
+    gap: 6px;
+    padding: 2px 2px 6px;
+  }
   .zone-thumb-btn {
-    flex: 0 0 56px;
-    height: 32px;
+    flex: 0 0 54px;
+    height: 30px;
+    border-radius: 6px;
+  }
+  .zone-thumb-num {
+    font-size: 0.6rem;
+    padding: 1px 3px;
   }
 }
 
-/* Zone Information Details */
+/* Zone Info Wrapper */
 .zone-info-wrapper {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .zone-sub {
   color: #2563eb;
+  font-size: 0.9rem;
   font-weight: 700;
-  font-size: 0.92rem;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 8px;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
 }
 
 .zone-heading {
+  color: #0f172a;
   font-size: 1.85rem;
   font-weight: 800;
-  line-height: 1.25;
   margin-bottom: 12px;
-  color: #0f172a;
+  letter-spacing: -0.5px;
+  line-height: 1.25;
+  word-break: break-word;
 }
 
 .zone-desc {
@@ -2339,6 +2425,8 @@
   border-radius: 14px;
   padding: 16px 20px;
   margin-bottom: 24px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .specs-title {
@@ -2363,7 +2451,11 @@
     gap: 8px;
   }
   .zone-heading {
-    font-size: 1.5rem;
+    font-size: 1.45rem;
+  }
+  .zone-desc {
+    font-size: 0.9rem;
+    line-height: 1.55;
   }
 }
 
@@ -2376,50 +2468,51 @@
   font-weight: 500;
 }
 
-/* Zone Facebook Contact CTA */
+/* Zone Action Bar & Modal Request CTA */
 .zone-action-bar {
   margin-top: 4px;
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+  width: 100%;
 }
 
-.btn-zone-contact-facebook {
+.btn-zone-request-modal {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
   padding: 14px 28px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #1877f2 0%, #166fe5 100%);
+  background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
   color: #ffffff !important;
   font-weight: 700;
   font-size: 1rem;
-  text-decoration: none !important;
-  box-shadow: 0 6px 20px rgba(24, 119, 242, 0.35);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
   cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
 }
 
-.btn-zone-contact-facebook:hover {
-  background: linear-gradient(135deg, #166fe5 0%, #0d5cbf 100%);
+.btn-zone-request-modal:hover {
+  background: linear-gradient(135deg, #0369a1 0%, #1d4ed8 100%);
   transform: translateY(-2px);
-  box-shadow: 0 10px 28px rgba(24, 119, 242, 0.45);
+  box-shadow: 0 10px 28px rgba(37, 99, 235, 0.45);
   color: #ffffff !important;
 }
 
-.btn-zone-contact-facebook:active {
+.btn-zone-request-modal:active {
   transform: translateY(0);
-  box-shadow: 0 4px 12px rgba(24, 119, 242, 0.3);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
-.btn-zone-contact-facebook svg {
+.btn-zone-request-modal svg {
   flex-shrink: 0;
 }
 
 @media (max-width: 640px) {
-  .btn-zone-contact-facebook {
+  .btn-zone-request-modal {
     width: 100%;
     padding: 13px 20px;
     font-size: 0.95rem;
@@ -25897,4 +25990,580 @@
   padding: 5px 12px;
   border-radius: 6px;
   border: 1px solid #e2e8f0;
+}
+
+/* ==========================================================================
+   ESPORT TOURNAMENT ORGANIZER MODAL (ป็อปอัพขอจัดงานแข่งและเช่าสถานที่)
+   ========================================================================== */
+.esport-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  background: rgba(10, 15, 29, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow-y: auto;
+  animation: esportFadeIn 0.25s ease-out;
+}
+
+@keyframes esportFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.esport-modal-dialog {
+  width: 100%;
+  max-width: 760px;
+  background: #ffffff;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 25px 65px -12px rgba(0, 0, 0, 0.45), 0 0 40px rgba(37, 99, 235, 0.12);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  margin: auto;
+  max-height: 94vh;
+  display: flex;
+  flex-direction: column;
+  animation: esportPopIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+@keyframes esportPopIn {
+  from { transform: scale(0.95) translateY(12px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* Modal Header */
+.esport-modal-header {
+  position: relative;
+  background: linear-gradient(135deg, #090d16 0%, #0f172a 60%, #1e3a8a 100%);
+  color: #ffffff;
+  padding: 26px 30px 22px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.esport-modal-close-btn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 5;
+}
+
+.esport-modal-close-btn:hover {
+  background: rgba(239, 68, 68, 0.85);
+  border-color: rgba(239, 68, 68, 1);
+  transform: rotate(90deg);
+}
+
+.esport-modal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  background: rgba(37, 99, 235, 0.28);
+  border: 1px solid rgba(147, 197, 253, 0.4);
+  color: #93c5fd;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+
+.esport-modal-title {
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 6px 0;
+  line-height: 1.3;
+}
+
+.esport-modal-subtitle {
+  color: #94a3b8;
+  font-size: 0.9rem;
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+/* Feature Highlights Bar */
+.esport-modal-chips-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.esport-feature-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  color: #e2e8f0;
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.esport-feature-chip svg {
+  color: #60a5fa;
+}
+
+/* Modal Body */
+.esport-modal-body {
+  padding: 24px 30px 28px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Section Groupings */
+.esport-form-section {
+  margin-bottom: 24px;
+}
+
+.esport-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.esport-section-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 0.82rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #bfdbfe;
+}
+
+.esport-section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+/* Game Selection Grid */
+.esport-game-chips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.esport-game-chip-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left;
+}
+
+.esport-game-chip-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+.esport-game-chip-btn.active {
+  background: #eff6ff;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.esport-chip-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+.esport-game-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.esport-game-chip-btn.active .esport-game-name {
+  color: #1d4ed8;
+}
+
+.esport-game-genre {
+  font-size: 0.72rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Format / Zone Selection Cards */
+.esport-format-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.esport-format-card-btn {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left;
+}
+
+.esport-format-card-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+.esport-format-card-btn.active {
+  background: #ffffff;
+  border-color: #2563eb;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.16);
+}
+
+.esport-format-icon-box {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2563eb;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.esport-format-card-btn.active .esport-format-icon-box {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+.esport-format-card-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 2px;
+}
+
+.esport-format-card-desc {
+  font-size: 0.78rem;
+  color: #64748b;
+  line-height: 1.35;
+}
+
+/* Modern Input Groups with Icons */
+.esport-inputs-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.esport-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.esport-field-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.esport-required-mark {
+  color: #ef4444;
+}
+
+.esport-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.esport-input-icon {
+  position: absolute;
+  left: 14px;
+  color: #94a3b8;
+  pointer-events: none;
+  transition: color 0.2s ease;
+}
+
+.esport-text-input {
+  width: 100%;
+  padding: 11px 14px 11px 40px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  color: #0f172a;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.esport-text-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.esport-text-input:focus + .esport-input-icon,
+.esport-input-wrapper:focus-within .esport-input-icon {
+  color: #2563eb;
+}
+
+.esport-textarea {
+  width: 100%;
+  padding: 12px 14px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  color: #0f172a;
+  transition: all 0.2s ease;
+  outline: none;
+  resize: vertical;
+  min-height: 75px;
+  font-family: inherit;
+}
+
+.esport-textarea:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* Quick Addon Checklist Chips */
+.esport-addons-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.esport-addon-chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.esport-addon-chip-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.esport-addon-chip-btn.active {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
+/* Submit Actions */
+.esport-submit-bar {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.esport-btn-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 28px;
+  background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 1.05rem;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.esport-btn-submit:hover {
+  background: linear-gradient(135deg, #0369a1 0%, #1d4ed8 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(37, 99, 235, 0.45);
+}
+
+.esport-btn-submit:active {
+  transform: translateY(0);
+}
+
+.esport-fast-help-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.esport-fast-contact-links {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.esport-fast-phone-link {
+  color: #0f172a;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.esport-fast-phone-link:hover {
+  color: #2563eb;
+}
+
+.esport-fast-line-link {
+  color: #06c755;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.esport-fast-line-link:hover {
+  text-decoration: underline;
+}
+
+/* Success Card */
+.esport-success-card {
+  text-align: center;
+  padding: 24px 12px;
+}
+
+.esport-success-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #dcfce7;
+  color: #16a34a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+  box-shadow: 0 8px 24px rgba(22, 163, 74, 0.2);
+}
+
+.esport-summary-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 18px;
+  max-width: 500px;
+  margin: 20px auto 24px;
+  text-align: left;
+}
+
+.esport-summary-line {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 0.88rem;
+  border-bottom: 1px dashed #e2e8f0;
+}
+
+.esport-summary-line:last-child {
+  border-bottom: none;
+}
+
+.esport-summary-label {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.esport-summary-value {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .esport-modal-dialog {
+    max-height: 96vh;
+    border-radius: 18px;
+  }
+  .esport-modal-header {
+    padding: 20px 20px 16px;
+  }
+  .esport-modal-title {
+    font-size: 1.25rem;
+  }
+  .esport-modal-body {
+    padding: 18px 18px 22px;
+  }
+  .esport-format-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .esport-inputs-grid-2 {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .esport-game-chips-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .esport-fast-help-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }

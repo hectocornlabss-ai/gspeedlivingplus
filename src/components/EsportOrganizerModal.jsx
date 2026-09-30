@@ -1,9 +1,56 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, Trophy, Phone, MessageCircle, Calendar, Users, 
-  Send, CheckCircle2, Monitor, Radio, ArrowRight, ExternalLink, Sparkles 
+  Send, CheckCircle2, Monitor, Radio, ArrowRight, ExternalLink, Sparkles,
+  User, Building2, Layers, Check, Tv, Zap, Shield, FileText
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
+
+const POPULAR_GAMES = [
+  { id: 'VALORANT', name: 'VALORANT', genre: '5v5 Tactical FPS' },
+  { id: 'Arena of Valor (RoV)', name: 'RoV', genre: '5v5 Mobile MOBA' },
+  { id: 'Counter-Strike 2', name: 'CS2', genre: 'Tactical Shooter' },
+  { id: 'PUBG PC', name: 'PUBG PC/Mobile', genre: 'Battle Royale' },
+  { id: 'EA Sports FC Online', name: 'EA FC Online', genre: 'Football' },
+  { id: 'Apex Legends', name: 'Apex Legends', genre: 'Hero Shooter' },
+  { id: 'other', name: 'เกมอื่นๆ', genre: 'ระบุชื่อเกมเอง' }
+];
+
+const VENUE_FORMATS = [
+  {
+    id: 'Main Stage 5v5 + Battleground Zone',
+    title: 'Main Stage 5v5 + Battleground',
+    desc: 'เวทีแข่งขันใหญ่พร้อมจอ LED 4K + ลานแข่งมาตรฐาน (จุ 100-200 คน)',
+    icon: Trophy
+  },
+  {
+    id: 'เหมาพื้นที่จัดแข่ง 50 เครื่อง',
+    title: 'โซนเครื่องแข่งขัน 50 เครื่อง',
+    desc: 'เครื่องสเปก RTX 4070 SUPER 240Hz เหมาะกับรอบคัดเลือก LAN',
+    icon: Monitor
+  },
+  {
+    id: 'เหมาอารีน่าทั้งร้าน 100+ เครื่อง',
+    title: 'เหมาทั้งอารีน่า 100+ เครื่อง',
+    desc: 'Full Arena Takeover ปิดศูนย์จัดแข่งกิจกรรม สัมมนา และแฟนมีต',
+    icon: Layers
+  },
+  {
+    id: 'Live Streaming & Caster Desk',
+    title: 'สตูดิโอ VIP & โต๊ะพากย์แคสเตอร์',
+    desc: 'ห้องเก็บเสียงระดับบรอดแคสต์ พร้อมไฟ Key Light และกล้อง 4K',
+    icon: Radio
+  }
+];
+
+const QUICK_ADDONS = [
+  'จอ LED Wall 4K ถ่ายทอดสด',
+  'โต๊ะแคสเตอร์พากย์สดสตูดิโอ',
+  'อาหารและเครื่องดื่ม Cyber Cafe',
+  'เน็ตเวิร์ก 10Gbps Latency ต่ำพิเศษ',
+  'กรรมการ & ทีมงานดูแลระบบ 24 ชม.',
+  'นัดเข้าชมสถานที่จริงก่อน'
+];
 
 export default function EsportOrganizerModal({ 
   isOpen, 
@@ -12,6 +59,7 @@ export default function EsportOrganizerModal({
 }) {
   const { siteData, addLead } = useSiteData();
   const [submitted, setSubmitted] = useState(false);
+  const [selectedAddons, setSelectedAddons] = useState([]);
 
   const [form, setForm] = useState({
     name: '',
@@ -28,10 +76,38 @@ export default function EsportOrganizerModal({
     notes: initialZoneName ? `สนใจจัดงานแข่งขันในโซน: ${initialZoneName}` : ''
   });
 
+  useEffect(() => {
+    if (initialZoneName) {
+      setForm(prev => ({
+        ...prev,
+        notes: prev.notes ? prev.notes : `สนใจจัดงานแข่งขันในโซน: ${initialZoneName}`
+      }));
+    }
+  }, [initialZoneName]);
+
+  // Handle escape key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const lineOaUrl = siteData?.footer?.lineUrl || 'https://line.me/R/ti/p/@gspeed';
   const hotlinePhone = siteData?.footer?.phone || '063-793-7704';
+
+  const toggleAddon = (addon) => {
+    if (selectedAddons.includes(addon)) {
+      setSelectedAddons(prev => prev.filter(item => item !== addon));
+    } else {
+      setSelectedAddons(prev => [...prev, addon]);
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -41,13 +117,15 @@ export default function EsportOrganizerModal({
     }
 
     const selectedGame = form.game === 'other' ? (form.customGame || 'เกมอื่นๆ') : form.game;
+    const addonsText = selectedAddons.length > 0 ? ` | อุปกรณ์เสริม: ${selectedAddons.join(', ')}` : '';
+    const fullNotes = `${form.notes || '-'}${addonsText}`;
 
     if (addLead) {
       addLead({
         name: form.name,
         company: form.organization || 'บุคคลทั่วไป / ทีมแข่งอิสระ',
         phone: form.phone,
-        email: form.email,
+        email: form.email || form.lineId,
         lineId: form.lineId,
         type: 'tournament_venue',
         typeName: `ติดต่อขอจัดงานแข่ง Esport (${selectedGame})`,
@@ -56,7 +134,7 @@ export default function EsportOrganizerModal({
         channel: 'web_esport_modal',
         floorArea: form.format,
         expectedOpening: form.expectedDate || 'เร็วๆ นี้',
-        notes: `เกมที่ต้องการจัด: ${selectedGame} | รูปแบบ: ${form.format} | ผู้เข้าร่วม: ${form.attendees} | LINE: ${form.lineId || '-'} | บันทึกเพิ่มเติม: ${form.notes || '-'}`
+        notes: `เกมที่ต้องการจัด: ${selectedGame} | รูปแบบ: ${form.format} | ผู้เข้าร่วม: ${form.attendees} | LINE: ${form.lineId || '-'} | บันทึกเพิ่มเติม: ${fullNotes}`
       });
     }
 
@@ -65,218 +143,365 @@ export default function EsportOrganizerModal({
 
   return (
     <div 
-      className="modal-backdrop" 
+      className="esport-modal-backdrop" 
       onClick={onClose}
-      style={{ zIndex: 10050, background: 'rgba(15, 23, 42, 0.85)', backdropFilter: 'blur(8px)' }}
     >
       <div 
-        className="modal-dialog"
+        className="esport-modal-dialog"
         onClick={e => e.stopPropagation()}
-        style={{ maxWidth: '680px', width: '94vw', maxHeight: '92vh', overflowY: 'auto', borderRadius: '16px', background: '#ffffff', padding: 0 }}
       >
         {/* Modal Header */}
-        <div style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%)', color: '#ffffff', padding: '24px 28px', position: 'relative' }}>
+        <div className="esport-modal-header">
           <button 
             type="button" 
             onClick={onClose}
-            style={{ position: 'absolute', top: '18px', right: '18px', background: 'rgba(255,255,255,0.15)', border: 'none', color: '#ffffff', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+            className="esport-modal-close-btn"
+            aria-label="ปิดหน้าต่าง"
           >
             <X size={18} />
           </button>
 
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(37, 99, 235, 0.3)', border: '1px solid rgba(147, 197, 253, 0.4)', padding: '4px 10px', borderRadius: '20px', fontSize: '0.76rem', fontWeight: 800, color: '#93c5fd', marginBottom: '8px' }}>
-            <Sparkles size={12} />
+          <div className="esport-modal-badge">
+            <Sparkles size={13} />
             <span>GLP ARENA TOURNAMENT VENUE</span>
           </div>
 
-          <h3 style={{ margin: '0 0 6px 0', fontSize: '1.4rem', fontWeight: 800, color: '#ffffff' }}>
+          <h3 className="esport-modal-title">
             ติดต่อขอจัดงานแข่ง Esport & เช่าสถานที่
           </h3>
-          <p style={{ margin: 0, fontSize: '0.88rem', color: '#cbd5e1', lineHeight: 1.5 }}>
-            พื้นที่ประลองเกมมาตรฐาน Pro Circuit พร้อมเวที Main Stage, จอถ่ายทอดสด LED, สเปก RTX 40 Series 360Hz และระบบเน็ตเวิร์ก 10Gbps
+          <p className="esport-modal-subtitle">
+            พื้นที่ประลองเกมมาตรฐาน Pro Circuit พร้อมเวที Main Stage, จอถ่ายทอดสด LED Wall 4K, สเปก 360Hz และระบบเน็ตเวิร์ก 10Gbps
           </p>
+
+          {/* Highlights Chips Bar */}
+          <div className="esport-modal-chips-bar">
+            <div className="esport-feature-chip">
+              <Trophy size={13} />
+              <span>เวที 5v5 Soundproof Stage</span>
+            </div>
+            <div className="esport-feature-chip">
+              <Tv size={13} />
+              <span>จอ LED Wall 4K สตูดิโอ</span>
+            </div>
+            <div className="esport-feature-chip">
+              <Zap size={13} />
+              <span>RTX 40 Series 360Hz</span>
+            </div>
+            <div className="esport-feature-chip">
+              <Radio size={13} />
+              <span>โต๊ะแคสเตอร์พากย์สด</span>
+            </div>
+          </div>
         </div>
 
         {/* Modal Body */}
-        <div style={{ padding: '24px 28px' }}>
-          {/* Quick Contact Bar */}
-          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: '24px' }}>
-            <div>
-              <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', display: 'block' }}>
-                ช่องทางด่วนฝ่ายกิจกรรม & งานแข่ง:
-              </span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginTop: '4px', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Phone size={15} className="text-blue" />
-                  <span>{hotlinePhone}</span>
-                </span>
-                <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#16a34a', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <MessageCircle size={15} />
-                  <span>LINE: @GSPEED</span>
-                </span>
-              </div>
-            </div>
-
-            <a 
-              href={lineOaUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ background: '#06c755', color: '#ffffff', padding: '8px 16px', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-            >
-              <MessageCircle size={15} />
-              <span>ทักแชต LINE OA</span>
-              <ExternalLink size={12} />
-            </a>
-          </div>
-
+        <div className="esport-modal-body">
           {submitted ? (
-            <div style={{ textAlign: 'center', padding: '30px 10px' }}>
-              <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#dcfce7', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-                <CheckCircle2 size={36} />
+            <div className="esport-success-card">
+              <div className="esport-success-icon">
+                <CheckCircle2 size={40} />
               </div>
-              <h4 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#0f172a', margin: '0 0 8px 0' }}>
+              <h4 style={{ fontSize: '1.45rem', fontWeight: 800, color: '#0f172a', margin: '0 0 8px 0' }}>
                 ส่งข้อมูลขอจัดงานแข่งสำเร็จแล้ว!
               </h4>
-              <p style={{ color: '#475569', fontSize: '0.95rem', lineHeight: 1.6, maxWidth: '460px', margin: '0 auto 24px' }}>
-                เจ้าหน้าที่ฝ่ายจัดกิจกรรม & ประสานงานทัวร์นาเมนต์ G-Speed จะติดต่อกลับหาคุณผ่านเบอร์โทรศัพท์และ LINE เพื่อเสนอแพ็กเกจสถานที่และนัดหมายเข้าชมสนามจริงภายใน 24 ชม.
+              <p style={{ color: '#475569', fontSize: '0.95rem', lineHeight: 1.6, maxWidth: '480px', margin: '0 auto 18px' }}>
+                เจ้าหน้าที่ฝ่ายประสานงานทัวร์นาเมนต์ GLP ได้รับข้อมูลของคุณเรียบร้อยแล้ว และจะติดต่อกลับผ่านเบอร์โทรศัพท์และ LINE เพื่อเสนอแพ็กเกจสถานที่และนัดหมายเข้าชมสนามจริงภายใน 24 ชม.
               </p>
-              <button 
-                type="button" 
-                onClick={onClose}
-                className="btn-primary"
-                style={{ padding: '10px 24px' }}
-              >
-                ตกลง
-              </button>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div className="form-row-2">
-                <div className="form-group">
-                  <label>ชื่อผู้ติดต่อ / ตัวแทนผู้จัด *</label>
-                  <input 
-                    type="text" required className="form-input"
-                    placeholder="เช่น คุณกอล์ฟ หรือ ชมรมอีสปอร์ต"
-                    value={form.name}
-                    onChange={e => setForm({ ...form, name: e.target.value })}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>องค์กร / บริษัท / มหาวิทยาลัย</label>
-                  <input 
-                    type="text" className="form-input"
-                    placeholder="เช่น ม.เกษตรศาสตร์ หรือ บริษัท ABC"
-                    value={form.organization}
-                    onChange={e => setForm({ ...form, organization: e.target.value })}
-                  />
-                </div>
-              </div>
 
-              <div className="form-row-2">
-                <div className="form-group">
-                  <label>เบอร์โทรศัพท์ติดต่อ *</label>
-                  <input 
-                    type="tel" required className="form-input"
-                    placeholder="08X-XXX-XXXX"
-                    value={form.phone}
-                    onChange={e => setForm({ ...form, phone: e.target.value })}
-                  />
+              {/* Summary Box */}
+              <div className="esport-summary-box">
+                <div className="esport-summary-line">
+                  <span className="esport-summary-label">ผู้ติดต่อ:</span>
+                  <span className="esport-summary-value">{form.name} {form.organization ? `(${form.organization})` : ''}</span>
                 </div>
-                <div className="form-group">
-                  <label>LINE ID หรือ อีเมล</label>
-                  <input 
-                    type="text" className="form-input"
-                    placeholder="ID Line สำหรับส่งใบเสนอราคา"
-                    value={form.lineId}
-                    onChange={e => setForm({ ...form, lineId: e.target.value })}
-                  />
+                <div className="esport-summary-line">
+                  <span className="esport-summary-label">เบอร์โทรศัพท์:</span>
+                  <span className="esport-summary-value">{form.phone}</span>
                 </div>
-              </div>
-
-              <div className="form-row-2">
-                <div className="form-group">
-                  <label>เกมที่ต้องการจัดแข่งขัน</label>
-                  <select 
-                    className="form-input"
-                    value={form.game}
-                    onChange={e => setForm({ ...form, game: e.target.value })}
-                  >
-                    <option value="VALORANT">VALORANT (5v5 Tactical FPS)</option>
-                    <option value="Arena of Valor (RoV)">RoV (5v5 Mobile MOBA)</option>
-                    <option value="Counter-Strike 2">Counter-Strike 2 (CS2)</option>
-                    <option value="PUBG PC">PUBG PC / PUBG Mobile</option>
-                    <option value="EA Sports FC Online">EA Sports FC Online</option>
-                    <option value="Apex Legends">Apex Legends</option>
-                    <option value="other">เกมอื่นๆ (ระบุเอง)</option>
-                  </select>
+                <div className="esport-summary-line">
+                  <span className="esport-summary-label">เกมที่ต้องการจัด:</span>
+                  <span className="esport-summary-value text-blue">{form.game === 'other' ? form.customGame : form.game}</span>
                 </div>
-                {form.game === 'other' ? (
-                  <div className="form-group">
-                    <label>ระบุชื่อเกม</label>
-                    <input 
-                      type="text" className="form-input"
-                      placeholder="เช่น Audition, Zone4, Street Fighter"
-                      value={form.customGame}
-                      onChange={e => setForm({ ...form, customGame: e.target.value })}
-                    />
-                  </div>
-                ) : (
-                  <div className="form-group">
-                    <label>วันที่หรือช่วงเวลาที่ต้องการจัดแข่ง</label>
-                    <input 
-                      type="text" className="form-input"
-                      placeholder="เช่น กลางเดือนตุลาคม หรือ เสาร์-อาทิตย์"
-                      value={form.expectedDate}
-                      onChange={e => setForm({ ...form, expectedDate: e.target.value })}
-                    />
+                <div className="esport-summary-line">
+                  <span className="esport-summary-label">รูปแบบพื้นที่:</span>
+                  <span className="esport-summary-value">{form.format}</span>
+                </div>
+                {selectedAddons.length > 0 && (
+                  <div className="esport-summary-line">
+                    <span className="esport-summary-label">อุปกรณ์เสริม:</span>
+                    <span className="esport-summary-value">{selectedAddons.join(', ')}</span>
                   </div>
                 )}
               </div>
 
-              <div className="form-row-2">
-                <div className="form-group">
-                  <label>รูปแบบและโซนที่ต้องการใช้งาน</label>
-                  <select 
-                    className="form-input"
-                    value={form.format}
-                    onChange={e => setForm({ ...form, format: e.target.value })}
-                  >
-                    <option value="Main Stage 5v5 + Battleground Zone">เวที Main Stage 5v5 + Battleground Zone (ยอดนิยม)</option>
-                    <option value="เหมาพื้นที่จัดแข่ง 50 เครื่อง">เช่าพื้นที่จัดแข่ง 50 เครื่อง</option>
-                    <option value="เหมาอารีน่าทั้งร้าน 100+ เครื่อง">เช่าพื้นที่อารีน่าทั้งร้าน 100+ เครื่อง (Full Arena)</option>
-                    <option value="Live Streaming & Caster Desk">เฉพาะห้องถ่ายทอดสด & โต๊ะพากย์แคสเตอร์</option>
-                  </select>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <a 
+                  href={lineOaUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-primary"
+                  style={{ background: '#06c755', borderColor: '#06c755', display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '11px 24px' }}
+                >
+                  <MessageCircle size={16} />
+                  <span>ทักแชต LINE OA เพื่อส่งรายละเอียดเพิ่ม</span>
+                  <ExternalLink size={14} />
+                </a>
+
+                <button 
+                  type="button" 
+                  onClick={onClose}
+                  className="btn-secondary"
+                  style={{ padding: '11px 24px' }}
+                >
+                  ปิดหน้าต่าง
+                </button>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit}>
+              {/* SECTION 1: เลือกเกม & โซนพื้นที่จัดงาน */}
+              <div className="esport-form-section">
+                <div className="esport-section-header">
+                  <span className="esport-section-num">1</span>
+                  <h4 className="esport-section-title">เลือกเกมและโซนพื้นที่จัดแข่งขัน</h4>
                 </div>
 
-                <div className="form-group">
-                  <label>จำนวนทีมหรือผู้เข้าร่วมโดยประมาณ</label>
-                  <input 
-                    type="text" className="form-input"
-                    placeholder="เช่น 16 ทีม (ประมาณ 100 คน)"
-                    value={form.attendees}
-                    onChange={e => setForm({ ...form, attendees: e.target.value })}
+                {/* Popular Games Chips */}
+                <div className="esport-field-group" style={{ marginBottom: '14px' }}>
+                  <label className="esport-field-label">เกมที่ต้องการจัดการแข่งขัน:</label>
+                  <div className="esport-game-chips-grid">
+                    {POPULAR_GAMES.map(g => {
+                      const isSel = form.game === g.id;
+                      return (
+                        <button
+                          key={g.id}
+                          type="button"
+                          className={`esport-game-chip-btn ${isSel ? 'active' : ''}`}
+                          onClick={() => setForm({ ...form, game: g.id })}
+                        >
+                          <div className="esport-chip-top">
+                            <span className="esport-game-name">{g.name}</span>
+                            {isSel && <Check size={14} className="text-blue" />}
+                          </div>
+                          <span className="esport-game-genre">{g.genre}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {form.game === 'other' && (
+                    <div className="esport-input-wrapper" style={{ marginTop: '8px' }}>
+                      <input 
+                        type="text" 
+                        required
+                        className="esport-text-input"
+                        placeholder="พิมพ์ระบุชื่อเกม เช่น Audition, Zone4, Street Fighter 6..."
+                        value={form.customGame}
+                        onChange={e => setForm({ ...form, customGame: e.target.value })}
+                        style={{ paddingLeft: '14px' }}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Venue Format Cards */}
+                <div className="esport-field-group">
+                  <label className="esport-field-label">โซนและขนาดพื้นที่ที่ต้องการใช้งาน:</label>
+                  <div className="esport-format-cards-grid">
+                    {VENUE_FORMATS.map(fmt => {
+                      const IconComp = fmt.icon;
+                      const isSel = form.format === fmt.id;
+                      return (
+                        <button
+                          key={fmt.id}
+                          type="button"
+                          className={`esport-format-card-btn ${isSel ? 'active' : ''}`}
+                          onClick={() => setForm({ ...form, format: fmt.id })}
+                        >
+                          <div className="esport-format-icon-box">
+                            <IconComp size={18} />
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <div className="esport-format-card-title">{fmt.title}</div>
+                            <div className="esport-format-card-desc">{fmt.desc}</div>
+                          </div>
+                          {isSel && <Check size={16} className="text-blue" style={{ marginTop: '2px' }} />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 2: ข้อมูลผู้ติดต่อ & องค์กร */}
+              <div className="esport-form-section">
+                <div className="esport-section-header">
+                  <span className="esport-section-num">2</span>
+                  <h4 className="esport-section-title">ข้อมูลผู้ติดต่อ & องค์กร</h4>
+                </div>
+
+                <div className="esport-inputs-grid-2">
+                  <div className="esport-field-group">
+                    <label className="esport-field-label">
+                      <span>ชื่อผู้ติดต่อ / ตัวแทนผู้จัด</span>
+                      <span className="esport-required-mark">*</span>
+                    </label>
+                    <div className="esport-input-wrapper">
+                      <User size={16} className="esport-input-icon" />
+                      <input 
+                        type="text" required 
+                        className="esport-text-input"
+                        placeholder="เช่น คุณกิตติศักดิ์ มั่นคง"
+                        value={form.name}
+                        onChange={e => setForm({ ...form, name: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="esport-field-group">
+                    <label className="esport-field-label">องค์กร / บริษัท / มหาวิทยาลัย / ทีมแข่ง</label>
+                    <div className="esport-input-wrapper">
+                      <Building2 size={16} className="esport-input-icon" />
+                      <input 
+                        type="text" 
+                        className="esport-text-input"
+                        placeholder="เช่น ม.เกษตรศาสตร์ หรือ บริษัท ABC"
+                        value={form.organization}
+                        onChange={e => setForm({ ...form, organization: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="esport-inputs-grid-2">
+                  <div className="esport-field-group">
+                    <label className="esport-field-label">
+                      <span>เบอร์โทรศัพท์ติดต่อ</span>
+                      <span className="esport-required-mark">*</span>
+                    </label>
+                    <div className="esport-input-wrapper">
+                      <Phone size={16} className="esport-input-icon" />
+                      <input 
+                        type="tel" required 
+                        className="esport-text-input"
+                        placeholder="08X-XXX-XXXX"
+                        value={form.phone}
+                        onChange={e => setForm({ ...form, phone: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="esport-field-group">
+                    <label className="esport-field-label">LINE ID หรือ อีเมลสำหรับรับใบเสนอราคา</label>
+                    <div className="esport-input-wrapper">
+                      <MessageCircle size={16} className="esport-input-icon" />
+                      <input 
+                        type="text" 
+                        className="esport-text-input"
+                        placeholder="เช่น @line_id หรือ email@domain.com"
+                        value={form.lineId}
+                        onChange={e => setForm({ ...form, lineId: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 3: วันที่จัดงาน, ผู้เข้าร่วม & อุปกรณ์เสริม */}
+              <div className="esport-form-section">
+                <div className="esport-section-header">
+                  <span className="esport-section-num">3</span>
+                  <h4 className="esport-section-title">กำหนดการ & ความต้องการเพิ่มเติม</h4>
+                </div>
+
+                <div className="esport-inputs-grid-2">
+                  <div className="esport-field-group">
+                    <label className="esport-field-label">วันที่หรือช่วงเวลาที่ต้องการจัดงาน:</label>
+                    <div className="esport-input-wrapper">
+                      <Calendar size={16} className="esport-input-icon" />
+                      <input 
+                        type="text" 
+                        className="esport-text-input"
+                        placeholder="เช่น 15-16 พ.ย. หรือ เสาร์-อาทิตย์"
+                        value={form.expectedDate}
+                        onChange={e => setForm({ ...form, expectedDate: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="esport-field-group">
+                    <label className="esport-field-label">จำนวนทีม / ผู้เข้าร่วมงานโดยประมาณ:</label>
+                    <div className="esport-input-wrapper">
+                      <Users size={16} className="esport-input-icon" />
+                      <input 
+                        type="text" 
+                        className="esport-text-input"
+                        placeholder="เช่น 16 ทีม (ประมาณ 100-200 คน)"
+                        value={form.attendees}
+                        onChange={e => setForm({ ...form, attendees: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quick Addons Checklist */}
+                <div className="esport-field-group" style={{ marginBottom: '14px' }}>
+                  <label className="esport-field-label">อุปกรณ์และบริการเสริมที่ต้องการ:</label>
+                  <div className="esport-addons-row">
+                    {QUICK_ADDONS.map(addon => {
+                      const isSel = selectedAddons.includes(addon);
+                      return (
+                        <button
+                          key={addon}
+                          type="button"
+                          className={`esport-addon-chip-btn ${isSel ? 'active' : ''}`}
+                          onClick={() => toggleAddon(addon)}
+                        >
+                          {isSel ? <Check size={13} className="text-blue" /> : <span style={{ opacity: 0.5 }}>+</span>}
+                          <span>{addon}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Detailed Notes */}
+                <div className="esport-field-group">
+                  <label className="esport-field-label">บันทึกเพิ่มเติม หรือคำถามที่ต้องการให้ประเมินราคา:</label>
+                  <textarea 
+                    className="esport-textarea"
+                    placeholder="เช่น ต้องการถ่ายทอดสด 2 ภาษา, ต้องการจัดเลี้ยงอาหารว่าง หรือต้องการนัดเข้าสำรวจสนามก่อนจัดงาน..."
+                    value={form.notes}
+                    onChange={e => setForm({ ...form, notes: e.target.value })}
                   />
                 </div>
               </div>
 
-              <div className="form-group">
-                <label>รายละเอียดเพิ่มเติม หรือความต้องการพิเศษ</label>
-                <textarea 
-                  className="form-input" rows="2"
-                  placeholder="เช่น ต้องการจอ LED Wall สำหรับถ่ายทอดสด, ต้องการโต๊ะแคสเตอร์พากย์เกม, หรือนัดเข้าชมสถานที่จริง"
-                  value={form.notes}
-                  onChange={e => setForm({ ...form, notes: e.target.value })}
-                />
-              </div>
+              {/* Submit Button & Fast Contact Bar */}
+              <div className="esport-submit-bar">
+                <button 
+                  type="submit" 
+                  className="esport-btn-submit"
+                >
+                  <Send size={18} />
+                  <span>ส่งข้อมูลขอจัดงาน & รับใบเสนอราคาฟรี</span>
+                </button>
 
-              <button 
-                type="submit" 
-                className="btn-primary"
-                style={{ padding: '14px', fontSize: '1rem', fontWeight: 800, marginTop: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
-              >
-                <Send size={18} />
-                <span>ส่งข้อมูลติดต่อขอจัดงานแข่ง</span>
-              </button>
+                <div className="esport-fast-help-row">
+                  <span>ต้องการสอบถามคิวว่างหรือปรึกษาด่วนทันที:</span>
+                  <div className="esport-fast-contact-links">
+                    <a href={`tel:${hotlinePhone.replace(/[^0-9]/g, '')}`} className="esport-fast-phone-link">
+                      <Phone size={14} className="text-blue" />
+                      <span>{hotlinePhone}</span>
+                    </a>
+                    <a href={lineOaUrl} target="_blank" rel="noopener noreferrer" className="esport-fast-line-link">
+                      <MessageCircle size={14} />
+                      <span>LINE: @GSPEED</span>
+                      <ExternalLink size={11} />
+                    </a>
+                  </div>
+                </div>
+              </div>
             </form>
           )}
         </div>
@@ -284,3 +509,4 @@ export default function EsportOrganizerModal({
     </div>
   );
 }
+
