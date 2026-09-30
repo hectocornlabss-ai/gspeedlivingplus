@@ -35,14 +35,14 @@ export const INITIAL_RAG_KNOWLEDGE = [
     category: 'general',
     title: 'เวลาเปิด-ปิด และการเดินทาง พิกัดร้าน',
     tags: ['เวลาเปิด', '24ชั่วโมง', 'เปิดกี่โมง', 'ที่อยู่', 'อยู่ที่ไหน', 'พิกัด', 'แผนที่', 'เบอร์โทร', 'ลาดพร้าว 112', 'รามคำแหง 53', 'วังทองหลาง'],
-    content: 'G-Speed Esport Arena เปิดให้บริการตลอด 24 ชั่วโมง ทุกวัน ตลอดทั้งปี ไม่มีวันหยุด (24/7) ที่ตั้ง: 79 ซอย ลาดพร้าว 112 แขวงพลับพลา เขตวังทองหลาง กรุงเทพมหานคร 10310 (เข้าออกได้ทั้งทางซอยลาดพร้าว 112 และซอยรามคำแหง 53) แผนที่ Google Maps: https://maps.google.com/?q=79+ซอย+ลาดพร้าว+112+แขวงพลับพลา+เขตวังทองหลาง+กรุงเทพมหานคร+10310 โทรศัพท์: 063-793-7704 อีเมล: gspeedlivingplus35@gmail.com มีที่จอดรถสะดวกสบายทั้งรถยนต์และมอเตอร์ไซค์ แอร์เย็นฉ่ำ 24 ชม. พร้อมระบบกรองอากาศ PM2.5 และระบบเน็ตเวิร์กความเร็วสูง 10Gbps Dual Fiber'
+    content: 'G-Speed Esport Arena เปิดให้บริการตลอด 24 ชั่วโมง ทุกวัน ตลอดทั้งปี ไม่มีวันหยุด (24/7) ที่ตั้ง: 79 ซอย รามคำแหง 53 แขวงพลับพลา เขตวังทองหลาง กรุงเทพมหานคร 10310 (เข้าออกได้ทั้งทางซอยลาดพร้าว 112 และซอยรามคำแหง 53 พิกัด 13.766999, 100.618755) แผนที่ Google Maps: https://maps.app.goo.gl/ak23az5WtsvXGWUR8 โทรศัพท์: 063-793-7704 อีเมล: gspeedlivingplus35@gmail.com มีที่จอดรถสะดวกสบายทั้งรถยนต์และมอเตอร์ไซค์ แอร์เย็นฉ่ำ 24 ชม. พร้อมระบบกรองอากาศ PM2.5 และระบบเน็ตเวิร์กความเร็วสูง 10Gbps Dual Fiber'
   },
   {
     id: 'rag-services-overview',
     category: 'services',
     title: 'บริการหลักของศูนย์ G-Speed Esport Arena',
     tags: ['บริการ', 'บริการของเรา', 'มีอะไรบ้าง', 'ร้านเกม', 'เช่าจัดแข่ง', 'ติดตั้งระบบ', 'บริการร้าน'],
-    content: 'บริการหลักของ G-Speed Esport Arena ได้แก่: 1. ร้านเกมคอมพิวเตอร์สเปกแข่งขันอีสปอร์ต 24 ชม. (RTX 40 Series, จอ 360Hz/240Hz, โซนทั่วไปและ VIP) 2. เปิดให้เช่าร้านจัดแข่งอีสปอร์ต (เวที 5v5 Stage, จอ LED Wall ขนาดยักษ์, ระบบ Live Streaming, โต๊ะพากย์) 3. รับติดตั้งและวางระบบร้านเกมครบวงจร (Diskless Server, เน็ต 10Gbps Multi-WAN, ระบบ POS บัญชีคลาวด์ และออกแบบผังร้าน 2D/3D) ที่ตั้ง 79 ซอย ลาดพร้าว 112 แขวงพลับพลา เขตวังทองหลาง กทม. โทร 063-793-7704'
+    content: 'บริการหลักของ G-Speed Esport Arena ได้แก่: 1. ร้านเกมคอมพิวเตอร์สเปกแข่งขันอีสปอร์ต 24 ชม. (RTX 40 Series, จอ 360Hz/240Hz, โซนทั่วไปและ VIP) 2. เปิดให้เช่าร้านจัดแข่งอีสปอร์ต (เวที 5v5 Stage, จอ LED Wall ขนาดยักษ์, ระบบ Live Streaming, โต๊ะพากย์) 3. รับติดตั้งและวางระบบร้านเกมครบวงจร (Diskless Server, เน็ต 10Gbps Multi-WAN, ระบบ POS บัญชีคลาวด์ และออกแบบผังร้าน 2D/3D) ที่ตั้ง: 79 ซอย รามคำแหง 53 แขวงพลับพลา เขตวังทองหลาง กทม. 10310 แผนที่: https://maps.app.goo.gl/ak23az5WtsvXGWUR8 โทร 063-793-7704'
   },
   {
     id: 'rag-food',
@@ -672,13 +672,13 @@ export const INITIAL_CONTACT_PAGE = {
   heroTitle: 'ติดต่อเรา & แผนที่ร้าน GLP',
   heroDesc: 'ศูนย์กีฬาอีสปอร์ตและร้านอินเทอร์เน็ตคาเฟ่มาตรฐานสากล GLP : G Speed Living Plus พร้อมต้อนรับนักกีฬาอีสปอร์ต เกมเมอร์ และผู้สนใจร่วมลงทุนแฟรนไชส์ตลอด 24 ชั่วโมง',
   storeName: 'GLP : G Speed Living Plus',
-  storeAddress: '79 ซอย ลาดพร้าว 112 แขวงพลับพลา เขตวังทองหลาง กรุงเทพมหานคร 10310',
+  storeAddress: '79 ซอย รามคำแหง 53 แขวงพลับพลา เขตวังทองหลาง กรุงเทพมหานคร 10310 (เข้าออกได้ทั้งทางซอยลาดพร้าว 112 และซอยรามคำแหง 53)',
   storePhone: '063-793-7704',
   storeEmail: 'gspeedlivingplus35@gmail.com',
   lineId: '@gspeedarena',
-  locationHint: '(ทำเลศักยภาพ เชื่อมต่อระหว่าง ซอยลาดพร้าว 112 และ ซอยรามคำแหง 53 มีที่จอดรถยนต์และจักรยานยนต์)',
-  googleMapsEmbedUrl: 'https://maps.google.com/maps?q=79%20%E0%B8%8B%E0%B8%AD%E0%B8%A2%20%E0%B8%A5%E0%B8%B2%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B9%89%E0%B8%B2%E0%B8%A7%20112%20%E0%B9%81%E0%B8%82%E0%B8%A7%E0%B8%87%E0%B8%9E%E0%B8%A5%E0%B8%B1%E0%B8%9A%E0%B8%9E%E0%B8%A5%E0%B8%B2%20%E0%B9%80%E0%B8%82%E0%B8%85%E0%B8%A7%E0%B8%B1%E0%B8%87%E0%B8%97%E0%B8%AD%E0%B8%87%E0%B8%AB%E0%B8%A5%E0%B8%B2%E0%B8%87%20%E0%B8%81%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B9%80%E0%B8%97%E0%B8%9E%E0%B8%A1%E0%B8%AB%E0%B8%B2%E0%B8%99%E0%B8%84%E0%B8%A3%2010310&t=&z=16&ie=UTF8&iwloc=&output=embed',
-  googleMapsDirectUrl: 'https://www.google.com/maps/search/?api=1&query=79%20%E0%B8%8B%E0%B8%AD%E0%B8%A2%20%E0%B8%A5%E0%B8%B2%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B9%89%E0%B8%B2%E0%B8%A7%20112%20%E0%B9%81%E0%B8%82%E0%B8%A7%E0%B8%87%E0%B8%9E%E0%B8%A5%E0%B8%B1%E0%B8%9A%E0%B8%9E%E0%B8%A5%E0%B8%B2%20%E0%B9%80%E0%B8%82%E0%B8%85%E0%B8%A7%E0%B8%B1%E0%B8%87%E0%B8%97%E0%B8%AD%E0%B8%87%E0%B8%AB%E0%B8%A5%E0%B8%B2%E0%B8%87%20%E0%B8%81%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B9%80%E0%B8%97%E0%B8%9E%E0%B8%A1%E0%B8%AB%E0%B8%B2%E0%B8%99%E0%B8%84%E0%B8%A3%2010310',
+  locationHint: '(ทำเลศักยภาพ เชื่อมต่อระหว่าง ซอยลาดพร้าว 112 และ ซอยรามคำแหง 53 พิกัด 13.766999, 100.618755 มีที่จอดรถสะดวกสบาย)',
+  googleMapsEmbedUrl: 'https://maps.google.com/maps?q=13.766999,100.618755&t=&z=17&ie=UTF8&iwloc=&output=embed',
+  googleMapsDirectUrl: 'https://maps.app.goo.gl/ak23az5WtsvXGWUR8',
   socialLinks: {
     facebook: 'https://www.facebook.com/GLP.Gspeedlivingplus',
     tiktok: 'https://www.tiktok.com/@gspeedlivingplus',
@@ -1037,8 +1037,8 @@ export const DEFAULT_SITE_DATA = {
     phone: '063-793-7704',
     email: 'gspeedlivingplus35@gmail.com',
     line: '@gspeedarena',
-    address: '79 ซอย ลาดพร้าว 112 แขวงพลับพลา เขตวังทองหลาง กรุงเทพมหานคร 10310',
-    googleMapUrl: 'https://maps.google.com/?q=79+ซอย+ลาดพร้าว+112+แขวงพลับพลา+เขตวังทองหลาง+กรุงเทพมหานคร+10310',
+    address: '79 ซอย รามคำแหง 53 แขวงพลับพลา เขตวังทองหลาง กรุงเทพมหานคร 10310',
+    googleMapUrl: 'https://maps.app.goo.gl/ak23az5WtsvXGWUR8',
     copyright: '2026 GLP : G Speed Living Plus. All Rights Reserved.',
     socialLinks: {
       facebook: 'https://www.facebook.com/GLP.Gspeedlivingplus',
@@ -1171,15 +1171,13 @@ export function SiteDataProvider({ children }) {
           if (!merged.footer.phone || merged.footer.phone.includes('02-888-9999') || merged.footer.phone.includes('02-999-8888') || merged.footer.phone === '063 793 7704') {
             merged.footer.phone = DEFAULT_SITE_DATA.footer.phone;
           }
-          if (!merged.footer.address || !merged.footer.address.includes('ลาดพร้าว 112')) {
+          if (!merged.footer.address || !merged.footer.address.includes('รามคำแหง 53')) {
             merged.footer.address = DEFAULT_SITE_DATA.footer.address;
           }
           if (!merged.footer.email || merged.footer.email.includes('contact@gspeedarena.com') || merged.footer.email.includes('franchise@gspeed-arena.com')) {
             merged.footer.email = DEFAULT_SITE_DATA.footer.email;
           }
-          if (!merged.footer.googleMapUrl || merged.footer.googleMapUrl.includes('share.google/Fj1DmZjpx1cBNBVTf')) {
-            merged.footer.googleMapUrl = DEFAULT_SITE_DATA.footer.googleMapUrl;
-          }
+          merged.footer.googleMapUrl = 'https://maps.app.goo.gl/ak23az5WtsvXGWUR8';
           if (merged.footer.copyright) {
             merged.footer.copyright = merged.footer.copyright.replace(/^©\s*/, '');
           }
@@ -1442,6 +1440,9 @@ export function SiteDataProvider({ children }) {
           merged.contactPage = {
             ...INITIAL_CONTACT_PAGE,
             ...merged.contactPage,
+            storeAddress: '79 ซอย รามคำแหง 53 แขวงพลับพลา เขตวังทองหลาง กรุงเทพมหานคร 10310 (เข้าออกได้ทั้งทางซอยลาดพร้าว 112 และซอยรามคำแหง 53)',
+            googleMapsDirectUrl: 'https://maps.app.goo.gl/ak23az5WtsvXGWUR8',
+            googleMapsEmbedUrl: 'https://maps.google.com/maps?q=13.766999,100.618755&t=&z=17&ie=UTF8&iwloc=&output=embed',
             socialLinks: { ...INITIAL_CONTACT_PAGE.socialLinks, ...(merged.contactPage.socialLinks || {}) },
             transportation: Array.isArray(merged.contactPage.transportation) && merged.contactPage.transportation.length > 0
               ? merged.contactPage.transportation

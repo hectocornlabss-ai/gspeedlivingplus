@@ -7,7 +7,8 @@ export default function Footer({ setActiveTab, onNavigate }) {
   const footer = siteData?.footer || {
     companyName: 'GLP : G Speed Living Plus',
     description: 'ศูนย์กีฬาอีสปอร์ตและร้านอินเทอร์เน็ตคาเฟ่มาตรฐานสากล บริหารงานโดย GLP Living Plus Group พร้อมระบบโซลูชันแฟรนไชส์อัจฉริยะสำหรับผู้ประกอบการรุ่นใหม่',
-    address: '79 ซอย ลาดพร้าว 112 แขวงพลับพลา เขตวังทองหลาง กรุงเทพมหานคร 10310',
+    address: '79 ซอย รามคำแหง 53 แขวงพลับพลา เขตวังทองหลาง กรุงเทพมหานคร 10310',
+    googleMapUrl: 'https://maps.app.goo.gl/ak23az5WtsvXGWUR8',
     phone: '063-793-7704',
     email: 'gspeedlivingplus35@gmail.com',
     hours: 'เปิดบริการตลอด 24 ชั่วโมง ทุกวัน (24/7)',
@@ -156,14 +157,17 @@ export default function Footer({ setActiveTab, onNavigate }) {
                 <MapPin size={18} className="text-blue shrink-0" />
                 <div>
                   <span>แผนที่ร้าน: {footer.address}</span>
-                  <div style={{ marginTop: '4px' }}>
-                    <button 
-                      onClick={() => handleLink('/contact')} 
+                  <div style={{ marginTop: '6px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <a 
+                      href={footer.googleMapUrl || 'https://maps.app.goo.gl/ak23az5WtsvXGWUR8'} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
                       className="footer-map-action-btn"
+                      style={{ textDecoration: 'none' }}
                     >
                       <Navigation size={13} />
-                      <span>ดูแผนที่ร้าน & การเดินทาง</span>
-                    </button>
+                      <span>เปิด Google Maps นำทาง</span>
+                    </a>
                   </div>
                 </div>
               </li>

@@ -58,18 +58,18 @@ export default function ContactPage({ onNavigateHome, onNavigateFranchise }) {
     return () => clearInterval(interval);
   }, []);
 
-  const storeAddress = contactPage.storeAddress || footer.address || '79 ซอย ลาดพร้าว 112 แขวงพลับพลา เขตวังทองหลาง กรุงเทพมหานคร 10310';
+  const storeAddress = contactPage.storeAddress || footer.address || '79 ซอย รามคำแหง 53 แขวงพลับพลา เขตวังทองหลาง กรุงเทพมหานคร 10310 (เข้าออกได้ทั้งทางซอยลาดพร้าว 112 และซอยรามคำแหง 53)';
   const storePhone = contactPage.storePhone || footer.phone || '063-793-7704';
   const storeEmail = contactPage.storeEmail || footer.email || 'gspeedlivingplus35@gmail.com';
   const cleanPhoneDigits = storePhone.replace(/[^0-9+]/g, '');
-  const locationHint = contactPage.locationHint || '(ทำเลศักยภาพ เชื่อมต่อระหว่าง ซอยลาดพร้าว 112 และ ซอยรามคำแหง 53 มีที่จอดรถยนต์และจักรยานยนต์)';
+  const locationHint = contactPage.locationHint || '(ทำเลศักยภาพ เชื่อมต่อระหว่าง ซอยลาดพร้าว 112 และ ซอยรามคำแหง 53 พิกัด 13.766999, 100.618755 มีที่จอดรถสะดวกสบาย)';
 
   const facebookUrl = contactPage.socialLinks?.facebook || footer.socialLinks?.facebook || 'https://www.facebook.com/GLP.Gspeedlivingplus';
   const tiktokUrl = contactPage.socialLinks?.tiktok || footer.socialLinks?.tiktok || 'https://www.tiktok.com/@gspeedlivingplus';
   const instagramUrl = contactPage.socialLinks?.instagram || footer.socialLinks?.instagram || 'https://www.instagram.com/gspeedlivingplus';
 
-  const googleMapsUrl = contactPage.googleMapsDirectUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(storeAddress)}`;
-  const googleMapsEmbedUrl = contactPage.googleMapsEmbedUrl || `https://maps.google.com/maps?q=${encodeURIComponent(storeAddress)}&t=&z=16&ie=UTF8&iwloc=&output=embed`;
+  const googleMapsUrl = contactPage.googleMapsDirectUrl || footer.googleMapUrl || 'https://maps.app.goo.gl/ak23az5WtsvXGWUR8';
+  const googleMapsEmbedUrl = contactPage.googleMapsEmbedUrl || 'https://maps.google.com/maps?q=13.766999,100.618755&t=&z=17&ie=UTF8&iwloc=&output=embed';
 
   const heroBadge = contactPage.heroBadge || 'CONTACT & STORE LOCATION • 24/7 OPEN';
   const heroTitle = contactPage.heroTitle || 'ติดต่อเรา & แผนที่ร้าน GLP';
@@ -353,7 +353,7 @@ export default function ContactPage({ onNavigateHome, onNavigateFranchise }) {
 
                   <button 
                     onClick={async () => {
-                      const mapsUrl = storeData.mapsUrl || 'https://maps.google.com/?q=G-Speed+Living+Plus+Ramkhamhaeng+53';
+                      const mapsUrl = googleMapsUrl || storeData.mapsUrl || 'https://maps.app.goo.gl/ak23az5WtsvXGWUR8';
                       if (navigator.share) {
                         try {
                           await navigator.share({
@@ -483,7 +483,7 @@ export default function ContactPage({ onNavigateHome, onNavigateFranchise }) {
             <div className="map-header-bar">
               <div className="map-header-info">
                 <h3 className="map-header-title">แผนที่ดาวเทียม & ระบบนำทางพิกัดร้าน</h3>
-                <p className="map-header-subtitle">ซอยลาดพร้าว 112 แขวงพลับพลา เขตวังทองหลาง กทม. 10310</p>
+                <p className="map-header-subtitle">79 ซอยรามคำแหง 53 แขวงพลับพลา เขตวังทองหลาง กทม. 10310 (พิกัด 13.766999, 100.618755)</p>
               </div>
               <a 
                 href={googleMapsUrl} 
@@ -499,7 +499,7 @@ export default function ContactPage({ onNavigateHome, onNavigateFranchise }) {
             <div className="map-iframe-container">
               <iframe
                 title="Google Maps Location - GLP G Speed Living Plus"
-                src={googleMapsEmbedUrl || `https://maps.google.com/maps?q=${encodeURIComponent(storeAddress)}&t=&z=16&ie=UTF8&iwloc=&output=embed`}
+                src={googleMapsEmbedUrl || 'https://maps.google.com/maps?q=13.766999,100.618755&t=&z=17&ie=UTF8&iwloc=&output=embed'}
                 width="100%"
                 height="450"
                 style={{ border: 0 }}
