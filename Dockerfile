@@ -30,8 +30,8 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # คัดลอกไฟล์ static build จาก builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# เปิดพอร์ต 80 (พอร์ตมาตรฐานสำหรับ Coolify Reverse Proxy)
-EXPOSE 80
+# เปิดพอร์ต 80 และ 3000 (รองรับทั้ง Nginx มาตรฐานและ Coolify default)
+EXPOSE 80 3000
 
 # สั่งเริ่มการทำงานของ Nginx
 CMD ["nginx", "-g", "daemon off;"]
