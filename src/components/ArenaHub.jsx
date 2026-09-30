@@ -60,8 +60,16 @@ export default function ArenaHub({
   const newsList = siteData?.news || GAME_NEWS;
   const categories = siteData?.activityCategories || EVENT_CATEGORIES;
 
-  // State for zone showcase
-  const [activeZone, setActiveZone] = useState(VENUE_ZONES[0].id);
+  // State for zone showcase & 20-image slider
+  const allZones = siteData?.venueZones || VENUE_ZONES;
+  const [activeZone, setActiveZone] = useState(allZones[0]?.id || 'stage');
+  const [zoneSlideIndex, setZoneSlideIndex] = useState(0);
+  const [touchStartX, setTouchStartX] = useState(0);
+
+  const handleSelectZone = (zoneId) => {
+    setActiveZone(zoneId);
+    setZoneSlideIndex(0);
+  };
 
   // Search and Category Filter for Activities
   const [searchQuery, setSearchQuery] = useState('');
@@ -98,7 +106,38 @@ export default function ArenaHub({
     }
   };
 
-  const currentZoneData = VENUE_ZONES.find(z => z.id === activeZone) || VENUE_ZONES[0];
+  const currentZoneData = allZones.find(z => z.id === activeZone) || allZones[0] || VENUE_ZONES[0];
+  const currentZoneImages = (Array.isArray(currentZoneData.images) && currentZoneData.images.length > 0)
+    ? currentZoneData.images
+    : (currentZoneData.image ? [{ id: `${currentZoneData.id}-0`, url: currentZoneData.image, caption: currentZoneData.title }] : []);
+  const totalZoneSlides = currentZoneImages.length;
+  const activeSlide = currentZoneImages[zoneSlideIndex % (totalZoneSlides || 1)] || currentZoneImages[0] || {};
+
+  const handleNextSlide = (e) => {
+    if (e) e.stopPropagation();
+    setZoneSlideIndex(prev => (prev + 1) % totalZoneSlides);
+  };
+
+  const handlePrevSlide = (e) => {
+    if (e) e.stopPropagation();
+    setZoneSlideIndex(prev => (prev - 1 + totalZoneSlides) % totalZoneSlides);
+  };
+
+  const handleTouchStart = (e) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e) => {
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX - touchEndX;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) {
+        handleNextSlide();
+      } else {
+        handlePrevSlide();
+      }
+    }
+  };
 
   // Filtered gallery activities based on category, tag, and search
   const filteredActivities = galleryList.filter(item => {
@@ -808,12 +847,13 @@ export default function ArenaHub({
 
               {/* Zone Tabs */}
               <div className="zone-tabs-list">
-                {(siteData?.venueZones || VENUE_ZONES).map((zone) => (
+                {allZones.map((zone) => (
                   <button
                     key={zone.id}
                     id={`btn-zone-tab-${zone.id}`}
-                    onClick={() => setActiveZone(zone.id)}
+                    onClick={() => handleSelectZone(zone.id)}
                     className={`zone-tab-btn ${activeZone === zone.id ? 'active' : ''}`}
+                    type="button"
                   >
                     {zone.id === 'stage' && <Trophy size={18} />}
                     {zone.id === 'vip' && <Shield size={18} />}
@@ -824,17 +864,84 @@ export default function ArenaHub({
                 ))}
               </div>
 
-              {/* Active Zone Detail Showcase */}
+              {/* Active Zone Detail Showcase with 16:9 20-Image Slider */}
               <div className="zone-showcase-panel glass-panel">
-                <div className="zone-image-wrapper">
-                  <img 
-                    src={currentZoneData.image} 
-                    alt={currentZoneData.title}
-                    className="zone-feature-img" 
-                  />
-                  <div className="zone-badge-overlay">
-                    <span className="badge-pill badge-blue">{currentZoneData.badge}</span>
+                <div className="zone-slider-column">
+                  <div 
+                    className="zone-slider-viewport"
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={handleTouchEnd}
+                  >
+                    <img 
+                      key={`${currentZoneData.id}-${activeSlide.id || zoneSlideIndex}`}
+                      src={activeSlide.url || activeSlide} 
+                      alt={activeSlide.caption || currentZoneData.title}
+                      className="zone-feature-img" 
+                      loading="lazy"
+                    />
+                    
+                    {/* Zone Badge Overlay */}
+                    <div className="zone-badge-overlay">
+                      <span className="badge-pill badge-blue">{currentZoneData.badge}</span>
+                    </div>
+
+                    {/* Slide Counter Overlay */}
+                    <div className="zone-counter-overlay">
+                      <Camera size={13} />
+                      <span>{zoneSlideIndex + 1} / {totalZoneSlides}</span>
+                    </div>
+
+                    {/* Prev / Next Navigation Arrows */}
+                    {totalZoneSlides > 1 && (
+                      <>
+                        <button 
+                          className="zone-slider-nav-btn prev"
+                          onClick={handlePrevSlide}
+                          aria-label="ภาพก่อนหน้า"
+                          type="button"
+                        >
+                          <ChevronLeft size={20} />
+                        </button>
+                        <button 
+                          className="zone-slider-nav-btn next"
+                          onClick={handleNextSlide}
+                          aria-label="ภาพถัดไป"
+                          type="button"
+                        >
+                          <ChevronRight size={20} />
+                        </button>
+                      </>
+                    )}
+
+                    {/* Photo Caption Overlay */}
+                    {activeSlide.caption && (
+                      <div className="zone-caption-scrim">
+                        <p className="zone-caption-text">{activeSlide.caption}</p>
+                      </div>
+                    )}
                   </div>
+
+                  {/* Thumbnail Strip (20 images preview) */}
+                  {totalZoneSlides > 1 && (
+                    <div className="zone-thumbnails-strip" aria-label="แถบภาพขนาดย่อ">
+                      {currentZoneImages.map((imgObj, idx) => {
+                        const thumbUrl = imgObj.url || imgObj;
+                        const isCur = idx === zoneSlideIndex;
+                        return (
+                          <button
+                            key={imgObj.id || idx}
+                            type="button"
+                            onClick={() => setZoneSlideIndex(idx)}
+                            className={`zone-thumb-btn ${isCur ? 'active' : ''}`}
+                            title={`ภาพที่ ${idx + 1}: ${imgObj.caption || ''}`}
+                          >
+                            <img src={thumbUrl} alt="" className="zone-thumb-img" loading="lazy" />
+                            <span className="zone-thumb-num">{idx + 1}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
 
                 <div className="zone-info-wrapper">
@@ -857,25 +964,20 @@ export default function ArenaHub({
                     </div>
                   </div>
 
-                  <div className="zone-action-bar" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                    <button 
-                      onClick={() => {
-                        setSelectedOrganizerZone(currentZoneData.name);
-                        setIsOrganizerModalOpen(true);
-                      }} 
-                      className="btn-primary"
-                      style={{ background: 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)' }}
+                  <div className="zone-action-bar">
+                    <a 
+                      href="https://www.facebook.com/GLP.Gspeedlivingplus"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-zone-contact-facebook"
+                      id={`btn-contact-zone-${currentZoneData.id}`}
                     >
-                      <Trophy size={16} />
-                      <span>ติดต่อขอจัดงานแข่งในโซนนี้</span>
-                    </button>
-                    <button 
-                      onClick={onNavigateFranchise} 
-                      className="btn-secondary"
-                    >
-                      <Compass size={16} />
-                      <span>ลองใส่โซนนี้ในผังร้านของคุณ</span>
-                    </button>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                      </svg>
+                      <span>ติดต่อขอเช่าสถานที่</span>
+                      <ExternalLink size={16} />
+                    </a>
                   </div>
                 </div>
               </div>

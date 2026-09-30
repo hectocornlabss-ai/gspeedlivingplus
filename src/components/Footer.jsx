@@ -13,7 +13,7 @@ export default function Footer({ setActiveTab, onNavigate }) {
     hours: 'เปิดบริการตลอด 24 ชั่วโมง ทุกวัน (24/7)',
     copyright: '2026 GLP : G Speed Living Plus. All Rights Reserved.',
     socialLinks: {
-      facebook: 'https://www.facebook.com/gspeedlivingplus',
+      facebook: 'https://www.facebook.com/GLP.Gspeedlivingplus',
       tiktok: 'https://www.tiktok.com/@gspeedlivingplus',
       instagram: 'https://www.instagram.com/gspeedlivingplus'
     }
@@ -68,7 +68,7 @@ export default function Footer({ setActiveTab, onNavigate }) {
               <div className="footer-social-row">
                 {/* 1. Facebook */}
                 <a 
-                  href={footer.socialLinks?.facebook || 'https://www.facebook.com/gspeedlivingplus'} 
+                  href={footer.socialLinks?.facebook || 'https://www.facebook.com/GLP.Gspeedlivingplus'} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="footer-social-circle fb"

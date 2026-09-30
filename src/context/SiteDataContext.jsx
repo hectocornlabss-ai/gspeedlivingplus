@@ -680,7 +680,7 @@ export const INITIAL_CONTACT_PAGE = {
   googleMapsEmbedUrl: 'https://maps.google.com/maps?q=79%20%E0%B8%8B%E0%B8%AD%E0%B8%A2%20%E0%B8%A5%E0%B8%B2%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B9%89%E0%B8%B2%E0%B8%A7%20112%20%E0%B9%81%E0%B8%82%E0%B8%A7%E0%B8%87%E0%B8%9E%E0%B8%A5%E0%B8%B1%E0%B8%9A%E0%B8%9E%E0%B8%A5%E0%B8%B2%20%E0%B9%80%E0%B8%82%E0%B8%85%E0%B8%A7%E0%B8%B1%E0%B8%87%E0%B8%97%E0%B8%AD%E0%B8%87%E0%B8%AB%E0%B8%A5%E0%B8%B2%E0%B8%87%20%E0%B8%81%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B9%80%E0%B8%97%E0%B8%9E%E0%B8%A1%E0%B8%AB%E0%B8%B2%E0%B8%99%E0%B8%84%E0%B8%A3%2010310&t=&z=16&ie=UTF8&iwloc=&output=embed',
   googleMapsDirectUrl: 'https://www.google.com/maps/search/?api=1&query=79%20%E0%B8%8B%E0%B8%AD%E0%B8%A2%20%E0%B8%A5%E0%B8%B2%E0%B8%94%E0%B8%9E%E0%B8%A3%E0%B9%89%E0%B8%B2%E0%B8%A7%20112%20%E0%B9%81%E0%B8%82%E0%B8%A7%E0%B8%87%E0%B8%9E%E0%B8%A5%E0%B8%B1%E0%B8%9A%E0%B8%9E%E0%B8%A5%E0%B8%B2%20%E0%B9%80%E0%B8%82%E0%B8%85%E0%B8%A7%E0%B8%B1%E0%B8%87%E0%B8%97%E0%B8%AD%E0%B8%87%E0%B8%AB%E0%B8%A5%E0%B8%B2%E0%B8%87%20%E0%B8%81%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B9%80%E0%B8%97%E0%B8%9E%E0%B8%A1%E0%B8%AB%E0%B8%B2%E0%B8%99%E0%B8%84%E0%B8%A3%2010310',
   socialLinks: {
-    facebook: 'https://www.facebook.com/gspeedlivingplus',
+    facebook: 'https://www.facebook.com/GLP.Gspeedlivingplus',
     tiktok: 'https://www.tiktok.com/@gspeedlivingplus',
     instagram: 'https://www.instagram.com/gspeedlivingplus',
     discord: 'https://discord.gg/gspeed',
@@ -1041,7 +1041,7 @@ export const DEFAULT_SITE_DATA = {
     googleMapUrl: 'https://maps.google.com/?q=79+ซอย+ลาดพร้าว+112+แขวงพลับพลา+เขตวังทองหลาง+กรุงเทพมหานคร+10310',
     copyright: '2026 GLP : G Speed Living Plus. All Rights Reserved.',
     socialLinks: {
-      facebook: 'https://www.facebook.com/gspeedlivingplus',
+      facebook: 'https://www.facebook.com/GLP.Gspeedlivingplus',
       tiktok: 'https://www.tiktok.com/@gspeedlivingplus',
       instagram: 'https://www.instagram.com/gspeedlivingplus',
       discord: 'https://discord.gg/gspeed',
@@ -1324,7 +1324,18 @@ export function SiteDataProvider({ children }) {
             };
           });
         }
-        if (!Array.isArray(merged.venueZones)) merged.venueZones = INITIAL_ZONES;
+        if (!Array.isArray(merged.venueZones) || merged.venueZones.length === 0) {
+          merged.venueZones = INITIAL_ZONES;
+        } else {
+          merged.venueZones = merged.venueZones.map(z => {
+            const init = INITIAL_ZONES.find(iz => iz.id === z.id);
+            return {
+              ...(init || {}),
+              ...z,
+              images: (Array.isArray(z.images) && z.images.length >= 10) ? z.images : (init ? init.images : (z.image ? [{ id: `${z.id}-1`, url: z.image, caption: z.title }] : []))
+            };
+          });
+        }
         if (!Array.isArray(merged.navLinks) || merged.navLinks.some(l => l.target === 'franchise' || l.label === 'หน้าหลัก' || l.label === 'ทัวร์นาเมนต์ & แข่งขัน') || !merged.navLinks.some(l => l.target === 'contact' || l.id === 'nav-contact')) {
           merged.navLinks = INITIAL_NAV_LINKS;
         }

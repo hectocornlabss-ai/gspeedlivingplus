@@ -64,7 +64,7 @@ export default function ContactPage({ onNavigateHome, onNavigateFranchise }) {
   const cleanPhoneDigits = storePhone.replace(/[^0-9+]/g, '');
   const locationHint = contactPage.locationHint || '(ทำเลศักยภาพ เชื่อมต่อระหว่าง ซอยลาดพร้าว 112 และ ซอยรามคำแหง 53 มีที่จอดรถยนต์และจักรยานยนต์)';
 
-  const facebookUrl = contactPage.socialLinks?.facebook || footer.socialLinks?.facebook || 'https://www.facebook.com/gspeedlivingplus';
+  const facebookUrl = contactPage.socialLinks?.facebook || footer.socialLinks?.facebook || 'https://www.facebook.com/GLP.Gspeedlivingplus';
   const tiktokUrl = contactPage.socialLinks?.tiktok || footer.socialLinks?.tiktok || 'https://www.tiktok.com/@gspeedlivingplus';
   const instagramUrl = contactPage.socialLinks?.instagram || footer.socialLinks?.instagram || 'https://www.instagram.com/gspeedlivingplus';
 

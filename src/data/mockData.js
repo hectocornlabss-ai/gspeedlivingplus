@@ -10,7 +10,29 @@ export const VENUE_ZONES = [
     icon: 'Trophy',
     badge: 'Official Tournament Ready',
     accentColor: '#2563eb',
-    image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1000&q=80'
+    image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1280&h=720&q=80',
+    images: [
+      { id: 'stg-1', url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'เวทีแข่งขัน Main Stage ระบบแสงสีเสียงและจอ LED Wall 4K ขนาดยักษ์' },
+      { id: 'stg-2', url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'ระบบแสงเวที Dynamic Light Sync เปลี่ยนสีตามสถานะการแข่งขัน' },
+      { id: 'stg-3', url: 'https://images.unsplash.com/photo-1511882150382-421056c89033?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'ทัศนียภาพมุมสูงของอารีน่าความจุผู้ชมกว่า 200 ที่นั่งพร้อมจอด้านข้าง' },
+      { id: 'stg-4', url: 'https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'อุโมงค์เปิดตัวนักกีฬา Player Tunnel พร้อมไฟสปอตไลต์ระดับนานาชาติ' },
+      { id: 'stg-5', url: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'โพเดียมถ้วยรางวัลเกียรติยศและเหรียญรางวัลชนะเลิศบนเวทีใหญ่' },
+      { id: 'stg-6', url: 'https://images.unsplash.com/photo-1593305841991-05c297ba4575?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'โต๊ะนักพากย์ Caster Desk สำหรับบรรยายสดพร้อมจอ Multi-View Live' },
+      { id: 'stg-7', url: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'ห้องควบคุมสวิตเชอร์ Production Switcher ถ่ายทอดสด 4K 60FPS' },
+      { id: 'stg-8', url: 'https://images.unsplash.com/photo-1542751110-97427bbecf20?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'บรรยากาศแฟนคลับแน่นขนัดส่งเสียงเชียร์จังหวะ Clutch 1v3' },
+      { id: 'stg-9', url: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'เอฟเฟกต์ไฟไพโรเทคนิคและเลเซอร์สร้างความตื่นเต้นรอบชิงชนะเลิศ' },
+      { id: 'stg-10', url: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'พิธีมอบเช็คเงินรางวัลและเหรียญทองเกียรติยศแก่ทีมแชมเปียน' },
+      { id: 'stg-11', url: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'หน้าจอ Instant Replay ช็อตเด็ด Slow Motion ไฮไลต์ประจำแมตช์' },
+      { id: 'stg-12', url: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'ระบบเสียง Dolby Surround รอบทิศทางและไมโครโฟนบรอดแคสต์สตูดิโอ' },
+      { id: 'stg-13', url: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'สัมภาษณ์สดนักแข่งยอดเยี่ยม MVP ประจำการแข่งขันบนเวที' },
+      { id: 'stg-14', url: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'โมเมนต์ชูถ้วยแชมป์ท่ามกลางสายฝนกระดาษทองคำฉลองชัยชนะ' },
+      { id: 'stg-15', url: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'ภาพถ่ายรวม 32 ทีมอีสปอร์ตบนเวทีก่อนเริ่มระเบิดศึกทัวร์นาเมนต์' },
+      { id: 'stg-16', url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'แอนิเมชันกราฟิก Hologram สายการแข่งขันทัวร์นาเมนต์แบบเรียลไทม์' },
+      { id: 'stg-17', url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'บรรยากาศการจับสลากแบ่งสาย Group Stage ถ่ายทอดสด' },
+      { id: 'stg-18', url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'แสงสีเวทีคอนเสิร์ตและดนตรีเปิดงานต้อนรับผู้เข้าแข่งขัน' },
+      { id: 'stg-19', url: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'ป้ายไฟเชียร์และบรรยากาศแฟนคลับคึกคักตลอดการแข่งขัน' },
+      { id: 'stg-20', url: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'ผู้บริหารขึ้นกล่าวเปิดการแข่งขันและสนับสนุนนักกีฬาอีสปอร์ตไทย' }
+    ]
   },
   {
     id: 'vip',
@@ -21,7 +43,29 @@ export const VENUE_ZONES = [
     icon: 'Shield',
     badge: 'Ultra Premium',
     accentColor: '#38bdf8',
-    image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1000&q=80'
+    image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1280&h=720&q=80',
+    images: [
+      { id: 'vip-1', url: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'ห้องส่วนตัว VIP Suite ผนังซับเสียง Acoustic เก็บเสียงเงียบสนิท' },
+      { id: 'vip-2', url: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'สเปกคอมพิวเตอร์ระดับสตรีมเมอร์ พร้อมไฟสตูดิโอ Elgato Key Light' },
+      { id: 'vip-3', url: 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'ไมโครโฟนระดับสตูดิโอบรอดแคสต์ Shure SM7B + RodeCaster Pro' },
+      { id: 'vip-4', url: 'https://images.unsplash.com/photo-1580234811497-9df7fd2f357e?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'บรรยากาศทีมบูตแคมป์ 5 คน นั่งซ้อมกลยุทธ์ส่วนตัวไม่มีเสียงรบกวน' },
+      { id: 'vip-5', url: 'https://images.unsplash.com/photo-1547658719-da2b51169166?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'แสงไฟนีออน Cyberpunk ปรับแต่งโปรไฟล์สีได้ตามความชอบของทีม' },
+      { id: 'vip-6', url: 'https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'หูฟังเกมมิ่ง Pro Wireless ตัดเสียงรบกวนภายนอก 100%' },
+      { id: 'vip-7', url: 'https://images.unsplash.com/photo-1541807084-5c52b6b3adef?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'หน้าจอคู่ Dual-Monitor: จอหลัก OLED 360Hz + จอรอง 4K มอนิเตอร์แชท' },
+      { id: 'vip-8', url: 'https://images.unsplash.com/photo-1616588589676-62b3bd4ff6d2?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'เก้าอี้ Secretlab TITAN Evo พรีเมียมรองรับหลัง นั่งสบายยาวนาน' },
+      { id: 'vip-9', url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'มุมวิเคราะห์แผนการเล่นหน้าจอสมาร์ททีวี 65 นิ้วสำหรับโค้ช' },
+      { id: 'vip-10', url: 'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'โค้ชและนักกีฬาบรีฟแผนการเล่นก่อนการแข่งขันแมตช์สำคัญ' },
+      { id: 'vip-11', url: 'https://images.unsplash.com/photo-1517256064527-09c73fc73e38?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'มุมพักผ่อนและโต๊ะทำงานส่วนตัวสำหรับครีเอเตอร์และผู้จัดการทีม' },
+      { id: 'vip-12', url: 'https://images.unsplash.com/photo-1547394765-185e1e68f34e?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'ระบบระบายความร้อน Custom Water Cooling เงียบสนิท ไร้เสียงพัดลมรบกวน' },
+      { id: 'vip-13', url: 'https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'คีย์บอร์ดกลไก Rapid Trigger ตอบสนองเร็วระดับมิลลิวินาที' },
+      { id: 'vip-14', url: 'https://images.unsplash.com/photo-1566577739112-5180d4bf9390?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'เมาส์เกมมิ่ง Pro Wireless น้ำหนักเบาพร้อมแผ่นรองเมาส์ Speed/Control' },
+      { id: 'vip-15', url: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'สาย LAN 10Gbps แยก Dedicated Bandwidth ไม่แชร์ความเร็วกับภายนอก' },
+      { id: 'vip-16', url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'มินิบาร์และตู้แช่เครื่องดื่มบริการเสิร์ฟถึงห้องพักส่วนตัว' },
+      { id: 'vip-17', url: 'https://images.unsplash.com/photo-1534423861386-85a16f5d13fd?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'บรรยากาศการซ้อมทีมที่เต็มไปด้วยสมาธิและการประสานงานที่ยอดเยี่ยม' },
+      { id: 'vip-18', url: 'https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'มีจุดเชื่อมต่อกล้อง DSLR / Capture Card 4K พร้อมสตรีมทันที' },
+      { id: 'vip-19', url: 'https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'ระบบปรับอากาศแยกส่วน Daikin Inverter เย็นสบายและเงียบเป็นพิเศษ' },
+      { id: 'vip-20', url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'ความสะดวกสบายและความเป็นส่วนตัวระดับ First-Class Gaming Lounge' }
+    ]
   },
   {
     id: 'standard',
@@ -32,7 +76,29 @@ export const VENUE_ZONES = [
     icon: 'Monitor',
     badge: 'Most Popular',
     accentColor: '#1d4ed8',
-    image: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1000&q=80'
+    image: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1280&h=720&q=80',
+    images: [
+      { id: 'std-1', url: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'แถวที่นั่งเล่นเกมมาตรฐานความจุกว่า 80+ ที่นั่ง แสงไฟนีออนสบายตา' },
+      { id: 'std-2', url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'บรรยากาศความสนุกสนานและคอมมูนิตี้คนรักเกมทุกวัยตลอด 24 ชม.' },
+      { id: 'std-3', url: 'https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'โต๊ะเกมมิ่งกว้างพิเศษ 120 ซม. ออกแบบมาเพื่อลากเมาส์ได้เต็มวงกว้าง' },
+      { id: 'std-4', url: 'https://images.unsplash.com/photo-1598550476439-6847785fcea6?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'หน้าจอ Fast-IPS 240Hz สีสันสดใส คมชัด มองสบายตาแม้เล่นนาน' },
+      { id: 'std-5', url: 'https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'คีย์บอร์ดกลไก Blue/Red Switch กดมันส์ เสียงแน่น ทนทาน' },
+      { id: 'std-6', url: 'https://images.unsplash.com/photo-1566577739112-5180d4bf9390?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'เมาส์เกมมิ่ง Ergonomic DPI สูง พร้อมปุ่ม Macro สำหรับเกม FPS และ MOBA' },
+      { id: 'std-7', url: 'https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'หูฟังครอบหูบุนวมหนานุ่ม เบสแน่น ไมโครโฟนตัดเสียงคุยในดิสคอร์ดชัดเจน' },
+      { id: 'std-8', url: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'ระบบอินเทอร์เน็ต Dual Fiber 10Gbps Ping ต่ำกว่า 3ms เล่นไม่กระตุก' },
+      { id: 'std-9', url: 'https://images.unsplash.com/photo-1547394765-185e1e68f34e?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'เคสคอมพิวเตอร์การ์ดจอ RTX 4070 SUPER ปรับกราฟิก Ultra ทุกเกม' },
+      { id: 'std-10', url: 'https://images.unsplash.com/photo-1558742569-fe6d39d0583a?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'ระบบสำรองไฟระดับองค์กร UPS ไฟดับเล่นต่อได้ไม่มีเซฟหลุด' },
+      { id: 'std-11', url: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'การเดินสายแลนแบบ Cat6A ชีลด์กันสัญญาณรบกวนใต้รางพื้นเรียบร้อย' },
+      { id: 'std-12', url: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'ระบบ Diskless และ Auto-Update เกม อัปเดตแพตช์ทันทีพร้อมเล่น' },
+      { id: 'std-13', url: 'https://images.unsplash.com/photo-1486572788966-cfd3dfdd4a42?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'เคาน์เตอร์แคชเชียร์และระบบสมาชิกเติมเงินออนไลน์ สะดวก รวดเร็ว' },
+      { id: 'std-14', url: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'บรรยากาศการรวมตัวเพื่อนฝูงจัดตี้เล่นเกมวันหยุดสุดสัปดาห์' },
+      { id: 'std-15', url: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'ความสะอาดของอุปกรณ์ มีการฆ่าเชื้อด้วยแอลกอฮอล์ทุกรอบการใช้งาน' },
+      { id: 'std-16', url: 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'เก้าอี้เกมมิ่งหุ้มหนัง PU ระบายความร้อน มีหมอนรองคอและหลัง' },
+      { id: 'std-17', url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'ทางเดินกว้างขวาง ปลอดโปร่ง แอร์เย็นฉ่ำ 24 องศาตลอดวัน' },
+      { id: 'std-18', url: 'https://images.unsplash.com/photo-1534423861386-85a16f5d13fd?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'โมเมนต์คว้าแชมป์ในเกมพร้อมเสียงเฮลั่นจากเพื่อนร่วมทีม' },
+      { id: 'std-19', url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'ไฟส่องสว่างนวลตา ลดการเมื่อยล้าของสายตาเมื่อเล่นเกมนาน' },
+      { id: 'std-20', url: 'https://images.unsplash.com/photo-1568992687947-868a62a9f521?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'พื้นที่พบปะสังสรรค์ของชาวเกมเมอร์ที่ใหญ่และทันสมัยที่สุด' }
+    ]
   },
   {
     id: 'cafe',
@@ -43,7 +109,29 @@ export const VENUE_ZONES = [
     icon: 'Coffee',
     badge: 'Chill & Dine',
     accentColor: '#60a5fa',
-    image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1000&q=80'
+    image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1280&h=720&q=80',
+    images: [
+      { id: 'cfe-1', url: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'เคาน์เตอร์บาร์เครื่องดื่ม Specialty Coffee สดใหม่พร้อมเสิร์ฟ' },
+      { id: 'cfe-2', url: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'มุมที่นั่งพักผ่อนสไตล์โมเดิร์นคาเฟ่ แอร์เย็น บรรยากาศผ่อนคลาย' },
+      { id: 'cfe-3', url: 'https://images.unsplash.com/photo-1576267423445-b2e0074d68a4?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'เมนูอาหารปรุงสด เบอร์เกอร์เนื้อพรีเมียม และเฟรนช์ฟรายส์กรอบ' },
+      { id: 'cfe-4', url: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'บาร์เครื่องดื่ม Energy Drinks นำเข้าเย็นเจี๊ยบเติมความสดชื่น' },
+      { id: 'cfe-5', url: 'https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'โซฟาเลานจ์ขนาดใหญ่พร้อมจอยักษ์ ถ่ายทอดสดทัวร์นาเมนต์ระดับโลก' },
+      { id: 'cfe-6', url: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'กาแฟอาราบิก้าแท้ คั่วบดหอมกรุ่นโดยบาริสต้าประจำร้าน' },
+      { id: 'cfe-7', url: 'https://images.unsplash.com/photo-1521017432531-fbd92d768814?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'พื้นที่นั่งรอและจุดนัดพบสำหรับเพื่อนๆ ระหว่างรอโต๊ะว่าง' },
+      { id: 'cfe-8', url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'บริการส่งอาหารและเครื่องดื่มตรงถึงโต๊ะคอม ไม่ต้องลุกไปสั่ง' },
+      { id: 'cfe-9', url: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'ขนมขบเคี้ยวและของหวาน ไอศกรีมหลากหลายรสชาติ' },
+      { id: 'cfe-10', url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'ตู้แช่เครื่องดื่มอัตโนมัติ ชำระเงินผ่านสแกน QR Code ทันใจ' },
+      { id: 'cfe-11', url: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'คอมมูนิตี้พบปะแลกเปลี่ยนประสบการณ์ของชาวเกมเมอร์' },
+      { id: 'cfe-12', url: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'มุมฉลองความสำเร็จและปาร์ตี้วันเกิดร่วมกับเพื่อนในทีม' },
+      { id: 'cfe-13', url: 'https://images.unsplash.com/photo-1486572788966-cfd3dfdd4a42?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'เมนูเซ็ตโปรโมชันคู่คอมพิวเตอร์ สั่งเป็นชุดสุดคุ้ม' },
+      { id: 'cfe-14', url: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'บรรยากาศยามค่ำคืนกับแสงไฟ Warm Light ให้ความรู้สึกอบอุ่น' },
+      { id: 'cfe-15', url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'ระบบเสียงเพลงเบาๆ ช่วยผ่อนคลายความเหนื่อยล้าหลังเล่นเกม' },
+      { id: 'cfe-16', url: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'มีจุดชาร์จโทรศัพท์มือถือไร้สายและปลั๊กไฟบริการฟรีทุกโต๊ะ' },
+      { id: 'cfe-17', url: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'มาตรฐานความสะอาดระดับพรีเมียม ภาชนะผ่านการฆ่าเชื้อทุกชิ้น' },
+      { id: 'cfe-18', url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'พื้นที่นั่งทำงาน Co-working Space ทำงานไปพลาง จิบกาแฟไปพลาง' },
+      { id: 'cfe-19', url: 'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'พนักงานบริการด้วยรอยยิ้มและพร้อมให้คำแนะนำตลอด 24 ชม.' },
+      { id: 'cfe-20', url: 'https://images.unsplash.com/photo-1568992687947-868a62a9f521?auto=format&fit=crop&w=1280&h=720&q=80', caption: 'จุดเช็กอินถ่ายรูปสวยพร้อมมุมถ่ายภาพชิคๆ โพสต์ลงโซเชียล' }
+    ]
   }
 ];
 
