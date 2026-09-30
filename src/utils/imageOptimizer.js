@@ -30,18 +30,40 @@ export function compressAndConvertToWebP(file, options = {}) {
   } = options;
 
   return new Promise((resolve, reject) => {
-    if (!file || !file.type.startsWith('image/')) {
-      return reject(new Error('ไฟล์ที่เลือกไม่ใช่รูปภาพที่รองรับ'));
+    const isImage = file && (
+      (file.type && (file.type.startsWith('image/') || file.type === 'image/webp')) ||
+      /\.(webp|jpe?g|png|gif|svg|avif|bmp|ico)$/i.test(file.name || '')
+    );
+
+    if (!isImage) {
+      return reject(new Error('ไฟล์ที่เลือกไม่ใช่รูปภาพที่รองรับ (รองรับ WebP, PNG, JPG, GIF, SVG)'));
     }
 
     const originalSize = file.size;
+    const isOriginalWebP = file.type === 'image/webp' || /\.(webp)$/i.test(file.name || '');
     const reader = new FileReader();
 
     reader.onerror = () => reject(new Error('เกิดข้อผิดพลาดในการอ่านไฟล์รูปภาพ'));
 
     reader.onload = (readerEvent) => {
       const img = new Image();
-      img.onerror = () => reject(new Error('ไม่สามารถประมวลผลรูปภาพได้'));
+      img.onerror = () => {
+        // If canvas/Image fails on exotic WebP/SVG, pass original base64 through cleanly
+        if (isOriginalWebP || file.type === 'image/svg+xml' || /\.svg$/i.test(file.name || '')) {
+          return resolve({
+            dataUrl: readerEvent.target.result,
+            originalSize,
+            compressedSize: originalSize,
+            originalSizeFormatted: formatBytes(originalSize),
+            compressedSizeFormatted: formatBytes(originalSize),
+            compressionRatio: '0% (WebP พร้อมใช้งาน)',
+            width: 1200,
+            height: 800,
+            format: 'webp'
+          });
+        }
+        reject(new Error('ไม่สามารถประมวลผลรูปภาพได้'));
+      };
 
       img.onload = () => {
         let width = img.width;

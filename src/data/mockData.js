@@ -2165,3 +2165,18 @@ export const INSTALLATION_TIMELINE = [
     tasks: ['จัดทัวร์นาเมนต์เปิดร้านเพื่อดึงดูดลูกค้าและสร้างกระแส', 'ยิงแคมเปญโฆษณาโซเชียลมีเดียในรัศมีรอบร้าน', 'เปิดให้บริการอย่างเป็นทางการ']
   }
 ];
+
+// Popular games list for Esport Organizer Modal with Logos
+export const DEFAULT_ORGANIZER_GAMES = [
+  { id: 'VALORANT', name: 'VALORANT', logo: '/game-logos/valorant.svg' },
+  { id: 'Arena of Valor (RoV)', name: 'RoV', logo: '/game-logos/rov.svg' },
+  { id: 'Counter-Strike 2', name: 'CS2', logo: '/game-logos/cs2.svg' },
+  { id: 'PUBG PC', name: 'PUBG PC/Mobile', logo: '/game-logos/pubg.svg' },
+  { id: 'EA Sports FC Online', name: 'EA FC Online', logo: '/game-logos/eafc.svg' },
+  { id: 'Apex Legends', name: 'Apex Legends', logo: '/game-logos/apex.svg' },
+  { id: 'AUDITION', name: 'AUDITION', logo: '/game-logos/audition.svg' },
+  { id: 'RAGNAROK', name: 'RAGNAROK', logo: '/game-logos/ragnarok.svg' },
+  { id: 'WARZ', name: 'WARZ', logo: '/game-logos/warz.svg' },
+  { id: 'other', name: 'เกมอื่นๆ', logo: '/game-logos/other.svg', isOther: true }
+];
+

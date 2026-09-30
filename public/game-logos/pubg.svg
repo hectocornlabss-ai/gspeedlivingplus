@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="pubgBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1c1917"/>
+      <stop offset="100%" stop-color="#0c0a09"/>
+    </linearGradient>
+    <linearGradient id="pubgGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="50%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+  </defs>
+  <rect width="100" height="100" rx="22" fill="url(#pubgBg)"/>
+  <rect width="98" height="98" x="1" y="1" rx="21" fill="none" stroke="rgba(245, 158, 11, 0.35)" stroke-width="1.5"/>
+  <!-- Stencil Box -->
+  <rect x="14" y="24" width="72" height="52" rx="8" fill="url(#pubgGold)"/>
+  <!-- PUBG Cutout -->
+  <text x="50" y="60" font-family="'Impact', 'Arial Black', sans-serif" font-size="28" font-weight="900" fill="#0c0a09" text-anchor="middle" letter-spacing="2">PUBG</text>
+  <!-- Sub label -->
+  <text x="50" y="71" font-family="'Inter', system-ui, sans-serif" font-size="7" font-weight="800" fill="#0c0a09" text-anchor="middle" letter-spacing="1">BATTLEGROUNDS</text>
+</svg>

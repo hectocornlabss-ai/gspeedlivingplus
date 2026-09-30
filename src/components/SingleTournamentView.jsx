@@ -985,7 +985,7 @@ export default function SingleTournamentView({
 
         {/* ORGANIZER & PUBLISHER CALLOUT */}
         <section className="tournaments-organizer-callout" style={{ marginTop: '40px' }}>
-          <div className="tournaments-organizer-box glass-panel">
+          <div className="organizer-box tournaments-organizer-box glass-panel">
             <div className="organizer-left">
               <div className="badge-pill badge-blue">
                 <Layers size={14} />

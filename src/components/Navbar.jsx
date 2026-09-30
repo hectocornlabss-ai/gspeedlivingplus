@@ -72,6 +72,9 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
     : defaultNavItems;
 
   const handleNavClick = (target = 'arena', explicitPath = null) => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    if (document.documentElement) document.documentElement.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
     setMobileMenuOpen(false);
     if (!target && !explicitPath) return;
 
@@ -107,7 +110,9 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
         else setActiveTab('arena');
       }
       window.history.pushState(null, '', destPath);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      if (document.documentElement) document.documentElement.scrollTop = 0;
+      if (document.body) document.body.scrollTop = 0;
     }
   };
 
@@ -134,7 +139,7 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
               <div className="logo-title">
                 GLP <span className="text-blue">ESPORTS</span>
               </div>
-              <div className="logo-subtitle">G-SPEED LIVING PLUS ARENA</div>
+              <div className="logo-subtitle">GSPEED LIVING PLUS</div>
             </div>
           </div>
 
@@ -264,7 +269,7 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
             </button>
           )}
           <p className="mobile-footer-text">
-            GLP ESPORT ARENA • เปิดบริการตลอด 24 ชม.
+            GSPEED LIVING PLUS • เปิดบริการตลอด 24 ชม.
           </p>
         </div>
       </div>

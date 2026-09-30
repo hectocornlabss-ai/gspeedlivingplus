@@ -2192,7 +2192,7 @@ export default function FranchisePlanner() {
               {/* Hidden file input */}
               <input 
                 type="file" 
-                accept="image/*" 
+                accept="image/*,.webp,image/webp" 
                 ref={fileInputRef} 
                 onChange={handleFileUpload} 
                 style={{ display: 'none' }} 

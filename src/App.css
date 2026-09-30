@@ -815,9 +815,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 14px;
+  gap: 12px;
   flex-wrap: wrap;
   margin-bottom: 45px;
+}
+
+.hero-cta-group .cta-btn-large {
+  padding: 13px 22px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .hero-metrics-grid {
@@ -2813,36 +2824,129 @@
   line-height: 1.6;
 }
 
+/* Vision Box - Modern Highlight Card */
 .vision-box {
+  background: linear-gradient(135deg, rgba(239, 246, 255, 0.85) 0%, rgba(255, 255, 255, 0.98) 100%);
+  border: 1px solid #bfdbfe;
+  border-left: 4px solid #2563eb;
+  border-radius: 16px;
+  padding: 20px 22px;
   margin-bottom: 24px;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.05);
+  backdrop-filter: blur(8px);
+}
+
+.vision-header-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.vision-icon-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
 }
 
 .vision-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   color: #0f172a;
-  font-size: 1.1rem;
-  margin-bottom: 8px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: -0.01em;
 }
 
 .vision-text {
   color: #475569;
+  font-size: 0.92rem;
   line-height: 1.7;
+  margin: 0;
 }
 
+/* Philosophy List - Modern Micro-cards */
 .founder-philosophy-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.philosophy-item {
+.philosophy-item-card {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  font-size: 0.92rem;
-  color: #334155;
+  gap: 14px;
+  padding: 14px 18px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+  transition: all 0.25s ease;
+}
+
+.philosophy-item-card:hover {
+  transform: translateY(-2px);
+  border-color: #cbd5e1;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+}
+
+.philosophy-icon-wrap {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid;
+  margin-top: 1px;
+}
+
+.philosophy-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.philosophy-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 3px 0;
+  line-height: 1.35;
+}
+
+.philosophy-desc {
+  font-size: 0.86rem;
+  color: #475569;
+  line-height: 1.55;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .vision-box {
+    padding: 16px 18px;
+  }
+  .philosophy-item-card {
+    padding: 12px 14px;
+    gap: 12px;
+  }
+  .philosophy-icon-wrap {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+  }
+  .philosophy-title {
+    font-size: 0.9rem;
+  }
+  .philosophy-desc {
+    font-size: 0.82rem;
+  }
 }
 
 /* Timeline & Milestones */
@@ -9832,12 +9936,30 @@
     font-size: 0.95rem;
   }
   .hero-cta-group {
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     width: 100%;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
     gap: 10px;
   }
-  .hero-cta-group a, .hero-cta-group button {
+  .hero-cta-group a, 
+  .hero-cta-group button,
+  .hero-cta-group .cta-btn-large {
     width: 100%;
+    min-height: 48px;
+    padding: 11px 6px !important;
+    font-size: 0.86rem !important;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    white-space: nowrap;
+    text-align: center;
+    border-radius: 12px;
+    box-sizing: border-box;
   }
   .hero-metrics-grid {
     grid-template-columns: 1fr 1fr;
@@ -21932,7 +22054,8 @@
   }
   .btn-partner-cta {
     width: 100% !important;
-    justify-content: space-between !important;
+    justify-content: center !important;
+    gap: 16px !important;
   }
 }
 
@@ -22939,22 +23062,26 @@
   margin-top: 50px;
 }
 
-.organizer-box {
+.organizer-box,
+.tournaments-organizer-box {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 30px;
-  padding: 32px 36px;
+  gap: 32px;
+  padding: 36px 40px;
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
   border: 1px solid #e2e8f0;
-  border-radius: 18px;
+  border-radius: 20px;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
 }
 
 @media (max-width: 860px) {
-  .organizer-box {
+  .organizer-box,
+  .tournaments-organizer-box {
     flex-direction: column;
-    padding: 24px;
+    padding: 24px 20px;
+    gap: 24px;
+    align-items: stretch;
   }
 }
 
@@ -23378,7 +23505,7 @@
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid #e2e8f0;
   position: sticky;
-  top: 114px;
+  top: 116px;
   z-index: 35;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
   padding: 0;
@@ -24511,7 +24638,7 @@
     gap: 8px;
   }
   .tournament-tabs-bar {
-    top: 96px;
+    top: 110px;
     padding: 0;
   }
   .tabs-inner-scroll {
@@ -26203,61 +26330,108 @@
   margin: 0;
 }
 
-/* Game Selection Grid */
+/* Game Selection Grid - 3 Columns with Clean Font Weight */
 .esport-game-chips-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   margin-bottom: 12px;
 }
 
 .esport-game-chip-btn {
+  position: relative;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 10px 12px;
-  background: #f8fafc;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 8px 8px;
+  min-height: 46px;
+  background: #ffffff;
   border: 1.5px solid #e2e8f0;
-  border-radius: 12px;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   text-align: left;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
 .esport-game-chip-btn:hover {
-  background: #f1f5f9;
+  background: #f8fafc;
   border-color: #cbd5e1;
   transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
 }
 
 .esport-game-chip-btn.active {
   background: #eff6ff;
   border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 0 0 1.5px rgba(37, 99, 235, 0.25);
 }
 
-.esport-chip-top {
+.esport-chip-content {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  margin-bottom: 4px;
+  gap: 7px;
+  min-width: 0;
+  flex: 1;
+}
+
+.esport-game-logo-img {
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  object-fit: contain;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.esport-game-logo-fallback {
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  border-radius: 6px;
+  flex-shrink: 0;
 }
 
 .esport-game-name {
-  font-size: 0.88rem;
-  font-weight: 700;
+  font-size: 0.8rem;
+  font-weight: 600; /* Decreased font-weight by 100 (from 700 to 600) */
   color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.01em;
 }
 
 .esport-game-chip-btn.active .esport-game-name {
   color: #1d4ed8;
+  font-weight: 600;
 }
 
-.esport-game-genre {
-  font-size: 0.72rem;
-  color: #64748b;
-  font-weight: 500;
+.esport-chip-check-badge {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.esport-chip-check-badge svg {
+  width: 9px;
+  height: 9px;
+  stroke: #ffffff;
+  stroke-width: 3;
 }
 
 /* Format / Zone Selection Cards */
@@ -26689,11 +26863,27 @@
     margin-bottom: 10px;
   }
   .esport-game-chips-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 6px !important;
   }
   .esport-game-chip-btn {
-    padding: 8px 10px;
+    padding: 6px 6px !important;
+    min-height: 42px !important;
+    border-radius: 8px !important;
+  }
+  .esport-chip-content {
+    gap: 5px !important;
+  }
+  .esport-game-logo-img,
+  .esport-game-logo-fallback {
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+    border-radius: 5px !important;
+  }
+  .esport-game-name {
+    font-size: 0.74rem !important;
+    font-weight: 600 !important;
   }
   .esport-submit-bar {
     margin-top: 6px;

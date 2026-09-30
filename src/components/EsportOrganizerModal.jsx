@@ -2,29 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { 
   X, Trophy, Phone, MessageCircle, Calendar, Users, 
   Send, CheckCircle2, Monitor, Radio, ArrowRight, ExternalLink, Sparkles,
-  User, Building2, Layers, Check, Tv, Zap, Shield, FileText
+  User, Building2, Layers, Check, Tv, Zap, Shield, FileText, Gamepad2
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 
 const POPULAR_GAMES = [
-  { id: 'VALORANT', name: 'VALORANT', genre: '5v5 Tactical FPS' },
-  { id: 'Arena of Valor (RoV)', name: 'RoV', genre: '5v5 Mobile MOBA' },
-  { id: 'Counter-Strike 2', name: 'CS2', genre: 'Tactical Shooter' },
-  { id: 'PUBG PC', name: 'PUBG PC/Mobile', genre: 'Battle Royale' },
-  { id: 'EA Sports FC Online', name: 'EA FC Online', genre: 'Football' },
-  { id: 'Apex Legends', name: 'Apex Legends', genre: 'Hero Shooter' },
-  { id: 'other', name: 'เกมอื่นๆ', genre: 'ระบุชื่อเกมเอง' }
-];
-
-
-
-const QUICK_ADDONS = [
-  'จอ LED Wall 4K ถ่ายทอดสด',
-  'โต๊ะแคสเตอร์พากย์สดสตูดิโอ',
-  'อาหารและเครื่องดื่ม Cyber Cafe',
-  'เน็ตเวิร์ก 10Gbps Latency ต่ำพิเศษ',
-  'กรรมการ & ทีมงานดูแลระบบ 24 ชม.',
-  'นัดเข้าชมสถานที่จริงก่อน'
+  { id: 'VALORANT', name: 'VALORANT', logo: '/game-logos/valorant.svg' },
+  { id: 'Arena of Valor (RoV)', name: 'RoV', logo: '/game-logos/rov.svg' },
+  { id: 'Counter-Strike 2', name: 'CS2', logo: '/game-logos/cs2.svg' },
+  { id: 'PUBG PC', name: 'PUBG PC/Mobile', logo: '/game-logos/pubg.svg' },
+  { id: 'EA Sports FC Online', name: 'EA FC Online', logo: '/game-logos/eafc.svg' },
+  { id: 'Apex Legends', name: 'Apex Legends', logo: '/game-logos/apex.svg' },
+  { id: 'AUDITION', name: 'AUDITION', logo: '/game-logos/audition.svg' },
+  { id: 'RAGNAROK', name: 'RAGNAROK', logo: '/game-logos/ragnarok.svg' },
+  { id: 'WARZ', name: 'WARZ', logo: '/game-logos/warz.svg' },
+  { id: 'other', name: 'เกมอื่นๆ', logo: '/game-logos/other.svg', isOther: true }
 ];
 
 export default function EsportOrganizerModal({ 
@@ -34,7 +26,6 @@ export default function EsportOrganizerModal({
 }) {
   const { siteData, addLead } = useSiteData();
   const [submitted, setSubmitted] = useState(false);
-  const [selectedAddons, setSelectedAddons] = useState([]);
 
   const [form, setForm] = useState({
     name: '',
@@ -48,6 +39,7 @@ export default function EsportOrganizerModal({
     expectedDate: '',
     attendees: '16-32 ทีม (ประมาณ 100-200 คน)',
     budget: '',
+    addonsText: '',
     notes: initialZoneName ? `สนใจจัดงานแข่งขันในโซน: ${initialZoneName}` : ''
   });
 
@@ -76,14 +68,6 @@ export default function EsportOrganizerModal({
   const lineOaUrl = siteData?.footer?.lineUrl || 'https://line.me/R/ti/p/@gspeed';
   const hotlinePhone = siteData?.footer?.phone || '063-793-7704';
 
-  const toggleAddon = (addon) => {
-    if (selectedAddons.includes(addon)) {
-      setSelectedAddons(prev => prev.filter(item => item !== addon));
-    } else {
-      setSelectedAddons(prev => [...prev, addon]);
-    }
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!form.name.trim() || !form.phone.trim()) {
@@ -92,8 +76,8 @@ export default function EsportOrganizerModal({
     }
 
     const selectedGame = form.game === 'other' ? (form.customGame || 'เกมอื่นๆ') : form.game;
-    const addonsText = selectedAddons.length > 0 ? ` | อุปกรณ์เสริม: ${selectedAddons.join(', ')}` : '';
-    const fullNotes = `${form.notes || '-'}${addonsText}`;
+    const addonsNote = form.addonsText?.trim() ? ` | อุปกรณ์เสริม: ${form.addonsText.trim()}` : '';
+    const fullNotes = `${form.notes || '-'}${addonsNote}`;
 
     if (addLead) {
       addLead({
@@ -138,7 +122,7 @@ export default function EsportOrganizerModal({
 
           <div className="esport-modal-badge">
             <Sparkles size={13} />
-            <span>GLP ARENA TOURNAMENT VENUE</span>
+            <span>GSPEED LIVING PLUS TOURNAMENT VENUE</span>
           </div>
 
           <h3 className="esport-modal-title">
@@ -243,11 +227,11 @@ export default function EsportOrganizerModal({
                   <h4 className="esport-section-title">เลือกเกมที่ต้องการจัดการแข่งขัน</h4>
                 </div>
 
-                {/* Popular Games Chips */}
+                {/* Popular Games Chips with Logos */}
                 <div className="esport-field-group">
                   <label className="esport-field-label">เกมที่ต้องการจัดการแข่งขัน:</label>
                   <div className="esport-game-chips-grid">
-                    {POPULAR_GAMES.map(g => {
+                    {(Array.isArray(siteData?.organizerGames) && siteData.organizerGames.length > 0 ? siteData.organizerGames : POPULAR_GAMES).map(g => {
                       const isSel = form.game === g.id;
                       return (
                         <button
@@ -256,18 +240,36 @@ export default function EsportOrganizerModal({
                           className={`esport-game-chip-btn ${isSel ? 'active' : ''}`}
                           onClick={() => setForm({ ...form, game: g.id })}
                         >
-                          <div className="esport-chip-top">
+                          <div className="esport-chip-content">
+                            {g.logo ? (
+                              <img 
+                                src={g.logo} 
+                                alt={g.name} 
+                                className="esport-game-logo-img"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                  const fallback = e.currentTarget.parentElement.querySelector('.esport-game-logo-fallback');
+                                  if (fallback) fallback.style.display = 'flex';
+                                }}
+                              />
+                            ) : null}
+                            <div className="esport-game-logo-fallback" style={{ display: g.logo ? 'none' : 'flex' }}>
+                              <Gamepad2 size={22} className="text-blue" />
+                            </div>
                             <span className="esport-game-name">{g.name}</span>
-                            {isSel && <Check size={14} className="text-blue" />}
                           </div>
-                          <span className="esport-game-genre">{g.genre}</span>
+                          {isSel && (
+                            <div className="esport-chip-check-badge">
+                              <Check size={14} className="text-blue" />
+                            </div>
+                          )}
                         </button>
                       );
                     })}
                   </div>
 
-                  {form.game === 'other' && (
-                    <div className="esport-input-wrapper" style={{ marginTop: '8px' }}>
+                  {(form.game === 'other' || (siteData?.organizerGames || POPULAR_GAMES).find(g => g.id === form.game)?.isOther) && (
+                    <div className="esport-input-wrapper" style={{ marginTop: '10px' }}>
                       <input 
                         type="text" 
                         required
@@ -393,24 +395,18 @@ export default function EsportOrganizerModal({
                   </div>
                 </div>
 
-                {/* Quick Addons Checklist */}
+                {/* Equipment & Services text input */}
                 <div className="esport-field-group" style={{ marginBottom: '14px' }}>
                   <label className="esport-field-label">อุปกรณ์และบริการเสริมที่ต้องการ:</label>
-                  <div className="esport-addons-row">
-                    {QUICK_ADDONS.map(addon => {
-                      const isSel = selectedAddons.includes(addon);
-                      return (
-                        <button
-                          key={addon}
-                          type="button"
-                          className={`esport-addon-chip-btn ${isSel ? 'active' : ''}`}
-                          onClick={() => toggleAddon(addon)}
-                        >
-                          {isSel ? <Check size={13} className="text-blue" /> : <span style={{ opacity: 0.5 }}>+</span>}
-                          <span>{addon}</span>
-                        </button>
-                      );
-                    })}
+                  <div className="esport-input-wrapper">
+                    <Sparkles size={16} className="esport-input-icon" />
+                    <input 
+                      type="text" 
+                      className="esport-text-input"
+                      placeholder="เช่น จอ LED Wall 4K, โต๊ะแคสเตอร์พากย์สด, อาหารเครื่องดื่ม, เน็ต 10Gbps..."
+                      value={form.addonsText}
+                      onChange={e => setForm({ ...form, addonsText: e.target.value })}
+                    />
                   </div>
                 </div>
 

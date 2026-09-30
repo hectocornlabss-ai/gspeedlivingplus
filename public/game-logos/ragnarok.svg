@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="roGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="50%" stop-color="#eab308"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+    <linearGradient id="roSilver" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#94a3b8"/>
+    </linearGradient>
+    <linearGradient id="roSapphire" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#60a5fa"/>
+      <stop offset="50%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#1e3a8a"/>
+    </linearGradient>
+    <radialGradient id="roGlow" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="120" height="120" rx="28" fill="#0b1120"/>
+  <circle cx="60" cy="50" r="45" fill="url(#roGlow)"/>
+  <rect x="3" y="3" width="114" height="114" rx="25" fill="none" stroke="url(#roGold)" stroke-width="2.5" opacity="0.8"/>
+
+  <!-- Valkyrie Golden Wings & Central Sword / RO Crest -->
+  <g transform="translate(10, 8)">
+    <!-- Left Wing -->
+    <path d="M50 48 C42 35 28 28 14 26 C12 34 16 44 26 48 C16 48 14 55 20 62 C26 68 36 67 48 62 Z" 
+          fill="url(#roGold)" stroke="#78350f" stroke-width="1.2"/>
+    <path d="M48 54 C38 46 26 44 18 40 C19 46 24 53 32 55 Z" fill="#fef08a" opacity="0.6"/>
+
+    <!-- Right Wing -->
+    <path d="M50 48 C58 35 72 28 86 26 C88 34 84 44 74 48 C84 48 86 55 80 62 C74 68 64 67 52 62 Z" 
+          fill="url(#roGold)" stroke="#78350f" stroke-width="1.2"/>
+    <path d="M52 54 C62 46 74 44 82 40 C81 46 76 53 68 55 Z" fill="#fef08a" opacity="0.6"/>
+
+    <!-- Central Holy Cross / Sword -->
+    <!-- Blade -->
+    <path d="M50 14 L53 18 L53 66 L50 78 L47 66 L47 18 Z" fill="url(#roSilver)" stroke="#475569" stroke-width="1"/>
+    <!-- Guard -->
+    <path d="M36 34 L64 34 L62 38 L38 38 Z" fill="url(#roGold)" stroke="#78350f" stroke-width="1"/>
+    
+    <!-- Central Sapphire Crest Shield -->
+    <path d="M50 30 L59 36 L59 48 C59 55 50 62 50 62 C50 62 41 55 41 48 L41 36 Z" 
+          fill="url(#roSapphire)" stroke="url(#roGold)" stroke-width="2"/>
+
+    <!-- Cross inside Gem -->
+    <path d="M47 43 L53 43 M50 38 L50 51" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+  <!-- Text RAGNAROK -->
+  <text x="60" y="105" font-family="'Inter', -apple-system, sans-serif" font-weight="900" font-size="11" fill="url(#roGold)" text-anchor="middle" letter-spacing="2">RAGNAROK</text>
+</svg>

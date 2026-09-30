@@ -122,7 +122,7 @@ export default function MediaLibraryModal({
               )}
               <input 
                 type="file" 
-                accept="image/*" 
+                accept="image/*,.webp,image/webp" 
                 style={{ display: 'none' }}
                 disabled={compressing}
                 onChange={e => {

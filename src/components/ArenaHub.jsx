@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { 
   Trophy, Shield, Monitor, Coffee, Zap, Calendar, Users, 
   ArrowRight, Compass, Layers, Calculator, CheckCircle2, ChevronRight, Play, Check, Flame, X, Send,
@@ -73,12 +73,37 @@ export default function ArenaHub({
     setZoneSlideIndex(0);
   };
 
-  // Auto-scroll active thumbnail into view on slide change
+  // Always ensure page starts at absolute top (0, 0) upon ArenaHub mounting
+  useLayoutEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    if (document.documentElement) document.documentElement.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      if (document.documentElement) document.documentElement.scrollTop = 0;
+      if (document.body) document.body.scrollTop = 0;
+    });
+  }, []);
+
+  const isInitialZoneMount = useRef(true);
+
+  // Auto-scroll active thumbnail horizontally ONLY inside the strip (never touches window scroll)
   useEffect(() => {
-    if (thumbnailsRef.current) {
-      const activeBtn = thumbnailsRef.current.querySelector('.zone-thumb-btn.active');
+    if (isInitialZoneMount.current) {
+      isInitialZoneMount.current = false;
+      return;
+    }
+    const container = thumbnailsRef.current;
+    if (container) {
+      const activeBtn = container.querySelector('.zone-thumb-btn.active');
       if (activeBtn) {
-        activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        const btnLeft = activeBtn.offsetLeft;
+        const btnWidth = activeBtn.offsetWidth;
+        const containerWidth = container.offsetWidth;
+        container.scrollTo({
+          left: btnLeft - (containerWidth / 2) + (btnWidth / 2),
+          behavior: 'smooth'
+        });
       }
     }
   }, [zoneSlideIndex, activeZone]);
@@ -299,10 +324,11 @@ export default function ArenaHub({
                     }}
                   >
                     <Trophy size={18} />
-                    <span>ติดต่อขอจัดงานแข่ง Esport</span>
+                    <span>{heroData.btn1Text || 'สนใจจัดงาน'}</span>
                   </button>
 
                   <button 
+                    id="btn-hero-activities"
                     onClick={() => {
                       if (onNavigateActivities) {
                         onNavigateActivities();
@@ -324,11 +350,11 @@ export default function ArenaHub({
                     }}
                   >
                     <Camera size={18} className="text-blue" />
-                    <span>{heroData.primaryCta || heroData.primaryCtaText || 'ชมภาพกิจกรรมทั้งหมด'}</span>
-                    <ArrowRight size={18} />
+                    <span>{heroData.btn2Text || 'ดูกิจกรรม'}</span>
                   </button>
 
                   <button 
+                    id="btn-hero-tournaments"
                     onClick={() => {
                       if (onNavigateTournaments) {
                         onNavigateTournaments();
@@ -350,8 +376,7 @@ export default function ArenaHub({
                     }}
                   >
                     <Trophy size={18} className="text-amber" />
-                    <span>{heroData.secondaryCtaText || 'ปฏิทินแข่งทัวร์นาเมนต์'}</span>
-                    <ArrowRight size={18} />
+                    <span>{heroData.btn3Text || 'ทัวร์นาเมนต์'}</span>
                   </button>
 
                   <button 
@@ -370,7 +395,7 @@ export default function ArenaHub({
                     }}
                   >
                     <Compass size={18} />
-                    <span>{(heroData.secondaryCta && !heroData.secondaryCta.includes('จำลองผังร้าน')) ? heroData.secondaryCta : 'ติดต่อเปิดร้านเกมของคุณ'}</span>
+                    <span>{heroData.btn4Text || 'ติดต่อเปิดร้านเกม'}</span>
                   </button>
                 </div>
 

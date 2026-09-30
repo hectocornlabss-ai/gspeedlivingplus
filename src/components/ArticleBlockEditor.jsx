@@ -599,7 +599,7 @@ export default function ArticleBlockEditor({ blocks = [], onChange = () => {} })
                             )}
                             <input
                               type="file"
-                              accept="image/*"
+                              accept="image/*,.webp,image/webp"
                               style={{ display: 'none' }}
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
@@ -703,7 +703,7 @@ export default function ArticleBlockEditor({ blocks = [], onChange = () => {} })
                           )}
                           <input
                             type="file"
-                            accept="image/*"
+                            accept="image/*,.webp,image/webp"
                             style={{ display: 'none' }}
                             onChange={(e) => {
                               const file = e.target.files?.[0];

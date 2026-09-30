@@ -12,7 +12,7 @@ import {
   MessagesSquare, Receipt, Crown
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
-import { DEMO_TOURNAMENT_PHOTOS_50, EVENT_CATEGORIES, DEFAULT_ARTICLE_TAGS } from '../data/mockData';
+import { DEMO_TOURNAMENT_PHOTOS_50, EVENT_CATEGORIES, DEFAULT_ARTICLE_TAGS, DEFAULT_ORGANIZER_GAMES } from '../data/mockData';
 import ThreeProductViewer from './ThreeProductViewer';
 import ProductSpecSheetModal from './ProductSpecSheetModal';
 import { compressAndConvertToWebP, formatBytes } from '../utils/imageOptimizer';
@@ -144,7 +144,7 @@ function SectionImageUploader({
               )}
               <input 
                 type="file" 
-                accept="image/*" 
+                accept="image/*,.webp,image/webp" 
                 style={{ display: 'none' }}
                 onChange={e => {
                   const file = e.target.files?.[0];
@@ -654,7 +654,11 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
     updateSmtpConfig,
     updateStaffAlertEmail,
     updateEmailTemplate,
-    resetEmailTemplates
+    resetEmailTemplates,
+    updateOrganizerGames,
+    addOrganizerGame,
+    updateOrganizerGame,
+    deleteOrganizerGame
   } = useSiteData();
 
   // Mail Server (SMTP) & Email Templates States
@@ -822,8 +826,10 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
   };
 
   // Tournament Tab sub-mode
-  const [tourneySubTab, setTourneySubTab] = useState('applications'); // 'applications' | 'brackets'
+  const [tourneySubTab, setTourneySubTab] = useState('applications'); // 'applications' | 'brackets' | 'games'
   const [selectedTourneyBracketId, setSelectedTourneyBracketId] = useState('tour-1');
+  const [showAddGameModal, setShowAddGameModal] = useState(false);
+  const [newGameForm, setNewGameForm] = useState({ name: '', logo: '' });
 
   // Arena Booking Filter & Search
   const [arenaBookingFilter, setArenaBookingFilter] = useState('all');
@@ -3079,7 +3085,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                               <span>{isAnalyzingPhoto ? 'กำลังวิเคราะห์ภาพ...' : '📸 อัปโหลดภาพสินค้าจริง -> แปลงเป็น 3D & สกัดสี'}</span>
                               <input 
                                 type="file" 
-                                accept="image/*" 
+                                accept="image/*,.webp,image/webp" 
                                 style={{ display: 'none' }}
                                 onChange={async (e) => {
                                   const file = e.target.files?.[0];
@@ -3555,7 +3561,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                                 )}
                                 <input 
                                   type="file" 
-                                  accept="image/*" 
+                                  accept="image/*,.webp,image/webp" 
                                   style={{ display: 'none' }}
                                   onChange={async (e) => {
                                     const file = e.target.files?.[0];
@@ -3907,7 +3913,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                               <span>{isAnalyzingPhoto ? 'กำลังวิเคราะห์ภาพ...' : '📸 อัปโหลดภาพสินค้าจริง -> แปลงเป็น 3D & สกัดสี'}</span>
                               <input 
                                 type="file" 
-                                accept="image/*" 
+                                accept="image/*,.webp,image/webp" 
                                 style={{ display: 'none' }}
                                 onChange={async (e) => {
                                   const file = e.target.files?.[0];
@@ -4369,7 +4375,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                                 )}
                                 <input 
                                   type="file" 
-                                  accept="image/*" 
+                                  accept="image/*,.webp,image/webp" 
                                   style={{ display: 'none' }}
                                   onChange={async (e) => {
                                     const file = e.target.files?.[0];
@@ -6089,22 +6095,48 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                     />
                   </div>
 
-                  <div className="form-row-2">
-                    <div className="form-group">
-                      <label>ข้อความบนปุ่มหลัก (Primary Button)</label>
-                      <input 
-                        type="text" className="form-input"
-                        value={siteData.hero.primaryCta}
-                        onChange={e => updateHero({ primaryCta: e.target.value })}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>ข้อความบนปุ่มรอง (Secondary Button)</label>
-                      <input 
-                        type="text" className="form-input"
-                        value={siteData.hero.secondaryCta}
-                        onChange={e => updateHero({ secondaryCta: e.target.value })}
-                      />
+                  <div className="form-group" style={{ marginBottom: '18px' }}>
+                    <label style={{ fontWeight: 800, fontSize: '0.96rem', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Layers size={16} className="text-blue" />
+                      <span>ปุ่มทางลัดทั้ง 4 ปุ่มใต้ Hero (Hero Quick Action Buttons - 2 คอลัมน์)</span>
+                    </label>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label style={{ fontSize: '0.82rem', fontWeight: 600 }}>ปุ่มที่ 1 (จัดงานแข่งอีสปอร์ต):</label>
+                        <input 
+                          type="text" className="form-input"
+                          placeholder="สนใจจัดงาน"
+                          value={siteData.hero?.btn1Text || siteData.hero?.organizeCtaText || 'สนใจจัดงาน'}
+                          onChange={e => updateHero({ btn1Text: e.target.value, organizeCtaText: e.target.value })}
+                        />
+                      </div>
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label style={{ fontSize: '0.82rem', fontWeight: 600 }}>ปุ่มที่ 2 (ดูกิจกรรม & ข่าวสาร):</label>
+                        <input 
+                          type="text" className="form-input"
+                          placeholder="ดูกิจกรรม"
+                          value={siteData.hero?.btn2Text || siteData.hero?.primaryCta || 'ดูกิจกรรม'}
+                          onChange={e => updateHero({ btn2Text: e.target.value, primaryCta: e.target.value })}
+                        />
+                      </div>
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label style={{ fontSize: '0.82rem', fontWeight: 600 }}>ปุ่มที่ 3 (ทัวร์นาเมนต์ & ปฏิทิน):</label>
+                        <input 
+                          type="text" className="form-input"
+                          placeholder="ทัวร์นาเมนต์"
+                          value={siteData.hero?.btn3Text || siteData.hero?.secondaryCtaText || 'ทัวร์นาเมนต์'}
+                          onChange={e => updateHero({ btn3Text: e.target.value, secondaryCtaText: e.target.value })}
+                        />
+                      </div>
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label style={{ fontSize: '0.82rem', fontWeight: 600 }}>ปุ่มที่ 4 (ติดต่อเปิดร้านเกมแฟรนไชส์):</label>
+                        <input 
+                          type="text" className="form-input"
+                          placeholder="ติดต่อเปิดร้านเกม"
+                          value={siteData.hero?.btn4Text || siteData.hero?.secondaryCta || 'ติดต่อเปิดร้านเกม'}
+                          onChange={e => updateHero({ btn4Text: e.target.value, secondaryCta: e.target.value })}
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -7278,6 +7310,132 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                         />
                       </div>
 
+                      {/* Philosophies Editor (3 เสาหลักวิสัยทัศน์และการดำเนินงาน) */}
+                      <div className="form-group" style={{ marginTop: '16px', marginBottom: '24px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                          <label style={{ margin: 0, fontWeight: 800, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <Layers size={16} className="text-blue" />
+                            <span>หลักการและปรัชญาการขับเคลื่อน (Core Philosophies - การ์ด 3 เสาหลัก)</span>
+                          </label>
+                          <button
+                            type="button"
+                            className="btn-secondary"
+                            style={{ fontSize: '0.78rem', padding: '5px 12px', display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}
+                            onClick={() => {
+                              const currentPhils = Array.isArray(siteData.founder?.philosophies) && siteData.founder.philosophies.length > 0
+                                ? siteData.founder.philosophies
+                                : [
+                                    { id: 'phil-1', title: 'เทคโนโลยีต้องดีที่สุด', desc: 'ลงทุนในฮาร์ดแวร์ระดับทัวร์นาเมนต์ จอ 360Hz และระบบเน็ตเวิร์กที่แข่งขันได้จริง' },
+                                    { id: 'phil-2', title: 'สิ่งแวดล้อมปลอดภัยและได้มาตรฐาน', desc: 'ยึดหลักร้านเกมสีขาว ได้รับใบอนุญาตถูกต้อง 100% ปลอดบุหรี่และโปร่งใส' },
+                                    { id: 'phil-3', title: 'คืนทุนไว พาร์ตเนอร์เติบโตยั่งยืน', desc: 'ระบบแฟรนไชส์ออกแบบโดยคำนึงถึงผลตอบแทนของผู้ลงทุน ควบคุมต้นทุนได้จริง' }
+                                  ];
+                              updateSectionConfig('founder', {
+                                ...siteData.founder,
+                                philosophies: [
+                                  ...currentPhils,
+                                  { id: `phil-${Date.now()}`, title: 'หัวข้อหลักการใหม่', desc: 'คำอธิบายรายละเอียด...' }
+                                ]
+                              });
+                            }}
+                          >
+                            <Plus size={13} />
+                            <span>เพิ่มหัวข้อ</span>
+                          </button>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                          {(Array.isArray(siteData.founder?.philosophies) && siteData.founder.philosophies.length > 0
+                            ? siteData.founder.philosophies
+                            : [
+                                { id: 'phil-1', title: 'เทคโนโลยีต้องดีที่สุด', desc: 'ลงทุนในฮาร์ดแวร์ระดับทัวร์นาเมนต์ จอ 360Hz และระบบเน็ตเวิร์กที่แข่งขันได้จริง' },
+                                { id: 'phil-2', title: 'สิ่งแวดล้อมปลอดภัยและได้มาตรฐาน', desc: 'ยึดหลักร้านเกมสีขาว ได้รับใบอนุญาตถูกต้อง 100% ปลอดบุหรี่และโปร่งใส' },
+                                { id: 'phil-3', title: 'คืนทุนไว พาร์ตเนอร์เติบโตยั่งยืน', desc: 'ระบบแฟรนไชส์ออกแบบโดยคำนึงถึงผลตอบแทนของผู้ลงทุน ควบคุมต้นทุนได้จริง' }
+                              ]
+                          ).map((item, pIdx) => (
+                            <div 
+                              key={item.id || pIdx}
+                              style={{ 
+                                background: '#f8fafc', 
+                                border: '1px solid #e2e8f0', 
+                                borderRadius: '12px', 
+                                padding: '12px 14px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '8px'
+                              }}
+                            >
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
+                                <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#2563eb' }}>
+                                  เสาหลักที่ {pIdx + 1}
+                                </span>
+                                <button
+                                  type="button"
+                                  title="ลบรายการนี้"
+                                  style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '2px' }}
+                                  onClick={() => {
+                                    const currentPhils = Array.isArray(siteData.founder?.philosophies) && siteData.founder.philosophies.length > 0
+                                      ? siteData.founder.philosophies
+                                      : [
+                                          { id: 'phil-1', title: 'เทคโนโลยีต้องดีที่สุด', desc: 'ลงทุนในฮาร์ดแวร์ระดับทัวร์นาเมนต์ จอ 360Hz และระบบเน็ตเวิร์กที่แข่งขันได้จริง' },
+                                          { id: 'phil-2', title: 'สิ่งแวดล้อมปลอดภัยและได้มาตรฐาน', desc: 'ยึดหลักร้านเกมสีขาว ได้รับใบอนุญาตถูกต้อง 100% ปลอดบุหรี่และโปร่งใส' },
+                                          { id: 'phil-3', title: 'คืนทุนไว พาร์ตเนอร์เติบโตยั่งยืน', desc: 'ระบบแฟรนไชส์ออกแบบโดยคำนึงถึงผลตอบแทนของผู้ลงทุน ควบคุมต้นทุนได้จริง' }
+                                        ];
+                                    const filtered = currentPhils.filter((_, idx) => idx !== pIdx);
+                                    updateSectionConfig('founder', {
+                                      ...siteData.founder,
+                                      philosophies: filtered
+                                    });
+                                  }}
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                              <input 
+                                type="text"
+                                className="form-input"
+                                style={{ fontWeight: 700 }}
+                                placeholder="เช่น เทคโนโลยีต้องดีที่สุด"
+                                value={item.title || ''}
+                                onChange={(e) => {
+                                  const currentPhils = Array.isArray(siteData.founder?.philosophies) && siteData.founder.philosophies.length > 0
+                                    ? [...siteData.founder.philosophies]
+                                    : [
+                                        { id: 'phil-1', title: 'เทคโนโลยีต้องดีที่สุด', desc: 'ลงทุนในฮาร์ดแวร์ระดับทัวร์นาเมนต์ จอ 360Hz และระบบเน็ตเวิร์กที่แข่งขันได้จริง' },
+                                        { id: 'phil-2', title: 'สิ่งแวดล้อมปลอดภัยและได้มาตรฐาน', desc: 'ยึดหลักร้านเกมสีขาว ได้รับใบอนุญาตถูกต้อง 100% ปลอดบุหรี่และโปร่งใส' },
+                                        { id: 'phil-3', title: 'คืนทุนไว พาร์ตเนอร์เติบโตยั่งยืน', desc: 'ระบบแฟรนไชส์ออกแบบโดยคำนึงถึงผลตอบแทนของผู้ลงทุน ควบคุมต้นทุนได้จริง' }
+                                      ];
+                                  currentPhils[pIdx] = { ...currentPhils[pIdx], title: e.target.value };
+                                  updateSectionConfig('founder', {
+                                    ...siteData.founder,
+                                    philosophies: currentPhils
+                                  });
+                                }}
+                              />
+                              <textarea
+                                className="form-input form-textarea"
+                                rows="2"
+                                placeholder="คำอธิบายรายละเอียด..."
+                                value={item.desc || ''}
+                                onChange={(e) => {
+                                  const currentPhils = Array.isArray(siteData.founder?.philosophies) && siteData.founder.philosophies.length > 0
+                                    ? [...siteData.founder.philosophies]
+                                    : [
+                                        { id: 'phil-1', title: 'เทคโนโลยีต้องดีที่สุด', desc: 'ลงทุนในฮาร์ดแวร์ระดับทัวร์นาเมนต์ จอ 360Hz และระบบเน็ตเวิร์กที่แข่งขันได้จริง' },
+                                        { id: 'phil-2', title: 'สิ่งแวดล้อมปลอดภัยและได้มาตรฐาน', desc: 'ยึดหลักร้านเกมสีขาว ได้รับใบอนุญาตถูกต้อง 100% ปลอดบุหรี่และโปร่งใส' },
+                                        { id: 'phil-3', title: 'คืนทุนไว พาร์ตเนอร์เติบโตยั่งยืน', desc: 'ระบบแฟรนไชส์ออกแบบโดยคำนึงถึงผลตอบแทนของผู้ลงทุน ควบคุมต้นทุนได้จริง' }
+                                      ];
+                                  currentPhils[pIdx] = { ...currentPhils[pIdx], desc: e.target.value };
+                                  updateSectionConfig('founder', {
+                                    ...siteData.founder,
+                                    philosophies: currentPhils
+                                  });
+                                }}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
                       <SectionColorCustomizer 
                         title="🎨 สีพื้นหลังและฟอนต์ส่วนผู้ก่อตั้ง & บริษัท"
                         description="กำหนดสีพื้นหลังและการ์ดโปรไฟล์ผู้ก่อตั้ง และสีฟอนต์ชื่อ/คำคม/ประวัติ"
@@ -7762,7 +7920,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                                         <span>อัปโหลดภาพจากเครื่อง</span>
                                         <input 
                                           type="file" 
-                                          accept="image/*" 
+                                          accept="image/*,.webp,image/webp" 
                                           style={{ display: 'none' }}
                                           onChange={(e) => {
                                             const file = e.target.files?.[0];
@@ -10923,6 +11081,24 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                 >
                   🏆 ควบคุมสายการแข่งขัน & สกอร์สด (Bracket Manager)
                 </button>
+                <button
+                  type="button"
+                  id="cms-subtab-tourney-games"
+                  onClick={() => setTourneySubTab('games')}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    fontSize: '0.85rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    background: tourneySubTab === 'games' ? '#ffffff' : 'transparent',
+                    color: tourneySubTab === 'games' ? '#1d4ed8' : '#64748b',
+                    boxShadow: tourneySubTab === 'games' ? '0 2px 6px rgba(0,0,0,0.08)' : 'none'
+                  }}
+                >
+                  🎮 เกมขอจัดแข่งขัน & โลโก้ ({((siteData.organizerGames || DEFAULT_ORGANIZER_GAMES).length)})
+                </button>
               </div>
 
               {tourneySubTab === 'applications' && (
@@ -11779,6 +11955,427 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                         </div>
                       ))}
                     </div>
+                  </div>
+                );
+              })()}
+
+              {/* -------------------------------------------------------------
+                  SUB-TAB 3: ESPORT ORGANIZER GAMES & LOGO MANAGER
+                  ------------------------------------------------------------- */}
+              {tourneySubTab === 'games' && (() => {
+                const games = siteData.organizerGames || DEFAULT_ORGANIZER_GAMES;
+
+                const handleMoveGame = (idx, direction) => {
+                  const targetIdx = idx + direction;
+                  if (targetIdx < 0 || targetIdx >= games.length) return;
+                  const newGames = [...games];
+                  const temp = newGames[idx];
+                  newGames[idx] = newGames[targetIdx];
+                  newGames[targetIdx] = temp;
+                  updateOrganizerGames(newGames);
+                  triggerSaveToast();
+                };
+
+                const handleResetGames = () => {
+                  if (window.confirm('คุณต้องการรีเซ็ตรายชื่อเกมและโลโก้กลับเป็นค่าเริ่มต้นทั้งหมดหรือไม่?')) {
+                    updateOrganizerGames(DEFAULT_ORGANIZER_GAMES);
+                    triggerSaveToast();
+                  }
+                };
+
+                return (
+                  <div className="cms-games-manager-wrap">
+                    {/* Top Action Bar */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '20px', padding: '16px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                      <div>
+                        <h4 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', margin: '0 0 4px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <Gamepad2 size={20} className="text-blue" />
+                          <span>จัดการรายชื่อเกมสำหรับขอจัดแข่งอีสปอร์ต ({games.length} เกม)</span>
+                        </h4>
+                        <p style={{ fontSize: '0.85rem', color: '#64748b', margin: 0 }}>
+                          เพิ่ม แก้ไขชื่อ เปลี่ยนโลโก้ (รองรับ WebP, PNG, SVG หรือเลือกจากคลังสื่อ) เพื่อให้ผู้จัดงานเลือกในหน้าฟอร์ม "สนใจจัดงาน"
+                        </p>
+                      </div>
+                      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                        <button
+                          type="button"
+                          className="btn-primary"
+                          id="btn-admin-add-game"
+                          onClick={() => {
+                            setNewGameForm({ name: '', logo: '' });
+                            setShowAddGameModal(true);
+                          }}
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#2563eb', borderColor: '#2563eb' }}
+                        >
+                          <Plus size={16} />
+                          <span>เพิ่มเกมใหม่</span>
+                        </button>
+                        <button
+                          type="button"
+                          className="btn-secondary"
+                          onClick={handleResetGames}
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                        >
+                          <RefreshCw size={14} />
+                          <span>รีเซ็ตเป็นค่าเริ่มต้น</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Live Preview Box */}
+                    <div style={{ marginBottom: '24px', padding: '16px 20px', background: '#ffffff', borderRadius: '14px', border: '1.5px dashed #cbd5e1' }}>
+                      <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#475569', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Eye size={14} className="text-blue" />
+                        <span>ตัวอย่างการแสดงผลชิปเลือกเกมในหน้าฟอร์มจริง (Live Client Preview):</span>
+                      </div>
+                      <div className="esport-game-chips-grid">
+                        {games.map(g => (
+                          <div 
+                            key={g.id} 
+                            className="esport-game-chip-btn"
+                            style={{ cursor: 'default' }}
+                          >
+                            <div className="esport-chip-content">
+                              {g.logo ? (
+                                <img src={g.logo} alt={g.name} className="esport-game-logo-img" />
+                              ) : (
+                                <div className="esport-game-logo-fallback">
+                                  <Gamepad2 size={20} className="text-blue" />
+                                </div>
+                              )}
+                              <span className="esport-game-name">{g.name}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Games Grid List */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' }}>
+                      {games.map((game, idx) => {
+                        return (
+                          <div 
+                            key={game.id} 
+                            className="admin-subcard glass-panel"
+                            style={{ 
+                              padding: '16px', 
+                              borderRadius: '14px', 
+                              border: '1px solid #e2e8f0',
+                              background: '#ffffff',
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '12px'
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                              <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#64748b', background: '#f1f5f9', padding: '2px 8px', borderRadius: '6px' }}>
+                                ลำดับที่ #{idx + 1}
+                              </span>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <button
+                                  type="button"
+                                  disabled={idx === 0}
+                                  onClick={() => handleMoveGame(idx, -1)}
+                                  className="btn-icon-subtle"
+                                  title="เลื่อนขึ้น"
+                                  style={{ padding: '4px', cursor: idx === 0 ? 'not-allowed' : 'pointer', opacity: idx === 0 ? 0.3 : 1 }}
+                                >
+                                  <ChevronUp size={16} />
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={idx === games.length - 1}
+                                  onClick={() => handleMoveGame(idx, 1)}
+                                  className="btn-icon-subtle"
+                                  title="เลื่อนลง"
+                                  style={{ padding: '4px', cursor: idx === games.length - 1 ? 'not-allowed' : 'pointer', opacity: idx === games.length - 1 ? 0.3 : 1 }}
+                                >
+                                  <ChevronDown size={16} />
+                                </button>
+                                {game.id !== 'other' && !game.isOther && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (window.confirm(`คุณต้องการลบเกม "${game.name}" ออกจากระบบหรือไม่?`)) {
+                                        deleteOrganizerGame(game.id);
+                                        triggerSaveToast();
+                                      }
+                                    }}
+                                    className="btn-icon-subtle"
+                                    title="ลบเกม"
+                                    style={{ color: '#ef4444', padding: '4px', marginLeft: '6px' }}
+                                  >
+                                    <Trash2 size={16} />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Logo Preview & Upload Row */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                              <div style={{
+                                width: '56px',
+                                height: '56px',
+                                minWidth: '56px',
+                                borderRadius: '12px',
+                                background: '#0f172a',
+                                border: '1.5px solid #cbd5e1',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                overflow: 'hidden',
+                                padding: '4px'
+                              }}>
+                                {game.logo ? (
+                                  <img 
+                                    src={game.logo} 
+                                    alt={game.name} 
+                                    style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
+                                  />
+                                ) : (
+                                  <Gamepad2 size={28} style={{ color: '#94a3b8' }} />
+                                )}
+                              </div>
+
+                              <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: '#475569' }}>
+                                  ชื่อเกม (Game Name):
+                                </label>
+                                <input 
+                                  type="text"
+                                  className="form-input"
+                                  style={{ height: '34px', fontSize: '0.86rem', fontWeight: 600 }}
+                                  value={game.name}
+                                  onChange={e => {
+                                    updateOrganizerGame(game.id, { name: e.target.value });
+                                    triggerSaveToast();
+                                  }}
+                                  placeholder="ชื่อเกม"
+                                />
+                              </div>
+                            </div>
+
+                            {/* Logo Controls */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', paddingTop: '4px', borderTop: '1px solid #f1f5f9' }}>
+                              <label style={{ fontSize: '0.74rem', fontWeight: 700, color: '#64748b' }}>
+                                โลโก้เกม (Logo URL หรือ อัปโหลด):
+                              </label>
+                              <div style={{ display: 'flex', gap: '6px' }}>
+                                <input 
+                                  type="text"
+                                  className="form-input"
+                                  style={{ height: '32px', fontSize: '0.78rem', flex: 1 }}
+                                  value={game.logo || ''}
+                                  onChange={e => {
+                                    updateOrganizerGame(game.id, { logo: e.target.value });
+                                    triggerSaveToast();
+                                  }}
+                                  placeholder="/game-logos/... หรือ URL รูปภาพ"
+                                />
+                                <label 
+                                  className="btn-secondary" 
+                                  style={{ 
+                                    cursor: 'pointer', 
+                                    height: '32px', 
+                                    padding: '0 10px', 
+                                    display: 'inline-flex', 
+                                    alignItems: 'center', 
+                                    gap: '4px', 
+                                    fontSize: '0.78rem', 
+                                    whiteSpace: 'nowrap' 
+                                  }}
+                                  title="อัปโหลดภาพ WebP/PNG จากเครื่อง"
+                                >
+                                  <Upload size={13} />
+                                  <span>อัปโหลด</span>
+                                  <input 
+                                    type="file"
+                                    accept="image/*,.webp,image/webp"
+                                    style={{ display: 'none' }}
+                                    onChange={e => {
+                                      const file = e.target.files?.[0];
+                                      if (file) {
+                                        handleImageUpload(file, (dataUrl) => {
+                                          updateOrganizerGame(game.id, { logo: dataUrl });
+                                          triggerSaveToast();
+                                        }, `game-logo-${game.id}`);
+                                        e.target.value = '';
+                                      }
+                                    }}
+                                  />
+                                </label>
+                                <button
+                                  type="button"
+                                  className="btn-secondary"
+                                  style={{ height: '32px', padding: '0 10px', fontSize: '0.78rem', whiteSpace: 'nowrap' }}
+                                  onClick={() => {
+                                    openMediaLibraryForField('game', (url) => {
+                                      updateOrganizerGame(game.id, { logo: url });
+                                      triggerSaveToast();
+                                    }, game.logo);
+                                  }}
+                                  title="เลือกภาพจากคลังสื่อของระบบ"
+                                >
+                                  <ImageIcon size={13} />
+                                  <span>คลังสื่อ</span>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Modal: เพิ่มเกมใหม่ */}
+                    {showAddGameModal && (
+                      <div className="modal-backdrop" onClick={() => setShowAddGameModal(false)}>
+                        <div 
+                          className="modal-dialog glass-panel" 
+                          onClick={e => e.stopPropagation()}
+                          style={{ maxWidth: '440px', padding: '24px', borderRadius: '16px', background: '#ffffff', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                            <h4 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <Plus size={18} className="text-blue" />
+                              <span>เพิ่มเกมใหม่สำหรับขอจัดแข่ง</span>
+                            </h4>
+                            <button 
+                              type="button" 
+                              onClick={() => setShowAddGameModal(false)}
+                              className="btn-icon-subtle"
+                            >
+                              <X size={18} />
+                            </button>
+                          </div>
+
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                            <div className="form-group">
+                              <label style={{ fontSize: '0.84rem', fontWeight: 700, color: '#334155' }}>
+                                ชื่อเกม (Game Title) *
+                              </label>
+                              <input 
+                                type="text"
+                                className="form-input"
+                                placeholder="เช่น Free Fire, Dota 2, Street Fighter 6..."
+                                value={newGameForm.name}
+                                onChange={e => setNewGameForm({ ...newGameForm, name: e.target.value })}
+                                autoFocus
+                              />
+                            </div>
+
+                            <div className="form-group">
+                              <label style={{ fontSize: '0.84rem', fontWeight: 700, color: '#334155' }}>
+                                โลโก้เกม (Game Logo)
+                              </label>
+                              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
+                                <div style={{
+                                  width: '48px',
+                                  height: '48px',
+                                  minWidth: '48px',
+                                  borderRadius: '10px',
+                                  background: '#0f172a',
+                                  border: '1.5px solid #cbd5e1',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  overflow: 'hidden',
+                                  padding: '4px'
+                                }}>
+                                  {newGameForm.logo ? (
+                                    <img src={newGameForm.logo} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                  ) : (
+                                    <Gamepad2 size={24} style={{ color: '#94a3b8' }} />
+                                  )}
+                                </div>
+                                <div style={{ display: 'flex', gap: '8px', flex: 1 }}>
+                                  <label 
+                                    className="btn-secondary" 
+                                    style={{ 
+                                      cursor: 'pointer', 
+                                      padding: '8px 12px', 
+                                      display: 'inline-flex', 
+                                      alignItems: 'center', 
+                                      gap: '6px', 
+                                      fontSize: '0.82rem',
+                                      flex: 1,
+                                      justifyContent: 'center'
+                                    }}
+                                  >
+                                    <Upload size={14} />
+                                    <span>อัปโหลด (WebP)</span>
+                                    <input 
+                                      type="file"
+                                      accept="image/*,.webp,image/webp"
+                                      style={{ display: 'none' }}
+                                      onChange={e => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                          handleImageUpload(file, (dataUrl) => {
+                                            setNewGameForm(prev => ({ ...prev, logo: dataUrl }));
+                                          }, 'new-game-logo');
+                                          e.target.value = '';
+                                        }
+                                      }}
+                                    />
+                                  </label>
+                                  <button
+                                    type="button"
+                                    className="btn-secondary"
+                                    style={{ padding: '8px 12px', fontSize: '0.82rem' }}
+                                    onClick={() => {
+                                      openMediaLibraryForField('game', (url) => {
+                                        setNewGameForm(prev => ({ ...prev, logo: url }));
+                                      }, newGameForm.logo);
+                                    }}
+                                  >
+                                    <ImageIcon size={14} />
+                                    <span>คลังสื่อ</span>
+                                  </button>
+                                </div>
+                              </div>
+                              <input 
+                                type="text"
+                                className="form-input"
+                                placeholder="หรือพิมพ์ URL รูปภาพโลโก้..."
+                                value={newGameForm.logo}
+                                onChange={e => setNewGameForm({ ...newGameForm, logo: e.target.value })}
+                                style={{ fontSize: '0.82rem' }}
+                              />
+                            </div>
+
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
+                              <button
+                                type="button"
+                                className="btn-secondary"
+                                onClick={() => setShowAddGameModal(false)}
+                              >
+                                ยกเลิก
+                              </button>
+                              <button
+                                type="button"
+                                className="btn-primary"
+                                onClick={() => {
+                                  if (!newGameForm.name.trim()) {
+                                    alert('กรุณากรอกชื่อเกม');
+                                    return;
+                                  }
+                                  addOrganizerGame({
+                                    name: newGameForm.name.trim(),
+                                    logo: newGameForm.logo || '/game-logos/other.svg'
+                                  });
+                                  triggerSaveToast();
+                                  setShowAddGameModal(false);
+                                  setNewGameForm({ name: '', logo: '' });
+                                }}
+                              >
+                                บันทึกเกมใหม่
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })()}

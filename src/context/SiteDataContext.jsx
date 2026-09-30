@@ -11,7 +11,8 @@ import {
   EVENT_CATEGORIES as INITIAL_CATEGORIES,
   DEFAULT_ARTICLE_TAGS as INITIAL_TAGS,
   ARENA_SEATING_ZONES,
-  INTERIOR_THEMES as INITIAL_INTERIOR_THEMES
+  INTERIOR_THEMES as INITIAL_INTERIOR_THEMES,
+  DEFAULT_ORGANIZER_GAMES
 } from '../data/mockData';
 
 // Initial Store RAG Knowledge Base Chunks
@@ -848,6 +849,7 @@ export const DEFAULT_SITE_DATA = {
   activityCategories: INITIAL_CATEGORIES,
   articleTags: INITIAL_TAGS,
   news: INITIAL_NEWS,
+  organizerGames: DEFAULT_ORGANIZER_GAMES,
   founder: {
     ...INITIAL_FOUNDER,
     bgColor: '#ffffff',
@@ -1540,6 +1542,30 @@ export function SiteDataProvider({ children }) {
         }
         if (!Array.isArray(merged.articleTags) || merged.articleTags.length === 0) {
           merged.articleTags = INITIAL_TAGS;
+        }
+        if (!Array.isArray(merged.organizerGames) || merged.organizerGames.length === 0) {
+          merged.organizerGames = DEFAULT_ORGANIZER_GAMES;
+        } else {
+          const existingIds = new Set(merged.organizerGames.map(g => g.id));
+          const missingDefaults = DEFAULT_ORGANIZER_GAMES.filter(dg => !existingIds.has(dg.id) && dg.id !== 'other');
+          
+          let combined = merged.organizerGames.map(g => {
+            const def = DEFAULT_ORGANIZER_GAMES.find(dg => dg.id === g.id || dg.name.toLowerCase() === (g.name || '').toLowerCase());
+            return {
+              ...g,
+              logo: g.logo || def?.logo || '/game-logos/other.svg'
+            };
+          });
+
+          if (missingDefaults.length > 0) {
+            const otherIdx = combined.findIndex(g => g.id === 'other' || g.isOther);
+            if (otherIdx !== -1) {
+              combined.splice(otherIdx, 0, ...missingDefaults);
+            } else {
+              combined.push(...missingDefaults);
+            }
+          }
+          merged.organizerGames = combined;
         }
         if (Array.isArray(merged.gallery)) {
           merged.gallery = merged.gallery.map(g => ({
@@ -2830,6 +2856,54 @@ export function SiteDataProvider({ children }) {
     }));
   };
 
+  // Esport Organizer Games Handlers (Logo & Game Names)
+  const updateOrganizerGames = (newGames) => {
+    setSiteData(prev => {
+      const updated = { ...prev, organizerGames: newGames };
+      saveSiteData(updated);
+      return updated;
+    });
+  };
+
+  const addOrganizerGame = (gameData) => {
+    setSiteData(prev => {
+      const existing = prev.organizerGames || DEFAULT_ORGANIZER_GAMES;
+      const newGame = {
+        id: `game-${Date.now()}`,
+        name: gameData.name || 'ชื่อเกมใหม่',
+        logo: gameData.logo || '/game-logos/other.svg',
+        ...gameData
+      };
+      // Keep "other" at the very end
+      const withoutOther = existing.filter(g => g.id !== 'other');
+      const otherItem = existing.find(g => g.id === 'other') || { id: 'other', name: 'เกมอื่นๆ', logo: '/game-logos/other.svg', isOther: true };
+      const updatedGames = [...withoutOther, newGame, otherItem];
+      const updated = { ...prev, organizerGames: updatedGames };
+      saveSiteData(updated);
+      return updated;
+    });
+  };
+
+  const updateOrganizerGame = (id, updates) => {
+    setSiteData(prev => {
+      const existing = prev.organizerGames || DEFAULT_ORGANIZER_GAMES;
+      const updatedGames = existing.map(g => g.id === id ? { ...g, ...updates } : g);
+      const updated = { ...prev, organizerGames: updatedGames };
+      saveSiteData(updated);
+      return updated;
+    });
+  };
+
+  const deleteOrganizerGame = (id) => {
+    setSiteData(prev => {
+      const existing = prev.organizerGames || DEFAULT_ORGANIZER_GAMES;
+      const updatedGames = existing.filter(g => g.id !== id);
+      const updated = { ...prev, organizerGames: updatedGames };
+      saveSiteData(updated);
+      return updated;
+    });
+  };
+
   const moveLeadStage = (id, newStage) => {
     updateLead(id, { stage: newStage });
   };
@@ -3262,6 +3336,10 @@ export function SiteDataProvider({ children }) {
     addInteriorTheme,
     deleteInteriorTheme,
     resetInteriorThemes,
+    updateOrganizerGames,
+    addOrganizerGame,
+    updateOrganizerGame,
+    deleteOrganizerGame,
     saveSiteData,
     resetToDefaults
   };

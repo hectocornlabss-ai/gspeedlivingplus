@@ -4,9 +4,11 @@ import {
   CheckCircle2, AlertCircle, Clock, Calendar, Users, DollarSign, MessageCircle 
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
+import { DEFAULT_ORGANIZER_GAMES } from '../data/mockData';
 
 export default function EsportRequestsCMS() {
   const { siteData, addLead, updateLead, deleteLead, addAuditLog } = useSiteData();
+  const organizerGames = siteData?.organizerGames || DEFAULT_ORGANIZER_GAMES;
 
   // Filters & Search
   const [filterStage, setFilterStage] = useState('all');
@@ -534,13 +536,9 @@ export default function EsportRequestsCMS() {
                     value={form.gameRequested}
                     onChange={e => setForm({ ...form, gameRequested: e.target.value })}
                   >
-                    <option value="VALORANT">VALORANT (PC)</option>
-                    <option value="RoV">RoV (Mobile)</option>
-                    <option value="CS2">Counter-Strike 2 (PC)</option>
-                    <option value="PUBG PC">PUBG: BATTLEGROUNDS (PC)</option>
-                    <option value="EA Sports FC 25">EA Sports FC 25 (PS5/PC)</option>
-                    <option value="Free Fire">Free Fire (Mobile)</option>
-                    <option value="Custom / อื่นๆ">เกมอื่นๆ / หลายเกม</option>
+                    {organizerGames.map(g => (
+                      <option key={g.id} value={g.name}>{g.name}</option>
+                    ))}
                   </select>
                 </div>
                 <div className="form-group">

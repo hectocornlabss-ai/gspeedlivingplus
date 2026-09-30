@@ -2,11 +2,45 @@ import React, { useState, useEffect } from 'react';
 import { 
   Users, Award, Cpu, Zap, Armchair, Monitor, 
   Wifi, ShieldCheck, CheckCircle2, TrendingUp, Mail, Phone, MapPin, Quote, Calculator, ArrowRight,
-  Camera, ZoomIn, ChevronLeft, ChevronRight, X, Layers, Building2
+  Camera, ZoomIn, ChevronLeft, ChevronRight, X, Layers, Building2, Target
 } from 'lucide-react';
 import { FOUNDER_INFO } from '../data/mockData';
 import { useSiteData } from '../context/SiteDataContext';
 import { sanitizeSafeUrl, isSafeExternalUrl } from '../utils/security';
+
+function getPhilosophyMeta(title = '', index = 0) {
+  const t = (title || '').toLowerCase();
+  if (t.includes('เทคโนโลยี') || t.includes('ฮาร์ดแวร์') || t.includes('tech') || index === 0) {
+    return {
+      icon: Cpu,
+      color: '#0284c7',
+      bgColor: '#eff6ff',
+      borderColor: '#bfdbfe'
+    };
+  }
+  if (t.includes('สิ่งแวดล้อม') || t.includes('ปลอดภัย') || t.includes('มาตรฐาน') || index === 1) {
+    return {
+      icon: ShieldCheck,
+      color: '#059669',
+      bgColor: '#ecfdf5',
+      borderColor: '#a7f3d0'
+    };
+  }
+  if (t.includes('คืนทุน') || t.includes('พาร์ตเนอร์') || t.includes('เติบโต') || index === 2) {
+    return {
+      icon: TrendingUp,
+      color: '#d97706',
+      bgColor: '#fffbeb',
+      borderColor: '#fde68a'
+    };
+  }
+  return {
+    icon: CheckCircle2,
+    color: '#2563eb',
+    bgColor: '#eff6ff',
+    borderColor: '#bfdbfe'
+  };
+}
 
 function isColorDark(hexColor) {
   if (!hexColor || typeof hexColor !== 'string') return false;
@@ -187,10 +221,14 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                 </div>
 
                 <div className="vision-box">
-                  <h4 className="vision-title">
-                    <TrendingUp size={18} className="text-blue" />
-                    <span>วิสัยทัศน์และการขับเคลื่อน (Core Vision)</span>
-                  </h4>
+                  <div className="vision-header-row">
+                    <div className="vision-icon-badge">
+                      <Target size={18} />
+                    </div>
+                    <h4 className="vision-title">
+                      <span>วิสัยทัศน์และการขับเคลื่อน (Core Vision)</span>
+                    </h4>
+                  </div>
                   <p className="vision-text" style={{ color: founder.textColor || (isDarkFounder ? '#cbd5e1' : '#475569') }}>{founder.vision}</p>
                 </div>
 
@@ -202,14 +240,32 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                         { title: 'สิ่งแวดล้อมปลอดภัยและได้มาตรฐาน', desc: 'ยึดหลักร้านเกมสีขาว ได้รับใบอนุญาตถูกต้อง 100% ปลอดบุหรี่และโปร่งใส' },
                         { title: 'คืนทุนไว พาร์ตเนอร์เติบโตยั่งยืน', desc: 'ระบบแฟรนไชส์ออกแบบโดยคำนึงถึงผลตอบแทนของผู้ลงทุน ควบคุมต้นทุนได้จริง' }
                       ]
-                  ).map((phil, pIdx) => (
-                    <div key={phil.id || pIdx} className="philosophy-item">
-                      <CheckCircle2 size={18} className="text-blue" />
-                      <div>
-                        <strong>{phil.title}:</strong> {phil.desc}
+                  ).map((phil, pIdx) => {
+                    const meta = getPhilosophyMeta(phil.title, pIdx);
+                    const PhilIcon = meta.icon;
+                    return (
+                      <div key={phil.id || pIdx} className="philosophy-item-card">
+                        <div 
+                          className="philosophy-icon-wrap"
+                          style={{
+                            color: meta.color,
+                            backgroundColor: meta.bgColor,
+                            borderColor: meta.borderColor
+                          }}
+                        >
+                          <PhilIcon size={18} />
+                        </div>
+                        <div className="philosophy-body">
+                          <h5 className="philosophy-title" style={{ color: isDarkFounder ? '#ffffff' : '#0f172a' }}>
+                            {phil.title}
+                          </h5>
+                          <p className="philosophy-desc" style={{ color: isDarkFounder ? '#94a3b8' : '#475569' }}>
+                            {phil.desc}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -407,7 +463,6 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                   <span className="btn-partner-tier-sub">{founder.franchiseCta?.subTitle || 'คำนวณงบลงทุน & วางระบบร้าน'}</span>
                   <span className="btn-partner-tier-main">{founder.franchiseCta?.title || 'ร่วมเป็นพาร์ตเนอร์แฟรนไชส์กับเรา'}</span>
                 </div>
-                <ArrowRight size={18} className="btn-partner-arrow" />
               </button>
             </div>
           </div>

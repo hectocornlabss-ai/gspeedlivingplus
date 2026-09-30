@@ -21,6 +21,7 @@ export default function Footer({ setActiveTab, onNavigate }) {
   };
 
   const handleLink = (path) => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     if (onNavigate) {
       onNavigate(path);
     } else {

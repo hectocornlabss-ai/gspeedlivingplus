@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useCallback, Suspense, lazy } from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ArenaHub from './components/ArenaHub';
@@ -9,6 +9,11 @@ import { SiteDataProvider, useSiteData } from './context/SiteDataContext';
 import { getRouteMetadata } from './data/routesConfig';
 import { applySEOMetadata, applyTrackingAndVerificationScripts } from './utils/seoManager';
 import './App.css';
+
+// Disable native browser auto-scroll restoration so SPA route transitions always start at top (0, 0)
+if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) {
+  window.history.scrollRestoration = 'manual';
+}
 
 // Code Splitting: Lazy load heavy modules for lightning fast initial load
 const AdminAuthGate = lazy(() => import('./components/AdminAuthGate'));
@@ -177,8 +182,8 @@ function AppContent() {
     }
   }, [routeState.pathname, routeState.eventSlug, routeState.actSlug, siteData]);
 
-  // เลื่อนกลับขึ้นบนสุดเมื่อเปลี่ยนหน้า
-  useEffect(() => {
+  // เลื่อนกลับขึ้นบนสุดเมื่อเปลี่ยนหน้า แบบทันที ไร้ดีเลย์ และไม่ค้างระหว่างทาง
+  useLayoutEffect(() => {
     if (routeState.sectionToScroll && !routeState.actSlug) {
       setTimeout(() => {
         const el = document.getElementById(routeState.sectionToScroll);
@@ -186,10 +191,17 @@ function AppContent() {
           el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       }, 100);
-    } else if (!routeState.sectionToScroll) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      if (document.documentElement) document.documentElement.scrollTop = 0;
+      if (document.body) document.body.scrollTop = 0;
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        if (document.documentElement) document.documentElement.scrollTop = 0;
+        if (document.body) document.body.scrollTop = 0;
+      });
     }
-  }, [routeState.sectionToScroll, routeState.tab, routeState.actSlug, routeState.eventSlug]);
+  }, [routeState.sectionToScroll, routeState.tab, routeState.actSlug, routeState.eventSlug, routeState.pathname]);
 
   // ดึงข้อมูลบทความปัจจุบันที่ตรงกับ Slug
   const allArticles = [...(siteData?.gallery || []), ...(siteData?.news || [])];
@@ -214,6 +226,9 @@ function AppContent() {
   const navigateTo = (path) => {
     window.history.pushState(null, '', path);
     setRouteState(parseCurrentLocation());
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    if (document.documentElement) document.documentElement.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
   };
 
   // Dynamic Theme Styling variables
