@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Sparkles, ArrowRight, Zap, Flame, Bell, ExternalLink } from 'lucide-react';
+import { Sparkles, ArrowRight, Flame, Bell, ExternalLink } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 
 export default function AnnouncementTicker({ onNavigate = () => {} }) {
@@ -118,7 +118,6 @@ export default function AnnouncementTicker({ onNavigate = () => {} }) {
                   boxShadow: `0 0 8px ${settings.leadBadgeDotColor || '#10b981'}`
                 }}
               />
-              <Zap size={13} className="text-amber" style={{ color: settings.leadBadgeIconColor || '#fbbf24' }} />
               <strong>{settings.leadBadgeText || 'GLP LIVE'}</strong>
             </div>
           </div>

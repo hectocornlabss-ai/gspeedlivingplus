@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   Bell, Plus, Trash2, Edit3, Eye, EyeOff, Sparkles, ArrowUp, ArrowDown,
-  ExternalLink, ArrowRight, Zap, CheckCircle2, Sliders, Palette, RefreshCw,
+  ExternalLink, ArrowRight, CheckCircle2, Sliders, Palette, RefreshCw,
   X, Check, AlertTriangle
 } from 'lucide-react';
 import { useSiteData, INITIAL_TICKER_SETTINGS, INITIAL_TICKER_ITEMS } from '../context/SiteDataContext';
@@ -264,7 +264,6 @@ export default function AnnouncementTickerCMS() {
                     boxShadow: `0 0 8px ${settings.leadBadgeDotColor || '#10b981'}`
                   }}
                 />
-                <Zap size={11} className="text-amber" style={{ color: settings.leadBadgeIconColor || '#fbbf24' }} />
                 <span>{settings.leadBadgeText || 'GLP LIVE'}</span>
               </div>
             )}
@@ -467,7 +466,7 @@ export default function AnnouncementTickerCMS() {
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
                   <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#e2e8f0', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Zap size={14} style={{ color: '#fbbf24' }} />
+                    <Palette size={14} style={{ color: '#38bdf8' }} />
                     ปรับแต่งสีป้าย Live ด้านซ้าย ({settings.leadBadgeText || 'GLP LIVE'})
                   </span>
                   
