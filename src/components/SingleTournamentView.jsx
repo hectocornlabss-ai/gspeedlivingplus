@@ -449,17 +449,12 @@ export default function SingleTournamentView({
                 gap: '18px',
                 boxShadow: '0 4px 16px rgba(16, 185, 129, 0.1)'
               }}>
-                <div style={{ flex: 1, minWidth: '280px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                    <span style={{ background: '#06c755', color: '#fff', padding: '3px 10px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 600 }}>
-                      LINE OFFICIAL
-                    </span>
-                    <strong style={{ fontSize: '1.15rem', color: '#14532d', fontWeight: 650 }}>
-                      ช่องทางรับสมัครนักกีฬา & ส่งรายชื่อทีม
-                    </strong>
-                  </div>
-                  <p style={{ margin: 0, color: '#166534', fontSize: '0.95rem', lineHeight: 1.6 }}>
-                    ไม่ต้องลงทะเบียนผ่านหน้าเว็บให้ยุ่งยาก เพียงทักแชต LINE Official เพื่อขอรับแบบฟอร์ม ส่งรายชื่อผู้เล่น และรับการยืนยันสิทธิ์จากทีมงาน G-Speed โดยตรง
+                <div style={{ flex: 1, minWidth: '240px' }}>
+                  <h3 style={{ fontSize: '1.15rem', color: '#14532d', fontWeight: 700, margin: '0 0 6px 0' }}>
+                    ช่องทางการรับสมัคร
+                  </h3>
+                  <p style={{ margin: 0, color: '#166534', fontSize: '0.92rem', lineHeight: 1.55 }}>
+                    ไม่ต้องลงทะเบียนผ่านหน้าเว็บให้ยุ่งยาก เพียงทักแชตเพื่อขอรับแบบฟอร์ม ส่งรายชื่อผู้เล่น และรับการยืนยันสิทธิ์จากทีมงาน G-Speed โดยตรง
                   </p>
                 </div>
                 <a 
@@ -469,20 +464,20 @@ export default function SingleTournamentView({
                   style={{ 
                     display: 'inline-flex', 
                     alignItems: 'center', 
-                    gap: '10px', 
+                    gap: '8px', 
                     background: '#06c755', 
                     color: '#ffffff', 
-                    padding: '13px 24px', 
+                    padding: '11px 22px', 
                     borderRadius: '10px', 
-                    fontWeight: 650, 
+                    fontWeight: 700, 
                     fontSize: '0.95rem',
                     textDecoration: 'none',
                     boxShadow: '0 4px 14px rgba(6, 199, 85, 0.35)',
                     flexShrink: 0
                   }}
                 >
-                  <MessageCircle size={18} />
-                  <span>เปิด LINE เพื่อสมัครแข่งขัน</span>
+                  <MessageCircle size={17} />
+                  <span>ลงทะเบียน</span>
                   <ExternalLink size={14} />
                 </a>
               </div>

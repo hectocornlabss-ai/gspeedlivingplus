@@ -9597,15 +9597,39 @@
     margin-bottom: 6px;
   }
   .studio-compact-steps {
-    overflow-x: auto;
-    width: 100%;
-    padding-bottom: 4px;
-    flex-wrap: nowrap;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 4px !important;
+    width: 100% !important;
+    padding-bottom: 2px !important;
+    overflow: visible !important;
+    flex-wrap: nowrap !important;
+  }
+  .studio-step-sep {
+    display: none !important;
   }
   .studio-step-pill {
-    flex-shrink: 0;
+    flex: 1 !important;
+    justify-content: center !important;
+    padding: 5px 2px !important;
+    gap: 3px !important;
+    border-radius: 8px !important;
+    font-size: 0.72rem !important;
+    min-width: 0 !important;
+  }
+  .studio-step-pill .step-num {
+    width: 16px !important;
+    height: 16px !important;
+    font-size: 0.65rem !important;
+    flex-shrink: 0 !important;
+  }
+  .studio-step-pill .step-txt {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .studio-step-pill .studio-active-dot {
+    display: none !important;
   }
   .studio-compact-metrics {
     width: 100%;

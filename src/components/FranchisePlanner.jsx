@@ -2008,7 +2008,10 @@ export default function FranchisePlanner() {
               title="ขั้นตอนที่ 1: กำหนดขนาดห้องและแปลนอาคาร"
             >
               <span className={`step-num ${currentStep === 1 ? 'active' : ''}`}>1</span>
-              <span className="step-txt">ขนาด {roomWidth}x{roomHeight}ม.</span>
+              <span className="step-txt">
+                <span className="hide-mobile">ขนาด {roomWidth}x{roomHeight}ม.</span>
+                <span className="show-mobile">ขนาดห้อง</span>
+              </span>
               {currentStep === 1 && <span className="studio-active-dot"></span>}
             </button>
             <ChevronRight size={14} className="studio-step-sep" />
@@ -2020,7 +2023,10 @@ export default function FranchisePlanner() {
               title="ขั้นตอนที่ 2: จัดผังร้าน 3D Studio & แปลน 2D"
             >
               <span className={`step-num ${currentStep === 2 ? 'active' : ''}`}>2</span>
-              <span className="step-txt">จัดผัง 3D Studio</span>
+              <span className="step-txt">
+                <span className="hide-mobile">จัดผัง 3D Studio</span>
+                <span className="show-mobile">ผัง 3D</span>
+              </span>
               {currentStep === 2 && <span className="studio-active-dot"></span>}
             </button>
             <ChevronRight size={14} className="studio-step-sep" />
@@ -2032,7 +2038,10 @@ export default function FranchisePlanner() {
               title="ขั้นตอนที่ 3: เลือกระดับสเปกฮาร์ดแวร์"
             >
               <span className={`step-num ${currentStep === 3 ? 'active' : ''}`}>3</span>
-              <span className="step-txt">สเปกคอม</span>
+              <span className="step-txt">
+                <span className="hide-mobile">สเปกคอม</span>
+                <span className="show-mobile">สเปก</span>
+              </span>
               {currentStep === 3 && <span className="studio-active-dot"></span>}
             </button>
             <ChevronRight size={14} className="studio-step-sep" />
@@ -2044,7 +2053,10 @@ export default function FranchisePlanner() {
               title="ขั้นตอนที่ 4: สรุปงบประมาณและผลตอบแทน ROI"
             >
               <span className={`step-num ${currentStep === 4 ? 'active' : ''}`}>4</span>
-              <span className="step-txt">งบ & ROI</span>
+              <span className="step-txt">
+                <span className="hide-mobile">งบ & ROI</span>
+                <span className="show-mobile">สรุปงบ</span>
+              </span>
               {currentStep === 4 && <span className="studio-active-dot"></span>}
             </button>
           </div>
