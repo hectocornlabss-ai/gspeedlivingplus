@@ -16,32 +16,7 @@ const POPULAR_GAMES = [
   { id: 'other', name: 'เกมอื่นๆ', genre: 'ระบุชื่อเกมเอง' }
 ];
 
-const VENUE_FORMATS = [
-  {
-    id: 'Main Stage 5v5 + Battleground Zone',
-    title: 'Main Stage 5v5 + Battleground',
-    desc: 'เวทีแข่งขันใหญ่พร้อมจอ LED 4K + ลานแข่งมาตรฐาน (จุ 100-200 คน)',
-    icon: Trophy
-  },
-  {
-    id: 'เหมาพื้นที่จัดแข่ง 50 เครื่อง',
-    title: 'โซนเครื่องแข่งขัน 50 เครื่อง',
-    desc: 'เครื่องสเปก RTX 4070 SUPER 240Hz เหมาะกับรอบคัดเลือก LAN',
-    icon: Monitor
-  },
-  {
-    id: 'เหมาอารีน่าทั้งร้าน 100+ เครื่อง',
-    title: 'เหมาทั้งอารีน่า 100+ เครื่อง',
-    desc: 'Full Arena Takeover ปิดศูนย์จัดแข่งกิจกรรม สัมมนา และแฟนมีต',
-    icon: Layers
-  },
-  {
-    id: 'Live Streaming & Caster Desk',
-    title: 'สตูดิโอ VIP & โต๊ะพากย์แคสเตอร์',
-    desc: 'ห้องเก็บเสียงระดับบรอดแคสต์ พร้อมไฟ Key Light และกล้อง 4K',
-    icon: Radio
-  }
-];
+
 
 const QUICK_ADDONS = [
   'จอ LED Wall 4K ถ่ายทอดสด',
@@ -69,7 +44,7 @@ export default function EsportOrganizerModal({
     email: '',
     game: 'VALORANT',
     customGame: '',
-    format: 'Main Stage 5v5 + Battleground Zone',
+    format: initialZoneName || 'ศูนย์การแข่งขัน GLP Arena',
     expectedDate: '',
     attendees: '16-32 ทีม (ประมาณ 100-200 คน)',
     budget: '',
@@ -132,9 +107,9 @@ export default function EsportOrganizerModal({
         budget: form.budget ? Number(form.budget.replace(/[^0-9]/g, '')) || 50000 : 50000,
         stage: 'new',
         channel: 'web_esport_modal',
-        floorArea: form.format,
+        floorArea: initialZoneName || form.format || 'ศูนย์การแข่งขัน GLP Arena',
         expectedOpening: form.expectedDate || 'เร็วๆ นี้',
-        notes: `เกมที่ต้องการจัด: ${selectedGame} | รูปแบบ: ${form.format} | ผู้เข้าร่วม: ${form.attendees} | LINE: ${form.lineId || '-'} | บันทึกเพิ่มเติม: ${fullNotes}`
+        notes: `${initialZoneName ? `โซนที่เลือก: ${initialZoneName} | ` : ''}เกมที่ต้องการจัด: ${selectedGame} | ผู้เข้าร่วม: ${form.attendees} | LINE: ${form.lineId || '-'} | บันทึกเพิ่มเติม: ${fullNotes}`
       });
     }
 
@@ -222,10 +197,12 @@ export default function EsportOrganizerModal({
                   <span className="esport-summary-label">เกมที่ต้องการจัด:</span>
                   <span className="esport-summary-value text-blue">{form.game === 'other' ? form.customGame : form.game}</span>
                 </div>
-                <div className="esport-summary-line">
-                  <span className="esport-summary-label">รูปแบบพื้นที่:</span>
-                  <span className="esport-summary-value">{form.format}</span>
-                </div>
+                {initialZoneName && (
+                  <div className="esport-summary-line">
+                    <span className="esport-summary-label">โซนที่สนใจ:</span>
+                    <span className="esport-summary-value">{initialZoneName}</span>
+                  </div>
+                )}
                 {selectedAddons.length > 0 && (
                   <div className="esport-summary-line">
                     <span className="esport-summary-label">อุปกรณ์เสริม:</span>
@@ -259,15 +236,15 @@ export default function EsportOrganizerModal({
             </div>
           ) : (
             <form onSubmit={handleSubmit}>
-              {/* SECTION 1: เลือกเกม & โซนพื้นที่จัดงาน */}
+              {/* SECTION 1: เลือกเกมที่ต้องการจัดแข่งขัน */}
               <div className="esport-form-section">
                 <div className="esport-section-header">
                   <span className="esport-section-num">1</span>
-                  <h4 className="esport-section-title">เลือกเกมและโซนพื้นที่จัดแข่งขัน</h4>
+                  <h4 className="esport-section-title">เลือกเกมที่ต้องการจัดการแข่งขัน</h4>
                 </div>
 
                 {/* Popular Games Chips */}
-                <div className="esport-field-group" style={{ marginBottom: '14px' }}>
+                <div className="esport-field-group">
                   <label className="esport-field-label">เกมที่ต้องการจัดการแข่งขัน:</label>
                   <div className="esport-game-chips-grid">
                     {POPULAR_GAMES.map(g => {
@@ -302,34 +279,6 @@ export default function EsportOrganizerModal({
                       />
                     </div>
                   )}
-                </div>
-
-                {/* Venue Format Cards */}
-                <div className="esport-field-group">
-                  <label className="esport-field-label">โซนและขนาดพื้นที่ที่ต้องการใช้งาน:</label>
-                  <div className="esport-format-cards-grid">
-                    {VENUE_FORMATS.map(fmt => {
-                      const IconComp = fmt.icon;
-                      const isSel = form.format === fmt.id;
-                      return (
-                        <button
-                          key={fmt.id}
-                          type="button"
-                          className={`esport-format-card-btn ${isSel ? 'active' : ''}`}
-                          onClick={() => setForm({ ...form, format: fmt.id })}
-                        >
-                          <div className="esport-format-icon-box">
-                            <IconComp size={18} />
-                          </div>
-                          <div style={{ flex: 1 }}>
-                            <div className="esport-format-card-title">{fmt.title}</div>
-                            <div className="esport-format-card-desc">{fmt.desc}</div>
-                          </div>
-                          {isSel && <Check size={16} className="text-blue" style={{ marginTop: '2px' }} />}
-                        </button>
-                      );
-                    })}
-                  </div>
                 </div>
               </div>
 
@@ -487,17 +436,39 @@ export default function EsportOrganizerModal({
                   <span>ส่งข้อมูลขอจัดงาน & รับใบเสนอราคาฟรี</span>
                 </button>
 
-                <div className="esport-fast-help-row">
-                  <span>ต้องการสอบถามคิวว่างหรือปรึกษาด่วนทันที:</span>
-                  <div className="esport-fast-contact-links">
-                    <a href={`tel:${hotlinePhone.replace(/[^0-9]/g, '')}`} className="esport-fast-phone-link">
-                      <Phone size={14} className="text-blue" />
-                      <span>{hotlinePhone}</span>
+                <div className="esport-fast-help-box">
+                  <div className="esport-fast-help-title">
+                    <Sparkles size={14} className="text-blue" />
+                    <span>ต้องการสอบถามคิวว่าง หรือปรึกษาทีมงานด่วนทันที:</span>
+                  </div>
+                  <div className="esport-fast-contact-grid">
+                    <a 
+                      href={`tel:${hotlinePhone.replace(/[^0-9]/g, '')}`} 
+                      className="esport-contact-action-btn phone"
+                    >
+                      <div className="contact-action-icon-circle">
+                        <Phone size={15} />
+                      </div>
+                      <div className="contact-action-info">
+                        <span className="contact-action-lbl">โทรสายด่วน</span>
+                        <span className="contact-action-val">{hotlinePhone}</span>
+                      </div>
                     </a>
-                    <a href={lineOaUrl} target="_blank" rel="noopener noreferrer" className="esport-fast-line-link">
-                      <MessageCircle size={14} />
-                      <span>LINE: @GSPEED</span>
-                      <ExternalLink size={11} />
+
+                    <a 
+                      href={lineOaUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="esport-contact-action-btn line"
+                    >
+                      <div className="contact-action-icon-circle">
+                        <MessageCircle size={15} />
+                      </div>
+                      <div className="contact-action-info">
+                        <span className="contact-action-lbl">แชท LINE ทางการ</span>
+                        <span className="contact-action-val">@GSPEED</span>
+                      </div>
+                      <ExternalLink size={12} className="contact-action-ext" />
                     </a>
                   </div>
                 </div>

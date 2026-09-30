@@ -26440,50 +26440,114 @@
   transform: translateY(0);
 }
 
-.esport-fast-help-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding: 12px 16px;
+/* Fast Contact Box Below Submit Button */
+.esport-fast-help-box {
+  margin-top: 4px;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  font-size: 0.85rem;
-  color: #64748b;
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.esport-fast-contact-links {
+.esport-fast-help-title {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #475569;
 }
 
-.esport-fast-phone-link {
-  color: #0f172a;
-  font-weight: 700;
-  text-decoration: none;
-  display: inline-flex;
+.esport-fast-contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+}
+
+.esport-contact-action-btn {
+  display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 9px;
+  padding: 9px 12px;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 11px;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
-.esport-fast-phone-link:hover {
+.esport-contact-action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.esport-contact-action-btn.phone:hover {
+  border-color: #93c5fd;
+  background: #f0f7ff;
+}
+
+.esport-contact-action-btn.line:hover {
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.contact-action-icon-circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.esport-contact-action-btn.phone .contact-action-icon-circle {
+  background: #eff6ff;
   color: #2563eb;
 }
 
-.esport-fast-line-link {
-  color: #06c755;
-  font-weight: 700;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
+.esport-contact-action-btn.line .contact-action-icon-circle {
+  background: #ecfdf5;
+  color: #059669;
 }
 
-.esport-fast-line-link:hover {
-  text-decoration: underline;
+.contact-action-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.contact-action-lbl {
+  font-size: 0.68rem;
+  color: #64748b;
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+.contact-action-val {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.esport-contact-action-btn.line .contact-action-val {
+  color: #059669;
+}
+
+.contact-action-ext {
+  color: #94a3b8;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 /* Success Card */
@@ -26539,31 +26603,93 @@
 
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
+  .esport-modal-backdrop {
+    padding: 10px 8px;
+    align-items: flex-start;
+  }
   .esport-modal-dialog {
-    max-height: 96vh;
+    max-height: calc(100vh - 20px);
+    margin-top: 6px;
     border-radius: 18px;
   }
   .esport-modal-header {
-    padding: 20px 20px 16px;
+    padding: 14px 16px 12px;
+  }
+  .esport-modal-badge {
+    margin-bottom: 6px;
+    font-size: 0.7rem;
+    padding: 3px 9px;
   }
   .esport-modal-title {
-    font-size: 1.25rem;
+    font-size: 1.15rem;
+    margin-bottom: 4px;
+  }
+  .esport-modal-subtitle {
+    font-size: 0.78rem;
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+  .esport-modal-chips-bar {
+    display: none;
   }
   .esport-modal-body {
-    padding: 18px 18px 22px;
+    padding: 14px 14px 18px;
   }
-  .esport-format-cards-grid {
-    grid-template-columns: 1fr;
+  .esport-form-section {
+    margin-bottom: 16px;
+  }
+  .esport-section-header {
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+  }
+  .esport-section-title {
+    font-size: 0.92rem;
   }
   .esport-inputs-grid-2 {
     grid-template-columns: 1fr;
-    gap: 10px;
+    gap: 8px;
+    margin-bottom: 10px;
   }
   .esport-game-chips-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
   }
-  .esport-fast-help-row {
-    flex-direction: column;
-    align-items: flex-start;
+  .esport-game-chip-btn {
+    padding: 8px 10px;
+  }
+  .esport-submit-bar {
+    margin-top: 6px;
+    gap: 10px;
+  }
+  .esport-btn-submit {
+    padding: 12px 18px;
+    font-size: 0.96rem;
+  }
+  .esport-fast-help-box {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+  .esport-contact-action-btn {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+  .contact-action-icon-circle {
+    width: 28px;
+    height: 28px;
+  }
+  .contact-action-val {
+    font-size: 0.8rem;
+  }
+
+  /* Compact landing page sections on mobile to eliminate excessive whitespace */
+  .tournaments-section {
+    padding: 36px 0;
+  }
+  .zones-section {
+    padding: 36px 0;
+  }
+  .zones-section .section-header,
+  .tournaments-section .section-header {
+    margin-bottom: 18px;
   }
 }
