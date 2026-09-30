@@ -759,6 +759,12 @@
   text-decoration: underline;
 }
 
+@media (max-width: 768px) {
+  .activity-search-bar-section {
+    display: none !important;
+  }
+}
+
 /* ==========================================================================
    HERO SECTION (WHITE / LIGHT THEME)
    ========================================================================== */

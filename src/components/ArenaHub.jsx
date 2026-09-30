@@ -114,8 +114,8 @@ export default function ArenaHub({
 
   return (
     <div className="arena-hub-page">
-      {/* 1. TOP ACTIVITY SEARCH & HOTLINE BAR */}
-      <section className="activity-search-bar-section">
+      {/* 1. TOP ACTIVITY SEARCH & HOTLINE BAR (Desktop only, hidden on mobile for clean immediate HERO display) */}
+      <section className="activity-search-bar-section hide-mobile">
         <div className="container activity-search-container">
           <div className="search-input-wrapper">
             <Search size={18} className="search-icon text-blue" />
