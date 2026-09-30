@@ -255,10 +255,10 @@ export default function ActivitiesPage({
                 GLP Esport Arena มีพื้นที่โถงอเนกประสงค์ขนาดใหญ่ เวทีแสงสีเสียง 4K รองรับผู้เข้าร่วมงานกว่า 200+ คน พร้อมบริการอาหาร เครื่องดื่ม และทีมงานดูแลงานแถลงข่าวครบวงจร
               </p>
               <div className="organizer-specs-chips">
-                <span className="spec-chip">✓ พื้นที่จัดงานกว่า 500 ตร.ม.</span>
-                <span className="spec-chip">✓ จอ LED Display ขนาดใหญ่</span>
-                <span className="spec-chip">✓ ระบบแสง สี เสียง มาตรฐานสากล</span>
-                <span className="spec-chip">✓ ที่จอดรถสะดวกสบายตลอด 24 ชม.</span>
+                <span className="spec-chip">✓ พื้นที่จัดงาน 500 ตร.ม.</span>
+                <span className="spec-chip">✓ จอ LED ขนาดใหญ่</span>
+                <span className="spec-chip">✓ ระบบแสงสีเสียง 4K</span>
+                <span className="spec-chip">✓ ที่จอดรถ 24 ชม.</span>
               </div>
             </div>
 

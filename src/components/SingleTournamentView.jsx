@@ -998,10 +998,10 @@ export default function SingleTournamentView({
                 GLP Esport Stadium พร้อมสนับสนุนค่ายเกม แบรนด์สปอนเซอร์ และออร์แกไนเซอร์ ด้วยเวทีแข่งขัน 5v5 มาตรฐานสากล, ระบบสตรีมมิ่ง 4K, ห้องพากย์แคสเตอร์เก็บเสียง, ระบบเซิร์ฟเวอร์ LAN 128-Tick และทีมงานเทคนิคอีสปอร์ตมืออาชีพ
               </p>
               <div className="organizer-specs-chips">
-                <span className="spec-chip">✓ เวทีแข่งขัน 5v5 Main Stage</span>
-                <span className="spec-chip">✓ เครื่องแข่ง i9 + RTX 4080 จอ 360Hz</span>
-                <span className="spec-chip">✓ ระบบถ่ายทอดสด 4K Streaming Rig</span>
-                <span className="spec-chip">✓ ห้องนักพากย์ Caster Studio</span>
+                <span className="spec-chip">✓ เวทีแข่งขัน 5v5</span>
+                <span className="spec-chip">✓ เครื่องแข่งสเปคสูง</span>
+                <span className="spec-chip">✓ ระบบถ่ายทอดสด 4K</span>
+                <span className="spec-chip">✓ ห้องพากย์ Caster Studio</span>
               </div>
             </div>
 
