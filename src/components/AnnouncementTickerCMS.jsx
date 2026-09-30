@@ -249,9 +249,22 @@ export default function AnnouncementTickerCMS() {
             }}
           >
             {settings.showLeadBadge !== false && (
-              <div className="ticker-sim-lead-pill">
-                <span className="live-pulsing-dot" />
-                <Zap size={11} className="text-amber" />
+              <div 
+                className="ticker-sim-lead-pill"
+                style={{
+                  backgroundColor: settings.leadBadgeBgColor || 'rgba(0, 0, 0, 0.45)',
+                  color: settings.leadBadgeTextColor || '#ffffff',
+                  borderColor: settings.leadBadgeBorderColor || 'rgba(255, 255, 255, 0.25)'
+                }}
+              >
+                <span 
+                  className="live-pulsing-dot" 
+                  style={{
+                    backgroundColor: settings.leadBadgeDotColor || '#10b981',
+                    boxShadow: `0 0 8px ${settings.leadBadgeDotColor || '#10b981'}`
+                  }}
+                />
+                <Zap size={11} className="text-amber" style={{ color: settings.leadBadgeIconColor || '#fbbf24' }} />
                 <span>{settings.leadBadgeText || 'GLP LIVE'}</span>
               </div>
             )}
@@ -440,6 +453,168 @@ export default function AnnouncementTickerCMS() {
                 </div>
               </div>
             </div>
+
+            {/* Live Badge Customizer (Colors & Themes) */}
+            {settings.showLeadBadge !== false && (
+              <div 
+                style={{ 
+                  marginTop: '16px', 
+                  padding: '14px 16px', 
+                  background: 'rgba(255, 255, 255, 0.03)', 
+                  borderRadius: '10px', 
+                  border: '1px solid rgba(255, 255, 255, 0.08)' 
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#e2e8f0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Zap size={14} style={{ color: '#fbbf24' }} />
+                    ปรับแต่งสีป้าย Live ด้านซ้าย ({settings.leadBadgeText || 'GLP LIVE'})
+                  </span>
+                  
+                  {/* Preset Themes */}
+                  <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>ธีมด่วน:</span>
+                    <button
+                      type="button"
+                      style={{ fontSize: '0.7rem', padding: '3px 8px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', border: '1px solid rgba(16, 185, 129, 0.3)', cursor: 'pointer' }}
+                      onClick={() => {
+                        updateTickerSettings({
+                          leadBadgeTextColor: '#ffffff',
+                          leadBadgeBgColor: 'rgba(0, 0, 0, 0.45)',
+                          leadBadgeDotColor: '#10b981',
+                          leadBadgeIconColor: '#fbbf24'
+                        });
+                        if (typeof triggerSaveToast === 'function') triggerSaveToast();
+                      }}
+                    >
+                      🟢 นีออนคลาสสิก
+                    </button>
+                    <button
+                      type="button"
+                      style={{ fontSize: '0.7rem', padding: '3px 8px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.15)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.3)', cursor: 'pointer' }}
+                      onClick={() => {
+                        updateTickerSettings({
+                          leadBadgeTextColor: '#ffffff',
+                          leadBadgeBgColor: 'rgba(239, 68, 68, 0.35)',
+                          leadBadgeDotColor: '#ef4444',
+                          leadBadgeIconColor: '#ffffff'
+                        });
+                        if (typeof triggerSaveToast === 'function') triggerSaveToast();
+                      }}
+                    >
+                      🔴 แดงไฟแรง (Hot Live)
+                    </button>
+                    <button
+                      type="button"
+                      style={{ fontSize: '0.7rem', padding: '3px 8px', borderRadius: '4px', background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24', border: '1px solid rgba(245, 158, 11, 0.3)', cursor: 'pointer' }}
+                      onClick={() => {
+                        updateTickerSettings({
+                          leadBadgeTextColor: '#fbbf24',
+                          leadBadgeBgColor: 'rgba(0, 0, 0, 0.6)',
+                          leadBadgeDotColor: '#f59e0b',
+                          leadBadgeIconColor: '#fbbf24'
+                        });
+                        if (typeof triggerSaveToast === 'function') triggerSaveToast();
+                      }}
+                    >
+                      🟡 ทองพรีเมียม
+                    </button>
+                    <button
+                      type="button"
+                      style={{ fontSize: '0.7rem', padding: '3px 8px', borderRadius: '4px', background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)', cursor: 'pointer' }}
+                      onClick={() => {
+                        updateTickerSettings({
+                          leadBadgeTextColor: '#e0f2fe',
+                          leadBadgeBgColor: 'rgba(14, 165, 233, 0.25)',
+                          leadBadgeDotColor: '#38bdf8',
+                          leadBadgeIconColor: '#38bdf8'
+                        });
+                        if (typeof triggerSaveToast === 'function') triggerSaveToast();
+                      }}
+                    >
+                      🔵 ไซเบอร์บลู
+                    </button>
+                  </div>
+                </div>
+
+                <div className="form-row-3">
+                  <div className="form-group">
+                    <label>สีตัวอักษรป้าย</label>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <input 
+                        type="color"
+                        value={settings.leadBadgeTextColor && settings.leadBadgeTextColor.startsWith('#') ? settings.leadBadgeTextColor : '#ffffff'}
+                        onChange={(e) => {
+                          updateTickerSettings({ leadBadgeTextColor: e.target.value });
+                          if (typeof triggerSaveToast === 'function') triggerSaveToast();
+                        }}
+                        style={{ width: '42px', height: '36px', padding: '2px', borderRadius: '6px', cursor: 'pointer', border: 'none' }}
+                      />
+                      <input 
+                        type="text"
+                        className="form-input"
+                        value={settings.leadBadgeTextColor || '#ffffff'}
+                        onChange={(e) => {
+                          updateTickerSettings({ leadBadgeTextColor: e.target.value });
+                          if (typeof triggerSaveToast === 'function') triggerSaveToast();
+                        }}
+                        placeholder="#ffffff"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>สีพื้นหลังป้าย</label>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <input 
+                        type="color"
+                        value={settings.leadBadgeBgColor && settings.leadBadgeBgColor.startsWith('#') ? settings.leadBadgeBgColor : '#0f172a'}
+                        onChange={(e) => {
+                          updateTickerSettings({ leadBadgeBgColor: e.target.value });
+                          if (typeof triggerSaveToast === 'function') triggerSaveToast();
+                        }}
+                        style={{ width: '42px', height: '36px', padding: '2px', borderRadius: '6px', cursor: 'pointer', border: 'none' }}
+                      />
+                      <input 
+                        type="text"
+                        className="form-input"
+                        value={settings.leadBadgeBgColor || 'rgba(0, 0, 0, 0.45)'}
+                        onChange={(e) => {
+                          updateTickerSettings({ leadBadgeBgColor: e.target.value });
+                          if (typeof triggerSaveToast === 'function') triggerSaveToast();
+                        }}
+                        placeholder="#0f172a หรือ rgba(0,0,0,0.4)"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>สีไฟกระพริบ Live Dot</label>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <input 
+                        type="color"
+                        value={settings.leadBadgeDotColor && settings.leadBadgeDotColor.startsWith('#') ? settings.leadBadgeDotColor : '#10b981'}
+                        onChange={(e) => {
+                          updateTickerSettings({ leadBadgeDotColor: e.target.value });
+                          if (typeof triggerSaveToast === 'function') triggerSaveToast();
+                        }}
+                        style={{ width: '42px', height: '36px', padding: '2px', borderRadius: '6px', cursor: 'pointer', border: 'none' }}
+                      />
+                      <input 
+                        type="text"
+                        className="form-input"
+                        value={settings.leadBadgeDotColor || '#10b981'}
+                        onChange={(e) => {
+                          updateTickerSettings({ leadBadgeDotColor: e.target.value });
+                          if (typeof triggerSaveToast === 'function') triggerSaveToast();
+                        }}
+                        placeholder="#10b981"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

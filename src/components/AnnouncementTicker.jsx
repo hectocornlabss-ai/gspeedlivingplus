@@ -103,9 +103,22 @@ export default function AnnouncementTicker({ onNavigate = () => {} }) {
         {/* Left Fixed Lead Badge */}
         {settings.showLeadBadge !== false && (
           <div className="ticker-lead-anchor">
-            <div className="ticker-live-pill">
-              <span className="live-pulsing-dot" />
-              <Zap size={13} className="text-amber" />
+            <div 
+              className="ticker-live-pill"
+              style={{
+                backgroundColor: settings.leadBadgeBgColor || 'rgba(0, 0, 0, 0.4)',
+                color: settings.leadBadgeTextColor || '#ffffff',
+                borderColor: settings.leadBadgeBorderColor || 'rgba(255, 255, 255, 0.25)'
+              }}
+            >
+              <span 
+                className="live-pulsing-dot" 
+                style={{
+                  backgroundColor: settings.leadBadgeDotColor || '#10b981',
+                  boxShadow: `0 0 8px ${settings.leadBadgeDotColor || '#10b981'}`
+                }}
+              />
+              <Zap size={13} className="text-amber" style={{ color: settings.leadBadgeIconColor || '#fbbf24' }} />
               <strong>{settings.leadBadgeText || 'GLP LIVE'}</strong>
             </div>
           </div>
