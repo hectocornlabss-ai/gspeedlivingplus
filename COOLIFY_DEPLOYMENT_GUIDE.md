@@ -1,114 +1,147 @@
-# คู่มือการ Deploy เว็บไซต์ G-SPEED ESPORT ARENA บน Coolify 🚀
+# คู่มือการ Deploy เว็บไซต์ G-SPEED ESPORT ARENA & 3D STUDIO บน Coolify 🚀
 
-คู่มือฉบับนี้จัดทำขึ้นเพื่อให้คุณสามารถนำโปรเจกต์ **G-SPEED ESPORT ARENA & 3D STUDIO** ไปติดตั้งและเปิดให้บริการบน **Coolify** ได้อย่างง่ายดาย ราบรื่น และได้ประสิทธิภาพระดับสูงสุด (Production Grade)
-
----
-
-## 🌟 จุดเด่นของสถาปัตยกรรมที่เตรียมไว้ให้สำหรับ Coolify
-
-1. **รองรับ Clean Path URLs 100%**: ด้วย `nginx.conf` ที่กำหนด `try_files $uri $uri/ /index.html;` ทำให้การเข้า URL ตรง เช่น `/events`, `/events/gspeed-valorant-championship-2026`, `/activities`, `/franchise`, หรือ `/admin` กดรีเฟรชหน้าแล้วไม่เจอ Error 404 อย่างแน่นอน
-2. **Multi-Stage Dockerfile ที่เบาและเร็ว**: แยก Stage การ Build (Node.js 20) ออกจาก Stage การ Run (Nginx Alpine) ทำให้ได้ Container ขนาดเล็ก ประหยัดแรมเซิร์ฟเวอร์ และบูตขึ้นเร็วมาก
-3. **เปิดใช้งาน Gzip Compression & Asset Caching**: โหลดไฟล์ภาพ, 3D Assets, และ JavaScript ได้อย่างรวดเร็ว โหลดซ้ำแทบไม่กิน Bandwidth
-4. **Auto SSL (Let's Encrypt)**: Coolify จะจัดการต่ออายุใบรับรองความปลอดภัย HTTPS ให้ฟรีตลอดชีพ
+คู่มือฉบับนี้จัดทำขึ้นเพื่อให้คุณสามารถนำโปรเจกต์ **G-SPEED ESPORT ARENA & 3D STUDIO** ไปติดตั้งและเปิดให้บริการบน **Coolify** (หรือ VPS ทั่วไป) ได้อย่างราบรื่น ปลอดภัย และได้ประสิทธิภาพระดับสูงสุด (Production Grade)
 
 ---
 
-## 📋 ไฟล์ที่เตรียมไว้ในโปรเจกต์แล้ว
+## 🌟 ภาพรวมสถาปัตยกรรมระบบ (Architecture)
 
-| ไฟล์ | หน้าที่ |
-| :--- | :--- |
-| `Dockerfile` | คำสั่ง Build และ Serve เว็บไซต์ด้วย Nginx Alpine อัตโนมัติ |
-| `nginx.conf` | การตั้งค่าเว็บเซิร์ฟเวอร์, รองรับ Clean Path URLs, Gzip, และ Security Headers |
-| `docker-compose.yml` | สำหรับผู้ที่ต้องการ Deploy ด้วย Docker Compose |
-| `.dockerignore` | กรองไฟล์ที่ไม่จำเป็นออก เพื่อให้การ Build บน Coolify รวดเร็วและมีขนาดเล็ก |
+โปรเจกต์นี้ได้รับการออกแบบให้ทำงานร่วมกันอย่างสมบูรณ์แบบในรูปแบบ **Containerized Microservices** ผ่าน `docker-compose.yml`:
+
+```
+                           [ Coolify Reverse Proxy / SSL (Let's Encrypt) ]
+                                                   │
+                                                   ▼
+┌─────────────────────────────────────────────────────────────────────────────────────────────┐
+│ Docker Network: glp-network                                                                 │
+│                                                                                             │
+│  ┌──────────────────────────────────────────┐    /api/*    ┌─────────────────────────────┐  │
+│  │ 1. gspeed-app (Port 80)                 │ ───────────> │ 2. email-service (Port 3001)│  │
+│  │  - Nginx Alpine (Ultra Fast & Lightweight)│              │  - Node.js Express Backend  │  │
+│  │  - React 19 + Three.js 3D Engine         │              │  - Hostinger SMTP (SSL 465) │  │
+│  │  - Clean Path URLs (No 404 on Refresh)   │              │  - Staff Email Alerts       │  │
+│  │  - Gzip & 1-Year Asset Caching           │              │  - Blueprint Streamer       │  │
+│  └──────────────────────────────────────────┘              └──────────────┬──────────────┘  │
+└───────────────────────────────────────────────────────────────────────────┼─────────────────┘
+                                                                            │ Port 465 SSL
+                                                                            ▼
+                                                             [ smtp.hostinger.com ]
+```
+
+### จุดเด่นที่เตรียมไว้พร้อมใช้งาน:
+1. **รองรับ Clean Path URLs 100%**: ด้วย Nginx `try_files $uri $uri/ /index.html;` เข้าลิงก์ตรง `/events`, `/activities`, `/franchise`, `/admin` กดรีเฟรชหน้าแล้วไม่เจอ Error 404
+2. **ระบบส่งอีเมล Hostinger SMTP อัตโนมัติ**: เมื่อลูกค้าส่งฟอร์มขอใบเสนอราคาผังร้าน 3D หรือฟอร์มติดต่อ ระบบส่งอีเมลยืนยันหาลูกค้าและแจ้งเตือนเข้า Inbox พนักงานทันที
+3. **ระบบดาวน์โหลดไฟล์พิมพ์เขียว/สำรองข้อมูล (Streamer)**: รองรับการดาวน์โหลดไฟล์ขนาดใหญ่สูงสุด 25MB พร้อมตั้งค่า Content-Disposition อัตโนมัติ
+4. **ความปลอดภัยระดับสูง (Security Headers)**: มี Rate Limiter ป้องกันสแปม, ซ่อน Server Header, บล็อก XSS และ Clickjacking
+
+---
+
+## 📋 เช็คลิสต์ก่อนเริ่ม Deploy วันนี้ (Pre-flight Checklist)
+
+ก่อนเริ่มกดปุ่ม Deploy บน Coolify แนะนำให้ตรวจสอบ 4 ข้อนี้:
+
+- [x] **โค้ดผ่านการทดสอบ Build ในเครื่องเรียบร้อย** (`npm run build` ผ่าน 100% ไม่มีข้อผิดพลาด)
+- [x] **การตั้งค่า Nginx และ Docker Compose ถูกต้อง** (`docker compose config` ผ่าน 100%)
+- [ ] **มีบัญชีอีเมล Hostinger และรหัสผ่านพร้อมใช้งาน** (เช่น `contact@gspeedlivingplus.com`)
+- [ ] **ชี้ DNS A Record โดเมนของคุณมาที่ IP ของเซิร์ฟเวอร์ Coolify** เรียบร้อยแล้ว (เช่น A Record ของ `gspeedlivingplus.com` ชี้ไปที่ Server IP)
 
 ---
 
 ## 🛠️ ขั้นตอนการ Deploy บน Coolify ทีละขั้นตอน (Step-by-Step)
 
-### ขั้นตอนที่ 1: อัปโหลดโค้ดขึ้น Git Repository
-1. นำโค้ดในโฟลเดอร์นี้ Push ขึ้นไปยัง Git (GitHub, GitLab, หรือ Self-hosted Gitea) ของคุณ:
-   ```bash
-   git add .
-   git commit -m "feat: complete clean urls, tournament system and coolify docker setup"
-   git push origin main
-   ```
+### ขั้นตอนที่ 1: ตรวจสอบและ Push โค้ดขึ้น Git Repository
+นำโค้ดล่าสุดขึ้น GitHub / GitLab / Gitea ของคุณ:
+```bash
+git add .
+git commit -m "feat: production ready docker-compose and coolify deployment setup"
+git push origin main
+```
 
 ---
 
-### ขั้นตอนที่ 2: เพิ่ม Resource ใหม่ใน Coolify
-1. เข้าสู่ระบบ Coolify Dashboard ของคุณ (เช่น `https://coolify.yourdomain.com`)
+### ขั้นตอนที่ 2: เพิ่ม Resource บน Coolify Dashboard
+1. เข้าสู่ระบบ Coolify Dashboard (เช่น `https://coolify.yourdomain.com`)
 2. เลือก **Project** และ **Environment** (เช่น Production)
-3. คลิกปุ่ม **`+ New`** หรือ **`+ Add Resource`**
+3. คลิกปุ่ม **`+ Add Resource`** (หรือ `+ New`)
 4. เลือก **Public Repository** หรือ **Private Repository (GitHub App / Deploy Key)**
 
 ---
 
-### ขั้นตอนที่ 3: ระบุข้อมูล Git Repository
-1. ใส่ URL ของ Git Repository ของคุณ
-2. เลือก Branch: `main` (หรือ branch ที่คุณต้องการ deploy)
-3. ติ๊กเลือก **Autodeploy** (เพื่อให้ Coolify ทำการ Deploy ใหม่อัตโนมัติทุกครั้งที่คุณ `git push`)
+### ขั้นตอนที่ 3: กำหนดค่า Git Repository
+1. วาง URL ของ Git Repository ของคุณ:
+   ```text
+   https://github.com/hectocornlabss-ai/gspeedlivingplus.git
+   ```
+2. เลือก Branch: `main`
+3. ติ๊กเปิด **Autodeploy** (เมื่อมีการ git push โค้ดใหม่ Coolify จะ build และ deploy ใหม่อัตโนมัติ)
 
 ---
 
-### ขั้นตอนที่ 4: Coolify ตรวจพบ Dockerfile อัตโนมัติ (Configuration)
-Coolify จะทำการตรวจสอบโปรเจกต์และเลือก **Build Pack: Dockerfile** ให้อัตโนมัติ:
+### ขั้นตอนที่ 4: เลือกรูปแบบการ Build (แนะนำ: Docker Compose)
 
-1. **Build Pack**: `Dockerfile` (ตรวจสอบว่าถูกเลือกเป็น Dockerfile)
-2. **Ports Exposes**: ใส่เลข `80` *(เนื่องจาก Nginx ใน Container ของเราเปิดพอร์ต 80)*
-3. **Domains (ชื่อโดเมนของคุณ)**:
-   - พิมพ์ชื่อโดเมนที่คุณต้องการ เช่น:
-     ```text
-     https://gspeedesport.com
-     ```
-   - หรือหากต้องการให้รองรับทั้ง `www` ด้วย:
-     ```text
-     https://gspeedesport.com,https://www.gspeedesport.com
-     ```
-   *(อย่าลืมชี้ DNS A Record ของโดเมนมาที่ IP ของเซิร์ฟเวอร์ Coolify ก่อนนะครับ)*
+#### ⭐ วิธีที่ 1: Docker Compose (แนะนำสูงสุด — ได้ทั้งเว็บ + ระบบส่งเมล)
+เมื่อ Coolify ให้เลือก **Build Pack**:
+1. เลือก **Build Pack: Docker Compose**
+2. Coolify จะอ่านไฟล์ `docker-compose.yml` ในโปรเจกต์โดยอัตโนมัติ
+3. กำหนด **Domains** ในหน้า Configuration:
+   ```text
+   https://gspeedlivingplus.com
+   ```
+   *(หรือใส่ทั้ง www ด้วย: `https://gspeedlivingplus.com,https://www.gspeedlivingplus.com`)*
+4. ไปที่แท็บ **Environment Variables** แล้วเพิ่มตัวแปรสำหรับระบบอีเมล Hostinger:
+   ```env
+   SMTP_HOST=smtp.hostinger.com
+   SMTP_PORT=465
+   SMTP_SECURE=true
+   SMTP_USER=contact@gspeedlivingplus.com
+   SMTP_PASS=รหัสผ่านอีเมลHostingerของคุณ
+   SMTP_FROM_NAME=GLP : G Speed Living Plus
+   SMTP_FROM_EMAIL=contact@gspeedlivingplus.com
+   STAFF_NOTIFICATION_EMAILS=staff1@gspeedlivingplus.com,manager@gspeedlivingplus.com
+   ```
 
----
-
-### ขั้นตอนที่ 5: กด Deploy 🚀
-1. คลิกปุ่ม **`Deploy`** (ปุ่มสีเขียวมุมขวาบน)
-2. ดูขั้นตอนการ Build ในแท็บ **Logs**:
-   - `Step 1`: ติดตั้ง dependencies (`npm ci`)
-   - `Step 2`: ทำการ Build Production Bundle (`npm run build`)
-   - `Step 3`: นำไฟล์ไปใส่ใน Nginx Container
-   - `Step 4`: Coolify ขอ SSL Certificate จาก Let's Encrypt และเปิดใช้งาน Reverse Proxy ให้อัตโนมัติ
-3. เมื่อสถานะเปลี่ยนเป็น **Running (Healthy)** สามารถคลิกเข้าชมเว็บไซต์ผ่านโดเมนของคุณได้ทันที!
-
----
-
-## 🌐 การเชื่อมต่อกับ Open WebUI และ n8n บนเซิร์ฟเวอร์เดียวกัน
-
-หากคุณติดตั้ง **Open WebUI** และ **n8n** บน Coolify เครื่องเดียวกัน:
-* คุณสามารถสร้าง **Docker Network** วงเดียวกันใน Coolify เพื่อให้ Container คุยหากันได้โดยไม่ต้องวิ่งออกเน็ตภายนอก
-* ตัวอย่าง URL ภายใน:
-  - Open WebUI: `http://openwebui:8080`
-  - n8n Automation: `http://n8n:5678`
-* สามารถนำ Webhook URL ของ n8n มาใส่ในหน้า **Admin CMS > ระบบ Automation & Webhooks** ของเว็บเพื่อส่งแจ้งเตือน Lead การขอเปิดร้านแฟรนไชส์ หรือการสมัครแข่งเกมเข้ากลุ่ม LINE / Discord ได้ทันที
+#### 🔹 วิธีที่ 2: Dockerfile (เฉพาะหน้าเว็บอย่างเดียว)
+หากต้องการรันเฉพาะหน้าเว็บ Static SPA:
+1. เลือก **Build Pack: Dockerfile**
+2. Ports Exposes: `80`
+3. Domains: ระบุชื่อโดเมนของคุณ
 
 ---
 
-## ❓ การแก้ไขปัญหาที่พบบ่อย (Troubleshooting)
+### ขั้นตอนที่ 5: กดปุ่ม Deploy 🚀
+1. คลิกปุ่ม **`Deploy`** (ปุ่มสีฟ้าหรือสีเขียวมุมขวาบน)
+2. สังเกตหน้าต่าง **Deployment Logs**:
+   - ระบบจะทำการดึง Base Image Node.js 20 และ Nginx Alpine
+   - ทำการติดตั้งแพ็กเกจและรันคำสั่ง `npm run build`
+   - Coolify จะเชื่อมต่อกับ Let's Encrypt เพื่อสร้างใบรับรองความปลอดภัย HTTPS (SSL) ให้อัตโนมัติ
+3. เมื่อสถานะแสดงเป็น **Running (Healthy)** คุณสามารถเปิดดูเว็บไซต์ผ่านโดเมนของคุณได้ทันที!
 
-### 1. กดรีเฟรชหน้า `/events` หรือ `/admin` แล้วเจอ 404 หรือไม่?
-* **ตอบ**: **ไม่เจอแน่นอนครับ** เพราะใน `nginx.conf` เราได้ใส่คำสั่ง `try_files $uri $uri/ /index.html;` ไว้เรียบร้อยแล้ว ทุก Route จะถูกส่งเข้า React SPA อย่างสมบูรณ์แบบ
+---
 
-### 2. ต้องการอัปเดตรหัสผ่านแอดมินหรือข้อมูลเริ่มต้นผ่าน Environment Variable ทำได้ไหม?
-* **ตอบ**: สามารถกำหนดตัวแปรในแท็บ **Environment Variables** บน Coolify ได้เลย เช่น:
-  ```env
-  VITE_API_BASE_URL=https://api.gspeedesport.com
-  VITE_ENABLE_ANALYTICS=true
-  ```
+## 🧪 การทดสอบระบบหลังการ Deploy (Verification Checklist)
 
-### 3. แคชรูปภาพหรือสเปกไม่อัปเดตเมื่อ Deploy เวอร์ชันใหม่?
-* **ตอบ**: ไฟล์ `index.html` ของเราถูกตั้งค่า `Cache-Control: no-cache` ไว้ ดังนั้นเมื่อคุณ Deploy เวอร์ชันใหม่ ผู้ใช้จะได้รับเวอร์ชันใหม่ทันที ส่วนไฟล์ JavaScript/CSS จะมี Hash กำกับอยู่แล้ว ทำให้ไม่ต้องกังวลเรื่องติดแคชเก่า
+เมื่อ Deploy สำเร็จแล้ว ให้เปิดเข้าเว็บผ่านโดเมนและทดสอบตามลำดับนี้:
 
-### 4. การเปิดใช้งานระบบส่งอีเมล Hostinger SMTP (Web + Email Microservice)
-* **ตอบ**: ในโปรเจกต์ได้เตรียม `docker-compose.yml` สำหรับรันควบคู่กัน 2 คอนเทนเนอร์:
-  1. `gspeed-app`: เว็บไซต์หลัก (Nginx Port 80)
-  2. `email-service`: ไมโครเซอร์วิสส่งอีเมล Node.js (Port 3001)
-  
-  บน Coolify คุณสามารถเลือก **Build Pack: Docker Compose** เพื่อสั่งรันทั้ง 2 บริการพร้อมกันได้ทันที โดยใส่ค่ารหัสผ่านอีเมล Hostinger ใน Environment Variables (`SMTP_USER` และ `SMTP_PASS`) ได้อย่างปลอดภัย 100%
+1. **ทดสอบ Clean URLs**:
+   - เปิดไปที่ `https://yourdomain.com/events`
+   - ลองกดปุ่ม **Refresh (F5)** บนเบราว์เซอร์ หากแสดงผลหน้าเดิมถูกต้อง ไม่ขึ้น 404 ถือว่าผ่าน
+2. **ทดสอบระบบดาวน์โหลดผังร้าน/สำรองข้อมูล**:
+   - ไปที่หน้า **3D Franchise Planner** หรือ **Admin CMS (แท็บ 14 สำรองข้อมูล)**
+   - กดปุ่ม "ดาวน์โหลดสำรองข้อมูลทั้งระบบ" ไฟล์ต้องโหลดลงเครื่องได้ทันที
+3. **ทดสอบการเชื่อมต่อ Hostinger SMTP**:
+   - ล็อกอินเข้าสู่ระบบหลังบ้าน `https://yourdomain.com/admin`
+   - ไปที่แท็บ **13. จัดการอีเมล SMTP**
+   - กดปุ่ม **"ทดสอบ Handshake SMTP"** เพื่อดูผลการตอบกลับว่าสถานะ Connected สำเร็จหรือไม่
+4. **ทดสอบการส่งแบบฟอร์มติดต่อ**:
+   - ไปที่หน้า `https://yourdomain.com/contact`
+   - ลองกรอกข้อความและกดส่ง จะต้องได้รับเลขอ้างอิงและอีเมลยืนยัน
+
+---
+
+## 🌐 การเชื่อมโยงกับ AI และ Automation บน Server เดียวกัน
+
+หากคุณรัน **Open WebUI** หรือ **n8n** อยู่บน Coolify เครื่องเดียวกัน:
+* สามารถเชื่อมต่อ Docker Network เดียวกันเพื่อคุยผ่าน Internal IP ได้โดยไม่ต้องวิ่งออกเน็ตภายนอก:
+  - **Open WebUI**: `http://openwebui:8080`
+  - **n8n**: `http://n8n:5678`
+* สามารถนำ Webhook URL ของ n8n มาใส่ในหน้า **Admin CMS > ระบบ Automation & Webhooks** เพื่อส่งการแจ้งเตือน Lead ไปยัง LINE Notify หรือ Discord ได้ทันที

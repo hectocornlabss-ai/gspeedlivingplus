@@ -598,6 +598,63 @@ app.post('/api/franchise-quote', async (req, res) => {
   }
 });
 
+// ==============================================================================
+// 6. Server-Side File Download Streaming Endpoints (For Exports / Blueprints)
+// ==============================================================================
+const fileDownloadCache = new Map();
+
+// Periodic cleanup of expired download files (3-minute TTL)
+setInterval(() => {
+  const now = Date.now();
+  for (const [id, item] of fileDownloadCache.entries()) {
+    if (now > item.expiresAt) {
+      fileDownloadCache.delete(id);
+    }
+  }
+}, 60 * 1000);
+
+app.post('/api/prepare-download', (req, res) => {
+  try {
+    const { dataUrl, filename, mimeType } = req.body || {};
+    if (!dataUrl) {
+      return res.status(400).json({ success: false, error: 'dataUrl is required' });
+    }
+    const fileId = 'dl_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+    fileDownloadCache.set(fileId, {
+      dataUrl,
+      filename: (filename || 'download.bin').replace(/[^\w.-]/g, '_'),
+      mimeType: mimeType || 'application/octet-stream',
+      expiresAt: Date.now() + 180000 // 3 minutes TTL
+    });
+    return res.json({ success: true, fileId });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/download-file', (req, res) => {
+  try {
+    const fileId = req.query.id;
+    const cached = fileId ? fileDownloadCache.get(fileId) : null;
+    if (!cached || !cached.dataUrl) {
+      return res.status(404).send('Download link expired or not found. Please try downloading again.');
+    }
+
+    const base64Data = cached.dataUrl.includes(',') ? cached.dataUrl.split(',')[1] : cached.dataUrl;
+    const buffer = Buffer.from(base64Data, 'base64');
+    const filename = (cached.filename || 'download.bin').replace(/[^\w.-]/g, '_');
+    const mimeType = cached.mimeType || 'application/octet-stream';
+
+    res.setHeader('Content-Type', mimeType);
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Length', buffer.length);
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+    return res.send(buffer);
+  } catch (err) {
+    return res.status(500).send('Error processing download: ' + err.message);
+  }
+});
+
 // Start Express Server
 app.listen(PORT, () => {
   console.log(`=======================================================`);
