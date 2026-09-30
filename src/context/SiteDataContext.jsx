@@ -834,7 +834,7 @@ export const DEFAULT_SITE_DATA = {
     badge: 'G-SPEED FRANCHISE & INTERIOR PLANNER',
     heading: 'อยากมีร้านเกมอีสปอร์ตสเปกเทพเป็นของตัวเอง?',
     desc: 'เพียงแค่คุณมีพื้นที่หรืออาคาร เรามีระบบ Interior Floor Plan Configurator ช่วยจำลองผังร้าน 2D สเกลจริง จัดวางโต๊ะคอมพิวเตอร์ เวทีแข่งขัน เคาน์เตอร์ และคำนวณต้นทุน สเปกอุปกรณ์ ระยะเวลาคืนทุน (ROI) และเวลาติดตั้งให้ทันที!',
-    buttonText: 'เริ่มออกแบบผังร้าน & ประเมินงบประมาณทันที',
+    buttonText: 'วางผังร้านและประเมินราคา',
     buttonLink: 'franchise',
     bgColor: '#1e3a8a',
     headingColor: '#ffffff',

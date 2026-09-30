@@ -987,8 +987,7 @@ export default function ArenaHub({
                       onClick={onNavigateFranchise} 
                       className="btn-primary cta-btn-large"
                     >
-                      <Compass size={18} />
-                      <span>{siteData?.franchiseBanner?.buttonText || 'เริ่มออกแบบผังร้าน & ประเมินงบประมาณทันที'}</span>
+                      <span>{siteData?.franchiseBanner?.buttonText && siteData?.franchiseBanner?.buttonText !== 'เริ่มออกแบบผังร้าน & ประเมินงบประมาณทันที' ? siteData.franchiseBanner.buttonText : 'วางผังร้านและประเมินราคา'}</span>
                       <ArrowRight size={18} />
                     </button>
                   </div>

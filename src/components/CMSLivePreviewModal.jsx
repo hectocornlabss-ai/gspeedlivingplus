@@ -477,8 +477,7 @@ export default function CMSLivePreviewModal({
                   </p>
 
                   <button className="btn-primary" style={{ padding: '12px 28px', fontSize: '0.92rem', boxShadow: '0 8px 20px rgba(0,0,0,0.3)' }}>
-                    <Compass size={17} />
-                    <span>{siteData?.franchiseBanner?.buttonText || 'เริ่มออกแบบผังร้าน & ประเมินงบประมาณทันที'}</span>
+                    <span>{siteData?.franchiseBanner?.buttonText && siteData?.franchiseBanner?.buttonText !== 'เริ่มออกแบบผังร้าน & ประเมินงบประมาณทันที' ? siteData.franchiseBanner.buttonText : 'วางผังร้านและประเมินราคา'}</span>
                     <ArrowRight size={17} />
                   </button>
                 </div>

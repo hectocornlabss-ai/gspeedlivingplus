@@ -9089,13 +9089,40 @@
 }
 
 @media (max-width: 768px) {
+  .footer-wrapper {
+    padding: 36px 0 16px;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    margin-bottom: 24px;
+  }
+
+  /* Item 1: เมนูลัด 2 คอลัมน์เต็มพื้นที่ ไม่ทิ้งพื้นที่ว่างฝั่งขวา */
+  .footer-links {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px 14px;
+  }
+
+  .footer-links button {
+    font-size: 0.84rem;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Item 2: ลดพื้นที่ว่างด้านล่างของ Footer ไม่ให้โล่งเกินไป */
   .footer-bottom {
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
-    gap: 10px;
-    padding-bottom: 76px;
+    gap: 8px;
+    padding-top: 16px;
+    padding-bottom: 12px;
   }
 
   .footer-legal-links {
@@ -9126,6 +9153,11 @@
     font-size: 0.65rem;
     color: rgba(255, 255, 255, 0.25);
     flex-shrink: 0;
+  }
+
+  .contact-hero-title {
+    font-size: 1.85rem;
+    font-weight: 600;
   }
 }
 
@@ -24759,7 +24791,8 @@
 .contact-hero-title {
   font-family: var(--font-heading);
   font-size: 2.4rem;
-  font-weight: 900;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   line-height: 1.25;
   color: #0f172a;
   margin-bottom: 14px;

@@ -6935,7 +6935,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                     <label>ข้อความบนปุ่มกด</label>
                     <input 
                       type="text" className="form-input"
-                      value={siteData.franchiseBanner?.buttonText || 'เริ่มออกแบบผังร้าน & ประเมินงบประมาณทันที'}
+                      value={siteData.franchiseBanner?.buttonText && siteData.franchiseBanner?.buttonText !== 'เริ่มออกแบบผังร้าน & ประเมินงบประมาณทันที' ? siteData.franchiseBanner.buttonText : 'วางผังร้านและประเมินราคา'}
                       onChange={e => updateSectionConfig('franchiseBanner', {
                         ...siteData.franchiseBanner,
                         buttonText: e.target.value

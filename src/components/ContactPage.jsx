@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   MapPin, Phone, Navigation, ExternalLink, 
-  Copy, Check, Send, Car, Train, Bus, 
+  Copy, Check, Send, Share2, Car, Train, Bus, 
   Sparkles, Building2, CheckCircle2,
   Clock, MailCheck, ShieldCheck, AlertCircle
 } from 'lucide-react';
@@ -352,12 +352,25 @@ export default function ContactPage({ onNavigateHome, onNavigateFranchise }) {
                   </a>
 
                   <button 
-                    onClick={() => handleCopy(storeAddress, 'address')} 
+                    onClick={async () => {
+                      const mapsUrl = storeData.mapsUrl || 'https://maps.google.com/?q=G-Speed+Living+Plus+Ramkhamhaeng+53';
+                      if (navigator.share) {
+                        try {
+                          await navigator.share({
+                            title: storeData.name || 'G-Speed Living Plus',
+                            text: `${storeData.name || 'G-Speed Living Plus'} - ${storeAddress}`,
+                            url: mapsUrl
+                          });
+                          return;
+                        } catch (err) {}
+                      }
+                      handleCopy(`${storeAddress}\nGoogle Maps: ${mapsUrl}`, 'address');
+                    }} 
                     className="glp-btn-copy"
-                    title="คัดลอกที่อยู่"
+                    title="แชร์ตำแหน่งร้าน"
                   >
-                    {copiedAddress ? <Check size={16} className="text-emerald-400" /> : <Copy size={16} />}
-                    <span>{copiedAddress ? 'คัดลอกแล้ว' : 'คัดลอกที่อยู่'}</span>
+                    {copiedAddress ? <Check size={16} className="text-emerald-400" /> : <Share2 size={16} />}
+                    <span>{copiedAddress ? 'คัดลอกพิกัดแล้ว' : 'แชร์ตำแหน่งร้าน'}</span>
                   </button>
                 </div>
               </div>
@@ -632,7 +645,7 @@ export default function ContactPage({ onNavigateHome, onNavigateFranchise }) {
                     </div>
 
                     <div className="form-group">
-                      <label htmlFor="contact-email">อีเมล (สำหรับรับใบยืนยันทาง SMTP)</label>
+                      <label htmlFor="contact-email">อีเมล</label>
                       <input 
                         id="contact-email"
                         type="email" 
