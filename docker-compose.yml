@@ -10,8 +10,8 @@ services:
       - "80:80"
     environment:
       - NODE_ENV=production
-    depends_on:
-      - email-service
+    volumes:
+      - glp-server-data:/app/server/data
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:80/"]
       interval: 30s

@@ -15,9 +15,22 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Persistent CMS Data Directory (mounted to Docker volume on production)
-const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
+const defaultDataDir = fs.existsSync('/app/data') ? '/app/data' : path.join(__dirname, 'data');
+const DATA_DIR = process.env.DATA_DIR || defaultDataDir;
 const BACKUP_DIR = path.join(DATA_DIR, 'backups');
 const SITE_DATA_FILE = path.join(DATA_DIR, 'site-data.json');
+
+// Load default metadata fallback for activities, tournaments & news
+let defaultMeta = { gallery: [], tournaments: [], news: [] };
+try {
+  const metaPath = path.join(__dirname, 'default-meta.json');
+  if (fs.existsSync(metaPath)) {
+    defaultMeta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+    console.log(`[Meta] Loaded default metadata fallback (${defaultMeta.gallery?.length || 0} activities, ${defaultMeta.tournaments?.length || 0} tournaments, ${defaultMeta.news?.length || 0} news)`);
+  }
+} catch (e) {
+  console.warn('[Meta] Warning reading default-meta.json:', e.message);
+}
 
 // Ensure database directories exist
 try {
@@ -902,6 +915,214 @@ app.get('/api/site-data/backups', (req, res) => {
     return res.json({ success: true, backups: files });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ==============================================================================
+// 8. Open Graph & Social Media Crawler SSR Pre-rendering (/render-meta)
+// ==============================================================================
+
+// Helper: Normalize slug for resilient matching (handles missing hyphens, case differences)
+const normalizeSlug = (s) => (s || '').toLowerCase().replace(/[^a-z0-9\u0E00-\u0E7F]/g, '');
+
+// Helper: Get active content from live server database or fallback to default-meta.json
+function getLiveContent(collectionName) {
+  try {
+    if (fs.existsSync(SITE_DATA_FILE)) {
+      const raw = fs.readFileSync(SITE_DATA_FILE, 'utf8');
+      const parsed = JSON.parse(raw);
+      if (parsed && Array.isArray(parsed[collectionName]) && parsed[collectionName].length > 0) {
+        return parsed[collectionName];
+      }
+    }
+  } catch (err) {
+    console.warn(`[Meta] Error reading SITE_DATA_FILE for ${collectionName}:`, err.message);
+  }
+  return (defaultMeta && Array.isArray(defaultMeta[collectionName])) ? defaultMeta[collectionName] : [];
+}
+
+// Helper: Match item by exact slug/id, normalized slug, or fuzzy substring
+function findMatchedItem(items, targetSlug) {
+  if (!Array.isArray(items) || !targetSlug) return null;
+  const targetNorm = normalizeSlug(targetSlug);
+  if (!targetNorm) return null;
+
+  // 1. Exact match by slug or id
+  let match = items.find(item => 
+    (item.slug && item.slug.toLowerCase() === targetSlug.toLowerCase()) ||
+    (item.id && item.id.toLowerCase() === targetSlug.toLowerCase())
+  );
+  if (match) return match;
+
+  // 2. Normalized match (handles e.g. audition-lady-tournamentcup vs audition-lady-tournament-cup)
+  match = items.find(item => {
+    const sNorm = normalizeSlug(item.slug);
+    const idNorm = normalizeSlug(item.id);
+    const titleNorm = normalizeSlug(item.title);
+    return (sNorm && sNorm === targetNorm) ||
+           (idNorm && idNorm === targetNorm) ||
+           (titleNorm && titleNorm === targetNorm);
+  });
+  if (match) return match;
+
+  // 3. Partial substring match
+  match = items.find(item => {
+    const sNorm = normalizeSlug(item.slug);
+    return sNorm && (sNorm.includes(targetNorm) || targetNorm.includes(sNorm));
+  });
+
+  return match || null;
+}
+
+// Helper: Extract valid absolute image URL for LINE / Facebook crawlers
+function getBestImageUrl(item, baseUrl) {
+  if (!item) return `${baseUrl}/glp-logo-transparent.png`;
+  
+  let img = item.image || 
+            (item.seo && item.seo.ogImage) || 
+            item.bannerImage || 
+            (item.galleryPhotos && item.galleryPhotos[0] ? (typeof item.galleryPhotos[0] === 'string' ? item.galleryPhotos[0] : item.galleryPhotos[0].url) : null) || 
+            (item.photos && item.photos[0] ? (typeof item.photos[0] === 'string' ? item.photos[0] : item.photos[0].url) : null);
+
+  if (!img) return `${baseUrl}/glp-logo-transparent.png`;
+  if (img.startsWith('http://') || img.startsWith('https://')) return img;
+  return `${baseUrl}${img.startsWith('/') ? '' : '/'}${img}`;
+}
+
+// Helper: Read index.html template from disk
+function getIndexHtmlTemplate() {
+  const candidates = [
+    '/usr/share/nginx/html/index.html',
+    path.join(__dirname, '../dist/index.html'),
+    path.join(__dirname, '../index.html'),
+    path.join(__dirname, 'index.html')
+  ];
+  for (const p of candidates) {
+    if (fs.existsSync(p)) {
+      return fs.readFileSync(p, 'utf8');
+    }
+  }
+  return `<!doctype html><html lang="th"><head><meta charset="UTF-8"><title>GLP : G Speed Living Plus</title></head><body><div id="root"></div></body></html>`;
+}
+
+// Helper: Escape HTML entities in meta content
+function escapeMetaAttr(str) {
+  return (str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+// GET /render-meta - Server-Side Dynamic Meta Tag Injector for LINE, Facebook, Discord, Twitter crawlers
+app.get('/render-meta', (req, res) => {
+  try {
+    const rawReqUrl = req.query.url || req.url || '/';
+    // Clean URL and parse pathname
+    let cleanPath = '/';
+    try {
+      const parsedUrl = new URL(rawReqUrl, 'http://localhost');
+      cleanPath = parsedUrl.pathname;
+    } catch {
+      cleanPath = rawReqUrl.split('?')[0];
+    }
+
+    const host = req.get('x-forwarded-host') || req.get('host') || 'glp.cyber-wp.com';
+    const proto = req.get('x-forwarded-proto') || (req.secure ? 'https' : 'https'); // Default https for social share
+    const baseUrl = `${proto}://${host}`;
+    const fullCanonicalUrl = `${baseUrl}${cleanPath}`;
+
+    const parts = cleanPath.split('/').filter(Boolean);
+    const section = (parts[0] || '').toLowerCase();
+    const slug = parts.slice(1).join('/');
+
+    let pageTitle = 'GLP : G Speed Living Plus | ศูนย์อีสปอร์ตครบวงจร & ระบบแฟรนไชส์จัดผังร้านอัจฉริยะ';
+    let pageDesc = 'ศูนย์กีฬาและคอมมูนิตี้อีสปอร์ตครบวงจร รับจัดทัวร์นาเมนต์ และระบบจำลองผังร้านแฟรนไชส์ 2D/3D Interior Planner พร้อมประเมินราคาและสเปกคอมพิวเตอร์แบบเรียลไทม์';
+    let pageImage = `${baseUrl}/glp-logo-transparent.png`;
+    let pageType = 'website';
+
+    if (section === 'activities' || section === 'gallery' || section === 'events') {
+      const activities = getLiveContent('gallery');
+      const item = findMatchedItem(activities, slug);
+      if (item) {
+        pageTitle = `${item.title} | GLP Activities & Community`;
+        const dateStr = item.date ? ` • วันที่: ${item.date}` : '';
+        const locStr = item.location ? ` • สถานที่: ${item.location}` : ' • G-Speed Arena รามคำแหง 53';
+        const partnerStr = item.partner ? ` • ผู้ร่วมจัด: ${item.partner}` : '';
+        pageDesc = `${item.desc || item.title}${dateStr}${locStr}${partnerStr}`;
+        pageImage = getBestImageUrl(item, baseUrl);
+        pageType = 'article';
+      }
+    } else if (section === 'tournaments') {
+      const tournaments = getLiveContent('tournaments');
+      const item = findMatchedItem(tournaments, slug);
+      if (item) {
+        pageTitle = `${item.title} | GLP Esports Tournament`;
+        const prizeStr = item.prizePool ? ` • ชิงรางวัล: ${item.prizePool}` : '';
+        const dateStr = item.date ? ` • แข่งขัน: ${item.date}` : '';
+        const gameStr = item.game ? ` • เกม: ${item.game}` : '';
+        pageDesc = `${item.desc || (item.seo && item.seo.metaDesc) || item.title}${prizeStr}${gameStr}${dateStr}`;
+        pageImage = getBestImageUrl(item, baseUrl);
+        pageType = 'article';
+      }
+    } else if (section === 'news') {
+      const newsItems = getLiveContent('news');
+      const item = findMatchedItem(newsItems, slug);
+      if (item) {
+        pageTitle = `${item.title} | GLP News`;
+        const dateStr = item.date ? ` • เผยแพร่เมื่อ: ${item.date}` : '';
+        pageDesc = `${item.desc || (item.seo && item.seo.metaDesc) || item.title}${dateStr}`;
+        pageImage = getBestImageUrl(item, baseUrl);
+        pageType = 'article';
+      }
+    }
+
+    const safeTitle = escapeMetaAttr(pageTitle);
+    const safeDesc = escapeMetaAttr(pageDesc);
+    const safeImage = escapeMetaAttr(pageImage);
+    const safeUrl = escapeMetaAttr(fullCanonicalUrl);
+
+    let template = getIndexHtmlTemplate();
+
+    // Replace <title>
+    template = template.replace(/<title>[\s\S]*?<\/title>/i, `<title>${safeTitle}</title>`);
+
+    // Replace or strip existing meta description, Open Graph, and Twitter tags to prevent duplicates
+    template = template
+      .replace(/<meta\s+name=["']description["'][\s\S]*?>/gi, '')
+      .replace(/<meta\s+property=["']og:[^"']+["'][\s\S]*?>/gi, '')
+      .replace(/<meta\s+name=["']twitter:[^"']+["'][\s\S]*?>/gi, '');
+
+    // Injected Open Graph tags strictly formatted for LINE bot, Facebook, Twitter & Discord
+    const crawlerMetaBlock = `
+    <!-- Dynamic Open Graph & Crawler SSR Meta Tags Generated by GLP Backend -->
+    <meta name="description" content="${safeDesc}" />
+    <meta property="og:type" content="${pageType}" />
+    <meta property="og:site_name" content="GLP : G Speed Living Plus" />
+    <meta property="og:url" content="${safeUrl}" />
+    <meta property="og:title" content="${safeTitle}" />
+    <meta property="og:description" content="${safeDesc}" />
+    <meta property="og:image" content="${safeImage}" />
+    <meta property="og:image:secure_url" content="${safeImage}" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="${safeTitle}" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="${safeTitle}" />
+    <meta name="twitter:description" content="${safeDesc}" />
+    <meta name="twitter:image" content="${safeImage}" />
+    <link rel="canonical" href="${safeUrl}" />
+`;
+
+    template = template.replace('</head>', `${crawlerMetaBlock}\n</head>`);
+
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=60'); // Cache for 60 seconds
+    return res.status(200).send(template);
+  } catch (error) {
+    console.error('[Render Meta Error]:', error);
+    return res.status(500).send('Internal Server Error generating meta tags: ' + error.message);
   }
 });
 

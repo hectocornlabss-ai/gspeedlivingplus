@@ -203,22 +203,32 @@ function AppContent() {
     }
   }, [routeState.sectionToScroll, routeState.tab, routeState.actSlug, routeState.eventSlug, routeState.pathname]);
 
-  // ดึงข้อมูลบทความปัจจุบันที่ตรงกับ Slug
+  const normalizeSlug = (s) => (s || '').toLowerCase().replace(/[^a-z0-9\u0E00-\u0E7F]/g, '');
+
+  // ดึงข้อมูลบทความปัจจุบันที่ตรงกับ Slug (รองรับทั้งแบบมีหรือไม่มีขีดกลาง)
   const allArticles = [...(siteData?.gallery || []), ...(siteData?.news || [])];
-  const matchedActivity = routeState.actSlug
+  const targetActSlug = routeState.actSlug || '';
+  const normTargetAct = normalizeSlug(targetActSlug);
+  const matchedActivity = targetActSlug
     ? allArticles.find(item => 
-        (item.slug && item.slug.toLowerCase() === routeState.actSlug.toLowerCase()) || 
-        item.id === routeState.actSlug
+        (item.slug && item.slug.toLowerCase() === targetActSlug.toLowerCase()) || 
+        item.id === targetActSlug ||
+        (item.slug && normalizeSlug(item.slug) === normTargetAct) ||
+        (item.id && normalizeSlug(item.id) === normTargetAct)
       )
     : null;
 
-  // ดึงข้อมูลทัวร์นาเมนต์ปัจจุบันที่ตรงกับ Slug (WordPress-like Permalink)
+  // ดึงข้อมูลทัวร์นาเมนต์ปัจจุบันที่ตรงกับ Slug (WordPress-like Permalink รองรับทั้งแบบมีหรือไม่มีขีดกลาง)
   const allTournaments = siteData?.tournaments || [];
-  const matchedTournament = routeState.eventSlug
+  const targetEventSlug = routeState.eventSlug || '';
+  const normTargetEvent = normalizeSlug(targetEventSlug);
+  const matchedTournament = targetEventSlug
     ? allTournaments.find(t => 
-        (t.slug && t.slug.toLowerCase() === routeState.eventSlug.toLowerCase()) || 
-        t.id === routeState.eventSlug ||
-        (t.seo && t.seo.slug && t.seo.slug.toLowerCase() === routeState.eventSlug.toLowerCase())
+        (t.slug && t.slug.toLowerCase() === targetEventSlug.toLowerCase()) || 
+        t.id === targetEventSlug ||
+        (t.seo && t.seo.slug && t.seo.slug.toLowerCase() === targetEventSlug.toLowerCase()) ||
+        (t.slug && normalizeSlug(t.slug) === normTargetEvent) ||
+        (t.id && normalizeSlug(t.id) === normTargetEvent)
       )
     : null;
 

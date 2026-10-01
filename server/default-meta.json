@@ -1,0 +1,122 @@
+{
+  "gallery": [
+    {
+      "id": "gal-1",
+      "slug": "icafe-attack-lan-tournament",
+      "title": "ICAFE ATTACK LAN TOURNAMENT",
+      "desc": "การแข่งขัน LAN สุดมันส์ในโซน Battleground พร้อมจอแสดงผลแบบเรียลไทม์ ผู้เข้าแข่งขันแน่นร้านตลอด 24 ชม.",
+      "date": "สิงหาคม 2026",
+      "image": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80",
+      "category": "tournament",
+      "tag": "LAN TOURNAMENT"
+    },
+    {
+      "id": "gal-2",
+      "slug": "thailand-predator-league-pubg",
+      "title": "THAILAND PREDATOR LEAGUE 2022 - PUBG BATTLEGROUNDS",
+      "desc": "งานเปิดตัวและแข่งขัน PUBG BATTLEGROUNDS อย่างเป็นทางการ พร้อมคอสเพลย์เยอร์และถ่ายทอดสด Live Stream",
+      "date": "กรกฎาคม 2026",
+      "image": "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80",
+      "category": "publisher",
+      "tag": "OFFICIAL PUBG EVENT"
+    },
+    {
+      "id": "gal-3",
+      "slug": "electronics-extreme-zone4-fan-meeting",
+      "title": "ELECTRONICS EXTREME - ZONE4 FAN MEETING",
+      "desc": "ค่ายเกม Electronics Extreme จัดงานแถลงข่าวและพบปะแฟนเกม Zone4 บน Main Stage ของ GLP",
+      "date": "มิถุนายน 2026",
+      "image": "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80",
+      "category": "publisher",
+      "tag": "GAME LAUNCH"
+    },
+    {
+      "id": "gal-4",
+      "slug": "audition-lady-tournament-cup",
+      "title": "AUDITION LADY TOURNAMENT CUP #7",
+      "desc": "การแข่งขัน Audition เกมเต้นอันดับ 1 ของไทย มอบเงินรางวัลชนะเลิศและไอเทมพิเศษ บรรยากาศอบอุ่นและสนุกสนาน",
+      "date": "สิงหาคม 2024",
+      "image": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80",
+      "category": "community",
+      "tag": "COMMUNITY CUP"
+    },
+    {
+      "id": "gal-5",
+      "slug": "audition-all-mode-tournament",
+      "title": "AUDITION ALL MODE TOURNAMENT ชิง 5,000 บาท",
+      "desc": "การประลองฝีมือกดปุ่มตามจังหวะเพลงสุดเร้าใจ กองเชียร์ส่งเสียงเชียร์กึกก้องทั่วร้านตลอดวันแข่งขัน",
+      "date": "เมษายน 2026",
+      "image": "https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=800&q=80",
+      "category": "community",
+      "tag": "AWARD CEREMONY"
+    },
+    {
+      "id": "gal-6",
+      "slug": "glp-esport-stadium-night-24hrs",
+      "title": "GLP ESPORT STADIUM NIGHT 24 HRS.",
+      "desc": "บรรยากาศผู้ใช้บริการแน่นร้านช่วงสุดสัปดาห์ เล่นเกมพร้อมแก๊งเพื่อน เครื่องสเปกแรง แอร์เย็นฉ่ำ สั่งอาหารได้ถึงโต๊ะ",
+      "date": "มีนาคม 2026",
+      "image": "https://images.unsplash.com/photo-1526738549149-8e07eca6c147?auto=format&fit=crop&w=800&q=80",
+      "category": "venue",
+      "tag": "ATMOSPHERE 24/7"
+    }
+  ],
+  "tournaments": [
+    {
+      "id": "tour-1",
+      "slug": "gspeed-valorant-championship-2026",
+      "title": "G-SPEED VALORANT CHAMPIONSHIP 2026",
+      "desc": "การแข่งขัน VALORANT LAN Tournament สุดยิ่งใหญ่ ณ G-Speed Arena รามคำแหง 53 เงินรางวัลรวม 100,000 บาท แข่งขันบนเวที Main Stage จอ 360Hz",
+      "date": "28-30 กันยายน 2026",
+      "image": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80",
+      "game": "VALORANT",
+      "prizePool": "100,000 บาท"
+    },
+    {
+      "id": "tour-2",
+      "slug": "rov-university-battle-league-2026",
+      "title": "ROV UNIVERSITY BATTLE LEAGUE",
+      "desc": "การแข่งขัน RoV ระดับมหาวิทยาลัย 64 สถาบันทั่วประเทศ จัด ณ G-Speed Arena รามคำแหง 53 ชิงทุนการศึกษาและถ้วยเกียรติยศ",
+      "date": "10-12 ตุลาคม 2026",
+      "image": "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200&q=80",
+      "game": "Arena of Valor (RoV)",
+      "prizePool": "50,000 บาท + ถ้วยรางวัลเกียรติยศ"
+    },
+    {
+      "id": "tour-3",
+      "slug": "cs2-bangkok-showdown-invitational-2026",
+      "title": "CS2 BANGKOK SHOWDOWN INVITATIONAL",
+      "desc": "การแข่งขัน Counter-Strike 2 ระดับนานาชาติ ชิงเงินรางวัล 150,000 บาท ณ G-Speed Arena รามคำแหง 53 Dedicated LAN Server",
+      "date": "24-25 ตุลาคม 2026",
+      "image": "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1200&q=80",
+      "game": "Counter-Strike 2",
+      "prizePool": "150,000 บาท"
+    }
+  ],
+  "news": [
+    {
+      "id": "news-1",
+      "slug": "thailand-predator-league-recap",
+      "title": "รวมภาพความมันส์งานแข่ง PUBG Predator League @ GLP Esports Arena",
+      "desc": "ภาพบรรยากาศการแข่งขันศึกชิงแชมป์ระดับประเทศ ทีมผู้เข้าแข่งขันกว่า 32 ทีม ดวลปืนสุดเดือดบนเวที 5v5 Stage พร้อมผู้ร่วมงานแน่นร้าน",
+      "date": "12 กันยายน 2026",
+      "image": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      "id": "news-2",
+      "slug": "glp-electronics-extreme-zone4",
+      "title": "GLP จับมือ Electronics Extreme จัดงาน Zone4 และแจกไอเทมลิขสิทธิ์แท้",
+      "desc": "ค่ายเกมชั้นนำเนรมิตร้าน GLP เป็นสมรภูมิประลองยุทธ์ พร้อมมอบของรางวัลและถ้วยเกียรติยศแก่ผู้ชนะการแข่งขัน",
+      "date": "5 กันยายน 2026",
+      "image": "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      "id": "news-3",
+      "slug": "rtx-40-series-360hz-upgrade",
+      "title": "อัปเกรดขุมพลังใหม่! สเปก RTX 40 Series พร้อมจอ 360Hz ทุกล็อตที่ GLP",
+      "desc": "ยกระดับประสบการณ์เล่นเกมให้ลื่นไหลไร้รอยต่อ เฟรมเรตนิ่ง ปิงต่ำกว่า 3ms ด้วยระบบเน็ตเวิร์กและ Diskless Server ใหม่ล่าสุด",
+      "date": "28 สิงหาคม 2026",
+      "image": "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80"
+    }
+  ]
+}
