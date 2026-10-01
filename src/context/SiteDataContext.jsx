@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { 
   CATALOG_ITEMS as INITIAL_CATALOG, 
   HARDWARE_TIERS as INITIAL_TIERS,
@@ -1673,6 +1673,27 @@ export function SiteDataProvider({ children }) {
     }
   }, [siteData]);
 
+  // Flag to track when initial server hydration is complete
+  const isHydratedRef = useRef(false);
+
+  // Debounced auto-sync to server database (/api/site-data) to keep mobile and desktop synced
+  useEffect(() => {
+    if (!siteData || !isHydratedRef.current) return;
+    const timer = setTimeout(async () => {
+      try {
+        await fetch('/api/site-data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ siteData, author: 'auto-sync' })
+        });
+      } catch (err) {
+        // Silently catch offline/network errors
+      }
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [siteData]);
+
   // Synchronize siteData changes across browser tabs and components in real time
   useEffect(() => {
     const handleStorageChange = (e) => {
@@ -1768,6 +1789,8 @@ export function SiteDataProvider({ children }) {
         }
       } catch (err) {
         console.log('[SiteDataContext] Server database check skipped (offline or initial boot):', err.message);
+      } finally {
+        isHydratedRef.current = true;
       }
     };
     fetchServerSiteData();
@@ -2129,6 +2152,9 @@ export function SiteDataProvider({ children }) {
       ...prev,
       gallery: (prev.gallery || []).map(item => 
         item.id === id ? { ...item, ...updatedFields } : item
+      ),
+      news: (prev.news || []).map(item => 
+        item.id === id ? { ...item, ...updatedFields } : item
       )
     }));
   };
@@ -2136,7 +2162,8 @@ export function SiteDataProvider({ children }) {
   const deleteActivityItem = (id) => {
     setSiteData(prev => ({
       ...prev,
-      gallery: (prev.gallery || []).filter(item => item.id !== id)
+      gallery: (prev.gallery || []).filter(item => item.id !== id),
+      news: (prev.news || []).filter(item => item.id !== id)
     }));
   };
 

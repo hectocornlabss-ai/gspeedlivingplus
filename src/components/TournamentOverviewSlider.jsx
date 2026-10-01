@@ -149,8 +149,13 @@ export default function TournamentOverviewSlider({ tournament }) {
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
-        {/* Animated Slide Image with Ken-Burns Zoom & Fade */}
-        <div className="tourney-slide-frame">
+        {/* Animated Slide Image with Ken-Burns Zoom & Fade - Clicking anywhere opens Fullscreen Lightbox */}
+        <div 
+          className="tourney-slide-frame"
+          onClick={() => setIsLightboxOpen(true)}
+          style={{ cursor: 'pointer' }}
+          title="คลิกหรือแตะที่รูปเพื่อขยายดูขนาดเต็ม (Full Screen)"
+        >
           <img 
             key={currentSlide.id}
             src={currentSlide.url} 
@@ -169,35 +174,47 @@ export default function TournamentOverviewSlider({ tournament }) {
             <span>{currentSlide.tag || 'ไฮไลต์เกม'}</span>
           </div>
 
-          {/* Top Right Mini Counter Pill */}
-          <div className="slide-mini-counter-floating">
-            <span>ภาพที่ {currentIndex + 1} จาก {slides.length}</span>
+          {/* Top Right Mini Counter Pill & Tap Hint */}
+          <div className="slide-top-right-group">
+            <div className="slide-mobile-tap-hint" title="แตะที่ภาพเพื่อขยายดูเต็มจอ">
+              <Maximize2 size={11} />
+              <span>แตะเพื่อขยาย</span>
+            </div>
+            <div className="slide-mini-counter-floating">
+              <span>{currentIndex + 1} / {slides.length}</span>
+            </div>
           </div>
 
-          {/* Navigation Arrows */}
+          {/* Navigation Arrows with stopPropagation */}
           <button 
             type="button" 
             className="slider-nav-arrow arrow-left" 
-            onClick={handlePrev}
+            onClick={(e) => {
+              e.stopPropagation();
+              handlePrev();
+            }}
             title="ภาพก่อนหน้า (กดปุ่มลูกศรซ้ายได้)"
             aria-label="Previous slide"
           >
-            <ChevronLeft size={24} />
+            <ChevronLeft size={22} />
           </button>
 
           <button 
             type="button" 
             className="slider-nav-arrow arrow-right" 
-            onClick={handleNext}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleNext();
+            }}
             title="ภาพถัดไป (กดปุ่มลูกศรขวาได้)"
             aria-label="Next slide"
           >
-            <ChevronRight size={24} />
+            <ChevronRight size={22} />
           </button>
 
           {/* Bottom Caption Overlay */}
-          <div className="slide-caption-container">
-            <div className="caption-text-block">
+          <div className="slide-caption-container" onClick={(e) => e.stopPropagation()}>
+            <div className="caption-text-block" onClick={() => setIsLightboxOpen(true)} style={{ cursor: 'pointer' }}>
               <span className="caption-tag-pill">{currentSlide.tag}</span>
               <h4 className="caption-main-title">{currentSlide.title}</h4>
               <p className="caption-subtitle">{currentSlide.subtitle}</p>
@@ -207,7 +224,10 @@ export default function TournamentOverviewSlider({ tournament }) {
               <button 
                 type="button"
                 className="btn-caption-expand"
-                onClick={() => setIsLightboxOpen(true)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsLightboxOpen(true);
+                }}
                 title="คลิกเพื่อขยายดูภาพแบบคมชัด Full Screen"
               >
                 <Maximize2 size={13} />

@@ -24753,10 +24753,32 @@
   z-index: 5;
 }
 
-.slide-mini-counter-floating {
+.slide-top-right-group {
   position: absolute;
   top: 14px;
   right: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 5;
+}
+
+.slide-mobile-tap-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: #38bdf8;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.slide-mini-counter-floating {
   background: rgba(15, 23, 42, 0.75);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -24765,20 +24787,19 @@
   border-radius: 20px;
   font-size: 0.72rem;
   font-weight: 600;
-  z-index: 5;
 }
 
 /* Nav Arrows */
 .slider-nav-arrow {
   position: absolute;
-  top: 50%;
+  top: 48%;
   transform: translateY(-50%);
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: rgba(15, 23, 42, 0.65);
+  background: rgba(15, 23, 42, 0.75);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -24789,8 +24810,8 @@
 }
 
 .slider-nav-arrow:hover {
-  background: rgba(29, 78, 216, 0.9);
-  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(29, 78, 216, 0.95);
+  border-color: rgba(255, 255, 255, 0.5);
   transform: translateY(-50%) scale(1.08);
 }
 
@@ -24805,19 +24826,24 @@
 /* Caption Overlay */
 .slide-caption-container {
   position: absolute;
-  bottom: 24px;
-  left: 20px;
-  right: 20px;
+  bottom: 20px;
+  left: 18px;
+  right: 18px;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 16px;
+  gap: 14px;
   z-index: 8;
+  background: rgba(10, 15, 29, 0.65);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 10px 14px;
+  border-radius: 12px;
 }
 
 .caption-text-block {
   flex: 1;
-  max-width: 80%;
+  max-width: 82%;
 }
 
 .caption-tag-pill {
@@ -24834,7 +24860,7 @@
 
 .caption-main-title {
   margin: 0;
-  font-size: 1.15rem;
+  font-size: 1.12rem;
   font-weight: 650;
   color: #ffffff;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
@@ -24843,7 +24869,7 @@
 
 .caption-subtitle {
   margin: 3px 0 0 0;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   color: #cbd5e1;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
   line-height: 1.3;
@@ -24855,20 +24881,21 @@
   gap: 6px;
   background: rgba(255, 255, 255, 0.18);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   color: #ffffff;
-  padding: 6px 12px;
+  padding: 7px 13px;
   border-radius: 8px;
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.76rem;
+  font-weight: 650;
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
 }
 
 .btn-caption-expand:hover {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: #ffffff;
+  background: rgba(29, 78, 216, 0.85);
+  border-color: #60a5fa;
+  transform: scale(1.04);
 }
 
 /* Progress Bar at Bottom of Slide */
@@ -24898,17 +24925,17 @@
 /* Dots Bar */
 .slider-dot-indicators-bar {
   position: absolute;
-  bottom: 8px;
+  bottom: 6px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 5px;
+  gap: 4px;
   align-items: center;
   justify-content: center;
   z-index: 10;
-  background: rgba(15, 23, 42, 0.5);
+  background: rgba(15, 23, 42, 0.6);
   backdrop-filter: blur(6px);
-  padding: 4px 8px;
+  padding: 3px 8px;
   border-radius: 20px;
   max-width: 90%;
   overflow-x: auto;
@@ -24941,9 +24968,7 @@
   border-radius: 4px;
 }
 
-/* =======================================================
-   HORIZONTAL SCROLLABLE MINI THUMBNAIL STRIP
-   ======================================================= */
+/* Horizontal Mini Thumbnail Strip */
 .tourney-thumbnail-strip-wrapper {
   margin-top: 14px;
   background: #f8fafc;
@@ -25072,26 +25097,37 @@
   font-weight: 650;
 }
 
-/* Lightbox Fullscreen Modal */
-.tourney-slider-lightbox {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.94);
-  backdrop-filter: blur(12px);
-  z-index: 10020;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
+/* =======================================================
+   FULLSCREEN LIGHTBOX MODAL (Matched to TournamentOverviewSlider)
+   ======================================================= */
+.slider-lightbox-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: rgba(0, 0, 0, 0.95) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  z-index: 99999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px !important;
+  box-sizing: border-box !important;
   animation: fadeIn 0.2s ease;
 }
 
-.lightbox-dialog {
-  max-width: 1280px;
-  width: min(1280px, 94vw);
+.lightbox-content-box {
+  position: relative;
+  max-width: 1240px;
+  width: min(1240px, 96vw);
+  max-height: 94vh;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
+  outline: none;
 }
 
 .lightbox-top-bar {
@@ -25099,90 +25135,176 @@
   align-items: center;
   justify-content: space-between;
   color: #ffffff;
+  padding: 4px 6px;
 }
 
-.lightbox-game-info {
+.lightbox-title-meta {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
-.lightbox-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.btn-lightbox-icon {
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+.lightbox-badge-game {
+  background: #1d4ed8;
   color: #ffffff;
-  padding: 6px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 6px;
   font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.lightbox-title-text {
+  font-size: 0.95rem;
+  font-weight: 650;
+  color: #f8fafc;
+}
+
+.lightbox-counter-pill {
+  background: rgba(255, 255, 255, 0.15);
+  color: #93c5fd;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.74rem;
+  font-family: monospace;
   font-weight: 600;
-  transition: all 0.15s ease;
 }
 
-.btn-lightbox-icon:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.lightbox-top-bar .btn-lightbox-close {
+.btn-lightbox-close {
   background: rgba(239, 68, 68, 0.25);
   border: 1px solid #ef4444;
-  color: #fca5a5;
-  padding: 6px;
+  color: #ffffff;
+  padding: 6px 10px;
   border-radius: 8px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.15s ease;
 }
 
-.lightbox-top-bar .btn-lightbox-close:hover {
+.btn-lightbox-close:hover {
   background: #ef4444;
-  color: #ffffff;
+  transform: scale(1.05);
 }
 
-.lightbox-16to9-wrap {
+.lightbox-img-viewport {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
+  max-height: 68vh;
+  background: #000000;
   border-radius: 12px;
   overflow: hidden;
-  background: #000000;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);
 }
 
 .lightbox-main-img {
-  width: 100%;
-  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
   object-fit: contain;
+  user-select: none;
 }
 
-.lightbox-bottom-bar {
+.lightbox-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #ffffff;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  color: #ffffff;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 15;
+  transition: all 0.2s ease;
 }
 
-.lightbox-caption-text h4 {
+.lightbox-arrow:hover {
+  background: rgba(29, 78, 216, 0.9);
+  border-color: #60a5fa;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.lightbox-arrow.arrow-left {
+  left: 14px;
+}
+
+.lightbox-arrow.arrow-right {
+  right: 14px;
+}
+
+.lightbox-caption-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #ffffff;
+  padding: 4px 6px;
+}
+
+.lightbox-desc-text {
   margin: 0;
-  font-size: 1.1rem;
-  font-weight: 650;
-  color: #ffffff;
+  font-size: 0.88rem;
+  color: #cbd5e1;
+  line-height: 1.4;
 }
 
-.lightbox-caption-text p {
-  margin: 2px 0 0 0;
-  font-size: 0.85rem;
-  color: #cbd5e1;
+.lightbox-thumb-strip {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+}
+
+.lightbox-mini-thumb {
+  position: relative;
+  width: 60px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  padding: 0;
+  background: #000;
+  opacity: 0.6;
+  transition: all 0.15s ease;
+}
+
+.lightbox-mini-thumb.active {
+  border-color: #38bdf8;
+  opacity: 1;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+}
+
+.lightbox-mini-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lightbox-mini-thumb span {
+  position: absolute;
+  bottom: 1px;
+  left: 2px;
+  font-size: 0.58rem;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 0 2px;
+  border-radius: 2px;
+  font-family: monospace;
 }
 
 @media (max-width: 900px) {
@@ -25208,8 +25330,13 @@
 }
 
 @media (max-width: 768px) {
+  .tournament-hero-banner {
+    padding: 24px 0 28px;
+  }
   .tournament-hero-title {
-    font-size: 1.35rem;
+    font-size: 1.25rem;
+    line-height: 1.35;
+    margin: 0 0 12px 0;
   }
   .tournament-nav-bar,
   .activity-floating-nav-bar {
@@ -25292,6 +25419,82 @@
   @keyframes shareSlideUp {
     from { transform: translateY(100%); }
     to { transform: translateY(0); }
+  }
+
+  /* Mobile Tournament Overview Slider Optimization */
+  .tourney-overview-showcase-section {
+    padding: 14px;
+    border-radius: 14px;
+  }
+  .tourney-showcase-header {
+    gap: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+  }
+  .showcase-title-text {
+    font-size: 1rem;
+  }
+  .tourney-16to9-viewport {
+    aspect-ratio: 16 / 9;
+    max-height: 250px;
+    border-radius: 10px;
+  }
+  .slider-nav-arrow {
+    width: 32px;
+    height: 32px;
+    top: 42%;
+  }
+  .slider-nav-arrow.arrow-left {
+    left: 8px;
+  }
+  .slider-nav-arrow.arrow-right {
+    right: 8px;
+  }
+  .slide-caption-container {
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    padding: 8px 10px;
+    gap: 8px;
+  }
+  .caption-text-block {
+    max-width: 72%;
+  }
+  .caption-main-title {
+    font-size: 0.92rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .caption-subtitle {
+    display: none;
+  }
+  .btn-caption-expand {
+    padding: 5px 9px;
+    font-size: 0.72rem;
+  }
+  .slider-dot-indicators-bar {
+    display: none; /* Hide 20 crowded dots on mobile for clean aesthetic */
+  }
+  .tourney-thumbnail-strip-wrapper {
+    display: none; /* Hide 20 thumbnails on mobile to eliminate clutter */
+  }
+  .lightbox-content-box {
+    max-height: 98vh;
+    gap: 6px;
+  }
+  .lightbox-img-viewport {
+    max-height: 75vh;
+  }
+  .lightbox-arrow {
+    width: 38px;
+    height: 38px;
+  }
+  .lightbox-arrow.arrow-left {
+    left: 8px;
+  }
+  .lightbox-arrow.arrow-right {
+    right: 8px;
   }
 }
 

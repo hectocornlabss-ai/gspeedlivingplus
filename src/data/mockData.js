@@ -1183,7 +1183,7 @@ export const GALLERY_ACTIVITIES = [
     slug: 'audition-lady-tournament-cup',
     title: 'AUDITION LADY TOURNAMENT CUP #7',
     category: 'community',
-    date: 'พฤษภาคม 2026',
+    date: 'สิงหาคม 2024',
     readTime: '3 นาทีในการอ่าน',
     desc: 'การแข่งขัน Audition เกมเต้นอันดับ 1 ของไทย มอบเงินรางวัลชนะเลิศและไอเทมพิเศษ บรรยากาศอบอุ่นและสนุกสนาน',
     image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80',

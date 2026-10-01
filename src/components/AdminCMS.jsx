@@ -827,8 +827,9 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
     triggerSaveToast();
   };
 
-  // Tournament Tab sub-mode
-  const [tourneySubTab, setTourneySubTab] = useState('applications'); // 'applications' | 'brackets' | 'games'
+  // Tournament Tab sub-mode (Default to full tournaments list & editor)
+  const [tourneySubTab, setTourneySubTab] = useState('tournaments'); // 'tournaments' | 'applications' | 'brackets' | 'games'
+  const [tourneySearchQuery, setTourneySearchQuery] = useState('');
   const [selectedTourneyBracketId, setSelectedTourneyBracketId] = useState('tour-1');
   const [showAddGameModal, setShowAddGameModal] = useState(false);
   const [newGameForm, setNewGameForm] = useState({ name: '', logo: '' });
@@ -1280,7 +1281,22 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
     }
     setIsTournamentModalOpen(false);
     triggerSaveToast();
+    setTimeout(() => {
+      saveSiteData();
+    }, 100);
   };
+
+  // Filtered Tournaments List for Tab 05 Tournaments Sub-tab
+  const filteredTournaments = (siteData.tournaments || []).filter(t => {
+    if (!tourneySearchQuery.trim()) return true;
+    const q = tourneySearchQuery.toLowerCase();
+    return (
+      (t.title && t.title.toLowerCase().includes(q)) ||
+      (t.game && t.game.toLowerCase().includes(q)) ||
+      (t.desc && t.desc.toLowerCase().includes(q)) ||
+      (t.venue && t.venue.toLowerCase().includes(q))
+    );
+  });
 
   // Activities & Articles CMS State
   const [articleAdminSubTab, setArticleAdminSubTab] = useState('list'); // 'list' | 'taxonomy'
@@ -10706,6 +10722,9 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                           });
                           setEditingActivity(null);
                           triggerSaveToast();
+                          setTimeout(() => {
+                            saveSiteData();
+                          }, 100);
                         }}
                       >
                         <Save size={14} /> บันทึกบทความกิจกรรม
@@ -11269,6 +11288,9 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                           });
                           setShowAddActivityModal(false);
                           triggerSaveToast();
+                          setTimeout(() => {
+                            saveSiteData();
+                          }, 100);
                         }}
                       >
                         <Save size={14} /> เพิ่มบทความใหม่ลงระบบ
@@ -11285,7 +11307,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
               ========================================================================= */}
           
           {/* =========================================================================
-              TAB: TOURNAMENT APPLICATIONS & TEAM ROSTER MANAGER
+              TAB: TOURNAMENTS & ESPORTS HUB (Full CRUD, Brackets, Teams, Games)
               ========================================================================= */}
           {activeTab === 'tourney-apps' && (
             <div className="cms-panel-block">
@@ -11293,20 +11315,28 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                 <div>
                   <h3 className="panel-title">
                     <Trophy size={20} className="text-blue" />
-                    <span>ระบบจัดการใบสมัครทีมแข่งขันอีสปอร์ต (Tournament Applications Hub)</span>
+                    <span>05. ทัวร์นาเมนต์ & สายการแข่งขันอีสปอร์ต (Esports Tournament Hub)</span>
                   </h3>
                   <p className="panel-desc">
-                    ตรวจสอบรายชื่อทีมที่สมัครเข้าร่วมแข่ง, ข้อมูลกัปตันทีม, เบอร์โทร, Discord, และรายชื่อผู้เล่นตัวจริง 5 คน พร้อมอนุมัติสิทธิ์เข้าสู่สายการแข่งขัน (Sync to Bracket) ทันที
+                    สร้าง เพิ่ม และแก้ไขข้อมูลทัวร์นาเมนต์ครบวงจร (วันแข่ง, เงินรางวัล, กติกา, สเปกเครื่อง, จัดการทีม, แกลเลอรี 50+ ภาพ), อนุมัติใบสมัครทีม, สกอร์สด (Bracket Manager) และคลังเกม
                   </p>
                 </div>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   <button 
                     type="button" 
                     className="btn-primary"
-                    onClick={openCreateTeamModal}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#2563eb', borderColor: '#2563eb' }}
+                    onClick={() => openCreateTournamentModal()}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#10b981', borderColor: '#10b981', fontWeight: 700 }}
                   >
-                    <Plus size={15} /> เพิ่มทีมแข่งขันด้วยตนเอง
+                    <Plus size={15} /> + เพิ่มทัวร์นาเมนต์ใหม่
+                  </button>
+                  <button 
+                    type="button" 
+                    className="btn-secondary"
+                    onClick={openCreateTeamModal}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <Users size={14} /> เพิ่มทีมแข่งขัน
                   </button>
                   <button 
                     type="button" 
@@ -11368,7 +11398,25 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
               </div>
 
               {/* Tournament Mode Sub-tabs */}
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', background: '#f1f5f9', padding: '4px', borderRadius: '10px', width: 'fit-content' }}>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', background: '#f1f5f9', padding: '4px', borderRadius: '10px', width: 'fit-content', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  id="cms-subtab-tourneys-list"
+                  onClick={() => setTourneySubTab('tournaments')}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    fontSize: '0.85rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    background: tourneySubTab === 'tournaments' ? '#ffffff' : 'transparent',
+                    color: tourneySubTab === 'tournaments' ? '#1d4ed8' : '#64748b',
+                    boxShadow: tourneySubTab === 'tournaments' ? '0 2px 6px rgba(0,0,0,0.08)' : 'none'
+                  }}
+                >
+                  🏆 รายการทัวร์นาเมนต์ทั้งหมด ({((siteData.tournaments || []).length)})
+                </button>
                 <button
                   type="button"
                   onClick={() => setTourneySubTab('applications')}
@@ -11401,7 +11449,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                     boxShadow: tourneySubTab === 'brackets' ? '0 2px 6px rgba(0,0,0,0.08)' : 'none'
                   }}
                 >
-                  🏆 ควบคุมสายการแข่งขัน & สกอร์สด (Bracket Manager)
+                  ⚔️ ควบคุมสายการแข่งขัน & สกอร์สด (Bracket Manager)
                 </button>
                 <button
                   type="button"
@@ -11422,6 +11470,275 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                   🎮 เกมขอจัดแข่งขัน & โลโก้ ({((siteData.organizerGames || DEFAULT_ORGANIZER_GAMES).length)})
                 </button>
               </div>
+
+              {/* -------------------------------------------------------------
+                  SUBTAB 1: TOURNAMENTS LIST & MANAGEMENT
+                  ------------------------------------------------------------- */}
+              {tourneySubTab === 'tournaments' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  {/* Top Action Bar & Search */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '14px', flexWrap: 'wrap', background: '#ffffff', padding: '16px 20px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: '260px' }}>
+                      <div className="search-box-wrapper" style={{ position: 'relative', width: '100%', maxWidth: '380px' }}>
+                        <Search size={15} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                        <input
+                          type="text"
+                          className="form-input"
+                          placeholder="ค้นหาชื่อทัวร์นาเมนต์ หรือชื่อเกม..."
+                          value={tourneySearchQuery}
+                          onChange={e => setTourneySearchQuery(e.target.value)}
+                          style={{ paddingLeft: '36px', height: '40px', fontSize: '0.88rem' }}
+                        />
+                      </div>
+                      {tourneySearchQuery && (
+                        <button 
+                          type="button" 
+                          onClick={() => setTourneySearchQuery('')}
+                          className="btn-secondary btn-sm"
+                          style={{ fontSize: '0.78rem' }}
+                        >
+                          ล้างค้นหา
+                        </button>
+                      )}
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                      <button 
+                        type="button"
+                        className="btn-section-preview"
+                        onClick={() => openPreview('tournaments')}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', height: '40px' }}
+                      >
+                        <Eye size={14} /> พรีวิวหน้ารวมทัวร์นาเมนต์
+                      </button>
+                      <button 
+                        type="button"
+                        className="btn-primary"
+                        onClick={() => openCreateTournamentModal()}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#10b981', borderColor: '#10b981', height: '40px', fontWeight: 700, padding: '0 18px', boxShadow: '0 4px 12px rgba(16,185,129,0.3)' }}
+                      >
+                        <Plus size={16} /> + เพิ่มทัวร์นาเมนต์ใหม่
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Summary KPI Badges */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '14px' }}>
+                    <div className="admin-subcard glass-panel" style={{ padding: '16px', borderLeft: '4px solid #3b82f6' }}>
+                      <span className="text-xs text-muted" style={{ fontWeight: 600 }}>รายการแข่งทั้งหมด</span>
+                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', marginTop: '4px' }}>
+                        {(siteData.tournaments || []).length} รายการ
+                      </div>
+                      <span className="text-xs text-muted">ครอบคลุมทุกเกมอีสปอร์ต</span>
+                    </div>
+
+                    <div className="admin-subcard glass-panel" style={{ padding: '16px', borderLeft: '4px solid #10b981', background: 'rgba(209, 250, 229, 0.3)' }}>
+                      <span className="text-xs" style={{ fontWeight: 600, color: '#047857' }}>เปิดรับสมัครอยู่</span>
+                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#059669', marginTop: '4px' }}>
+                        {(siteData.tournaments || []).filter(t => t.status === 'Open').length} รายการ
+                      </div>
+                      <span className="text-xs text-muted">รับทีมเข้าชิงเงินรางวัล</span>
+                    </div>
+
+                    <div className="admin-subcard glass-panel" style={{ padding: '16px', borderLeft: '4px solid #f59e0b' }}>
+                      <span className="text-xs text-muted" style={{ fontWeight: 600 }}>ทีมยื่นสมัครทั้งหมด</span>
+                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#d97706', marginTop: '4px' }}>
+                        {(siteData.tournamentApplications || []).length} ทีม
+                      </div>
+                      <span className="text-xs text-muted">รออนุมัติ & ยืนยันสิทธิ์</span>
+                    </div>
+
+                    <div className="admin-subcard glass-panel" style={{ padding: '16px', borderLeft: '4px solid #8b5cf6' }}>
+                      <span className="text-xs text-muted" style={{ fontWeight: 600 }}>คลังภาพกิจกรรมรวม</span>
+                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#7c3aed', marginTop: '4px' }}>
+                        {(siteData.tournaments || []).reduce((acc, t) => acc + ((t.galleryPhotos || []).length), 0)} ภาพ
+                      </div>
+                      <span className="text-xs text-muted">ไฮไลต์ & บรรยากาศ LAN</span>
+                    </div>
+                  </div>
+
+                  {/* Tournaments Data Table */}
+                  <div className="cms-table-wrapper" style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+                    <div style={{ padding: '14px 18px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <strong style={{ fontSize: '1rem', color: '#0f172a' }}>รายการทัวร์นาเมนต์ & เมนูแก้ไขข้อมูล</strong>
+                        <span style={{ fontSize: '0.82rem', color: '#64748b', marginLeft: '8px' }}>
+                          (คลิก "แก้ไข" เพื่อเปลี่ยนชื่อ, วันที่, เงินรางวัล, กติกา, สเปกเครื่อง, จัดการทีม, และแกลเลอรีภาพ)
+                        </span>
+                      </div>
+                      <span className="text-xs" style={{ background: '#eff6ff', color: '#1d4ed8', padding: '4px 10px', borderRadius: '6px', fontWeight: 600 }}>
+                        แสดงผล {filteredTournaments.length} จาก {(siteData.tournaments || []).length} รายการ
+                      </span>
+                    </div>
+
+                    <table className="cms-data-table">
+                      <thead>
+                        <tr>
+                          <th>เกม & รายการแข่งขัน</th>
+                          <th>วันแข่งขัน / เวลา</th>
+                          <th>เงินรางวัล</th>
+                          <th>ทีม & นักแข่ง</th>
+                          <th>คลังภาพ 50+ ภาพ</th>
+                          <th>สถานะ & SEO</th>
+                          <th style={{ textAlign: 'center' }}>การจัดการ</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredTournaments.length === 0 ? (
+                          <tr>
+                            <td colSpan="7" style={{ textAlign: 'center', padding: '36px 16px', color: '#64748b' }}>
+                              <Trophy size={32} style={{ margin: '0 auto 8px', opacity: 0.3 }} />
+                              <div>ไม่พบรายการทัวร์นาเมนต์ที่ตรงกับเงื่อนไขการค้นหา</div>
+                              <button 
+                                type="button" 
+                                className="btn-secondary btn-sm" 
+                                onClick={() => setTourneySearchQuery('')}
+                                style={{ marginTop: '10px' }}
+                              >
+                                ล้างคำค้นหา
+                              </button>
+                            </td>
+                          </tr>
+                        ) : (
+                          filteredTournaments.map(t => {
+                            const photoCount = (t.galleryPhotos || []).length;
+                            const teamCount = (t.teams || []).length;
+                            const hasSeo = Boolean(t.seo?.metaTitle);
+                            const slug = t.slug || t.seo?.slug || t.id;
+
+                            return (
+                              <tr key={t.id}>
+                                <td>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    {t.bannerImage ? (
+                                      <img 
+                                        src={t.bannerImage} 
+                                        alt={t.title}
+                                        style={{ width: '56px', height: '40px', objectFit: 'cover', borderRadius: '6px', border: '1px solid rgba(0,0,0,0.1)' }}
+                                      />
+                                    ) : (
+                                      <div style={{ width: '56px', height: '40px', background: '#0f172a', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#60a5fa' }}>
+                                        <Trophy size={18} />
+                                      </div>
+                                    )}
+                                    <div>
+                                      <strong style={{ display: 'block', fontSize: '0.92rem', color: '#0f172a' }}>{t.title}</strong>
+                                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginTop: '3px', flexWrap: 'wrap' }}>
+                                        <span className="text-xs" style={{ fontWeight: 650, color: '#1d4ed8', background: '#eff6ff', padding: '1px 6px', borderRadius: '4px' }}>
+                                          {t.game}
+                                        </span>
+                                        {t.gameCategory && (
+                                          <span className="text-xs" style={{ background: '#f1f5f9', padding: '1px 6px', borderRadius: '4px', color: '#64748b' }}>
+                                            {t.gameCategory}
+                                          </span>
+                                        )}
+                                        {t.format && (
+                                          <span className="text-xs text-muted" style={{ fontSize: '0.72rem' }}>
+                                            • {t.format}
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td>
+                                  <div style={{ fontWeight: 600, fontSize: '0.88rem', color: '#1e293b' }}>{t.date}</div>
+                                  <span className="text-xs text-muted block">{t.time || '10:00 - 19:00 น.'}</span>
+                                </td>
+                                <td><strong className="text-blue" style={{ fontSize: '0.95rem' }}>{t.prizePool}</strong></td>
+                                <td>
+                                  <button 
+                                    type="button"
+                                    className="btn-table-action"
+                                    style={{ padding: '4px 10px', fontSize: '0.8rem', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', borderRadius: '6px' }}
+                                    onClick={() => openEditTournamentModal(t, 'roster')}
+                                    title="คลิกเพื่อจัดการรายชื่อนักแข่ง & ทีม"
+                                  >
+                                    <Users size={13} />
+                                    <span>{teamCount} ทีม</span>
+                                  </button>
+                                </td>
+                                <td>
+                                  <button 
+                                    type="button"
+                                    className="btn-table-action"
+                                    style={{ 
+                                      padding: '4px 10px', 
+                                      fontSize: '0.8rem', 
+                                      background: photoCount >= 50 ? '#ecfdf5' : '#f8fafc', 
+                                      color: photoCount >= 50 ? '#059669' : '#475569', 
+                                      border: photoCount >= 50 ? '1px solid #a7f3d0' : '1px solid #e2e8f0',
+                                      borderRadius: '6px'
+                                    }}
+                                    onClick={() => openEditTournamentModal(t, 'gallery')}
+                                    title="คลิกเพื่อจัดการแกลเลอรีภาพกิจกรรม 50+ ภาพ"
+                                  >
+                                    <Camera size={13} />
+                                    <span>{photoCount} ภาพ {photoCount >= 50 ? '✓ (50+)' : ''}</span>
+                                  </button>
+                                </td>
+                                <td>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                    <span className={`status-pill ${t.status === 'Open' ? 'status-pill-success' : 'status-pill-warning'}`} style={{ width: 'fit-content' }}>
+                                      {t.status === 'Open' ? '🟢 เปิดรับสมัคร' : t.status === 'Completed' ? '🏁 แข่งขันจบแล้ว' : `🟡 ${t.status}`}
+                                    </span>
+                                    <span 
+                                      className="text-xs" 
+                                      style={{ color: hasSeo ? '#059669' : '#94a3b8', display: 'flex', alignItems: 'center', gap: '3px' }}
+                                      title={hasSeo ? `SEO: ${t.seo?.metaTitle}` : 'ยังไม่ได้ตั้งค่า SEO'}
+                                    >
+                                      <Globe size={11} /> {hasSeo ? 'SEO พร้อม' : 'รอตั้ง SEO'}
+                                    </span>
+                                  </div>
+                                </td>
+                                <td>
+                                  <div className="actions-cell" style={{ justifyContent: 'center', gap: '6px' }}>
+                                    <button 
+                                      type="button"
+                                      className="btn-table-action edit"
+                                      onClick={() => openEditTournamentModal(t, 'general')}
+                                      title="แก้ไขข้อมูลทัวร์นาเมนต์ (วันแข่ง, เงินรางวัล, กติกา, สเปก, แกลเลอรี, SEO)"
+                                      style={{ background: '#eff6ff', color: '#1d4ed8', borderColor: '#bfdbfe', padding: '4px 8px' }}
+                                    >
+                                      <Edit3 size={14} />
+                                      <span style={{ fontSize: '0.78rem', fontWeight: 600 }}>แก้ไข</span>
+                                    </button>
+                                    <a 
+                                      href={`/tournaments/${slug}`}
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      className="btn-table-action view" 
+                                      title="เปิดดูหน้าเว็บจริงของทัวร์นาเมนต์นี้"
+                                      style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '4px 6px' }}
+                                    >
+                                      <ExternalLink size={14} />
+                                    </a>
+                                    <button 
+                                      type="button"
+                                      className="btn-table-action action-delete"
+                                      onClick={() => {
+                                        if (window.confirm(`คุณต้องการลบทัวร์นาเมนต์ "${t.title}" ใช่หรือไม่?`)) {
+                                          deleteTournament(t.id);
+                                          triggerSaveToast();
+                                          setTimeout(() => { saveSiteData(); }, 100);
+                                        }
+                                      }}
+                                      title="ลบทัวร์นาเมนต์นี้"
+                                      style={{ padding: '4px 6px' }}
+                                    >
+                                      <Trash2 size={14} />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
 
               {tourneySubTab === 'applications' && (
                 <>
