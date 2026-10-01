@@ -283,7 +283,7 @@ export default function SingleActivityView({
             <button 
               type="button" 
               onClick={() => onBack('activities')} 
-              className="btn-tourney-back"
+              className="btn-tourney-back btn-activity-back"
               title="ย้อนกลับไปรวมภาพกิจกรรม"
             >
               <ArrowLeft size={15} />
@@ -297,7 +297,7 @@ export default function SingleActivityView({
             <button
               ref={shareBtnRef}
               type="button"
-              className="btn-tourney-share-trigger"
+              className="btn-tourney-share-trigger btn-activity-share"
               onClick={() => setShareOpen(!shareOpen)}
               title="แชร์บทความนี้ (Facebook, LINE, Messenger, Instagram, คัดลอกลิงก์)"
             >

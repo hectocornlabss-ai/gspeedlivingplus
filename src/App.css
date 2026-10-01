@@ -14803,6 +14803,7 @@
 
 /* Top Sticky Navigation Bar for Activity (Pins seamlessly under mobile/desktop menu on scroll) */
 .activity-floating-nav-bar {
+  position: -webkit-sticky;
   position: sticky;
   top: 68px;
   z-index: 40;
@@ -14812,7 +14813,39 @@
   border-bottom: 1px solid #e2e8f0;
   padding: 8px 0;
   margin: 0;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+}
+
+.activity-floating-nav-bar .btn-activity-back,
+.activity-floating-nav-bar .btn-tourney-back {
+  background: #f1f5f9 !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  font-weight: 700 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.activity-floating-nav-bar .btn-activity-back:hover,
+.activity-floating-nav-bar .btn-tourney-back:hover {
+  background: #e2e8f0 !important;
+  color: #1d4ed8 !important;
+  border-color: #93c5fd !important;
+}
+
+.activity-floating-nav-bar .btn-activity-share,
+.activity-floating-nav-bar .btn-tourney-share-trigger {
+  background: #eff6ff !important;
+  border: 1px solid #bfdbfe !important;
+  color: #1d4ed8 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.activity-floating-nav-bar .btn-activity-share:hover,
+.activity-floating-nav-bar .btn-tourney-share-trigger:hover {
+  background: #dbeafe !important;
+  border-color: #3b82f6 !important;
+  color: #1e40af !important;
 }
 
 .nav-bar-inner {
@@ -24131,15 +24164,18 @@
   min-height: 100vh;
   padding-bottom: 80px;
   width: 100%;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
 }
 
 .tournament-nav-bar {
   position: relative;
-  top: 0;
+  top: 0 !important;
   z-index: 30;
   background: #0f172a;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   padding: 10px 0;
+  margin: 0 !important;
 }
 
 .btn-tourney-back {
@@ -25649,13 +25685,21 @@
     line-height: 1.35;
     margin: 0 0 12px 0;
   }
-  .tournament-nav-bar,
-  .activity-floating-nav-bar {
-    top: 66px;
+  .tournament-nav-bar {
+    position: relative !important;
+    top: 0 !important;
     padding: 6px 0;
+    margin: 0 !important;
+  }
+  .activity-floating-nav-bar {
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: 62px !important;
+    padding: 6px 0;
+    margin: 0 !important;
   }
   .activity-article-header {
-    padding: 18px 0 16px;
+    padding: 16px 0 14px;
   }
   .article-meta-top {
     margin-top: 4px;
@@ -25663,7 +25707,7 @@
     gap: 8px;
   }
   .tournament-tabs-bar {
-    top: 110px;
+    top: 62px !important;
     padding: 0;
   }
   .tabs-inner-scroll {
