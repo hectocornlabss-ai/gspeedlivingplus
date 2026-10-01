@@ -12,10 +12,13 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+// Internal microservice MUST strictly use port 3001, immune to Coolify's PORT=3000 override
+const PORT = 3001;
 
 // Persistent CMS Data Directory (mounted to Docker volume on production)
-const defaultDataDir = fs.existsSync('/app/data') ? '/app/data' : path.join(__dirname, 'data');
+const defaultDataDir = fs.existsSync('/app/server/data') 
+  ? '/app/server/data' 
+  : (fs.existsSync('/app/data') ? '/app/data' : path.join(__dirname, 'data'));
 const DATA_DIR = process.env.DATA_DIR || defaultDataDir;
 const BACKUP_DIR = path.join(DATA_DIR, 'backups');
 const SITE_DATA_FILE = path.join(DATA_DIR, 'site-data.json');
@@ -1178,11 +1181,19 @@ app.get('/render-meta', (req, res) => {
   }
 });
 
-// Start Express Server
-app.listen(PORT, () => {
+// Start Express Server on 0.0.0.0:3001
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`=======================================================`);
-  console.log(`🚀 GLP Hostinger SMTP Email Service Running on Port ${PORT}`);
+  console.log(`🚀 GLP Backend API & SMTP Service Running on 0.0.0.0:${PORT}`);
   console.log(`📡 Health Check: http://localhost:${PORT}/health`);
-  console.log(`📧 Hostinger SMTP Host: ${process.env.SMTP_HOST || 'smtp.hostinger.com:465'}`);
+  console.log(`📁 Persistent Data Dir: ${DATA_DIR} (exists: ${fs.existsSync(DATA_DIR)})`);
   console.log(`=======================================================`);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('[UncaughtException] Non-fatal server error:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[UnhandledRejection] Non-fatal promise rejection:', reason);
 });

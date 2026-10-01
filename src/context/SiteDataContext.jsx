@@ -2018,12 +2018,14 @@ export function SiteDataProvider({ children }) {
     // 1. Immediate LocalStorage & in-memory event broadcast
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
-      // Also sync to legacy/secondary storage key to ensure 100% backward compatibility
-      try { localStorage.setItem('glp_site_data', JSON.stringify(dataToSave)); } catch (e2) {}
       window.dispatchEvent(new CustomEvent('gspeed-site-data-updated', { detail: dataToSave }));
       localOk = true;
     } catch (e) {
-      console.warn('LocalStorage save error:', e);
+      console.warn('LocalStorage save warning:', e);
+      try {
+        window.dispatchEvent(new CustomEvent('gspeed-site-data-updated', { detail: dataToSave }));
+        localOk = true;
+      } catch (e2) {}
     }
 
     // 2. Server Database Persistence (Volume Mount / Docker)
@@ -2034,6 +2036,9 @@ export function SiteDataProvider({ children }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ siteData: dataToSave, author: 'admin' })
       });
+      if (!response.ok) {
+        throw new Error(`Server returned HTTP ${response.status}`);
+      }
       const resJson = await response.json();
       if (resJson?.success) {
         serverOk = true;
@@ -2053,6 +2058,12 @@ export function SiteDataProvider({ children }) {
     } catch (apiErr) {
       console.warn('[SiteDataContext] Server API sync warning:', apiErr.message);
       setServerSyncStatus(prev => ({ ...prev, saving: false, error: apiErr.message }));
+      return { 
+        success: localOk, 
+        serverSaved: false, 
+        timestamp: nowTime, 
+        error: apiErr.message 
+      };
     }
 
     return { success: localOk, serverSaved: serverOk, timestamp: nowTime };
