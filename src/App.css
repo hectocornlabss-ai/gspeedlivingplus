@@ -11977,6 +11977,29 @@
   transform: translateY(-1px);
 }
 
+.btn-tourney-card-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 650;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-tourney-card-edit:hover {
+  background: #1d4ed8;
+  color: #ffffff;
+  border-color: #1d4ed8;
+  box-shadow: 0 2px 6px rgba(29, 78, 216, 0.2);
+}
+
 .btn-tourney-table-icon {
   width: 34px;
   height: 34px;

@@ -1098,6 +1098,22 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
     wins: 0,
     losses: 0
   });
+  const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
+  const [editingTeamIndex, setEditingTeamIndex] = useState(null);
+  const [teamEditDraft, setTeamEditDraft] = useState({
+    name: '',
+    tag: '',
+    logo: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80',
+    seed: 1,
+    status: 'Confirmed',
+    captain: '',
+    captainPhone: '',
+    captainDiscord: '',
+    players: ['', '', '', '', ''],
+    substitutes: [''],
+    wins: 0,
+    losses: 0
+  });
 
   const openCreateTournamentModal = () => {
     setActiveTournamentDraft({
@@ -1267,6 +1283,109 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
       losses: 0
     });
     setShowAddTeamForm(false);
+  };
+
+  const handleOpenAddTeamModal = () => {
+    const nextSeed = (activeTournamentDraft?.teams || []).length + 1;
+    setTeamEditDraft({
+      name: '',
+      tag: '',
+      logo: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80',
+      seed: nextSeed,
+      status: 'Confirmed',
+      captain: '',
+      captainPhone: '',
+      captainDiscord: '',
+      players: ['', '', '', '', ''],
+      substitutes: [''],
+      wins: 0,
+      losses: 0
+    });
+    setEditingTeamIndex(-1);
+    setIsTeamModalOpen(true);
+  };
+
+  const handleOpenEditTeamModal = (tm, index) => {
+    const rawPlayers = Array.isArray(tm.players) ? tm.players : [];
+    const fivePlayers = [
+      rawPlayers[0] !== undefined ? rawPlayers[0] : '',
+      rawPlayers[1] !== undefined ? rawPlayers[1] : '',
+      rawPlayers[2] !== undefined ? rawPlayers[2] : '',
+      rawPlayers[3] !== undefined ? rawPlayers[3] : '',
+      rawPlayers[4] !== undefined ? rawPlayers[4] : ''
+    ];
+    const rawSubs = Array.isArray(tm.substitutes) ? tm.substitutes : [];
+
+    setTeamEditDraft({
+      ...tm,
+      name: tm.name || '',
+      tag: tm.tag || '',
+      logo: tm.logo || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80',
+      seed: tm.seed || (index + 1),
+      status: tm.status || 'Confirmed',
+      captain: tm.captain || '',
+      captainPhone: tm.captainPhone || '',
+      captainDiscord: tm.captainDiscord || '',
+      players: fivePlayers,
+      substitutes: rawSubs.length > 0 ? rawSubs : [''],
+      wins: tm.wins || 0,
+      losses: tm.losses || 0
+    });
+    setEditingTeamIndex(index);
+    setIsTeamModalOpen(true);
+  };
+
+  const handleSaveTeamModal = () => {
+    if (!teamEditDraft.name.trim()) {
+      alert('กรุณากรอกชื่อทีม (Team Name)');
+      return;
+    }
+    const cleanPlayers = (teamEditDraft.players || []).map(p => (p || '').trim()).filter(p => p.length > 0);
+    const cleanSubs = (teamEditDraft.substitutes || []).map(s => (s || '').trim()).filter(s => s.length > 0);
+
+    const teamData = {
+      ...teamEditDraft,
+      name: teamEditDraft.name.trim(),
+      tag: (teamEditDraft.tag || teamEditDraft.name.slice(0, 3)).trim().toUpperCase(),
+      players: cleanPlayers.length > 0 ? cleanPlayers : [teamEditDraft.captain || 'Player 1'],
+      substitutes: cleanSubs
+    };
+
+    const currentTeams = [...(activeTournamentDraft?.teams || [])];
+
+    if (editingTeamIndex !== null && editingTeamIndex >= 0 && editingTeamIndex < currentTeams.length) {
+      currentTeams[editingTeamIndex] = {
+        ...currentTeams[editingTeamIndex],
+        ...teamData
+      };
+    } else {
+      currentTeams.push({
+        ...teamData,
+        id: teamData.id || `team-${Date.now()}`
+      });
+    }
+
+    setActiveTournamentDraft(prev => ({
+      ...prev,
+      teams: currentTeams
+    }));
+
+    setIsTeamModalOpen(false);
+    setEditingTeamIndex(null);
+    triggerSaveToast();
+  };
+
+  const handleDeleteTeam = (index) => {
+    const tm = activeTournamentDraft?.teams?.[index];
+    const teamName = tm?.name || `ทีมที่ ${index + 1}`;
+    if (window.confirm(`คุณต้องการลบทีม "${teamName}" ออกจากทัวร์นาเมนต์นี้ใช่หรือไม่?`)) {
+      const updated = (activeTournamentDraft.teams || []).filter((_, i) => i !== index);
+      setActiveTournamentDraft({
+        ...activeTournamentDraft,
+        teams: updated
+      });
+      triggerSaveToast();
+    }
   };
 
   const handleSaveTournamentDraft = () => {
@@ -14792,109 +14911,11 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                             <button 
                               type="button" 
                               className="btn-primary btn-sm"
-                              onClick={() => setShowAddTeamForm(!showAddTeamForm)}
+                              onClick={handleOpenAddTeamModal}
                             >
-                              <Plus size={14} /> {showAddTeamForm ? 'ปิดฟอร์ม' : 'เพิ่มทีมใหม่'}
+                              <Plus size={14} /> เพิ่มทีมใหม่
                             </button>
                           </div>
-
-                          {/* Add Team Inline Form */}
-                          {showAddTeamForm && (
-                            <div style={{ background: '#ffffff', border: '2px solid #2563eb', borderRadius: '8px', padding: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
-                              <h5 style={{ margin: '0 0 12px 0', color: '#1e3a8a', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <Plus size={15} /> ฟอร์มเพิ่มทีมผู้เข้าแข่งขันใหม่
-                              </h5>
-
-                              <div className="form-row-2">
-                                <div className="form-group">
-                                  <label>ชื่อทีม (Team Name) *</label>
-                                  <input 
-                                    type="text" className="form-input" placeholder="เช่น Talon Academy"
-                                    value={newTeamDraft.name}
-                                    onChange={e => setNewTeamDraft({ ...newTeamDraft, name: e.target.value })}
-                                  />
-                                </div>
-                                <div className="form-group">
-                                  <label>แท็กทีม (Team Tag)</label>
-                                  <input 
-                                    type="text" className="form-input" placeholder="เช่น TLN"
-                                    value={newTeamDraft.tag}
-                                    onChange={e => setNewTeamDraft({ ...newTeamDraft, tag: e.target.value })}
-                                  />
-                                </div>
-                              </div>
-
-                              <div className="form-row-2">
-                                <div className="form-group">
-                                  <label>ชื่อกัปตันทีม (Captain IGN & Full Name)</label>
-                                  <input 
-                                    type="text" className="form-input" placeholder="เช่น SScary (กัปตัน)"
-                                    value={newTeamDraft.captain}
-                                    onChange={e => setNewTeamDraft({ ...newTeamDraft, captain: e.target.value })}
-                                  />
-                                </div>
-                                <div className="form-group">
-                                  <label>เบอร์โทรศัพท์ติดต่อกัปตัน</label>
-                                  <input 
-                                    type="text" className="form-input" placeholder="08X-XXX-XXXX"
-                                    value={newTeamDraft.captainPhone}
-                                    onChange={e => setNewTeamDraft({ ...newTeamDraft, captainPhone: e.target.value })}
-                                  />
-                                </div>
-                              </div>
-
-                              <div className="form-row-2">
-                                <div className="form-group">
-                                  <label>Discord Tag (สำหรับประสานงาน)</label>
-                                  <input 
-                                    type="text" className="form-input" placeholder="captain#1234"
-                                    value={newTeamDraft.captainDiscord}
-                                    onChange={e => setNewTeamDraft({ ...newTeamDraft, captainDiscord: e.target.value })}
-                                  />
-                                </div>
-                                <div className="form-group">
-                                  <label>สถานะทีม (Status)</label>
-                                  <select 
-                                    className="form-input"
-                                    value={newTeamDraft.status}
-                                    onChange={e => setNewTeamDraft({ ...newTeamDraft, status: e.target.value })}
-                                  >
-                                    <option value="Confirmed">Confirmed (ยืนยันสิทธิ์แล้ว)</option>
-                                    <option value="Pending">Pending (รอตรวจสอบ)</option>
-                                    <option value="Paid">Paid (ชำระค่าสมัครแล้ว)</option>
-                                  </select>
-                                </div>
-                              </div>
-
-                              <div className="form-group">
-                                <label>รายชื่อผู้เล่นตัวจริง 5 คน (Player 1 - 5 IGNs)</label>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px' }}>
-                                  {[0, 1, 2, 3, 4].map(idx => (
-                                    <input 
-                                      key={idx}
-                                      type="text" className="form-input" 
-                                      placeholder={`ผู้เล่นคนที่ ${idx + 1}`}
-                                      value={newTeamDraft.players[idx] || ''}
-                                      onChange={e => {
-                                        const p = [...newTeamDraft.players];
-                                        p[idx] = e.target.value;
-                                        setNewTeamDraft({ ...newTeamDraft, players: p });
-                                      }}
-                                    />
-                                  ))}
-                                </div>
-                              </div>
-
-                              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '12px' }}>
-                                <button type="button" className="btn-secondary" onClick={() => setShowAddTeamForm(false)}>
-                                  ยกเลิก
-                                </button>
-                                <button type="button" className="btn-primary" onClick={handleAddTeam}>
-                                  <Check size={14} /> ยืนยันเพิ่มทีมนี้
-                                </button>
-                              </div>
-                            </div>
-                          )}
 
                           {/* Teams Cards List */}
                           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '12px' }}>
@@ -14908,7 +14929,8 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                                   padding: '14px',
                                   display: 'flex',
                                   flexDirection: 'column',
-                                  gap: '10px'
+                                  gap: '10px',
+                                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
                                 }}
                               >
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -14924,17 +14946,25 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                                       </div>
                                     </div>
                                   </div>
-                                  <button 
-                                    type="button" 
-                                    className="btn-table-action action-delete"
-                                    onClick={() => {
-                                      const updated = activeTournamentDraft.teams.filter((_, i) => i !== tidx);
-                                      setActiveTournamentDraft({ ...activeTournamentDraft, teams: updated });
-                                    }}
-                                    title="ลบทีมนี้"
-                                  >
-                                    <Trash2 size={13} />
-                                  </button>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <button 
+                                      type="button" 
+                                      className="btn-tourney-card-edit"
+                                      onClick={() => handleOpenEditTeamModal(tm, tidx)}
+                                      title="แก้ไขข้อมูลทีม กัปตัน และรายชื่อนักแข่ง"
+                                    >
+                                      <Edit3 size={13} />
+                                      <span>แก้ไข</span>
+                                    </button>
+                                    <button 
+                                      type="button" 
+                                      className="btn-table-action action-delete"
+                                      onClick={() => handleDeleteTeam(tidx)}
+                                      title="ลบทีมนี้"
+                                    >
+                                      <Trash2 size={13} />
+                                    </button>
+                                  </div>
                                 </div>
 
                                 <div style={{ fontSize: '0.82rem', color: '#475569', background: '#f8fafc', padding: '8px', borderRadius: '6px' }}>
@@ -14960,6 +14990,191 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                               </div>
                             ))}
                           </div>
+
+                          {/* Dedicated Team Edit / Add Modal Popup */}
+                          {isTeamModalOpen && (
+                            <div className="cms-modal-backdrop submodal" onClick={() => setIsTeamModalOpen(false)}>
+                              <div 
+                                className="cms-modal-card" 
+                                onClick={e => e.stopPropagation()}
+                                style={{ maxWidth: '680px', width: '92vw', borderRadius: '14px', overflow: 'hidden', boxShadow: '0 25px 60px rgba(0,0,0,0.45)' }}
+                              >
+                                {/* Modal Head */}
+                                <div style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'rgba(59, 130, 246, 0.2)', border: '1px solid rgba(59, 130, 246, 0.35)', color: '#60a5fa', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                      <Users size={18} />
+                                    </div>
+                                    <div>
+                                      <h4 style={{ margin: 0, color: '#ffffff', fontSize: '1.05rem', fontWeight: 700 }}>
+                                        {editingTeamIndex >= 0 ? `แก้ไขข้อมูลทีม: ${teamEditDraft.name || ''}` : 'เพิ่มทีมผู้เข้าแข่งขันใหม่'}
+                                      </h4>
+                                      <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                                        ปรับแต่งชื่อทีม, แท็ก, กัปตัน, เบอร์ติดต่อ, Discord และไลน์อัปนักแข่ง 5 คน
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <button 
+                                    type="button" 
+                                    onClick={() => setIsTeamModalOpen(false)} 
+                                    style={{ background: 'none', border: 'none', color: '#cbd5e1', fontSize: '1.2rem', cursor: 'pointer', padding: '4px' }}
+                                  >
+                                    ✕
+                                  </button>
+                                </div>
+
+                                {/* Modal Body */}
+                                <div style={{ padding: '20px', maxHeight: '72vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                                  {/* Row 1: Name & Tag */}
+                                  <div className="form-row-2">
+                                    <div className="form-group" style={{ margin: 0 }}>
+                                      <label style={{ fontWeight: 650, fontSize: '0.85rem' }}>ชื่อทีม (Team Name) *</label>
+                                      <input 
+                                        type="text" className="form-input" placeholder="เช่น Talon Academy, MiTH"
+                                        value={teamEditDraft.name}
+                                        onChange={e => setTeamEditDraft({ ...teamEditDraft, name: e.target.value })}
+                                      />
+                                    </div>
+                                    <div className="form-group" style={{ margin: 0 }}>
+                                      <label style={{ fontWeight: 650, fontSize: '0.85rem' }}>แท็กทีม (Team Tag)</label>
+                                      <input 
+                                        type="text" className="form-input" placeholder="เช่น TLN, MITH"
+                                        value={teamEditDraft.tag}
+                                        onChange={e => setTeamEditDraft({ ...teamEditDraft, tag: e.target.value })}
+                                      />
+                                    </div>
+                                  </div>
+
+                                  {/* Row 2: Seed & Status */}
+                                  <div className="form-row-2">
+                                    <div className="form-group" style={{ margin: 0 }}>
+                                      <label style={{ fontWeight: 650, fontSize: '0.85rem' }}>ลำดับการวางสาย (Seed Number)</label>
+                                      <input 
+                                        type="number" className="form-input" min="1" max="64"
+                                        value={teamEditDraft.seed}
+                                        onChange={e => setTeamEditDraft({ ...teamEditDraft, seed: parseInt(e.target.value) || 1 })}
+                                      />
+                                    </div>
+                                    <div className="form-group" style={{ margin: 0 }}>
+                                      <label style={{ fontWeight: 650, fontSize: '0.85rem' }}>สถานะของทีม (Status)</label>
+                                      <select 
+                                        className="form-input"
+                                        value={teamEditDraft.status}
+                                        onChange={e => setTeamEditDraft({ ...teamEditDraft, status: e.target.value })}
+                                      >
+                                        <option value="Confirmed">Confirmed (ยืนยันสิทธิ์แล้ว ✓)</option>
+                                        <option value="Pending">Pending (รอตรวจสอบข้อมูล ⏳)</option>
+                                        <option value="Paid">Paid (ชำระค่าสมัครแล้ว 💳)</option>
+                                      </select>
+                                    </div>
+                                  </div>
+
+                                  {/* Section: Captain */}
+                                  <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                    <strong style={{ fontSize: '0.86rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                      <Award size={14} className="text-blue" /> ข้อมูลกัปตันทีมและช่องทางติดต่อ
+                                    </strong>
+                                    <div className="form-row-2">
+                                      <div className="form-group" style={{ margin: 0 }}>
+                                        <label style={{ fontSize: '0.8rem' }}>ชื่อกัปตันทีม (Captain IGN & Name)</label>
+                                        <input 
+                                          type="text" className="form-input" placeholder="เช่น SScary (กัปตันทีม)"
+                                          value={teamEditDraft.captain}
+                                          onChange={e => setTeamEditDraft({ ...teamEditDraft, captain: e.target.value })}
+                                        />
+                                      </div>
+                                      <div className="form-group" style={{ margin: 0 }}>
+                                        <label style={{ fontSize: '0.8rem' }}>เบอร์โทรศัพท์กัปตัน</label>
+                                        <input 
+                                          type="text" className="form-input" placeholder="08X-XXX-XXXX"
+                                          value={teamEditDraft.captainPhone}
+                                          onChange={e => setTeamEditDraft({ ...teamEditDraft, captainPhone: e.target.value })}
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="form-group" style={{ margin: 0 }}>
+                                      <label style={{ fontSize: '0.8rem' }}>Discord Tag กัปตัน (สำหรับส่งลิงก์ห้องแข่ง)</label>
+                                      <input 
+                                        type="text" className="form-input" placeholder="เช่น sscary#0001 หรือ discord username"
+                                        value={teamEditDraft.captainDiscord}
+                                        onChange={e => setTeamEditDraft({ ...teamEditDraft, captainDiscord: e.target.value })}
+                                      />
+                                    </div>
+                                  </div>
+
+                                  {/* Section: 5 Players Roster */}
+                                  <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                      <strong style={{ fontSize: '0.86rem', color: '#1d4ed8', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <Users size={14} /> ไลน์อัปรายชื่อผู้เล่นตัวจริง 5 คน (Players 1 - 5)
+                                      </strong>
+                                      <span style={{ fontSize: '0.72rem', color: '#3b82f6', fontWeight: 600 }}>สามารถเปลี่ยนชื่อ/แก้ไขนักแข่งได้ทันที</span>
+                                    </div>
+
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(115px, 1fr))', gap: '8px' }}>
+                                      {[0, 1, 2, 3, 4].map(idx => (
+                                        <div key={idx}>
+                                          <label style={{ fontSize: '0.72rem', color: '#475569', fontWeight: 600, display: 'block', marginBottom: '3px' }}>
+                                            ผู้เล่นคนที่ {idx + 1} {idx === 0 ? '(กัปตัน)' : ''}
+                                          </label>
+                                          <input 
+                                            type="text" 
+                                            className="form-input" 
+                                            style={{ background: '#ffffff', fontSize: '0.82rem', padding: '6px 8px' }}
+                                            placeholder={`IGN #${idx + 1}`}
+                                            value={teamEditDraft.players[idx] || ''}
+                                            onChange={e => {
+                                              const p = [...(teamEditDraft.players || ['', '', '', '', ''])];
+                                              p[idx] = e.target.value;
+                                              setTeamEditDraft({ ...teamEditDraft, players: p });
+                                            }}
+                                          />
+                                        </div>
+                                      ))}
+                                    </div>
+
+                                    {/* Substitute */}
+                                    <div style={{ marginTop: '4px' }}>
+                                      <label style={{ fontSize: '0.74rem', color: '#b45309', fontWeight: 650, display: 'block', marginBottom: '3px' }}>
+                                        ผู้เล่นตัวสำรอง (Substitute / สำรอง 1-2 คน คั่นด้วยเครื่องหมายจุลภาค)
+                                      </label>
+                                      <input 
+                                        type="text" 
+                                        className="form-input" 
+                                        style={{ background: '#fffbeb', borderColor: '#fde68a', fontSize: '0.82rem' }}
+                                        placeholder="เช่น Governor, xNova (เว้นว่างได้ถ้าไม่มีตัวสำรอง)"
+                                        value={(teamEditDraft.substitutes || []).join(', ')}
+                                        onChange={e => {
+                                          const subs = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+                                          setTeamEditDraft({ ...teamEditDraft, substitutes: subs.length > 0 ? subs : [''] });
+                                        }}
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Modal Footer */}
+                                <div style={{ padding: '12px 20px', background: '#f8fafc', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                                  <button 
+                                    type="button" 
+                                    className="btn-secondary"
+                                    onClick={() => setIsTeamModalOpen(false)}
+                                  >
+                                    ยกเลิก
+                                  </button>
+                                  <button 
+                                    type="button" 
+                                    className="btn-primary"
+                                    onClick={handleSaveTeamModal}
+                                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                                  >
+                                    <Check size={15} />
+                                    <span>{editingTeamIndex >= 0 ? 'บันทึกการแก้ไขข้อมูลทีม' : 'ยืนยันเพิ่มทีม'}</span>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
 
