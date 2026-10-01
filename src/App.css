@@ -25663,6 +25663,19 @@
   right: 14px;
 }
 
+@media (max-width: 768px) {
+  .lightbox-arrow {
+    width: 36px;
+    height: 36px;
+  }
+  .lightbox-arrow.arrow-left {
+    left: 8px;
+  }
+  .lightbox-arrow.arrow-right {
+    right: 8px;
+  }
+}
+
 .lightbox-caption-bar {
   display: flex;
   flex-direction: column;

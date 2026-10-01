@@ -48,7 +48,7 @@ export default function TournamentOverviewSlider({ tournament }) {
     };
   }, [isPlaying, isHovered, isLightboxOpen, handleNext]);
 
-  // Touch Swipe handlers for mobile / tablet
+  // Touch Swipe handlers for in-page mobile / tablet slideshow
   const minSwipeDistance = 45;
 
   const onTouchStart = (e) => {
@@ -72,6 +72,58 @@ export default function TournamentOverviewSlider({ tournament }) {
       handlePrev();
     }
   };
+
+  // Lightbox Touch Swipe handlers with interactive drag offset for mobile / tablet
+  const lightboxTouchStartRef = useRef({ x: 0, y: 0, time: 0 });
+  const [lightboxIsSwiping, setLightboxIsSwiping] = useState(false);
+  const [lightboxSwipeOffset, setLightboxSwipeOffset] = useState(0);
+
+  const handleLightboxTouchStart = (e) => {
+    if (e.touches && e.touches.length === 1) {
+      lightboxTouchStartRef.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+        time: Date.now()
+      };
+      setLightboxIsSwiping(true);
+      setLightboxSwipeOffset(0);
+    }
+  };
+
+  const handleLightboxTouchMove = (e) => {
+    if (!lightboxIsSwiping || !e.touches || e.touches.length !== 1) return;
+    const deltaX = e.touches[0].clientX - lightboxTouchStartRef.current.x;
+    const deltaY = e.touches[0].clientY - lightboxTouchStartRef.current.y;
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      setLightboxSwipeOffset(deltaX);
+    }
+  };
+
+  const handleLightboxTouchEnd = () => {
+    if (!lightboxIsSwiping) return;
+    setLightboxIsSwiping(false);
+    const deltaX = lightboxSwipeOffset;
+    const elapsed = Date.now() - lightboxTouchStartRef.current.time;
+    const velocity = Math.abs(deltaX) / (elapsed || 1);
+
+    if (deltaX < -35 || (deltaX < -15 && velocity > 0.25)) {
+      handleNext();
+    } else if (deltaX > 35 || (deltaX > 15 && velocity > 0.25)) {
+      handlePrev();
+    }
+    setLightboxSwipeOffset(0);
+  };
+
+  // Lock body scroll when lightbox is open
+  useEffect(() => {
+    if (isLightboxOpen) {
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prevOverflow;
+      };
+    }
+  }, [isLightboxOpen]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -324,28 +376,51 @@ export default function TournamentOverviewSlider({ tournament }) {
               </button>
             </div>
 
-            <div className="lightbox-img-viewport">
+            <div 
+              className="lightbox-img-viewport"
+              onTouchStart={handleLightboxTouchStart}
+              onTouchMove={handleLightboxTouchMove}
+              onTouchEnd={handleLightboxTouchEnd}
+              style={{ touchAction: 'pan-y' }}
+              title="ปัดซ้าย-ขวาด้วยนิ้ว หรือกดลูกศรเพื่อดูภาพถัดไป"
+            >
               <img 
                 src={currentSlide.url} 
                 alt={currentSlide.title} 
                 className="lightbox-main-img" 
+                style={{
+                  transform: lightboxIsSwiping ? `translateX(${lightboxSwipeOffset * 0.38}px)` : 'none',
+                  transition: lightboxIsSwiping ? 'none' : 'transform 0.22s ease-out',
+                  userSelect: 'none',
+                  WebkitUserSelect: 'none',
+                  pointerEvents: 'none'
+                }}
+                draggable={false}
               />
 
               <button 
                 type="button" 
                 className="lightbox-arrow arrow-left" 
-                onClick={handlePrev}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handlePrev();
+                }}
                 title="ภาพก่อนหน้า"
+                aria-label="Previous image"
               >
-                <ChevronLeft size={32} />
+                <ChevronLeft size={22} />
               </button>
               <button 
                 type="button" 
                 className="lightbox-arrow arrow-right" 
-                onClick={handleNext}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleNext();
+                }}
                 title="ภาพถัดไป"
+                aria-label="Next image"
               >
-                <ChevronRight size={32} />
+                <ChevronRight size={22} />
               </button>
             </div>
 

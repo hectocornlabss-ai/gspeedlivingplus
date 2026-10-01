@@ -203,8 +203,10 @@ export default defineConfig({
   server: {
     port: 5899,
     host: true,
+    watch: {
+      ignored: ['**/server/data/**', '**/server/data/backups/**', '**/*.tmp.*']
+    },
     proxy: {
-      '/api/site-data': 'http://localhost:3001',
       '/api/send-email': 'http://localhost:3001',
       '/api/test-smtp': 'http://localhost:3001',
       '/api/contact-inquiry': 'http://localhost:3001',

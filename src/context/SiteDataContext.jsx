@@ -1660,6 +1660,12 @@ export function SiteDataProvider({ children }) {
     return DEFAULT_SITE_DATA;
   });
 
+  // Keep a synchronous ref to siteData to prevent stale closure reads during rapid saves
+  const siteDataRef = useRef(siteData);
+  useEffect(() => {
+    siteDataRef.current = siteData;
+  }, [siteData]);
+
   // Save to localStorage automatically on state change
   useEffect(() => {
     try {
@@ -1733,13 +1739,18 @@ export function SiteDataProvider({ children }) {
     const fetchServerSiteData = async () => {
       try {
         const res = await fetch('/api/site-data');
-        if (!res.ok) return;
+        if (!res.ok) {
+          isHydratedRef.current = true;
+          return;
+        }
         const result = await res.json();
         if (result && result.success && result.siteData && typeof result.siteData === 'object') {
           if (isMounted) {
             console.log('[SiteDataContext] Hydrated from persistent server database.');
             setSiteData(prev => {
-              const merged = deepMerge(prev, result.siteData);
+              // If local edits already exist, preserve them so stale mock data doesn't wipe them
+              const hasLocalEdits = Boolean(localStorage.getItem(STORAGE_KEY));
+              const merged = hasLocalEdits ? deepMerge(result.siteData, prev) : deepMerge(prev, result.siteData);
               // Sanitize legacy/invalid emails and Facebook link from server DB if any
               if (merged.footer) {
                 if (!merged.footer.email || merged.footer.email.includes('contact@') || merged.footer.email.includes('@gspeed') || merged.footer.email !== 'gspeedlivingplus35@gmail.com') {
@@ -1774,6 +1785,7 @@ export function SiteDataProvider({ children }) {
               try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
               } catch (e) {}
+              siteDataRef.current = merged;
               return merged;
             });
             const syncTime = result.updatedAt 
@@ -1787,7 +1799,9 @@ export function SiteDataProvider({ children }) {
             });
           }
         }
+        isHydratedRef.current = true;
       } catch (err) {
+        isHydratedRef.current = true;
         console.log('[SiteDataContext] Server database check skipped (offline or initial boot):', err.message);
       } finally {
         isHydratedRef.current = true;
@@ -2010,7 +2024,7 @@ export function SiteDataProvider({ children }) {
   };
 
   const saveSiteData = async (manualData) => {
-    const dataToSave = manualData || siteData;
+    const dataToSave = manualData || siteDataRef.current || siteData;
     let localOk = false;
     let serverOk = false;
     const nowTime = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
@@ -2152,30 +2166,57 @@ export function SiteDataProvider({ children }) {
   const addActivityItem = (newItem) => {
     const slug = newItem.slug || (newItem.title || 'event').toLowerCase().replace(/[^a-z0-9\u0E00-\u0E7F]+/g, '-').replace(/(^-|-$)/g, '') || `event-${Date.now()}`;
     const id = newItem.id || `gal-${Date.now()}`;
-    setSiteData(prev => ({
-      ...prev,
-      gallery: [{ ...newItem, id, slug }, ...(prev.gallery || [])]
-    }));
+    setSiteData(prev => {
+      const nextData = {
+        ...prev,
+        gallery: [{ ...newItem, id, slug }, ...(prev.gallery || [])]
+      };
+      siteDataRef.current = nextData;
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
+        window.dispatchEvent(new CustomEvent('gspeed-site-data-updated', { detail: nextData }));
+      } catch (e) {}
+      saveSiteData(nextData);
+      return nextData;
+    });
   };
 
   const updateActivityItem = (id, updatedFields) => {
-    setSiteData(prev => ({
-      ...prev,
-      gallery: (prev.gallery || []).map(item => 
-        item.id === id ? { ...item, ...updatedFields } : item
-      ),
-      news: (prev.news || []).map(item => 
-        item.id === id ? { ...item, ...updatedFields } : item
-      )
-    }));
+    setSiteData(prev => {
+      const nextData = {
+        ...prev,
+        gallery: (prev.gallery || []).map(item => 
+          item.id === id ? { ...item, ...updatedFields } : item
+        ),
+        news: (prev.news || []).map(item => 
+          item.id === id ? { ...item, ...updatedFields } : item
+        )
+      };
+      siteDataRef.current = nextData;
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
+        window.dispatchEvent(new CustomEvent('gspeed-site-data-updated', { detail: nextData }));
+      } catch (e) {}
+      saveSiteData(nextData);
+      return nextData;
+    });
   };
 
   const deleteActivityItem = (id) => {
-    setSiteData(prev => ({
-      ...prev,
-      gallery: (prev.gallery || []).filter(item => item.id !== id),
-      news: (prev.news || []).filter(item => item.id !== id)
-    }));
+    setSiteData(prev => {
+      const nextData = {
+        ...prev,
+        gallery: (prev.gallery || []).filter(item => item.id !== id),
+        news: (prev.news || []).filter(item => item.id !== id)
+      };
+      siteDataRef.current = nextData;
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
+        window.dispatchEvent(new CustomEvent('gspeed-site-data-updated', { detail: nextData }));
+      } catch (e) {}
+      saveSiteData(nextData);
+      return nextData;
+    });
   };
 
   // Activity Categories & Tags Handlers
@@ -2732,38 +2773,65 @@ export function SiteDataProvider({ children }) {
   const addTournament = (newItem) => {
     const id = newItem.id || `tour-${Date.now()}`;
     const slug = newItem.slug || newItem.seo?.slug || (newItem.title ? newItem.title.toLowerCase().replace(/[^a-z0-9\u0E00-\u0E7F]+/g, '-').replace(/(^-|-$)/g, '') : id);
-    setSiteData(prev => ({
-      ...prev,
-      tournaments: [...(prev.tournaments || []), { 
-        ...newItem, 
-        id, 
-        slug,
-        seo: { ...(newItem.seo || {}), slug: newItem.seo?.slug || slug }
-      }]
-    }));
+    setSiteData(prev => {
+      const nextData = {
+        ...prev,
+        tournaments: [...(prev.tournaments || []), { 
+          ...newItem, 
+          id, 
+          slug,
+          seo: { ...(newItem.seo || {}), slug: newItem.seo?.slug || slug }
+        }]
+      };
+      siteDataRef.current = nextData;
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
+        window.dispatchEvent(new CustomEvent('gspeed-site-data-updated', { detail: nextData }));
+      } catch (e) {}
+      saveSiteData(nextData);
+      return nextData;
+    });
   };
 
   const updateTournament = (id, updates) => {
-    setSiteData(prev => ({
-      ...prev,
-      tournaments: (prev.tournaments || []).map(t => {
-        if (t.id !== id) return t;
-        const newSlug = updates.slug || updates.seo?.slug || t.slug || t.seo?.slug;
-        return { 
-          ...t, 
-          ...updates, 
-          slug: newSlug,
-          seo: { ...(t.seo || {}), ...(updates.seo || {}), slug: newSlug }
-        };
-      })
-    }));
+    setSiteData(prev => {
+      const nextData = {
+        ...prev,
+        tournaments: (prev.tournaments || []).map(t => {
+          if (t.id !== id) return t;
+          const newSlug = updates.slug || updates.seo?.slug || t.slug || t.seo?.slug;
+          return { 
+            ...t, 
+            ...updates, 
+            slug: newSlug,
+            seo: { ...(t.seo || {}), ...(updates.seo || {}), slug: newSlug }
+          };
+        })
+      };
+      siteDataRef.current = nextData;
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
+        window.dispatchEvent(new CustomEvent('gspeed-site-data-updated', { detail: nextData }));
+      } catch (e) {}
+      saveSiteData(nextData);
+      return nextData;
+    });
   };
 
   const deleteTournament = (id) => {
-    setSiteData(prev => ({
-      ...prev,
-      tournaments: (prev.tournaments || []).filter(t => t.id !== id)
-    }));
+    setSiteData(prev => {
+      const nextData = {
+        ...prev,
+        tournaments: (prev.tournaments || []).filter(t => t.id !== id)
+      };
+      siteDataRef.current = nextData;
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
+        window.dispatchEvent(new CustomEvent('gspeed-site-data-updated', { detail: nextData }));
+      } catch (e) {}
+      saveSiteData(nextData);
+      return nextData;
+    });
   };
 
   const updateTournamentBracketMatch = (tournamentId, matchId, matchUpdates) => {
