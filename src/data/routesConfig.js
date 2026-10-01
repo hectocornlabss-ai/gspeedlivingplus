@@ -128,6 +128,8 @@ export const ROUTES_CONFIG = {
  * - /events/:slug (ทัวร์นาเมนต์รายรายการ)
  * - /activities/:slug (บทความ/ภาพกิจกรรมรายรายการ)
  */
+const normalizeSlug = (s) => (s || '').toLowerCase().replace(/[^a-z0-9\u0E00-\u0E7F]/g, '');
+
 export function getRouteMetadata(pathname = '/', extraData = {}) {
   const cleanPath = (pathname || '/').toLowerCase().trim();
 
@@ -135,11 +137,15 @@ export function getRouteMetadata(pathname = '/', extraData = {}) {
   const eventMatch = cleanPath.match(/^\/(?:events|tournaments)\/([^/?#]+)/i);
   if (eventMatch) {
     const slug = decodeURIComponent(eventMatch[1]);
+    const normSlug = normalizeSlug(slug);
     const tournaments = extraData.tournaments || [];
     const tour = tournaments.find(t => 
       (t.slug && t.slug.toLowerCase() === slug.toLowerCase()) || 
       t.id === slug ||
-      (t.seo && t.seo.slug && t.seo.slug.toLowerCase() === slug.toLowerCase())
+      (t.seo && t.seo.slug && t.seo.slug.toLowerCase() === slug.toLowerCase()) ||
+      (t.slug && normalizeSlug(t.slug) === normSlug) ||
+      (t.id && normalizeSlug(t.id) === normSlug) ||
+      (t.seo?.slug && normalizeSlug(t.seo.slug) === normSlug)
     );
 
     if (tour) {
@@ -150,18 +156,18 @@ export function getRouteMetadata(pathname = '/', extraData = {}) {
 
       return {
         type: 'tournament_single',
-        path: `/events/${tour.slug || tour.id}`,
-        canonical: `${SITE_BASE_URL}/events/${tour.slug || tour.id}`,
+        path: `/tournaments/${tour.slug || tour.id}`,
+        canonical: `${SITE_BASE_URL}/tournaments/${tour.slug || tour.id}`,
         name: tour.title,
-        badge: `${tour.game.toUpperCase()} • ${tour.gameCategory || 'TOURNAMENT'}`,
+        badge: `${(tour.game || 'ESPORTS').toUpperCase()} • ${tour.gameCategory || 'TOURNAMENT'}`,
         metaTitle: tourTitle,
         metaDesc: tourDesc,
         keywords: tourKeywords,
         ogImage: tourImage,
         breadcrumbs: [
           { label: 'หน้าหลัก', path: '/' },
-          { label: 'การแข่งขัน & อีเวนต์', path: '/events' },
-          { label: tour.title, path: `/events/${tour.slug || tour.id}` }
+          { label: 'การแข่งขัน & อีเวนต์', path: '/tournaments' },
+          { label: tour.title, path: `/tournaments/${tour.slug || tour.id}` }
         ],
         itemData: tour
       };
@@ -172,17 +178,20 @@ export function getRouteMetadata(pathname = '/', extraData = {}) {
   const activityMatch = cleanPath.match(/^\/(?:activities|activity|article|news)\/([^/?#]+)/i);
   if (activityMatch) {
     const slug = decodeURIComponent(activityMatch[1]);
+    const normSlug = normalizeSlug(slug);
     const articles = [...(extraData.gallery || []), ...(extraData.news || [])];
     const act = articles.find(a => 
       (a.slug && a.slug.toLowerCase() === slug.toLowerCase()) || 
-      a.id === slug
+      a.id === slug ||
+      (a.slug && normalizeSlug(a.slug) === normSlug) ||
+      (a.id && normalizeSlug(a.id) === normSlug)
     );
 
     if (act) {
       const actTitle = `${act.title} | GLP : G Speed Living Plus`;
       const actDesc = act.desc || act.summary || `ภาพกิจกรรมและเนื้อหาข่าวสาร ${act.title} ประจำศูนย์ GLP : G Speed Living Plus รามคำแหง 53`;
       const actKeywords = `${act.tag || act.category || 'Esports'}, G-Speed, ข่าวกีฬาเกม, กิจกรรมร้านเกม, รามคำแหง 53`;
-      const actImage = act.image || ROUTES_CONFIG.activities.ogImage;
+      const actImage = act.image || (act.galleryPhotos && act.galleryPhotos[0]?.url) || ROUTES_CONFIG.activities.ogImage;
 
       return {
         type: 'activity_single',

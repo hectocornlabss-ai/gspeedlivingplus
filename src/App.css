@@ -217,7 +217,18 @@
 .app-layout {
   position: relative;
   min-height: 100vh;
-  overflow: visible;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.main-content {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 /* Responsive visibility utilities */
