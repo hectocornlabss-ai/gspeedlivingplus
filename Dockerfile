@@ -42,15 +42,11 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 # คัดลอกการตั้งค่า Nginx (Reverse Proxy & Clean Path URLs & Crawler SSR)
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# คัดลอกและตั้งค่าสิทธิ์ให้ Entrypoint Script (แปลง Line Endings เป็น LF ป้องกัน error บน Linux)
-COPY docker-entrypoint.sh /docker-entrypoint.sh
-RUN tr -d '\r' < /docker-entrypoint.sh > /docker-entrypoint-clean.sh && mv /docker-entrypoint-clean.sh /docker-entrypoint.sh && chmod +x /docker-entrypoint.sh
-
 # Persistent Volume สำหรับเก็บฐานข้อมูล CMS Site Data และรูปภาพข้ามการ Deploy
 VOLUME ["/app/server/data"]
 
 # เปิดพอร์ต 80 และ 3000 (รองรับทั้ง Nginx มาตรฐานและ Coolify default)
 EXPOSE 80 3000
 
-# เริ่มการทำงานของ Node.js Backend และ Nginx ผ่าน Entrypoint Script
-ENTRYPOINT ["/docker-entrypoint.sh"]
+# เริ่มการทำงานของ Node.js Backend และ Nginx อย่างปลอดภัย ไร้ปัญหา Entrypoint Permissions/CRLF
+CMD ["/bin/sh", "-c", "mkdir -p /app/server/data/backups && node /app/server/email-service.js & exec nginx -g 'daemon off;'"]
