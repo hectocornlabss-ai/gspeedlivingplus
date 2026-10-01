@@ -71,18 +71,23 @@ export default function AdminAuthGate({ onExitToPublic = () => {} }) {
     return () => clearInterval(timer);
   }, []);
 
-  // Inactivity Auto-Logout Timer (Default: 30 minutes)
+  // Inactivity Auto-Logout Timer (Disabled in DEV, 120 minutes default in PROD)
   useEffect(() => {
     if (!isAuthenticated) return;
+    if (import.meta.env.DEV) return; // Never auto-logout during local development / editing
 
-    const timeoutMinutes = siteData?.securityConfig?.sessionTimeoutMinutes || 30;
+    const timeoutMinutes = Math.max(siteData?.securityConfig?.sessionTimeoutMinutes || 120, 120);
     const timeoutMs = timeoutMinutes * 60 * 1000;
     let lastActive = Date.now();
-    localStorage.setItem(LAST_ACTIVITY_KEY, lastActive.toString());
+    try {
+      localStorage.setItem(LAST_ACTIVITY_KEY, lastActive.toString());
+    } catch (e) {}
 
     const updateActivity = () => {
       lastActive = Date.now();
-      localStorage.setItem(LAST_ACTIVITY_KEY, lastActive.toString());
+      try {
+        localStorage.setItem(LAST_ACTIVITY_KEY, lastActive.toString());
+      } catch (e) {}
     };
 
     const checkTimeout = () => {
@@ -92,19 +97,14 @@ export default function AdminAuthGate({ onExitToPublic = () => {} }) {
       }
     };
 
-    const timer = setInterval(checkTimeout, 10000); // Check every 10s
+    const timer = setInterval(checkTimeout, 30000); // Check every 30s
 
-    window.addEventListener('mousemove', updateActivity, { passive: true });
-    window.addEventListener('keydown', updateActivity, { passive: true });
-    window.addEventListener('click', updateActivity, { passive: true });
-    window.addEventListener('scroll', updateActivity, { passive: true });
+    const events = ['mousemove', 'mousedown', 'keydown', 'click', 'scroll', 'touchstart', 'touchmove', 'input', 'change', 'focus'];
+    events.forEach(ev => window.addEventListener(ev, updateActivity, { passive: true }));
 
     return () => {
       clearInterval(timer);
-      window.removeEventListener('mousemove', updateActivity);
-      window.removeEventListener('keydown', updateActivity);
-      window.removeEventListener('click', updateActivity);
-      window.removeEventListener('scroll', updateActivity);
+      events.forEach(ev => window.removeEventListener(ev, updateActivity));
     };
   }, [isAuthenticated, siteData?.securityConfig?.sessionTimeoutMinutes]);
 
@@ -232,9 +232,10 @@ export default function AdminAuthGate({ onExitToPublic = () => {} }) {
 
     setIsAuthenticated(false);
     if (reason === 'SESSION_TIMEOUT') {
-      setErrorMsg('เซสชันหมดอายุเนื่องจากไม่มีการใช้งานเกิน 30 นาที กรุณาเข้าสู่ระบบใหม่อีกครั้ง');
+      setErrorMsg('เซสชันหมดอายุเนื่องจากไม่มีการใช้งาน กรุณาเข้าสู่ระบบใหม่อีกครั้ง');
+    } else {
+      onExitToPublic();
     }
-    onExitToPublic();
   };
 
   // If already authenticated, render the full CMS with ErrorBoundary

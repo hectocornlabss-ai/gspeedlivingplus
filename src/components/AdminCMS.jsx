@@ -2661,19 +2661,6 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
             <span>{isSaving ? 'กำลังบันทึก...' : 'บันทึกข้อมูล (Save)'}</span>
           </button>
 
-          <button 
-            onClick={() => {
-              if (window.confirm('คุณต้องการรีเซ็ตข้อมูลทั้งหมดกลับเป็นค่าเริ่มต้นใช่หรือไม่?')) {
-                resetToDefaults();
-                triggerSaveToast();
-              }
-            }}
-            className="btn-admin-reset"
-            title="คืนค่าโรงงาน"
-          >
-            <RefreshCw size={14} />
-            <span>คืนค่าเริ่มต้น</span>
-          </button>
 
           <a href="#/" target="_blank" rel="noopener noreferrer" className="btn-admin-viewsite" title="ดูหน้าเว็บสาธารณะ">
             <ExternalLink size={14} />
@@ -9221,11 +9208,29 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
 
               {/* Edit Activity Modal */}
               {editingActivity && (
-                <div className="cms-modal-backdrop" onClick={() => setEditingActivity(null)}>
+                <div 
+                  className="cms-modal-backdrop" 
+                  onClick={(e) => {
+                    if (e.target === e.currentTarget) {
+                      if (window.confirm('คุณต้องการปิดหน้าต่างแก้ไขบทความใช่หรือไม่? (ข้อมูลที่ยังไม่บันทึกจะหายไป)')) {
+                        setEditingActivity(null);
+                      }
+                    }
+                  }}
+                >
                   <div className="cms-modal-card modal-extra-wide" style={{ maxHeight: '92vh', display: 'flex', flexDirection: 'column' }} onClick={e => e.stopPropagation()}>
                     <div className="modal-head" style={{ flexShrink: 0 }}>
                       <h4>แก้ไขบทความกิจกรรม: {editingActivity.title}</h4>
-                      <button onClick={() => setEditingActivity(null)} className="btn-close-modal">✕</button>
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          if (window.confirm('คุณต้องการปิดหน้าต่างแก้ไขบทความใช่หรือไม่? (ข้อมูลที่ยังไม่บันทึกจะหายไป)')) {
+                            setEditingActivity(null);
+                          }
+                        }} 
+                        className="btn-close-modal"
+                        title="ปิดหน้าต่าง"
+                      >✕</button>
                     </div>
 
                     <div className="modal-body-form" style={{ flex: '1 1 auto', overflowY: 'auto', minHeight: 0 }}>
@@ -9800,11 +9805,29 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
 
               {/* Add New Activity Modal */}
               {showAddActivityModal && (
-                <div className="cms-modal-backdrop" onClick={() => setShowAddActivityModal(false)}>
+                <div 
+                  className="cms-modal-backdrop" 
+                  onClick={(e) => {
+                    if (e.target === e.currentTarget) {
+                      if (window.confirm('คุณต้องการปิดหน้าต่างเพิ่มบทความใหม่ใช่หรือไม่? (ข้อมูลที่กรอกไว้จะสูญหาย)')) {
+                        setShowAddActivityModal(false);
+                      }
+                    }
+                  }}
+                >
                   <div className="cms-modal-card modal-extra-wide" style={{ maxHeight: '92vh', display: 'flex', flexDirection: 'column' }} onClick={e => e.stopPropagation()}>
                     <div className="modal-head" style={{ flexShrink: 0 }}>
                       <h4>เพิ่มกิจกรรม & บทความใหม่ (New Article)</h4>
-                      <button onClick={() => setShowAddActivityModal(false)} className="btn-close-modal">✕</button>
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          if (window.confirm('คุณต้องการปิดหน้าต่างเพิ่มบทความใหม่ใช่หรือไม่? (ข้อมูลที่กรอกไว้จะสูญหาย)')) {
+                            setShowAddActivityModal(false);
+                          }
+                        }} 
+                        className="btn-close-modal"
+                        title="ปิดหน้าต่าง"
+                      >✕</button>
                     </div>
 
                     <div className="modal-body-form" style={{ flex: '1 1 auto', overflowY: 'auto', minHeight: 0 }}>

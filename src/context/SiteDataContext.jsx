@@ -1682,23 +1682,6 @@ export function SiteDataProvider({ children }) {
   // Flag to track when initial server hydration is complete
   const isHydratedRef = useRef(false);
 
-  // Debounced auto-sync to server database (/api/site-data) to keep mobile and desktop synced
-  useEffect(() => {
-    if (!siteData || !isHydratedRef.current) return;
-    const timer = setTimeout(async () => {
-      try {
-        await fetch('/api/site-data', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ siteData, author: 'auto-sync' })
-        });
-      } catch (err) {
-        // Silently catch offline/network errors
-      }
-    }, 1500);
-
-    return () => clearTimeout(timer);
-  }, [siteData]);
 
   // Synchronize siteData changes across browser tabs and components in real time
   useEffect(() => {

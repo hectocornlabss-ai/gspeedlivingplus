@@ -204,7 +204,13 @@ export default defineConfig({
     port: 5899,
     host: true,
     watch: {
-      ignored: ['**/server/data/**', '**/server/data/backups/**', '**/*.tmp.*']
+      ignored: [
+        '**/server/**',
+        '**/server/data/**',
+        '**/server/data/backups/**',
+        '**/*.tmp.*',
+        (file) => typeof file === 'string' && (file.includes('server') || file.includes('data') || file.includes('.tmp.'))
+      ]
     },
     proxy: {
       '/api/send-email': 'http://localhost:3001',
