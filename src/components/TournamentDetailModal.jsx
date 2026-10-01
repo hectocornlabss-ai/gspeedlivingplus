@@ -31,6 +31,80 @@ export default function TournamentDetailModal({
   const [bracketViewMode, setBracketViewMode] = useState('tree'); // 'tree' | 'list'
   const [bracketRoundFilter, setBracketRoundFilter] = useState('all');
 
+  // Touch Swipe Gesture & Navigation for Lightbox
+  const lightboxTouchStartRef = useRef({ x: 0, y: 0, time: 0 });
+  const [lightboxSwipeOffset, setLightboxSwipeOffset] = useState(0);
+  const [lightboxIsSwiping, setLightboxIsSwiping] = useState(false);
+
+  const galleryList = tournament?.galleryPhotos || [];
+
+  const handleNextLightboxPhoto = () => {
+    setLightboxIndex(prev => (prev === null ? null : (prev + 1) % galleryList.length));
+  };
+
+  const handlePrevLightboxPhoto = () => {
+    setLightboxIndex(prev => (prev === null ? null : (prev - 1 + galleryList.length) % galleryList.length));
+  };
+
+  const handleLightboxTouchStart = (e) => {
+    if (e.touches && e.touches.length === 1) {
+      lightboxTouchStartRef.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+        time: Date.now()
+      };
+      setLightboxIsSwiping(true);
+      setLightboxSwipeOffset(0);
+    }
+  };
+
+  const handleLightboxTouchMove = (e) => {
+    if (!lightboxIsSwiping || !e.touches || e.touches.length !== 1) return;
+    const deltaX = e.touches[0].clientX - lightboxTouchStartRef.current.x;
+    const deltaY = e.touches[0].clientY - lightboxTouchStartRef.current.y;
+
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      setLightboxSwipeOffset(deltaX);
+    }
+  };
+
+  const handleLightboxTouchEnd = () => {
+    if (!lightboxIsSwiping) return;
+    setLightboxIsSwiping(false);
+
+    const deltaX = lightboxSwipeOffset;
+    const elapsed = Date.now() - lightboxTouchStartRef.current.time;
+    const velocity = Math.abs(deltaX) / (elapsed || 1);
+
+    if (deltaX < -35 || (deltaX < -15 && velocity > 0.25)) {
+      handleNextLightboxPhoto();
+    } else if (deltaX > 35 || (deltaX > 15 && velocity > 0.25)) {
+      handlePrevLightboxPhoto();
+    }
+
+    setLightboxSwipeOffset(0);
+  };
+
+  // Keyboard navigation for lightbox
+  useEffect(() => {
+    if (lightboxIndex === null) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setLightboxIndex(null);
+      } else if (e.key === 'ArrowRight') {
+        handleNextLightboxPhoto();
+      } else if (e.key === 'ArrowLeft') {
+        handlePrevLightboxPhoto();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [lightboxIndex, galleryList.length]);
+
   const matches = (tournament.bracketMatches && tournament.bracketMatches.length > 0)
     ? tournament.bracketMatches
     : generateDefaultBracket(tournament.teams, tournament.title);
@@ -1421,36 +1495,96 @@ export default function TournamentDetailModal({
 
           {/* Large Image Container */}
           <div 
-            style={{ position: 'relative', maxWidth: 'min(1280px, 94vw)', maxHeight: 'min(720px, 80vh)', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            style={{ 
+              position: 'relative', 
+              maxWidth: 'min(1400px, 98vw)', 
+              maxHeight: 'min(85vh, 800px)', 
+              width: '100%', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              touchAction: 'pan-y'
+            }}
             onClick={e => e.stopPropagation()}
+            onTouchStart={handleLightboxTouchStart}
+            onTouchMove={handleLightboxTouchMove}
+            onTouchEnd={handleLightboxTouchEnd}
           >
             <img 
               src={tournament.galleryPhotos[lightboxIndex].url} 
               alt={tournament.galleryPhotos[lightboxIndex].caption}
-              style={{ maxWidth: '1280px', width: '100%', maxHeight: 'min(720px, 78vh)', objectFit: 'contain', borderRadius: '12px', boxShadow: '0 25px 60px rgba(0,0,0,0.85)', background: '#000000' }}
+              style={{ 
+                maxWidth: 'min(1400px, 98vw)', 
+                width: 'auto', 
+                height: 'auto', 
+                maxHeight: 'calc(84vh - 60px)', 
+                objectFit: 'contain', 
+                borderRadius: '12px', 
+                boxShadow: '0 25px 60px rgba(0,0,0,0.85)', 
+                background: 'transparent',
+                transform: lightboxIsSwiping ? `translateX(${lightboxSwipeOffset * 0.38}px)` : 'none',
+                transition: lightboxIsSwiping ? 'none' : 'transform 0.22s ease-out'
+              }}
+              draggable={false}
             />
 
             {/* Prev Button */}
-            {lightboxIndex > 0 && (
+            {tournament.galleryPhotos.length > 1 && (
               <button 
                 type="button"
-                onClick={() => setLightboxIndex(lightboxIndex - 1)}
-                style={{ position: 'absolute', left: '12px', zIndex: 10, background: 'rgba(15,23,42,0.75)', backdropFilter: 'blur(6px)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50%', width: '42px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handlePrevLightboxPhoto();
+                }}
+                style={{ 
+                  position: 'absolute', 
+                  left: '10px', 
+                  zIndex: 10, 
+                  background: 'rgba(15,23,42,0.65)', 
+                  backdropFilter: 'blur(8px)', 
+                  color: '#fff', 
+                  border: '1px solid rgba(255,255,255,0.2)', 
+                  borderRadius: '50%', 
+                  width: '36px', 
+                  height: '36px', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  cursor: 'pointer' 
+                }}
                 title="ภาพก่อนหน้า"
               >
-                <ChevronLeft size={24} />
+                <ChevronLeft size={20} />
               </button>
             )}
 
             {/* Next Button */}
-            {lightboxIndex < tournament.galleryPhotos.length - 1 && (
+            {tournament.galleryPhotos.length > 1 && (
               <button 
                 type="button"
-                onClick={() => setLightboxIndex(lightboxIndex + 1)}
-                style={{ position: 'absolute', right: '12px', zIndex: 10, background: 'rgba(15,23,42,0.75)', backdropFilter: 'blur(6px)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50%', width: '42px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleNextLightboxPhoto();
+                }}
+                style={{ 
+                  position: 'absolute', 
+                  right: '10px', 
+                  zIndex: 10, 
+                  background: 'rgba(15,23,42,0.65)', 
+                  backdropFilter: 'blur(8px)', 
+                  color: '#fff', 
+                  border: '1px solid rgba(255,255,255,0.2)', 
+                  borderRadius: '50%', 
+                  width: '36px', 
+                  height: '36px', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  cursor: 'pointer' 
+                }}
                 title="ภาพถัดไป"
               >
-                <ChevronRight size={24} />
+                <ChevronRight size={20} />
               </button>
             )}
           </div>

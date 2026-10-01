@@ -4,7 +4,7 @@ import {
   Users, Camera, Zap, Clock, Shield, CheckCircle2, 
   ArrowRight, ChevronLeft, ChevronRight, Home,
   GitBranch, ExternalLink, Radio, Search, Share2, 
-  AlertCircle, MessageCircle, Sparkles, PhoneCall, Layers
+  AlertCircle, MessageCircle, Sparkles, PhoneCall, Layers, X
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 import { generateDefaultBracket } from '../data/mockData';
@@ -178,6 +178,82 @@ export default function SingleTournamentView({
     if (galleryCategory === 'all') return true;
     return p.category === galleryCategory;
   });
+
+  // Touch Swipe Gesture & Navigation for Lightbox
+  const lightboxTouchStartRef = useRef({ x: 0, y: 0, time: 0 });
+  const [lightboxSwipeOffset, setLightboxSwipeOffset] = useState(0);
+  const [lightboxIsSwiping, setLightboxIsSwiping] = useState(false);
+
+  const handleNextLightboxPhoto = () => {
+    setLightboxIndex(prev => (prev === null ? null : (prev + 1) % filteredPhotos.length));
+  };
+
+  const handlePrevLightboxPhoto = () => {
+    setLightboxIndex(prev => (prev === null ? null : (prev - 1 + filteredPhotos.length) % filteredPhotos.length));
+  };
+
+  const handleLightboxTouchStart = (e) => {
+    if (e.touches && e.touches.length === 1) {
+      lightboxTouchStartRef.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+        time: Date.now()
+      };
+      setLightboxIsSwiping(true);
+      setLightboxSwipeOffset(0);
+    }
+  };
+
+  const handleLightboxTouchMove = (e) => {
+    if (!lightboxIsSwiping || !e.touches || e.touches.length !== 1) return;
+    const deltaX = e.touches[0].clientX - lightboxTouchStartRef.current.x;
+    const deltaY = e.touches[0].clientY - lightboxTouchStartRef.current.y;
+
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      setLightboxSwipeOffset(deltaX);
+    }
+  };
+
+  const handleLightboxTouchEnd = () => {
+    if (!lightboxIsSwiping) return;
+    setLightboxIsSwiping(false);
+
+    const deltaX = lightboxSwipeOffset;
+    const elapsed = Date.now() - lightboxTouchStartRef.current.time;
+    const velocity = Math.abs(deltaX) / (elapsed || 1);
+
+    if (deltaX < -35 || (deltaX < -15 && velocity > 0.25)) {
+      handleNextLightboxPhoto();
+    } else if (deltaX > 35 || (deltaX > 15 && velocity > 0.25)) {
+      handlePrevLightboxPhoto();
+    }
+
+    setLightboxSwipeOffset(0);
+  };
+
+  // Keyboard navigation & body scroll lock while lightbox is active
+  useEffect(() => {
+    if (lightboxIndex === null) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setLightboxIndex(null);
+      } else if (e.key === 'ArrowRight') {
+        handleNextLightboxPhoto();
+      } else if (e.key === 'ArrowLeft') {
+        handlePrevLightboxPhoto();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    const origOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = origOverflow;
+    };
+  }, [lightboxIndex, filteredPhotos.length]);
 
   // Related Tournaments
   const relatedTournaments = allTournaments.filter(t => t.id !== tournament.id);
@@ -1087,26 +1163,81 @@ export default function SingleTournamentView({
       {/* Lightbox Modal for Gallery */}
       {lightboxIndex !== null && filteredPhotos[lightboxIndex] && (
         <div 
-          className="modal-backdrop" 
+          className="photo-lightbox-backdrop" 
           onClick={() => setLightboxIndex(null)}
-          style={{ zIndex: 10050, background: 'rgba(0,0,0,0.94)', backdropFilter: 'blur(12px)' }}
+          role="dialog"
+          aria-modal="true"
         >
-          <div style={{ position: 'relative', maxWidth: '1280px', width: 'min(1280px, 94vw)', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }} onClick={e => e.stopPropagation()}>
-            <img 
-              src={filteredPhotos[lightboxIndex].url || filteredPhotos[lightboxIndex]} 
-              alt="Tournament Lightbox"
-              style={{ maxHeight: 'min(720px, 78vh)', maxWidth: '1280px', width: '100%', objectFit: 'contain', borderRadius: '12px', boxShadow: '0 25px 60px rgba(0,0,0,0.85)', background: '#000000' }}
-            />
-            <div style={{ color: '#ffffff', marginTop: '14px', fontSize: '0.95rem', fontWeight: 600 }}>
-              {filteredPhotos[lightboxIndex].caption || `ภาพที่ ${lightboxIndex + 1}`}
+          {/* Top fixed Close Button */}
+          <button 
+            type="button"
+            className="btn-lightbox-close" 
+            onClick={(e) => {
+              e.stopPropagation();
+              setLightboxIndex(null);
+            }}
+            title="ปิดหน้าต่างภาพ (Esc)"
+            aria-label="Close lightbox"
+          >
+            <X size={20} />
+          </button>
+
+          <div 
+            className="lightbox-container" 
+            onClick={e => e.stopPropagation()}
+            onTouchStart={handleLightboxTouchStart}
+            onTouchMove={handleLightboxTouchMove}
+            onTouchEnd={handleLightboxTouchEnd}
+          >
+            {/* Prev Photo Arrow (Smaller & Sleeker) */}
+            {filteredPhotos.length > 1 && (
+              <button 
+                type="button"
+                className="btn-lightbox-arrow prev"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handlePrevLightboxPhoto();
+                }}
+                title="ภาพก่อนหน้า (ลูกศรซ้าย หรือสไลด์ขวา)"
+                aria-label="Previous image"
+              >
+                <ChevronLeft size={20} />
+              </button>
+            )}
+
+            <div className="lightbox-img-wrapper">
+              <img 
+                src={filteredPhotos[lightboxIndex].url || filteredPhotos[lightboxIndex]} 
+                alt={filteredPhotos[lightboxIndex].caption || 'Tournament Lightbox'} 
+                style={{
+                  transform: lightboxIsSwiping ? `translateX(${lightboxSwipeOffset * 0.38}px)` : 'none',
+                  transition: lightboxIsSwiping ? 'none' : 'transform 0.22s ease-out'
+                }}
+                draggable={false}
+              />
+              <div className="lightbox-caption">
+                <span className="caption-text">{filteredPhotos[lightboxIndex].caption || `ภาพที่ ${lightboxIndex + 1}`}</span>
+                {filteredPhotos.length > 1 && (
+                  <span className="counter-tag">{lightboxIndex + 1} / {filteredPhotos.length}</span>
+                )}
+              </div>
             </div>
-            <button 
-              type="button" 
-              onClick={() => setLightboxIndex(null)}
-              style={{ position: 'absolute', top: '-46px', right: 0, background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.25)', color: '#fff', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
-            >
-              ✕
-            </button>
+
+            {/* Next Photo Arrow (Smaller & Sleeker) */}
+            {filteredPhotos.length > 1 && (
+              <button 
+                type="button"
+                className="btn-lightbox-arrow next"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleNextLightboxPhoto();
+                }}
+                title="ภาพถัดไป (ลูกศรขวา หรือสไลด์ซ้าย)"
+                aria-label="Next image"
+              >
+                <ChevronRight size={20} />
+              </button>
+            )}
           </div>
         </div>
       )}

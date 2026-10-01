@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Users, Award, Cpu, Zap, Armchair, Monitor, 
   Wifi, ShieldCheck, CheckCircle2, TrendingUp, Mail, Phone, MapPin, Quote, Calculator, ArrowRight,
@@ -132,6 +132,50 @@ export default function CompanyProfile({ onNavigateFranchise }) {
       ...prev,
       index: (prev.index + 1) % prev.list.length
     }));
+  };
+
+  // Touch Swipe Gesture for Company Lightbox
+  const compTouchStartRef = useRef({ x: 0, y: 0, time: 0 });
+  const [compSwipeOffset, setCompSwipeOffset] = useState(0);
+  const [compIsSwiping, setCompIsSwiping] = useState(false);
+
+  const handleCompTouchStart = (e) => {
+    if (e.touches && e.touches.length === 1) {
+      compTouchStartRef.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+        time: Date.now()
+      };
+      setCompIsSwiping(true);
+      setCompSwipeOffset(0);
+    }
+  };
+
+  const handleCompTouchMove = (e) => {
+    if (!compIsSwiping || !e.touches || e.touches.length !== 1) return;
+    const deltaX = e.touches[0].clientX - compTouchStartRef.current.x;
+    const deltaY = e.touches[0].clientY - compTouchStartRef.current.y;
+
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      setCompSwipeOffset(deltaX);
+    }
+  };
+
+  const handleCompTouchEnd = () => {
+    if (!compIsSwiping) return;
+    setCompIsSwiping(false);
+
+    const deltaX = compSwipeOffset;
+    const elapsed = Date.now() - compTouchStartRef.current.time;
+    const velocity = Math.abs(deltaX) / (elapsed || 1);
+
+    if (deltaX < -35 || (deltaX < -15 && velocity > 0.25)) {
+      handleNextPhoto();
+    } else if (deltaX > 35 || (deltaX > 15 && velocity > 0.25)) {
+      handlePrevPhoto();
+    }
+
+    setCompSwipeOffset(0);
   };
 
   return (
@@ -534,6 +578,9 @@ export default function CompanyProfile({ onNavigateFranchise }) {
             <div 
               className="company-lightbox-panel"
               onClick={(e) => e.stopPropagation()}
+              onTouchStart={handleCompTouchStart}
+              onTouchMove={handleCompTouchMove}
+              onTouchEnd={handleCompTouchEnd}
             >
               <button 
                 type="button" 
@@ -549,6 +596,11 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                   src={curPhoto.url} 
                   alt={curPhoto.title} 
                   className="company-lightbox-img" 
+                  style={{
+                    transform: compIsSwiping ? `translateX(${compSwipeOffset * 0.38}px)` : 'none',
+                    transition: compIsSwiping ? 'none' : 'transform 0.22s ease-out'
+                  }}
+                  draggable={false}
                 />
 
                 {lightboxData.list.length > 1 && (

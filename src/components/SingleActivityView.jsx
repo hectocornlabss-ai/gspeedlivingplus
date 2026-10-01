@@ -210,6 +210,86 @@ export default function SingleActivityView({
         { url: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80', caption: 'จอแสดงผลถ่ายทอดสด 4K LED Wall ขนาดยักษ์' },
         { url: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80', caption: 'อุปกรณ์เกมมิ่งเกียร์และสเปกคอมพิวเตอร์ระดับทัวร์นาเมนต์' }
       ];
+  // Touch Swipe Gesture & Navigation for Mobile & iPad Lightbox
+  const touchStartRef = useRef({ x: 0, y: 0, time: 0 });
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [isSwiping, setIsSwiping] = useState(false);
+
+  const handleNextPhoto = () => {
+    setActivePhotoIdx(prev => (prev === null ? null : (prev + 1) % galleryPhotos.length));
+  };
+
+  const handlePrevPhoto = () => {
+    setActivePhotoIdx(prev => (prev === null ? null : (prev - 1 + galleryPhotos.length) % galleryPhotos.length));
+  };
+
+  const handleTouchStart = (e) => {
+    if (e.touches && e.touches.length === 1) {
+      touchStartRef.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+        time: Date.now()
+      };
+      setIsSwiping(true);
+      setSwipeOffset(0);
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (!isSwiping || !e.touches || e.touches.length !== 1) return;
+    const deltaX = e.touches[0].clientX - touchStartRef.current.x;
+    const deltaY = e.touches[0].clientY - touchStartRef.current.y;
+
+    // Prioritize horizontal swipe when deltaX > deltaY
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      setSwipeOffset(deltaX);
+    }
+  };
+
+  const handleTouchEnd = (e) => {
+    if (!isSwiping) return;
+    setIsSwiping(false);
+
+    const deltaX = swipeOffset;
+    const elapsed = Date.now() - touchStartRef.current.time;
+    const velocity = Math.abs(deltaX) / (elapsed || 1);
+
+    // Trigger swipe if dragged > 35px or quick flick (> 15px with speed)
+    if (deltaX < -35 || (deltaX < -15 && velocity > 0.25)) {
+      handleNextPhoto();
+    } else if (deltaX > 35 || (deltaX > 15 && velocity > 0.25)) {
+      handlePrevPhoto();
+    }
+
+    setSwipeOffset(0);
+  };
+
+  // Keyboard navigation & body scroll lock while lightbox is active
+  useEffect(() => {
+    if (activePhotoIdx === null && !lightboxImage) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setActivePhotoIdx(null);
+        setLightboxImage(null);
+      } else if (activePhotoIdx !== null) {
+        if (e.key === 'ArrowRight') {
+          handleNextPhoto();
+        } else if (e.key === 'ArrowLeft') {
+          handlePrevPhoto();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    const origOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = origOverflow;
+    };
+  }, [activePhotoIdx, lightboxImage, galleryPhotos.length]);
 
   // Content Paragraphs Fallback
   const contentParagraphs = activity.contentParagraphs && activity.contentParagraphs.length > 0
@@ -953,65 +1033,116 @@ export default function SingleActivityView({
 
       {/* Full-Screen Photo Lightbox Modal */}
       {activePhotoIdx !== null && (
-        <div className="photo-lightbox-backdrop" onClick={() => setActivePhotoIdx(null)}>
-          <div className="lightbox-container" onClick={e => e.stopPropagation()}>
-            <button 
-              className="btn-lightbox-close" 
-              onClick={() => setActivePhotoIdx(null)}
-              title="ปิดหน้าต่างภาพ"
-            >
-              <X size={24} />
-            </button>
+        <div 
+          className="photo-lightbox-backdrop" 
+          onClick={() => setActivePhotoIdx(null)}
+          role="dialog"
+          aria-modal="true"
+        >
+          {/* Top fixed Close Button */}
+          <button 
+            type="button"
+            className="btn-lightbox-close" 
+            onClick={(e) => {
+              e.stopPropagation();
+              setActivePhotoIdx(null);
+            }}
+            title="ปิดหน้าต่างภาพ (Esc)"
+            aria-label="Close photo lightbox"
+          >
+            <X size={20} />
+          </button>
 
-            <button 
-              className="btn-lightbox-arrow prev"
-              onClick={() => setActivePhotoIdx((activePhotoIdx - 1 + galleryPhotos.length) % galleryPhotos.length)}
-              title="ภาพก่อนหน้า"
-            >
-              <ChevronLeft size={28} />
-            </button>
+          <div 
+            className="lightbox-container" 
+            onClick={e => e.stopPropagation()}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            {/* Prev Photo Arrow (Smaller & Sleeker) */}
+            {galleryPhotos.length > 1 && (
+              <button 
+                type="button"
+                className="btn-lightbox-arrow prev"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handlePrevPhoto();
+                }}
+                title="ภาพก่อนหน้า (ลูกศรซ้าย หรือสไลด์ขวา)"
+                aria-label="Previous image"
+              >
+                <ChevronLeft size={20} />
+              </button>
+            )}
 
             <div className="lightbox-img-wrapper">
               <img 
                 src={galleryPhotos[activePhotoIdx]?.url || galleryPhotos[activePhotoIdx]} 
                 alt={galleryPhotos[activePhotoIdx]?.alt || galleryPhotos[activePhotoIdx]?.caption || activity.title} 
+                style={{
+                  transform: isSwiping ? `translateX(${swipeOffset * 0.38}px)` : 'none',
+                  transition: isSwiping ? 'none' : 'transform 0.22s ease-out'
+                }}
+                draggable={false}
               />
               <div className="lightbox-caption">
-                <span>{galleryPhotos[activePhotoIdx]?.caption || activity.title}</span>
-                <span className="counter-tag">{activePhotoIdx + 1} / {galleryPhotos.length}</span>
+                <span className="caption-text">{galleryPhotos[activePhotoIdx]?.caption || activity.title}</span>
+                {galleryPhotos.length > 1 && (
+                  <span className="counter-tag">{activePhotoIdx + 1} / {galleryPhotos.length}</span>
+                )}
               </div>
             </div>
 
-            <button 
-              className="btn-lightbox-arrow next"
-              onClick={() => setActivePhotoIdx((activePhotoIdx + 1) % galleryPhotos.length)}
-              title="ภาพถัดไป"
-            >
-              <ChevronRight size={28} />
-            </button>
+            {/* Next Photo Arrow (Smaller & Sleeker) */}
+            {galleryPhotos.length > 1 && (
+              <button 
+                type="button"
+                className="btn-lightbox-arrow next"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleNextPhoto();
+                }}
+                title="ภาพถัดไป (ลูกศรขวา หรือสไลด์ซ้าย)"
+                aria-label="Next image"
+              >
+                <ChevronRight size={20} />
+              </button>
+            )}
           </div>
         </div>
       )}
 
       {/* Full-Screen Photo Lightbox Modal (For Gutenberg Content Blocks) */}
       {lightboxImage && (
-        <div className="photo-lightbox-backdrop" onClick={() => setLightboxImage(null)}>
+        <div 
+          className="photo-lightbox-backdrop" 
+          onClick={() => setLightboxImage(null)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <button 
+            type="button"
+            className="btn-lightbox-close" 
+            onClick={(e) => {
+              e.stopPropagation();
+              setLightboxImage(null);
+            }}
+            title="ปิดหน้าต่างภาพ (Esc)"
+            aria-label="Close photo lightbox"
+          >
+            <X size={20} />
+          </button>
           <div className="lightbox-container" onClick={e => e.stopPropagation()}>
-            <button 
-              className="btn-lightbox-close" 
-              onClick={() => setLightboxImage(null)}
-              title="ปิดหน้าต่างภาพ"
-            >
-              <X size={24} />
-            </button>
             <div className="lightbox-img-wrapper">
               <img 
                 src={lightboxImage.url} 
                 alt={lightboxImage.alt || lightboxImage.caption || activity.title} 
+                draggable={false}
               />
               {lightboxImage.caption && (
                 <div className="lightbox-caption">
-                  <span>{lightboxImage.caption}</span>
+                  <span className="caption-text">{lightboxImage.caption}</span>
                 </div>
               )}
             </div>
