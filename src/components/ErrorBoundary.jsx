@@ -99,16 +99,16 @@ export default class ErrorBoundary extends React.Component {
               <strong>Error:</strong> {this.state.error?.toString() || 'Unknown Error'}
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ display: 'flex', gap: '10px' }}>
               <button
-                onClick={this.handleResetStorage}
+                onClick={this.handleReload}
                 style={{
+                  flex: 1,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
-                  width: '100%',
-                  padding: '12px 20px',
+                  padding: '13px 18px',
                   borderRadius: '12px',
                   background: 'linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%)',
                   color: '#ffffff',
@@ -119,55 +119,31 @@ export default class ErrorBoundary extends React.Component {
                   boxShadow: '0 4px 15px rgba(29, 78, 216, 0.35)'
                 }}
               >
-                <Wrench size={16} />
-                <span>ซ่อมแซมและคืนค่าเริ่มต้น (Auto-Repair & Reset Storage)</span>
+                <RefreshCw size={16} />
+                <span>ลองโหลดใหม่อีกครั้ง</span>
               </button>
 
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button
-                  onClick={this.handleReload}
-                  style={{
-                    flex: 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    padding: '11px 16px',
-                    borderRadius: '12px',
-                    background: 'rgba(255, 255, 255, 0.08)',
-                    color: '#f1f5f9',
-                    fontWeight: 600,
-                    fontSize: '0.9rem',
-                    border: '1px solid rgba(255, 255, 255, 0.15)',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <RefreshCw size={15} />
-                  <span>ลองโหลดใหม่อีกครั้ง</span>
-                </button>
-
-                <button
-                  onClick={this.handleGoHome}
-                  style={{
-                    flex: 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    padding: '11px 16px',
-                    borderRadius: '12px',
-                    background: 'rgba(255, 255, 255, 0.08)',
-                    color: '#f1f5f9',
-                    fontWeight: 600,
-                    fontSize: '0.9rem',
-                    border: '1px solid rgba(255, 255, 255, 0.15)',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <Home size={15} />
-                  <span>กลับหน้าหลัก</span>
-                </button>
-              </div>
+              <button
+                onClick={this.handleGoHome}
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  padding: '13px 18px',
+                  borderRadius: '12px',
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  color: '#f1f5f9',
+                  fontWeight: 600,
+                  fontSize: '0.92rem',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  cursor: 'pointer'
+                }}
+              >
+                <Home size={15} />
+                <span>กลับหน้าหลัก</span>
+              </button>
             </div>
           </div>
         </div>

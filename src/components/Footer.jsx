@@ -1,9 +1,11 @@
 import React from 'react';
 import { ShieldCheck, MapPin, Phone, Mail, Award, Clock, Navigation } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
+import { useTranslation } from '../context/LanguageContext';
 
 export default function Footer({ setActiveTab, onNavigate }) {
   const { siteData } = useSiteData();
+  const { t, language } = useTranslation();
   const footer = siteData?.footer || {
     companyName: 'GLP : G Speed Living Plus',
     description: 'ศูนย์กีฬาอีสปอร์ตและร้านอินเทอร์เน็ตคาเฟ่มาตรฐานสากล บริหารงานโดย GLP Living Plus Group พร้อมระบบโซลูชันแฟรนไชส์อัจฉริยะสำหรับผู้ประกอบการรุ่นใหม่',
@@ -61,16 +63,24 @@ export default function Footer({ setActiveTab, onNavigate }) {
               <span className="footer-brand-title">{footer.companyName || 'GLP : G Speed Living Plus'}</span>
             </div>
             <p className="footer-desc">
-              {footer.description}
+              {language === 'th' ? footer.description : (t('footer.tagline') || footer.description)}
             </p>
             <div className="trust-badges">
-              <span className="trust-item"><ShieldCheck size={16} className="text-blue" /> ลิขสิทธิ์ซอฟต์แวร์แท้ 100%</span>
-              <span className="trust-item"><Award size={16} className="text-blue" /> มาตรฐานสมาคมกีฬาอีสปอร์ต</span>
+              <span className="trust-item">
+                <ShieldCheck size={16} className="text-blue" /> 
+                {language === 'th' ? 'ลิขสิทธิ์ซอฟต์แวร์แท้ 100%' : language === 'zh' ? '100% 正版授权软件' : '100% Licensed Software'}
+              </span>
+              <span className="trust-item">
+                <Award size={16} className="text-blue" /> 
+                {language === 'th' ? 'มาตรฐานสมาคมกีฬาอีสปอร์ต' : language === 'zh' ? '职业电竞协会认证标准' : 'Esports Association Standards'}
+              </span>
             </div>
 
             {/* 3 Prominent Social Media Buttons */}
             <div className="footer-social-wrapper">
-              <span className="footer-social-heading">ช่องทางโซเชียลมีเดีย:</span>
+              <span className="footer-social-heading">
+                {language === 'th' ? 'ช่องทางโซเชียลมีเดีย:' : language === 'zh' ? '官方社交平台:' : 'Social Channels:'}
+              </span>
               <div className="footer-social-row">
                 {/* 1. Facebook */}
                 <a 
@@ -78,7 +88,7 @@ export default function Footer({ setActiveTab, onNavigate }) {
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="footer-social-circle fb"
-                  title="ติดตาม Facebook ของ GLP (เปิดหน้าต่างใหม่)"
+                  title="Facebook GLP"
                   aria-label="Facebook GLP"
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="#ffffff">
@@ -92,7 +102,7 @@ export default function Footer({ setActiveTab, onNavigate }) {
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="footer-social-circle tt"
-                  title="ติดตาม TikTok ของ GLP (เปิดหน้าต่างใหม่)"
+                  title="TikTok GLP"
                   aria-label="TikTok GLP"
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="#ffffff">
@@ -106,7 +116,7 @@ export default function Footer({ setActiveTab, onNavigate }) {
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="footer-social-circle ig"
-                  title="ติดตาม Instagram ของ GLP (เปิดหน้าต่างใหม่)"
+                  title="Instagram GLP"
                   aria-label="Instagram GLP"
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="#ffffff">
@@ -119,36 +129,36 @@ export default function Footer({ setActiveTab, onNavigate }) {
 
           {/* Quick Navigation */}
           <div className="footer-col">
-            <h4 className="footer-heading">เมนูลัด (Clean Links)</h4>
+            <h4 className="footer-heading">{t('footer.quickLinks') || 'เมนูลัด'}</h4>
             <ul className="footer-links">
               <li>
                 <button onClick={() => handleLink('/')}>
-                  หน้าแรก
+                  {t('nav.home')}
                 </button>
               </li>
               <li>
                 <button onClick={() => handleLink('/tournaments')}>
-                  ทัวร์นาเมนต์
+                  {t('nav.tournaments')}
                 </button>
               </li>
               <li>
                 <button onClick={() => handleLink('/activities')}>
-                  ภาพกิจกรรม
+                  {t('nav.activities')}
                 </button>
               </li>
               <li>
                 <button onClick={() => handleLink('/company')}>
-                  เกี่ยวกับเรา
+                  {t('nav.company')}
                 </button>
               </li>
               <li>
                 <button onClick={() => handleLink('/contact')} className="text-highlight">
-                  ติดต่อเรา & แผนที่ร้าน
+                  {t('nav.contact')}
                 </button>
               </li>
               <li>
                 <button onClick={() => handleLink('/franchise')} className="text-blue">
-                  ติดต่อเปิดร้านเกมของคุณ
+                  {t('nav.cta')}
                 </button>
               </li>
             </ul>
@@ -156,12 +166,12 @@ export default function Footer({ setActiveTab, onNavigate }) {
 
           {/* Business & Store Contact */}
           <div className="footer-col">
-            <h4 className="footer-heading">ช่องทางการติดต่อ & พิกัดร้าน</h4>
+            <h4 className="footer-heading">{t('footer.contactInfo') || 'ช่องทางการติดต่อ'}</h4>
             <ul className="footer-contact-list">
               <li>
                 <MapPin size={18} className="text-blue shrink-0" />
                 <div>
-                  <span>แผนที่ร้าน: {footer.address}</span>
+                  <span>{language === 'th' ? `แผนที่ร้าน: ${footer.address}` : `${t('contactPage.address')}: ${footer.address}`}</span>
                   <div style={{ marginTop: '6px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     <a 
                       href={footer.googleMapUrl || 'https://maps.app.goo.gl/ak23az5WtsvXGWUR8'} 
@@ -171,7 +181,7 @@ export default function Footer({ setActiveTab, onNavigate }) {
                       style={{ textDecoration: 'none' }}
                     >
                       <Navigation size={13} />
-                      <span>เปิด Google Maps นำทาง</span>
+                      <span>{language === 'th' ? 'เปิด Google Maps นำทาง' : language === 'zh' ? 'Google 地图导航' : 'Open in Google Maps'}</span>
                     </a>
                   </div>
                 </div>
@@ -179,7 +189,9 @@ export default function Footer({ setActiveTab, onNavigate }) {
               <li>
                 <Phone size={18} className="text-blue shrink-0" />
                 <div>
-                  <span style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8' }}>เบอร์โทรติดต่อ:</span>
+                  <span style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8' }}>
+                    {language === 'th' ? 'เบอร์โทรติดต่อ:' : language === 'zh' ? '联系电话:' : 'Phone Number:'}
+                  </span>
                   <a href={`tel:${phoneDigits}`} className="footer-direct-link">
                     {footer.phone}
                   </a>
@@ -188,7 +200,9 @@ export default function Footer({ setActiveTab, onNavigate }) {
               <li>
                 <Mail size={18} className="text-blue shrink-0" />
                 <div>
-                  <span style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8' }}>อีเมลติดต่อ:</span>
+                  <span style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8' }}>
+                    {language === 'th' ? 'อีเมลติดต่อ:' : language === 'zh' ? '电子邮箱:' : 'Email Address:'}
+                  </span>
                   <a href={`mailto:${footer.email}`} className="footer-direct-link">
                     {footer.email}
                   </a>
@@ -196,7 +210,9 @@ export default function Footer({ setActiveTab, onNavigate }) {
               </li>
               <li>
                 <Clock size={18} className="text-blue shrink-0" />
-                <span>เวลาทำการ: {footer.hours || 'เปิดบริการตลอด 24 ชม.'}</span>
+                <span>
+                  {language === 'th' ? `เวลาทำการ: ${footer.hours || 'เปิดบริการตลอด 24 ชม.'}` : `${t('contactPage.hours')}: ${footer.hours || 'Open 24/7'}`}
+                </span>
               </li>
             </ul>
           </div>
@@ -210,22 +226,19 @@ export default function Footer({ setActiveTab, onNavigate }) {
               onClick={() => handleLink('/contact')}
               className="footer-legal-item"
             >
-              ติดต่อเรา
+              {t('nav.contact')}
             </button>
             <span className="footer-legal-sep">•</span>
             <a href="#terms" className="footer-legal-item">
-              <span className="hide-mobile">เงื่อนไขการใช้บริการ</span>
-              <span className="show-mobile">เงื่อนไขบริการ</span>
+              <span>{language === 'th' ? 'เงื่อนไขการใช้บริการ' : language === 'zh' ? '服务条款' : 'Terms of Service'}</span>
             </a>
             <span className="footer-legal-sep">•</span>
             <a href="#privacy" className="footer-legal-item">
-              <span className="hide-mobile">นโยบายความเป็นส่วนตัว</span>
-              <span className="show-mobile">นโยบายส่วนตัว</span>
+              <span>{language === 'th' ? 'นโยบายความเป็นส่วนตัว' : language === 'zh' ? '隐私政策' : 'Privacy Policy'}</span>
             </a>
             <span className="footer-legal-sep">•</span>
             <a href="#franchise-terms" className="footer-legal-item">
-              <span className="hide-mobile">ข้อกำหนดการลงทุนแฟรนไชส์</span>
-              <span className="show-mobile">ข้อกำหนดแฟรนไชส์</span>
+              <span>{language === 'th' ? 'ข้อกำหนดการลงทุนแฟรนไชส์' : language === 'zh' ? '加盟投资条款' : 'Franchise Terms'}</span>
             </a>
           </div>
         </div>

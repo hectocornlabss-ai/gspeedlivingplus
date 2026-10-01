@@ -374,13 +374,86 @@ export default function FranchisePlanner() {
     return calculateBlueprintFeasibility(roomWidth, roomHeight);
   }, [roomWidth, roomHeight]);
 
-  // Fullscreen Studio Mode State
+  // Fullscreen Studio Mode State & Landscape Orientation
   const [isPlannerFullscreen, setIsPlannerFullscreen] = useState(false);
+  const [forceLandscapeRotate, setForceLandscapeRotate] = useState(false);
+  const hasEnteredNativeFullscreenRef = useRef(false);
+
+  const handleToggleFullscreen = async () => {
+    const next = !isPlannerFullscreen;
+    setIsPlannerFullscreen(next);
+    if (next) {
+      try {
+        const docEl = document.documentElement;
+        if (docEl.requestFullscreen) {
+          await docEl.requestFullscreen().then(() => {
+            hasEnteredNativeFullscreenRef.current = true;
+          }).catch(() => {});
+        } else if (docEl.webkitRequestFullscreen) {
+          await docEl.webkitRequestFullscreen().then(() => {
+            hasEnteredNativeFullscreenRef.current = true;
+          }).catch(() => {});
+        }
+      } catch (e) {}
+
+      try {
+        if (window.screen?.orientation?.lock) {
+          await window.screen.orientation.lock('landscape').catch(() => {});
+        }
+      } catch (e) {}
+    } else {
+      handleExitFullscreen();
+    }
+  };
+
+  const handleExitFullscreen = async () => {
+    hasEnteredNativeFullscreenRef.current = false;
+    setIsPlannerFullscreen(false);
+    setForceLandscapeRotate(false);
+    try {
+      if (document.fullscreenElement && document.exitFullscreen) {
+        await document.exitFullscreen().catch(() => {});
+      } else if (document.webkitFullscreenElement && document.webkitExitFullscreen) {
+        await document.webkitExitFullscreen().catch(() => {});
+      }
+    } catch (e) {}
+    try {
+      if (window.screen?.orientation?.unlock) {
+        window.screen.orientation.unlock();
+      }
+    } catch (e) {}
+  };
+
+  // Sync native browser ESC or fullscreen exit
+  useEffect(() => {
+    const handleNativeFullscreenChange = () => {
+      const isCurrentlyNative = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      if (isCurrentlyNative) {
+        hasEnteredNativeFullscreenRef.current = true;
+      } else if (hasEnteredNativeFullscreenRef.current) {
+        // Only trigger exit if the session had actually entered browser native fullscreen
+        hasEnteredNativeFullscreenRef.current = false;
+        setIsPlannerFullscreen(false);
+        setForceLandscapeRotate(false);
+        try {
+          if (window.screen?.orientation?.unlock) {
+            window.screen.orientation.unlock();
+          }
+        } catch (e) {}
+      }
+    };
+    document.addEventListener('fullscreenchange', handleNativeFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleNativeFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleNativeFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleNativeFullscreenChange);
+    };
+  }, []);
 
   useEffect(() => {
     const handleEsc = (e) => {
       if (e.key === 'Escape' && isPlannerFullscreen) {
-        setIsPlannerFullscreen(false);
+        handleExitFullscreen();
       }
     };
     if (isPlannerFullscreen) {
@@ -590,7 +663,7 @@ export default function FranchisePlanner() {
   const isOvercrowded = totalStations > idealMaxPCs;
 
   // Cost Calculations
-  const currentTierInfo = hardwareTiers[selectedTier] || hardwareTiers.pro || { unitCost: 45000 };
+  const currentTierInfo = hardwareTiers[selectedTier] || Object.values(hardwareTiers)[0] || { unitCost: 45000 };
   const hardwareCost = totalStations * (currentTierInfo?.unitCost || 45000);
   
   // Custom furniture and base cost from placed items
@@ -1210,7 +1283,7 @@ export default function FranchisePlanner() {
       ctx.fillStyle = '#047857';
       ctx.font = 'bold 22px "Inter", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('🚪 ทางเข้า ⬆', entranceX + (entranceW / 2), roomOriginY + roomPxH + 36);
+      ctx.fillText('ทางเข้า ⬆', entranceX + (entranceW / 2), roomOriginY + roomPxH + 36);
       ctx.textAlign = 'left';
     } else if (activeWall === 'back') {
       const entranceX = roomOriginX + (roomPxW * doorRatio) - (entranceW / 2);
@@ -1221,7 +1294,7 @@ export default function FranchisePlanner() {
       ctx.fillStyle = '#047857';
       ctx.font = 'bold 22px "Inter", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('🚪 ทางเข้า ⬇', entranceX + (entranceW / 2), roomOriginY - 22);
+      ctx.fillText('ทางเข้า ⬇', entranceX + (entranceW / 2), roomOriginY - 22);
       ctx.textAlign = 'left';
     } else if (activeWall === 'left') {
       const entranceY = roomOriginY + (roomPxH * doorRatio) - (entranceW / 2);
@@ -1232,7 +1305,7 @@ export default function FranchisePlanner() {
       ctx.fillStyle = '#047857';
       ctx.font = 'bold 22px "Inter", sans-serif';
       ctx.textAlign = 'right';
-      ctx.fillText('🚪 ทางเข้า ➡', roomOriginX - 16, entranceY + (entranceW / 2) + 7);
+      ctx.fillText('ทางเข้า ➡', roomOriginX - 16, entranceY + (entranceW / 2) + 7);
       ctx.textAlign = 'left';
     } else {
       const entranceY = roomOriginY + (roomPxH * doorRatio) - (entranceW / 2);
@@ -1242,7 +1315,7 @@ export default function FranchisePlanner() {
       ctx.stroke();
       ctx.fillStyle = '#047857';
       ctx.font = 'bold 22px "Inter", sans-serif';
-      ctx.fillText('🚪 ทางเข้า ⬅', roomOriginX + roomPxW + 16, entranceY + (entranceW / 2) + 7);
+      ctx.fillText('ทางเข้า ⬅', roomOriginX + roomPxW + 16, entranceY + (entranceW / 2) + 7);
     }
 
     // 5. Electrical & LAN Conduit Lines (Connecting Server Rack to desk clusters)
@@ -2662,7 +2735,39 @@ export default function FranchisePlanner() {
 
       {/* 3. STEP 2: 3D INTERIOR STUDIO & 2D FLOOR PLAN */}
       {currentStep === 2 && (
-        <section className={`step-content-section container ${isPlannerFullscreen ? 'planner-fullscreen-mode' : ''}`}>
+        <section className={`step-content-section container ${isPlannerFullscreen ? 'planner-fullscreen-mode' : ''} ${forceLandscapeRotate ? 'force-landscape-active' : ''}`}>
+          {/* Sticky Exit Fullscreen Button - Visible on All Screens & Devices */}
+          {isPlannerFullscreen && (
+            <button
+              type="button"
+              id="btn-sticky-exit-fullscreen"
+              className="btn-sticky-exit-fullscreen"
+              onClick={handleExitFullscreen}
+              title="กดเพื่อออกจากโหมดเต็มจอ (ESC)"
+            >
+              <Minimize2 size={16} />
+              <span>ออกจากเต็มจอ (ESC)</span>
+            </button>
+          )}
+
+          {/* Landscape Orientation Guide for Tablets/Mobiles in Fullscreen Mode */}
+          {isPlannerFullscreen && (
+            <div className="planner-fullscreen-landscape-bar">
+              <div className="landscape-bar-info">
+                <span className="landscape-icon">🔄</span>
+                <span className="landscape-text">โหมดเต็มจอ: แนะนำหมุน iPad / แท็บเล็ต เป็นแนวนอนเพื่อมุมมองที่ดีที่สุด</span>
+              </div>
+              <button
+                type="button"
+                className="btn-landscape-rotate-toggle"
+                onClick={() => setForceLandscapeRotate(prev => !prev)}
+                title="สลับหมุนจอ 90 องศา"
+              >
+                <span>{forceLandscapeRotate ? 'คืนค่ามุมมองปกติ' : 'บังคับหมุนจอ 90°'}</span>
+              </button>
+            </div>
+          )}
+
           {/* Top Control Bar: View Switcher & Material Customization */}
           <div className="planner-top-controls glass-panel">
             {/* View Mode Toggle */}
@@ -2675,8 +2780,8 @@ export default function FranchisePlanner() {
                   onClick={() => setViewMode('3d')}
                 >
                   <Box size={16} />
-                  <span className="view-mode-txt-full">3D Isometric Studio (สไตล์ Homestyler)</span>
-                  <span className="view-mode-txt-short">3D Studio</span>
+                  <span className="view-mode-txt-full">3D Studio</span>
+                  <span className="view-mode-txt-short">3D</span>
                 </button>
                 <button 
                   id="btn-view-mode-2d"
@@ -2696,6 +2801,16 @@ export default function FranchisePlanner() {
                 >
                   <Sparkles size={14} />
                   <span>จัดผังอัตโนมัติ</span>
+                </button>
+                <button 
+                  type="button"
+                  id="btn-topbar-fullscreen-toggle"
+                  className={`btn-topbar-fullscreen ${isPlannerFullscreen ? 'active' : ''}`}
+                  onClick={handleToggleFullscreen}
+                  title={isPlannerFullscreen ? 'ออกจากโหมดเต็มจอ (ESC)' : 'เปิดสตูดิโอเต็มหน้าจอ (Zen Mode)'}
+                >
+                  {isPlannerFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+                  <span>{isPlannerFullscreen ? 'ย่อหน้าต่าง (ESC)' : 'ขยายเต็มจอ'}</span>
                 </button>
               </div>
             </div>
@@ -2753,14 +2868,12 @@ export default function FranchisePlanner() {
                   setInspectorTab('materials');
                   if (selectedItemId === 'store-door') setSelectedItemId(null);
                 }}
-                title="คลิกเพื่อเปลี่ยนวอลเปเปอร์ผนังและวัสดุพื้น (ในแถบซ้าย)"
+                title="คลิกเพื่อเปลี่ยนวอลเปเปอร์ผนังและวัสดุพื้น"
               >
                 <Palette size={13} className="text-blue" />
-                <span>ผนัง: {WALLPAPERS.find(w => w.id === selectedWallpaper)?.name.split(' ')[0]}</span>
-                <span className="pill-dot" style={{ backgroundColor: WALLPAPERS.find(w => w.id === selectedWallpaper)?.color || '#e2e8f0' }} />
-                <span className="pill-divider">|</span>
-                <span>พื้น: {FLOOR_MATERIALS.find(f => f.id === selectedFloorMaterial)?.name.split(' ')[0]}</span>
-                <span className="pill-dot floor-dot" style={{ backgroundColor: FLOOR_MATERIALS.find(f => f.id === selectedFloorMaterial)?.color || '#b45309' }} />
+                <span>โทนสี</span>
+                <span className="pill-dot" style={{ backgroundColor: WALLPAPERS.find(w => w.id === selectedWallpaper)?.color || '#e2e8f0' }} title="สีผนัง" />
+                <span className="pill-dot floor-dot" style={{ backgroundColor: FLOOR_MATERIALS.find(f => f.id === selectedFloorMaterial)?.color || '#b45309' }} title="สีพื้น" />
               </button>
 
               <button
@@ -3820,7 +3933,7 @@ export default function FranchisePlanner() {
                   type="button"
                   id="btn-toolbar-fullscreen-toggle"
                   className={`btn-toolbar-fullscreen ${isPlannerFullscreen ? 'active' : ''}`}
-                  onClick={() => setIsPlannerFullscreen(!isPlannerFullscreen)}
+                  onClick={handleToggleFullscreen}
                   title={isPlannerFullscreen ? 'ออกจากโหมดเต็มจอ (กด ESC ได้)' : 'เปิดสตูดิโอเต็มหน้าจอ (Zen Mode)'}
                 >
                   {isPlannerFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
@@ -3845,7 +3958,7 @@ export default function FranchisePlanner() {
                   onDeleteItem={promptDeleteItem}
                   onNudgeItem={handleNudgeItem}
                   isPlannerFullscreen={isPlannerFullscreen}
-                  onToggleFullscreen={() => setIsPlannerFullscreen(!isPlannerFullscreen)}
+                  onToggleFullscreen={handleToggleFullscreen}
                   doorConfig={doorConfig}
                   onChangeDoorConfig={setDoorConfig}
                 />
@@ -3859,7 +3972,7 @@ export default function FranchisePlanner() {
                   <div className="floorplan-floating-controls" onClick={e => e.stopPropagation()}>
                     <button 
                       type="button" 
-                      className="btn-floorplan-ctrl" 
+                      className="btn-floorplan-ctrl btn-floorplan-zoom-out" 
                       onClick={() => setZoomMultiplier(z => Math.max(Number((z - 0.15).toFixed(2)), 0.5))} 
                       title="ซูมย่อแปลน (-)"
                     >
@@ -3875,7 +3988,7 @@ export default function FranchisePlanner() {
                     </button>
                     <button 
                       type="button" 
-                      className="btn-floorplan-ctrl" 
+                      className="btn-floorplan-ctrl btn-floorplan-zoom-in" 
                       onClick={() => setZoomMultiplier(z => Math.min(Number((z + 0.15).toFixed(2)), 2.5))} 
                       title="ซูมขยายแปลน (+)"
                     >

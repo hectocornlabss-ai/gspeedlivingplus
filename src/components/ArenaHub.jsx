@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef, useMemo } from 'react';
 import { 
   Trophy, Shield, Monitor, Coffee, Zap, Calendar, Users, 
   ArrowRight, Compass, Layers, Calculator, CheckCircle2, ChevronRight, Play, Check, Flame, X, Send,
@@ -11,7 +11,10 @@ import {
   EVENT_CATEGORIES, GAME_NEWS 
 } from '../data/mockData';
 import { useSiteData } from '../context/SiteDataContext';
+import { useTranslation } from '../context/LanguageContext';
 import EsportOrganizerModal from './EsportOrganizerModal';
+import ArenaSeatBookingModal from './ArenaSeatBookingModal';
+import { compareTournaments, isTournamentRegistrationOpen } from '../utils/tournamentUtils';
 
 // Helper functions for dynamic theme contrast & color overlays
 function isColorDark(hexColor) {
@@ -48,20 +51,124 @@ export default function ArenaHub({
   initialTag = 'all'
 }) {
   const { siteData, updateTournament } = useSiteData();
-  const heroData = siteData?.hero || {
-    badge: 'GLP ESPORTS • ความสนุกสุดมันส์ ตลอด 24 ชม.',
-    title: 'GLP ESPORT STADIUM MEETING\nศูนย์รวมกิจกรรม & ทัวร์นาเมนต์ระดับประเทศ',
-    subtitle: 'สมรภูมิประลองเกมอันดับ 1 ของเกมเมอร์ชาวไทย เวทีแข่งขันมาตรฐานสากล รองรับทัวร์นาเมนต์ LAN ทุกเกม พร้อมโซนซ้อมสตรีมเมอร์ และบริการจัดกิจกรรมสำหรับค่ายเกมชั้นนำ',
-    primaryCtaText: 'ชมภาพกิจกรรมทั้งหมด',
-    secondaryCtaText: 'สมัครแข่งทัวร์นาเมนต์'
+  const { t, language } = useTranslation();
+  const isThai = language === 'th';
+
+  const rawHeroData = siteData?.hero || {};
+  const heroData = {
+    ...rawHeroData,
+    badge: isThai ? (rawHeroData.badge || 'GLP ESPORTS • ความสนุกสุดมันส์ ตลอด 24 ชม.') : t('hero.tag'),
+    title: isThai ? (rawHeroData.title || 'GLP ESPORT STADIUM MEETING\nศูนย์รวมกิจกรรม & ทัวร์นาเมนต์ระดับประเทศ') : t('hero.title'),
+    subtitle: isThai ? (rawHeroData.subtitle || 'สมรภูมิประลองเกมอันดับ 1 ของเกมเมอร์ชาวไทย เวทีแข่งขันมาตรฐานสากล รองรับทัวร์นาเมนต์ LAN ทุกเกม พร้อมโซนซ้อมสตรีมเมอร์ และบริการจัดกิจกรรมสำหรับค่ายเกมชั้นนำ') : t('hero.subtitle'),
+    btn1Text: isThai ? (rawHeroData.btn1Text || 'สนใจจัดงาน') : t('hero.btn1'),
+    btn2Text: isThai ? (rawHeroData.btn2Text || 'ดูกิจกรรม') : t('hero.btn2'),
+    btn3Text: isThai ? (rawHeroData.btn3Text || 'ทัวร์นาเมนต์') : t('hero.btn3'),
+    btn4Text: isThai ? (rawHeroData.btn4Text || 'ติดต่อเปิดร้านเกม') : t('hero.btn4'),
+    metrics: !isThai
+      ? (language === 'zh'
+          ? [
+              { number: '750+', label: '全国电竞对战席位' },
+              { number: '360Hz', label: 'Fast-IPS & OLED 电竞屏' },
+              { number: '10Gbps', label: '专用多线光纤 延迟 < 3ms' },
+              { number: '24/7', label: '24小时全年无休' }
+            ]
+          : [
+              { number: '750+', label: 'Battle Stations Nationwide' },
+              { number: '360Hz', label: 'Fast-IPS & OLED Displays' },
+              { number: '10Gbps', label: 'Dedicated Multi-WAN Ping < 3ms' },
+              { number: '24/7', label: 'Open 24 Hours / 7 Days' }
+            ])
+      : (rawHeroData.metrics && rawHeroData.metrics.length > 0
+          ? rawHeroData.metrics
+          : [
+              { number: '750+', label: 'Battle Stations ทั่วประเทศ' },
+              { number: '360Hz', label: 'Fast-IPS & OLED Displays' },
+              { number: '10Gbps', label: 'Dedicated Multi-WAN Ping < 3ms' },
+              { number: '24/7', label: 'เปิดบริการตลอด 24 ชั่วโมง' }
+            ])
   };
-  const tournamentsList = siteData?.tournaments || TOURNAMENTS;
+
+  const rawTournamentsList = siteData?.tournaments || TOURNAMENTS;
+  const tournamentsList = useMemo(() => {
+    return [...rawTournamentsList].sort(compareTournaments);
+  }, [rawTournamentsList]);
   const galleryList = siteData?.gallery || GALLERY_ACTIVITIES;
   const newsList = siteData?.news || GAME_NEWS;
   const categories = siteData?.activityCategories || EVENT_CATEGORIES;
 
-  // State for zone showcase & 20-image slider
-  const allZones = siteData?.venueZones || VENUE_ZONES;
+  // State for zone showcase & 3-image slider with multi-language support
+  const rawVenueZones = siteData?.venueZones || VENUE_ZONES;
+  const allZones = useMemo(() => {
+    if (isThai) return rawVenueZones;
+    return rawVenueZones.map(z => {
+      let title = z.title;
+      let subtitle = z.subtitle;
+      let badge = z.badge;
+      let specs = z.specs;
+      let desc = z.description;
+      if (language === 'en') {
+        if (z.id === 'stage') {
+          title = '5v5 Tournament Main Stage';
+          subtitle = 'Championship 5v5 Stage with 4K LED Screen';
+          badge = 'PROFESSIONAL 5v5 STAGE';
+          specs = ['5v5 Tournament PCs (RTX 4080)', '360Hz Fast-IPS Gaming Monitors', 'Pro Audio & Live Stream Broadcaster', '4K Giant LED Wall Display'];
+          desc = 'Championship-grade stage built to international esports tournament standards, featuring acoustic treatment and broadcast-ready production facilities.';
+        } else if (z.id === 'vip') {
+          title = 'VIP & Streamer Pods';
+          subtitle = 'Private VIP Suites & Streaming Rooms';
+          badge = 'PRIVATE VIP SUITES';
+          specs = ['Dual-PC Streaming Setup (RTX 4090)', 'Ergonomic Premium Gaming Chairs', 'Soundproof Acoustic Studio Walls', 'Dedicated 10Gbps Multi-WAN Fiber'];
+          desc = 'Private, noise-isolated suites engineered for pro team bootcamps, content creators, and private gaming sessions with zero distractions.';
+        } else if (z.id === 'standard') {
+          title = 'Esports Battleground Zone';
+          subtitle = 'High-Performance Gaming Stations';
+          badge = 'ESPORTS BATTLEGROUND';
+          specs = ['RTX 4070 Ti Super Graphics', '240Hz High Refresh Displays', 'Mechanical Keyboards & Pro Mice', 'Diskless 10Gbps Instant Loading'];
+          desc = 'Open arena stations equipped with high-refresh rate displays and competitive peripherals for intense gaming sessions with friends.';
+        } else if (z.id === 'cafe') {
+          title = 'Cyber Cafe & Snack Lounge';
+          subtitle = 'Fresh Cafe, Snacks & Chilled Drinks';
+          badge = 'CAFE & CHILL LOUNGE';
+          specs = ['Artisan Fresh Coffee & Drinks', 'Hot Meal Sets & Quick Snacks', 'Relaxed Cozy Dining Area', 'High-Speed Free Wi-Fi 6'];
+          desc = 'A modern cafe and chill lounge offering freshly brewed coffee, hot meals, and refreshments to keep you recharged 24/7.';
+        }
+      } else if (language === 'zh') {
+        if (z.id === 'stage') {
+          title = '5v5 专业电竞主舞台';
+          subtitle = '国际级5v5竞技舞台与4K巨幕LED屏';
+          badge = '国际专业5v5主舞台';
+          specs = ['5v5 对战主机 (RTX 4080)', '360Hz Fast-IPS 电竞级显示器', '专业现场转播与音频控制台', '4K 高清巨幕LED背景大屏'];
+          desc = '依照国际电竞赛事标准精心打造的专业主舞台，配备声学降噪系统与4K超清直转播设施。';
+        } else if (z.id === 'vip') {
+          title = 'VIP战队训练与主播独立包厢';
+          subtitle = '独立私密训练营与高清直播室';
+          badge = '私密VIP战队训练包厢';
+          specs = ['双电脑直播推流工作站 (RTX 4090)', '人体工学专业电竞椅', '专业声学隔音舱墙体', '独立独享 10Gbps 专线网络'];
+          desc = '专为职业战队集训营、知名游戏主播打造的私密隔音空间，零外界干扰，尽情专注对局。';
+        } else if (z.id === 'standard') {
+          title = '高阶竞技对战专区';
+          subtitle = '高端专业配置电竞对战席';
+          badge = '高阶竞技对战大厅';
+          specs = ['RTX 4070 Ti Super 独立显卡', '240Hz 高刷新率电竞屏幕', '职业级机械键盘与轻量化鼠标', '10Gbps 极速无盘秒开系统'];
+          desc = '开放式竞技对战大厅，全席位配备超高刷电竞屏与职业外设，随时与好友开黑畅玩。';
+        } else if (z.id === 'cafe') {
+          title = '电竞咖啡与休闲轻食吧';
+          subtitle = '现磨手作咖啡与美味轻食能量补给';
+          badge = '休闲轻食与能量补给吧';
+          specs = ['现磨手作咖啡与特调饮品', '热腾腾快餐简餐与能量点心', '宽敞舒适的用餐休息区', '全场覆盖高速 Wi-Fi 6'];
+          desc = '现代时尚的电竞咖啡休闲吧，供应现磨咖啡、营养套餐和冰镇冷饮，全天候24小时为选手补充充沛能量。';
+        }
+      }
+      return {
+        ...z,
+        title,
+        subtitle: subtitle || z.subtitle,
+        badge: badge || z.badge,
+        specs: specs || z.specs,
+        description: desc || z.description
+      };
+    });
+  }, [rawVenueZones, isThai, language]);
   const [activeZone, setActiveZone] = useState(allZones[0]?.id || 'stage');
   const [zoneSlideIndex, setZoneSlideIndex] = useState(0);
   const [touchStartX, setTouchStartX] = useState(0);
@@ -176,6 +283,10 @@ export default function ArenaHub({
   const [isOrganizerModalOpen, setIsOrganizerModalOpen] = useState(false);
   const [selectedOrganizerZone, setSelectedOrganizerZone] = useState('');
 
+  // Arena Live Seat Booking Modal State
+  const [isSeatBookingOpen, setIsSeatBookingOpen] = useState(false);
+  const [bookingInitialZone, setBookingInitialZone] = useState('stage');
+
   const handleOpenTournament = (tour) => {
     const slug = tour.slug || tour.seo?.slug || tour.id;
     if (onSelectTournamentSlug) {
@@ -187,11 +298,30 @@ export default function ArenaHub({
   };
 
   const currentZoneData = allZones.find(z => z.id === activeZone) || allZones[0] || VENUE_ZONES[0];
-  const currentZoneImages = (Array.isArray(currentZoneData.images) && currentZoneData.images.length > 0)
-    ? currentZoneData.images
-    : (currentZoneData.image ? [{ id: `${currentZoneData.id}-0`, url: currentZoneData.image, caption: currentZoneData.title }] : []);
-  const totalZoneSlides = currentZoneImages.length;
-  const activeSlide = currentZoneImages[zoneSlideIndex % (totalZoneSlides || 1)] || currentZoneImages[0] || {};
+  const defaultZoneInit = VENUE_ZONES.find(z => z.id === currentZoneData.id) || VENUE_ZONES[0];
+
+  // Robust extraction of 3 zone images with fallback to default mockData
+  const currentZoneImages = useMemo(() => {
+    const rawImages = Array.isArray(currentZoneData.images) && currentZoneData.images.length > 0
+      ? currentZoneData.images.slice(0, 3)
+      : (defaultZoneInit.images || [{ id: `${currentZoneData.id}-0`, url: currentZoneData.image || defaultZoneInit.image, caption: currentZoneData.title }]);
+
+    return rawImages.map((imgObj, idx) => {
+      const defaultSlot = defaultZoneInit?.images?.[idx] || defaultZoneInit?.images?.[0] || {};
+      const urlStr = typeof imgObj === 'string' ? imgObj : (imgObj?.url || '');
+      const validUrl = (urlStr && urlStr.trim() && urlStr !== '[object Object]') 
+        ? urlStr 
+        : (defaultSlot.url || defaultZoneInit.image || '');
+      return {
+        id: imgObj?.id || `${currentZoneData.id}-img-${idx}`,
+        url: validUrl,
+        caption: (imgObj?.caption && imgObj.caption.trim()) ? imgObj.caption : (defaultSlot.caption || currentZoneData.title)
+      };
+    });
+  }, [currentZoneData, defaultZoneInit]);
+
+  const totalZoneSlides = currentZoneImages.length || 1;
+  const activeSlide = currentZoneImages[zoneSlideIndex % totalZoneSlides] || currentZoneImages[0] || {};
 
   const handleNextSlide = (e) => {
     if (e) e.stopPropagation();
@@ -536,15 +666,15 @@ export default function ArenaHub({
               }}
             >
               <div className="banner-content">
-                <span className="badge-pill badge-blue">{siteData?.featureBanners?.bannerLeft?.badge || 'GLP OUR EVENTS'}</span>
+                <span className="badge-pill badge-blue">{isThai ? (siteData?.featureBanners?.bannerLeft?.badge || 'GLP OUR EVENTS') : t('home.featureEvents.badge')}</span>
                 <h3 className="banner-title" style={{ color: '#ffffff' }}>
-                  {siteData?.featureBanners?.bannerLeft?.title || 'รวมภาพกิจกรรม & บรรยากาศสด'}
+                  {isThai ? (siteData?.featureBanners?.bannerLeft?.title || 'รวมภาพกิจกรรม & บรรยากาศสด') : t('home.featureEvents.title')}
                 </h3>
                 <p className="banner-desc" style={{ color: '#cbd5e1' }}>
-                  {siteData?.featureBanners?.bannerLeft?.desc || 'ภาพงานแข่ง LAN, งานเปิดตัวเกม, มีตติ้ง และพิธีมอบรางวัลชนะเลิศตลอดทั้งปี'}
+                  {isThai ? (siteData?.featureBanners?.bannerLeft?.desc || 'ภาพงานแข่ง LAN, งานเปิดตัวเกม, มีตติ้ง และพิธีมอบรางวัลชนะเลิศตลอดทั้งปี') : t('home.featureEvents.desc')}
                 </p>
                 <div className="banner-link-row text-blue">
-                  <span style={{ color: '#60a5fa' }}>{siteData?.featureBanners?.bannerLeft?.linkText || 'เข้าสู่หน้ารวมภาพกิจกรรม & แกลเลอรี'}</span>
+                  <span style={{ color: '#60a5fa' }}>{isThai ? (siteData?.featureBanners?.bannerLeft?.linkText || 'เข้าสู่หน้ารวมภาพกิจกรรม & แกลเลอรี') : t('home.featureEvents.link')}</span>
                   <ArrowRight size={18} color="#60a5fa" />
                 </div>
               </div>
@@ -568,15 +698,15 @@ export default function ArenaHub({
               }}
             >
               <div className="banner-content">
-                <span className="badge-pill badge-white">{siteData?.featureBanners?.bannerRight?.badge || 'GLP TOURNAMENTS'}</span>
+                <span className="badge-pill badge-white">{isThai ? (siteData?.featureBanners?.bannerRight?.badge || 'GLP TOURNAMENTS') : t('home.featureTournaments.badge')}</span>
                 <h3 className="banner-title" style={{ color: '#ffffff' }}>
-                  {siteData?.featureBanners?.bannerRight?.title || 'ปฏิทินแข่ง & ชิงรางวัล LAN'}
+                  {isThai ? (siteData?.featureBanners?.bannerRight?.title || 'ปฏิทินแข่ง & ชิงรางวัล LAN') : t('home.featureTournaments.title')}
                 </h3>
                 <p className="banner-desc" style={{ color: '#cbd5e1' }}>
-                  {siteData?.featureBanners?.bannerRight?.desc || 'เกาะติดผลการแข่งขัน สายแข่งสด (Brackets) และลงทะเบียนประลองฝีมือระดับประเทศ'}
+                  {isThai ? (siteData?.featureBanners?.bannerRight?.desc || 'เกาะติดผลการแข่งขัน สายแข่งสด (Brackets) และลงทะเบียนประลองฝีมือระดับประเทศ') : t('home.featureTournaments.desc')}
                 </p>
                 <div className="banner-link-row text-blue">
-                  <span style={{ color: '#60a5fa' }}>{siteData?.featureBanners?.bannerRight?.linkText || 'เข้าสู่หน้าปฏิทินทัวร์นาเมนต์ทั้งหมด'}</span>
+                  <span style={{ color: '#60a5fa' }}>{isThai ? (siteData?.featureBanners?.bannerRight?.linkText || 'เข้าสู่หน้าปฏิทินทัวร์นาเมนต์ทั้งหมด') : t('home.featureTournaments.link')}</span>
                   <ArrowRight size={18} color="#60a5fa" />
                 </div>
               </div>
@@ -588,31 +718,39 @@ export default function ArenaHub({
       {/* 4. ACTIVITIES & COMMUNITY GALLERY (ภาพกิจกรรม) */}
       <section className="activities-gallery-section" id="activities">
         <div className="container">
-          <div className="section-header-center">
+          <div className="section-header" style={{ marginBottom: '20px' }}>
             <div className="badge-pill badge-blue">
               <ImageIcon size={14} />
               <span>GLP PHOTO & COMMUNITY GALLERY</span>
             </div>
-            <h2 className="section-title">
-              ภาพกิจกรรม & <span className="text-blue">บรรยากาศความมันส์</span>
-            </h2>
-            <p className="section-subtitle max-w-700">
-              ย้อนชมภาพความประทับใจ การประลองฝีมือของเหล่านักกีฬาอีสปอร์ต และงานอีเวนต์ร่วมกับค่ายเกมชั้นนำ ณ GLP Esports
-            </p>
-
-            {/* CTA Button to enter dedicated Activities Page */}
-            <div className="section-enter-cta-row" style={{ marginTop: '14px', marginBottom: '8px', display: 'flex', justifyContent: 'center' }}>
+            <div className="section-header-row-flex" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+              <div style={{ flex: '1 1 500px' }}>
+                <h2 className="section-title" style={{ margin: 0 }}>
+                  {isThai ? (
+                    <>ภาพกิจกรรม & <span className="text-blue">บรรยากาศความมันส์</span></>
+                  ) : (
+                    <span>{t('home.latestActivities.title')}</span>
+                  )}
+                </h2>
+                <p className="section-subtitle" style={{ marginTop: '8px', marginBottom: 0 }}>
+                  {isThai 
+                    ? 'ย้อนชมภาพความประทับใจ การประลองฝีมือของเหล่านักกีฬาอีสปอร์ต และงานอีเวนต์ร่วมกับค่ายเกมชั้นนำ ณ GLP Esports'
+                    : (language === 'zh' ? '记录线下狂欢赛、游戏发布会与玩家社区精彩瞬间' : 'Relive highlights from championship tournaments, publisher showcases, and gamer meetups at GLP Esports.')
+                  }
+                </p>
+              </div>
               <button 
                 type="button" 
-                className="btn-enter-dedicated-page"
+                className="btn-enter-dedicated-page desktop-only-btn"
                 onClick={() => onNavigateActivities ? onNavigateActivities() : (window.history.pushState(null, '', '/activities'), window.dispatchEvent(new PopStateEvent('popstate')))}
               >
-                <Camera size={16} className="text-blue" />
-                <span>เข้าสู่หน้ารวมภาพกิจกรรม & แกลเลอรีทั้งหมด ({galleryList.length} รายการ)</span>
+                <span>{t('common.viewAll')}</span>
                 <ArrowRight size={16} />
               </button>
             </div>
+          </div>
 
+          <div className="section-header-center" style={{ paddingTop: 0 }}>
             {/* Category Filter Tabs (Single Row & Touch Swipeable) */}
             <div className="category-scroll-wrapper" style={{ width: '100%', margin: '20px 0 0 0' }}>
               <div className="category-filter-pills">
@@ -681,7 +819,7 @@ export default function ArenaHub({
           {/* Activities Grid */}
           <div className="gallery-items-grid">
             {filteredActivities.length > 0 ? (
-              filteredActivities.map(item => (
+              filteredActivities.slice(0, 3).map(item => (
                 <div 
                   key={item.id} 
                   className="gallery-card glass-panel clickable-article-card"
@@ -725,7 +863,17 @@ export default function ArenaHub({
             )}
           </div>
 
-
+          {/* Mobile Bottom CTA: Displayed only on mobile below the 3 cards */}
+          <div className="section-mobile-bottom-cta">
+            <button 
+              type="button" 
+              className="btn-enter-dedicated-page"
+              onClick={() => onNavigateActivities ? onNavigateActivities() : (window.history.pushState(null, '', '/activities'), window.dispatchEvent(new PopStateEvent('popstate')))}
+            >
+              <span>ดูทั้งหมด</span>
+              <ArrowRight size={16} />
+            </button>
+          </div>
         </div>
       </section>
 
@@ -752,33 +900,40 @@ export default function ArenaHub({
                 <div className="section-header-row-flex" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
                   <div style={{ flex: '1 1 500px' }}>
                     <h2 className="section-title" style={{ color: siteData?.tournamentsSection?.titleColor || (isDarkTour ? '#ffffff' : '#0f172a'), margin: 0 }}>
-                      {siteData?.tournamentsSection?.title || 'ปฏิทินการแข่งขัน อีสปอร์ตประจำเดือน'}
+                      {isThai ? (siteData?.tournamentsSection?.title || 'ปฏิทินการแข่งขัน อีสปอร์ตประจำเดือน') : t('home.latestTournaments.title')}
                     </h2>
                     <p className="section-subtitle" style={{ color: siteData?.tournamentsSection?.subtitleColor || (isDarkTour ? '#cbd5e1' : '#475569'), marginTop: '8px', marginBottom: 0 }}>
-                      {siteData?.tournamentsSection?.subtitle || 'ร่วมชิงเงินรางวัลรวมกว่าหลายแสนบาท พิสูจน์ฝีมือบนเวที LAN Final ถ่ายทอดสดสู่สายตาแฟนเกมทั่วประเทศ'}
+                      {isThai 
+                        ? (siteData?.tournamentsSection?.subtitle || 'ร่วมชิงเงินรางวัลรวมกว่าหลายแสนบาท พิสูจน์ฝีมือบนเวที LAN Final ถ่ายทอดสดสู่สายตาแฟนเกมทั่วประเทศ')
+                        : (language === 'zh' ? '全国大型电竞锦标赛赛程，丰厚奖金池，4K主舞台全程高清直播' : 'Compete for national championships and major prize pools, streamed live on the 4K Main Stage.')
+                      }
                     </p>
                   </div>
                   <button 
                     type="button" 
-                    className="btn-enter-dedicated-page amber-theme"
+                    className="btn-enter-dedicated-page amber-theme desktop-only-btn"
                     onClick={() => onNavigateTournaments ? onNavigateTournaments() : (window.history.pushState(null, '', '/tournaments'), window.dispatchEvent(new PopStateEvent('popstate')))}
                   >
-                    <Trophy size={16} className="text-amber" />
-                    <span>เข้าสู่หน้าทัวร์นาเมนต์ & สายแข่งทั้งหมด</span>
+                    <span>{t('common.viewAll')}</span>
                     <ArrowRight size={16} />
                   </button>
                 </div>
               </div>
 
               <div className="tournaments-grid">
-                {tournamentsList.map((t) => {
+                {tournamentsList.slice(0, 3).map((t) => {
                   const photoCount = (t.galleryPhotos || []).length;
                   const teamCount = (t.teams || []).length;
-                  const isRegistrationOpen = t.status === 'Open';
+                  const isRegistrationOpen = isTournamentRegistrationOpen(t);
                   return (
                     <div key={t.id} className="tournament-card">
-                      {/* Banner Image with Overlays */}
-                      <div className="t-banner-wrapper">
+                      {/* Banner Image with Overlays - Clickable */}
+                      <div 
+                        className="t-banner-wrapper"
+                        onClick={() => handleOpenTournament(t, 'overview')}
+                        style={{ cursor: 'pointer' }}
+                        title={`ดูรายละเอียด ${t.title}`}
+                      >
                         <img 
                           src={t.bannerImage || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80'} 
                           alt={t.title} 
@@ -814,18 +969,18 @@ export default function ArenaHub({
                           <span className="t-game-tag">
                             {t.game}
                           </span>
-                          {photoCount > 0 && (
-                            <span className="t-photo-pill">
-                              <Camera size={12} /> {photoCount} ภาพ
-                            </span>
-                          )}
                         </div>
                       </div>
 
                       {/* Card Content */}
                       <div className="t-card-body">
                         <div>
-                          <h3 className="t-card-title" title={t.title}>
+                          <h3 
+                            className="t-card-title clickable-title" 
+                            title={t.title}
+                            onClick={() => handleOpenTournament(t, 'overview')}
+                            style={{ cursor: 'pointer' }}
+                          >
                             {t.title}
                           </h3>
 
@@ -859,18 +1014,11 @@ export default function ArenaHub({
 
                         {/* Action Buttons */}
                         <div className="t-card-footer">
-                          <div className="t-action-pair">
+                          <div className="t-action-single">
                             <button 
                               type="button"
                               className="t-btn-secondary"
-                              onClick={() => handleOpenTournament(t, 'gallery')}
-                            >
-                              <Camera size={14} />
-                              <span>ภาพกิจกรรม ({photoCount})</span>
-                            </button>
-                            <button 
-                              type="button"
-                              className="t-btn-secondary"
+                              style={{ width: '100%', justifyContent: 'center' }}
                               onClick={() => handleOpenTournament(t, 'roster')}
                             >
                               <Users size={14} />
@@ -878,40 +1026,26 @@ export default function ArenaHub({
                             </button>
                           </div>
 
-                          {t.status === 'Open' ? (
-                            <div className="t-action-open-grid">
-                              <button 
-                                id={`btn-reg-${t.id}`}
-                                className="t-btn-register"
-                                onClick={() => handleOpenTournament(t, 'register')}
-                              >
-                                <Zap size={16} className="text-amber-300" style={{ filter: 'drop-shadow(0 0 4px rgba(251, 191, 36, 0.8))' }} />
-                                <span>สมัครแข่ง</span>
-                                <ArrowRight size={17} className="btn-arrow-icon" />
-                              </button>
-                              <button
-                                className="t-btn-bracket-split"
-                                title="ดูสายการแข่งขัน & สกอร์สด"
-                                onClick={() => handleOpenTournament(t, 'bracket')}
-                              >
-                                <Trophy size={15} />
-                                <span>สายแข่ง</span>
-                              </button>
-                            </div>
-                          ) : t.status === 'Full' ? (
+                          {/* Action Buttons - Clean, Consistent & Aligned */}
+                          {isRegistrationOpen ? (
+                            <button 
+                              id={`btn-reg-${t.id}`}
+                              className="t-btn-register"
+                              style={{ width: '100%', justifyContent: 'center' }}
+                              onClick={() => handleOpenTournament(t, 'register')}
+                            >
+                              <Zap size={16} className="text-amber-300" style={{ filter: 'drop-shadow(0 0 4px rgba(251, 191, 36, 0.8))' }} />
+                              <span>สมัครเข้าร่วมแข่งขัน</span>
+                              <ArrowRight size={17} className="btn-arrow-icon" />
+                            </button>
+                          ) : (
                             <button 
                               className="t-btn-full"
+                              style={{ width: '100%', justifyContent: 'center' }}
                               onClick={() => handleOpenTournament(t, 'bracket')}
                             >
                               <Trophy size={15} />
                               <span>ดูสายการแข่งขัน & สกอร์สด (Brackets)</span>
-                            </button>
-                          ) : (
-                            <button 
-                              className="t-btn-details"
-                              onClick={() => handleOpenTournament(t, 'bracket')}
-                            >
-                              <span>ดูสายแข่ง & รายละเอียดการแข่งขัน</span>
                               <ArrowRight size={16} />
                             </button>
                           )}
@@ -922,7 +1056,17 @@ export default function ArenaHub({
                 })}
               </div>
 
-
+              {/* Mobile Bottom CTA: Displayed only on mobile below the 3 cards */}
+              <div className="section-mobile-bottom-cta">
+                <button 
+                  type="button" 
+                  className="btn-enter-dedicated-page amber-theme"
+                  onClick={() => onNavigateTournaments ? onNavigateTournaments() : (window.history.pushState(null, '', '/tournaments'), window.dispatchEvent(new PopStateEvent('popstate')))}
+                >
+                  <span>ดูทั้งหมด</span>
+                  <ArrowRight size={16} />
+                </button>
+              </div>
             </div>
           </section>
         );
@@ -946,13 +1090,13 @@ export default function ArenaHub({
               <div className="section-header">
                 <div className="badge-pill badge-white">
                   <Layers size={14} />
-                  <span>{siteData?.zonesSection?.badge || 'VENUE ATMOSPHERE & ZONES'}</span>
+                  <span>{isThai ? (siteData?.zonesSection?.badge || 'VENUE ATMOSPHERE & ZONES') : t('home.zones.badge')}</span>
                 </div>
                 <h2 className="section-title" style={{ color: siteData?.zonesSection?.titleColor || (isDarkZones ? '#ffffff' : '#0f172a') }}>
-                  {siteData?.zonesSection?.title || 'บรรยากาศและโซนการให้บริการ GLP ESPORTS'}
+                  {isThai ? (siteData?.zonesSection?.title || 'บรรยากาศและโซนการให้บริการ GLP ESPORTS') : t('home.zones.title')}
                 </h2>
                 <p className="section-subtitle" style={{ color: siteData?.zonesSection?.subtitleColor || (isDarkZones ? '#cbd5e1' : '#475569') }}>
-                  {siteData?.zonesSection?.subtitle || 'สัมผัสความพรีเมียมที่ออกแบบมาสำหรับเกมเมอร์ทุกสไตล์ ตั้งแต่ผู้เล่นทั่วไป สตรีมเมอร์ ไปจนถึงการประลองระดับแชมป์เปียนชิป'}
+                  {isThai ? (siteData?.zonesSection?.subtitle || 'สัมผัสความพรีเมียมที่ออกแบบมาสำหรับเกมเมอร์ทุกสไตล์ ตั้งแต่ผู้เล่นทั่วไป สตรีมเมอร์ ไปจนถึงการประลองระดับแชมป์เปียนชิป') : t('home.zones.subtitle')}
                 </p>
               </div>
 
@@ -975,7 +1119,7 @@ export default function ArenaHub({
                 ))}
               </div>
 
-              {/* Active Zone Detail Showcase with 16:9 20-Image Slider */}
+              {/* Active Zone Detail Showcase with 16:9 3-Image Slider */}
               <div className="zone-showcase-panel glass-panel">
                 <div className="zone-slider-column">
                   <div 
@@ -985,10 +1129,14 @@ export default function ArenaHub({
                   >
                     <img 
                       key={`${currentZoneData.id}-${activeSlide.id || zoneSlideIndex}`}
-                      src={activeSlide.url || activeSlide} 
+                      src={activeSlide.url || defaultZoneInit.image} 
                       alt={activeSlide.caption || currentZoneData.title}
                       className="zone-feature-img" 
                       loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = defaultZoneInit?.images?.[zoneSlideIndex % (defaultZoneInit.images?.length || 1)]?.url || defaultZoneInit.image;
+                      }}
                     />
                     
                     {/* Zone Badge Overlay */}
@@ -1032,11 +1180,12 @@ export default function ArenaHub({
                     )}
                   </div>
 
-                  {/* Thumbnail Strip (20 images preview) */}
+                  {/* Thumbnail Strip (Symmetrical 3-column preview) */}
                   {totalZoneSlides > 1 && (
                     <div className="zone-thumbnails-strip" aria-label="แถบภาพขนาดย่อ" ref={thumbnailsRef}>
                       {currentZoneImages.map((imgObj, idx) => {
-                        const thumbUrl = imgObj.url || imgObj;
+                        const fallbackThumb = defaultZoneInit?.images?.[idx]?.url || defaultZoneInit.image;
+                        const thumbUrl = imgObj.url || fallbackThumb;
                         const isCur = idx === zoneSlideIndex;
                         return (
                           <button
@@ -1046,7 +1195,16 @@ export default function ArenaHub({
                             className={`zone-thumb-btn ${isCur ? 'active' : ''}`}
                             title={`ภาพที่ ${idx + 1}: ${imgObj.caption || ''}`}
                           >
-                            <img src={thumbUrl} alt="" className="zone-thumb-img" loading="lazy" />
+                            <img 
+                              src={thumbUrl} 
+                              alt="" 
+                              className="zone-thumb-img" 
+                              loading="lazy" 
+                              onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = fallbackThumb;
+                              }}
+                            />
                             <span className="zone-thumb-num">{idx + 1}</span>
                           </button>
                         );
@@ -1056,19 +1214,27 @@ export default function ArenaHub({
                 </div>
 
                 <div className="zone-info-wrapper">
-                  <div className="zone-sub">{currentZoneData.subtitle}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                    <div className="zone-sub">{currentZoneData.subtitle}</div>
+                    {currentZoneData.ratePerHour && (
+                      <span className="badge-pill badge-blue" style={{ fontSize: '0.78rem', padding: '4px 10px' }}>
+                        {currentZoneData.ratePerHour}
+                      </span>
+                    )}
+                  </div>
+                  
                   <h3 className="zone-heading">{currentZoneData.title}</h3>
                   <p className="zone-desc">{currentZoneData.description}</p>
 
                   <div className="zone-specs-box">
                     <div className="specs-title">
                       <Zap size={16} className="text-blue" />
-                      <span>จุดเด่นของโซนนี้:</span>
+                      <span>{isThai ? 'จุดเด่นของโซนนี้:' : (language === 'zh' ? '本区核心亮点:' : 'Key Zone Features:')}</span>
                     </div>
                     <div className="specs-grid">
                       {currentZoneData.specs.map((spec, idx) => (
                         <div key={idx} className="spec-item">
-                          <CheckCircle2 size={16} className="text-blue" />
+                          <CheckCircle2 size={16} className="text-blue" style={{ flexShrink: 0 }} />
                           <span>{spec}</span>
                         </div>
                       ))}
@@ -1086,8 +1252,20 @@ export default function ArenaHub({
                       id={`btn-contact-zone-${currentZoneData.id}`}
                     >
                       <Trophy size={18} />
-                      <span>ติดต่อขอเช่าสถานที่</span>
+                      <span>{isThai ? 'ติดต่อขอเช่าสถานที่' : (language === 'zh' ? '咨询场地租赁 / 承办' : 'Inquire / Book Zone')}</span>
                       <ArrowRight size={16} />
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        setBookingInitialZone(currentZoneData.id);
+                        setIsSeatBookingOpen(true);
+                      }}
+                      className="btn-zone-booking-modal"
+                      id={`btn-book-zone-${currentZoneData.id}`}
+                    >
+                      <Gamepad2 size={18} />
+                      <span>{isThai ? 'จองที่นั่งโซนนี้ (Live Booking)' : (language === 'zh' ? '在线预订机位' : 'Reserve Seat')}</span>
                     </button>
                   </div>
                 </div>
@@ -1252,6 +1430,13 @@ export default function ArenaHub({
         isOpen={isOrganizerModalOpen}
         onClose={() => setIsOrganizerModalOpen(false)}
         initialZoneName={selectedOrganizerZone}
+      />
+
+      {/* Arena Live Seat Booking Modal */}
+      <ArenaSeatBookingModal
+        isOpen={isSeatBookingOpen}
+        onClose={() => setIsSeatBookingOpen(false)}
+        initialZoneId={bookingInitialZone}
       />
     </div>
   );

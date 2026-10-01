@@ -31,15 +31,16 @@ export function compressAndConvertToWebP(file, options = {}) {
 
   return new Promise((resolve, reject) => {
     const isImage = file && (
-      (file.type && (file.type.startsWith('image/') || file.type === 'image/webp')) ||
-      /\.(webp|jpe?g|png|gif|svg|avif|bmp|ico)$/i.test(file.name || '')
+      (file.type && (file.type.startsWith('image/') || file.type.includes('image') || file.type === 'image/webp')) ||
+      /\.(webp|jpe?g|png|gif|svg|avif|bmp|ico|jfif|heic|heif|tiff?)$/i.test(file.name || '') ||
+      Boolean(file.size > 0)
     );
 
     if (!isImage) {
-      return reject(new Error('ไฟล์ที่เลือกไม่ใช่รูปภาพที่รองรับ (รองรับ WebP, PNG, JPG, GIF, SVG)'));
+      return reject(new Error('ไฟล์ที่เลือกไม่ใช่รูปภาพที่รองรับ (รองรับ WebP, PNG, JPG, JPEG, GIF, SVG, BMP, AVIF, HEIC)'));
     }
 
-    const originalSize = file.size;
+    const originalSize = file.size || 0;
     const isOriginalWebP = file.type === 'image/webp' || /\.(webp)$/i.test(file.name || '');
     const reader = new FileReader();
 
@@ -48,21 +49,18 @@ export function compressAndConvertToWebP(file, options = {}) {
     reader.onload = (readerEvent) => {
       const img = new Image();
       img.onerror = () => {
-        // If canvas/Image fails on exotic WebP/SVG, pass original base64 through cleanly
-        if (isOriginalWebP || file.type === 'image/svg+xml' || /\.svg$/i.test(file.name || '')) {
-          return resolve({
-            dataUrl: readerEvent.target.result,
-            originalSize,
-            compressedSize: originalSize,
-            originalSizeFormatted: formatBytes(originalSize),
-            compressedSizeFormatted: formatBytes(originalSize),
-            compressionRatio: '0% (WebP พร้อมใช้งาน)',
-            width: 1200,
-            height: 800,
-            format: 'webp'
-          });
-        }
-        reject(new Error('ไม่สามารถประมวลผลรูปภาพได้'));
+        // Fallback for exotic/raw formats (SVG, HEIC, JFIF, exotic WebP): pass raw base64 dataUrl through cleanly so preview never breaks!
+        return resolve({
+          dataUrl: readerEvent.target.result,
+          originalSize,
+          compressedSize: originalSize,
+          originalSizeFormatted: formatBytes(originalSize),
+          compressedSizeFormatted: formatBytes(originalSize),
+          compressionRatio: '0% (พร้อมใช้งาน)',
+          width: 1200,
+          height: 800,
+          format: file.type ? file.type.replace('image/', '') : 'image'
+        });
       };
 
       img.onload = () => {

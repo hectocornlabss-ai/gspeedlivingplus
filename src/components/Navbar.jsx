@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Gamepad2, Users, LayoutGrid, Calculator, Menu, X, ArrowRight, PhoneCall, Trophy, Sparkles, Globe, Camera } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
+import { useTranslation } from '../context/LanguageContext';
+import LanguageSelector from './LanguageSelector';
 
 export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onNavigate }) {
   const { siteData } = useSiteData();
+  const { t, language } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -38,13 +41,26 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
     return LayoutGrid;
   };
 
-  // Active navigation items with clean semantic paths (1.หน้าแรก 2.ทัวร์นาเมนต์ 3.ภาพกิจกรรม 4.เกี่ยวกับเรา 5.ติดต่อเรา)
+  // Active navigation items with clean semantic paths with internationalization support
+  const navLabelMap = {
+    'nav-arena': t('nav.home'),
+    'nav-tournaments': t('nav.tournaments'),
+    'nav-activities': t('nav.activities'),
+    'nav-company': t('nav.company'),
+    'nav-contact': t('nav.contact'),
+    'arena': t('nav.home'),
+    'tournaments': t('nav.tournaments'),
+    'activities': t('nav.activities'),
+    'company': t('nav.company'),
+    'contact': t('nav.contact')
+  };
+
   const defaultNavItems = [
-    { id: 'nav-arena', label: 'หน้าแรก', target: 'arena', cleanPath: '/', visible: true },
-    { id: 'nav-tournaments', label: 'ทัวร์นาเมนต์', target: 'tournaments', cleanPath: '/tournaments', visible: true },
-    { id: 'nav-activities', label: 'ภาพกิจกรรม', target: 'activities', cleanPath: '/activities', visible: true },
-    { id: 'nav-company', label: 'เกี่ยวกับเรา', target: 'company', cleanPath: '/company', visible: true },
-    { id: 'nav-contact', label: 'ติดต่อเรา', target: 'contact', cleanPath: '/contact', visible: true }
+    { id: 'nav-arena', label: t('nav.home'), target: 'arena', cleanPath: '/', visible: true },
+    { id: 'nav-tournaments', label: t('nav.tournaments'), target: 'tournaments', cleanPath: '/tournaments', visible: true },
+    { id: 'nav-activities', label: t('nav.activities'), target: 'activities', cleanPath: '/activities', visible: true },
+    { id: 'nav-company', label: t('nav.company'), target: 'company', cleanPath: '/company', visible: true },
+    { id: 'nav-contact', label: t('nav.contact'), target: 'contact', cleanPath: '/contact', visible: true }
   ];
 
   const activeNavItems = (siteData?.navLinks && siteData.navLinks.length > 0)
@@ -52,21 +68,15 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
         .filter(item => item.visible !== false && (item.target || '').toLowerCase() !== 'franchise' && (item.target || '').toLowerCase() !== '3d')
         .map(item => {
           let cleanPath = '/';
-          const t = (item.target || '').toLowerCase();
-          if (t === 'company' || t === 'about') cleanPath = '/company';
-          else if (t === 'events' || t === 'tournaments' || t.includes('tournament')) cleanPath = '/tournaments';
-          else if (t === 'activities' || t === 'gallery' || t.includes('activit')) cleanPath = '/activities';
-          else if (t === 'contact' || t.includes('contact') || t === 'location' || t === 'map') cleanPath = '/contact';
-          else if (t.startsWith('/')) cleanPath = t;
+          const targetStr = (item.target || '').toLowerCase();
+          if (targetStr === 'company' || targetStr === 'about') cleanPath = '/company';
+          else if (targetStr === 'events' || targetStr === 'tournaments' || targetStr.includes('tournament')) cleanPath = '/tournaments';
+          else if (targetStr === 'activities' || targetStr === 'gallery' || targetStr.includes('activit')) cleanPath = '/activities';
+          else if (targetStr === 'contact' || targetStr.includes('contact') || targetStr === 'location' || targetStr === 'map') cleanPath = '/contact';
+          else if (targetStr.startsWith('/')) cleanPath = targetStr;
 
-          // Standardize display label if it matches default IDs
-          let label = item.label;
-          if (item.id === 'nav-arena' && (label === 'หน้าหลัก' || label === 'หน้าแรก & กิจกรรม')) label = 'หน้าแรก';
-          if (item.id === 'nav-tournaments' && (label === 'ทัวร์นาเมนต์ & แข่งขัน' || label === 'งานแข่ง & อีเวนต์')) label = 'ทัวร์นาเมนต์';
-          if (item.id === 'nav-activities' && (label === 'ภาพกิจกรรม & แกลเลอรี' || label === 'ภาพกิจกรรม')) label = 'ภาพกิจกรรม';
-          if (item.id === 'nav-company' && (label === 'เกี่ยวกับองค์กร' || label === 'ข้อมูลบริษัท & พาร์ตเนอร์')) label = 'เกี่ยวกับเรา';
-          if (item.id === 'nav-contact' && (label === 'ติดต่อเรา & แผนที่' || label === 'ติดต่อสาขา')) label = 'ติดต่อเรา';
-
+          // Standardize display label with translation support
+          let label = navLabelMap[item.id] || navLabelMap[targetStr] || item.label;
           return { ...item, label, cleanPath };
         })
     : defaultNavItems;
@@ -116,8 +126,12 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
     }
   };
 
+  const rawCtaText = siteData?.headerCta?.text;
+  const isDefaultCta = !rawCtaText || rawCtaText === 'สนใจเปิดร้าน' || rawCtaText === 'คำนวณราคาเปิดร้าน';
+  const ctaLabel = isDefaultCta ? t('nav.cta') : rawCtaText;
+
   const headerCta = {
-    text: (siteData?.headerCta?.text && siteData.headerCta.text !== 'คำนวณราคาเปิดร้าน') ? siteData.headerCta.text : 'สนใจเปิดร้าน',
+    text: ctaLabel,
     target: siteData?.headerCta?.target || 'franchise',
     visible: siteData?.headerCta?.visible !== false
   };
@@ -177,6 +191,8 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
 
           {/* Header Right Actions */}
           <div className="header-actions">
+            <LanguageSelector variant="navbar" />
+
             {headerCta.visible !== false && (
               <button 
                 id="btn-quick-franchise-cta"
@@ -184,7 +200,7 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
                 onClick={() => handleNavClick(headerCta.target || 'franchise')}
               >
                 <Calculator size={16} />
-                <span>{headerCta.text || 'คำนวณราคาเปิดร้าน'}</span>
+                <span>{headerCta.text}</span>
               </button>
             )}
 
@@ -196,7 +212,7 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
               aria-label="Toggle navigation menu"
             >
               {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-              <span className="menu-btn-label">{mobileMenuOpen ? 'ปิด' : 'เมนู'}</span>
+              <span className="menu-btn-label">{mobileMenuOpen ? t('nav.close') : t('nav.menu')}</span>
             </button>
           </div>
         </div>
@@ -233,7 +249,24 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
         </div>
 
         <div className="mobile-drawer-body">
-          <span className="mobile-menu-label">เมนูนำทาง (NAVIGATION)</span>
+          {/* Mobile Language Switcher */}
+          <div style={{
+            padding: '10px 12px',
+            marginBottom: '16px',
+            background: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: '12px',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px'
+          }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              🌐 {language === 'th' ? 'เลือกภาษา / LANGUAGE' : language === 'zh' ? '选择语言 / LANGUAGE' : 'SELECT LANGUAGE'}
+            </span>
+            <LanguageSelector variant="segmented" />
+          </div>
+
+          <span className="mobile-menu-label">{t('nav.menu')} (NAVIGATION)</span>
           {activeNavItems.map((item) => {
             const Icon = getNavIcon(item.target, item.id, item.label);
             const isActive = (item.cleanPath === '/' && (currentPath === '/' || !currentPath)) ||
@@ -258,7 +291,7 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
           <div className="mobile-drawer-hotline">
             <PhoneCall size={18} className="text-blue" />
             <div>
-              <span className="hotline-sub">สายด่วนจองเครื่อง & จองเวที:</span>
+              <span className="hotline-sub">{t('common.hotline') || 'สายด่วนจองเครื่อง & จองเวที'}:</span>
               <a href={`tel:${(siteData?.footer?.phone || '063-793-7704').replace(/[^0-9]/g, '')}`} className="hotline-number">
                 {siteData?.footer?.phone || '063-793-7704'}
               </a>
@@ -273,11 +306,11 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
               onClick={() => handleNavClick(headerCta.target || 'franchise')}
             >
               <Calculator size={16} />
-              <span>{headerCta.text || 'สนใจเปิดร้าน'}</span>
+              <span>{headerCta.text}</span>
             </button>
           )}
           <p className="mobile-footer-text">
-            GSPEED LIVING PLUS • เปิดบริการตลอด 24 ชม.
+            GSPEED LIVING PLUS • 24/7 Service
           </p>
         </div>
       </div>
@@ -291,7 +324,7 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
           onClick={() => handleNavClick('arena', '/')}
         >
           <Gamepad2 size={20} className="bottom-nav-icon" />
-          <span className="bottom-nav-label">หน้าแรก</span>
+          <span className="bottom-nav-label">{t('nav.home')}</span>
         </button>
 
         <button 
@@ -301,7 +334,7 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
           onClick={() => handleNavClick('tournaments', '/tournaments')}
         >
           <Trophy size={20} className="bottom-nav-icon" />
-          <span className="bottom-nav-label">ทัวร์นาเมนต์</span>
+          <span className="bottom-nav-label">{t('nav.tournaments')}</span>
         </button>
 
         <button 
@@ -313,7 +346,7 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
           <div className="bottom-nav-feature-pill">
             <LayoutGrid size={20} className="bottom-nav-icon" />
           </div>
-          <span className="bottom-nav-label">สนใจเปิดร้าน</span>
+          <span className="bottom-nav-label">{t('nav.cta')}</span>
         </button>
 
         <button 
@@ -323,7 +356,7 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
           onClick={() => handleNavClick('activities', '/activities')}
         >
           <Camera size={20} className="bottom-nav-icon" />
-          <span className="bottom-nav-label">ภาพกิจกรรม</span>
+          <span className="bottom-nav-label">{t('nav.activities')}</span>
         </button>
 
         <button 
@@ -333,7 +366,7 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
           {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-          <span className="bottom-nav-label">{mobileMenuOpen ? 'ปิด' : 'เมนู'}</span>
+          <span className="bottom-nav-label">{mobileMenuOpen ? t('nav.close') : t('nav.menu')}</span>
         </button>
       </nav>
     </>

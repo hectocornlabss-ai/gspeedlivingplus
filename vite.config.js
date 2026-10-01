@@ -101,6 +101,51 @@ const downloadServerPlugin = () => {
           res.end();
         }
       });
+      // High-performance Media Upload Middleware for development
+      server.middlewares.use('/api/upload-media', (req, res, next) => {
+        if (req.method === 'POST') {
+          let body = '';
+          req.on('data', chunk => { body += chunk; });
+          req.on('end', () => {
+            try {
+              const { dataUrl, filename = 'image.webp', category = 'gallery' } = JSON.parse(body);
+              if (!dataUrl) {
+                res.statusCode = 400;
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify({ success: false, error: 'dataUrl is required' }));
+                return;
+              }
+
+              const uploadsDir = path.resolve(process.cwd(), 'public', 'uploads', category);
+              if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+
+              const base64Data = dataUrl.includes(',') ? dataUrl.split(',')[1] : dataUrl;
+              const buffer = Buffer.from(base64Data, 'base64');
+              const ext = dataUrl.includes('image/webp') ? '.webp' : (dataUrl.includes('image/png') ? '.png' : (dataUrl.includes('image/svg') ? '.svg' : '.jpg'));
+              const safeName = filename.replace(/\.[^/.]+$/, '').replace(/[^\w-]/g, '_').toLowerCase();
+              const uniqueName = `${safeName || category}-${Date.now()}-${Math.random().toString(36).substring(2, 6)}${ext}`;
+              const filePath = path.join(uploadsDir, uniqueName);
+              fs.writeFileSync(filePath, buffer);
+
+              const publicUrl = `/uploads/${category}/${uniqueName}`;
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({
+                success: true,
+                url: publicUrl,
+                name: filename || uniqueName,
+                sizeBytes: buffer.length
+              }));
+            } catch (err) {
+              res.statusCode = 500;
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({ success: false, error: err.message }));
+            }
+          });
+          return;
+        }
+        next();
+      });
+
       // Persistent Local Site Data Middleware for development
       server.middlewares.use('/api/site-data', (req, res, next) => {
         const localDataDir = path.resolve(process.cwd(), 'server', 'data');
@@ -171,9 +216,18 @@ const downloadServerPlugin = () => {
                 } catch (bErr) {}
               }
 
-              const tmpFile = `${localDataFile}.tmp.${Date.now()}`;
-              fs.writeFileSync(tmpFile, JSON.stringify(parsed.siteData, null, 2), 'utf8');
-              fs.renameSync(tmpFile, localDataFile);
+              try {
+                const tmpFile = `${localDataFile}.tmp.${Date.now()}`;
+                fs.writeFileSync(tmpFile, JSON.stringify(parsed.siteData, null, 2), 'utf8');
+                try {
+                  fs.renameSync(tmpFile, localDataFile);
+                } catch (rErr) {
+                  fs.copyFileSync(tmpFile, localDataFile);
+                  try { fs.unlinkSync(tmpFile); } catch (uErr) {}
+                }
+              } catch (wErr) {
+                fs.writeFileSync(localDataFile, JSON.stringify(parsed.siteData, null, 2), 'utf8');
+              }
 
               const stats = fs.statSync(localDataFile);
               res.setHeader('Content-Type', 'application/json');

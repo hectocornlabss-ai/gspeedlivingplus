@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { FOUNDER_INFO } from '../data/mockData';
 import { useSiteData } from '../context/SiteDataContext';
+import { useTranslation } from '../context/LanguageContext';
 import { sanitizeSafeUrl, isSafeExternalUrl } from '../utils/security';
 
 function getPhilosophyMeta(title = '', index = 0) {
@@ -56,6 +57,7 @@ function isColorDark(hexColor) {
 
 export default function CompanyProfile({ onNavigateFranchise }) {
   const { siteData } = useSiteData();
+  const { t, language } = useTranslation();
   const founder = siteData?.founder || FOUNDER_INFO;
   const founderBg = founder.bgColor || '#ffffff';
   const isDarkFounder = isColorDark(founderBg);
@@ -63,6 +65,8 @@ export default function CompanyProfile({ onNavigateFranchise }) {
   // Clean metrics values to ensure symmetrical, balanced layout
   const cleanExp = (() => {
     const raw = (founder.experience || '16+ ปี').trim();
+    if (language === 'en') return raw.replace(/ปี/, 'Years').replace(/ในอุตสาหกรรม.*/, '');
+    if (language === 'zh') return raw.replace(/ปี/, '年').replace(/ในอุตสาหกรรม.*/, '');
     if (raw.includes('ในอุตสาหกรรม') || raw.length > 15) {
       const match = raw.match(/^(\d+\+?\s*ปี)/);
       return match ? match[1] : '16+ ปี';
@@ -72,6 +76,8 @@ export default function CompanyProfile({ onNavigateFranchise }) {
 
   const cleanBranches = (() => {
     const raw = (founder.managedBranches || '8 สาขา').trim();
+    if (language === 'en') return raw.replace(/สาขา|แห่ง/, 'Arenas').replace(/ที่บริหาร.*/, '');
+    if (language === 'zh') return raw.replace(/สาขา|แห่ง/, '家门店').replace(/ที่บริหาร.*/, '');
     if (raw.includes('ที่บริหาร') || raw.length > 15) {
       const match = raw.match(/^(\d+\+?\s*(?:สาขา|แห่ง)?)/);
       return match ? match[1] : '8 สาขา';
@@ -186,17 +192,21 @@ export default function CompanyProfile({ onNavigateFranchise }) {
           <div className="section-header-center">
             <div className="badge-pill badge-cyan">
               <Users size={14} />
-              <span>{founder.hero?.badge || 'LEADERSHIP & CORPORATE PROFILE'}</span>
+              <span>{language === 'th' ? (founder.hero?.badge || t('companyPage.badge')) : t('companyPage.badge')}</span>
             </div>
             <h1 className="section-title">
-              {founder.hero?.title ? (
-                founder.hero.title
+              {language === 'th' ? (
+                founder.hero?.title ? (
+                  founder.hero.title
+                ) : (
+                  <>วิสัยทัศน์ผู้บริหาร & <span className="text-blue">ประวัติองค์กร G-SPEED</span></>
+                )
               ) : (
-                <>วิสัยทัศน์ผู้บริหาร & <span className="text-blue">ประวัติองค์กร G-SPEED</span></>
+                <span>{t('companyPage.title')}</span>
               )}
             </h1>
             <p className="section-subtitle max-w-700">
-              {founder.hero?.subtitle || 'มุ่งมั่นขับเคลื่อนอุตสาหกรรมอีสปอร์ตไทยสู่มาตรฐานสากล ด้วยเทคโนโลยีระดับมืออาชีพ และระบบการจัดการที่โปร่งใส มั่นคง ยั่งยืน'}
+              {language === 'th' ? (founder.hero?.subtitle || t('companyPage.subtitle')) : t('companyPage.subtitle')}
             </p>
           </div>
         </div>
@@ -229,7 +239,7 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                     className="founder-img" 
                   />
                   <div className="founder-badge-overlay">
-                    <span className="founder-tag">FOUNDER & CEO</span>
+                    <span className="founder-tag">{t('companyPage.founderTag')}</span>
                   </div>
                 </div>
                 <div className="founder-quick-metrics">
@@ -238,14 +248,14 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                       <Award size={18} />
                     </div>
                     <span className="m-val text-blue">{cleanExp}</span>
-                    <span className="m-lbl">ประสบการณ์ในอุตสาหกรรม</span>
+                    <span className="m-lbl">{t('companyPage.experienceLabel')}</span>
                   </div>
                   <div className={`founder-m-item ${isDarkFounder ? 'dark-founder' : ''}`}>
                     <div className="founder-m-icon-wrap">
                       <Building2 size={18} />
                     </div>
                     <span className="m-val text-blue">{cleanBranches}</span>
-                    <span className="m-lbl">อารีนาที่บริหารจัดการ</span>
+                    <span className="m-lbl">{t('companyPage.branchesLabel')}</span>
                   </div>
                 </div>
               </div>
@@ -256,12 +266,18 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                   <Award size={14} />
                   <span>PRESIDENT & FOUNDER</span>
                 </div>
-                <h2 className="founder-name" style={{ color: founder.titleColor || (isDarkFounder ? '#ffffff' : '#0f172a') }}>{founder.name}</h2>
-                <div className="founder-title" style={{ color: isDarkFounder ? '#94a3b8' : '#64748b' }}>{founder.title}</div>
+                <h2 className="founder-name" style={{ color: founder.titleColor || (isDarkFounder ? '#ffffff' : '#0f172a') }}>
+                  {language === 'th' ? founder.name : t('companyPage.founderName', founder.name)}
+                </h2>
+                <div className="founder-title" style={{ color: isDarkFounder ? '#94a3b8' : '#64748b' }}>
+                  {language === 'th' ? founder.title : t('companyPage.founderTitle', founder.title)}
+                </div>
 
                 <div className="founder-quote-box">
                   <Quote size={28} className="quote-icon text-blue" />
-                  <p className="quote-text" style={{ color: founder.textColor || (isDarkFounder ? '#e2e8f0' : '#334155') }}>{founder.quote}</p>
+                  <p className="quote-text" style={{ color: founder.textColor || (isDarkFounder ? '#e2e8f0' : '#334155') }}>
+                    {language === 'th' ? founder.quote : t('companyPage.quote', founder.quote)}
+                  </p>
                 </div>
 
                 <div className="vision-box">
@@ -270,23 +286,36 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                       <Target size={18} />
                     </div>
                     <h4 className="vision-title">
-                      <span>วิสัยทัศน์และการขับเคลื่อน (Core Vision)</span>
+                      <span>{t('companyPage.coreVisionTitle')}</span>
                     </h4>
                   </div>
-                  <p className="vision-text" style={{ color: founder.textColor || (isDarkFounder ? '#cbd5e1' : '#475569') }}>{founder.vision}</p>
+                  <p className="vision-text" style={{ color: founder.textColor || (isDarkFounder ? '#cbd5e1' : '#475569') }}>
+                    {language === 'th' ? founder.vision : t('companyPage.coreVisionDesc', founder.vision)}
+                  </p>
                 </div>
 
                 <div className="founder-philosophy-list">
                   {(founder.philosophies && founder.philosophies.length > 0 
                     ? founder.philosophies 
                     : [
-                        { title: 'เทคโนโลยีต้องดีที่สุด', desc: 'ลงทุนในฮาร์ดแวร์ระดับทัวร์นาเมนต์ จอ 360Hz และระบบเน็ตเวิร์กที่แข่งขันได้จริง' },
-                        { title: 'สิ่งแวดล้อมปลอดภัยและได้มาตรฐาน', desc: 'ยึดหลักร้านเกมสีขาว ได้รับใบอนุญาตถูกต้อง 100% ปลอดบุหรี่และโปร่งใส' },
-                        { title: 'คืนทุนไว พาร์ตเนอร์เติบโตยั่งยืน', desc: 'ระบบแฟรนไชส์ออกแบบโดยคำนึงถึงผลตอบแทนของผู้ลงทุน ควบคุมต้นทุนได้จริง' }
+                        { 
+                          title: t('companyPage.pillar1Title'), 
+                          desc: t('companyPage.pillar1Desc') 
+                        },
+                        { 
+                          title: t('companyPage.pillar2Title'), 
+                          desc: t('companyPage.pillar2Desc') 
+                        },
+                        { 
+                          title: t('companyPage.pillar3Title'), 
+                          desc: t('companyPage.pillar3Desc') 
+                        }
                       ]
                   ).map((phil, pIdx) => {
                     const meta = getPhilosophyMeta(phil.title, pIdx);
                     const PhilIcon = meta.icon;
+                    const displayTitle = pIdx === 0 ? t('companyPage.pillar1Title', phil.title) : (pIdx === 1 ? t('companyPage.pillar2Title', phil.title) : t('companyPage.pillar3Title', phil.title));
+                    const displayDesc = pIdx === 0 ? t('companyPage.pillar1Desc', phil.desc) : (pIdx === 1 ? t('companyPage.pillar2Desc', phil.desc) : t('companyPage.pillar3Desc', phil.desc));
                     return (
                       <div key={phil.id || pIdx} className="philosophy-item-card">
                         <div 
@@ -301,10 +330,10 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                         </div>
                         <div className="philosophy-body">
                           <h5 className="philosophy-title" style={{ color: isDarkFounder ? '#ffffff' : '#0f172a' }}>
-                            {phil.title}
+                            {language === 'th' ? phil.title : displayTitle}
                           </h5>
                           <p className="philosophy-desc" style={{ color: isDarkFounder ? '#94a3b8' : '#475569' }}>
-                            {phil.desc}
+                            {language === 'th' ? phil.desc : displayDesc}
                           </p>
                         </div>
                       </div>
@@ -323,13 +352,17 @@ export default function CompanyProfile({ onNavigateFranchise }) {
           <div className="section-header">
             <div className="badge-pill badge-amber">
               <Award size={14} />
-              <span>COMPANY MILESTONES</span>
+              <span>{t('companyPage.milestonesBadge')}</span>
             </div>
             <h2 className="section-title">
-              เส้นทางการเติบโตของ <span className="text-blue">G-SPEED GROUP</span>
+              {language === 'th' ? (
+                <>เส้นทางการเติบโตของ <span className="text-blue">G-SPEED GROUP</span></>
+              ) : (
+                <span>{t('companyPage.milestonesTitle')}</span>
+              )}
             </h2>
             <p className="section-subtitle">
-              จากร้านอินเทอร์เน็ตคาเฟ่สาขาแรก สู่การเป็นเครือข่ายศูนย์กีฬาอีสปอร์ตครบวงจรชั้นนำของไทย
+              {t('companyPage.milestonesSubtitle')}
             </p>
           </div>
 
@@ -504,8 +537,8 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                   <Calculator size={20} />
                 </div>
                 <div className="btn-partner-text-stack">
-                  <span className="btn-partner-tier-sub">{founder.franchiseCta?.subTitle || 'คำนวณงบลงทุน & วางระบบร้าน'}</span>
-                  <span className="btn-partner-tier-main">{founder.franchiseCta?.title || 'ร่วมเป็นพาร์ตเนอร์แฟรนไชส์กับเรา'}</span>
+                  <span className="btn-partner-tier-sub">{t('companyPage.calculatorCta')}</span>
+                  <span className="btn-partner-tier-main">{t('companyPage.calculatorBtn')}</span>
                 </div>
               </button>
             </div>

@@ -6,7 +6,7 @@ import {
   Layers, Sun, RefreshCw, ZoomIn, ZoomOut, Check, ArrowRight,
   ArrowLeft, ArrowUp, ArrowDown, Move, Camera, Download, DoorOpen,
   DoorClosed, SplitSquareVertical, Sliders, Award, Zap, Building2, X,
-  Sparkles, Footprints
+  Sparkles, Footprints, RotateCcw, ChevronUp, ChevronDown, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { downloadFile } from '../utils/fileDownloader';
 
@@ -51,13 +51,14 @@ export default function Room3DStudio({
   const activeCamPresetRef = useRef('iso');
   const [fpsCoords, setFpsCoords] = useState({ x: 0, z: 0 });
   const [isPointerLocked, setIsPointerLocked] = useState(false);
+  const [isSprinting, setIsSprinting] = useState(false);
   const wasPointerLockedRef = useRef(false);
   const exitWalkModeRef = useRef(null);
   const fpsStateRef = useRef({
     pos: new THREE.Vector3(0, 1.65, 0),
     yaw: 0,
     pitch: -0.05,
-    keys: { w: false, a: false, s: false, d: false, up: false, down: false, left: false, right: false, shift: false },
+    keys: { w: false, a: false, s: false, d: false, up: false, down: false, left: false, right: false, shift: false, turnLeft: false, turnRight: false },
     isDragging: false,
     lastMouseX: 0,
     lastMouseY: 0
@@ -569,8 +570,16 @@ export default function Room3DStudio({
       if (activeCamPresetRef.current === 'walk') {
         const fps = fpsStateRef.current;
         const keys = fps.keys;
-        const speed = keys.shift ? 5.8 : 3.4; // m/s (Sprint or Walk)
+        const speed = (keys.shift || isSprinting) ? 5.8 : 3.4; // m/s (Sprint or Walk)
         const moveDist = speed * dt;
+
+        // Process smooth continuous touch turn buttons
+        if (keys.turnLeft) {
+          fps.yaw += 1.8 * dt;
+        }
+        if (keys.turnRight) {
+          fps.yaw -= 1.8 * dt;
+        }
 
         // Current horizontal facing direction
         const yaw = fps.yaw;
@@ -659,6 +668,43 @@ export default function Room3DStudio({
           dy = e.clientY - fpsStateRef.current.lastMouseY;
           fpsStateRef.current.lastMouseX = e.clientX;
           fpsStateRef.current.lastMouseY = e.clientY;
+
+          const isTouch = e.pointerType === 'touch' || ('ontouchstart' in window && window.innerWidth <= 1024);
+
+          if (isTouch) {
+            // Touch device (iPad / mobile / tablet):
+            // User requested: "เดินด้วยนิ้วเหมือนเดิมอ่ะ"
+            // Dragging UP walks FORWARD, Dragging DOWN walks BACKWARD, Dragging LEFT/RIGHT turns!
+            const touchMoveSensitivity = 0.038;
+            const touchTurnSensitivity = 0.0055;
+
+            if (Math.abs(dy) > 0.8) {
+              const forwardStep = -dy * touchMoveSensitivity;
+              const forwardX = -Math.sin(fpsStateRef.current.yaw);
+              const forwardZ = -Math.cos(fpsStateRef.current.yaw);
+              fpsStateRef.current.pos.x += forwardX * forwardStep;
+              fpsStateRef.current.pos.z += forwardZ * forwardStep;
+
+              // Keep player strictly inside room walls
+              const minX = -roomWidth / 2 + 0.65;
+              const maxX = roomWidth / 2 - 0.65;
+              const minZ = -roomHeight / 2 + 0.65;
+              const maxZ = roomHeight / 2 - 0.65;
+              fpsStateRef.current.pos.x = Math.max(minX, Math.min(maxX, fpsStateRef.current.pos.x));
+              fpsStateRef.current.pos.z = Math.max(minZ, Math.min(maxZ, fpsStateRef.current.pos.z));
+            }
+
+            if (Math.abs(dx) > 0.8) {
+              fpsStateRef.current.yaw -= dx * touchTurnSensitivity;
+            }
+
+            camera.position.copy(fpsStateRef.current.pos);
+            camera.rotation.order = 'YXZ';
+            camera.rotation.y = fpsStateRef.current.yaw;
+            camera.rotation.x = fpsStateRef.current.pitch;
+            camera.rotation.z = 0;
+            return;
+          }
         }
 
         if (dx !== 0 || dy !== 0) {
@@ -685,6 +731,48 @@ export default function Room3DStudio({
       fpsStateRef.current.isDragging = false;
     };
 
+    const handleGlobalTouchMove = (e) => {
+      if (activeCamPresetRef.current === 'walk' && fpsStateRef.current.isDragging && e.touches?.[0]) {
+        const touch = e.touches[0];
+        const dx = touch.clientX - fpsStateRef.current.lastMouseX;
+        const dy = touch.clientY - fpsStateRef.current.lastMouseY;
+        fpsStateRef.current.lastMouseX = touch.clientX;
+        fpsStateRef.current.lastMouseY = touch.clientY;
+
+        const touchMoveSensitivity = 0.038;
+        const touchTurnSensitivity = 0.0055;
+
+        if (Math.abs(dy) > 0.8) {
+          const forwardStep = -dy * touchMoveSensitivity;
+          const forwardX = -Math.sin(fpsStateRef.current.yaw);
+          const forwardZ = -Math.cos(fpsStateRef.current.yaw);
+          fpsStateRef.current.pos.x += forwardX * forwardStep;
+          fpsStateRef.current.pos.z += forwardZ * forwardStep;
+
+          const minX = -roomWidth / 2 + 0.65;
+          const maxX = roomWidth / 2 - 0.65;
+          const minZ = -roomHeight / 2 + 0.65;
+          const maxZ = roomHeight / 2 - 0.65;
+          fpsStateRef.current.pos.x = Math.max(minX, Math.min(maxX, fpsStateRef.current.pos.x));
+          fpsStateRef.current.pos.z = Math.max(minZ, Math.min(maxZ, fpsStateRef.current.pos.z));
+        }
+
+        if (Math.abs(dx) > 0.8) {
+          fpsStateRef.current.yaw -= dx * touchTurnSensitivity;
+        }
+
+        camera.position.copy(fpsStateRef.current.pos);
+        camera.rotation.order = 'YXZ';
+        camera.rotation.y = fpsStateRef.current.yaw;
+        camera.rotation.x = fpsStateRef.current.pitch;
+        camera.rotation.z = 0;
+      }
+    };
+
+    const handleGlobalTouchEnd = () => {
+      fpsStateRef.current.isDragging = false;
+    };
+
     const handlePointerLockChange = () => {
       const canvasEl = renderer.domElement || container;
       const locked = document.pointerLockElement === canvasEl;
@@ -706,6 +794,8 @@ export default function Room3DStudio({
     document.addEventListener('webkitpointerlockchange', handlePointerLockChange);
     window.addEventListener('pointermove', handleGlobalPointerMove);
     window.addEventListener('pointerup', handleGlobalPointerUp);
+    window.addEventListener('touchmove', handleGlobalTouchMove, { passive: true });
+    window.addEventListener('touchend', handleGlobalTouchEnd, { passive: true });
 
     // Resize Handler with ResizeObserver for ultra-smooth fullscreen responsiveness
     const handleResize = () => {
@@ -730,6 +820,8 @@ export default function Room3DStudio({
       document.removeEventListener('webkitpointerlockchange', handlePointerLockChange);
       window.removeEventListener('pointermove', handleGlobalPointerMove);
       window.removeEventListener('pointerup', handleGlobalPointerUp);
+      window.removeEventListener('touchmove', handleGlobalTouchMove);
+      window.removeEventListener('touchend', handleGlobalTouchEnd);
       window.removeEventListener('resize', handleResize);
       if (resizeObserver) resizeObserver.disconnect();
       cancelAnimationFrame(animationFrameId);
@@ -1942,6 +2034,14 @@ export default function Room3DStudio({
     }
   };
 
+  const handleTouchStart = (event) => {
+    if (activeCamPresetRef.current === 'walk' && event.touches?.[0]) {
+      fpsStateRef.current.isDragging = true;
+      fpsStateRef.current.lastMouseX = event.touches[0].clientX;
+      fpsStateRef.current.lastMouseY = event.touches[0].clientY;
+    }
+  };
+
   // Camera Presets & First-Person Walk Setup
   const setCameraView = (viewType) => {
     const camera = cameraRef.current;
@@ -2235,11 +2335,14 @@ export default function Room3DStudio({
               title="กำหนดตำแหน่งและรูปแบบประตูทางเข้าร้าน"
             >
               <DoorOpen size={14} className={isDoorPopoverOpen || selectedItemId === 'store-door' ? 'text-white' : 'text-emerald'} />
-              <span>🚪 ทางเข้า: {
-                doorConfig?.wall === 'front' ? 'ด้านหน้า' :
-                doorConfig?.wall === 'left' ? 'ผนังซ้าย' :
-                doorConfig?.wall === 'back' ? 'ผนังหลัง' : 'ผนังขวา'
-              } ({Math.round((doorConfig?.offsetRatio ?? 0.75) * 100)}%)</span>
+              <span className="door-btn-label">
+                <span className="door-btn-prefix">ทางเข้า</span>
+                <span className="door-btn-detail">: {
+                  doorConfig?.wall === 'front' ? 'ด้านหน้า' :
+                  doorConfig?.wall === 'left' ? 'ผนังซ้าย' :
+                  doorConfig?.wall === 'back' ? 'ผนังหลัง' : 'ผนังขวา'
+                } ({Math.round((doorConfig?.offsetRatio ?? 0.75) * 100)}%)</span>
+              </span>
             </button>
 
             <div className="cam-zoom-divider"></div>
@@ -2248,10 +2351,10 @@ export default function Room3DStudio({
               <button 
                 className={`btn-cam-view ${activeCamPreset === 'iso' ? 'active' : ''}`}
                 onClick={() => setCameraView('iso')}
-                title="มุมมอง 3D Isometric (45°)"
+                title="มุมมอง 3D (45°)"
               >
                 <Eye size={14} />
-                <span>3D Isometric</span>
+                <span>3D</span>
               </button>
               <button 
                 className={`btn-cam-view btn-cam-storefront ${activeCamPreset === 'storefront' ? 'active' : ''}`}
@@ -2282,10 +2385,10 @@ export default function Room3DStudio({
 
           {/* Right Camera Tools Cluster - Fixed & Pinned */}
           <div className="camera-tools-cluster">
-            <button className="btn-cam-mini" onClick={() => handleZoom(1)} title="ซูมเข้า (+)">
+            <button className="btn-cam-mini btn-cam-zoom-in" onClick={() => handleZoom(1)} title="ซูมเข้า (+)">
               <ZoomIn size={15} />
             </button>
-            <button className="btn-cam-mini" onClick={() => handleZoom(-1)} title="ซูมออก (-)">
+            <button className="btn-cam-mini btn-cam-zoom-out" onClick={() => handleZoom(-1)} title="ซูมออก (-)">
               <ZoomOut size={15} />
             </button>
             <button 
@@ -2295,6 +2398,15 @@ export default function Room3DStudio({
               title="ถ่ายภาพเรนเดอร์ 3D (PNG Snapshot)"
             >
               <Camera size={15} />
+            </button>
+            <button
+              type="button"
+              id="btn-cam-fullscreen-toggle"
+              className={`btn-cam-mini btn-cam-fullscreen ${isPlannerFullscreen ? 'active' : ''}`}
+              onClick={onToggleFullscreen}
+              title={isPlannerFullscreen ? "ออกจากโหมดเต็มจอ (ESC)" : "ขยายเต็มจอ (Zen Mode)"}
+            >
+              {isPlannerFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
             </button>
           </div>
         </div>
@@ -2338,10 +2450,10 @@ export default function Room3DStudio({
                 onWalkModeChange(false);
                 onRequestFullscreen(false);
               }}
-              title="สลับเป็นมุมมอง 3D Isometric"
+              title="สลับเป็นมุมมอง 3D"
             >
               <Eye size={13} />
-              <span>3D Isometric</span>
+              <span>3D</span>
             </button>
             <button 
               type="button" 
@@ -2387,6 +2499,7 @@ export default function Room3DStudio({
           className="three-canvas-viewport" 
           ref={containerRef}
           onPointerDown={handlePointerDown}
+          onTouchStart={handleTouchStart}
         />
 
         {/* 2. Walk Mode Immersion: Center Gamer Crosshair */}
@@ -2400,7 +2513,14 @@ export default function Room3DStudio({
           </div>
         )}
 
-        {/* 2.1 Click to Lock FPS Aim Floating Prompt */}
+        {/* 2.1 Mobile & Tablet Walk Touch Hint */}
+        {activeCamPreset === 'walk' && (
+          <div className="walk-hud-touch-hint">
+            <span>👆 ลากนิ้วบนหน้าจอเพื่อเดินชม หรือกดปุ่มควบคุมด้านล่าง</span>
+          </div>
+        )}
+
+        {/* 2.2 Click to Lock FPS Aim Floating Prompt (Desktop) */}
         {activeCamPreset === 'walk' && !isPointerLocked && (
           <div 
             id="walk-hud-lock-prompt"
@@ -2458,6 +2578,146 @@ export default function Room3DStudio({
               X: {fpsCoords.x >= 0 ? `+${fpsCoords.x.toFixed(1)}` : fpsCoords.x.toFixed(1)}ม. | Z: {fpsCoords.z >= 0 ? `+${fpsCoords.z.toFixed(1)}` : fpsCoords.z.toFixed(1)}ม.
             </span>
           </div>
+        )}
+
+        {/* 5. Mobile & Tablet Touch Walk Gamepad Controller */}
+        {activeCamPreset === 'walk' && (
+          <div className="walk-touch-gamepad-container" onClick={(e) => e.stopPropagation()}>
+            {/* Left Thumb Virtual D-Pad */}
+            <div className="walk-touch-dpad">
+              <button
+                type="button"
+                className="touch-dpad-btn touch-up"
+                onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); fpsStateRef.current.keys.w = true; }}
+                onPointerUp={(e) => { e.preventDefault(); fpsStateRef.current.keys.w = false; }}
+                onPointerCancel={() => { fpsStateRef.current.keys.w = false; }}
+                onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); fpsStateRef.current.keys.w = true; }}
+                onTouchEnd={(e) => { e.preventDefault(); fpsStateRef.current.keys.w = false; }}
+                onTouchCancel={() => { fpsStateRef.current.keys.w = false; }}
+                title="เดินหน้า (Forward)"
+              >
+                <ChevronUp size={26} />
+              </button>
+              <div className="touch-dpad-middle">
+                <button
+                  type="button"
+                  className="touch-dpad-btn touch-left"
+                  onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); fpsStateRef.current.keys.a = true; }}
+                  onPointerUp={(e) => { e.preventDefault(); fpsStateRef.current.keys.a = false; }}
+                  onPointerCancel={() => { fpsStateRef.current.keys.a = false; }}
+                  onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); fpsStateRef.current.keys.a = true; }}
+                  onTouchEnd={(e) => { e.preventDefault(); fpsStateRef.current.keys.a = false; }}
+                  onTouchCancel={() => { fpsStateRef.current.keys.a = false; }}
+                  title="สเต็ปซ้าย (Strafe Left)"
+                >
+                  <ChevronLeft size={26} />
+                </button>
+                <div className="touch-dpad-center">
+                  <Footprints size={18} />
+                </div>
+                <button
+                  type="button"
+                  className="touch-dpad-btn touch-right"
+                  onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); fpsStateRef.current.keys.d = true; }}
+                  onPointerUp={(e) => { e.preventDefault(); fpsStateRef.current.keys.d = false; }}
+                  onPointerCancel={() => { fpsStateRef.current.keys.d = false; }}
+                  onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); fpsStateRef.current.keys.d = true; }}
+                  onTouchEnd={(e) => { e.preventDefault(); fpsStateRef.current.keys.d = false; }}
+                  onTouchCancel={() => { fpsStateRef.current.keys.d = false; }}
+                  title="สเต็ปขวา (Strafe Right)"
+                >
+                  <ChevronRight size={26} />
+                </button>
+              </div>
+              <button
+                type="button"
+                className="touch-dpad-btn touch-down"
+                onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); fpsStateRef.current.keys.s = true; }}
+                onPointerUp={(e) => { e.preventDefault(); fpsStateRef.current.keys.s = false; }}
+                onPointerCancel={() => { fpsStateRef.current.keys.s = false; }}
+                onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); fpsStateRef.current.keys.s = true; }}
+                onTouchEnd={(e) => { e.preventDefault(); fpsStateRef.current.keys.s = false; }}
+                onTouchCancel={() => { fpsStateRef.current.keys.s = false; }}
+                title="ถอยหลัง (Backward)"
+              >
+                <ChevronDown size={26} />
+              </button>
+            </div>
+
+            {/* Right Thumb Actions: Turn Left / Turn Right & Sprint Toggle */}
+            <div className="walk-touch-actions">
+              <button
+                type="button"
+                className={`touch-action-btn sprint-toggle ${isSprinting ? 'active' : ''}`}
+                onPointerDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsSprinting(prev => {
+                    const next = !prev;
+                    fpsStateRef.current.keys.shift = next;
+                    return next;
+                  });
+                }}
+                onTouchStart={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsSprinting(prev => {
+                    const next = !prev;
+                    fpsStateRef.current.keys.shift = next;
+                    return next;
+                  });
+                }}
+                title="สลับวิ่งเร็ว / เดิน"
+              >
+                <Zap size={16} />
+                <span>{isSprinting ? 'วิ่งเร็ว (เปิด)' : 'วิ่งเร็ว'}</span>
+              </button>
+              <div className="touch-turn-buttons">
+                <button
+                  type="button"
+                  className="touch-action-btn turn-left"
+                  onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); fpsStateRef.current.keys.turnLeft = true; }}
+                  onPointerUp={(e) => { e.preventDefault(); fpsStateRef.current.keys.turnLeft = false; }}
+                  onPointerCancel={() => { fpsStateRef.current.keys.turnLeft = false; }}
+                  onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); fpsStateRef.current.keys.turnLeft = true; }}
+                  onTouchEnd={(e) => { e.preventDefault(); fpsStateRef.current.keys.turnLeft = false; }}
+                  onTouchCancel={() => { fpsStateRef.current.keys.turnLeft = false; }}
+                  title="หมุนมุมมองซ้าย"
+                >
+                  <RotateCcw size={18} />
+                  <span>หันซ้าย</span>
+                </button>
+                <button
+                  type="button"
+                  className="touch-action-btn turn-right"
+                  onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); fpsStateRef.current.keys.turnRight = true; }}
+                  onPointerUp={(e) => { e.preventDefault(); fpsStateRef.current.keys.turnRight = false; }}
+                  onPointerCancel={() => { fpsStateRef.current.keys.turnRight = false; }}
+                  onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); fpsStateRef.current.keys.turnRight = true; }}
+                  onTouchEnd={(e) => { e.preventDefault(); fpsStateRef.current.keys.turnRight = false; }}
+                  onTouchCancel={() => { fpsStateRef.current.keys.turnRight = false; }}
+                  title="หมุนมุมมองขวา"
+                >
+                  <RotateCw size={18} />
+                  <span>หันขวา</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Floating 3D Fullscreen Button at Bottom-Right */}
+        {activeCamPreset !== 'walk' && (
+          <button
+            type="button"
+            id="btn-floating-3d-fullscreen"
+            className={`floating-3d-fullscreen-btn ${isPlannerFullscreen ? 'active' : ''}`}
+            onClick={onToggleFullscreen}
+            title={isPlannerFullscreen ? "ออกจากโหมดเต็มจอ (ESC)" : "ขยายเต็มจอ (Zen Mode)"}
+          >
+            {isPlannerFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+            <span>{isPlannerFullscreen ? 'ย่อหน้าต่าง (ESC)' : 'ขยายเต็มจอ'}</span>
+          </button>
         )}
 
         {/* Floating Quick Door Configuration Popover (Only in editing mode) */}

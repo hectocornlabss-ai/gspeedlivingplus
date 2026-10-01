@@ -7,6 +7,7 @@ import {
   AlertCircle, MessageCircle, Sparkles, PhoneCall, Layers, X
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
+import { useTranslation } from '../context/LanguageContext';
 import { generateDefaultBracket } from '../data/mockData';
 import TournamentOverviewSlider from './TournamentOverviewSlider';
 import SocialSharePopover from './SocialSharePopover';
@@ -20,6 +21,7 @@ export default function SingleTournamentView({
   onNavigateFranchise = () => {}
 }) {
   const { siteData } = useSiteData();
+  const { t, language, translateDynamic } = useTranslation();
   const allTournaments = siteData?.tournaments || [];
 
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -29,6 +31,58 @@ export default function SingleTournamentView({
   const [copiedLink, setCopiedLink] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const shareBtnRef = useRef(null);
+  const tabsAnchorRef = useRef(null);
+  const tabsBarRef = useRef(null);
+  const isFirstRender = useRef(true);
+
+  const scrollToTabsTop = () => {
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+    const navOffset = isMobile ? 62 : 72;
+
+    if (tabsAnchorRef.current) {
+      tabsAnchorRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      const heroEl = document.querySelector('.tourney-hero-header');
+      if (heroEl) {
+        const topPos = heroEl.offsetTop + heroEl.offsetHeight - navOffset;
+        window.scrollTo({ top: Math.max(0, topPos), behavior: 'smooth' });
+      }
+    }
+  };
+
+  const handleTabSelect = (tabId, buttonEl) => {
+    setActiveTab(tabId);
+
+    // 1. Center the clicked tab button horizontally on mobile/desktop
+    if (buttonEl) {
+      try {
+        buttonEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      } catch (e) {}
+    }
+
+    // 2. Vertically scroll up so user immediately sees the beginning of the tab content
+    scrollToTabsTop();
+    setTimeout(() => {
+      scrollToTabsTop();
+    }, 50);
+  };
+
+  // Auto scroll up on activeTab change if user was scrolled down into content
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    const heroEl = document.querySelector('.tourney-hero-header');
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+    const navOffset = isMobile ? 62 : 72;
+    if (heroEl) {
+      const tabsNaturalTop = heroEl.offsetTop + heroEl.offsetHeight - navOffset;
+      if (window.pageYOffset > tabsNaturalTop - 40) {
+        scrollToTabsTop();
+      }
+    }
+  }, [activeTab]);
 
   // Bracket state
   const [bracketViewMode, setBracketViewMode] = useState('tree'); // 'tree' | 'list'
@@ -325,11 +379,11 @@ export default function SingleTournamentView({
               type="button" 
               onClick={onBack} 
               className="btn-tourney-back"
-              title="ย้อนกลับไปหน้ารวมทัวร์นาเมนต์"
+              title={t('singleTournament.back')}
             >
               <ArrowLeft size={15} />
-              <span className="back-btn-text-full">ย้อนกลับไปหน้ารวมทัวร์นาเมนต์</span>
-              <span className="back-btn-text-short">ย้อนกลับ</span>
+              <span className="back-btn-text-full">{t('singleTournament.back')}</span>
+              <span className="back-btn-text-short">{t('common.back')}</span>
             </button>
           </div>
 
@@ -340,10 +394,10 @@ export default function SingleTournamentView({
               type="button"
               className="btn-tourney-share-trigger"
               onClick={() => setShareOpen(!shareOpen)}
-              title="แชร์ทัวร์นาเมนต์นี้ (Facebook, LINE, Messenger, Instagram, คัดลอกลิงก์)"
+              title={t('common.share')}
             >
               <Share2 size={14} className="text-blue" />
-              <span>แชร์</span>
+              <span>{t('common.share')}</span>
             </button>
 
             <SocialSharePopover
@@ -464,7 +518,7 @@ export default function SingleTournamentView({
 
             {/* Title */}
             <h1 className="tournament-hero-title">
-              {tournament.title}
+              {translateDynamic(tournament.title)}
             </h1>
 
             {/* Metadata Info Grid - 3 Equal Balanced Columns */}
@@ -506,30 +560,35 @@ export default function SingleTournamentView({
         </div>
       </div>
 
-      {/* 3. TABS NAVIGATION BAR (STICKY) */}
-      <div className="tournament-tabs-bar">
+      {/* 3. TABS ANCHOR & NAVIGATION BAR (STICKY) */}
+      <div 
+        ref={tabsAnchorRef} 
+        id="tournament-tabs-anchor" 
+        style={{ 
+          scrollMarginTop: '75px', 
+          height: '1px', 
+          marginTop: '-1px', 
+          visibility: 'hidden' 
+        }} 
+      />
+
+      <div className="tournament-tabs-bar" ref={tabsBarRef}>
         <div className="container tabs-inner-scroll">
           {[
-            { id: 'overview', label: 'ภาพรวม & กติกา', icon: <Award size={14} /> },
-            { id: 'schedule', label: 'กำหนดการ & วันที่', icon: <Calendar size={14} /> },
+            { id: 'overview', label: t('singleTournament.overview'), icon: <Award size={14} /> },
+            { id: 'schedule', label: t('singleTournament.schedule'), icon: <Calendar size={14} /> },
             { 
               id: 'bracket', 
-              label: (!isRegistrationOpen && liveMatches.length > 0) ? `สายแข่ง (${matches.length}) 🔴 LIVE` : `สายแข่ง & ตาราง (${matches.length})`, 
+              label: (!isRegistrationOpen && liveMatches.length > 0) ? `${t('singleTournament.bracket')} (${matches.length}) 🔴 LIVE` : `${t('singleTournament.bracket')} (${matches.length})`, 
               icon: <GitBranch size={14} />,
               highlight: !isRegistrationOpen && liveMatches.length > 0
             },
-            { id: 'roster', label: `รายชื่อทีม (${teamsList.length})`, icon: <Users size={14} /> },
-            { id: 'gallery', label: `ภาพกิจกรรม (${photosList.length})`, icon: <Camera size={14} /> }
+            { id: 'roster', label: `${t('singleTournament.teams')} (${teamsList.length})`, icon: <Users size={14} /> }
           ].map(tab => (
             <button 
               key={tab.id}
               type="button"
-              onClick={(e) => {
-                setActiveTab(tab.id);
-                try {
-                  e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                } catch (err) {}
-              }}
+              onClick={(e) => handleTabSelect(tab.id, e.currentTarget)}
               className={`tourney-tab-item ${activeTab === tab.id ? 'active' : ''} ${tab.highlight ? 'highlight' : ''}`}
             >
               {tab.icon}

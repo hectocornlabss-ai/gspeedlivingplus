@@ -1159,11 +1159,20 @@ function deepMerge(target, source) {
   }
   const result = { ...target };
   for (const key of Object.keys(source)) {
-    if (source[key] !== null && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+    if (key === 'hardwareTiers') {
+      // hardwareTiers is a user-managed collection of PC specs.
+      // NEVER copy deleted tiers from target! User's source is the authoritative source of truth.
+      if (source.hardwareTiers && typeof source.hardwareTiers === 'object' && !Array.isArray(source.hardwareTiers) && Object.keys(source.hardwareTiers).length > 0) {
+        result.hardwareTiers = { ...source.hardwareTiers };
+      }
+    } else if (source[key] !== null && typeof source[key] === 'object' && !Array.isArray(source[key])) {
       result[key] = deepMerge(target[key] || {}, source[key]);
     } else if (source[key] !== undefined) {
       result[key] = source[key];
     }
+  }
+  if (source.hardwareTiers && typeof source.hardwareTiers === 'object' && !Array.isArray(source.hardwareTiers) && Object.keys(source.hardwareTiers).length > 0) {
+    result.hardwareTiers = { ...source.hardwareTiers };
   }
   return result;
 }
@@ -1179,6 +1188,9 @@ export function SiteDataProvider({ children }) {
         const parsed = JSON.parse(saved);
         // Deep merge saved data with defaults so NO missing keys exist
         const merged = deepMerge(DEFAULT_SITE_DATA, parsed);
+        if (parsed.hardwareTiers && typeof parsed.hardwareTiers === 'object' && Object.keys(parsed.hardwareTiers).length > 0) {
+          merged.hardwareTiers = { ...parsed.hardwareTiers };
+        }
 
         // Update default address/phone/email/social if old placeholder exists
         if (merged.footer) {
@@ -1216,6 +1228,14 @@ export function SiteDataProvider({ children }) {
             if (!merged.contactPage.socialLinks.facebook || merged.contactPage.socialLinks.facebook.includes('gspeedesport')) {
               merged.contactPage.socialLinks.facebook = 'https://www.facebook.com/GLP.Gspeedlivingplus';
             }
+          }
+          if (Array.isArray(merged.contactPage.perks)) {
+            merged.contactPage.perks = merged.contactPage.perks.map(p => {
+              if (p.id === 'perk-1' || (p.text && (p.text.includes('เปิดบริ') || p.text.includes('365')))) {
+                return { ...p, text: 'เปิดบริการ 24 ชั่วโมง 365 วัน ไม่มีวันหยุด' };
+              }
+              return p;
+            });
           }
         }
 
@@ -1303,13 +1323,10 @@ export function SiteDataProvider({ children }) {
               : INITIAL_FOUNDER.partners,
           };
         }
-        if (!merged.hardwareTiers || typeof merged.hardwareTiers !== 'object' || Array.isArray(merged.hardwareTiers)) {
+        if (!merged.hardwareTiers || typeof merged.hardwareTiers !== 'object' || Array.isArray(merged.hardwareTiers) || Object.keys(merged.hardwareTiers).length === 0) {
           merged.hardwareTiers = INITIAL_TIERS;
         } else {
-          merged.hardwareTiers = {
-            ...INITIAL_TIERS,
-            ...merged.hardwareTiers
-          };
+          // Preserve user customized hardwareTiers as source of truth (do not revive deleted tiers)
           Object.keys(merged.hardwareTiers).forEach(k => {
             if (merged.hardwareTiers[k]?.chair) {
               delete merged.hardwareTiers[k].chair;
@@ -1330,65 +1347,75 @@ export function SiteDataProvider({ children }) {
         if (!Array.isArray(merged.tournaments)) {
           merged.tournaments = INITIAL_TOURNAMENTS;
         } else {
+          // Preserve saved tournaments as-is
           merged.tournaments = merged.tournaments.map(t => {
             const def = INITIAL_TOURNAMENTS.find(it => it.id === t.id);
             const slug = t.slug || t.seo?.slug || (def && def.slug) || (t.title ? t.title.toLowerCase().replace(/[^a-z0-9\u0E00-\u0E7F]+/g, '-').replace(/(^-|-$)/g, '') : t.id);
-            const isOpen = (t.status || (def && def.status)) === 'Open';
-            let currentBracketMatches = (t.bracketMatches && t.bracketMatches.length > 0) ? t.bracketMatches : (def ? (def.bracketMatches || []) : []);
-            let currentTeams = (t.teams && t.teams.length > 0) ? t.teams : (def ? (def.teams || []) : []);
-
-            if (isOpen) {
-              currentBracketMatches = currentBracketMatches.map(m => ({
-                ...m,
-                status: 'Upcoming',
-                teamA: m.teamA ? { ...m.teamA, score: 0, isWinner: false } : null,
-                teamB: m.teamB ? { ...m.teamB, score: 0, isWinner: false } : null,
-                maps: [],
-                mvp: null
-              }));
-              currentTeams = currentTeams.map(tm => ({
-                ...tm,
-                wins: 0,
-                losses: 0
-              }));
-            }
-
-            if (def) {
-              return {
-                ...def,
-                ...t,
-                slug,
-                teams: currentTeams,
-                bracketMatches: currentBracketMatches,
-                galleryPhotos: (t.galleryPhotos && t.galleryPhotos.length > 0) ? t.galleryPhotos : def.galleryPhotos,
-                rules: (t.rules && t.rules.length > 0) ? t.rules : def.rules,
-                prizeDistribution: (t.prizeDistribution && t.prizeDistribution.length > 0) ? t.prizeDistribution : def.prizeDistribution,
-                scheduleTimetable: (t.scheduleTimetable && t.scheduleTimetable.length > 0) ? t.scheduleTimetable : def.scheduleTimetable,
-                seo: (t.seo && t.seo.metaTitle) ? { ...t.seo, slug: t.seo.slug || slug } : { ...def.seo, slug }
-              };
-            }
             return {
-              teams: currentTeams,
-              bracketMatches: currentBracketMatches,
-              galleryPhotos: [],
-              rules: [],
-              prizeDistribution: [],
-              scheduleTimetable: [],
-              seo: { slug },
+              ...(def || {}),
+              ...t,
               slug,
-              ...t
+              teams: Array.isArray(t.teams) ? t.teams : (def ? (def.teams || []) : []),
+              bracketMatches: Array.isArray(t.bracketMatches) ? t.bracketMatches : (def ? (def.bracketMatches || []) : []),
+              galleryPhotos: Array.isArray(t.galleryPhotos) ? t.galleryPhotos : (def ? (def.galleryPhotos || []) : []),
+              rules: Array.isArray(t.rules) ? t.rules : (def ? (def.rules || []) : []),
+              prizeDistribution: Array.isArray(t.prizeDistribution) ? t.prizeDistribution : (def ? (def.prizeDistribution || []) : []),
+              scheduleTimetable: Array.isArray(t.scheduleTimetable) ? t.scheduleTimetable : (def ? (def.scheduleTimetable || []) : []),
+              seo: (t.seo && t.seo.metaTitle) ? { ...t.seo, slug: t.seo.slug || slug } : { ...(def ? def.seo : {}), slug }
             };
           });
         }
         if (!Array.isArray(merged.venueZones) || merged.venueZones.length === 0) {
-          merged.venueZones = INITIAL_ZONES;
+          merged.venueZones = INITIAL_ZONES.map(z => ({
+            ...z,
+            images: (z.images || []).slice(0, 3)
+          }));
         } else {
-          merged.venueZones = merged.venueZones.map(z => {
+          // Ensure all 4 zones exist
+          const existingIds = new Set(merged.venueZones.map(z => z.id));
+          const completeZones = [...merged.venueZones];
+          INITIAL_ZONES.forEach(initZone => {
+            if (!existingIds.has(initZone.id)) {
+              completeZones.push({ ...initZone, images: (initZone.images || []).slice(0, 3) });
+            }
+          });
+
+          merged.venueZones = completeZones.map(z => {
             const init = INITIAL_ZONES.find(iz => iz.id === z.id);
+            let zoneImages = Array.isArray(z.images) && z.images.length > 0
+              ? z.images.slice(0, 3)
+              : (init && Array.isArray(init.images) ? init.images.slice(0, 3) : []);
+            
+            if (zoneImages.length === 0 && (z.image || init?.image)) {
+              zoneImages = [{ id: `${z.id}-1`, url: z.image || init?.image || '', caption: z.title || init?.title || '' }];
+            }
+
+            // Ensure each slot has a valid URL and fallback
+            zoneImages = zoneImages.map((s, idx) => {
+              const initSlot = init?.images?.[idx] || init?.images?.[0];
+              let validUrl = (s?.url && typeof s.url === 'string' && s.url.trim() && s.url !== '[object Object]') 
+                ? s.url 
+                : (initSlot?.url || init?.image || '');
+
+              // Automatically replace outdated medieval castle or claw machine photos with real esports stage photos
+              if (validUrl.includes('photo-1518709268805-4e9042af9f23') || validUrl.includes('photo-1511882150382-421056c89033')) {
+                validUrl = initSlot?.url || init?.image || validUrl;
+              }
+
+              return {
+                id: s?.id || `${z.id}-img-${idx + 1}`,
+                url: validUrl,
+                caption: s?.caption !== undefined ? s.caption : (initSlot?.caption || '')
+              };
+            });
+
             return {
               ...(init || {}),
               ...z,
-              images: (Array.isArray(z.images) && z.images.length >= 10) ? z.images : (init ? init.images : (z.image ? [{ id: `${z.id}-1`, url: z.image, caption: z.title }] : []))
+              subtitle: z.subtitle !== undefined ? z.subtitle : (init?.subtitle || ''),
+              badge: z.badge !== undefined ? z.badge : (init?.badge || ''),
+              images: zoneImages,
+              image: zoneImages[0]?.url || z.image || init?.image || ''
             };
           });
         }
@@ -1660,24 +1687,14 @@ export function SiteDataProvider({ children }) {
     siteDataRef.current = siteData;
   }, [siteData]);
 
-  // Save to localStorage automatically on state change
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(siteData));
-    } catch (e) {
-      if (e.name === 'QuotaExceededError' || e.code === 22) {
-        console.warn('LocalStorage Quota Exceeded! CMS state is preserved in-memory. Consider using WebP or URLs for large media.', e);
-      } else {
-        console.error('Failed to persist CMS data to localStorage', e);
-      }
-    }
-  }, [siteData]);
+  // State changes are kept in-memory for maximum 60FPS typing performance.
+  // Real persistence to localStorage and the server database occurs on explicit Save (saveSiteData).
 
   // Flag to track when initial server hydration is complete
   const isHydratedRef = useRef(false);
 
 
-  // Synchronize siteData changes across browser tabs and components in real time
+  // Synchronize siteData changes across browser tabs in real time
   useEffect(() => {
     const handleStorageChange = (e) => {
       if (e.key === STORAGE_KEY && e.newValue) {
@@ -1689,16 +1706,9 @@ export function SiteDataProvider({ children }) {
         }
       }
     };
-    const handleCustomSync = (e) => {
-      if (e.detail) {
-        setSiteData(prev => deepMerge(prev, e.detail));
-      }
-    };
     window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('gspeed-site-data-updated', handleCustomSync);
     return () => {
       window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('gspeed-site-data-updated', handleCustomSync);
     };
   }, []);
 
@@ -1710,7 +1720,7 @@ export function SiteDataProvider({ children }) {
     saving: false
   });
 
-  // Hydrate from persistent server database (Docker volume) on initial load
+  // Hydrate from persistent server database on initial load (Server is Single Source of Truth)
   useEffect(() => {
     let isMounted = true;
     const fetchServerSiteData = async () => {
@@ -1725,8 +1735,25 @@ export function SiteDataProvider({ children }) {
           if (isMounted) {
             console.log('[SiteDataContext] Hydrated from persistent server database.');
             setSiteData(prev => {
-              // Server database is the single source of truth: merge server data on top of prev
-              const merged = deepMerge(prev, result.siteData);
+              // Server database is the authoritative single source of truth
+              const merged = deepMerge(DEFAULT_SITE_DATA, result.siteData);
+
+              // Explicitly preserve user-managed collections from server
+              if (result.siteData.hardwareTiers && typeof result.siteData.hardwareTiers === 'object' && Object.keys(result.siteData.hardwareTiers).length > 0) {
+                merged.hardwareTiers = { ...result.siteData.hardwareTiers };
+              }
+              if (Array.isArray(result.siteData.gallery)) merged.gallery = result.siteData.gallery;
+              if (Array.isArray(result.siteData.news)) merged.news = result.siteData.news;
+              if (Array.isArray(result.siteData.tournaments)) merged.tournaments = result.siteData.tournaments;
+              if (Array.isArray(result.siteData.venueZones)) merged.venueZones = result.siteData.venueZones;
+              if (Array.isArray(result.siteData.catalogItems)) merged.catalogItems = result.siteData.catalogItems;
+              if (Array.isArray(result.siteData.interiorThemes)) merged.interiorThemes = result.siteData.interiorThemes;
+
+              // Cache fresh server data to localStorage and ref
+              try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+              } catch (e) {}
+              siteDataRef.current = merged;
               // Sanitize legacy/invalid emails and Facebook link from server DB if any
               if (merged.footer) {
                 if (!merged.footer.email || merged.footer.email.includes('contact@') || merged.footer.email.includes('@gspeed') || merged.footer.email !== 'gspeedlivingplus35@gmail.com') {
@@ -1867,7 +1894,7 @@ export function SiteDataProvider({ children }) {
     };
     setSiteData(prev => {
       const items = [...(prev.tickerItems || INITIAL_TICKER_ITEMS), newItem];
-      return {
+      const nextData = {
         ...prev,
         tickerItems: items,
         tickerBadge: items[0]?.badge || prev.tickerBadge,
@@ -1875,6 +1902,8 @@ export function SiteDataProvider({ children }) {
         tickerLinkTarget: items[0]?.linkTarget || prev.tickerLinkTarget,
         tickerLinkText: items[0]?.linkText || prev.tickerLinkText
       };
+      saveSiteData(nextData);
+      return nextData;
     });
     return newItem;
   };
@@ -1883,7 +1912,7 @@ export function SiteDataProvider({ children }) {
     setSiteData(prev => {
       const currentList = prev.tickerItems || INITIAL_TICKER_ITEMS;
       const updated = currentList.map(it => it.id === id ? { ...it, ...updates } : it);
-      return {
+      const nextData = {
         ...prev,
         tickerItems: updated,
         tickerBadge: updated[0]?.badge || prev.tickerBadge,
@@ -1891,6 +1920,8 @@ export function SiteDataProvider({ children }) {
         tickerLinkTarget: updated[0]?.linkTarget || prev.tickerLinkTarget,
         tickerLinkText: updated[0]?.linkText || prev.tickerLinkText
       };
+      saveSiteData(nextData);
+      return nextData;
     });
   };
 
@@ -1898,30 +1929,40 @@ export function SiteDataProvider({ children }) {
     setSiteData(prev => {
       const currentList = prev.tickerItems || INITIAL_TICKER_ITEMS;
       const filtered = currentList.filter(it => it.id !== id);
-      return {
+      const nextData = {
         ...prev,
         tickerItems: filtered,
         tickerBadge: filtered[0]?.badge || '',
         tickerText: filtered[0]?.text || ''
       };
+      saveSiteData(nextData);
+      return nextData;
     });
   };
 
   const reorderTickerItems = (reorderedItems) => {
-    setSiteData(prev => ({
-      ...prev,
-      tickerItems: reorderedItems
-    }));
+    setSiteData(prev => {
+      const nextData = {
+        ...prev,
+        tickerItems: reorderedItems
+      };
+      saveSiteData(nextData);
+      return nextData;
+    });
   };
 
   const updateTickerSettings = (settingsUpdates) => {
-    setSiteData(prev => ({
-      ...prev,
-      tickerSettings: {
-        ...(prev.tickerSettings || INITIAL_TICKER_SETTINGS),
-        ...settingsUpdates
-      }
-    }));
+    setSiteData(prev => {
+      const nextData = {
+        ...prev,
+        tickerSettings: {
+          ...(prev.tickerSettings || INITIAL_TICKER_SETTINGS),
+          ...settingsUpdates
+        }
+      };
+      saveSiteData(nextData);
+      return nextData;
+    });
   };
 
   const updateHeaderCta = (ctaUpdates) => {
@@ -2000,20 +2041,43 @@ export function SiteDataProvider({ children }) {
   };
 
   const saveSiteData = async (manualData) => {
-    const dataToSave = manualData || siteDataRef.current || siteData;
+    const rawData = manualData || siteDataRef.current || siteData;
+    const nowIso = new Date().toISOString();
+    const dataToSave = {
+      ...rawData,
+      lastModified: nowIso,
+      updatedAt: nowIso
+    };
+
+    if (dataToSave.hardwareTiers && typeof dataToSave.hardwareTiers === 'object') {
+      for (const k of Object.keys(dataToSave.hardwareTiers)) {
+        const t = dataToSave.hardwareTiers[k];
+        if (t && t.image && typeof t.image === 'object' && t.image.dataUrl) {
+          t.image = t.image.dataUrl;
+        }
+      }
+    }
+
+    // Synchronously update ref and state
+    siteDataRef.current = dataToSave;
+    setSiteData(dataToSave);
+
     let localOk = false;
     let serverOk = false;
     const nowTime = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
 
-    // 1. Immediate LocalStorage & in-memory event broadcast
+    // 1. Immediate LocalStorage persistence with quota safety
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
-      window.dispatchEvent(new CustomEvent('gspeed-site-data-updated', { detail: dataToSave }));
       localOk = true;
     } catch (e) {
       console.warn('LocalStorage save warning:', e);
       try {
-        window.dispatchEvent(new CustomEvent('gspeed-site-data-updated', { detail: dataToSave }));
+        const compactData = { ...dataToSave };
+        if (Array.isArray(compactData.mediaLibrary) && compactData.mediaLibrary.length > 5) {
+          compactData.mediaLibrary = compactData.mediaLibrary.slice(0, 5);
+        }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(compactData));
         localOk = true;
       } catch (e2) {}
     }
@@ -2092,26 +2156,38 @@ export function SiteDataProvider({ children }) {
 
   // Catalog Handlers (Furniture, Desks, Chairs, Counters)
   const updateCatalogItem = (updatedItem) => {
-    setSiteData(prev => ({
-      ...prev,
-      catalogItems: prev.catalogItems.map(item => 
-        item.type === updatedItem.type ? { ...item, ...updatedItem } : item
-      )
-    }));
+    setSiteData(prev => {
+      const nextData = {
+        ...prev,
+        catalogItems: prev.catalogItems.map(item => 
+          item.type === updatedItem.type ? { ...item, ...updatedItem } : item
+        )
+      };
+      saveSiteData(nextData);
+      return nextData;
+    });
   };
 
   const addCatalogItem = (newItem) => {
-    setSiteData(prev => ({
-      ...prev,
-      catalogItems: [...prev.catalogItems, newItem]
-    }));
+    setSiteData(prev => {
+      const nextData = {
+        ...prev,
+        catalogItems: [...prev.catalogItems, newItem]
+      };
+      saveSiteData(nextData);
+      return nextData;
+    });
   };
 
   const deleteCatalogItem = (type) => {
-    setSiteData(prev => ({
-      ...prev,
-      catalogItems: prev.catalogItems.filter(item => item.type !== type)
-    }));
+    setSiteData(prev => {
+      const nextData = {
+        ...prev,
+        catalogItems: prev.catalogItems.filter(item => item.type !== type)
+      };
+      saveSiteData(nextData);
+      return nextData;
+    });
   };
 
   // RAG Knowledge Handlers
@@ -2142,57 +2218,45 @@ export function SiteDataProvider({ children }) {
   const addActivityItem = (newItem) => {
     const slug = newItem.slug || (newItem.title || 'event').toLowerCase().replace(/[^a-z0-9\u0E00-\u0E7F]+/g, '-').replace(/(^-|-$)/g, '') || `event-${Date.now()}`;
     const id = newItem.id || `gal-${Date.now()}`;
-    setSiteData(prev => {
-      const nextData = {
-        ...prev,
-        gallery: [{ ...newItem, id, slug }, ...(prev.gallery || [])]
-      };
-      siteDataRef.current = nextData;
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
-        window.dispatchEvent(new CustomEvent('gspeed-site-data-updated', { detail: nextData }));
-      } catch (e) {}
-      saveSiteData(nextData);
-      return nextData;
-    });
+    const current = siteDataRef.current || siteData;
+    const nextData = {
+      ...current,
+      gallery: [{ ...newItem, id, slug }, ...(current.gallery || [])]
+    };
+    siteDataRef.current = nextData;
+    setSiteData(nextData);
+    saveSiteData(nextData);
+    return nextData;
   };
 
   const updateActivityItem = (id, updatedFields) => {
-    setSiteData(prev => {
-      const nextData = {
-        ...prev,
-        gallery: (prev.gallery || []).map(item => 
-          item.id === id ? { ...item, ...updatedFields } : item
-        ),
-        news: (prev.news || []).map(item => 
-          item.id === id ? { ...item, ...updatedFields } : item
-        )
-      };
-      siteDataRef.current = nextData;
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
-        window.dispatchEvent(new CustomEvent('gspeed-site-data-updated', { detail: nextData }));
-      } catch (e) {}
-      saveSiteData(nextData);
-      return nextData;
-    });
+    const current = siteDataRef.current || siteData;
+    const nextData = {
+      ...current,
+      gallery: (current.gallery || []).map(item => 
+        item.id === id ? { ...item, ...updatedFields } : item
+      ),
+      news: (current.news || []).map(item => 
+        item.id === id ? { ...item, ...updatedFields } : item
+      )
+    };
+    siteDataRef.current = nextData;
+    setSiteData(nextData);
+    saveSiteData(nextData);
+    return nextData;
   };
 
   const deleteActivityItem = (id) => {
-    setSiteData(prev => {
-      const nextData = {
-        ...prev,
-        gallery: (prev.gallery || []).filter(item => item.id !== id),
-        news: (prev.news || []).filter(item => item.id !== id)
-      };
-      siteDataRef.current = nextData;
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
-        window.dispatchEvent(new CustomEvent('gspeed-site-data-updated', { detail: nextData }));
-      } catch (e) {}
-      saveSiteData(nextData);
-      return nextData;
-    });
+    const current = siteDataRef.current || siteData;
+    const nextData = {
+      ...current,
+      gallery: (current.gallery || []).filter(item => item.id !== id),
+      news: (current.news || []).filter(item => item.id !== id)
+    };
+    siteDataRef.current = nextData;
+    setSiteData(nextData);
+    saveSiteData(nextData);
+    return nextData;
   };
 
   // Activity Categories & Tags Handlers
@@ -2438,7 +2502,7 @@ export function SiteDataProvider({ children }) {
     }));
   };
 
-  const addPendingQuestion = (query) => {
+  const addPendingQuestion = (query, translationTh = '', lang = 'th') => {
     if (!query) return;
     setSiteData(prev => {
       const existing = prev.aiGuardrails?.pendingQuestions || [];
@@ -2449,6 +2513,8 @@ export function SiteDataProvider({ children }) {
       const newEntry = {
         id: `pq-${Date.now()}`,
         query,
+        translationTh: translationTh || query,
+        lang: lang || 'th',
         timestamp: timeStr,
         status: 'pending'
       };
@@ -2749,114 +2815,105 @@ export function SiteDataProvider({ children }) {
   const addTournament = (newItem) => {
     const id = newItem.id || `tour-${Date.now()}`;
     const slug = newItem.slug || newItem.seo?.slug || (newItem.title ? newItem.title.toLowerCase().replace(/[^a-z0-9\u0E00-\u0E7F]+/g, '-').replace(/(^-|-$)/g, '') : id);
-    setSiteData(prev => {
-      const nextData = {
-        ...prev,
-        tournaments: [...(prev.tournaments || []), { 
-          ...newItem, 
-          id, 
-          slug,
-          seo: { ...(newItem.seo || {}), slug: newItem.seo?.slug || slug }
-        }]
-      };
-      siteDataRef.current = nextData;
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
-        window.dispatchEvent(new CustomEvent('gspeed-site-data-updated', { detail: nextData }));
-      } catch (e) {}
-      saveSiteData(nextData);
-      return nextData;
-    });
+    const current = siteDataRef.current || siteData;
+    const nextData = {
+      ...current,
+      tournaments: [...(current.tournaments || []), { 
+        ...newItem, 
+        id, 
+        slug,
+        seo: { ...(newItem.seo || {}), slug: newItem.seo?.slug || slug }
+      }]
+    };
+    siteDataRef.current = nextData;
+    setSiteData(nextData);
+    saveSiteData(nextData);
+    return nextData;
   };
 
   const updateTournament = (id, updates) => {
-    setSiteData(prev => {
-      const nextData = {
-        ...prev,
-        tournaments: (prev.tournaments || []).map(t => {
-          if (t.id !== id) return t;
-          const newSlug = updates.slug || updates.seo?.slug || t.slug || t.seo?.slug;
-          return { 
-            ...t, 
-            ...updates, 
-            slug: newSlug,
-            seo: { ...(t.seo || {}), ...(updates.seo || {}), slug: newSlug }
-          };
-        })
-      };
-      siteDataRef.current = nextData;
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
-        window.dispatchEvent(new CustomEvent('gspeed-site-data-updated', { detail: nextData }));
-      } catch (e) {}
-      saveSiteData(nextData);
-      return nextData;
-    });
+    const current = siteDataRef.current || siteData;
+    const nextData = {
+      ...current,
+      tournaments: (current.tournaments || []).map(t => {
+        if (t.id !== id) return t;
+        const newSlug = updates.slug || updates.seo?.slug || t.slug || t.seo?.slug;
+        return { 
+          ...t, 
+          ...updates, 
+          slug: newSlug,
+          seo: { ...(t.seo || {}), ...(updates.seo || {}), slug: newSlug }
+        };
+      })
+    };
+    siteDataRef.current = nextData;
+    setSiteData(nextData);
+    saveSiteData(nextData);
+    return nextData;
   };
 
   const deleteTournament = (id) => {
-    setSiteData(prev => {
-      const nextData = {
-        ...prev,
-        tournaments: (prev.tournaments || []).filter(t => t.id !== id)
-      };
-      siteDataRef.current = nextData;
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
-        window.dispatchEvent(new CustomEvent('gspeed-site-data-updated', { detail: nextData }));
-      } catch (e) {}
-      saveSiteData(nextData);
-      return nextData;
-    });
+    const current = siteDataRef.current || siteData;
+    const nextData = {
+      ...current,
+      tournaments: (current.tournaments || []).filter(t => t.id !== id)
+    };
+    siteDataRef.current = nextData;
+    setSiteData(nextData);
+    saveSiteData(nextData);
+    return nextData;
   };
 
   const updateTournamentBracketMatch = (tournamentId, matchId, matchUpdates) => {
-    setSiteData(prev => {
-      const tourneyList = prev.tournaments || [];
-      const updatedTournaments = tourneyList.map(tour => {
-        if (tour.id !== tournamentId) return tour;
-        const currentMatches = tour.bracketMatches || [];
-        const matchIdx = currentMatches.findIndex(m => m.id === matchId);
-        if (matchIdx === -1) return tour;
+    const current = siteDataRef.current || siteData;
+    const tourneyList = current.tournaments || [];
+    const updatedTournaments = tourneyList.map(tour => {
+      if (tour.id !== tournamentId) return tour;
+      const currentMatches = tour.bracketMatches || [];
+      const matchIdx = currentMatches.findIndex(m => m.id === matchId);
+      if (matchIdx === -1) return tour;
 
-        const targetMatch = currentMatches[matchIdx];
-        const updatedMatch = { ...targetMatch, ...matchUpdates };
-        let newMatches = [...currentMatches];
-        newMatches[matchIdx] = updatedMatch;
+      const targetMatch = currentMatches[matchIdx];
+      const updatedMatch = { ...targetMatch, ...matchUpdates };
+      let newMatches = [...currentMatches];
+      newMatches[matchIdx] = updatedMatch;
 
-        // Auto Advance Winner to nextMatchId if set
-        if (updatedMatch.nextMatchId && updatedMatch.nextMatchSlot) {
-          const winningTeam = updatedMatch.teamA?.isWinner 
-            ? updatedMatch.teamA 
-            : (updatedMatch.teamB?.isWinner ? updatedMatch.teamB : null);
+      // Auto Advance Winner to nextMatchId if set
+      if (updatedMatch.nextMatchId && updatedMatch.nextMatchSlot) {
+        const winningTeam = updatedMatch.teamA?.isWinner 
+          ? updatedMatch.teamA 
+          : (updatedMatch.teamB?.isWinner ? updatedMatch.teamB : null);
 
-          if (winningTeam) {
-            const nextMatchIdx = newMatches.findIndex(m => m.id === updatedMatch.nextMatchId);
-            if (nextMatchIdx !== -1) {
-              const nextMatch = newMatches[nextMatchIdx];
-              newMatches[nextMatchIdx] = {
-                ...nextMatch,
-                [updatedMatch.nextMatchSlot]: {
-                  ...winningTeam,
-                  score: 0,
-                  isWinner: false
-                }
-              };
-            }
+        if (winningTeam) {
+          const nextMatchIdx = newMatches.findIndex(m => m.id === updatedMatch.nextMatchId);
+          if (nextMatchIdx !== -1) {
+            const nextMatch = newMatches[nextMatchIdx];
+            newMatches[nextMatchIdx] = {
+              ...nextMatch,
+              [updatedMatch.nextMatchSlot]: {
+                ...winningTeam,
+                score: 0,
+                isWinner: false
+              }
+            };
           }
         }
-
-        return {
-          ...tour,
-          bracketMatches: newMatches
-        };
-      });
+      }
 
       return {
-        ...prev,
-        tournaments: updatedTournaments
+        ...tour,
+        bracketMatches: newMatches
       };
     });
+
+    const nextData = {
+      ...current,
+      tournaments: updatedTournaments
+    };
+    siteDataRef.current = nextData;
+    setSiteData(nextData);
+    saveSiteData(nextData);
+    return nextData;
   };
 
   // Arena Seat Booking Handlers
@@ -2918,10 +2975,24 @@ export function SiteDataProvider({ children }) {
 
   // Venue Zones Handler
   const updateVenueZone = (id, updates) => {
-    setSiteData(prev => ({
-      ...prev,
-      venueZones: (prev.venueZones || []).map(z => z.id === id ? { ...z, ...updates } : z)
-    }));
+    setSiteData(prev => {
+      const updatedZones = (prev.venueZones || []).map(z => {
+        if (z.id === id) {
+          const nextZone = { ...z, ...updates };
+          if (Array.isArray(nextZone.images) && nextZone.images.length > 0 && nextZone.images[0]?.url) {
+            nextZone.image = nextZone.images[0].url;
+          }
+          return nextZone;
+        }
+        return z;
+      });
+      const nextData = {
+        ...prev,
+        venueZones: updatedZones
+      };
+      saveSiteData(nextData);
+      return nextData;
+    });
   };
 
   // n8n Workflows Handlers
@@ -3348,79 +3419,95 @@ export function SiteDataProvider({ children }) {
 
   // Hardware Specs (Tiers) & Infrastructure Pricing Management
   const updateHardwareTier = (tierId, updates) => {
-    setSiteData(prev => {
-      const currentTiers = prev.hardwareTiers || INITIAL_TIERS;
-      return {
-        ...prev,
-        hardwareTiers: {
-          ...currentTiers,
-          [tierId]: {
-            ...(currentTiers[tierId] || {}),
-            ...updates,
-            id: tierId
-          }
+    const current = siteDataRef.current || siteData;
+    const currentTiers = current?.hardwareTiers || INITIAL_TIERS;
+    const nextData = {
+      ...current,
+      hardwareTiers: {
+        ...currentTiers,
+        [tierId]: {
+          ...(currentTiers[tierId] || {}),
+          ...updates,
+          id: tierId
         }
-      };
-    });
+      }
+    };
+    saveSiteData(nextData);
   };
 
   const addHardwareTier = (newTier) => {
+    const current = siteDataRef.current || siteData;
     const id = newTier.id || `tier-${Date.now()}`;
-    setSiteData(prev => ({
-      ...prev,
+    const nextData = {
+      ...current,
       hardwareTiers: {
-        ...(prev.hardwareTiers || INITIAL_TIERS),
+        ...(current?.hardwareTiers || INITIAL_TIERS),
         [id]: {
           ...newTier,
           id
         }
       }
-    }));
+    };
+    saveSiteData(nextData);
     return id;
   };
 
   const deleteHardwareTier = (tierId) => {
-    setSiteData(prev => {
-      const copy = { ...(prev.hardwareTiers || INITIAL_TIERS) };
-      delete copy[tierId];
-      return {
-        ...prev,
-        hardwareTiers: copy
-      };
-    });
+    const current = siteDataRef.current || siteData;
+    const copy = { ...(current?.hardwareTiers || INITIAL_TIERS) };
+    delete copy[tierId];
+    const nextData = {
+      ...current,
+      hardwareTiers: copy
+    };
+    saveSiteData(nextData);
   };
 
   const resetHardwareTiers = () => {
-    setSiteData(prev => ({
-      ...prev,
+    const current = siteDataRef.current || siteData;
+    const nextData = {
+      ...current,
       hardwareTiers: INITIAL_TIERS
-    }));
+    };
+    saveSiteData(nextData);
   };
 
   const updateFixedInfrastructure = (updates) => {
-    setSiteData(prev => ({
-      ...prev,
-      fixedInfrastructure: {
-        ...(prev.fixedInfrastructure || INITIAL_FIXED_INFRASTRUCTURE),
-        ...updates
-      }
-    }));
+    setSiteData(prev => {
+      const nextData = {
+        ...prev,
+        fixedInfrastructure: {
+          ...(prev.fixedInfrastructure || INITIAL_FIXED_INFRASTRUCTURE),
+          ...updates
+        }
+      };
+      saveSiteData(nextData);
+      return nextData;
+    });
   };
 
   const resetFixedInfrastructure = () => {
-    setSiteData(prev => ({
-      ...prev,
-      fixedInfrastructure: INITIAL_FIXED_INFRASTRUCTURE
-    }));
+    setSiteData(prev => {
+      const nextData = {
+        ...prev,
+        fixedInfrastructure: INITIAL_FIXED_INFRASTRUCTURE
+      };
+      saveSiteData(nextData);
+      return nextData;
+    });
   };
 
   const updateCatalogItemCost = (itemId, newCost) => {
-    setSiteData(prev => ({
-      ...prev,
-      catalogItems: (prev.catalogItems || INITIAL_CATALOG).map(item =>
-        item.id === itemId ? { ...item, baseCost: Number(newCost) || 0 } : item
-      )
-    }));
+    setSiteData(prev => {
+      const nextData = {
+        ...prev,
+        catalogItems: (prev.catalogItems || INITIAL_CATALOG).map(item =>
+          item.id === itemId ? { ...item, baseCost: Number(newCost) || 0 } : item
+        )
+      };
+      saveSiteData(nextData);
+      return nextData;
+    });
   };
 
   // Interior Style Themes Handlers
@@ -3431,7 +3518,9 @@ export function SiteDataProvider({ children }) {
       if (idx !== -1) {
         list[idx] = { ...list[idx], ...updates };
       }
-      return { ...prev, interiorThemes: list };
+      const nextData = { ...prev, interiorThemes: list };
+      saveSiteData(nextData);
+      return nextData;
     });
   };
 
@@ -3439,28 +3528,36 @@ export function SiteDataProvider({ children }) {
     setSiteData(prev => {
       const list = Array.isArray(prev.interiorThemes) ? [...prev.interiorThemes] : [...INITIAL_INTERIOR_THEMES];
       const id = newTheme.id || `theme-${Date.now()}`;
-      return {
+      const nextData = {
         ...prev,
         interiorThemes: [...list, { ...newTheme, id }]
       };
+      saveSiteData(nextData);
+      return nextData;
     });
   };
 
   const deleteInteriorTheme = (id) => {
     setSiteData(prev => {
       const list = Array.isArray(prev.interiorThemes) ? [...prev.interiorThemes] : [...INITIAL_INTERIOR_THEMES];
-      return {
+      const nextData = {
         ...prev,
         interiorThemes: list.filter(t => t.id !== id)
       };
+      saveSiteData(nextData);
+      return nextData;
     });
   };
 
   const resetInteriorThemes = () => {
-    setSiteData(prev => ({
-      ...prev,
-      interiorThemes: INITIAL_INTERIOR_THEMES
-    }));
+    setSiteData(prev => {
+      const nextData = {
+        ...prev,
+        interiorThemes: INITIAL_INTERIOR_THEMES
+      };
+      saveSiteData(nextData);
+      return nextData;
+    });
   };
 
   // SEO & Marketing Tracking Handlers

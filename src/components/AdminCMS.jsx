@@ -12,7 +12,7 @@ import {
   MessagesSquare, Receipt, Crown
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
-import { DEMO_TOURNAMENT_PHOTOS_50, EVENT_CATEGORIES, DEFAULT_ARTICLE_TAGS, DEFAULT_ORGANIZER_GAMES } from '../data/mockData';
+import { VENUE_ZONES, DEMO_TOURNAMENT_PHOTOS_50, EVENT_CATEGORIES, DEFAULT_ARTICLE_TAGS, DEFAULT_ORGANIZER_GAMES } from '../data/mockData';
 import ThreeProductViewer from './ThreeProductViewer';
 import ProductSpecSheetModal from './ProductSpecSheetModal';
 import { compressAndConvertToWebP, formatBytes } from '../utils/imageOptimizer';
@@ -23,6 +23,7 @@ import OmnichannelLeadsCMS from './OmnichannelLeadsCMS';
 import HardwarePricingCMS from './HardwarePricingCMS';
 import EsportRequestsCMS from './EsportRequestsCMS';
 import ArticleBlockEditor from './ArticleBlockEditor';
+import ActivityFormModal from './ActivityFormModal';
 import SeoMarketingCMS from './SeoMarketingCMS';
 import AdminStaffRolesCMS, { PERMISSION_TABS_LIST } from './AdminStaffRolesCMS';
 import AnnouncementTickerCMS from './AnnouncementTickerCMS';
@@ -1077,6 +1078,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
   // Tournament Master CMS State & Actions
   const [tournamentModalTab, setTournamentModalTab] = useState('general'); // 'general', 'rules', 'roster', 'gallery', 'seo'
   const [isTournamentModalOpen, setIsTournamentModalOpen] = useState(false);
+  const [activeZoneEditTab, setActiveZoneEditTab] = useState('all');
   const [isEditingTournament, setIsEditingTournament] = useState(false);
   const [activeTournamentDraft, setActiveTournamentDraft] = useState(null);
   const [batchPhotoUrls, setBatchPhotoUrls] = useState('');
@@ -1400,9 +1402,6 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
     }
     setIsTournamentModalOpen(false);
     triggerSaveToast();
-    setTimeout(() => {
-      saveSiteData();
-    }, 100);
   };
 
   // Filtered Tournaments List for Tab 05 Tournaments Sub-tab
@@ -1647,8 +1646,10 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
   const [compressingItemId, setCompressingItemId] = useState(null);
   const [compressionToast, setCompressionToast] = useState(null);
 
-  const handleImageUpload = async (file, onComplete, fieldKey = 'image') => {
+  const handleImageUpload = async (file, arg2, arg3) => {
     if (!file) return;
+    const onComplete = typeof arg2 === 'function' ? arg2 : (typeof arg3 === 'function' ? arg3 : () => {});
+    const fieldKey = typeof arg2 === 'string' ? arg2 : (typeof arg3 === 'string' ? arg3 : 'image');
     setCompressingItemId(fieldKey);
     try {
       const res = await compressAndConvertToWebP(file, { maxWidth: 1600, maxHeight: 1600, quality: 0.82 });
@@ -5581,7 +5582,17 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                         {(siteData.aiGuardrails?.pendingQuestions || []).map(pq => (
                           <tr key={pq.id}>
                             <td className="text-xs text-muted">{pq.timestamp}</td>
-                            <td><strong>"{pq.query}"</strong></td>
+                            <td>
+                              <div><strong>"{pq.query}"</strong></div>
+                              {pq.translationTh && pq.translationTh !== pq.query && (
+                                <div style={{ fontSize: '0.82rem', color: '#1d4ed8', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                  <span style={{ background: '#eff6ff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #bfdbfe', fontWeight: 600 }}>
+                                    🇹🇭 แปลไทย:
+                                  </span>
+                                  <span>{pq.translationTh}</span>
+                                </div>
+                              )}
+                            </td>
                             <td>
                               <div className="actions-cell">
                                 <button 
@@ -7085,7 +7096,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                           <th style={{ minWidth: '140px' }}>วันแข่งขัน / เวลา</th>
                           <th style={{ minWidth: '120px' }}>เงินรางวัล</th>
                           <th style={{ minWidth: '110px' }}>ทีม & นักแข่ง</th>
-                          <th style={{ minWidth: '140px' }}>คลังภาพกิจกรรม</th>
+                          <th style={{ minWidth: '140px' }}>สายการแข่ง (Brackets)</th>
                           <th style={{ minWidth: '130px' }}>สถานะ & SEO</th>
                           <th style={{ minWidth: '150px', textAlign: 'center' }}>การจัดการ</th>
                         </tr>
@@ -7150,17 +7161,14 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                               </td>
                               <td>
                                 <button 
-                                  type="button"
-                                  className={`tourney-pill-btn ${photoCount >= 50 ? 'pill-gallery-ready' : 'pill-gallery-pending'}`}
-                                  onClick={() => openEditTournamentModal(t, 'gallery')}
-                                  title="คลิกเพื่อจัดการแกลเลอรีภาพกิจกรรม 50+ ภาพ"
+                                  type="button" 
+                                  className="tourney-pill-btn pill-gallery-ready"
+                                  onClick={() => openEditTournamentModal(t, 'brackets')}
+                                  title="คลิกเพื่อจัดการสายการแข่งและผลคะแนน"
                                 >
-                                  <Camera size={14} />
-                                  <span className="pill-counter">{photoCount}</span>
-                                  <span>ภาพ</span>
-                                  {photoCount >= 50 && (
-                                    <span className="pill-badge-gold">✓ 50+</span>
-                                  )}
+                                  <Trophy size={14} color="#2563eb" />
+                                  <span className="pill-counter">{(t.bracketMatches || []).length}</span>
+                                  <span>คู่</span>
                                 </button>
                               </td>
                               <td>
@@ -7204,7 +7212,6 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                                       if (window.confirm(`คุณต้องการลบทัวร์นาเมนต์ "${t.title}" ใช่หรือไม่?`)) {
                                         deleteTournament(t.id);
                                         triggerSaveToast();
-                                        setTimeout(() => { saveSiteData(); }, 100);
                                       }
                                     }}
                                     title="ลบทัวร์นาเมนต์นี้"
@@ -7301,75 +7308,375 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                     defaultSubtitle="#475569"
                   />
 
-                  {/* Zones Grid */}
-                  <div className="form-row-2" style={{ gap: '16px', marginTop: '16px' }}>
-                    {(siteData.venueZones || []).map(zone => {
-                      const zoneTitle = zone.title || zone.name || 'โซนร้านเกม';
-                      const zoneDesc = zone.description || zone.desc || '';
-                      const zoneSpecs = Array.isArray(zone.specs) ? zone.specs.join(', ') : (zone.specs || '');
+                  {/* Zone Filter Tab Buttons */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    margin: '18px 0 16px 0',
+                    flexWrap: 'wrap',
+                    padding: '8px',
+                    background: '#f1f5f9',
+                    borderRadius: '10px',
+                    border: '1px solid #e2e8f0'
+                  }}>
+                    <button
+                      type="button"
+                      onClick={() => setActiveZoneEditTab('all')}
+                      style={{
+                        padding: '6px 14px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        background: activeZoneEditTab === 'all' ? '#1d4ed8' : '#ffffff',
+                        color: activeZoneEditTab === 'all' ? '#ffffff' : '#334155',
+                        fontWeight: 700,
+                        fontSize: '0.82rem',
+                        cursor: 'pointer',
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                      }}
+                    >
+                      👁️ แสดงทุกโซน (4 โซน)
+                    </button>
+                    {(siteData.venueZones || []).map(z => {
+                      const isCur = activeZoneEditTab === z.id;
                       return (
-                        <div key={zone.id} className="form-subblock">
-                          <h5 className="form-subblock-title">
-                            <Monitor size={14} className="text-blue" />
-                            <span>{zoneTitle}</span>
-                          </h5>
-
-                          <div className="form-row-2">
-                            <div className="form-group">
-                              <label>ชื่อโซน</label>
-                              <input 
-                                type="text" className="form-input"
-                                value={zoneTitle}
-                                onChange={e => updateVenueZone(zone.id, { title: e.target.value, name: e.target.value })}
-                              />
-                            </div>
-                            <div className="form-group">
-                              <label>อัตราค่าบริการ / ชม.</label>
-                              <input 
-                                type="text" className="form-input"
-                                placeholder="เช่น ฿35 / ชม. หรือ ฟรีสำหรับสมาชิก"
-                                value={zone.ratePerHour || ''}
-                                onChange={e => updateVenueZone(zone.id, { ratePerHour: e.target.value })}
-                              />
-                            </div>
-                          </div>
-
-                          <SectionImageUploader 
-                            label={`ภาพถ่ายบรรยากาศประจำโซน (${zoneTitle})`}
-                            value={zone.image || ''}
-                            onChange={val => updateVenueZone(zone.id, { image: val })}
-                            recommendedSize="1000 x 650 px"
-                            aspectRatio="16:10 หรือ 16:9 (แนวนอน)"
-                            description={`ภาพถ่ายจริงหรือ 3D Render ของ ${zoneTitle} สำหรับแท็บสลับดูบรรยากาศร้านหน้าแรก`}
-                            uploadKey={`zone-img-${zone.id}`}
-                            compressingItemId={compressingItemId}
-                            handleImageUpload={handleImageUpload}
-                            previewWidth={160}
-                            previewHeight={100}
-                          />
-
-                          <div className="form-group">
-                            <label>สเปกฮาร์ดแวร์ประจำโซน (คั่นด้วยจุลภาค ,)</label>
-                            <input 
-                              type="text" className="form-input"
-                              value={zoneSpecs}
-                              onChange={e => updateVenueZone(zone.id, { 
-                                specs: e.target.value.split(',').map(s => s.trim()).filter(Boolean) 
-                              })}
-                            />
-                          </div>
-
-                          <div className="form-group">
-                            <label>คำบรรยายโซน</label>
-                            <textarea 
-                              className="form-input form-textarea" rows="2"
-                              value={zoneDesc}
-                              onChange={e => updateVenueZone(zone.id, { description: e.target.value, desc: e.target.value })}
-                            />
-                          </div>
-                        </div>
+                        <button
+                          key={z.id}
+                          type="button"
+                          onClick={() => setActiveZoneEditTab(z.id)}
+                          style={{
+                            padding: '6px 14px',
+                            borderRadius: '8px',
+                            border: 'none',
+                            background: isCur ? '#1d4ed8' : '#ffffff',
+                            color: isCur ? '#ffffff' : '#334155',
+                            fontWeight: 700,
+                            fontSize: '0.82rem',
+                            cursor: 'pointer',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                          }}
+                        >
+                          {z.id === 'stage' && '🏆 '}
+                          {z.id === 'vip' && '🛡️ '}
+                          {z.id === 'standard' && '🖥️ '}
+                          {z.id === 'cafe' && '☕ '}
+                          {z.title || z.id}
+                        </button>
                       );
                     })}
+                  </div>
+
+                  {/* Zones List */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '16px' }}>
+                    {(siteData.venueZones || [])
+                      .filter(zone => activeZoneEditTab === 'all' || zone.id === activeZoneEditTab)
+                      .map(zone => {
+                        const zoneTitle = zone.title || zone.name || 'โซนร้านเกม';
+                        const zoneBadge = zone.badge || '';
+                        const zoneSubtitle = zone.subtitle || '';
+                        const zoneDesc = zone.description || zone.desc || '';
+                        const zoneSpecs = Array.isArray(zone.specs) ? zone.specs.join(', ') : (zone.specs || '');
+
+                        // Normalize exactly 3 images per zone with default fallbacks
+                        const defaultZoneMock = VENUE_ZONES.find(v => v.id === zone.id);
+                        const zoneImages = Array.isArray(zone.images) ? [...zone.images] : [];
+                        const slot0 = zoneImages[0] || { id: `${zone.id}-img-1`, url: zone.image || defaultZoneMock?.images?.[0]?.url || defaultZoneMock?.image || '', caption: '' };
+                        const slot1 = zoneImages[1] || { id: `${zone.id}-img-2`, url: defaultZoneMock?.images?.[1]?.url || '', caption: '' };
+                        const slot2 = zoneImages[2] || { id: `${zone.id}-img-3`, url: defaultZoneMock?.images?.[2]?.url || '', caption: '' };
+                        const threeSlots = [
+                          { ...slot0, label: 'ภาพที่ 1: ภาพหน้าปกหลัก (Main 16:9 Cover)' },
+                          { ...slot1, label: 'ภาพที่ 2: ภาพมุมกว้าง / สิ่งอำนวยความสะดวก' },
+                          { ...slot2, label: 'ภาพที่ 3: ภาพอุปกรณ์ / สเตชันแข่งขัน' }
+                        ];
+
+                        const handleSlotChange = (slotIdx, newUrl, newCaption) => {
+                          const updatedSlots = threeSlots.map((s, idx) => {
+                            if (idx === slotIdx) {
+                              return {
+                                ...s,
+                                url: newUrl !== undefined ? newUrl : s.url,
+                                caption: newCaption !== undefined ? newCaption : s.caption
+                              };
+                            }
+                            return s;
+                          });
+                          updateVenueZone(zone.id, {
+                            images: updatedSlots.map(s => ({ id: s.id, url: s.url, caption: s.caption || '' })),
+                            image: updatedSlots[0]?.url || zone.image || defaultZoneMock?.image || ''
+                          });
+                        };
+
+                        const handleSlotFileUpload = async (file, sIdx) => {
+                          if (!file) return;
+                          setCompressingItemId(`zone-${zone.id}-slot-${sIdx}`);
+                          try {
+                            const res = await compressAndConvertToWebP(file, { maxWidth: 1600, maxHeight: 1200, quality: 0.84 });
+                            handleSlotChange(sIdx, res.dataUrl, undefined);
+                            if (addMediaItem) {
+                              addMediaItem({
+                                name: file.name.replace(/\.[^/.]+$/, "") || `${zoneTitle} Slot ${sIdx + 1}`,
+                                alt: `${zoneTitle} - Slot ${sIdx + 1}`,
+                                category: 'venue',
+                                url: res.dataUrl,
+                                dimensions: `${res.width || 1200}x${res.height || 800} (${res.format || 'WebP'})`
+                              });
+                            }
+                            setCompressionToast({
+                              original: res.originalSizeFormatted,
+                              compressed: res.compressedSizeFormatted,
+                              ratio: res.compressionRatio,
+                              format: res.format
+                            });
+                            setTimeout(() => setCompressionToast(null), 5000);
+                          } catch (err) {
+                            console.warn('Fallback direct file reader:', err);
+                            const reader = new FileReader();
+                            reader.onload = (ev) => {
+                              handleSlotChange(sIdx, ev.target.result, undefined);
+                            };
+                            reader.readAsDataURL(file);
+                          } finally {
+                            setCompressingItemId(null);
+                          }
+                        };
+
+                        return (
+                          <div key={zone.id} className="form-subblock" style={{ background: '#ffffff', border: '1.5px solid #e2e8f0', borderRadius: '12px', padding: '20px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', borderBottom: '1px solid #f1f5f9', paddingBottom: '10px' }}>
+                              <h5 className="form-subblock-title" style={{ margin: 0, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <Monitor size={16} className="text-blue" />
+                                <span style={{ fontWeight: 800, color: '#0f172a' }}>{zoneTitle}</span>
+                              </h5>
+                              <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '3px 8px', background: '#eff6ff', color: '#1d4ed8', borderRadius: '6px' }}>
+                                ID: {zone.id}
+                              </span>
+                            </div>
+
+                            <div className="form-row-2">
+                              <div className="form-group">
+                                <label style={{ fontWeight: 700 }}>ชื่อโซน (Title)</label>
+                                <input 
+                                  type="text" className="form-input"
+                                  value={zoneTitle}
+                                  onChange={e => updateVenueZone(zone.id, { title: e.target.value, name: e.target.value })}
+                                />
+                              </div>
+                              <div className="form-group">
+                                <label style={{ fontWeight: 700 }}>ป้ายกำกับโซน (Badge)</label>
+                                <input 
+                                  type="text" className="form-input"
+                                  placeholder="เช่น PROFESSIONAL 5v5 STAGE หรือ PRIVATE VIP SUITES"
+                                  value={zoneBadge}
+                                  onChange={e => updateVenueZone(zone.id, { badge: e.target.value })}
+                                />
+                              </div>
+                            </div>
+
+                            <div className="form-row-2">
+                              <div className="form-group">
+                                <label style={{ fontWeight: 700 }}>คำโปรยหัวข้อ (Subtitle)</label>
+                                <input 
+                                  type="text" className="form-input"
+                                  placeholder="เช่น เวทีแข่งขันมาตรฐานสากลพร้อมจอ LED 4K"
+                                  value={zoneSubtitle}
+                                  onChange={e => updateVenueZone(zone.id, { subtitle: e.target.value })}
+                                />
+                              </div>
+                              <div className="form-group">
+                                <label style={{ fontWeight: 700 }}>อัตราค่าบริการ / ชม.</label>
+                                <input 
+                                  type="text" className="form-input"
+                                  placeholder="เช่น ฿35 / ชม. หรือ ฟรีสำหรับสมาชิก"
+                                  value={zone.ratePerHour || ''}
+                                  onChange={e => updateVenueZone(zone.id, { ratePerHour: e.target.value })}
+                                />
+                              </div>
+                            </div>
+
+                            <div className="form-group">
+                              <label style={{ fontWeight: 700 }}>สเปกฮาร์ดแวร์ประจำโซน (คั่นด้วยจุลภาค ,)</label>
+                              <input 
+                                type="text" className="form-input"
+                                value={zoneSpecs}
+                                onChange={e => updateVenueZone(zone.id, { 
+                                  specs: e.target.value.split(',').map(s => s.trim()).filter(Boolean) 
+                                })}
+                              />
+                            </div>
+
+                            <div className="form-group">
+                              <label style={{ fontWeight: 700 }}>คำบรรยายโซน (Description)</label>
+                              <textarea 
+                                className="form-input form-textarea" rows="2"
+                                value={zoneDesc}
+                                onChange={e => updateVenueZone(zone.id, { description: e.target.value, desc: e.target.value })}
+                              />
+                            </div>
+
+                            {/* 3-Image Gallery Manager (Slot 1, Slot 2, Slot 3) */}
+                            <div style={{ marginTop: '16px', background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1.5px solid #e2e8f0' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <Camera size={18} className="text-blue" />
+                                  <strong style={{ fontSize: '0.92rem', color: '#0f172a' }}>แกลเลอรีภาพบรรยากาศโซน (3 ภาพต่อโซน)</strong>
+                                </div>
+                                <span style={{ fontSize: '0.78rem', color: '#64748b', background: '#ffffff', padding: '3px 10px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                                  ⚡ รองรับทุกรูปแบบ (WebP, JPG, PNG, GIF, SVG, AVIF, BMP)
+                                </span>
+                              </div>
+
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+                                {threeSlots.map((slot, sIdx) => {
+                                  const defaultSlotImg = defaultZoneMock?.images?.[sIdx]?.url || (sIdx === 0 ? (defaultZoneMock?.image || '') : '');
+                                  const previewUrl = slot.url || defaultSlotImg;
+                                  const hasCustom = Boolean(slot.url && slot.url.trim() && slot.url !== defaultSlotImg);
+
+                                  return (
+                                    <div key={sIdx} style={{ background: '#ffffff', border: '1.5px solid #cbd5e1', borderRadius: '10px', padding: '14px', boxShadow: '0 2px 6px rgba(0,0,0,0.02)' }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                                        <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>
+                                          {slot.label}
+                                        </span>
+                                        {hasCustom && (
+                                          <button
+                                            type="button"
+                                            onClick={() => handleSlotChange(sIdx, '', '')}
+                                            style={{ border: 'none', background: 'transparent', color: '#ef4444', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 700 }}
+                                            title="รีเซ็ตกลับเป็นภาพเริ่มต้น"
+                                          >
+                                            รีเซ็ตภาพ
+                                          </button>
+                                        )}
+                                      </div>
+
+                                      {/* Preview Frame with 16:9 ratio */}
+                                      <div style={{ width: '100%', height: '145px', background: '#0f172a', borderRadius: '8px', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px', border: '1px solid #cbd5e1' }}>
+                                        {previewUrl ? (
+                                          <>
+                                            <img 
+                                              src={previewUrl} 
+                                              alt={`Slot ${sIdx + 1}`} 
+                                              style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                              onError={(e) => {
+                                                if (defaultSlotImg && e.currentTarget.src !== defaultSlotImg) {
+                                                  e.currentTarget.src = defaultSlotImg;
+                                                }
+                                              }}
+                                            />
+                                            <div style={{ 
+                                              position: 'absolute', 
+                                              top: '6px', 
+                                              right: '6px', 
+                                              background: hasCustom ? 'rgba(37, 99, 235, 0.9)' : 'rgba(15, 23, 42, 0.75)', 
+                                              color: '#ffffff', 
+                                              fontSize: '0.68rem', 
+                                              fontWeight: 700, 
+                                              padding: '3px 8px', 
+                                              borderRadius: '4px', 
+                                              backdropFilter: 'blur(4px)',
+                                              border: '1px solid rgba(255,255,255,0.2)'
+                                            }}>
+                                              {hasCustom ? '✓ กำหนดเอง (Custom WebP)' : 'ภาพเริ่มต้น (Default)'}
+                                            </div>
+                                          </>
+                                        ) : (
+                                          <div style={{ textAlign: 'center', color: '#94a3b8' }}>
+                                            <ImageIcon size={24} style={{ opacity: 0.5, margin: '0 auto 4px auto' }} />
+                                            <div style={{ fontSize: '0.75rem' }}>ยังไม่มีรูปภาพ</div>
+                                          </div>
+                                        )}
+                                      </div>
+
+                                      {/* URL Input */}
+                                      <div style={{ marginBottom: '8px' }}>
+                                        <input
+                                          type="text"
+                                          className="form-input"
+                                          placeholder="URL รูปภาพ (https://... หรือ /images/...)"
+                                          style={{ fontSize: '0.78rem', padding: '6px 10px', background: '#f8fafc' }}
+                                          value={slot.url || ''}
+                                          onChange={e => handleSlotChange(sIdx, e.target.value, undefined)}
+                                        />
+                                      </div>
+
+                                      {/* Upload / Media Library Buttons */}
+                                      <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                                        <label 
+                                          style={{
+                                            flex: 1,
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '6px',
+                                            padding: '7px 10px',
+                                            background: '#eff6ff',
+                                            border: '1.5px solid #93c5fd',
+                                            borderRadius: '6px',
+                                            fontSize: '0.78rem',
+                                            fontWeight: 700,
+                                            color: '#1d4ed8',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.15s ease'
+                                          }}
+                                        >
+                                          <Sparkles size={13} className="text-blue" />
+                                          <span>อัปโหลดภาพ (WebP)</span>
+                                          <input
+                                            type="file"
+                                            accept="image/*,.webp,.png,.jpg,.jpeg,.gif,.svg,.avif,.bmp,.ico"
+                                            style={{ display: 'none' }}
+                                            onChange={e => {
+                                              const file = e.target.files?.[0];
+                                              if (file) {
+                                                handleSlotFileUpload(file, sIdx);
+                                              }
+                                              e.target.value = '';
+                                            }}
+                                          />
+                                        </label>
+
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            openMediaLibraryForField('zones', (item) => {
+                                              handleSlotChange(sIdx, item.url, item.alt || item.name);
+                                            }, slot.url);
+                                          }}
+                                          style={{
+                                            padding: '7px 12px',
+                                            background: '#ffffff',
+                                            border: '1px solid #cbd5e1',
+                                            borderRadius: '6px',
+                                            fontSize: '0.78rem',
+                                            fontWeight: 600,
+                                            color: '#334155',
+                                            cursor: 'pointer'
+                                          }}
+                                          title="เลือกจากคลังสื่อ Media Library"
+                                        >
+                                          คลังสื่อ
+                                        </button>
+                                      </div>
+
+                                      {/* Caption Input */}
+                                      <div>
+                                        <input
+                                          type="text"
+                                          className="form-input"
+                                          placeholder="คำบรรยายภาพ (Caption Overlay บนสไลเดอร์)"
+                                          style={{ fontSize: '0.76rem', padding: '6px 10px' }}
+                                          value={slot.caption || ''}
+                                          onChange={e => handleSlotChange(sIdx, undefined, e.target.value)}
+                                        />
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                   </div>
 
                   <div className="modal-footer-btns" style={{ marginTop: '16px' }}>
@@ -9206,1186 +9513,35 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                 </div>
               )}
 
-              {/* Edit Activity Modal */}
-              {editingActivity && (
-                <div 
-                  className="cms-modal-backdrop" 
-                  onClick={(e) => {
-                    if (e.target === e.currentTarget) {
-                      if (window.confirm('คุณต้องการปิดหน้าต่างแก้ไขบทความใช่หรือไม่? (ข้อมูลที่ยังไม่บันทึกจะหายไป)')) {
-                        setEditingActivity(null);
-                      }
-                    }
-                  }}
-                >
-                  <div className="cms-modal-card modal-extra-wide" style={{ maxHeight: '92vh', display: 'flex', flexDirection: 'column' }} onClick={e => e.stopPropagation()}>
-                    <div className="modal-head" style={{ flexShrink: 0 }}>
-                      <h4>แก้ไขบทความกิจกรรม: {editingActivity.title}</h4>
-                      <button 
-                        type="button"
-                        onClick={() => {
-                          if (window.confirm('คุณต้องการปิดหน้าต่างแก้ไขบทความใช่หรือไม่? (ข้อมูลที่ยังไม่บันทึกจะหายไป)')) {
-                            setEditingActivity(null);
-                          }
-                        }} 
-                        className="btn-close-modal"
-                        title="ปิดหน้าต่าง"
-                      >✕</button>
-                    </div>
+              {/* Isolated Activity Form Modal (Edit Activity) */}
+              <ActivityFormModal
+                isOpen={Boolean(editingActivity)}
+                initialData={editingActivity}
+                onClose={() => setEditingActivity(null)}
+                categories={siteData.activityCategories || EVENT_CATEGORIES}
+                availableTags={siteData.articleTags || DEFAULT_ARTICLE_TAGS}
+                onAddNewTag={addArticleTag}
+                onSave={async (savedData) => {
+                  updateActivityItem(savedData.id, savedData);
+                  setEditingActivity(null);
+                  triggerSaveToast();
+                }}
+              />
 
-                    <div className="modal-body-form" style={{ flex: '1 1 auto', overflowY: 'auto', minHeight: 0 }}>
-                      <div className="form-row-2">
-                        <div className="form-group">
-                          <label>ชื่อกิจกรรม / หัวข้อบทความ</label>
-                          <input 
-                            type="text" className="form-input"
-                            value={editingActivity.title}
-                            onChange={e => setEditingActivity({ ...editingActivity, title: e.target.value })}
-                          />
-                        </div>
-
-                        <div className="form-group">
-                          <label>URL Slug ปลายทาง (เช่น icafe-lan-tournament)</label>
-                          <div className="slug-input-prefix">
-                            <span>/activities/</span>
-                            <input 
-                              type="text" className="form-input"
-                              value={editingActivity.slug || ''}
-                              onChange={e => setEditingActivity({ 
-                                ...editingActivity, 
-                                slug: e.target.value.toLowerCase().replace(/[^a-z0-9\u0E00-\u0E7F]+/g, '-').replace(/(^-|-$)/g, '') 
-                              })}
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="form-row-3">
-                        <div className="form-group">
-                          <label>หมวดหมู่</label>
-                          <select 
-                            className="form-input"
-                            value={editingActivity.category}
-                            onChange={e => setEditingActivity({ ...editingActivity, category: e.target.value })}
-                          >
-                            {(siteData.activityCategories || EVENT_CATEGORIES).map(cat => (
-                              <option key={cat.id} value={cat.id}>{cat.label} ({cat.id})</option>
-                            ))}
-                          </select>
-                        </div>
-
-                        <div className="form-group">
-                          <label>ป้ายหัวข้อเล็ก (Tag Badge เช่น LAN TOURNAMENT)</label>
-                          <input 
-                            type="text" className="form-input"
-                            value={editingActivity.tag || ''}
-                            onChange={e => setEditingActivity({ ...editingActivity, tag: e.target.value })}
-                          />
-                        </div>
-
-                        <div className="form-group">
-                          <label>พาร์ตเนอร์ / ผู้สนับสนุน</label>
-                          <input 
-                            type="text" className="form-input"
-                            value={editingActivity.partner || ''}
-                            onChange={e => setEditingActivity({ ...editingActivity, partner: e.target.value })}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Interactive Article Tags Multi-Selector */}
-                      <div className="form-group" style={{ background: '#f8fafc', padding: '14px 16px', borderRadius: '10px', border: '1px solid #e2e8f0', margin: '14px 0' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                          <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, fontSize: '0.88rem', color: '#0f172a' }}>
-                            <Tag size={15} className="text-blue" />
-                            <span>แท็กบทความที่เกี่ยวข้อง (Article Tags) *คลิกเพื่อเลือก/ยกเลิกแท็ก:</span>
-                          </span>
-                          <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                            เลือกแล้ว: {(editingActivity.tags || []).length} แท็ก
-                          </span>
-                        </div>
-
-                        {/* Tag Chips Picker */}
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '10px' }}>
-                          {(siteData.articleTags || DEFAULT_ARTICLE_TAGS).map((tag, tIdx) => {
-                            const isSelected = (editingActivity.tags || []).includes(tag);
-                            return (
-                              <button
-                                key={tIdx}
-                                type="button"
-                                onClick={() => {
-                                  setEditingActivity(prev => {
-                                    const current = prev.tags || [];
-                                    const next = current.includes(tag)
-                                      ? current.filter(t => t !== tag)
-                                      : [...current, tag];
-                                    return { ...prev, tags: next };
-                                  });
-                                }}
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '4px',
-                                  padding: '4px 10px',
-                                  borderRadius: '20px',
-                                  fontSize: '0.78rem',
-                                  fontWeight: 600,
-                                  cursor: 'pointer',
-                                  transition: 'all 0.15s ease',
-                                  border: isSelected ? '1.5px solid #2563eb' : '1px solid #cbd5e1',
-                                  background: isSelected ? '#eff6ff' : '#ffffff',
-                                  color: isSelected ? '#1d4ed8' : '#475569'
-                                }}
-                              >
-                                <span>{tag}</span>
-                                {isSelected ? <Check size={12} color="#1d4ed8" /> : <Plus size={12} color="#94a3b8" />}
-                              </button>
-                            );
-                          })}
-                        </div>
-
-                        {/* Quick Add Custom Tag */}
-                        <div style={{ display: 'flex', gap: '8px', maxWidth: '400px' }}>
-                          <input 
-                            type="text" 
-                            className="form-input form-input-sm"
-                            placeholder="พิมพ์แท็กใหม่ เช่น #RoV, #VALORANT..."
-                            value={newTagInput}
-                            onChange={e => setNewTagInput(e.target.value)}
-                            onKeyDown={e => {
-                              if (e.key === 'Enter') {
-                                e.preventDefault();
-                                if (newTagInput.trim()) {
-                                  const tag = newTagInput.trim().startsWith('#') ? newTagInput.trim() : '#' + newTagInput.trim();
-                                  addArticleTag(tag);
-                                  setEditingActivity(prev => ({
-                                    ...prev,
-                                    tags: [...(prev.tags || []), tag]
-                                  }));
-                                  setNewTagInput('');
-                                }
-                              }
-                            }}
-                          />
-                          <button
-                            type="button"
-                            className="btn-secondary btn-sm"
-                            onClick={() => {
-                              if (newTagInput.trim()) {
-                                const tag = newTagInput.trim().startsWith('#') ? newTagInput.trim() : '#' + newTagInput.trim();
-                                addArticleTag(tag);
-                                setEditingActivity(prev => ({
-                                  ...prev,
-                                  tags: [...(prev.tags || []), tag]
-                                }));
-                                setNewTagInput('');
-                              }
-                            }}
-                          >
-                            <Plus size={12} /> เพิ่ม
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="form-row-3">
-                        <div className="form-group">
-                          <label>วันที่จัดกิจกรรม (เช่น สิงหาคม 2026)</label>
-                          <input 
-                            type="text" className="form-input"
-                            value={editingActivity.date || ''}
-                            onChange={e => setEditingActivity({ ...editingActivity, date: e.target.value })}
-                          />
-                        </div>
-
-                        <div className="form-group">
-                          <label>เวลาที่ใช้ในการอ่าน (เช่น 3 นาที)</label>
-                          <input 
-                            type="text" className="form-input"
-                            value={editingActivity.readTime || '3 นาทีในการอ่าน'}
-                            onChange={e => setEditingActivity({ ...editingActivity, readTime: e.target.value })}
-                          />
-                        </div>
-
-                        <div className="form-group">
-                          <label>รางวัลรวม (Prize Pool)</label>
-                          <input 
-                            type="text" className="form-input"
-                            value={editingActivity.prizePool || ''}
-                            onChange={e => setEditingActivity({ ...editingActivity, prizePool: e.target.value })}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="image-manager-row">
-                        <div className="form-group" style={{ flex: 1 }}>
-                          <label>URL รูปภาพหน้าปก (Cover Image URL)</label>
-                          <input 
-                            type="url" className="form-input"
-                            value={editingActivity.image || ''}
-                            onChange={e => setEditingActivity({ ...editingActivity, image: e.target.value })}
-                          />
-                        </div>
-                        <div className="image-upload-wrapper">
-                          <label className="btn-upload-file" title="เลือกไฟล์ภาพ ระบบจะย่อขนาดและแปลงเป็น WebP บีบอัดอัตโนมัติ">
-                            {compressingItemId === 'edit-act-cover' ? (
-                              <>
-                                <RefreshCw size={14} className="spin-icon" />
-                                <span>กำลังแปลง WebP...</span>
-                              </>
-                            ) : (
-                              <>
-                                <Upload size={14} />
-                                <span>อัปโหลดภาพ (WebP)</span>
-                              </>
-                            )}
-                            <input 
-                              type="file" 
-                              accept="image/*" 
-                              style={{ display: 'none' }}
-                              onChange={e => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                  handleImageUpload(file, (dataUrl) => {
-                                    setEditingActivity({ ...editingActivity, image: dataUrl });
-                                  }, 'edit-act-cover');
-                                }
-                              }}
-                            />
-                          </label>
-                        </div>
-                      </div>
-
-                      {/* Image ALT Tag for SEO */}
-                      <div className="form-group" style={{ marginTop: '4px' }}>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
-                          <Tag size={13} className="text-blue" />
-                          <span>คำอธิบายรูปภาพสำหรับ SEO (Image ALT Tag):</span>
-                        </label>
-                        <input 
-                          type="text" 
-                          className="form-input"
-                          placeholder="เช่น ภาพถ่ายบรรยากาศการแข่งขันรอบชิงชนะเลิศ GLP VALORANT ณ เวทีกลาง"
-                          value={editingActivity.imageAlt || ''}
-                          onChange={e => setEditingActivity({ ...editingActivity, imageAlt: e.target.value })}
-                        />
-                        <span className="text-xs text-muted" style={{ display: 'block', marginTop: '4px' }}>
-                          ใช้สำหรับ Google Image Search และการแชร์ขึ้น Social Media (OG Image)
-                        </span>
-                      </div>
-
-                      <div className="form-group">
-                        <label>คำอธิบายสั้น (Excerpt / บทคัดย่อ)</label>
-                        <textarea 
-                          className="form-input form-textarea" rows="2"
-                          value={editingActivity.desc || ''}
-                          onChange={e => setEditingActivity({ ...editingActivity, desc: e.target.value })}
-                        />
-                      </div>
-
-                      <div className="form-group" style={{ marginBottom: '24px' }}>
-                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 700, fontSize: '0.95rem' }}>
-                          เนื้อหาบทความเต็ม (Visual Block Editor สไตล์ WordPress Gutenberg)
-                        </label>
-                        <ArticleBlockEditor 
-                          blocks={editingActivity.contentBlocks || []} 
-                          onChange={(updatedBlocks) => {
-                            setEditingActivity(prev => ({
-                              ...prev,
-                              contentBlocks: updatedBlocks
-                            }));
-                          }} 
-                        />
-                      </div>
-
-                      {/* Interactive High-Res Photo Gallery & SEO ALT Manager */}
-                      <div className="form-group gallery-cms-section">
-                        <div className="gallery-cms-header">
-                          <div className="gallery-cms-title-wrap">
-                            <div className="gallery-cms-title">
-                              <ImageIcon size={18} className="text-blue" />
-                              <strong>แกลเลอรีรูปภาพความละเอียดสูง (Photo Gallery)</strong>
-                              <span className="gallery-count-badge">{(editingActivity.galleryPhotos || []).length} ภาพ</span>
-                            </div>
-                            <p className="gallery-cms-subtitle">
-                              อัปโหลดภาพกิจกรรม (แปลงเป็น WebP อัตโนมัติ) และกำหนด ALT Text สำหรับ SEO & AI Search Engine
-                            </p>
-                          </div>
-
-                          <div className="gallery-cms-actions">
-                            <label className="btn-upload-file btn-upload-gallery-primary" title="เลือกไฟล์ภาพหลายไฟล์พร้อมกัน ระบบจะย่อขนาดและแปลงเป็น WebP อัตโนมัติ">
-                              {compressingItemId === 'edit-gallery-photos' ? (
-                                <>
-                                  <RefreshCw size={14} className="spin-icon" />
-                                  <span>กำลังแปลง WebP...</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Upload size={14} />
-                                  <span>อัปโหลดภาพแกลเลอรี (WebP)</span>
-                                </>
-                              )}
-                              <input 
-                                type="file" 
-                                accept="image/*" 
-                                multiple
-                                style={{ display: 'none' }}
-                                onChange={e => {
-                                  if (e.target.files && e.target.files.length > 0) {
-                                    handleBatchGalleryUpload(e.target.files, true);
-                                    e.target.value = '';
-                                  }
-                                }}
-                              />
-                            </label>
-                          </div>
-                        </div>
-
-                        {/* Quick Add URL Box */}
-                        <div className="gallery-url-quick-add">
-                          <input 
-                            type="url" 
-                            className="form-input form-input-sm" 
-                            placeholder="หรือวาง URL รูปภาพภายนอกที่นี่..." 
-                            value={editGalleryUrl}
-                            onChange={e => setEditGalleryUrl(e.target.value)}
-                            onKeyDown={e => {
-                              if (e.key === 'Enter') {
-                                e.preventDefault();
-                                if (editGalleryUrl.trim()) {
-                                  setEditingActivity(prev => ({
-                                    ...prev,
-                                    galleryPhotos: [
-                                      ...(prev.galleryPhotos || []),
-                                      {
-                                        url: editGalleryUrl.trim(),
-                                        caption: prev.title || 'ภาพบรรยากาศกิจกรรม',
-                                        alt: `${prev.title || 'กิจกรรม'} - ภาพประกอบ`
-                                      }
-                                    ]
-                                  }));
-                                  setEditGalleryUrl('');
-                                }
-                              }
-                            }}
-                          />
-                          <button 
-                            type="button"
-                            className="btn-secondary btn-sm"
-                            onClick={() => {
-                              if (editGalleryUrl.trim()) {
-                                setEditingActivity(prev => ({
-                                  ...prev,
-                                  galleryPhotos: [
-                                    ...(prev.galleryPhotos || []),
-                                    {
-                                      url: editGalleryUrl.trim(),
-                                      caption: prev.title || 'ภาพบรรยากาศกิจกรรม',
-                                      alt: `${prev.title || 'กิจกรรม'} - ภาพประกอบ`
-                                    }
-                                  ]
-                                }));
-                                setEditGalleryUrl('');
-                              }
-                            }}
-                          >
-                            <Plus size={13} /> เพิ่ม URL
-                          </button>
-                        </div>
-
-                        {/* Generative AI Search & SEO Notice Banner */}
-                        <div className="ai-search-status-banner">
-                          <div className="ai-search-banner-left">
-                            <Sparkles size={16} className="text-cyan" />
-                            <div>
-                              <div className="ai-search-title">
-                                <span>เปิด AI Search ทุกแพลตฟอร์ม (Generative Engine Optimization - GEO)</span>
-                                <span className="ai-status-tag active">Active ทุกระบบ</span>
-                              </div>
-                              <p className="ai-search-desc">
-                                รูปภาพและข้อความ ALT จะถูกจัดโครงสร้าง Schema.org (ImageObject) ให้อัตโนมัติ เพื่อให้ Google SGE, Gemini, ChatGPT (GPTBot), ClaudeBot, PerplexityBot นำภาพไปแนะนำ
-                              </p>
-                            </div>
-                          </div>
-                          <div className="ai-bots-chip-list">
-                            <span className="bot-pill google">Google SGE / Gemini</span>
-                            <span className="bot-pill gpt">OpenAI ChatGPT</span>
-                            <span className="bot-pill claude">Anthropic Claude</span>
-                            <span className="bot-pill perplexity">Perplexity AI</span>
-                            <span className="bot-pill apple">Applebot</span>
-                          </div>
-                        </div>
-
-                        {/* Gallery Photo List with ALT & Caption inputs */}
-                        <div className="gallery-photo-items-list">
-                          {(editingActivity.galleryPhotos || []).length === 0 ? (
-                            <div className="gallery-empty-state">
-                              <ImageIcon size={32} className="text-muted" />
-                              <p>ยังไม่มีรูปภาพในแกลเลอรี</p>
-                              <span>กดปุ่ม <strong>"อัปโหลดภาพแกลเลอรี (WebP)"</strong> ด้านบน เพื่อเลือกไฟล์จากเครื่อง (เลือกได้หลายไฟล์พร้อมกัน) หรือวาง URL</span>
-                            </div>
-                          ) : (
-                            (editingActivity.galleryPhotos || []).map((photo, pIdx) => (
-                              <div key={pIdx} className="gallery-item-card">
-                                <div className="gallery-item-thumb">
-                                  <img src={photo.url || photo} alt={photo.alt || `ภาพ ${pIdx + 1}`} />
-                                  <span className="gallery-item-index">#{pIdx + 1}</span>
-                                </div>
-
-                                <div className="gallery-item-fields">
-                                  <div className="form-group">
-                                    <label className="field-lbl-sm">
-                                      <Tag size={12} className="text-blue" />
-                                      <span>คำอธิบายภาพสำหรับ SEO (Image ALT Tag) *สำคัญต่อ Google & AI Search:</span>
-                                    </label>
-                                    <input 
-                                      type="text" 
-                                      className="form-input form-input-sm"
-                                      placeholder="เช่น ภาพถ่ายบรรยากาศนักกีฬาบนเวทีการแข่งขัน GLP 2026..."
-                                      value={photo.alt || ''}
-                                      onChange={e => {
-                                        const newAlt = e.target.value;
-                                        setEditingActivity(prev => {
-                                          const list = [...(prev.galleryPhotos || [])];
-                                          list[pIdx] = { ...list[pIdx], alt: newAlt };
-                                          return { ...prev, galleryPhotos: list };
-                                        });
-                                      }}
-                                    />
-                                    <span className="text-xs text-muted">
-                                      {photo.alt ? '✓ SEO & AI Ready' : '⚠️ แนะนำให้ระบุ ALT เพื่อให้ AI และ Google Image Search ค้นพบภาพนี้'}
-                                    </span>
-                                  </div>
-
-                                  <div className="form-group" style={{ marginTop: '6px' }}>
-                                    <label className="field-lbl-sm">
-                                      <span>คำบรรยายใต้ภาพ (Lightbox Caption):</span>
-                                    </label>
-                                    <input 
-                                      type="text" 
-                                      className="form-input form-input-sm"
-                                      placeholder="เช่น จอ LED 4K ขนาดยักษ์ ถ่ายทอดสดมุมมองผู้เล่น..."
-                                      value={photo.caption || ''}
-                                      onChange={e => {
-                                        const newCap = e.target.value;
-                                        setEditingActivity(prev => {
-                                          const list = [...(prev.galleryPhotos || [])];
-                                          list[pIdx] = { ...list[pIdx], caption: newCap };
-                                          return { ...prev, galleryPhotos: list };
-                                        });
-                                      }}
-                                    />
-                                  </div>
-                                </div>
-
-                                <div className="gallery-item-actions">
-                                  <button 
-                                    type="button" 
-                                    className="btn-item-ctrl" 
-                                    disabled={pIdx === 0}
-                                    title="ย้ายขึ้น"
-                                    onClick={() => {
-                                      setEditingActivity(prev => {
-                                        const list = [...(prev.galleryPhotos || [])];
-                                        if (pIdx > 0) {
-                                          const temp = list[pIdx];
-                                          list[pIdx] = list[pIdx - 1];
-                                          list[pIdx - 1] = temp;
-                                        }
-                                        return { ...prev, galleryPhotos: list };
-                                      });
-                                    }}
-                                  >
-                                    <ChevronUp size={14} />
-                                  </button>
-                                  <button 
-                                    type="button" 
-                                    className="btn-item-ctrl" 
-                                    disabled={pIdx === (editingActivity.galleryPhotos || []).length - 1}
-                                    title="ย้ายลง"
-                                    onClick={() => {
-                                      setEditingActivity(prev => {
-                                        const list = [...(prev.galleryPhotos || [])];
-                                        if (pIdx < list.length - 1) {
-                                          const temp = list[pIdx];
-                                          list[pIdx] = list[pIdx + 1];
-                                          list[pIdx + 1] = temp;
-                                        }
-                                        return { ...prev, galleryPhotos: list };
-                                      });
-                                    }}
-                                  >
-                                    <ChevronDown size={14} />
-                                  </button>
-                                  <button 
-                                    type="button" 
-                                    className="btn-item-ctrl delete" 
-                                    title="ลบรูปภาพนี้"
-                                    onClick={() => {
-                                      setEditingActivity(prev => ({
-                                        ...prev,
-                                        galleryPhotos: (prev.galleryPhotos || []).filter((_, i) => i !== pIdx)
-                                      }));
-                                    }}
-                                  >
-                                    <Trash2 size={14} />
-                                  </button>
-                                </div>
-                              </div>
-                            ))
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="modal-footer-btns" style={{ flexShrink: 0 }}>
-                      <button className="btn-secondary" onClick={() => setEditingActivity(null)}>ยกเลิก</button>
-                      <button 
-                        type="button" 
-                        className="btn-section-preview" 
-                        onClick={() => openPreview('article-view', editingActivity)}
-                      >
-                        <Eye size={14} /> พรีวิวตัวอย่างบทความ
-                      </button>
-                      <button 
-                        className="btn-primary" 
-                        onClick={() => {
-                          let paragraphs = [];
-                          if (editingActivity.contentBlocks && editingActivity.contentBlocks.length > 0) {
-                            paragraphs = editingActivity.contentBlocks
-                              .map(b => {
-                                if (b.type === 'heading') return b.text;
-                                if (b.type === 'paragraph') return b.text;
-                                if (b.type === 'media-text') return `${b.title ? b.title + ': ' : ''}${b.text || ''}`.trim();
-                                if (b.type === 'columns-2') return `${b.leftTitle || ''} ${b.leftText || ''}\n${b.rightTitle || ''} ${b.rightText || ''}`.trim();
-                                if (b.type === 'columns-3') return `${b.col1Text || ''}\n${b.col2Text || ''}\n${b.col3Text || ''}`.trim();
-                                if (b.type === 'quote') return `"${b.text}" ${b.author ? `— ${b.author}` : ''}`.trim();
-                                if (b.type === 'callout') return `${b.title ? b.title + ': ' : ''}${b.text || ''}`.trim();
-                                if (b.type === 'list') return (b.items || []).join('\n');
-                                return '';
-                              })
-                              .filter(Boolean);
-                          }
-                          if (paragraphs.length === 0) {
-                            paragraphs = (editingActivity.contentParagraphsText || '')
-                              .split('\n\n')
-                              .map(p => p.trim())
-                              .filter(Boolean);
-                          }
-                          const validPhotos = (editingActivity.galleryPhotos || []).map(p => {
-                            if (typeof p === 'string') return { url: p, caption: editingActivity.title, alt: editingActivity.imageAlt || editingActivity.title };
-                            return {
-                              url: p.url || '',
-                              caption: p.caption || editingActivity.title || '',
-                              alt: p.alt || p.caption || editingActivity.imageAlt || editingActivity.title || ''
-                            };
-                          }).filter(p => Boolean(p.url));
-
-                          updateActivityItem(editingActivity.id, {
-                            ...editingActivity,
-                            tags: Array.isArray(editingActivity.tags) && editingActivity.tags.length > 0 
-                              ? editingActivity.tags 
-                              : ['#EsportsThailand', '#GLP2026', '#Tournament', '#GamingArena'],
-                            contentBlocks: editingActivity.contentBlocks || [],
-                            contentParagraphs: paragraphs.length > 0 ? paragraphs : [editingActivity.desc],
-                            galleryPhotos: validPhotos.length > 0 ? validPhotos : [{ url: editingActivity.image, caption: editingActivity.title, alt: editingActivity.imageAlt || editingActivity.title }]
-                          });
-                          setEditingActivity(null);
-                          triggerSaveToast();
-                          setTimeout(() => {
-                            saveSiteData();
-                          }, 100);
-                        }}
-                      >
-                        <Save size={14} /> บันทึกบทความกิจกรรม
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Add New Activity Modal */}
-              {showAddActivityModal && (
-                <div 
-                  className="cms-modal-backdrop" 
-                  onClick={(e) => {
-                    if (e.target === e.currentTarget) {
-                      if (window.confirm('คุณต้องการปิดหน้าต่างเพิ่มบทความใหม่ใช่หรือไม่? (ข้อมูลที่กรอกไว้จะสูญหาย)')) {
-                        setShowAddActivityModal(false);
-                      }
-                    }
-                  }}
-                >
-                  <div className="cms-modal-card modal-extra-wide" style={{ maxHeight: '92vh', display: 'flex', flexDirection: 'column' }} onClick={e => e.stopPropagation()}>
-                    <div className="modal-head" style={{ flexShrink: 0 }}>
-                      <h4>เพิ่มกิจกรรม & บทความใหม่ (New Article)</h4>
-                      <button 
-                        type="button"
-                        onClick={() => {
-                          if (window.confirm('คุณต้องการปิดหน้าต่างเพิ่มบทความใหม่ใช่หรือไม่? (ข้อมูลที่กรอกไว้จะสูญหาย)')) {
-                            setShowAddActivityModal(false);
-                          }
-                        }} 
-                        className="btn-close-modal"
-                        title="ปิดหน้าต่าง"
-                      >✕</button>
-                    </div>
-
-                    <div className="modal-body-form" style={{ flex: '1 1 auto', overflowY: 'auto', minHeight: 0 }}>
-                      <div className="form-row-2">
-                        <div className="form-group">
-                          <label>ชื่อกิจกรรม / หัวข้อบทความ</label>
-                          <input 
-                            type="text" className="form-input"
-                            placeholder="เช่น GLP VALORANT OPEN CHAMPIONSHIP 2026"
-                            value={newActivity.title}
-                            onChange={e => {
-                              const title = e.target.value;
-                              const autoSlug = title.toLowerCase().replace(/[^a-z0-9\u0E00-\u0E7F]+/g, '-').replace(/(^-|-$)/g, '');
-                              setNewActivity({ 
-                                ...newActivity, 
-                                title, 
-                                slug: newActivity.slug ? newActivity.slug : autoSlug 
-                              });
-                            }}
-                          />
-                        </div>
-
-                        <div className="form-group">
-                          <label>URL Slug ปลายทาง (เช่น glp-valorant-open-2026)</label>
-                          <div className="slug-input-prefix">
-                            <span>/activities/</span>
-                            <input 
-                              type="text" className="form-input"
-                              placeholder="valorant-open-2026"
-                              value={newActivity.slug}
-                              onChange={e => setNewActivity({ 
-                                ...newActivity, 
-                                slug: e.target.value.toLowerCase().replace(/[^a-z0-9\u0E00-\u0E7F]+/g, '-').replace(/(^-|-$)/g, '') 
-                              })}
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="form-row-3">
-                        <div className="form-group">
-                          <label>หมวดหมู่</label>
-                          <select 
-                            className="form-input"
-                            value={newActivity.category}
-                            onChange={e => setNewActivity({ ...newActivity, category: e.target.value })}
-                          >
-                            {(siteData.activityCategories || EVENT_CATEGORIES).map(cat => (
-                              <option key={cat.id} value={cat.id}>{cat.label} ({cat.id})</option>
-                            ))}
-                          </select>
-                        </div>
-
-                        <div className="form-group">
-                          <label>ป้ายหัวข้อเล็ก (Tag Badge)</label>
-                          <input 
-                            type="text" className="form-input"
-                            placeholder="LAN TOURNAMENT"
-                            value={newActivity.tag}
-                            onChange={e => setNewActivity({ ...newActivity, tag: e.target.value })}
-                          />
-                        </div>
-
-                        <div className="form-group">
-                          <label>พาร์ตเนอร์ / ผู้สนับสนุน</label>
-                          <input 
-                            type="text" className="form-input"
-                            placeholder="ASUS ROG, NVIDIA"
-                            value={newActivity.partner}
-                            onChange={e => setNewActivity({ ...newActivity, partner: e.target.value })}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Interactive Article Tags Multi-Selector for New Article */}
-                      <div className="form-group" style={{ background: '#f8fafc', padding: '14px 16px', borderRadius: '10px', border: '1px solid #e2e8f0', margin: '14px 0' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                          <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, fontSize: '0.88rem', color: '#0f172a' }}>
-                            <Tag size={15} className="text-blue" />
-                            <span>แท็กบทความที่เกี่ยวข้อง (Article Tags) *คลิกเพื่อเลือก/ยกเลิกแท็ก:</span>
-                          </span>
-                          <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                            เลือกแล้ว: {(newActivity.tags || []).length} แท็ก
-                          </span>
-                        </div>
-
-                        {/* Tag Chips Picker */}
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '10px' }}>
-                          {(siteData.articleTags || DEFAULT_ARTICLE_TAGS).map((tag, tIdx) => {
-                            const isSelected = (newActivity.tags || []).includes(tag);
-                            return (
-                              <button
-                                key={tIdx}
-                                type="button"
-                                onClick={() => {
-                                  setNewActivity(prev => {
-                                    const current = prev.tags || [];
-                                    const next = current.includes(tag)
-                                      ? current.filter(t => t !== tag)
-                                      : [...current, tag];
-                                    return { ...prev, tags: next };
-                                  });
-                                }}
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '4px',
-                                  padding: '4px 10px',
-                                  borderRadius: '20px',
-                                  fontSize: '0.78rem',
-                                  fontWeight: 600,
-                                  cursor: 'pointer',
-                                  transition: 'all 0.15s ease',
-                                  border: isSelected ? '1.5px solid #2563eb' : '1px solid #cbd5e1',
-                                  background: isSelected ? '#eff6ff' : '#ffffff',
-                                  color: isSelected ? '#1d4ed8' : '#475569'
-                                }}
-                              >
-                                <span>{tag}</span>
-                                {isSelected ? <Check size={12} color="#1d4ed8" /> : <Plus size={12} color="#94a3b8" />}
-                              </button>
-                            );
-                          })}
-                        </div>
-
-                        {/* Quick Add Custom Tag */}
-                        <div style={{ display: 'flex', gap: '8px', maxWidth: '400px' }}>
-                          <input 
-                            type="text" 
-                            className="form-input form-input-sm"
-                            placeholder="พิมพ์แท็กใหม่ เช่น #RoV, #VALORANT..."
-                            value={newTagInput}
-                            onChange={e => setNewTagInput(e.target.value)}
-                            onKeyDown={e => {
-                              if (e.key === 'Enter') {
-                                e.preventDefault();
-                                if (newTagInput.trim()) {
-                                  const tag = newTagInput.trim().startsWith('#') ? newTagInput.trim() : '#' + newTagInput.trim();
-                                  addArticleTag(tag);
-                                  setNewActivity(prev => ({
-                                    ...prev,
-                                    tags: [...(prev.tags || []), tag]
-                                  }));
-                                  setNewTagInput('');
-                                }
-                              }
-                            }}
-                          />
-                          <button
-                            type="button"
-                            className="btn-secondary btn-sm"
-                            onClick={() => {
-                              if (newTagInput.trim()) {
-                                const tag = newTagInput.trim().startsWith('#') ? newTagInput.trim() : '#' + newTagInput.trim();
-                                addArticleTag(tag);
-                                setNewActivity(prev => ({
-                                  ...prev,
-                                  tags: [...(prev.tags || []), tag]
-                                }));
-                                setNewTagInput('');
-                              }
-                            }}
-                          >
-                            <Plus size={12} /> เพิ่ม
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="image-manager-row">
-                        <div className="form-group" style={{ flex: 1 }}>
-                          <label>URL รูปภาพหน้าปก (Cover Image URL)</label>
-                          <input 
-                            type="url" className="form-input"
-                            value={newActivity.image}
-                            onChange={e => setNewActivity({ ...newActivity, image: e.target.value })}
-                          />
-                        </div>
-                        <div className="image-upload-wrapper">
-                          <label className="btn-upload-file" title="เลือกไฟล์ภาพ ระบบจะย่อขนาดและแปลงเป็น WebP บีบอัดอัตโนมัติ">
-                            {compressingItemId === 'new-act-cover' ? (
-                              <>
-                                <RefreshCw size={14} className="spin-icon" />
-                                <span>กำลังแปลง WebP...</span>
-                              </>
-                            ) : (
-                              <>
-                                <Upload size={14} />
-                                <span>อัปโหลดภาพ (WebP)</span>
-                              </>
-                            )}
-                            <input 
-                              type="file" 
-                              accept="image/*" 
-                              style={{ display: 'none' }}
-                              onChange={e => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                  handleImageUpload(file, (dataUrl) => {
-                                    setNewActivity({ ...newActivity, image: dataUrl });
-                                  }, 'new-act-cover');
-                                }
-                              }}
-                            />
-                          </label>
-                        </div>
-                      </div>
-
-                      {/* Image ALT Tag for SEO */}
-                      <div className="form-group" style={{ marginTop: '4px' }}>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
-                          <Tag size={13} className="text-blue" />
-                          <span>คำอธิบายรูปภาพสำหรับ SEO (Image ALT Tag):</span>
-                        </label>
-                        <input 
-                          type="text" 
-                          className="form-input"
-                          placeholder="เช่น ภาพถ่ายบรรยากาศการแข่งขันรอบชิงชนะเลิศ GLP VALORANT ณ เวทีกลาง"
-                          value={newActivity.imageAlt || ''}
-                          onChange={e => setNewActivity({ ...newActivity, imageAlt: e.target.value })}
-                        />
-                        <span className="text-xs text-muted" style={{ display: 'block', marginTop: '4px' }}>
-                          ใช้สำหรับ Google Image Search และการแชร์ขึ้น Social Media (OG Image)
-                        </span>
-                      </div>
-
-                      <div className="form-group">
-                        <label>คำอธิบายสั้น (Excerpt)</label>
-                        <textarea 
-                          className="form-input form-textarea" rows="2"
-                          placeholder="สรุปไฮไลต์ของกิจกรรมสั้นๆ..."
-                          value={newActivity.desc}
-                          onChange={e => setNewActivity({ ...newActivity, desc: e.target.value })}
-                        />
-                      </div>
-
-                      <div className="form-group" style={{ marginBottom: '24px' }}>
-                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 700, fontSize: '0.95rem' }}>
-                          เนื้อหาบทความเต็ม (Visual Block Editor สไตล์ WordPress Gutenberg)
-                        </label>
-                        <ArticleBlockEditor 
-                          blocks={newActivity.contentBlocks || []} 
-                          onChange={(updatedBlocks) => {
-                            setNewActivity(prev => ({
-                              ...prev,
-                              contentBlocks: updatedBlocks
-                            }));
-                          }} 
-                        />
-                      </div>
-                      {/* Interactive High-Res Photo Gallery & SEO ALT Manager */}
-                      <div className="form-group gallery-cms-section">
-                        <div className="gallery-cms-header">
-                          <div className="gallery-cms-title-wrap">
-                            <div className="gallery-cms-title">
-                              <ImageIcon size={18} className="text-blue" />
-                              <strong>แกลเลอรีรูปภาพความละเอียดสูง (Photo Gallery)</strong>
-                              <span className="gallery-count-badge">{(newActivity.galleryPhotos || []).length} ภาพ</span>
-                            </div>
-                            <p className="gallery-cms-subtitle">
-                              อัปโหลดภาพกิจกรรม (แปลงเป็น WebP อัตโนมัติ) และกำหนด ALT Text สำหรับ SEO & AI Search Engine
-                            </p>
-                          </div>
-
-                          <div className="gallery-cms-actions">
-                            <label className="btn-upload-file btn-upload-gallery-primary" title="เลือกไฟล์ภาพหลายไฟล์พร้อมกัน ระบบจะย่อขนาดและแปลงเป็น WebP อัตโนมัติ">
-                              {compressingItemId === 'new-gallery-photos' ? (
-                                <>
-                                  <RefreshCw size={14} className="spin-icon" />
-                                  <span>กำลังแปลง WebP...</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Upload size={14} />
-                                  <span>อัปโหลดภาพแกลเลอรี (WebP)</span>
-                                </>
-                              )}
-                              <input 
-                                type="file" 
-                                accept="image/*" 
-                                multiple
-                                style={{ display: 'none' }}
-                                onChange={e => {
-                                  if (e.target.files && e.target.files.length > 0) {
-                                    handleBatchGalleryUpload(e.target.files, false);
-                                    e.target.value = '';
-                                  }
-                                }}
-                              />
-                            </label>
-                          </div>
-                        </div>
-
-                        {/* Quick Add URL Box */}
-                        <div className="gallery-url-quick-add">
-                          <input 
-                            type="url" 
-                            className="form-input form-input-sm" 
-                            placeholder="หรือวาง URL รูปภาพภายนอกที่นี่..." 
-                            value={newGalleryUrl}
-                            onChange={e => setNewGalleryUrl(e.target.value)}
-                            onKeyDown={e => {
-                              if (e.key === 'Enter') {
-                                e.preventDefault();
-                                if (newGalleryUrl.trim()) {
-                                  setNewActivity(prev => ({
-                                    ...prev,
-                                    galleryPhotos: [
-                                      ...(prev.galleryPhotos || []),
-                                      {
-                                        url: newGalleryUrl.trim(),
-                                        caption: prev.title || 'ภาพบรรยากาศกิจกรรม',
-                                        alt: `${prev.title || 'กิจกรรม'} - ภาพประกอบ`
-                                      }
-                                    ]
-                                  }));
-                                  setNewGalleryUrl('');
-                                }
-                              }
-                            }}
-                          />
-                          <button 
-                            type="button"
-                            className="btn-secondary btn-sm"
-                            onClick={() => {
-                              if (newGalleryUrl.trim()) {
-                                setNewActivity(prev => ({
-                                  ...prev,
-                                  galleryPhotos: [
-                                    ...(prev.galleryPhotos || []),
-                                    {
-                                      url: newGalleryUrl.trim(),
-                                      caption: prev.title || 'ภาพบรรยากาศกิจกรรม',
-                                      alt: `${prev.title || 'กิจกรรม'} - ภาพประกอบ`
-                                    }
-                                  ]
-                                }));
-                                setNewGalleryUrl('');
-                              }
-                            }}
-                          >
-                            <Plus size={13} /> เพิ่ม URL
-                          </button>
-                        </div>
-
-                        {/* Generative AI Search & SEO Notice Banner */}
-                        <div className="ai-search-status-banner">
-                          <div className="ai-search-banner-left">
-                            <Sparkles size={16} className="text-cyan" />
-                            <div>
-                              <div className="ai-search-title">
-                                <span>เปิด AI Search ทุกแพลตฟอร์ม (Generative Engine Optimization - GEO)</span>
-                                <span className="ai-status-tag active">Active ทุกระบบ</span>
-                              </div>
-                              <p className="ai-search-desc">
-                                รูปภาพและข้อความ ALT จะถูกจัดโครงสร้าง Schema.org (ImageObject) ให้อัตโนมัติ เพื่อให้ Google SGE, Gemini, ChatGPT (GPTBot), ClaudeBot, PerplexityBot นำภาพไปแนะนำ
-                              </p>
-                            </div>
-                          </div>
-                          <div className="ai-bots-chip-list">
-                            <span className="bot-pill google">Google SGE / Gemini</span>
-                            <span className="bot-pill gpt">OpenAI ChatGPT</span>
-                            <span className="bot-pill claude">Anthropic Claude</span>
-                            <span className="bot-pill perplexity">Perplexity AI</span>
-                            <span className="bot-pill apple">Applebot</span>
-                          </div>
-                        </div>
-
-                        {/* Gallery Photo List with ALT & Caption inputs */}
-                        <div className="gallery-photo-items-list">
-                          {(newActivity.galleryPhotos || []).length === 0 ? (
-                            <div className="gallery-empty-state">
-                              <ImageIcon size={32} className="text-muted" />
-                              <p>ยังไม่มีรูปภาพในแกลเลอรี</p>
-                              <span>กดปุ่ม <strong>"อัปโหลดภาพแกลเลอรี (WebP)"</strong> ด้านบน เพื่อเลือกไฟล์จากเครื่อง (เลือกได้หลายไฟล์พร้อมกัน) หรือวาง URL</span>
-                            </div>
-                          ) : (
-                            (newActivity.galleryPhotos || []).map((photo, pIdx) => (
-                              <div key={pIdx} className="gallery-item-card">
-                                <div className="gallery-item-thumb">
-                                  <img src={photo.url || photo} alt={photo.alt || `ภาพ ${pIdx + 1}`} />
-                                  <span className="gallery-item-index">#{pIdx + 1}</span>
-                                </div>
-
-                                <div className="gallery-item-fields">
-                                  <div className="form-group">
-                                    <label className="field-lbl-sm">
-                                      <Tag size={12} className="text-blue" />
-                                      <span>คำอธิบายภาพสำหรับ SEO (Image ALT Tag) *สำคัญต่อ Google & AI Search:</span>
-                                    </label>
-                                    <input 
-                                      type="text" 
-                                      className="form-input form-input-sm"
-                                      placeholder="เช่น ภาพถ่ายบรรยากาศนักกีฬาบนเวทีการแข่งขัน GLP 2026..."
-                                      value={photo.alt || ''}
-                                      onChange={e => {
-                                        const newAlt = e.target.value;
-                                        setNewActivity(prev => {
-                                          const list = [...(prev.galleryPhotos || [])];
-                                          list[pIdx] = { ...list[pIdx], alt: newAlt };
-                                          return { ...prev, galleryPhotos: list };
-                                        });
-                                      }}
-                                    />
-                                    <span className="text-xs text-muted">
-                                      {photo.alt ? '✓ SEO & AI Ready' : '⚠️ แนะนำให้ระบุ ALT เพื่อให้ AI และ Google Image Search ค้นพบภาพนี้'}
-                                    </span>
-                                  </div>
-
-                                  <div className="form-group" style={{ marginTop: '6px' }}>
-                                    <label className="field-lbl-sm">
-                                      <span>คำบรรยายใต้ภาพ (Lightbox Caption):</span>
-                                    </label>
-                                    <input 
-                                      type="text" 
-                                      className="form-input form-input-sm"
-                                      placeholder="เช่น จอ LED 4K ขนาดยักษ์ ถ่ายทอดสดมุมมองผู้เล่น..."
-                                      value={photo.caption || ''}
-                                      onChange={e => {
-                                        const newCap = e.target.value;
-                                        setNewActivity(prev => {
-                                          const list = [...(prev.galleryPhotos || [])];
-                                          list[pIdx] = { ...list[pIdx], caption: newCap };
-                                          return { ...prev, galleryPhotos: list };
-                                        });
-                                      }}
-                                    />
-                                  </div>
-                                </div>
-
-                                <div className="gallery-item-actions">
-                                  <button 
-                                    type="button" 
-                                    className="btn-item-ctrl" 
-                                    disabled={pIdx === 0}
-                                    title="ย้ายขึ้น"
-                                    onClick={() => {
-                                      setNewActivity(prev => {
-                                        const list = [...(prev.galleryPhotos || [])];
-                                        if (pIdx > 0) {
-                                          const temp = list[pIdx];
-                                          list[pIdx] = list[pIdx - 1];
-                                          list[pIdx - 1] = temp;
-                                        }
-                                        return { ...prev, galleryPhotos: list };
-                                      });
-                                    }}
-                                  >
-                                    <ChevronUp size={14} />
-                                  </button>
-                                  <button 
-                                    type="button" 
-                                    className="btn-item-ctrl" 
-                                    disabled={pIdx === (newActivity.galleryPhotos || []).length - 1}
-                                    title="ย้ายลง"
-                                    onClick={() => {
-                                      setNewActivity(prev => {
-                                        const list = [...(prev.galleryPhotos || [])];
-                                        if (pIdx < list.length - 1) {
-                                          const temp = list[pIdx];
-                                          list[pIdx] = list[pIdx + 1];
-                                          list[pIdx + 1] = temp;
-                                        }
-                                        return { ...prev, galleryPhotos: list };
-                                      });
-                                    }}
-                                  >
-                                    <ChevronDown size={14} />
-                                  </button>
-                                  <button 
-                                    type="button" 
-                                    className="btn-item-ctrl delete" 
-                                    title="ลบรูปภาพนี้"
-                                    onClick={() => {
-                                      setNewActivity(prev => ({
-                                        ...prev,
-                                        galleryPhotos: (prev.galleryPhotos || []).filter((_, i) => i !== pIdx)
-                                      }));
-                                    }}
-                                  >
-                                    <Trash2 size={14} />
-                                  </button>
-                                </div>
-                              </div>
-                            ))
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="modal-footer-btns" style={{ flexShrink: 0 }}>
-                      <button className="btn-secondary" onClick={() => setShowAddActivityModal(false)}>ยกเลิก</button>
-                      <button 
-                        type="button" 
-                        className="btn-section-preview" 
-                        onClick={() => openPreview('article-view', newActivity)}
-                      >
-                        <Eye size={14} /> พรีวิวตัวอย่างบทความ
-                      </button>
-                      <button 
-                        className="btn-primary" 
-                        onClick={() => {
-                          if (!newActivity.title.trim()) {
-                            alert('กรุณาระบุชื่อกิจกรรม');
-                            return;
-                          }
-                          let paragraphs = [];
-                          if (newActivity.contentBlocks && newActivity.contentBlocks.length > 0) {
-                            paragraphs = newActivity.contentBlocks
-                              .map(b => {
-                                if (b.type === 'heading') return b.text;
-                                if (b.type === 'paragraph') return b.text;
-                                if (b.type === 'media-text') return `${b.title ? b.title + ': ' : ''}${b.text || ''}`.trim();
-                                if (b.type === 'columns-2') return `${b.leftTitle || ''} ${b.leftText || ''}\n${b.rightTitle || ''} ${b.rightText || ''}`.trim();
-                                if (b.type === 'columns-3') return `${b.col1Text || ''}\n${b.col2Text || ''}\n${b.col3Text || ''}`.trim();
-                                if (b.type === 'quote') return `"${b.text}" ${b.author ? `— ${b.author}` : ''}`.trim();
-                                if (b.type === 'callout') return `${b.title ? b.title + ': ' : ''}${b.text || ''}`.trim();
-                                if (b.type === 'list') return (b.items || []).join('\n');
-                                return '';
-                              })
-                              .filter(Boolean);
-                          }
-                          if (paragraphs.length === 0) {
-                            paragraphs = (newActivity.contentParagraphsText || '')
-                              .split('\n\n')
-                              .map(p => p.trim())
-                              .filter(Boolean);
-                          }
-                          const validPhotos = (newActivity.galleryPhotos || []).map(p => {
-                            if (typeof p === 'string') return { url: p, caption: newActivity.title, alt: newActivity.imageAlt || newActivity.title };
-                            return {
-                              url: p.url || '',
-                              caption: p.caption || newActivity.title || '',
-                              alt: p.alt || p.caption || newActivity.imageAlt || newActivity.title || ''
-                            };
-                          }).filter(p => Boolean(p.url));
-
-                          addActivityItem({
-                            ...newActivity,
-                            tags: Array.isArray(newActivity.tags) && newActivity.tags.length > 0 
-                              ? newActivity.tags 
-                              : ['#EsportsThailand', '#GLP2026', '#Tournament', '#GamingArena'],
-                            contentBlocks: newActivity.contentBlocks || [],
-                            contentParagraphs: paragraphs.length > 0 ? paragraphs : [newActivity.desc],
-                            galleryPhotos: validPhotos.length > 0 ? validPhotos : [{ url: newActivity.image, caption: newActivity.title, alt: newActivity.imageAlt || newActivity.title }]
-                          });
-                          setShowAddActivityModal(false);
-                          triggerSaveToast();
-                          setTimeout(() => {
-                            saveSiteData();
-                          }, 100);
-                        }}
-                      >
-                        <Save size={14} /> เพิ่มบทความใหม่ลงระบบ
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
+              {/* Isolated Activity Form Modal (Create New Activity) */}
+              <ActivityFormModal
+                isOpen={showAddActivityModal}
+                initialData={null}
+                onClose={() => setShowAddActivityModal(false)}
+                categories={siteData.activityCategories || EVENT_CATEGORIES}
+                availableTags={siteData.articleTags || DEFAULT_ARTICLE_TAGS}
+                onAddNewTag={addArticleTag}
+                onSave={async (savedData) => {
+                  addActivityItem(savedData);
+                  setShowAddActivityModal(false);
+                  triggerSaveToast();
+                }}
+              />
             </div>
           )}
 
@@ -10752,18 +9908,15 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                                 </td>
                                 <td>
                                   <button 
-                                    type="button"
-                                    className={`tourney-pill-btn ${photoCount >= 50 ? 'pill-gallery-ready' : 'pill-gallery-pending'}`}
-                                    onClick={() => openEditTournamentModal(t, 'gallery')}
-                                    title="คลิกเพื่อจัดการแกลเลอรีภาพกิจกรรม 50+ ภาพ"
-                                  >
-                                    <Camera size={14} />
-                                    <span className="pill-counter">{photoCount}</span>
-                                    <span>ภาพ</span>
-                                    {photoCount >= 50 && (
-                                      <span className="pill-badge-gold">✓ 50+</span>
-                                    )}
-                                  </button>
+                                  type="button" 
+                                  className="tourney-pill-btn pill-gallery-ready"
+                                  onClick={() => openEditTournamentModal(t, 'brackets')}
+                                  title="คลิกเพื่อจัดการสายการแข่งและผลคะแนน"
+                                >
+                                  <Trophy size={14} color="#2563eb" />
+                                  <span className="pill-counter">{(t.bracketMatches || []).length}</span>
+                                  <span>คู่</span>
+                                </button>
                                 </td>
                                 <td>
                                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
@@ -10806,7 +9959,6 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                                         if (window.confirm(`คุณต้องการลบทัวร์นาเมนต์ "${t.title}" ใช่หรือไม่?`)) {
                                           deleteTournament(t.id);
                                           triggerSaveToast();
-                                          setTimeout(() => { saveSiteData(); }, 100);
                                         }
                                       }}
                                       title="ลบทัวร์นาเมนต์นี้"
@@ -11576,9 +10728,31 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', background: match.teamA?.isWinner ? '#eff6ff' : '#f8fafc', borderRadius: '8px', border: match.teamA?.isWinner ? '1px solid #93c5fd' : '1px solid #e2e8f0' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
                                 {match.teamA?.isWinner && <Crown size={15} color="#eab308" />}
-                                <span style={{ fontWeight: match.teamA?.isWinner ? 800 : 600, fontSize: '0.85rem', color: '#0f172a' }}>
-                                  {match.teamA?.name || 'TBD'}
-                                </span>
+                                <select
+                                  value={match.teamA?.name || ''}
+                                  onChange={e => {
+                                    const selectedName = e.target.value;
+                                    const tm = (currentTourney.teams || []).find(t => t.name === selectedName);
+                                    updateTournamentBracketMatch(selectedTourneyBracketId, match.id, {
+                                      teamA: {
+                                        ...match.teamA,
+                                        name: selectedName || 'TBD',
+                                        tag: tm?.tag || '',
+                                        seed: tm?.seed || null
+                                      }
+                                    });
+                                    triggerSaveToast();
+                                  }}
+                                  className="form-input form-input-sm"
+                                  style={{ fontWeight: match.teamA?.isWinner ? 800 : 600, fontSize: '0.84rem', maxWidth: '240px', padding: '3px 8px' }}
+                                >
+                                  <option value="">-- รอผล (TBD) --</option>
+                                  {(currentTourney.teams || []).map(t => (
+                                    <option key={t.id || t.name} value={t.name}>
+                                      {t.name} {t.tag ? `[${t.tag}]` : ''} {t.seed ? `(Seed #${t.seed})` : ''}
+                                    </option>
+                                  ))}
+                                </select>
                               </div>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <input
@@ -11625,9 +10799,31 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', background: match.teamB?.isWinner ? '#eff6ff' : '#f8fafc', borderRadius: '8px', border: match.teamB?.isWinner ? '1px solid #93c5fd' : '1px solid #e2e8f0' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
                                 {match.teamB?.isWinner && <Crown size={15} color="#eab308" />}
-                                <span style={{ fontWeight: match.teamB?.isWinner ? 800 : 600, fontSize: '0.85rem', color: '#0f172a' }}>
-                                  {match.teamB?.name || 'TBD'}
-                                </span>
+                                <select
+                                  value={match.teamB?.name || ''}
+                                  onChange={e => {
+                                    const selectedName = e.target.value;
+                                    const tm = (currentTourney.teams || []).find(t => t.name === selectedName);
+                                    updateTournamentBracketMatch(selectedTourneyBracketId, match.id, {
+                                      teamB: {
+                                        ...match.teamB,
+                                        name: selectedName || 'TBD',
+                                        tag: tm?.tag || '',
+                                        seed: tm?.seed || null
+                                      }
+                                    });
+                                    triggerSaveToast();
+                                  }}
+                                  className="form-input form-input-sm"
+                                  style={{ fontWeight: match.teamB?.isWinner ? 800 : 600, fontSize: '0.84rem', maxWidth: '240px', padding: '3px 8px' }}
+                                >
+                                  <option value="">-- รอผล (TBD) --</option>
+                                  {(currentTourney.teams || []).map(t => (
+                                    <option key={t.id || t.name} value={t.name}>
+                                      {t.name} {t.tag ? `[${t.tag}]` : ''} {t.seed ? `(Seed #${t.seed})` : ''}
+                                    </option>
+                                  ))}
+                                </select>
                               </div>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <input
@@ -14288,36 +13484,6 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
         </main>
       </div>
 
-      {/* Floating Save Action Bar */}
-      <div className="admin-floating-save-bar glass-panel">
-        <div className="floating-save-status">
-          <span className="save-status-dot"></span>
-          <span className="save-status-text">
-            {lastSavedTime ? `บันทึกล่าสุดเวลา ${lastSavedTime} น.` : 'พร้อมบันทึกข้อมูล CMS'}
-          </span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <button 
-            type="button"
-            onClick={() => openPreview(activeTab === 'sections' ? activeSectionSubTab : (activeTab === 'articles' ? 'article-view' : (activeTab === 'menu-footer' ? 'menu-footer' : 'full-site')))}
-            className="btn-section-preview"
-            title="ดูตัวอย่างส่วนที่กำลังแก้ไขอยู่ก่อนบันทึก"
-          >
-            <Eye size={14} />
-            <span>พรีวิวส่วนนี้ก่อนบันทึก</span>
-          </button>
-          <button 
-            id="btn-floating-save-action"
-            type="button"
-            onClick={handleManualSave}
-            disabled={isSaving}
-            className={`btn-floating-save ${isSaving ? 'saving' : ''}`}
-          >
-            {isSaving ? <RefreshCw size={15} className="spin-icon" /> : <Save size={15} />}
-            <span>{isSaving ? 'กำลังบันทึก...' : 'บันทึกข้อมูลทั้งหมด (Save Changes)'}</span>
-          </button>
-        </div>
-      </div>
 
       {/* Live Preview Modal */}
       <CMSLivePreviewModal 
@@ -14385,7 +13551,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                             {isEditingTournament ? `แก้ไขทัวร์นาเมนต์: ${activeTournamentDraft.title || ''}` : 'สร้างทัวร์นาเมนต์ใหม่ (New Tournament)'}
                           </h4>
                           <span style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '2px', display: 'block' }}>
-                            ระบบจัดการงานแข่งรวมศูนย์ (ชื่อเกม, รายชื่อนักแข่ง, ระบบวันที่, กติกา, SEO, ภาพกิจกรรม 50+ ภาพ)
+                            ระบบจัดการงานแข่งรวมศูนย์ (ชื่อเกม, รายชื่อนักแข่ง, ระบบวันที่, กติกา, SEO, สายการแข่งขัน & สกอร์สด)
                           </span>
                         </div>
                       </div>
@@ -14427,13 +13593,15 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
 
                       <button 
                         type="button" 
-                        className={`tourney-modal-subtab-btn tab-gallery ${tournamentModalTab === 'gallery' ? 'active' : ''}`}
-                        onClick={() => setTournamentModalTab('gallery')}
+                        className={`tourney-modal-subtab-btn tab-brackets ${tournamentModalTab === 'brackets' ? 'active' : ''}`}
+                        onClick={() => setTournamentModalTab('brackets')}
                       >
                         <span className="tab-step-badge">04</span>
-                        <Camera size={16} />
-                        <span>คลังภาพกิจกรรม 50+ ภาพ</span>
-                        <span className="tab-count-badge gold">{(activeTournamentDraft.galleryPhotos || []).length} ภาพ</span>
+                        <Trophy size={16} />
+                        <span>สายการแข่งขัน & ผลแพ้ชนะ</span>
+                        <span className="tab-count-badge" style={{ background: '#2563eb', color: '#fff' }}>
+                          {(activeTournamentDraft.bracketMatches || []).length} คู่
+                        </span>
                       </button>
 
                       <button 
@@ -15201,209 +14369,310 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                         </div>
                       )}
 
-                      {/* ----------------- TAB 4: 50+ PHOTO GALLERY ----------------- */}
-                      {tournamentModalTab === 'gallery' && (
+                      {/* ----------------- TAB 4: BRACKETS & MATCH RESULTS ----------------- */}
+                      {tournamentModalTab === 'brackets' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                          {/* Banner Highlight for 50+ Photos */}
-                          <div 
-                            style={{ 
-                              background: (activeTournamentDraft.galleryPhotos || []).length >= 50 ? '#ecfdf5' : '#eff6ff', 
-                              border: (activeTournamentDraft.galleryPhotos || []).length >= 50 ? '1px solid #6ee7b7' : '1px solid #bfdbfe', 
-                              borderRadius: '8px', 
-                              padding: '14px 18px',
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              alignItems: 'center',
-                              flexWrap: 'wrap',
-                              gap: '12px'
-                            }}
-                          >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                              <Camera size={22} color={(activeTournamentDraft.galleryPhotos || []).length >= 50 ? '#059669' : '#2563eb'} />
-                              <div>
-                                <strong style={{ color: (activeTournamentDraft.galleryPhotos || []).length >= 50 ? '#065f46' : '#1e3a8a', fontSize: '1rem' }}>
-                                  คลังภาพกิจกรรมทัวร์นาเมนต์: {(activeTournamentDraft.galleryPhotos || []).length} ภาพ
+                          {/* Banner & Actions Header */}
+                          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                            <div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <Trophy size={20} className="text-blue" />
+                                <strong style={{ fontSize: '1rem', color: '#0f172a' }}>
+                                  สายการแข่งขัน & ผลแพ้ชนะ (Bracket Manager & Scores)
                                 </strong>
-                                <span className="text-xs block" style={{ color: (activeTournamentDraft.galleryPhotos || []).length >= 50 ? '#047857' : '#475569' }}>
-                                  {(activeTournamentDraft.galleryPhotos || []).length >= 50 
-                                    ? '✅ ครบถ้วนตามเป้าหมายมากกว่า 50 ภาพ รองรับการแสดงผลแกลเลอรีแบบ Lightbox คมชัดระดับ 4K'
-                                    : 'สามารถเพิ่มภาพแบบเดี่ยว หรือกดโหลดตัวอย่าง 50 รูป หรือนำเข้า URL แบบชุดได้ทันที'}
+                                <span className="tab-count-badge" style={{ background: '#2563eb', color: '#fff', fontSize: '0.75rem', padding: '2px 8px', borderRadius: '12px' }}>
+                                  {(activeTournamentDraft.bracketMatches || []).length} คู่
                                 </span>
                               </div>
+                              <span style={{ fontSize: '0.8rem', color: '#64748b', display: 'block', marginTop: '2px' }}>
+                                กำหนดคู่แข่งและเลือกผลแพ้ชนะ โดยระบบจะให้เลือกเฉพาะทีมในทัวร์นาเมนต์นี้เท่านั้น ({(activeTournamentDraft.teams || []).length} ทีม)
+                              </span>
                             </div>
 
-                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                              <button 
-                                type="button" 
+                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                              <button
+                                type="button"
                                 className="btn-primary btn-sm"
-                                style={{ background: '#059669', borderColor: '#059669' }}
-                                onClick={handleLoadDemo50Photos}
-                                title="โหลดภาพตัวอย่างบรรยากาศการแข่งขันอีสปอร์ต 52 ภาพทันที"
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#2563eb', borderColor: '#2563eb' }}
+                                onClick={() => {
+                                  const currentMatches = activeTournamentDraft.bracketMatches || [];
+                                  const tms = activeTournamentDraft.teams || [];
+                                  const newMatch = {
+                                    id: `m-${Date.now()}-${Math.random().toString(36).substring(2, 5)}`,
+                                    roundLabel: `คู่ที่ ${currentMatches.length + 1}`,
+                                    time: '18:00 น.',
+                                    status: 'Upcoming',
+                                    teamA: { name: tms[0]?.name || 'TBD', score: 0, isWinner: false, tag: tms[0]?.tag || '' },
+                                    teamB: { name: tms[1]?.name || 'TBD', score: 0, isWinner: false, tag: tms[1]?.tag || '' }
+                                  };
+                                  setActiveTournamentDraft({
+                                    ...activeTournamentDraft,
+                                    bracketMatches: [...currentMatches, newMatch]
+                                  });
+                                }}
                               >
-                                <Sparkles size={14} /> โหลดภาพตัวอย่าง 50 ภาพ (Demo 50 Photos)
-                              </button>
-                              <button 
-                                type="button" 
-                                className="btn-secondary btn-sm"
-                                onClick={() => setShowBatchImporter(!showBatchImporter)}
-                              >
-                                <Upload size={14} /> นำเข้า URL แบบชุด (Batch)
+                                <Plus size={14} /> + เพิ่มคู่แข่งในสาย
                               </button>
                             </div>
                           </div>
 
-                          {/* Batch Importer Accordion */}
-                          {showBatchImporter && (
-                            <div style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '16px' }}>
-                              <strong style={{ fontSize: '0.9rem', color: '#0f172a', display: 'block', marginBottom: '6px' }}>
-                                📋 นำเข้า Image URLs แบบชุด (วาง 1 URL ต่อ 1 บรรทัด สามารถวางได้ 50+ บรรทัด)
-                              </strong>
-                              <textarea 
-                                className="form-input form-textarea" rows="4"
-                                placeholder="https://images.unsplash.com/photo-1...&#10;https://images.unsplash.com/photo-2...&#10;https://images.unsplash.com/photo-3..."
-                                value={batchPhotoUrls}
-                                onChange={e => setBatchPhotoUrls(e.target.value)}
-                              />
-                              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '8px' }}>
-                                <button type="button" className="btn-secondary btn-sm" onClick={() => setShowBatchImporter(false)}>
-                                  ยกเลิก
-                                </button>
-                                <button type="button" className="btn-primary btn-sm" onClick={handleImportBatchPhotos}>
-                                  <Plus size={14} /> เพิ่มภาพทั้งหมดที่ระบุ
-                                </button>
-                              </div>
+                          {/* Matches List */}
+                          {(activeTournamentDraft.bracketMatches || []).length === 0 ? (
+                            <div style={{ textAlign: 'center', padding: '36px 16px', background: '#f8fafc', border: '2px dashed #cbd5e1', borderRadius: '10px' }}>
+                              <Trophy size={36} style={{ margin: '0 auto 8px', opacity: 0.4 }} />
+                              <p style={{ margin: '0 0 8px', fontWeight: 600, color: '#475569' }}>ยังไม่มีคู่แข่งขันในสายนี้</p>
+                              <span style={{ fontSize: '0.82rem', color: '#64748b' }}>
+                                คลิกปุ่ม "+ เพิ่มคู่แข่งในสาย" ด้านบน เพื่อเริ่มสร้างสายการแข่งขัน
+                              </span>
+                            </div>
+                          ) : (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '14px', maxHeight: '520px', overflowY: 'auto', padding: '4px' }}>
+                              {(activeTournamentDraft.bracketMatches || []).map((match, mIdx) => {
+                                const registeredTeams = activeTournamentDraft.teams || [];
+                                return (
+                                  <div
+                                    key={match.id || mIdx}
+                                    style={{
+                                      background: '#ffffff',
+                                      border: match.status === 'Finished' ? '1px solid #10b981' : match.status === 'LIVE' ? '1px solid #ef4444' : '1px solid #cbd5e1',
+                                      borderLeft: match.status === 'Finished' ? '5px solid #10b981' : match.status === 'LIVE' ? '5px solid #ef4444' : '5px solid #3b82f6',
+                                      borderRadius: '10px',
+                                      padding: '14px',
+                                      boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                                      display: 'flex',
+                                      flexDirection: 'column',
+                                      gap: '10px'
+                                    }}
+                                  >
+                                    {/* Top Row: Round Label, Time & Status */}
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                                      <input
+                                        type="text"
+                                        className="form-input form-input-sm"
+                                        style={{ fontWeight: 700, fontSize: '0.82rem', color: '#1d4ed8', flex: 1, padding: '3px 8px' }}
+                                        value={match.roundLabel || ''}
+                                        placeholder="เช่น รอบ 8 ทีม คู่ที่ 1"
+                                        onChange={e => {
+                                          const nextMatches = [...(activeTournamentDraft.bracketMatches || [])];
+                                          nextMatches[mIdx] = { ...nextMatches[mIdx], roundLabel: e.target.value };
+                                          setActiveTournamentDraft({ ...activeTournamentDraft, bracketMatches: nextMatches });
+                                        }}
+                                      />
+                                      <select
+                                        value={match.status || 'Upcoming'}
+                                        onChange={e => {
+                                          const nextMatches = [...(activeTournamentDraft.bracketMatches || [])];
+                                          nextMatches[mIdx] = { ...nextMatches[mIdx], status: e.target.value };
+                                          setActiveTournamentDraft({ ...activeTournamentDraft, bracketMatches: nextMatches });
+                                        }}
+                                        style={{
+                                          fontSize: '0.75rem',
+                                          fontWeight: 700,
+                                          padding: '3px 8px',
+                                          borderRadius: '6px',
+                                          border: '1px solid #cbd5e1',
+                                          background: match.status === 'LIVE' ? '#fee2e2' : match.status === 'Finished' ? '#ecfdf5' : '#f1f5f9',
+                                          color: match.status === 'LIVE' ? '#b91c1c' : match.status === 'Finished' ? '#047857' : '#475569'
+                                        }}
+                                      >
+                                        <option value="Upcoming">⏳ รอแข่ง (Upcoming)</option>
+                                        <option value="LIVE">🔴 กำลังแข่งสด (LIVE)</option>
+                                        <option value="Finished">✓ จบการแข่งขัน (Finished)</option>
+                                      </select>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const nextMatches = (activeTournamentDraft.bracketMatches || []).filter((_, i) => i !== mIdx);
+                                          setActiveTournamentDraft({ ...activeTournamentDraft, bracketMatches: nextMatches });
+                                        }}
+                                        style={{ border: 'none', background: '#fee2e2', color: '#dc2626', width: '24px', height: '24px', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                        title="ลบคู่แข่งนี้"
+                                      >
+                                        <Trash2 size={12} />
+                                      </button>
+                                    </div>
+
+                                    {/* Team A vs Team B selection & scoring */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                      {/* Team 1 */}
+                                      <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        padding: '8px 10px',
+                                        background: match.teamA?.isWinner ? '#eff6ff' : '#f8fafc',
+                                        border: match.teamA?.isWinner ? '1px solid #3b82f6' : '1px solid #e2e8f0',
+                                        borderRadius: '8px'
+                                      }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+                                          {match.teamA?.isWinner && <Crown size={15} color="#eab308" />}
+                                          <select
+                                            className="form-input form-input-sm"
+                                            style={{ fontWeight: match.teamA?.isWinner ? 800 : 600, fontSize: '0.84rem', flex: 1, padding: '3px 8px' }}
+                                            value={match.teamA?.name || ''}
+                                            onChange={e => {
+                                              const selectedName = e.target.value;
+                                              const tmObj = registeredTeams.find(t => t.name === selectedName);
+                                              const nextMatches = [...(activeTournamentDraft.bracketMatches || [])];
+                                              nextMatches[mIdx] = {
+                                                ...nextMatches[mIdx],
+                                                teamA: {
+                                                  ...nextMatches[mIdx].teamA,
+                                                  name: selectedName || 'TBD',
+                                                  tag: tmObj?.tag || '',
+                                                  seed: tmObj?.seed || null
+                                                }
+                                              };
+                                              setActiveTournamentDraft({ ...activeTournamentDraft, bracketMatches: nextMatches });
+                                            }}
+                                          >
+                                            <option value="">-- เลือกทีม 1 (TBD) --</option>
+                                            {registeredTeams.map(t => (
+                                              <option key={t.id || t.name} value={t.name}>
+                                                {t.name} {t.tag ? `[${t.tag}]` : ''} {t.seed ? `(Seed #${t.seed})` : ''}
+                                              </option>
+                                            ))}
+                                          </select>
+                                        </div>
+
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: '8px' }}>
+                                          <input
+                                            type="number"
+                                            min="0"
+                                            max="10"
+                                            style={{ width: '44px', textAlign: 'center', fontWeight: 800, padding: '3px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
+                                            value={match.teamA?.score ?? 0}
+                                            onChange={e => {
+                                              const score = parseInt(e.target.value) || 0;
+                                              const nextMatches = [...(activeTournamentDraft.bracketMatches || [])];
+                                              nextMatches[mIdx] = {
+                                                ...nextMatches[mIdx],
+                                                teamA: { ...nextMatches[mIdx].teamA, score }
+                                              };
+                                              setActiveTournamentDraft({ ...activeTournamentDraft, bracketMatches: nextMatches });
+                                            }}
+                                          />
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              const nextMatches = [...(activeTournamentDraft.bracketMatches || [])];
+                                              const isAlreadyWinner = match.teamA?.isWinner;
+                                              nextMatches[mIdx] = {
+                                                ...nextMatches[mIdx],
+                                                status: isAlreadyWinner ? 'Upcoming' : 'Finished',
+                                                teamA: { ...nextMatches[mIdx].teamA, isWinner: !isAlreadyWinner },
+                                                teamB: { ...nextMatches[mIdx].teamB, isWinner: false }
+                                              };
+                                              setActiveTournamentDraft({ ...activeTournamentDraft, bracketMatches: nextMatches });
+                                            }}
+                                            style={{
+                                              fontSize: '0.72rem',
+                                              fontWeight: 700,
+                                              padding: '4px 8px',
+                                              borderRadius: '6px',
+                                              border: 'none',
+                                              background: match.teamA?.isWinner ? '#2563eb' : '#e2e8f0',
+                                              color: match.teamA?.isWinner ? '#ffffff' : '#475569',
+                                              cursor: 'pointer'
+                                            }}
+                                          >
+                                            {match.teamA?.isWinner ? '🏆 ชนะ' : 'เลือกชนะ'}
+                                          </button>
+                                        </div>
+                                      </div>
+
+                                      {/* Team 2 */}
+                                      <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        padding: '8px 10px',
+                                        background: match.teamB?.isWinner ? '#eff6ff' : '#f8fafc',
+                                        border: match.teamB?.isWinner ? '1px solid #3b82f6' : '1px solid #e2e8f0',
+                                        borderRadius: '8px'
+                                      }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+                                          {match.teamB?.isWinner && <Crown size={15} color="#eab308" />}
+                                          <select
+                                            className="form-input form-input-sm"
+                                            style={{ fontWeight: match.teamB?.isWinner ? 800 : 600, fontSize: '0.84rem', flex: 1, padding: '3px 8px' }}
+                                            value={match.teamB?.name || ''}
+                                            onChange={e => {
+                                              const selectedName = e.target.value;
+                                              const tmObj = registeredTeams.find(t => t.name === selectedName);
+                                              const nextMatches = [...(activeTournamentDraft.bracketMatches || [])];
+                                              nextMatches[mIdx] = {
+                                                ...nextMatches[mIdx],
+                                                teamB: {
+                                                  ...nextMatches[mIdx].teamB,
+                                                  name: selectedName || 'TBD',
+                                                  tag: tmObj?.tag || '',
+                                                  seed: tmObj?.seed || null
+                                                }
+                                              };
+                                              setActiveTournamentDraft({ ...activeTournamentDraft, bracketMatches: nextMatches });
+                                            }}
+                                          >
+                                            <option value="">-- เลือกทีม 2 (TBD) --</option>
+                                            {registeredTeams.map(t => (
+                                              <option key={t.id || t.name} value={t.name}>
+                                                {t.name} {t.tag ? `[${t.tag}]` : ''} {t.seed ? `(Seed #${t.seed})` : ''}
+                                              </option>
+                                            ))}
+                                          </select>
+                                        </div>
+
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: '8px' }}>
+                                          <input
+                                            type="number"
+                                            min="0"
+                                            max="10"
+                                            style={{ width: '44px', textAlign: 'center', fontWeight: 800, padding: '3px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
+                                            value={match.teamB?.score ?? 0}
+                                            onChange={e => {
+                                              const score = parseInt(e.target.value) || 0;
+                                              const nextMatches = [...(activeTournamentDraft.bracketMatches || [])];
+                                              nextMatches[mIdx] = {
+                                                ...nextMatches[mIdx],
+                                                teamB: { ...nextMatches[mIdx].teamB, score }
+                                              };
+                                              setActiveTournamentDraft({ ...activeTournamentDraft, bracketMatches: nextMatches });
+                                            }}
+                                          />
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              const nextMatches = [...(activeTournamentDraft.bracketMatches || [])];
+                                              const isAlreadyWinner = match.teamB?.isWinner;
+                                              nextMatches[mIdx] = {
+                                                ...nextMatches[mIdx],
+                                                status: isAlreadyWinner ? 'Upcoming' : 'Finished',
+                                                teamA: { ...nextMatches[mIdx].teamA, isWinner: false },
+                                                teamB: { ...nextMatches[mIdx].teamB, isWinner: !isAlreadyWinner }
+                                              };
+                                              setActiveTournamentDraft({ ...activeTournamentDraft, bracketMatches: nextMatches });
+                                            }}
+                                            style={{
+                                              fontSize: '0.72rem',
+                                              fontWeight: 700,
+                                              padding: '4px 8px',
+                                              borderRadius: '6px',
+                                              border: 'none',
+                                              background: match.teamB?.isWinner ? '#2563eb' : '#e2e8f0',
+                                              color: match.teamB?.isWinner ? '#ffffff' : '#475569',
+                                              cursor: 'pointer'
+                                            }}
+                                          >
+                                            {match.teamB?.isWinner ? '🏆 ชนะ' : 'เลือกชนะ'}
+                                          </button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
                             </div>
                           )}
-
-                          {/* Quick Single Photo Adder */}
-                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', background: '#f8fafc', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                            <input 
-                              type="text" className="form-input" style={{ flex: 2 }}
-                              placeholder="URL ภาพใหม่ (https://...)"
-                              value={newSinglePhoto.url}
-                              onChange={e => setNewSinglePhoto({ ...newSinglePhoto, url: e.target.value })}
-                            />
-                            <input 
-                              type="text" className="form-input" style={{ flex: 2 }}
-                              placeholder="คำบรรยายภาพ (Caption)"
-                              value={newSinglePhoto.caption}
-                              onChange={e => setNewSinglePhoto({ ...newSinglePhoto, caption: e.target.value })}
-                            />
-                            <select 
-                              className="form-input" style={{ width: '130px' }}
-                              value={newSinglePhoto.category}
-                              onChange={e => setNewSinglePhoto({ ...newSinglePhoto, category: e.target.value })}
-                            >
-                              <option value="stage">เวที & แสงสี</option>
-                              <option value="players">นักกีฬา</option>
-                              <option value="gear">อุปกรณ์</option>
-                              <option value="crowd">กองเชียร์</option>
-                              <option value="trophy">มอบถ้วยรางวัล</option>
-                              <option value="caster">แคสเตอร์</option>
-                            </select>
-                            <button 
-                              type="button" 
-                              className="btn-primary btn-sm"
-                              onClick={() => {
-                                if (!newSinglePhoto.url.trim()) return;
-                                const current = activeTournamentDraft.galleryPhotos || [];
-                                setActiveTournamentDraft({
-                                  ...activeTournamentDraft,
-                                  galleryPhotos: [
-                                    ...current,
-                                    {
-                                      id: `p-${Date.now()}`,
-                                      url: newSinglePhoto.url.trim(),
-                                      caption: newSinglePhoto.caption.trim() || `ภาพกิจกรรม #${current.length + 1}`,
-                                      category: newSinglePhoto.category
-                                    }
-                                  ]
-                                });
-                                setNewSinglePhoto({ url: '', caption: '', category: 'stage' });
-                              }}
-                            >
-                              <Plus size={14} /> เพิ่มรูป
-                            </button>
-                          </div>
-
-                          {/* Category Filter Pills */}
-                          <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '4px' }}>
-                            {[
-                              { id: 'all', label: 'ทั้งหมด' },
-                              { id: 'stage', label: 'เวที & แสงสี' },
-                              { id: 'players', label: 'นักกีฬา' },
-                              { id: 'gear', label: 'อุปกรณ์ & สเปก' },
-                              { id: 'crowd', label: 'กองเชียร์ & บรรยากาศ' },
-                              { id: 'trophy', label: 'มอบรางวัล' },
-                              { id: 'caster', label: 'แคสเตอร์' }
-                            ].map(cat => (
-                              <button 
-                                key={cat.id}
-                                type="button"
-                                className={`subtab-btn ${galleryCategoryFilter === cat.id ? 'active' : ''}`}
-                                style={{ padding: '3px 10px', fontSize: '0.78rem' }}
-                                onClick={() => setGalleryCategoryFilter(cat.id)}
-                              >
-                                {cat.label}
-                              </button>
-                            ))}
-                          </div>
-
-                          {/* Photos Grid */}
-                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: '10px', maxHeight: '420px', overflowY: 'auto', padding: '4px' }}>
-                            {(activeTournamentDraft.galleryPhotos || [])
-                              .filter(p => galleryCategoryFilter === 'all' || p.category === galleryCategoryFilter)
-                              .map((photo, pidx) => (
-                                <div 
-                                  key={photo.id || pidx}
-                                  style={{ 
-                                    position: 'relative', 
-                                    border: '1px solid #e2e8f0', 
-                                    borderRadius: '6px', 
-                                    overflow: 'hidden',
-                                    background: '#ffffff',
-                                    boxShadow: '0 1px 3px rgba(0,0,0,0.06)'
-                                  }}
-                                >
-                                  <div style={{ position: 'relative', height: '110px', background: '#0f172a' }}>
-                                    <img 
-                                      src={photo.url} 
-                                      alt={photo.caption}
-                                      loading="lazy"
-                                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                    />
-                                    <span style={{ position: 'absolute', top: '4px', left: '4px', background: 'rgba(0,0,0,0.7)', color: '#fff', fontSize: '0.65rem', padding: '1px 5px', borderRadius: '4px', fontWeight: 700 }}>
-                                      #{pidx + 1}
-                                    </span>
-                                    <button 
-                                      type="button" 
-                                      onClick={() => {
-                                        const updated = activeTournamentDraft.galleryPhotos.filter((_, i) => i !== pidx);
-                                        setActiveTournamentDraft({ ...activeTournamentDraft, galleryPhotos: updated });
-                                      }}
-                                      style={{ position: 'absolute', top: '4px', right: '4px', background: 'rgba(239, 68, 68, 0.9)', color: '#fff', border: 'none', borderRadius: '4px', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-                                      title="ลบรูปนี้"
-                                    >
-                                      <Trash2 size={11} />
-                                    </button>
-                                  </div>
-                                  <div style={{ padding: '6px' }}>
-                                    <input 
-                                      type="text" 
-                                      className="form-input" 
-                                      style={{ fontSize: '0.75rem', padding: '3px 6px', width: '100%' }}
-                                      value={photo.caption || ''}
-                                      onChange={e => {
-                                        const updated = [...activeTournamentDraft.galleryPhotos];
-                                        updated[pidx].caption = e.target.value;
-                                        setActiveTournamentDraft({ ...activeTournamentDraft, galleryPhotos: updated });
-                                      }}
-                                      placeholder="คำบรรยายภาพ"
-                                    />
-                                  </div>
-                                </div>
-                              ))}
-                          </div>
                         </div>
                       )}
 

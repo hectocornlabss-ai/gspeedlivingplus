@@ -35,10 +35,12 @@ try {
   console.warn('[Meta] Warning reading default-meta.json:', e.message);
 }
 
-// Ensure database directories exist
+// Ensure database and uploads directories exist
+const UPLOADS_DIR = path.join(DATA_DIR, 'uploads');
 try {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
   if (!fs.existsSync(BACKUP_DIR)) fs.mkdirSync(BACKUP_DIR, { recursive: true });
+  if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 } catch (dirErr) {
   console.warn('[Database] Directory init warning:', dirErr.message);
 }
@@ -52,11 +54,18 @@ app.use(cors({
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Simple in-memory rate limiter (exempts /api/site-data and /health)
+// Serve persistent uploads statically
+app.use('/uploads', express.static(UPLOADS_DIR));
+const publicUploads = path.resolve(__dirname, '..', 'public', 'uploads');
+if (fs.existsSync(publicUploads)) {
+  app.use('/uploads', express.static(publicUploads));
+}
+
+// Simple in-memory rate limiter (exempts /api/site-data, /api/upload-media, and /health)
 const rateLimitMap = new Map();
 const rateLimitMiddleware = (req, res, next) => {
-  // Never rate-limit database queries or health checks
-  if (req.path.startsWith('/api/site-data') || req.path === '/health' || req.method === 'GET') {
+  // Never rate-limit database queries, file uploads, or health checks
+  if (req.path.startsWith('/api/site-data') || req.path.startsWith('/api/upload-media') || req.path === '/health' || req.method === 'GET') {
     return next();
   }
 
@@ -848,6 +857,45 @@ app.get('/api/site-data', (req, res) => {
   }
 });
 
+// POST /api/upload-media - Handle batch media file uploads and save as static WebP files
+app.post('/api/upload-media', (req, res) => {
+  try {
+    const { dataUrl, filename = 'image.webp', category = 'gallery' } = req.body || {};
+    if (!dataUrl) {
+      return res.status(400).json({ success: false, error: 'dataUrl is required' });
+    }
+
+    const catDir = path.join(UPLOADS_DIR, category);
+    if (!fs.existsSync(catDir)) fs.mkdirSync(catDir, { recursive: true });
+
+    const base64Data = dataUrl.includes(',') ? dataUrl.split(',')[1] : dataUrl;
+    const buffer = Buffer.from(base64Data, 'base64');
+    const ext = dataUrl.includes('image/webp') ? '.webp' : (dataUrl.includes('image/png') ? '.png' : (dataUrl.includes('image/svg') ? '.svg' : '.jpg'));
+    const safeName = filename.replace(/\.[^/.]+$/, '').replace(/[^\w-]/g, '_').toLowerCase();
+    const uniqueName = `${safeName || category}-${Date.now()}-${Math.random().toString(36).substring(2, 6)}${ext}`;
+    const filePath = path.join(catDir, uniqueName);
+    fs.writeFileSync(filePath, buffer);
+
+    // Also copy to public/uploads if available for dev convenience
+    try {
+      const pubCatDir = path.join(publicUploads, category);
+      if (!fs.existsSync(pubCatDir)) fs.mkdirSync(pubCatDir, { recursive: true });
+      fs.copyFileSync(filePath, path.join(pubCatDir, uniqueName));
+    } catch (pubErr) {}
+
+    const publicUrl = `/uploads/${category}/${uniqueName}`;
+    return res.json({
+      success: true,
+      url: publicUrl,
+      name: filename || uniqueName,
+      sizeBytes: buffer.length
+    });
+  } catch (err) {
+    console.error('[Upload Media Error]:', err);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // POST /api/site-data - Persist site data with atomic file write and rolling backup
 app.post('/api/site-data', (req, res) => {
   try {
@@ -873,10 +921,19 @@ app.post('/api/site-data', (req, res) => {
       }
     }
 
-    // Atomic write using temporary file to prevent corruption during writes
-    const tempFile = `${SITE_DATA_FILE}.tmp.${Date.now()}`;
-    fs.writeFileSync(tempFile, jsonString, 'utf8');
-    fs.renameSync(tempFile, SITE_DATA_FILE);
+    // Robust file write with atomic fallback (safe against Windows locks and Docker EXDEV errors)
+    try {
+      const tempFile = `${SITE_DATA_FILE}.tmp.${Date.now()}`;
+      fs.writeFileSync(tempFile, jsonString, 'utf8');
+      try {
+        fs.renameSync(tempFile, SITE_DATA_FILE);
+      } catch (renameErr) {
+        fs.copyFileSync(tempFile, SITE_DATA_FILE);
+        try { fs.unlinkSync(tempFile); } catch (uErr) {}
+      }
+    } catch (writeErr) {
+      fs.writeFileSync(SITE_DATA_FILE, jsonString, 'utf8');
+    }
 
     const stats = fs.statSync(SITE_DATA_FILE);
     console.log(`[Database] Successfully saved site-data.json (${(stats.size / 1024).toFixed(1)} KB) by ${author}`);

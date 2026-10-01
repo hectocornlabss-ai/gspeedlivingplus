@@ -6,7 +6,9 @@ import {
   Filter, Play, ExternalLink, Gamepad2, Layers, Tag
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
+import { useTranslation } from '../context/LanguageContext';
 import { TOURNAMENTS } from '../data/mockData';
+import { compareTournaments, isTournamentRegistrationOpen } from '../utils/tournamentUtils';
 
 export default function TournamentsPage({
   initialTournamentSlug = null,
@@ -15,6 +17,7 @@ export default function TournamentsPage({
   onNavigateFranchise
 }) {
   const { siteData, updateTournament } = useSiteData();
+  const { t, language, translateDynamic } = useTranslation();
   const tournamentsList = siteData?.tournaments || TOURNAMENTS;
 
   // Search & Game Filter States
@@ -31,7 +34,7 @@ export default function TournamentsPage({
     return Object.entries(counts).map(([name, count]) => ({ name, count }));
   }, [tournamentsList]);
 
-  // Filtered and Sorted Tournaments (New / Open tournaments sorted automatically to the front)
+  // Filtered and Sorted Tournaments (New / Open tournaments sorted automatically to the front, closed to the back)
   const filteredTournaments = useMemo(() => {
     return tournamentsList
       .filter(t => {
@@ -49,19 +52,12 @@ export default function TournamentsPage({
 
         return matchSearch && matchGame;
       })
-      .sort((a, b) => {
-        // รายการที่เปิดรับสมัคร หรือเป็นทัวร์ใหม่ ให้แสดงผลขึ้นมาก่อนอัตโนมัติ
-        const aIsOpen = a.status === 'Open';
-        const bIsOpen = b.status === 'Open';
-        if (aIsOpen && !bIsOpen) return -1;
-        if (!aIsOpen && bIsOpen) return 1;
-        return 0;
-      });
+      .sort(compareTournaments);
   }, [tournamentsList, searchQuery, gameFilter]);
 
   // Aggregate stats
   const totalPrizePoolText = '฿300,000+';
-  const openCount = tournamentsList.filter(t => t.status === 'Open').length;
+  const openCount = tournamentsList.filter(isTournamentRegistrationOpen).length;
   const totalTeams = tournamentsList.reduce((acc, t) => acc + (t.teams ? t.teams.length : 0), 0);
 
   const handleOpenTournament = (tour) => {
@@ -86,11 +82,11 @@ export default function TournamentsPage({
               style={{ cursor: 'pointer', color: '#2563eb', fontWeight: 600, fontSize: '0.85rem' }}
               onClick={() => onNavigateHome ? onNavigateHome() : (window.history.pushState(null, '', '/'), window.dispatchEvent(new PopStateEvent('popstate')))}
             >
-              หน้าแรก
+              {t('nav.home')}
             </span>
             <span className="breadcrumb-separator" style={{ color: '#94a3b8' }}>/</span>
             <span className="breadcrumb-item current" style={{ color: '#0f172a', fontWeight: 700, fontSize: '0.85rem' }}>
-              ปฏิทินการแข่งขัน & ทัวร์นาเมนต์
+              {t('nav.tournaments')}
             </span>
           </div>
 
@@ -102,7 +98,7 @@ export default function TournamentsPage({
                 <Search size={18} className="search-icon text-blue" />
                 <input 
                   type="text" 
-                  placeholder="ค้นหาชื่อการแข่งขัน, ชื่อเกม (VALORANT, RoV, CS2...), หรือรูปแบบ..."
+                  placeholder={t('tournamentsPage.searchPlaceholder') || 'ค้นหาชื่อการแข่งขัน, ชื่อเกม (VALORANT, RoV, CS2...), หรือรูปแบบ...'}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="search-input"
@@ -128,7 +124,7 @@ export default function TournamentsPage({
                     }}
                   >
                     <Trophy size={14} />
-                    <span>ทั้งหมด ({tournamentsList.length})</span>
+                    <span>{t('common.all')} ({tournamentsList.length})</span>
                   </button>
                   {gamesWithCount.map(({ name, count }) => (
                     <button 
@@ -158,13 +154,19 @@ export default function TournamentsPage({
         <div className="container tournaments-hero-container">
           <div className="tournaments-hero-badge">
             <Flame size={15} className="text-amber pulse-icon" />
-            <span>GLP ESPORTS LEAGUE & TOURNAMENTS</span>
+            <span>{t('tournamentsPage.badge') || 'GLP ESPORTS LEAGUE & TOURNAMENTS'}</span>
           </div>
           <h1 className="tournaments-hero-title">
-            ปฏิทินการแข่งขัน & <span className="text-blue">ทัวร์นาเมนต์อีสปอร์ต</span>
+            {language === 'th' ? (
+              <>ปฏิทินการแข่งขัน & <span className="text-blue">ทัวร์นาเมนต์อีสปอร์ต</span></>
+            ) : (
+              <span>{t('tournamentsPage.title')}</span>
+            )}
           </h1>
           <p className="tournaments-hero-subtitle" style={{ marginBottom: 0 }}>
-            ศูนย์รวมการแข่งขันอีสปอร์ตระดับประเทศ ชิงเงินรางวัลรวมกว่าหลายแสนบาท พิสูจน์ฝีมือบนเวที LAN Final 4K สเปก Intel i9 + RTX 4080 จอ 360Hz พร้อมระบบ Dedicated Server 128-Tick และถ่ายทอดสดเต็มรูปแบบ
+            {language === 'th'
+              ? 'ศูนย์รวมการแข่งขันอีสปอร์ตระดับประเทศ ชิงเงินรางวัลรวมกว่าหลายแสนบาท พิสูจน์ฝีมือบนเวที LAN Final 4K สเปก Intel i9 + RTX 4080 จอ 360Hz พร้อมระบบ Dedicated Server 128-Tick และถ่ายทอดสดเต็มรูปแบบ'
+              : t('tournamentsPage.subtitle')}
           </p>
         </div>
       </section>
@@ -173,9 +175,21 @@ export default function TournamentsPage({
       <section className="tournaments-grid-section">
         <div className="container">
           <div className="tournaments-count-heading">
-            <span>พบทั้งหมด <strong>{filteredTournaments.length}</strong> รายการแข่งขัน</span>
+            <span>
+              {language === 'th' ? (
+                <>พบทั้งหมด <strong>{filteredTournaments.length}</strong> รายการแข่งขัน</>
+              ) : (
+                <><strong>{filteredTournaments.length}</strong> {t('nav.tournaments')}</>
+              )}
+            </span>
             {openCount > 0 && (
-              <span className="open-notice-tag">🔥 เปิดรับสมัคร ({openCount}) รายการ พร้อมประลองฝีมือ</span>
+              <span className="open-notice-tag">
+                🔥 {language === 'th' 
+                  ? `เปิดรับสมัคร (${openCount}) รายการ พร้อมประลองฝีมือ`
+                  : language === 'zh'
+                  ? `${openCount} 项赛事报名中`
+                  : `${openCount} Open Tournaments`}
+              </span>
             )}
           </div>
 
@@ -184,7 +198,7 @@ export default function TournamentsPage({
               {filteredTournaments.map((t) => {
                 const photoCount = (t.galleryPhotos || []).length;
                 const teamCount = (t.teams || []).length;
-                const isRegistrationOpen = t.status === 'Open';
+                const isRegistrationOpen = isTournamentRegistrationOpen(t);
 
                 return (
                   <div key={t.id} className="tournament-card">
@@ -229,11 +243,6 @@ export default function TournamentsPage({
                         <span className="t-game-tag">
                           {t.game}
                         </span>
-                        {photoCount > 0 && (
-                          <span className="t-photo-pill">
-                            <Camera size={12} /> {photoCount} ภาพ
-                          </span>
-                        )}
                       </div>
                     </div>
 
@@ -245,14 +254,14 @@ export default function TournamentsPage({
                           title={t.title}
                           onClick={() => handleOpenTournament(t, 'overview')}
                         >
-                          {t.title}
+                          {translateDynamic(t.title)}
                         </h3>
 
                         {/* High-impact Prize Banner */}
                         <div className="t-prize-banner" style={{ marginTop: '14px' }}>
                           <div className="t-prize-label">
                             <Trophy size={16} className="text-amber" />
-                            <span>เงินรางวัลรวม</span>
+                            <span>{t('common.prizePool')}</span>
                           </div>
                           <div className="t-prize-amount">
                             {t.prizePool}
@@ -263,37 +272,30 @@ export default function TournamentsPage({
                         <div className="t-details-list" style={{ marginTop: '12px' }}>
                           <div className="t-detail-item">
                             <Calendar size={15} className="text-cyan" style={{ flexShrink: 0 }} />
-                            <span><strong>วันที่:</strong> {t.date} ({t.time})</span>
+                            <span><strong>{t('common.date')}:</strong> {t.date} ({t.time})</span>
                           </div>
                           <div className="t-detail-item">
                             <Users size={15} className="text-blue" style={{ flexShrink: 0 }} />
-                            <span><strong>จำนวนทีม:</strong> {t.slots} ({teamCount} ทีมร่วมแข่ง)</span>
+                            <span><strong>{t('common.teams')}:</strong> {t.slots} ({teamCount} {t('common.teamsCount')})</span>
                           </div>
                           <div className="t-detail-item">
                             <Zap size={15} className="text-amber" style={{ flexShrink: 0 }} />
-                            <span><strong>รูปแบบ:</strong> {t.format}</span>
+                            <span><strong>{language === 'th' ? 'รูปแบบ:' : (language === 'zh' ? '赛制:' : 'Format:')}</strong> {translateDynamic(t.format)}</span>
                           </div>
                         </div>
                       </div>
 
                       {/* Action Buttons */}
                       <div className="t-card-footer">
-                        <div className="t-action-pair">
+                        <div className="t-action-single">
                           <button 
                             type="button"
                             className="t-btn-secondary"
-                            onClick={() => handleOpenTournament(t, 'gallery')}
-                          >
-                            <Camera size={14} />
-                            <span>ภาพกิจกรรม ({photoCount})</span>
-                          </button>
-                          <button 
-                            type="button"
-                            className="t-btn-secondary"
+                            style={{ width: '100%', justifyContent: 'center' }}
                             onClick={() => handleOpenTournament(t, 'roster')}
                           >
                             <Users size={14} />
-                            <span>รายชื่อทีม ({teamCount})</span>
+                            <span>{t('tournamentsPage.registeredTeams')} ({teamCount})</span>
                           </button>
                         </div>
 
@@ -305,7 +307,7 @@ export default function TournamentsPage({
                               onClick={() => handleOpenTournament(t, 'register')}
                             >
                               <Zap size={15} />
-                              <span>สมัครแข่ง</span>
+                              <span>{t('common.registerTeam')}</span>
                               <ArrowRight size={14} />
                             </button>
                             <button 
@@ -315,7 +317,7 @@ export default function TournamentsPage({
                               title="ดูสายการแข่งขัน (Tournament Bracket)"
                             >
                               <Layers size={14} />
-                              <span>สายแข่ง</span>
+                              <span>{t('common.bracket')}</span>
                             </button>
                           </div>
                         ) : (
@@ -324,7 +326,7 @@ export default function TournamentsPage({
                             className="t-btn-bracket-full"
                             onClick={() => handleOpenTournament(t, 'bracket')}
                           >
-                            <span>ดูสายการแข่งขัน & สกอร์สด (Brackets)</span>
+                            <span>{language === 'th' ? 'ดูสายการแข่งขัน & สกอร์สด (Brackets)' : (language === 'zh' ? '查看赛程与比分 (Brackets)' : 'View Match Brackets & Live Scores')}</span>
                             <ArrowRight size={14} />
                           </button>
                         )}
@@ -337,8 +339,8 @@ export default function TournamentsPage({
           ) : (
             <div className="no-tournaments-found glass-panel">
               <Search size={40} className="text-blue" />
-              <h3>ไม่พบรายการแข่งขันตามเงื่อนไขที่ค้นหา</h3>
-              <p>ลองเปลี่ยนคำค้นหา หรือเลือกตัวกรองสถานะเป็น "ทั้งหมด" เพื่อดูรายการแข่งขันทั้งหมด</p>
+              <h3>{language === 'th' ? 'ไม่พบรายการแข่งขันตามเงื่อนไขที่ค้นหา' : (language === 'zh' ? '未找到符合条件的赛事' : 'No tournaments match your search')}</h3>
+              <p>{language === 'th' ? 'ลองเปลี่ยนคำค้นหา หรือเลือกตัวกรองสถานะเป็น "ทั้งหมด" เพื่อดูรายการแข่งขันทั้งหมด' : (language === 'zh' ? '请尝试更换搜索词或选择“全部”查看更多赛事' : 'Try adjusting your search query or reset the game filter to view all events.')}</p>
               <button 
                 type="button"
                 className="btn-primary"

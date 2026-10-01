@@ -6,6 +6,7 @@ import AIChatWidget from './components/AIChatWidget';
 import AnnouncementTicker from './components/AnnouncementTicker';
 import ErrorBoundary from './components/ErrorBoundary';
 import { SiteDataProvider, useSiteData } from './context/SiteDataContext';
+import { LanguageProvider } from './context/LanguageContext';
 import { getRouteMetadata } from './data/routesConfig';
 import { applySEOMetadata, applyTrackingAndVerificationScripts } from './utils/seoManager';
 import './App.css';
@@ -404,7 +405,9 @@ export default function App() {
   return (
     <ErrorBoundary>
       <SiteDataProvider>
-        <AppContent />
+        <LanguageProvider>
+          <AppContent />
+        </LanguageProvider>
       </SiteDataProvider>
     </ErrorBoundary>
   );

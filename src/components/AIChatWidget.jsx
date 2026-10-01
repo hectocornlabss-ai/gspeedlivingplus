@@ -6,6 +6,7 @@ import {
   Globe, Compass, Layers
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
+import { useTranslation } from '../context/LanguageContext';
 
 // Clean Mini SVG Flag Components (Render crisp and vibrant on all OS)
 const ThaiFlag = () => (
@@ -367,21 +368,74 @@ Feel free to ask about our opening hours, location, rates, tournament rental, or
   }
 };
 
+const WELCOME_MESSAGES = {
+  th: 'สวัสดีครับ ยินดีต้อนรับสู่ **G-Speed Esport Arena** ครับ! 😊\n\nสามารถสอบถามเวลาทำการ, พิกัดร้าน, อัตราค่าบริการ, การขอเช่าจัดแข่งอีสปอร์ต หรือการรับติดตั้งระบบร้านเกม ได้เลยครับ เจ้าหน้าที่พร้อมให้ข้อมูลครับ\n*(We support Thai, English, and Chinese / 支持泰语、英语和中文咨询)*',
+  en: 'Hello! Welcome to **G-Speed Esport Arena**! 😊\n\nFeel free to ask about our 24/7 operating hours, location & maps, gaming rates, tournament venue rentals, or cyber cafe system setups. Our team is ready to assist you!\n*(We support Thai, English, and Chinese / 支持泰语、英语和中文咨询)*',
+  zh: '您好！欢迎光临 **G-Speed Esport Arena** 电竞馆！😊\n\n您可以随时咨询我们的24小时营业时间、门店地址导航、网费价格与优惠、电竞赛事场地租赁或网吧系统一站式安装服务。客服人员随时为您解答！\n*(We support Thai, English, and Chinese / 支持泰语、英语和中文咨询)*'
+};
+
+const translateQueryToThai = (query, lang) => {
+  if (!query || lang === 'th') return null;
+  const q = query.toLowerCase().trim();
+
+  if (['franchise', 'open shop', 'open cafe', 'invest', 'cost to open', '加盟', '开网吧', '开店', '投资', '加盟费'].some(k => q.includes(k))) {
+    return 'ลูกค้าสอบถาม: ข้อมูลการลงทุนเปิดร้าน / ค่าธรรมเนียมแฟรนไชส์ และงบประมาณ';
+  }
+  if (['hour', 'hours', 'open time', 'close time', 'timing', 'schedule', '24/7', '营业时间', '几点', '开门', '关门'].some(k => q.includes(k))) {
+    return 'ลูกค้าสอบถาม: เวลาเปิด-ปิดทำการของร้าน (เปิด 24 ชั่วโมง หรือไม่)';
+  }
+  if (['location', 'where', 'address', 'map', 'directions', '地址', '在哪里', '地图', '导航'].some(k => q.includes(k))) {
+    return 'ลูกค้าสอบถาม: พิกัดที่ตั้งร้าน และแผนที่นำทาง Google Maps';
+  }
+  if (['tournament', 'venue', 'rental', 'event', 'book', 'stage', '赛事', '租场', '舞台', '比赛'].some(k => q.includes(k))) {
+    return 'ลูกค้าสอบถาม: การขอเช่าพื้นที่ / เวที 5v5 เพื่อจัดทัวร์นาเมนต์อีสปอร์ต';
+  }
+  if (['price', 'pricing', 'rate', 'cost', 'fee', 'promo', 'promotion', '价格', '多少钱', '收费', '充值'].some(k => q.includes(k))) {
+    return 'ลูกค้าสอบถาม: อัตราค่าบริการคอมพิวเตอร์, โปรโมชัน และราคาห้อง VIP';
+  }
+  if (['spec', 'specs', 'hardware', 'gpu', 'cpu', 'monitor', '360hz', 'rtx', '配置', '显卡', '屏幕'].some(k => q.includes(k))) {
+    return 'ลูกค้าสอบถาม: สเปกคอมพิวเตอร์ การ์ดจอ และหน้าจอ 360Hz';
+  }
+  if (['install', 'setup', 'diskless', 'turnkey', 'network', 'pos', '无盘', '系统', '搭建'].some(k => q.includes(k))) {
+    return 'ลูกค้าสอบถาม: บริการรับติดตั้งระบบ Diskless และวางระบบร้านเกมครบวงจร';
+  }
+  if (['hello', 'hi', 'hey', '你好', '您好', '在吗'].some(k => q.includes(k))) {
+    return 'ลูกค้าส่งข้อความทักทาย (สวัสดี / มีใครอยู่ไหม)';
+  }
+
+  return `ลูกค้าสอบถาม (${lang === 'en' ? 'ภาษาอังกฤษ' : 'ภาษาจีน'}): "${query}"`;
+};
+
 export default function AIChatWidget() {
   const { siteData, addPendingQuestion } = useSiteData();
+  const { t, language } = useTranslation();
 
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
-      id: 'msg-1',
+      id: 'welcome-msg',
       role: 'assistant',
-      text: 'สวัสดีครับ ยินดีต้อนรับสู่ **G-Speed Esport Arena** ครับ! 😊\n\nสามารถสอบถามเวลาทำการ, พิกัดร้าน, อัตราค่าบริการ, การขอเช่าจัดแข่งอีสปอร์ต หรือการรับติดตั้งระบบร้านเกม ได้เลยครับ เจ้าหน้าที่พร้อมให้ข้อมูลครับ\n*(We support Thai, English, and Chinese / 支持泰语、英语和中文咨询)*'
+      text: WELCOME_MESSAGES[language] || WELCOME_MESSAGES.th
     }
   ]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
   const widgetRef = useRef(null);
+
+  // Sync initial welcome message when customer changes language
+  useEffect(() => {
+    setMessages(prev => {
+      if (prev.length === 1 && prev[0].role === 'assistant') {
+        return [{
+          id: 'welcome-msg',
+          role: 'assistant',
+          text: WELCOME_MESSAGES[language] || WELCOME_MESSAGES.th
+        }];
+      }
+      return prev;
+    });
+  }, [language]);
 
   // Auto collapse / minimize when clicking outside the widget
   useEffect(() => {
@@ -409,15 +463,31 @@ export default function AIChatWidget() {
     }
   }, [messages, isOpen]);
 
-  // Quick Prompt Suggestions with Multi-language chips
-  const quickPrompts = [
+  // Quick Prompt Suggestions with Dynamic Language adaptation
+  const quickPrompts = (language === 'en') ? [
+    { label: '🏢 Franchise & Store Opening', query: 'Franchise and store opening investment budget' },
+    { label: '🕒 Opening Hours?', query: 'What are your opening hours?' },
+    { label: '📍 Location & Maps', query: 'Where is the arena located?' },
+    { label: '🏆 Host Esports Tournament', query: 'Tournament and event venue rental' },
+    { label: '💳 Pricing & Rates', query: 'What are your rates and promotions?' },
+    { label: '💻 Hardware Specs', query: 'What are your PC hardware specs?' },
+    { label: '🛠️ Turnkey System Setup', query: 'Turnkey cyber cafe system setup service' }
+  ] : (language === 'zh') ? [
+    { label: '🏢 加盟开店 / 投资预算', query: '电竞馆加盟与开店投资预算' },
+    { label: '🕒 营业时间？', query: '请问营业时间是几点到几点？' },
+    { label: '📍 门店地址与地图导航', query: '电竞馆具体地址和地图在哪里？' },
+    { label: '🏆 电竞赛事场地租赁', query: '举办电竞赛事与场地租用' },
+    { label: '💳 网费价格与优惠', query: '网费价格多少钱每小时？' },
+    { label: '💻 电脑硬件配置', query: '电脑和电竞设备配置是什么？' },
+    { label: '🛠️ 一站式网吧系统工程', query: '网吧软硬件系统一站式安装服务' }
+  ] : [
     { label: '🏢 สนใจเปิดร้าน / แฟรนไชส์', query: 'สนใจเปิดร้าน ราคาเท่าไหร่' },
     { label: '🕒 ร้านเปิดกี่โมง?', query: 'ร้านเปิดกี่โมง' },
     { label: '📍 ร้านอยู่ที่ไหน & แผนที่', query: 'ร้านอยู่ที่ไหน' },
     { label: '🏆 ขอเช่าจัดแข่งอีสปอร์ต', query: 'ขอเช่าจัดแข่งอีสปอร์ต' },
-    { label: '🛠️ รับติดตั้งระบบร้านเกม', query: 'บริการรับติดตั้งระบบร้านเกม' },
-    { label: '🌐 English: Hours & Map', query: 'What are your opening hours and location?' },
-    { label: '🇨🇳 中文咨询 (营业时间/地址)', query: '请问营业时间和地址在哪里？' }
+    { label: '💳 อัตราค่าบริการ & โปรโมชัน', query: 'อัตราค่าบริการและโปรโมชัน' },
+    { label: '💻 สเปกคอมพิวเตอร์', query: 'สเปกคอมพิวเตอร์และการ์ดจอ' },
+    { label: '🛠️ รับติดตั้งระบบร้านเกม', query: 'บริการรับติดตั้งระบบร้านเกม' }
   ];
 
   // Match Core Intents
@@ -551,16 +621,23 @@ export default function AIChatWidget() {
 
     setInputText('');
 
-    // Add User Message
+    const lang = detectLanguage(query) || (language === 'zh' ? 'zh' : (language === 'en' ? 'en' : 'th'));
+    const thaiTranslation = (lang !== 'th') ? translateQueryToThai(query, lang) : null;
+
+    // Add User Message with translation
     const userMsg = {
       id: `user-${Date.now()}`,
       role: 'user',
-      text: query
+      text: query,
+      lang: lang,
+      translationTh: thaiTranslation
     };
     setMessages(prev => [...prev, userMsg]);
     setIsLoading(true);
 
-    const lang = detectLanguage(query);
+    if (lang !== 'th' && thaiTranslation) {
+      addPendingQuestion(query, thaiTranslation, lang);
+    }
 
     // 1. First check if query matches Core Knowledge directly (instant high-accuracy matching in 3 languages)
     const matchedCoreAnswer = matchCoreIntent(query, lang);
@@ -695,7 +772,7 @@ ${contextText}
           finalAnswer = matchedDocs.map(d => d.content).join('\n\n');
         } else {
           finalAnswer = CORE_KNOWLEDGE.outOfScope[lang] || CORE_KNOWLEDGE.outOfScope.th;
-          addPendingQuestion(query);
+          addPendingQuestion(query, thaiTranslation, lang);
         }
       }
 
@@ -727,8 +804,8 @@ ${contextText}
             <Headphones size={20} className="trigger-icon" />
           </div>
           <div className="trigger-text-badge">
-            <span className="badge-subtitle">G-SPEED ARENA</span>
-            <span className="trigger-label">สอบถามข้อมูล / แชทกับเจ้าหน้าที่</span>
+            <span className="badge-subtitle">{t('chat.triggerSubtitle')}</span>
+            <span className="trigger-label">{t('chat.triggerLabel')}</span>
           </div>
         </button>
       )}
@@ -743,10 +820,10 @@ ${contextText}
                 <Headphones size={18} />
               </div>
               <div>
-                <strong className="chat-title">ศูนย์บริการข้อมูลลูกค้า • G-SPEED ARENA</strong>
+                <strong className="chat-title">{t('chat.cardTitle')}</strong>
                 <div className="chat-status-pill">
                   <span className="status-dot-green"></span>
-                  <span>Online • สอบถามข้อมูล & บริการร้าน 24 ชม.</span>
+                  <span>{t('chat.statusOnline')}</span>
                   <span className="chat-lang-pill" title="บริการ 3 ภาษา: ไทย 🇹🇭 • English 🇬🇧 • 中文 🇨🇳">
                     <ThaiFlag />
                     <UKFlag />
@@ -778,6 +855,25 @@ ${contextText}
                 )}
                 <div className={`chat-bubble-content ${msg.role === 'user' ? 'bubble-user' : 'bubble-bot'} ${msg.isOutOfScopeNotice ? 'bubble-warning' : ''}`}>
                   <FormattedChatMessage text={msg.text} onNavigate={() => setIsOpen(false)} />
+                  
+                  {/* Real-time Thai Translation for Admin */}
+                  {msg.role === 'user' && msg.translationTh && (
+                    <div style={{
+                      marginTop: '6px',
+                      padding: '4px 8px',
+                      background: 'rgba(255, 255, 255, 0.95)',
+                      borderRadius: '6px',
+                      color: '#1e3a8a',
+                      fontSize: '0.74rem',
+                      fontWeight: 500,
+                      border: '1px solid rgba(191, 219, 254, 0.8)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}>
+                      <span>🇹🇭 <strong>แปลไทย (Admin):</strong> {msg.translationTh}</span>
+                    </div>
+                  )}
                   
                   {/* Interactive Store Planner CTA Button */}
                   {msg.role === 'assistant' && (
@@ -885,7 +981,7 @@ ${contextText}
             <input 
               type="text" 
               className="chat-input-field"
-              placeholder="สอบถามเวลาทำการ, ที่ตั้งร้าน, จัดแข่ง, หรือติดตั้งระบบ..."
+              placeholder={t('chat.inputPlaceholder')}
               value={inputText}
               onChange={e => setInputText(e.target.value)}
               disabled={isLoading}
@@ -894,7 +990,7 @@ ${contextText}
               type="submit" 
               className="btn-chat-send"
               disabled={!inputText.trim() || isLoading}
-              title="ส่งข้อความ"
+              title={t('chat.sendBtn')}
             >
               <Send size={16} />
             </button>

@@ -5,6 +5,7 @@ import {
   Image as ImageIcon, ZoomIn, X, ChevronLeft, Gamepad2, Shield, ShieldCheck, Zap, Gift, LayoutGrid, Tag, Globe
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
+import { useTranslation } from '../context/LanguageContext';
 import SocialSharePopover from './SocialSharePopover';
 
 export default function SingleActivityView({ 
@@ -16,6 +17,7 @@ export default function SingleActivityView({
   isPreview = false 
 }) {
   const { siteData } = useSiteData();
+  const { t, language, translateDynamic } = useTranslation();
   const allActivities = [...(siteData?.gallery || []), ...(siteData?.news || [])];
 
   // State for share copy feedback
@@ -364,11 +366,11 @@ export default function SingleActivityView({
               type="button" 
               onClick={() => onBack('activities')} 
               className="btn-tourney-back btn-activity-back"
-              title="ย้อนกลับไปรวมภาพกิจกรรม"
+              title={t('singleActivity.back')}
             >
               <ArrowLeft size={15} />
-              <span className="back-btn-text-full">ย้อนกลับไปรวมภาพกิจกรรม</span>
-              <span className="back-btn-text-short">ย้อนกลับ</span>
+              <span className="back-btn-text-full">{t('singleActivity.back')}</span>
+              <span className="back-btn-text-short">{t('common.back')}</span>
             </button>
           </div>
 
@@ -379,15 +381,15 @@ export default function SingleActivityView({
               type="button"
               className="btn-tourney-share-trigger btn-activity-share"
               onClick={() => setShareOpen(!shareOpen)}
-              title="แชร์บทความนี้ (Facebook, LINE, Messenger, Instagram, คัดลอกลิงก์)"
+              title={t('common.share')}
             >
               <Share2 size={14} className="text-blue" />
-              <span>แชร์</span>
+              <span>{t('common.share')}</span>
             </button>
 
             <SocialSharePopover
               url={typeof window !== 'undefined' ? window.location.href : ''}
-              title={activity.title}
+              title={translateDynamic(activity.title)}
               subtitle={activity.tag || 'GLP NEWS & EVENT'}
               isOpen={shareOpen}
               onClose={() => setShareOpen(false)}
@@ -405,10 +407,10 @@ export default function SingleActivityView({
               type="button"
               className={`badge-pill badge-blue category-badge-clickable ${activeFilterCategory === activity.category ? 'active-filter' : ''}`}
               onClick={() => handleCategoryClick(activity.category)}
-              title={`คลิกเพื่อกรองบทความในหมวดหมู่ ${activity.tag || activity.category}`}
+              title={activity.tag || activity.category}
             >
               {renderCategoryIcon(activity.category)}
-              <span>{activity.tag || 'GLP OFFICIAL EVENT'}</span>
+              <span>{translateDynamic(activity.tag || activity.category || 'GLP OFFICIAL EVENT')}</span>
             </button>
 
             <span className="article-date-badge">
@@ -418,25 +420,25 @@ export default function SingleActivityView({
 
             <span className="article-read-badge">
               <Clock size={14} />
-              <span>{activity.readTime || '3 นาทีในการอ่าน'}</span>
+              <span>{activity.readTime ? translateDynamic(activity.readTime) : `3 ${t('singleActivity.minutes')}`}</span>
             </span>
 
             {activity.partner && (
               <span className="article-partner-badge">
                 <ShieldCheck size={14} className="text-blue" />
-                <span>พาร์ตเนอร์: <strong>{activity.partner}</strong></span>
+                <span>{t('singleActivity.partner')}: <strong>{activity.partner}</strong></span>
               </span>
             )}
           </div>
 
-          <h1 className="article-title">{activity.title}</h1>
+          <h1 className="article-title">{translateDynamic(activity.title)}</h1>
 
           {/* Article Header Tags */}
           {activity.tags && activity.tags.length > 0 && (
             <div className="article-header-tags-row">
               <span className="header-tags-label">
                 <Tag size={13} className="text-blue" />
-                <span>แท็กบทความ:</span>
+                <span>{t('common.tags')}:</span>
               </span>
               <div className="header-tags-list">
                 {activity.tags.map((tag, tIdx) => (
@@ -804,14 +806,14 @@ export default function SingleActivityView({
             <div className="event-facts-card glass-panel">
               <div className="card-top-header">
                 <Trophy size={18} className="text-blue" />
-                <h4>ข้อมูลสรุปกิจกรรม (Quick Facts)</h4>
+                <h4>{language === 'th' ? 'ข้อมูลสรุปกิจกรรม (Quick Facts)' : (language === 'zh' ? '活动速览 (Quick Facts)' : 'Event Quick Facts')}</h4>
               </div>
 
               <ul className="facts-list">
                 <li className="fact-item">
                   <div className="fact-icon-box"><Calendar size={16} /></div>
                   <div className="fact-content">
-                    <span className="fact-lbl">ช่วงเวลาจัดกิจกรรม</span>
+                    <span className="fact-lbl">{language === 'th' ? 'ช่วงเวลาจัดกิจกรรม' : (language === 'zh' ? '活动时间' : 'Event Schedule')}</span>
                     <strong className="fact-val">{activity.date}</strong>
                   </div>
                 </li>
@@ -819,7 +821,7 @@ export default function SingleActivityView({
                 <li className="fact-item">
                   <div className="fact-icon-box"><MapPin size={16} /></div>
                   <div className="fact-content">
-                    <span className="fact-lbl">สถานที่จัดงาน</span>
+                    <span className="fact-lbl">{t('common.location')}</span>
                     <strong className="fact-val">{activity.location || 'G-Speed Esport Arena (Main Stage Zone)'}</strong>
                   </div>
                 </li>
@@ -827,7 +829,7 @@ export default function SingleActivityView({
                 <li className="fact-item">
                   <div className="fact-icon-box"><Trophy size={16} /></div>
                   <div className="fact-content">
-                    <span className="fact-lbl">รางวัลรวม</span>
+                    <span className="fact-lbl">{t('common.prizePool')}</span>
                     <strong className="fact-val text-blue">{activity.prizePool || '฿50,000 พร้อมถ้วยเกียรติยศ'}</strong>
                   </div>
                 </li>
@@ -835,7 +837,7 @@ export default function SingleActivityView({
                 <li className="fact-item">
                   <div className="fact-icon-box"><Users size={16} /></div>
                   <div className="fact-content">
-                    <span className="fact-lbl">ผู้เข้าร่วมงาน</span>
+                    <span className="fact-lbl">{language === 'th' ? 'ผู้เข้าร่วมงาน' : (language === 'zh' ? '参赛规模' : 'Attendees & Teams')}</span>
                     <strong className="fact-val">{activity.attendees || '350+ คน (32 ทีม)'}</strong>
                   </div>
                 </li>
@@ -843,7 +845,7 @@ export default function SingleActivityView({
                 <li className="fact-item">
                   <div className="fact-icon-box"><ShieldCheck size={16} /></div>
                   <div className="fact-content">
-                    <span className="fact-lbl">ผู้สนับสนุนหลัก</span>
+                    <span className="fact-lbl">{t('singleActivity.partner')}</span>
                     <strong className="fact-val">{activity.partner || 'ASUS ROG & NVIDIA'}</strong>
                   </div>
                 </li>
@@ -851,8 +853,8 @@ export default function SingleActivityView({
                 <li className="fact-item">
                   <div className="fact-icon-box"><Gamepad2 size={16} /></div>
                   <div className="fact-content">
-                    <span className="fact-lbl">หมวดหมู่</span>
-                    <strong className="fact-val">{activity.tag || 'ESPORTS EVENT'}</strong>
+                    <span className="fact-lbl">{t('common.category')}</span>
+                    <strong className="fact-val">{translateDynamic(activity.tag || 'ESPORTS EVENT')}</strong>
                   </div>
                 </li>
 

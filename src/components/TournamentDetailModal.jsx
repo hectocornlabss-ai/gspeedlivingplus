@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 import { generateDefaultBracket } from '../data/mockData';
+import { isTournamentRegistrationOpen } from '../utils/tournamentUtils';
 
 export default function TournamentDetailModal({
   tournament,
@@ -179,7 +180,7 @@ export default function TournamentDetailModal({
     setRegisterSuccess(true);
   };
 
-  const isRegistrationOpen = tournament.status === 'Open';
+  const isRegistrationOpen = isTournamentRegistrationOpen(tournament);
 
   return (
     <div 
@@ -328,7 +329,6 @@ export default function TournamentDetailModal({
               highlight: liveMatches.length > 0
             },
             { id: 'roster', label: `รายชื่อทีม (${(tournament.teams || []).length})`, icon: <Users size={15} /> },
-            { id: 'gallery', label: `คลังภาพกิจกรรม (${(tournament.galleryPhotos || []).length})`, icon: <Camera size={15} /> },
             { id: 'register', label: 'ลงทะเบียนแข่งขัน', icon: <Send size={15} />, highlight: true }
           ].map(tab => (
             <button 

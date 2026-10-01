@@ -52,7 +52,7 @@ services:
       retries: 3
       start_period: 5s
     volumes:
-      - glp-server-data:/app/data
+      - glp-server-data:/app/server/data
     networks:
       - glp-network
 

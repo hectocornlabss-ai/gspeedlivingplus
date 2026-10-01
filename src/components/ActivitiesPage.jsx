@@ -5,6 +5,7 @@ import {
   Calendar, Users, Sparkles, Filter, PhoneCall, LayoutGrid, Tag
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
+import { useTranslation } from '../context/LanguageContext';
 import { GALLERY_ACTIVITIES, EVENT_CATEGORIES, GAME_NEWS } from '../data/mockData';
 
 export default function ActivitiesPage({
@@ -15,6 +16,7 @@ export default function ActivitiesPage({
   initialTag = 'all'
 }) {
   const { siteData } = useSiteData();
+  const { t, language, translateDynamic } = useTranslation();
   const galleryList = siteData?.gallery || GALLERY_ACTIVITIES;
   const newsList = siteData?.news || GAME_NEWS;
   const categories = siteData?.activityCategories || EVENT_CATEGORIES;
@@ -99,11 +101,11 @@ export default function ActivitiesPage({
               style={{ cursor: 'pointer', color: '#2563eb', fontWeight: 600, fontSize: '0.85rem' }}
               onClick={() => onNavigateHome ? onNavigateHome() : (window.history.pushState(null, '', '/'), window.dispatchEvent(new PopStateEvent('popstate')))}
             >
-              หน้าแรก
+              {t('nav.home')}
             </span>
             <span className="breadcrumb-separator" style={{ color: '#94a3b8' }}>/</span>
             <span className="breadcrumb-item current" style={{ color: '#0f172a', fontWeight: 700, fontSize: '0.85rem' }}>
-              ภาพกิจกรรม & แกลเลอรี
+              {t('nav.activities')}
             </span>
           </div>
 
@@ -115,7 +117,7 @@ export default function ActivitiesPage({
                 <Search size={18} className="search-icon text-blue" />
                 <input 
                   type="text" 
-                  placeholder="ค้นหาภาพกิจกรรม, ชื่องาน, ค่ายเกม หรือชื่อเกม..."
+                  placeholder={t('activitiesPage.searchPlaceholder') || 'ค้นหาภาพกิจกรรม, ชื่องาน, ค่ายเกม หรือชื่อเกม...'}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="search-input"
@@ -150,7 +152,7 @@ export default function ActivitiesPage({
                         className={`cat-pill-btn ${selectedCategory === cat.id ? 'active' : ''}`}
                       >
                         <CategoryIcon size={14} />
-                        <span>{cat.label}</span>
+                        <span>{translateDynamic(cat.label)}</span>
                       </button>
                     );
                   })}
@@ -166,13 +168,19 @@ export default function ActivitiesPage({
         <div className="container activities-hero-container">
           <div className="activities-hero-badge">
             <ImageIcon size={15} className="text-blue pulse-icon" />
-            <span>GLP PHOTO & COMMUNITY GALLERY</span>
+            <span>{t('activitiesPage.badge') || 'GLP PHOTO & COMMUNITY GALLERY'}</span>
           </div>
           <h1 className="activities-hero-title">
-            ประมวลภาพกิจกรรม & <span className="text-blue">บรรยากาศความมันส์</span>
+            {language === 'th' ? (
+              <>ประมวลภาพกิจกรรม & <span className="text-blue">บรรยากาศความมันส์</span></>
+            ) : (
+              <span>{t('activitiesPage.title')}</span>
+            )}
           </h1>
           <p className="activities-hero-subtitle" style={{ marginBottom: 0 }}>
-            ย้อนชมภาพความประทับใจ บรรยากาศการประลองฝีมือของเหล่านักกีฬาอีสปอร์ต งานแถลงข่าวเปิดตัวเกม และงานแฟนมีตติ้งร่วมกับค่ายเกมชั้นนำระดับประเทศ ณ GLP Esport Stadium
+            {language === 'th' 
+              ? 'ย้อนชมภาพความประทับใจ บรรยากาศการประลองฝีมือของเหล่านักกีฬาอีสปอร์ต งานแถลงข่าวเปิดตัวเกม และงานแฟนมีตติ้งร่วมกับค่ายเกมชั้นนำระดับประเทศ ณ GLP Esport Stadium'
+              : t('activitiesPage.subtitle')}
           </p>
         </div>
       </section>
@@ -181,8 +189,20 @@ export default function ActivitiesPage({
       <section className="activities-grid-section">
         <div className="container">
           <div className="activities-count-heading">
-            <span>แสดงผล <strong>{filteredActivities.length}</strong> บทความ & อัลบั้มภาพกิจกรรม</span>
-            <span className="click-hint-badge">💡 คลิกที่การ์ดเพื่ออ่านบทความและชมภาพขนาดเต็ม</span>
+            <span>
+              {language === 'th' ? (
+                <>แสดงผล <strong>{filteredActivities.length}</strong> บทความ & อัลบั้มภาพกิจกรรม</>
+              ) : (
+                <><strong>{filteredActivities.length}</strong> {t('common.overview')}</>
+              )}
+            </span>
+            <span className="click-hint-badge">
+              {language === 'th' 
+                ? '💡 คลิกที่การ์ดเพื่ออ่านบทความและชมภาพขนาดเต็ม' 
+                : language === 'zh'
+                ? '💡 点击卡片查看完整文章与高清相册'
+                : '💡 Click card to read full article & view high-res gallery'}
+            </span>
           </div>
 
           {filteredActivities.length > 0 ? (
@@ -200,7 +220,7 @@ export default function ActivitiesPage({
                       className="gallery-thumb-img" 
                       loading="lazy"
                     />
-                    <span className="gallery-tag-pill">{item.tag || item.category}</span>
+                    <span className="gallery-tag-pill">{translateDynamic(item.tag || item.category)}</span>
                   </div>
 
                   <div className="gallery-info">
@@ -211,11 +231,11 @@ export default function ActivitiesPage({
                       </span>
                       <span className="gallery-partner">{item.partner}</span>
                     </div>
-                    <h3 className="gallery-title">{item.title}</h3>
-                    <p className="gallery-desc">{item.desc}</p>
+                    <h3 className="gallery-title">{translateDynamic(item.title)}</h3>
+                    <p className="gallery-desc">{translateDynamic(item.desc)}</p>
 
                     <div className="gallery-view-link text-blue">
-                      <span>อ่านบทความ & ชมภาพกิจกรรมเต็ม</span>
+                      <span>{language === 'th' ? 'อ่านบทความ & ชมภาพกิจกรรมเต็ม' : (language === 'zh' ? '阅读文章 & 查看完整相册' : 'Read Article & View Full Gallery')}</span>
                       <ExternalLink size={14} />
                     </div>
                   </div>
@@ -225,14 +245,14 @@ export default function ActivitiesPage({
           ) : (
             <div className="no-events-found glass-panel">
               <Search size={36} className="text-blue" />
-              <h3>ไม่พบกิจกรรมตามเงื่อนไขที่ค้นหา</h3>
-              <p>ลองเปลี่ยนคำค้นหาหรือเลือกหมวดหมู่อื่นเพื่อดูกิจกรรมที่น่าสนใจ</p>
+              <h3>{language === 'th' ? 'ไม่พบกิจกรรมตามเงื่อนไขที่ค้นหา' : (language === 'zh' ? '未找到符合条件的活动或图集' : 'No activities match your search')}</h3>
+              <p>{language === 'th' ? 'ลองเปลี่ยนคำค้นหาหรือเลือกหมวดหมู่อื่นเพื่อดูกิจกรรมที่น่าสนใจ' : (language === 'zh' ? '请尝试更换搜索词或选择其他分类' : 'Try adjusting your search query or select another category.')}</p>
               <button 
                 type="button"
                 className="btn-primary" 
                 onClick={() => { setSearchQuery(''); setSelectedCategory('all'); setSelectedTag('all'); }}
               >
-                แสดงภาพกิจกรรมทั้งหมด
+                {language === 'th' ? 'แสดงภาพกิจกรรมทั้งหมด' : (language === 'zh' ? '显示全部活动' : 'Show All Activities')}
               </button>
             </div>
           )}

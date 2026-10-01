@@ -620,10 +620,10 @@ export default function AnnouncementTickerCMS() {
         {/* Announcement Items Cards List */}
         <div className="ticker-items-list-box" style={{ marginTop: '18px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-            <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#f1f5f9' }}>
+            <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a' }}>
               รายการข้อความประกาศที่วิ่ง ({items.length} รายการ)
             </span>
-            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+            <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
               * สามารถเลื่อนลำดับด้วยลูกศรขึ้น/ลง เพื่อจัดคิวข้อความที่จะวิ่งก่อน-หลัง
             </span>
           </div>
