@@ -1719,6 +1719,37 @@ export function SiteDataProvider({ children }) {
             console.log('[SiteDataContext] Hydrated from persistent server database.');
             setSiteData(prev => {
               const merged = deepMerge(prev, result.siteData);
+              // Sanitize legacy/invalid emails and Facebook link from server DB if any
+              if (merged.footer) {
+                if (!merged.footer.email || merged.footer.email.includes('contact@') || merged.footer.email.includes('@gspeed') || merged.footer.email !== 'gspeedlivingplus35@gmail.com') {
+                  merged.footer.email = 'gspeedlivingplus35@gmail.com';
+                }
+                if (!merged.footer.socialLinks || !merged.footer.socialLinks.facebook || merged.footer.socialLinks.facebook.includes('gspeedesport') || merged.footer.socialLinks.facebook !== 'https://www.facebook.com/GLP.Gspeedlivingplus') {
+                  if (!merged.footer.socialLinks) merged.footer.socialLinks = {};
+                  merged.footer.socialLinks.facebook = 'https://www.facebook.com/GLP.Gspeedlivingplus';
+                }
+              }
+              if (merged.contactPage) {
+                if (!merged.contactPage.storeEmail || merged.contactPage.storeEmail !== 'gspeedlivingplus35@gmail.com') {
+                  merged.contactPage.storeEmail = 'gspeedlivingplus35@gmail.com';
+                }
+                if (merged.contactPage.socialLinks) {
+                  if (!merged.contactPage.socialLinks.facebook || merged.contactPage.socialLinks.facebook.includes('gspeedesport')) {
+                    merged.contactPage.socialLinks.facebook = 'https://www.facebook.com/GLP.Gspeedlivingplus';
+                  }
+                }
+              }
+              if (merged.smtpConfig) {
+                if (!merged.smtpConfig.senderEmail || merged.smtpConfig.senderEmail.includes('@gspeedlivingplus.com') || merged.smtpConfig.senderEmail.includes('@gspeed-esport.com') || merged.smtpConfig.senderEmail.includes('contact@')) {
+                  merged.smtpConfig.senderEmail = 'gspeedlivingplus35@gmail.com';
+                }
+                if (!merged.smtpConfig.user || merged.smtpConfig.user.includes('@gspeedlivingplus.com') || merged.smtpConfig.user.includes('contact@')) {
+                  merged.smtpConfig.user = 'gspeedlivingplus35@gmail.com';
+                }
+                if (!merged.smtpConfig.adminCcEmail || merged.smtpConfig.adminCcEmail.includes('@gspeedlivingplus.com') || merged.smtpConfig.adminCcEmail.includes('@gspeed-esport.com')) {
+                  merged.smtpConfig.adminCcEmail = 'gspeedlivingplus35@gmail.com';
+                }
+              }
               try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
               } catch (e) {}

@@ -5952,6 +5952,164 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                     onChange={e => updateFooter({ description: e.target.value })}
                   />
                 </div>
+
+                {/* Social Media & External Links (Editable in Admin CMS) */}
+                <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #e2e8f0' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Globe size={16} className="text-blue" />
+                      <strong style={{ fontSize: '0.95rem', color: '#0f172a' }}>ลิงก์โซเชียลมีเดีย & ปุ่มภายนอก (Social Media & External Links)</strong>
+                    </div>
+                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                      แก้ไขลิงก์สำหรับไอคอน Facebook, TikTok, Instagram และ Google Maps ท้ายเว็บ
+                    </span>
+                  </div>
+
+                  <div className="form-row-2">
+                    <div className="form-group">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                        <label style={{ margin: 0, fontWeight: 700, fontSize: '0.82rem' }}>Facebook Page URL</label>
+                        {siteData.footer?.socialLinks?.facebook && (
+                          <a 
+                            href={siteData.footer.socialLinks.facebook} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            style={{ fontSize: '0.72rem', color: '#1d4ed8', display: 'inline-flex', alignItems: 'center', gap: '3px', textDecoration: 'none' }}
+                          >
+                            <ExternalLink size={11} /> ทดสอบเปิด
+                          </a>
+                        )}
+                      </div>
+                      <input 
+                        type="url" 
+                        className="form-input font-mono"
+                        placeholder="https://www.facebook.com/GLP.Gspeedlivingplus"
+                        value={siteData.footer?.socialLinks?.facebook || ''}
+                        onChange={e => updateFooter({ socialLinks: { ...(siteData.footer?.socialLinks || {}), facebook: e.target.value } })}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                        <label style={{ margin: 0, fontWeight: 700, fontSize: '0.82rem' }}>TikTok Profile URL</label>
+                        {siteData.footer?.socialLinks?.tiktok && (
+                          <a 
+                            href={siteData.footer.socialLinks.tiktok} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            style={{ fontSize: '0.72rem', color: '#1d4ed8', display: 'inline-flex', alignItems: 'center', gap: '3px', textDecoration: 'none' }}
+                          >
+                            <ExternalLink size={11} /> ทดสอบเปิด
+                          </a>
+                        )}
+                      </div>
+                      <input 
+                        type="url" 
+                        className="form-input font-mono"
+                        placeholder="https://www.tiktok.com/@gspeedlivingplus"
+                        value={siteData.footer?.socialLinks?.tiktok || ''}
+                        onChange={e => updateFooter({ socialLinks: { ...(siteData.footer?.socialLinks || {}), tiktok: e.target.value } })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-row-2" style={{ marginTop: '10px' }}>
+                    <div className="form-group">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                        <label style={{ margin: 0, fontWeight: 700, fontSize: '0.82rem' }}>Instagram Profile URL</label>
+                        {siteData.footer?.socialLinks?.instagram && (
+                          <a 
+                            href={siteData.footer.socialLinks.instagram} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            style={{ fontSize: '0.72rem', color: '#1d4ed8', display: 'inline-flex', alignItems: 'center', gap: '3px', textDecoration: 'none' }}
+                          >
+                            <ExternalLink size={11} /> ทดสอบเปิด
+                          </a>
+                        )}
+                      </div>
+                      <input 
+                        type="url" 
+                        className="form-input font-mono"
+                        placeholder="https://www.instagram.com/gspeedlivingplus"
+                        value={siteData.footer?.socialLinks?.instagram || ''}
+                        onChange={e => updateFooter({ socialLinks: { ...(siteData.footer?.socialLinks || {}), instagram: e.target.value } })}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                        <label style={{ margin: 0, fontWeight: 700, fontSize: '0.82rem' }}>Google Maps Direct URL (พิกัดนำทาง)</label>
+                        {siteData.footer?.googleMapUrl && (
+                          <a 
+                            href={siteData.footer.googleMapUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            style={{ fontSize: '0.72rem', color: '#1d4ed8', display: 'inline-flex', alignItems: 'center', gap: '3px', textDecoration: 'none' }}
+                          >
+                            <ExternalLink size={11} /> ทดสอบเปิด
+                          </a>
+                        )}
+                      </div>
+                      <input 
+                        type="url" 
+                        className="form-input font-mono"
+                        placeholder="https://maps.app.goo.gl/ak23az5WtsvXGWUR8"
+                        value={siteData.footer?.googleMapUrl || ''}
+                        onChange={e => updateFooter({ googleMapUrl: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-row-2" style={{ marginTop: '10px' }}>
+                    <div className="form-group">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                        <label style={{ margin: 0, fontWeight: 700, fontSize: '0.82rem' }}>Discord Server Invite URL</label>
+                        {siteData.footer?.socialLinks?.discord && (
+                          <a 
+                            href={siteData.footer.socialLinks.discord} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            style={{ fontSize: '0.72rem', color: '#1d4ed8', display: 'inline-flex', alignItems: 'center', gap: '3px', textDecoration: 'none' }}
+                          >
+                            <ExternalLink size={11} /> ทดสอบเปิด
+                          </a>
+                        )}
+                      </div>
+                      <input 
+                        type="url" 
+                        className="form-input font-mono"
+                        placeholder="https://discord.gg/gspeed"
+                        value={siteData.footer?.socialLinks?.discord || ''}
+                        onChange={e => updateFooter({ socialLinks: { ...(siteData.footer?.socialLinks || {}), discord: e.target.value } })}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                        <label style={{ margin: 0, fontWeight: 700, fontSize: '0.82rem' }}>YouTube Channel URL</label>
+                        {siteData.footer?.socialLinks?.youtube && (
+                          <a 
+                            href={siteData.footer.socialLinks.youtube} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            style={{ fontSize: '0.72rem', color: '#1d4ed8', display: 'inline-flex', alignItems: 'center', gap: '3px', textDecoration: 'none' }}
+                          >
+                            <ExternalLink size={11} /> ทดสอบเปิด
+                          </a>
+                        )}
+                      </div>
+                      <input 
+                        type="url" 
+                        className="form-input font-mono"
+                        placeholder="https://youtube.com/@gspeedarena"
+                        value={siteData.footer?.socialLinks?.youtube || ''}
+                        onChange={e => updateFooter({ socialLinks: { ...(siteData.footer?.socialLinks || {}), youtube: e.target.value } })}
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 <div className="modal-footer-btns" style={{ marginTop: '16px' }}>
                   <button type="button" className="btn-section-preview" onClick={() => openPreview('menu-footer')}>
                     <Eye size={14} /> พรีวิวเมนู Header & Footer ก่อนบันทึก
