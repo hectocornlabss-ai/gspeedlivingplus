@@ -6972,16 +6972,16 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
 
                   {/* Tournaments Data Table */}
                   <div className="cms-table-wrapper" style={{ marginTop: '16px' }}>
-                    <table className="cms-data-table">
+                    <table className="tourney-admin-table">
                       <thead>
                         <tr>
-                          <th>เกม & รายการแข่งขัน</th>
-                          <th>วันแข่งขัน / เวลา</th>
-                          <th>เงินรางวัล</th>
-                          <th>ทีม & นักแข่ง</th>
-                          <th>คลังภาพกิจกรรม</th>
-                          <th>สถานะ & SEO</th>
-                          <th style={{ textAlign: 'center' }}>การจัดการ</th>
+                          <th style={{ minWidth: '260px' }}>เกม & รายการแข่งขัน</th>
+                          <th style={{ minWidth: '140px' }}>วันแข่งขัน / เวลา</th>
+                          <th style={{ minWidth: '120px' }}>เงินรางวัล</th>
+                          <th style={{ minWidth: '110px' }}>ทีม & นักแข่ง</th>
+                          <th style={{ minWidth: '140px' }}>คลังภาพกิจกรรม</th>
+                          <th style={{ minWidth: '130px' }}>สถานะ & SEO</th>
+                          <th style={{ minWidth: '150px', textAlign: 'center' }}>การจัดการ</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -6989,21 +6989,28 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                           const photoCount = (t.galleryPhotos || []).length;
                           const teamCount = (t.teams || []).length;
                           const hasSeo = Boolean(t.seo?.metaTitle);
+                          const slug = t.slug || t.seo?.slug || t.id;
                           return (
                             <tr key={t.id}>
                               <td>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                  {t.bannerImage && (
+                                  {t.bannerImage ? (
                                     <img 
                                       src={t.bannerImage} 
                                       alt={t.title}
-                                      style={{ width: '48px', height: '36px', objectFit: 'cover', borderRadius: '4px', border: '1px solid rgba(0,0,0,0.1)' }}
+                                      style={{ width: '54px', height: '38px', objectFit: 'cover', borderRadius: '6px', border: '1px solid rgba(0,0,0,0.1)', flexShrink: 0 }}
                                     />
+                                  ) : (
+                                    <div style={{ width: '54px', height: '38px', background: '#0f172a', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#60a5fa', flexShrink: 0 }}>
+                                      <Trophy size={18} />
+                                    </div>
                                   )}
                                   <div>
-                                    <strong style={{ display: 'block' }}>{t.title}</strong>
-                                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginTop: '2px' }}>
-                                      <span className="text-xs text-muted" style={{ fontWeight: 600 }}>{t.game}</span>
+                                    <strong style={{ display: 'block', fontSize: '0.92rem', color: '#0f172a' }}>{t.title}</strong>
+                                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginTop: '3px' }}>
+                                      <span className="text-xs" style={{ fontWeight: 700, color: '#1d4ed8', background: '#eff6ff', border: '1px solid #bfdbfe', padding: '1px 6px', borderRadius: '4px' }}>
+                                        {t.game}
+                                      </span>
                                       {t.gameCategory && (
                                         <span className="text-xs" style={{ background: '#f1f5f9', padding: '1px 6px', borderRadius: '4px', color: '#64748b' }}>
                                           {t.gameCategory}
@@ -7014,48 +7021,50 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                                 </div>
                               </td>
                               <td>
-                                <div>{t.date}</div>
-                                <span className="text-xs text-muted block">{t.time}</span>
+                                <div style={{ fontWeight: 650, fontSize: '0.88rem', color: '#1e293b', whiteSpace: 'nowrap' }}>{t.date}</div>
+                                <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px', whiteSpace: 'nowrap' }}>{t.time || '10:00 - 19:00 น.'}</div>
                               </td>
-                              <td><strong className="text-blue">{t.prizePool}</strong></td>
+                              <td>
+                                <span className="tourney-prize-chip">
+                                  <Trophy size={13} className="text-amber" />
+                                  <span>{t.prizePool}</span>
+                                </span>
+                              </td>
                               <td>
                                 <button 
                                   type="button"
-                                  className="btn-table-action"
-                                  style={{ padding: '3px 8px', fontSize: '0.8rem', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe' }}
+                                  className="tourney-pill-btn pill-teams"
                                   onClick={() => openEditTournamentModal(t, 'roster')}
                                   title="คลิกเพื่อจัดการรายชื่อนักแข่ง & ทีม"
                                 >
-                                  <Users size={12} />
-                                  <span>{teamCount} ทีม</span>
+                                  <Users size={14} />
+                                  <span className="pill-counter">{teamCount}</span>
+                                  <span>ทีม</span>
                                 </button>
                               </td>
                               <td>
                                 <button 
                                   type="button"
-                                  className="btn-table-action"
-                                  style={{ 
-                                    padding: '3px 8px', 
-                                    fontSize: '0.8rem', 
-                                    background: photoCount >= 50 ? '#ecfdf5' : '#f8fafc', 
-                                    color: photoCount >= 50 ? '#059669' : '#475569', 
-                                    border: photoCount >= 50 ? '1px solid #a7f3d0' : '1px solid #e2e8f0' 
-                                  }}
+                                  className={`tourney-pill-btn ${photoCount >= 50 ? 'pill-gallery-ready' : 'pill-gallery-pending'}`}
                                   onClick={() => openEditTournamentModal(t, 'gallery')}
                                   title="คลิกเพื่อจัดการแกลเลอรีภาพกิจกรรม 50+ ภาพ"
                                 >
-                                  <Camera size={12} />
-                                  <span>{photoCount} ภาพ {photoCount >= 50 ? '✓ (50+)' : ''}</span>
+                                  <Camera size={14} />
+                                  <span className="pill-counter">{photoCount}</span>
+                                  <span>ภาพ</span>
+                                  {photoCount >= 50 && (
+                                    <span className="pill-badge-gold">✓ 50+</span>
+                                  )}
                                 </button>
                               </td>
                               <td>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                  <span className={`status-pill ${t.status === 'Open' ? 'status-pill-success' : 'status-pill-warning'}`}>
-                                    {t.status}
+                                  <span className={`status-pill ${t.status === 'Open' ? 'status-pill-success' : 'status-pill-warning'}`} style={{ width: 'fit-content', whiteSpace: 'nowrap' }}>
+                                    {t.status === 'Open' ? '🟢 เปิดรับสมัคร' : t.status === 'Completed' ? '🏁 แข่งจบแล้ว' : `🟡 ${t.status}`}
                                   </span>
                                   <span 
                                     className="text-xs" 
-                                    style={{ color: hasSeo ? '#059669' : '#94a3b8', display: 'flex', alignItems: 'center', gap: '3px' }}
+                                    style={{ color: hasSeo ? '#059669' : '#94a3b8', display: 'inline-flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', fontWeight: 600 }}
                                     title={hasSeo ? `SEO: ${t.seo?.metaTitle}` : 'ยังไม่ได้ตั้งค่า SEO'}
                                   >
                                     <Globe size={11} /> {hasSeo ? 'SEO พร้อม' : 'รอตั้ง SEO'}
@@ -7063,25 +7072,38 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                                 </div>
                               </td>
                               <td>
-                                <div className="actions-cell" style={{ justifyContent: 'center', gap: '6px' }}>
+                                <div className="tourney-actions-group">
                                   <button 
-                                    className="btn-table-action"
+                                    type="button"
+                                    className="btn-tourney-table-edit"
                                     onClick={() => openEditTournamentModal(t, 'general')}
                                     title="แก้ไขข้อมูลทัวร์นาเมนต์ครบวงจร"
                                   >
                                     <Edit3 size={13} />
+                                    <span>แก้ไข</span>
                                   </button>
+                                  <a 
+                                    href={`/tournaments/${slug}`}
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="btn-tourney-table-icon view" 
+                                    title="เปิดดูหน้าเว็บจริงของทัวร์นาเมนต์นี้"
+                                  >
+                                    <ExternalLink size={14} />
+                                  </a>
                                   <button 
-                                    className="btn-table-action action-delete"
+                                    type="button"
+                                    className="btn-tourney-table-icon delete"
                                     onClick={() => {
                                       if (window.confirm(`คุณต้องการลบทัวร์นาเมนต์ "${t.title}" ใช่หรือไม่?`)) {
                                         deleteTournament(t.id);
                                         triggerSaveToast();
+                                        setTimeout(() => { saveSiteData(); }, 100);
                                       }
                                     }}
                                     title="ลบทัวร์นาเมนต์นี้"
                                   >
-                                    <Trash2 size={13} />
+                                    <Trash2 size={14} />
                                   </button>
                                 </div>
                               </td>
@@ -10494,16 +10516,16 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                       </span>
                     </div>
 
-                    <table className="cms-data-table">
+                    <table className="tourney-admin-table">
                       <thead>
                         <tr>
-                          <th>เกม & รายการแข่งขัน</th>
-                          <th>วันแข่งขัน / เวลา</th>
-                          <th>เงินรางวัล</th>
-                          <th>ทีม & นักแข่ง</th>
-                          <th>คลังภาพ 50+ ภาพ</th>
-                          <th>สถานะ & SEO</th>
-                          <th style={{ textAlign: 'center' }}>การจัดการ</th>
+                          <th style={{ minWidth: '280px' }}>เกม & รายการแข่งขัน</th>
+                          <th style={{ minWidth: '145px' }}>วันแข่งขัน / เวลา</th>
+                          <th style={{ minWidth: '125px' }}>เงินรางวัล</th>
+                          <th style={{ minWidth: '115px' }}>ทีม & นักแข่ง</th>
+                          <th style={{ minWidth: '150px' }}>คลังภาพ 50+ ภาพ</th>
+                          <th style={{ minWidth: '135px' }}>สถานะ & SEO</th>
+                          <th style={{ minWidth: '155px', textAlign: 'center' }}>การจัดการ</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -10537,26 +10559,26 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                                       <img 
                                         src={t.bannerImage} 
                                         alt={t.title}
-                                        style={{ width: '56px', height: '40px', objectFit: 'cover', borderRadius: '6px', border: '1px solid rgba(0,0,0,0.1)' }}
+                                        style={{ width: '60px', height: '42px', objectFit: 'cover', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', flexShrink: 0 }}
                                       />
                                     ) : (
-                                      <div style={{ width: '56px', height: '40px', background: '#0f172a', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#60a5fa' }}>
-                                        <Trophy size={18} />
+                                      <div style={{ width: '60px', height: '42px', background: '#0f172a', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#60a5fa', flexShrink: 0 }}>
+                                        <Trophy size={20} />
                                       </div>
                                     )}
                                     <div>
-                                      <strong style={{ display: 'block', fontSize: '0.92rem', color: '#0f172a' }}>{t.title}</strong>
-                                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginTop: '3px', flexWrap: 'wrap' }}>
-                                        <span className="text-xs" style={{ fontWeight: 650, color: '#1d4ed8', background: '#eff6ff', padding: '1px 6px', borderRadius: '4px' }}>
+                                      <strong style={{ display: 'block', fontSize: '0.94rem', color: '#0f172a', lineHeight: 1.35 }}>{t.title}</strong>
+                                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginTop: '4px', flexWrap: 'wrap' }}>
+                                        <span className="text-xs" style={{ fontWeight: 700, color: '#1d4ed8', background: '#eff6ff', border: '1px solid #bfdbfe', padding: '2px 8px', borderRadius: '6px' }}>
                                           {t.game}
                                         </span>
                                         {t.gameCategory && (
-                                          <span className="text-xs" style={{ background: '#f1f5f9', padding: '1px 6px', borderRadius: '4px', color: '#64748b' }}>
+                                          <span className="text-xs" style={{ background: '#f1f5f9', padding: '2px 8px', borderRadius: '6px', color: '#475569', fontWeight: 500 }}>
                                             {t.gameCategory}
                                           </span>
                                         )}
                                         {t.format && (
-                                          <span className="text-xs text-muted" style={{ fontSize: '0.72rem' }}>
+                                          <span className="text-xs text-muted" style={{ fontSize: '0.74rem' }}>
                                             • {t.format}
                                           </span>
                                         )}
@@ -10565,49 +10587,50 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                                   </div>
                                 </td>
                                 <td>
-                                  <div style={{ fontWeight: 600, fontSize: '0.88rem', color: '#1e293b' }}>{t.date}</div>
-                                  <span className="text-xs text-muted block">{t.time || '10:00 - 19:00 น.'}</span>
+                                  <div style={{ fontWeight: 650, fontSize: '0.88rem', color: '#1e293b', whiteSpace: 'nowrap' }}>{t.date}</div>
+                                  <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '3px', whiteSpace: 'nowrap' }}>{t.time || '10:00 - 19:00 น.'}</div>
                                 </td>
-                                <td><strong className="text-blue" style={{ fontSize: '0.95rem' }}>{t.prizePool}</strong></td>
+                                <td>
+                                  <span className="tourney-prize-chip">
+                                    <Trophy size={13} className="text-amber" />
+                                    <span>{t.prizePool}</span>
+                                  </span>
+                                </td>
                                 <td>
                                   <button 
                                     type="button"
-                                    className="btn-table-action"
-                                    style={{ padding: '4px 10px', fontSize: '0.8rem', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', borderRadius: '6px' }}
+                                    className="tourney-pill-btn pill-teams"
                                     onClick={() => openEditTournamentModal(t, 'roster')}
                                     title="คลิกเพื่อจัดการรายชื่อนักแข่ง & ทีม"
                                   >
-                                    <Users size={13} />
-                                    <span>{teamCount} ทีม</span>
+                                    <Users size={14} />
+                                    <span className="pill-counter">{teamCount}</span>
+                                    <span>ทีม</span>
                                   </button>
                                 </td>
                                 <td>
                                   <button 
                                     type="button"
-                                    className="btn-table-action"
-                                    style={{ 
-                                      padding: '4px 10px', 
-                                      fontSize: '0.8rem', 
-                                      background: photoCount >= 50 ? '#ecfdf5' : '#f8fafc', 
-                                      color: photoCount >= 50 ? '#059669' : '#475569', 
-                                      border: photoCount >= 50 ? '1px solid #a7f3d0' : '1px solid #e2e8f0',
-                                      borderRadius: '6px'
-                                    }}
+                                    className={`tourney-pill-btn ${photoCount >= 50 ? 'pill-gallery-ready' : 'pill-gallery-pending'}`}
                                     onClick={() => openEditTournamentModal(t, 'gallery')}
                                     title="คลิกเพื่อจัดการแกลเลอรีภาพกิจกรรม 50+ ภาพ"
                                   >
-                                    <Camera size={13} />
-                                    <span>{photoCount} ภาพ {photoCount >= 50 ? '✓ (50+)' : ''}</span>
+                                    <Camera size={14} />
+                                    <span className="pill-counter">{photoCount}</span>
+                                    <span>ภาพ</span>
+                                    {photoCount >= 50 && (
+                                      <span className="pill-badge-gold">✓ 50+</span>
+                                    )}
                                   </button>
                                 </td>
                                 <td>
-                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                    <span className={`status-pill ${t.status === 'Open' ? 'status-pill-success' : 'status-pill-warning'}`} style={{ width: 'fit-content' }}>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                                    <span className={`status-pill ${t.status === 'Open' ? 'status-pill-success' : 'status-pill-warning'}`} style={{ width: 'fit-content', whiteSpace: 'nowrap' }}>
                                       {t.status === 'Open' ? '🟢 เปิดรับสมัคร' : t.status === 'Completed' ? '🏁 แข่งขันจบแล้ว' : `🟡 ${t.status}`}
                                     </span>
                                     <span 
                                       className="text-xs" 
-                                      style={{ color: hasSeo ? '#059669' : '#94a3b8', display: 'flex', alignItems: 'center', gap: '3px' }}
+                                      style={{ color: hasSeo ? '#059669' : '#94a3b8', display: 'inline-flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', fontWeight: 600 }}
                                       title={hasSeo ? `SEO: ${t.seo?.metaTitle}` : 'ยังไม่ได้ตั้งค่า SEO'}
                                     >
                                       <Globe size={11} /> {hasSeo ? 'SEO พร้อม' : 'รอตั้ง SEO'}
@@ -10615,30 +10638,28 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                                   </div>
                                 </td>
                                 <td>
-                                  <div className="actions-cell" style={{ justifyContent: 'center', gap: '6px' }}>
+                                  <div className="tourney-actions-group">
                                     <button 
                                       type="button"
-                                      className="btn-table-action edit"
+                                      className="btn-tourney-table-edit"
                                       onClick={() => openEditTournamentModal(t, 'general')}
                                       title="แก้ไขข้อมูลทัวร์นาเมนต์ (วันแข่ง, เงินรางวัล, กติกา, สเปก, แกลเลอรี, SEO)"
-                                      style={{ background: '#eff6ff', color: '#1d4ed8', borderColor: '#bfdbfe', padding: '4px 8px' }}
                                     >
-                                      <Edit3 size={14} />
-                                      <span style={{ fontSize: '0.78rem', fontWeight: 600 }}>แก้ไข</span>
+                                      <Edit3 size={13} />
+                                      <span>แก้ไข</span>
                                     </button>
                                     <a 
                                       href={`/tournaments/${slug}`}
                                       target="_blank" 
                                       rel="noopener noreferrer"
-                                      className="btn-table-action view" 
+                                      className="btn-tourney-table-icon view" 
                                       title="เปิดดูหน้าเว็บจริงของทัวร์นาเมนต์นี้"
-                                      style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '4px 6px' }}
                                     >
                                       <ExternalLink size={14} />
                                     </a>
                                     <button 
                                       type="button"
-                                      className="btn-table-action action-delete"
+                                      className="btn-tourney-table-icon delete"
                                       onClick={() => {
                                         if (window.confirm(`คุณต้องการลบทัวร์นาเมนต์ "${t.title}" ใช่หรือไม่?`)) {
                                           deleteTournament(t.id);
@@ -10647,7 +10668,6 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                                         }
                                       }}
                                       title="ลบทัวร์นาเมนต์นี้"
-                                      style={{ padding: '4px 6px' }}
                                     >
                                       <Trash2 size={14} />
                                     </button>
@@ -14213,69 +14233,75 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                     style={{ maxWidth: '1080px', width: '95vw', maxHeight: '92vh', display: 'flex', flexDirection: 'column' }}
                   >
                     {/* Modal Head */}
-                    <div className="modal-head" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '14px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{ background: '#eff6ff', color: '#1d4ed8', width: '38px', height: '38px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div className="modal-head" style={{ padding: '16px 24px', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                      <div className="modal-head-title" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ background: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa', border: '1px solid rgba(59, 130, 246, 0.35)', width: '40px', height: '40px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <Trophy size={20} />
                         </div>
                         <div>
-                          <h4 style={{ margin: 0, fontSize: '1.15rem' }}>
+                          <h4 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700, color: '#ffffff' }}>
                             {isEditingTournament ? `แก้ไขทัวร์นาเมนต์: ${activeTournamentDraft.title || ''}` : 'สร้างทัวร์นาเมนต์ใหม่ (New Tournament)'}
                           </h4>
-                          <span className="text-xs text-muted">
+                          <span style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '2px', display: 'block' }}>
                             ระบบจัดการงานแข่งรวมศูนย์ (ชื่อเกม, รายชื่อนักแข่ง, ระบบวันที่, กติกา, SEO, ภาพกิจกรรม 50+ ภาพ)
                           </span>
                         </div>
                       </div>
-                      <button onClick={() => setIsTournamentModalOpen(false)} className="btn-close-modal">✕</button>
+                      <button onClick={() => setIsTournamentModalOpen(false)} className="btn-close-modal" style={{ color: '#cbd5e1' }}>✕</button>
                     </div>
 
-                    {/* Master Tabs Bar */}
-                    <div className="subtabs-bar" style={{ padding: '8px 16px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', gap: '8px', overflowX: 'auto' }}>
+                    {/* Master Tabs Bar - High Visibility Esports Style */}
+                    <div className="tourney-modal-subtabs-bar">
                       <button 
                         type="button" 
-                        className={`subtab-btn ${tournamentModalTab === 'general' ? 'active' : ''}`}
+                        className={`tourney-modal-subtab-btn tab-general ${tournamentModalTab === 'general' ? 'active' : ''}`}
                         onClick={() => setTournamentModalTab('general')}
-                        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                       >
-                        <Gamepad2 size={14} />
-                        <span>1. ข้อมูลหลัก & เกม & วันที่</span>
+                        <span className="tab-step-badge">01</span>
+                        <Gamepad2 size={16} />
+                        <span>ข้อมูลหลัก & เกม & วันที่</span>
                       </button>
+
                       <button 
                         type="button" 
-                        className={`subtab-btn ${tournamentModalTab === 'rules' ? 'active' : ''}`}
+                        className={`tourney-modal-subtab-btn tab-rules ${tournamentModalTab === 'rules' ? 'active' : ''}`}
                         onClick={() => setTournamentModalTab('rules')}
-                        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                       >
-                        <List size={14} />
-                        <span>2. คำอธิบาย & กติกา & รางวัล</span>
+                        <span className="tab-step-badge">02</span>
+                        <List size={16} />
+                        <span>คำอธิบาย & กติกา & รางวัล</span>
                       </button>
+
                       <button 
                         type="button" 
-                        className={`subtab-btn ${tournamentModalTab === 'roster' ? 'active' : ''}`}
+                        className={`tourney-modal-subtab-btn tab-roster ${tournamentModalTab === 'roster' ? 'active' : ''}`}
                         onClick={() => setTournamentModalTab('roster')}
-                        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                       >
-                        <Users size={14} />
-                        <span>3. รายชื่อนักแข่ง & ทีม ({(activeTournamentDraft.teams || []).length})</span>
+                        <span className="tab-step-badge">03</span>
+                        <Users size={16} />
+                        <span>รายชื่อนักแข่ง & ทีม</span>
+                        <span className="tab-count-badge">{(activeTournamentDraft.teams || []).length}</span>
                       </button>
+
                       <button 
                         type="button" 
-                        className={`subtab-btn ${tournamentModalTab === 'gallery' ? 'active' : ''}`}
+                        className={`tourney-modal-subtab-btn tab-gallery ${tournamentModalTab === 'gallery' ? 'active' : ''}`}
                         onClick={() => setTournamentModalTab('gallery')}
-                        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                       >
-                        <Camera size={14} />
-                        <span>4. คลังภาพกิจกรรม 50+ ภาพ ({(activeTournamentDraft.galleryPhotos || []).length})</span>
+                        <span className="tab-step-badge">04</span>
+                        <Camera size={16} />
+                        <span>คลังภาพกิจกรรม 50+ ภาพ</span>
+                        <span className="tab-count-badge gold">{(activeTournamentDraft.galleryPhotos || []).length} ภาพ</span>
                       </button>
+
                       <button 
                         type="button" 
-                        className={`subtab-btn ${tournamentModalTab === 'seo' ? 'active' : ''}`}
+                        className={`tourney-modal-subtab-btn tab-seo ${tournamentModalTab === 'seo' ? 'active' : ''}`}
                         onClick={() => setTournamentModalTab('seo')}
-                        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                       >
-                        <Globe size={14} />
-                        <span>5. ระบบ SEO & โซเชียล</span>
+                        <span className="tab-step-badge">05</span>
+                        <Globe size={16} />
+                        <span>ระบบ SEO & โซเชียล</span>
                       </button>
                     </div>
 
