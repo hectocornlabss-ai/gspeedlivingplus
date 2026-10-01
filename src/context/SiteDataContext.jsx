@@ -1526,21 +1526,15 @@ export function SiteDataProvider({ children }) {
           merged.arenaSeatingZones = ARENA_SEATING_ZONES;
         }
 
-        // Hydrate gallery items with mockData slugs & rich content if missing
-        merged.gallery = merged.gallery.map(item => {
-          const initial = INITIAL_GALLERY.find(g => g.id === item.id);
-          return initial 
-            ? { ...initial, ...item, slug: item.slug || initial.slug, galleryPhotos: item.galleryPhotos || initial.galleryPhotos, contentParagraphs: item.contentParagraphs || initial.contentParagraphs }
-            : item;
-        });
+        // Preserve saved gallery items as-is
+        if (Array.isArray(merged.gallery)) {
+          merged.gallery = merged.gallery.map(item => item);
+        }
 
-        // Hydrate news items with mockData slugs, tags & rich content if missing
-        merged.news = merged.news.map(item => {
-          const initial = INITIAL_NEWS.find(n => n.id === item.id);
-          return initial
-            ? { ...initial, ...item, slug: item.slug || initial.slug, tags: item.tags || initial.tags, contentParagraphs: item.contentParagraphs || initial.contentParagraphs, galleryPhotos: item.galleryPhotos || initial.galleryPhotos, seo: item.seo || initial.seo }
-            : item;
-        });
+        // Preserve saved news items as-is
+        if (Array.isArray(merged.news)) {
+          merged.news = merged.news.map(item => item);
+        }
 
         // Hydrate catalog items with mockData images, colors, grade, warranty, sku, weightKg, maxLoadKg, and imageAlt if missing
         merged.catalogItems = merged.catalogItems.map(item => {
@@ -1731,9 +1725,8 @@ export function SiteDataProvider({ children }) {
           if (isMounted) {
             console.log('[SiteDataContext] Hydrated from persistent server database.');
             setSiteData(prev => {
-              // If local edits already exist, preserve them so stale mock data doesn't wipe them
-              const hasLocalEdits = Boolean(localStorage.getItem(STORAGE_KEY));
-              const merged = hasLocalEdits ? deepMerge(result.siteData, prev) : deepMerge(prev, result.siteData);
+              // Server database is the single source of truth: merge server data on top of prev
+              const merged = deepMerge(prev, result.siteData);
               // Sanitize legacy/invalid emails and Facebook link from server DB if any
               if (merged.footer) {
                 if (!merged.footer.email || merged.footer.email.includes('contact@') || merged.footer.email.includes('@gspeed') || merged.footer.email !== 'gspeedlivingplus35@gmail.com') {
