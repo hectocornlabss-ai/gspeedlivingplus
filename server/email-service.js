@@ -975,7 +975,7 @@ function findMatchedItem(items, targetSlug) {
 }
 
 // Helper: Extract valid absolute image URL for LINE / Facebook crawlers
-function getBestImageUrl(item, baseUrl) {
+function getBestImageUrl(item, baseUrl, section = 'gallery', slug = '') {
   if (!item) return `${baseUrl}/glp-logo-transparent.png`;
   
   let img = item.image || 
@@ -985,9 +985,61 @@ function getBestImageUrl(item, baseUrl) {
             (item.photos && item.photos[0] ? (typeof item.photos[0] === 'string' ? item.photos[0] : item.photos[0].url) : null);
 
   if (!img) return `${baseUrl}/glp-logo-transparent.png`;
+
+  // If image is a Base64 data URL from user upload, stream it via /api/og-image so LINE & FB crawlers can fetch the binary image
+  if (img.startsWith('data:image/')) {
+    const cleanSlug = item.slug || slug || item.id || '';
+    return `${baseUrl}/api/og-image?section=${encodeURIComponent(section)}&slug=${encodeURIComponent(cleanSlug)}`;
+  }
+
   if (img.startsWith('http://') || img.startsWith('https://')) return img;
   return `${baseUrl}${img.startsWith('/') ? '' : '/'}${img}`;
 }
+
+// GET /api/og-image - Decodes and streams uploaded Base64 WebP/PNG images directly as binary images for LINE / Facebook crawlers
+app.get('/api/og-image', (req, res) => {
+  try {
+    const section = (req.query.section || 'gallery').toLowerCase();
+    const slug = req.query.slug || '';
+    const collectionName = (section === 'tournaments') ? 'tournaments' : ((section === 'news') ? 'news' : 'gallery');
+    const items = getLiveContent(collectionName);
+    const item = findMatchedItem(items, slug);
+
+    if (!item) {
+      return res.redirect('/glp-logo-transparent.png');
+    }
+
+    let img = item.image || 
+              (item.seo && item.seo.ogImage) || 
+              item.bannerImage || 
+              (item.galleryPhotos && item.galleryPhotos[0] ? (typeof item.galleryPhotos[0] === 'string' ? item.galleryPhotos[0] : item.galleryPhotos[0].url) : null);
+
+    if (!img) {
+      return res.redirect('/glp-logo-transparent.png');
+    }
+
+    if (img.startsWith('http://') || img.startsWith('https://')) {
+      return res.redirect(img);
+    }
+
+    if (img.startsWith('data:image/')) {
+      const match = img.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/);
+      if (match) {
+        const mimeType = match[1];
+        const buffer = Buffer.from(match[2], 'base64');
+        res.setHeader('Content-Type', mimeType);
+        res.setHeader('Content-Length', buffer.length);
+        res.setHeader('Cache-Control', 'public, max-age=86400');
+        return res.end(buffer);
+      }
+    }
+
+    return res.redirect('/glp-logo-transparent.png');
+  } catch (err) {
+    console.error('[OG Image Error]:', err);
+    return res.redirect('/glp-logo-transparent.png');
+  }
+});
 
 // Helper: Read index.html template from disk
 function getIndexHtmlTemplate() {
@@ -1051,7 +1103,7 @@ app.get('/render-meta', (req, res) => {
         const locStr = item.location ? ` • สถานที่: ${item.location}` : ' • G-Speed Arena รามคำแหง 53';
         const partnerStr = item.partner ? ` • ผู้ร่วมจัด: ${item.partner}` : '';
         pageDesc = `${item.desc || item.title}${dateStr}${locStr}${partnerStr}`;
-        pageImage = getBestImageUrl(item, baseUrl);
+        pageImage = getBestImageUrl(item, baseUrl, section, slug);
         pageType = 'article';
       }
     } else if (section === 'tournaments') {
@@ -1063,7 +1115,7 @@ app.get('/render-meta', (req, res) => {
         const dateStr = item.date ? ` • แข่งขัน: ${item.date}` : '';
         const gameStr = item.game ? ` • เกม: ${item.game}` : '';
         pageDesc = `${item.desc || (item.seo && item.seo.metaDesc) || item.title}${prizeStr}${gameStr}${dateStr}`;
-        pageImage = getBestImageUrl(item, baseUrl);
+        pageImage = getBestImageUrl(item, baseUrl, section, slug);
         pageType = 'article';
       }
     } else if (section === 'news') {
@@ -1073,7 +1125,7 @@ app.get('/render-meta', (req, res) => {
         pageTitle = `${item.title} | GLP News`;
         const dateStr = item.date ? ` • เผยแพร่เมื่อ: ${item.date}` : '';
         pageDesc = `${item.desc || (item.seo && item.seo.metaDesc) || item.title}${dateStr}`;
-        pageImage = getBestImageUrl(item, baseUrl);
+        pageImage = getBestImageUrl(item, baseUrl, section, slug);
         pageType = 'article';
       }
     }
