@@ -26,13 +26,13 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
   }, [mobileMenuOpen]);
 
   // Dynamic Icon Selector
-  const getNavIcon = (target = '', id = '') => {
-    const key = `${target} ${id}`.toLowerCase();
+  const getNavIcon = (target = '', id = '', label = '') => {
+    const key = `${target} ${id} ${label}`.toLowerCase();
     if (key.includes('arena') || key === '/') return Gamepad2;
     if (key.includes('company') || key.includes('about') || key.includes('team')) return Users;
     if (key.includes('franchise') || key.includes('3d') || key.includes('plan')) return LayoutGrid;
     if (key.includes('tournament') || key.includes('event')) return Trophy;
-    if (key.includes('activit') || key.includes('gallery')) return Sparkles;
+    if (key.includes('activit') || key.includes('gallery') || key.includes('photo') || key.includes('ภาพกิจกรรม') || key.includes('กล้อง')) return Camera;
     if (key.includes('contact') || key.includes('location') || key.includes('phone') || key.includes('map')) return PhoneCall;
     if (key.includes('http')) return Globe;
     return LayoutGrid;
@@ -126,14 +126,18 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
     <>
       <header className={`navbar-wrapper ${scrolled ? 'navbar-scrolled' : ''}`}>
         <div className="container navbar-container">
-          {/* Brand Logo - G-Speed Blue & White CL */}
+          {/* Brand Logo - GLP Esports */}
           <div 
             className="brand-logo" 
             onClick={() => handleNavClick('arena')}
             id="btn-brand-logo"
           >
             <div className="logo-icon-box">
-              <span className="logo-letter">GL</span>
+              <img 
+                src="/glp-logo-badge.png" 
+                alt="GLP Esports" 
+                className="brand-logo-img" 
+              />
             </div>
             <div className="logo-text">
               <div className="logo-title">
@@ -146,7 +150,7 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
           {/* Desktop Navigation */}
           <nav className="desktop-nav">
             {activeNavItems.map((item) => {
-              const Icon = getNavIcon(item.target, item.id);
+              const Icon = getNavIcon(item.target, item.id, item.label);
               const isActive = (item.cleanPath === '/' && (currentPath === '/' || !currentPath)) ||
                 (item.cleanPath && item.cleanPath !== '/' && (
                   currentPath === item.cleanPath ||
@@ -211,7 +215,11 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
         <div className="mobile-drawer-head">
           <div className="brand-logo" onClick={() => handleNavClick('arena')}>
             <div className="logo-icon-box small">
-              <span className="logo-letter">GL</span>
+              <img 
+                src="/glp-logo-badge.png" 
+                alt="GLP Esports" 
+                className="brand-logo-img" 
+              />
             </div>
             <span className="mobile-drawer-title">GLP ESPORTS</span>
           </div>
@@ -227,7 +235,7 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
         <div className="mobile-drawer-body">
           <span className="mobile-menu-label">เมนูนำทาง (NAVIGATION)</span>
           {activeNavItems.map((item) => {
-            const Icon = getNavIcon(item.target, item.id);
+            const Icon = getNavIcon(item.target, item.id, item.label);
             const isActive = (item.cleanPath === '/' && (currentPath === '/' || !currentPath)) ||
               (item.cleanPath && item.cleanPath !== '/' && currentPath.startsWith(item.cleanPath));
             return (

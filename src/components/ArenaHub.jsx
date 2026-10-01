@@ -73,6 +73,49 @@ export default function ArenaHub({
     setZoneSlideIndex(0);
   };
 
+  const handleHeroAction = (customLink, customTarget, defaultAction) => {
+    const rawLink = (customLink || '').trim();
+    if (!rawLink) {
+      if (typeof defaultAction === 'function') defaultAction();
+      return;
+    }
+
+    const isExternal = /^https?:\/\//i.test(rawLink) || /^\/\//.test(rawLink) || /^(www\.|line\.me|facebook\.com|fb\.com|instagram\.com|tiktok\.com|youtube\.com)/i.test(rawLink);
+    const link = (/^(www\.|line\.me|facebook\.com|fb\.com|instagram\.com|tiktok\.com|youtube\.com)/i.test(rawLink))
+      ? `https://${rawLink}`
+      : rawLink;
+
+    if (customTarget === '_blank') {
+      window.open(link, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    // target is _self
+    if (isExternal) {
+      window.location.href = link;
+    } else if (link.startsWith('#')) {
+      if (link === '#organizer-modal' || link === '#esport-modal') {
+        setSelectedOrganizerZone('Main Stage & Battleground Zone');
+        setIsOrganizerModalOpen(true);
+      } else {
+        const targetEl = document.querySelector(link);
+        if (targetEl) {
+          targetEl.scrollIntoView({ behavior: 'smooth' });
+        } else {
+          window.location.hash = link;
+        }
+      }
+    } else {
+      // Internal semantic route e.g. /activities, /tournaments, /franchise, /contact
+      const cleanPath = link.startsWith('/') ? link : `/${link}`;
+      window.history.pushState(null, '', cleanPath);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      if (document.documentElement) document.documentElement.scrollTop = 0;
+      if (document.body) document.body.scrollTop = 0;
+    }
+  };
+
   // Always ensure page starts at absolute top (0, 0) upon ArenaHub mounting
   useLayoutEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
@@ -314,8 +357,14 @@ export default function ArenaHub({
                   <button 
                     id="btn-hero-organize-esport"
                     onClick={() => {
-                      setSelectedOrganizerZone('Main Stage & Battleground Zone');
-                      setIsOrganizerModalOpen(true);
+                      handleHeroAction(
+                        heroData.btn1Link,
+                        heroData.btn1Target || '_self',
+                        () => {
+                          setSelectedOrganizerZone('Main Stage & Battleground Zone');
+                          setIsOrganizerModalOpen(true);
+                        }
+                      );
                     }} 
                     className="btn-primary cta-btn-large"
                     style={{
@@ -330,12 +379,18 @@ export default function ArenaHub({
                   <button 
                     id="btn-hero-activities"
                     onClick={() => {
-                      if (onNavigateActivities) {
-                        onNavigateActivities();
-                      } else {
-                        window.history.pushState(null, '', '/activities');
-                        window.dispatchEvent(new PopStateEvent('popstate'));
-                      }
+                      handleHeroAction(
+                        heroData.btn2Link !== undefined ? heroData.btn2Link : '/activities',
+                        heroData.btn2Target || '_self',
+                        () => {
+                          if (onNavigateActivities) {
+                            onNavigateActivities();
+                          } else {
+                            window.history.pushState(null, '', '/activities');
+                            window.dispatchEvent(new PopStateEvent('popstate'));
+                          }
+                        }
+                      );
                     }} 
                     className="btn-secondary cta-btn-large"
                     style={isDarkHero ? {
@@ -356,12 +411,18 @@ export default function ArenaHub({
                   <button 
                     id="btn-hero-tournaments"
                     onClick={() => {
-                      if (onNavigateTournaments) {
-                        onNavigateTournaments();
-                      } else {
-                        window.history.pushState(null, '', '/tournaments');
-                        window.dispatchEvent(new PopStateEvent('popstate'));
-                      }
+                      handleHeroAction(
+                        heroData.btn3Link !== undefined ? heroData.btn3Link : '/tournaments',
+                        heroData.btn3Target || '_self',
+                        () => {
+                          if (onNavigateTournaments) {
+                            onNavigateTournaments();
+                          } else {
+                            window.history.pushState(null, '', '/tournaments');
+                            window.dispatchEvent(new PopStateEvent('popstate'));
+                          }
+                        }
+                      );
                     }} 
                     className="btn-secondary cta-btn-large"
                     style={isDarkHero ? {
@@ -381,7 +442,20 @@ export default function ArenaHub({
 
                   <button 
                     id="btn-hero-navigate-franchise"
-                    onClick={onNavigateFranchise} 
+                    onClick={() => {
+                      handleHeroAction(
+                        heroData.btn4Link !== undefined ? heroData.btn4Link : '/franchise',
+                        heroData.btn4Target || '_self',
+                        () => {
+                          if (onNavigateFranchise) {
+                            onNavigateFranchise();
+                          } else {
+                            window.history.pushState(null, '', '/franchise');
+                            window.dispatchEvent(new PopStateEvent('popstate'));
+                          }
+                        }
+                      );
+                    }} 
                     className="btn-secondary cta-btn-large"
                     style={isDarkHero ? {
                       background: 'rgba(255, 255, 255, 0.12)',

@@ -42,7 +42,7 @@ services:
       - SMTP_USER=${SMTP_USER:-}
       - SMTP_PASS=${SMTP_PASS:-}
       - "SMTP_FROM_NAME=${SMTP_FROM_NAME:-GLP : G Speed Living Plus}"
-      - SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL:-contact@gspeedlivingplus.com}
+      - SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL:-gspeedlivingplus35@gmail.com}
       - STAFF_NOTIFICATION_EMAILS=${STAFF_NOTIFICATION_EMAILS:-}
       - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL:-}
     healthcheck:
@@ -51,9 +51,15 @@ services:
       timeout: 10s
       retries: 3
       start_period: 5s
+    volumes:
+      - glp-server-data:/app/data
     networks:
       - glp-network
 
 networks:
   glp-network:
     driver: bridge
+
+volumes:
+  glp-server-data:
+    driver: local

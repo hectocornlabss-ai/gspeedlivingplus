@@ -765,6 +765,18 @@ export const DEFAULT_SITE_DATA = {
     primaryCta: 'สำรวจกิจกรรม & ทัวร์นาเมนต์',
     primaryCtaLink: '#activities',
     secondaryCta: 'ติดต่อเปิดร้านเกมของคุณ',
+    btn1Text: 'สนใจจัดงาน',
+    btn1Link: '',
+    btn1Target: '_self',
+    btn2Text: 'สำรวจกิจกรรม & ทัวร์นาเมนต์',
+    btn2Link: '/activities',
+    btn2Target: '_self',
+    btn3Text: 'ทัวร์นาเมนต์',
+    btn3Link: '/tournaments',
+    btn3Target: '_self',
+    btn4Text: 'ติดต่อเปิดร้านเกมของคุณ',
+    btn4Link: '/franchise',
+    btn4Target: '_self',
     bgColor: '#ffffff',
     titleColor: '#0f172a',
     subtitleColor: '#475569',
@@ -1002,18 +1014,18 @@ export const DEFAULT_SITE_DATA = {
     host: 'smtp.hostinger.com',
     port: '465',
     encryption: 'SSL/TLS',
-    user: 'contact@gspeedlivingplus.com',
+    user: 'gspeedlivingplus35@gmail.com',
     pass: '••••••••••••••••',
     senderName: 'GLP : G-Speed Living Plus',
-    senderEmail: 'contact@gspeedlivingplus.com',
-    adminCcEmail: 'management@gspeedlivingplus.com, engineering@gspeedlivingplus.com',
+    senderEmail: 'gspeedlivingplus35@gmail.com',
+    adminCcEmail: 'gspeedlivingplus35@gmail.com',
     autoReplyEnabled: true,
     staffAlertEmails: [
-      { id: 1, email: 'management@gspeedlivingplus.com', role: 'ผู้บริหาร / เจ้าของร้าน (Owner/Executive)', active: true },
-      { id: 2, email: 'sales@gspeedlivingplus.com', role: 'ฝ่ายขาย & ที่ปรึกษาแฟรนไชส์ (Sales & Franchise)', active: true },
-      { id: 3, email: 'engineering@gspeedlivingplus.com', role: 'ทีมวิศวกร & เทคนิค 3D (Engineering)', active: true },
-      { id: 4, email: 'support@gspeedlivingplus.com', role: 'ฝ่ายบริการลูกค้า & นัดหมาย (Customer Support)', active: true },
-      { id: 5, email: 'manager@gspeedlivingplus.com', role: 'ผู้จัดการสาขารามคำแหง (Store Manager)', active: true }
+      { id: 1, email: 'gspeedlivingplus35@gmail.com', role: 'ผู้บริหาร / เจ้าของร้าน (Owner/Executive)', active: true },
+      { id: 2, email: '', role: 'ฝ่ายขาย & ที่ปรึกษาแฟรนไชส์ (Sales & Franchise)', active: false },
+      { id: 3, email: '', role: 'ทีมวิศวกร & เทคนิค 3D (Engineering)', active: false },
+      { id: 4, email: '', role: 'ฝ่ายบริการลูกค้า & นัดหมาย (Customer Support)', active: false },
+      { id: 5, email: '', role: 'ผู้จัดการสาขารามคำแหง (Store Manager)', active: false }
     ],
     lastTestedAt: '28/09/2026 23:05',
     lastTestStatus: 'Connected (Hostinger SMTP 250 OK)'
@@ -1168,7 +1180,7 @@ export function SiteDataProvider({ children }) {
         // Deep merge saved data with defaults so NO missing keys exist
         const merged = deepMerge(DEFAULT_SITE_DATA, parsed);
 
-        // Update default address/phone if old placeholder address exists
+        // Update default address/phone/email/social if old placeholder exists
         if (merged.footer) {
           if (!merged.footer.phone || merged.footer.phone.includes('02-888-9999') || merged.footer.phone.includes('02-999-8888') || merged.footer.phone === '063 793 7704') {
             merged.footer.phone = DEFAULT_SITE_DATA.footer.phone;
@@ -1176,8 +1188,8 @@ export function SiteDataProvider({ children }) {
           if (!merged.footer.address || !merged.footer.address.includes('รามคำแหง 53')) {
             merged.footer.address = DEFAULT_SITE_DATA.footer.address;
           }
-          if (!merged.footer.email || merged.footer.email.includes('contact@gspeedarena.com') || merged.footer.email.includes('franchise@gspeed-arena.com')) {
-            merged.footer.email = DEFAULT_SITE_DATA.footer.email;
+          if (!merged.footer.email || merged.footer.email.includes('contact@') || merged.footer.email.includes('@gspeed') || merged.footer.email !== 'gspeedlivingplus35@gmail.com') {
+            merged.footer.email = 'gspeedlivingplus35@gmail.com';
           }
           merged.footer.googleMapUrl = 'https://maps.app.goo.gl/ak23az5WtsvXGWUR8';
           if (merged.footer.copyright) {
@@ -1191,11 +1203,55 @@ export function SiteDataProvider({ children }) {
               ...merged.footer.socialLinks
             };
           }
+          if (!merged.footer.socialLinks.facebook || merged.footer.socialLinks.facebook.includes('gspeedesport') || merged.footer.socialLinks.facebook !== 'https://www.facebook.com/GLP.Gspeedlivingplus') {
+            merged.footer.socialLinks.facebook = 'https://www.facebook.com/GLP.Gspeedlivingplus';
+          }
         }
 
-        // Migrate legacy secondaryCta button text
-        if (merged.hero && (!merged.hero.secondaryCta || merged.hero.secondaryCta.includes('จำลองผังร้าน'))) {
-          merged.hero.secondaryCta = 'ติดต่อเปิดร้านเกมของคุณ';
+        if (merged.contactPage) {
+          if (!merged.contactPage.storeEmail || merged.contactPage.storeEmail !== 'gspeedlivingplus35@gmail.com') {
+            merged.contactPage.storeEmail = 'gspeedlivingplus35@gmail.com';
+          }
+          if (merged.contactPage.socialLinks) {
+            if (!merged.contactPage.socialLinks.facebook || merged.contactPage.socialLinks.facebook.includes('gspeedesport')) {
+              merged.contactPage.socialLinks.facebook = 'https://www.facebook.com/GLP.Gspeedlivingplus';
+            }
+          }
+        }
+
+        if (merged.smtpConfig) {
+          if (!merged.smtpConfig.senderEmail || merged.smtpConfig.senderEmail.includes('@gspeedlivingplus.com') || merged.smtpConfig.senderEmail.includes('@gspeed-esport.com') || merged.smtpConfig.senderEmail.includes('contact@')) {
+            merged.smtpConfig.senderEmail = 'gspeedlivingplus35@gmail.com';
+          }
+          if (!merged.smtpConfig.user || merged.smtpConfig.user.includes('@gspeedlivingplus.com') || merged.smtpConfig.user.includes('contact@')) {
+            merged.smtpConfig.user = 'gspeedlivingplus35@gmail.com';
+          }
+          if (!merged.smtpConfig.adminCcEmail || merged.smtpConfig.adminCcEmail.includes('@gspeedlivingplus.com') || merged.smtpConfig.adminCcEmail.includes('@gspeed-esport.com')) {
+            merged.smtpConfig.adminCcEmail = 'gspeedlivingplus35@gmail.com';
+          }
+          if (Array.isArray(merged.smtpConfig.staffAlertEmails)) {
+            merged.smtpConfig.staffAlertEmails = merged.smtpConfig.staffAlertEmails.map(st => {
+              if (st.email && (st.email.includes('@gspeedlivingplus.com') || st.email.includes('@gspeed-esport.com'))) {
+                return { ...st, email: st.id === 1 ? 'gspeedlivingplus35@gmail.com' : '' };
+              }
+              return st;
+            });
+          }
+        }
+
+        // Migrate legacy secondaryCta button text and ensure hero buttons defaults
+        if (merged.hero && typeof merged.hero === 'object') {
+          if (!merged.hero.secondaryCta || merged.hero.secondaryCta.includes('จำลองผังร้าน')) {
+            merged.hero.secondaryCta = 'ติดต่อเปิดร้านเกมของคุณ';
+          }
+          if (merged.hero.btn1Target === undefined) merged.hero.btn1Target = '_self';
+          if (merged.hero.btn2Target === undefined) merged.hero.btn2Target = '_self';
+          if (merged.hero.btn3Target === undefined) merged.hero.btn3Target = '_self';
+          if (merged.hero.btn4Target === undefined) merged.hero.btn4Target = '_self';
+          if (merged.hero.btn1Link === undefined) merged.hero.btn1Link = '';
+          if (merged.hero.btn2Link === undefined) merged.hero.btn2Link = '/activities';
+          if (merged.hero.btn3Link === undefined) merged.hero.btn3Link = '/tournaments';
+          if (merged.hero.btn4Link === undefined) merged.hero.btn4Link = '/franchise';
         }
 
         // Sanitize legacy founder experience if it has the long sentence
@@ -1486,13 +1542,18 @@ export function SiteDataProvider({ children }) {
             : item;
         });
 
-        // Hydrate catalog items with mockData images, colors, grade, and warranty if missing
+        // Hydrate catalog items with mockData images, colors, grade, warranty, sku, weightKg, maxLoadKg, and imageAlt if missing
         merged.catalogItems = merged.catalogItems.map(item => {
           const initial = INITIAL_CATALOG.find(c => c.type === item.type);
           return initial
             ? { 
                 ...initial, 
                 ...item, 
+                sku: item.sku || initial.sku || ('GLP-' + (item.type || 'ITEM').toUpperCase()),
+                weightKg: item.weightKg !== undefined ? item.weightKg : (initial.weightKg || 48),
+                maxLoadKg: item.maxLoadKg !== undefined ? item.maxLoadKg : (initial.maxLoadKg || 350),
+                weightNote: item.weightNote || initial.weightNote || '',
+                imageAlt: item.imageAlt || initial.imageAlt || item.name || '',
                 image: item.image || initial.image,
                 grade: item.grade || initial.grade || 'pro',
                 deskColor: item.deskColor || initial.deskColor || item.color || '#0f172a',
@@ -1635,6 +1696,51 @@ export function SiteDataProvider({ children }) {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('gspeed-site-data-updated', handleCustomSync);
     };
+  }, []);
+
+  // Server Database Sync & Persistence Tracking
+  const [serverSyncStatus, setServerSyncStatus] = useState({
+    synced: false,
+    lastSynced: null,
+    error: null,
+    saving: false
+  });
+
+  // Hydrate from persistent server database (Docker volume) on initial load
+  useEffect(() => {
+    let isMounted = true;
+    const fetchServerSiteData = async () => {
+      try {
+        const res = await fetch('/api/site-data');
+        if (!res.ok) return;
+        const result = await res.json();
+        if (result && result.success && result.siteData && typeof result.siteData === 'object') {
+          if (isMounted) {
+            console.log('[SiteDataContext] Hydrated from persistent server database.');
+            setSiteData(prev => {
+              const merged = deepMerge(prev, result.siteData);
+              try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+              } catch (e) {}
+              return merged;
+            });
+            const syncTime = result.updatedAt 
+              ? new Date(result.updatedAt).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })
+              : new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+            setServerSyncStatus({
+              synced: true,
+              lastSynced: syncTime,
+              error: null,
+              saving: false
+            });
+          }
+        }
+      } catch (err) {
+        console.log('[SiteDataContext] Server database check skipped (offline or initial boot):', err.message);
+      }
+    };
+    fetchServerSiteData();
+    return () => { isMounted = false; };
   }, []);
 
   // Generic Update Handlers
@@ -1797,10 +1903,28 @@ export function SiteDataProvider({ children }) {
   };
 
   const updateFooter = (footerUpdates) => {
-    setSiteData(prev => ({
-      ...prev,
-      footer: { ...prev.footer, ...footerUpdates }
-    }));
+    setSiteData(prev => {
+      const mergedSocialLinks = footerUpdates.socialLinks ? {
+        ...(prev.footer?.socialLinks || {}),
+        ...footerUpdates.socialLinks
+      } : (prev.footer?.socialLinks || {});
+
+      return {
+        ...prev,
+        footer: {
+          ...prev.footer,
+          ...footerUpdates,
+          socialLinks: mergedSocialLinks
+        },
+        contactPage: footerUpdates.socialLinks ? {
+          ...(prev.contactPage || {}),
+          socialLinks: {
+            ...(prev.contactPage?.socialLinks || {}),
+            ...footerUpdates.socialLinks
+          }
+        } : prev.contactPage
+      };
+    });
   };
 
   const updateNavLinks = (newLinks) => {
@@ -1831,15 +1955,83 @@ export function SiteDataProvider({ children }) {
     }));
   };
 
-  const saveSiteData = (manualData) => {
+  const saveSiteData = async (manualData) => {
     const dataToSave = manualData || siteData;
+    let localOk = false;
+    let serverOk = false;
+    const nowTime = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+
+    // 1. Immediate LocalStorage & in-memory event broadcast
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+      // Also sync to legacy/secondary storage key to ensure 100% backward compatibility
+      try { localStorage.setItem('glp_site_data', JSON.stringify(dataToSave)); } catch (e2) {}
       window.dispatchEvent(new CustomEvent('gspeed-site-data-updated', { detail: dataToSave }));
-      return { success: true, timestamp: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) };
+      localOk = true;
     } catch (e) {
-      console.error('Failed to save data', e);
-      return { success: false, error: e.message };
+      console.warn('LocalStorage save error:', e);
+    }
+
+    // 2. Server Database Persistence (Volume Mount / Docker)
+    try {
+      setServerSyncStatus(prev => ({ ...prev, saving: true }));
+      const response = await fetch('/api/site-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ siteData: dataToSave, author: 'admin' })
+      });
+      const resJson = await response.json();
+      if (resJson?.success) {
+        serverOk = true;
+        setServerSyncStatus({
+          synced: true,
+          lastSynced: nowTime,
+          error: null,
+          saving: false
+        });
+        return { 
+          success: true, 
+          serverSaved: true, 
+          timestamp: nowTime, 
+          message: resJson.message 
+        };
+      }
+    } catch (apiErr) {
+      console.warn('[SiteDataContext] Server API sync warning:', apiErr.message);
+      setServerSyncStatus(prev => ({ ...prev, saving: false, error: apiErr.message }));
+    }
+
+    return { success: localOk, serverSaved: serverOk, timestamp: nowTime };
+  };
+
+  const syncWithServerDatabase = async () => {
+    try {
+      setServerSyncStatus(prev => ({ ...prev, saving: true }));
+      const res = await fetch('/api/site-data');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const result = await res.json();
+      if (result && result.success && result.siteData) {
+        setSiteData(prev => {
+          const merged = deepMerge(prev, result.siteData);
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+          } catch (e) {}
+          return merged;
+        });
+        const syncTime = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+        setServerSyncStatus({
+          synced: true,
+          lastSynced: syncTime,
+          error: null,
+          saving: false
+        });
+        return { success: true, message: 'ดึงข้อมูลล่าสุดจาก Server Database สำเร็จ', timestamp: syncTime };
+      }
+      setServerSyncStatus(prev => ({ ...prev, saving: false }));
+      return { success: false, message: 'ยังไม่มีข้อมูลบนเซิร์ฟเวอร์' };
+    } catch (err) {
+      setServerSyncStatus(prev => ({ ...prev, saving: false, error: err.message }));
+      return { success: false, message: err.message };
     }
   };
 
@@ -3341,6 +3533,8 @@ export function SiteDataProvider({ children }) {
     updateOrganizerGame,
     deleteOrganizerGame,
     saveSiteData,
+    syncWithServerDatabase,
+    serverSyncStatus,
     resetToDefaults
   };
 

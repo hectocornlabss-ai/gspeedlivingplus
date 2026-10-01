@@ -285,12 +285,21 @@
   justify-content: center;
   position: relative;
   box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
+  overflow: hidden;
 }
 
 .logo-icon-box.small {
   width: 34px;
   height: 34px;
   border-radius: 8px;
+}
+
+.brand-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  display: block;
 }
 
 .logo-letter {
@@ -10260,7 +10269,288 @@
     display: none !important;
   }
   .franchise-planner-page {
-    padding-bottom: 120px !important;
+    padding-top: 8px !important;
+    padding-bottom: calc(160px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  .franchise-planner-page .container {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+  .step-content-section {
+    padding-top: 2px !important;
+    padding-bottom: 8px !important;
+  }
+
+  /* STEP 1: MOBILE COMPACT LAYOUT */
+  .setup-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+  .setup-card {
+    padding: 12px 10px !important;
+    border-radius: 12px !important;
+  }
+  .setup-card-title {
+    font-size: 1.05rem !important;
+    gap: 6px !important;
+    margin-bottom: 4px !important;
+  }
+  .setup-card-desc {
+    font-size: 0.78rem !important;
+    line-height: 1.35 !important;
+    margin-bottom: 10px !important;
+    color: #64748b !important;
+  }
+  .setup-mode-tabs {
+    gap: 6px !important;
+    margin-bottom: 10px !important;
+  }
+  .setup-mode-tab-btn {
+    padding: 6px 10px !important;
+    font-size: 0.78rem !important;
+    border-radius: 8px !important;
+  }
+  .preset-cards-grid {
+    gap: 6px !important;
+    margin-bottom: 10px !important;
+  }
+  .preset-card {
+    padding: 8px 10px !important;
+    border-radius: 8px !important;
+  }
+  .preset-head {
+    margin-bottom: 2px !important;
+    font-size: 0.82rem !important;
+  }
+  .preset-dim {
+    font-size: 0.74rem !important;
+  }
+  .preset-info {
+    font-size: 0.72rem !important;
+    line-height: 1.25 !important;
+  }
+  .dimension-sliders {
+    gap: 8px !important;
+    margin-bottom: 10px !important;
+  }
+  .slider-group {
+    gap: 4px !important;
+  }
+  .slider-header {
+    font-size: 0.8rem !important;
+  }
+  .area-summary-pill {
+    padding: 8px 10px !important;
+    font-size: 0.78rem !important;
+    border-radius: 8px !important;
+  }
+  .form-group {
+    margin-bottom: 10px !important;
+  }
+  .form-label {
+    font-size: 0.8rem !important;
+    margin-bottom: 4px !important;
+  }
+  .form-select {
+    padding: 8px 10px !important;
+    font-size: 0.8rem !important;
+    border-radius: 8px !important;
+  }
+  .theme-options-grid {
+    gap: 6px !important;
+  }
+  .theme-option {
+    padding: 8px 10px 8px 14px !important;
+    border-radius: 8px !important;
+    gap: 2px !important;
+  }
+  .theme-option strong {
+    font-size: 0.84rem !important;
+  }
+  .theme-option span {
+    font-size: 0.72rem !important;
+    line-height: 1.25 !important;
+    margin-top: 1px !important;
+  }
+  .setup-actions {
+    margin-top: 12px !important;
+  }
+  .setup-actions .btn-primary {
+    padding: 9px 14px !important;
+    font-size: 0.85rem !important;
+    border-radius: 8px !important;
+  }
+
+  /* STEP 3 & 4: MOBILE COMPACT LAYOUT */
+  .section-header-center {
+    margin-bottom: 12px !important;
+    padding: 0 4px !important;
+  }
+  .section-title {
+    font-size: 1.15rem !important;
+    margin-bottom: 4px !important;
+  }
+  .section-subtitle {
+    font-size: 0.76rem !important;
+    margin-bottom: 10px !important;
+    line-height: 1.35 !important;
+  }
+  .tiers-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    margin-bottom: 14px !important;
+  }
+  .tier-card {
+    padding: 12px 10px !important;
+    border-radius: 10px !important;
+  }
+  .tier-header {
+    margin-bottom: 8px !important;
+  }
+  .tier-name {
+    font-size: 1.05rem !important;
+    margin-bottom: 2px !important;
+  }
+  .tier-tagline {
+    font-size: 0.74rem !important;
+    min-height: auto !important;
+    margin-bottom: 6px !important;
+    line-height: 1.25 !important;
+  }
+  .price-num {
+    font-size: 1.35rem !important;
+  }
+  .price-unit {
+    font-size: 0.74rem !important;
+  }
+  .tier-total-badge {
+    font-size: 0.72rem !important;
+    padding: 3px 8px !important;
+    margin-top: 4px !important;
+  }
+  .tier-specs-list {
+    gap: 4px !important;
+    margin-bottom: 8px !important;
+  }
+  .tier-spec-item {
+    font-size: 0.74rem !important;
+    padding: 2px 0 !important;
+    gap: 6px !important;
+  }
+  .tier-card button {
+    padding: 8px 12px !important;
+    font-size: 0.8rem !important;
+    border-radius: 8px !important;
+  }
+  .infra-showcase-panel {
+    padding: 12px 10px !important;
+    margin-top: 12px !important;
+    border-radius: 10px !important;
+  }
+  .infra-title {
+    font-size: 0.92rem !important;
+    margin-bottom: 8px !important;
+    gap: 6px !important;
+  }
+  .infra-grid {
+    gap: 6px !important;
+  }
+  .infra-item {
+    padding: 8px 10px !important;
+    font-size: 0.72rem !important;
+    line-height: 1.35 !important;
+  }
+  .step3-nav-actions {
+    margin-top: 10px !important;
+    gap: 6px !important;
+  }
+  .step3-nav-actions button {
+    padding: 8px 14px !important;
+    font-size: 0.8rem !important;
+  }
+  .budget-columns-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+  .cost-table-card, .roi-calculator-card {
+    padding: 12px 10px !important;
+    border-radius: 10px !important;
+  }
+  .cost-table-card .card-subheading,
+  .roi-calculator-card .card-subheading {
+    font-size: 0.95rem !important;
+    margin-bottom: 8px !important;
+    gap: 6px !important;
+  }
+  .cost-breakdown-list {
+    gap: 4px !important;
+  }
+  .cb-row {
+    grid-template-columns: 1fr auto !important;
+    gap: 4px !important;
+    padding: 6px 8px !important;
+    font-size: 0.72rem !important;
+    border-radius: 6px !important;
+  }
+  .cb-row span {
+    grid-column: 1 / -1 !important;
+    font-size: 0.68rem !important;
+    color: #64748b !important;
+    line-height: 1.25 !important;
+  }
+  .cb-row.header-row {
+    padding: 5px 8px !important;
+    font-size: 0.7rem !important;
+    grid-template-columns: 1fr auto !important;
+  }
+  .cb-row.header-row span:nth-child(2) {
+    display: none !important;
+  }
+  .cb-row.total-row {
+    padding: 8px 10px !important;
+    margin-top: 4px !important;
+  }
+  .cb-row.total-row .font-large {
+    font-size: 1.05rem !important;
+  }
+  .roi-inputs {
+    gap: 8px !important;
+    padding: 8px 10px !important;
+    border-radius: 8px !important;
+  }
+  .roi-input-group {
+    gap: 4px !important;
+  }
+  .roi-label-row {
+    font-size: 0.76rem !important;
+  }
+  .roi-val-badge {
+    font-size: 0.74rem !important;
+    padding: 2px 6px !important;
+  }
+  .range-hints {
+    font-size: 0.66rem !important;
+    margin-top: 2px !important;
+  }
+  .roi-metrics-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
+    margin-top: 8px !important;
+  }
+  .roi-metric-box {
+    padding: 8px 6px !important;
+    border-radius: 8px !important;
+  }
+  .roi-metric-box .metric-val {
+    font-size: 1.05rem !important;
+  }
+  .roi-metric-box .metric-lbl {
+    font-size: 0.66rem !important;
+  }
+  .timeline-card, .lead-submission-form {
+    padding: 12px 10px !important;
+    margin-top: 10px !important;
+    border-radius: 10px !important;
   }
   .studio-compact-header {
     padding: 6px 0;
@@ -10464,17 +10754,15 @@
   }
   .planner-bottom-nav-bar {
     position: fixed !important;
-    bottom: calc(58px + env(safe-area-inset-bottom, 0px)) !important;
-    left: 0 !important;
-    right: 0 !important;
-    z-index: 9900 !important;
+    bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+    left: 8px !important;
+    right: 8px !important;
+    z-index: 9980 !important;
     margin: 0 !important;
-    padding: 8px 12px !important;
-    border-radius: 0 !important;
-    border-left: none !important;
-    border-right: none !important;
-    border-top: 1px solid #cbd5e1 !important;
-    box-shadow: 0 -4px 18px rgba(15, 23, 42, 0.12) !important;
+    padding: 7px 12px !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(203, 213, 225, 0.95) !important;
+    box-shadow: 0 4px 22px rgba(15, 23, 42, 0.18) !important;
     background: rgba(255, 255, 255, 0.97) !important;
     backdrop-filter: blur(14px) !important;
     -webkit-backdrop-filter: blur(14px) !important;
@@ -10482,7 +10770,7 @@
     align-items: center !important;
     justify-content: space-between !important;
     gap: 8px !important;
-    width: 100% !important;
+    width: auto !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
   }
@@ -10493,7 +10781,7 @@
     display: flex !important;
     align-items: center !important;
     gap: 4px !important;
-    font-size: 0.76rem !important;
+    font-size: 0.74rem !important;
     color: #334155 !important;
     line-height: 1.25 !important;
     white-space: nowrap !important;
@@ -10516,8 +10804,8 @@
   .bottom-nav-right-actions .btn-secondary {
     flex: none !important;
     min-width: 0 !important;
-    padding: 8px 10px !important;
-    font-size: 0.8rem !important;
+    padding: 7px 10px !important;
+    font-size: 0.78rem !important;
     text-align: center !important;
     justify-content: center !important;
     white-space: nowrap !important;
@@ -10526,18 +10814,18 @@
   .bottom-nav-right-actions .btn-primary {
     flex: none !important;
     min-width: 0 !important;
-    padding: 8px 12px !important;
-    font-size: 0.82rem !important;
+    padding: 7px 12px !important;
+    font-size: 0.8rem !important;
     text-align: center !important;
     justify-content: center !important;
     white-space: nowrap !important;
     border-radius: 8px !important;
   }
   .btn-ai-chat-trigger {
-    bottom: 140px !important;
-    right: 14px !important;
-    width: 44px !important;
-    height: 44px !important;
+    bottom: calc(146px + env(safe-area-inset-bottom, 0px)) !important;
+    right: 12px !important;
+    width: 42px !important;
+    height: 42px !important;
     padding: 0 !important;
     border-radius: 50% !important;
     display: flex !important;
@@ -14706,9 +14994,22 @@
   transform: translateY(-1px);
 }
 .share-pill-btn.copy.copied {
-  background: #ecfdf5;
-  color: #059669;
-  border-color: #6ee7b7;
+  background: #ecfdf5 !important;
+  color: #059669 !important;
+  border-color: #6ee7b7 !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.article-share-strip .social-share-popover-box {
+  bottom: calc(100% + 10px);
+  top: auto;
+  box-shadow: 0 -8px 30px rgba(15, 23, 42, 0.16);
+}
+@media (max-width: 640px) {
+  .article-share-strip .social-share-popover-box {
+    bottom: 0;
+    top: auto;
+  }
 }
 
 /* Compact Share Icon Button */
@@ -18332,18 +18633,22 @@
 }
 
 /* =========================================================================
-   COMPREHENSIVE CATALOG EDIT & ADD MODAL (1240PX DUAL COLUMN)
+   COMPREHENSIVE CATALOG EDIT & ADD MODAL (1260PX EXPANSIVE DUAL COLUMN)
    ========================================================================= */
-.cms-modal-card.modal-extra-wide {
-  width: 95vw;
-  max-width: 1260px;
-  max-height: 92vh;
-  display: flex;
-  flex-direction: column;
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(226, 232, 240, 0.8);
-  overflow: hidden;
+.cms-modal-card.modal-extra-wide,
+.cms-modal-card.catalog-edit-dual-modal {
+  width: 96vw !important;
+  max-width: 1260px !important;
+  height: 92vh !important;
+  max-height: 92vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background: #ffffff !important;
+  border-radius: 16px !important;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(226, 232, 240, 0.8) !important;
+  overflow: hidden !important;
+  position: relative !important;
+  inset: auto !important;
 }
 
 .catalog-edit-dual-modal .modal-head {
@@ -18354,6 +18659,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .catalog-edit-dual-modal .modal-head-title {
@@ -18418,22 +18724,25 @@
 }
 
 .modal-dual-body {
-  display: grid;
-  grid-template-columns: 1.25fr 0.95fr;
-  gap: 24px;
-  padding: 20px 24px 24px;
-  overflow-y: hidden;
-  height: calc(92vh - 75px);
-  background: #f8fafc;
+  display: grid !important;
+  grid-template-columns: 1.18fr 0.82fr !important;
+  gap: 24px !important;
+  padding: 20px 24px 24px !important;
+  overflow: hidden !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  height: auto !important;
+  background: #f8fafc !important;
 }
 
 /* Left Column: Smooth Scrollable Form */
 .modal-form-scrollable {
-  overflow-y: auto;
-  padding-right: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  overflow-y: auto !important;
+  padding-right: 14px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+  min-height: 0 !important;
 }
 
 .modal-form-scrollable::-webkit-scrollbar {
@@ -18571,11 +18880,12 @@
 
 /* Right Column: Sticky Live 3D & Floor Plan Studio */
 .modal-live-3d-pane {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  overflow-y: auto;
-  padding-right: 4px;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+  overflow-y: auto !important;
+  padding-right: 4px !important;
+  min-height: 0 !important;
 }
 
 .modal-live-3d-pane::-webkit-scrollbar {
@@ -18827,13 +19137,26 @@
 }
 
 @media (max-width: 992px) {
-  .modal-dual-body {
-    grid-template-columns: 1fr;
-    height: auto;
-    overflow-y: auto;
+  .cms-modal-card.modal-extra-wide,
+  .cms-modal-card.catalog-edit-dual-modal {
+    width: 98vw !important;
+    height: 96vh !important;
+    max-height: 96vh !important;
   }
-  .cms-modal-card.modal-extra-wide {
-    max-height: 96vh;
+  .modal-dual-body {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+    overflow-y: auto !important;
+    gap: 16px !important;
+    padding: 16px !important;
+  }
+  .modal-form-scrollable {
+    overflow-y: visible !important;
+    padding-right: 0 !important;
+  }
+  .modal-live-3d-pane {
+    overflow-y: visible !important;
+    padding-right: 0 !important;
   }
 }
 
@@ -27184,4 +27507,31 @@
   .tournaments-section .section-header {
     margin-bottom: 18px;
   }
+}
+
+/* Persistent Server Database Sync Pill & Status Badges */
+.admin-server-sync-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border-radius: 9999px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+.admin-server-sync-pill.synced {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+.admin-server-sync-pill.pending {
+  background: rgba(59, 130, 246, 0.12);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+.admin-server-sync-pill .spin-icon {
+  animation: spin 1s linear infinite;
 }

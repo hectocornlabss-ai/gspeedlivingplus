@@ -149,13 +149,39 @@ export default function SingleActivityView({
     );
   }
 
-  // Handle Share / Copy Link
+  // Handle Share / Copy Link with reliable fallback and visual feedback
   const handleCopyLink = () => {
-    const fullUrl = window.location.href;
-    navigator.clipboard.writeText(fullUrl).then(() => {
+    const fullUrl = typeof window !== 'undefined' ? window.location.href : '';
+    const onCopied = () => {
       setCopiedLink(true);
-      setTimeout(() => setCopiedLink(false), 2200);
-    });
+      setTimeout(() => setCopiedLink(false), 2500);
+    };
+
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(fullUrl).then(onCopied).catch(() => {
+        fallbackCopyText(fullUrl, onCopied);
+      });
+    } else {
+      fallbackCopyText(fullUrl, onCopied);
+    }
+  };
+
+  const fallbackCopyText = (text, cb) => {
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-9999px';
+      textArea.style.top = '0';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      if (successful && typeof cb === 'function') cb();
+    } catch (err) {
+      console.error('Fallback copy link failed:', err);
+    }
   };
 
   const handleShareFacebook = () => {
@@ -645,6 +671,26 @@ export default function SingleActivityView({
                     <span>X</span>
                   </button>
 
+                  {/* Copy Link Button with Live Visual Feedback */}
+                  <button 
+                    type="button"
+                    onClick={handleCopyLink}
+                    className={`share-pill-btn copy ${copiedLink ? 'copied' : ''}`}
+                    title="คัดลอกลิงก์บทความนี้"
+                  >
+                    {copiedLink ? (
+                      <>
+                        <Check size={14} className="text-emerald" />
+                        <span>คัดลอกลิงก์แล้ว ✓</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={14} />
+                        <span>คัดลอกลิงก์</span>
+                      </>
+                    )}
+                  </button>
+
                   {/* Compact Share Trigger Icon Button & Popover */}
                   <div className="share-btn-relative-wrapper">
                     <button 
@@ -652,8 +698,8 @@ export default function SingleActivityView({
                       type="button"
                       onClick={() => setBottomShareOpen(!bottomShareOpen)}
                       className={`share-pill-btn share-icon-btn ${bottomShareOpen ? 'active' : ''}`}
-                      title="แชร์บทความและคัดลอกลิงก์ (Messenger, Instagram, และแอปอื่นๆ)"
-                      aria-label="แชร์บทความนี้"
+                      title="ช่องทางแชร์เพิ่มเติม (Messenger, Instagram, และแอปอื่นๆ)"
+                      aria-label="ช่องทางแชร์เพิ่มเติม"
                     >
                       <Share2 size={15} className="text-blue" />
                     </button>
@@ -768,8 +814,8 @@ export default function SingleActivityView({
                   <PhoneCall size={16} />
                   <span>สายด่วน: 063-793-7704</span>
                 </a>
-                <a href="mailto:partner@gspeedarena.com" className="inquiry-contact-btn secondary">
-                  <span>อีเมล: partner@gspeedarena.com</span>
+                <a href="mailto:gspeedlivingplus35@gmail.com" className="inquiry-contact-btn secondary">
+                  <span>อีเมล: gspeedlivingplus35@gmail.com</span>
                 </a>
               </div>
             </div>
@@ -970,6 +1016,37 @@ export default function SingleActivityView({
               )}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Floating Toast Notification when Link Copied */}
+      {copiedLink && (
+        <div 
+          style={{
+            position: 'fixed',
+            bottom: '28px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'rgba(15, 23, 42, 0.94)',
+            color: '#ffffff',
+            padding: '12px 22px',
+            borderRadius: '999px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            boxShadow: '0 12px 30px rgba(0, 0, 0, 0.28)',
+            zIndex: 9999,
+            fontSize: '0.88rem',
+            fontWeight: 650,
+            backdropFilter: 'blur(8px)',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            pointerEvents: 'none'
+          }}
+        >
+          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '50%', background: '#10b981', color: '#fff' }}>
+            <Check size={14} />
+          </span>
+          <span>คัดลอกลิงก์สำเร็จแล้ว พร้อมส่งต่อได้ทันที ✓</span>
         </div>
       )}
     </div>

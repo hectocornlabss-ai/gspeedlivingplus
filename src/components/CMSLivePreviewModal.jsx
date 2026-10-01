@@ -236,15 +236,22 @@ export default function CMSLivePreviewModal({
                       {siteData?.hero?.subtitle || 'สัมผัสประสบการณ์เกมมิ่งระดับทัวร์นาเมนต์ สเปก RTX 40 Series จอ 360Hz และระบบ 3D Interior Floor Plan คำนวณงบประมาณและผลตอบแทนการลงทุนทันที'}
                     </p>
 
-                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                      <button className="btn-primary" style={{ padding: '12px 24px', fontSize: '0.9rem' }}>
-                        <Compass size={17} />
-                        <span>{siteData?.hero?.primaryCta || 'จำลองผังร้าน 3D & คำนวณงบประมาณ'}</span>
-                        <ArrowRight size={17} />
+                    <div style={{ display: 'grid', gridTemplateColumns: viewport === 'mobile' ? '1fr' : 'repeat(2, 1fr)', gap: '10px', maxWidth: '640px', margin: '0 auto' }}>
+                      <button className="btn-primary" style={{ padding: '12px 18px', fontSize: '0.86rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                        <Trophy size={16} />
+                        <span>{siteData?.hero?.btn1Text || 'สนใจจัดงาน'}</span>
                       </button>
-                      <button className="btn-secondary" style={{ padding: '12px 22px', fontSize: '0.9rem', background: isDarkHero ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.9)', color: isDarkHero ? '#fff' : '#1e293b', border: isDarkHero ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(203,213,225,0.9)' }}>
-                        <Compass size={17} />
-                        <span>{siteData?.hero?.secondaryCta || 'ติดต่อเปิดร้านเกมของคุณ'}</span>
+                      <button className="btn-secondary" style={{ padding: '12px 18px', fontSize: '0.86rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: isDarkHero ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.9)', color: isDarkHero ? '#fff' : '#1e293b', border: isDarkHero ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(203,213,225,0.9)' }}>
+                        <Camera size={16} />
+                        <span>{siteData?.hero?.btn2Text || siteData?.hero?.primaryCta || 'ดูกิจกรรม'}</span>
+                      </button>
+                      <button className="btn-secondary" style={{ padding: '12px 18px', fontSize: '0.86rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: isDarkHero ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.9)', color: isDarkHero ? '#fff' : '#1e293b', border: isDarkHero ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(203,213,225,0.9)' }}>
+                        <Trophy size={16} />
+                        <span>{siteData?.hero?.btn3Text || 'ทัวร์นาเมนต์'}</span>
+                      </button>
+                      <button className="btn-secondary" style={{ padding: '12px 18px', fontSize: '0.86rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: isDarkHero ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.9)', color: isDarkHero ? '#fff' : '#1e293b', border: isDarkHero ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(203,213,225,0.9)' }}>
+                        <Compass size={16} />
+                        <span>{siteData?.hero?.btn4Text || siteData?.hero?.secondaryCta || 'ติดต่อเปิดร้านเกม'}</span>
                       </button>
                     </div>
                   </div>
@@ -798,8 +805,8 @@ export default function CMSLivePreviewModal({
                     <div>
                       <h6 style={{ color: '#fff', margin: '0 0 8px', fontSize: '0.8rem' }}>ติดต่อสอบถาม</h6>
                       <div style={{ fontSize: '0.74rem', color: '#94a3b8', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <span>โทร: {siteData?.footer?.contactPhone || '02-888-9999'}</span>
-                        <span>อีเมล: {siteData?.footer?.contactEmail || 'partner@gspeedarena.com'}</span>
+                        <span>โทร: {siteData?.footer?.phone || siteData?.footer?.contactPhone || '063-793-7704'}</span>
+                        <span>อีเมล: {siteData?.footer?.email || siteData?.footer?.contactEmail || 'gspeedlivingplus35@gmail.com'}</span>
                       </div>
                     </div>
                   </div>

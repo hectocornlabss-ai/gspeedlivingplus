@@ -186,6 +186,41 @@ export default function SingleTournamentView({
   const [bottomShareOpen, setBottomShareOpen] = useState(false);
   const bottomShareBtnRef = useRef(null);
 
+  // Handle Share / Copy Link with reliable fallback and visual feedback
+  const handleCopyLink = () => {
+    const fullUrl = canonicalUrl || (typeof window !== 'undefined' ? window.location.href : '');
+    const onCopied = () => {
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2500);
+    };
+
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(fullUrl).then(onCopied).catch(() => {
+        fallbackCopyText(fullUrl, onCopied);
+      });
+    } else {
+      fallbackCopyText(fullUrl, onCopied);
+    }
+  };
+
+  const fallbackCopyText = (text, cb) => {
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-9999px';
+      textArea.style.top = '0';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      if (successful && typeof cb === 'function') cb();
+    } catch (err) {
+      console.error('Fallback copy link failed:', err);
+    }
+  };
+
   const handleShareFacebook = () => {
     const url = encodeURIComponent(canonicalUrl);
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'width=600,height=400');
@@ -616,6 +651,26 @@ export default function SingleTournamentView({
                     <span>X</span>
                   </button>
 
+                  {/* Copy Link Button with Live Visual Feedback */}
+                  <button 
+                    type="button"
+                    onClick={handleCopyLink}
+                    className={`share-pill-btn copy ${copiedLink ? 'copied' : ''}`}
+                    title="คัดลอกลิงก์ทัวร์นาเมนต์นี้"
+                  >
+                    {copiedLink ? (
+                      <>
+                        <Check size={14} className="text-emerald" />
+                        <span>คัดลอกลิงก์แล้ว ✓</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={14} />
+                        <span>คัดลอกลิงก์</span>
+                      </>
+                    )}
+                  </button>
+
                   {/* Compact Share Trigger Icon Button & Popover */}
                   <div className="share-btn-relative-wrapper">
                     <button 
@@ -623,8 +678,8 @@ export default function SingleTournamentView({
                       type="button"
                       onClick={() => setBottomShareOpen(!bottomShareOpen)}
                       className={`share-pill-btn share-icon-btn ${bottomShareOpen ? 'active' : ''}`}
-                      title="แชร์ทัวร์นาเมนต์และคัดลอกลิงก์ (Messenger, Instagram, และแอปอื่นๆ)"
-                      aria-label="แชร์ทัวร์นาเมนต์นี้"
+                      title="ช่องทางแชร์เพิ่มเติม (Messenger, Instagram, และแอปอื่นๆ)"
+                      aria-label="ช่องทางแชร์เพิ่มเติม"
                     >
                       <Share2 size={15} className="text-blue" />
                     </button>
@@ -1053,6 +1108,37 @@ export default function SingleTournamentView({
               ✕
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Floating Toast Notification when Link Copied */}
+      {copiedLink && (
+        <div 
+          style={{
+            position: 'fixed',
+            bottom: '28px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'rgba(15, 23, 42, 0.94)',
+            color: '#ffffff',
+            padding: '12px 22px',
+            borderRadius: '999px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            boxShadow: '0 12px 30px rgba(0, 0, 0, 0.28)',
+            zIndex: 9999,
+            fontSize: '0.88rem',
+            fontWeight: 650,
+            backdropFilter: 'blur(8px)',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            pointerEvents: 'none'
+          }}
+        >
+          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '50%', background: '#10b981', color: '#fff' }}>
+            <Check size={14} />
+          </span>
+          <span>คัดลอกลิงก์สำเร็จแล้ว พร้อมส่งต่อได้ทันที ✓</span>
         </div>
       )}
     </div>

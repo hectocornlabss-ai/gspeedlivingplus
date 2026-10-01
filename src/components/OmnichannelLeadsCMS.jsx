@@ -377,7 +377,7 @@ export default function OmnichannelLeadsCMS() {
             </div>
             <div className="channel-pill active">
               <span className="channel-dot green"></span>
-              <strong>Facebook:</strong> gspeedesport
+              <strong>Facebook:</strong> GLP.Gspeedlivingplus
               <span className="channel-sub">Messenger Active</span>
             </div>
             <div className="channel-pill active">

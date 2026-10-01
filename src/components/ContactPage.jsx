@@ -148,7 +148,7 @@ export default function ContactPage({ onNavigateHome, onNavigateFranchise }) {
       encryption: 'SSL/TLS',
       senderName: 'GLP : G-Speed Living Plus Support Team',
       senderEmail: 'gspeedlivingplus35@gmail.com',
-      adminCcEmail: 'investment@gspeed-esport.com, engineering@gspeed-esport.com',
+      adminCcEmail: 'gspeedlivingplus35@gmail.com',
       autoReplyEnabled: true
     };
 
@@ -220,7 +220,7 @@ export default function ContactPage({ onNavigateHome, onNavigateFranchise }) {
           sentAt: nowIso,
           status: 'Delivered (Hostinger SMTP 250 OK)',
           smtpServer: `${smtpConfig.host || 'smtp.hostinger.com'}:${smtpConfig.port || '465'}`,
-          sender: `${smtpConfig.senderName || 'GLP Alert System'} <${smtpConfig.senderEmail || 'contact@gspeedlivingplus.com'}>`,
+          sender: `${smtpConfig.senderName || 'GLP Alert System'} <${smtpConfig.senderEmail || 'gspeedlivingplus35@gmail.com'}>`,
           details: {
             type: 'staff_contact_notification',
             inquiryRef,

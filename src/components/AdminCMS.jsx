@@ -624,6 +624,8 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
     addNavLink,
     deleteNavLink,
     saveSiteData,
+    serverSyncStatus,
+    syncWithServerDatabase,
     resetToDefaults,
     setSiteData,
     addMediaItem,
@@ -692,7 +694,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
         sentAt: nowIso,
         status: 'Delivered (Hostinger SMTP 250 OK)',
         smtpServer: `${siteData.smtpConfig?.host || 'smtp.hostinger.com'}:${siteData.smtpConfig?.port || '465'}`,
-        sender: `${siteData.smtpConfig?.senderName || 'GLP Alert System'} <${siteData.smtpConfig?.senderEmail || 'contact@gspeedlivingplus.com'}>`,
+        sender: `${siteData.smtpConfig?.senderName || 'GLP Alert System'} <${siteData.smtpConfig?.senderEmail || 'gspeedlivingplus35@gmail.com'}>`,
         details: {
           type: 'staff_test_broadcast',
           role: staff.role,
@@ -779,7 +781,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
   const handleSendTestEmail = async () => {
     setIsSendingTestEmail(true);
     setTestEmailSuccess(null);
-    const targetEmail = siteData.footer?.email || 'contact@gspeedlivingplus.com';
+    const targetEmail = siteData.footer?.email || 'gspeedlivingplus35@gmail.com';
     const activeTpl = siteData.emailTemplates?.[activeEmailTemplateKey] || {};
 
     const testEmailRecord = {
@@ -991,6 +993,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
         if (window.confirm('คุณต้องการกู้คืนข้อมูลระบบทั้งหมดจากไฟล์สำรองนี้ใช่หรือไม่?\n(ข้อมูลปัจจุบันจะถูกเขียนทับด้วยข้อมูลในไฟล์)')) {
           setSiteData(parsed);
           try {
+            localStorage.setItem('gspeed_site_cms_data_v2', JSON.stringify(parsed));
             localStorage.setItem('glp_site_data', JSON.stringify(parsed));
           } catch (err) {
             console.warn('localStorage error:', err);
@@ -1490,16 +1493,19 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
     setTimeout(() => setShowSavedToast(false), 2600);
   };
 
-  const handleManualSave = () => {
+  const handleManualSave = async () => {
     setIsSaving(true);
-    const result = saveSiteData();
-    setTimeout(() => {
+    try {
+      const result = await saveSiteData();
       setIsSaving(false);
       if (result?.success) {
         setLastSavedTime(result.timestamp || new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }));
         triggerSaveToast();
       }
-    }, 400);
+    } catch (err) {
+      setIsSaving(false);
+      console.error('Save error:', err);
+    }
   };
 
   // WebP Image Compression State & Handler
@@ -2478,10 +2484,21 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
             </div>
           )}
 
+          {/* Server Database Sync Status Pill */}
+          <div 
+            className={`admin-server-sync-pill ${serverSyncStatus?.synced ? 'synced' : 'pending'}`}
+            title={serverSyncStatus?.synced 
+              ? `ฐานข้อมูล Server ปลอดภัย: บันทึกล่าสุด ${serverSyncStatus.lastSynced} น. (Docker Volume Persistent)` 
+              : 'ฐานข้อมูล Persistent Server พร้อมเชื่อมต่อ'}
+          >
+            <Database size={13} className={serverSyncStatus?.saving ? 'spin-icon' : ''} />
+            <span>{serverSyncStatus?.saving ? 'กำลังซิงค์เซิร์ฟเวอร์...' : (serverSyncStatus?.synced ? `Server Saved (${serverSyncStatus.lastSynced})` : 'Server Database')}</span>
+          </div>
+
           {showSavedToast && (
             <div className="toast-saved-pill">
               <CheckCircle2 size={14} />
-              <span>บันทึกข้อมูลเรียบร้อยแล้ว</span>
+              <span>บันทึกข้อมูลและรูปภาพลงฐานข้อมูล Server แล้ว (ปลอดภัยข้ามการ Deploy 100%) ✓</span>
             </div>
           )}
 
@@ -2931,6 +2948,9 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                           <td>
                             <strong className="catalog-item-title">{item.name}</strong>
                             <div className="catalog-meta-row">
+                              <span className="sub-type-tag" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#2563eb', border: '1px solid rgba(59, 130, 246, 0.25)', fontWeight: 600 }}>
+                                {item.sku || ('GLP-' + (item.type || '').toUpperCase())}
+                              </span>
                               <span className="sub-type-tag">{item.type}</span>
                               <span className={`grade-tag-pill ${item.grade || 'pro'}`}>
                                 {(item.grade || 'pro').toUpperCase()}
@@ -2944,11 +2964,18 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                             <div className="dims-text">
                               {item.widthMeters} x {item.depth3D || item.heightMeters} x {item.height3D || 1.25} ม.
                             </div>
-                            {item.seats > 0 && (
-                              <span className="text-muted text-xs">
-                                ({item.seats} ที่นั่ง)
-                              </span>
-                            )}
+                            <div style={{ display: 'flex', gap: '6px', marginTop: '3px', alignItems: 'center' }}>
+                              {item.seats > 0 && (
+                                <span className="text-muted text-xs">
+                                  ({item.seats} ที่นั่ง)
+                                </span>
+                              )}
+                              {item.weightKg > 0 && (
+                                <span className="text-muted text-xs" title="น้ำหนักสินค้าสุทธิ">
+                                  • {item.weightKg} กก.
+                                </span>
+                              )}
+                            </div>
                           </td>
                           <td>
                             <div className="color-swatches-cluster" title={`สีโต๊ะ: ${item.deskColor || item.color || '#0f172a'}, ไฟ LED: ${item.accentColor || '#1d4ed8'}, เก้าอี้: ${item.chairColor || '#0f172a'}`}>
@@ -6095,47 +6122,184 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                     />
                   </div>
 
-                  <div className="form-group" style={{ marginBottom: '18px' }}>
-                    <label style={{ fontWeight: 800, fontSize: '0.96rem', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <Layers size={16} className="text-blue" />
-                      <span>ปุ่มทางลัดทั้ง 4 ปุ่มใต้ Hero (Hero Quick Action Buttons - 2 คอลัมน์)</span>
-                    </label>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
-                      <div className="form-group" style={{ margin: 0 }}>
-                        <label style={{ fontSize: '0.82rem', fontWeight: 600 }}>ปุ่มที่ 1 (จัดงานแข่งอีสปอร์ต):</label>
-                        <input 
-                          type="text" className="form-input"
-                          placeholder="สนใจจัดงาน"
-                          value={siteData.hero?.btn1Text || siteData.hero?.organizeCtaText || 'สนใจจัดงาน'}
-                          onChange={e => updateHero({ btn1Text: e.target.value, organizeCtaText: e.target.value })}
-                        />
+                  <div className="form-group" style={{ marginBottom: '22px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
+                      <label style={{ fontWeight: 800, fontSize: '0.96rem', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Layers size={16} className="text-blue" />
+                        <span>ปุ่มทางลัดทั้ง 4 ปุ่มใต้ Hero (Hero Quick Action Buttons - 2 คอลัมน์)</span>
+                      </label>
+                      <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                        กำหนดข้อความ ลิงก์ปลายทาง และการเปิดหน้าต่างได้อิสระ
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '14px' }}>
+                      {/* ปุ่มที่ 1 */}
+                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <label style={{ fontSize: '0.86rem', fontWeight: 700, color: '#1e293b', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', borderRadius: '50%', background: '#2563eb', color: '#fff', fontSize: '0.72rem', fontWeight: 800 }}>1</span>
+                            ปุ่มที่ 1 (จัดงานแข่งอีสปอร์ต)
+                          </label>
+                          <span style={{ fontSize: '0.72rem', color: '#2563eb', background: '#eff6ff', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>ปุ่มหลักสีน้ำเงิน</span>
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 600, marginBottom: '4px', display: 'block' }}>ข้อความบนปุ่ม:</label>
+                          <input 
+                            type="text" className="form-input"
+                            placeholder="สนใจจัดงาน"
+                            value={siteData.hero?.btn1Text !== undefined ? siteData.hero.btn1Text : (siteData.hero?.organizeCtaText || 'สนใจจัดงาน')}
+                            onChange={e => updateHero({ btn1Text: e.target.value, organizeCtaText: e.target.value })}
+                          />
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 140px', gap: '8px' }}>
+                          <div>
+                            <label style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 600, marginBottom: '4px', display: 'block' }}>ลิงก์ปลายทาง (URL หรือ Path):</label>
+                            <input 
+                              type="text" className="form-input"
+                              placeholder="เว้นว่าง = เปิดป๊อปอัปจัดงาน หรือใส่ URL / Path"
+                              value={siteData.hero?.btn1Link || ''}
+                              onChange={e => updateHero({ btn1Link: e.target.value })}
+                            />
+                          </div>
+                          <div>
+                            <label style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 600, marginBottom: '4px', display: 'block' }}>การเปิดหน้าต่าง:</label>
+                            <select 
+                              className="form-input"
+                              value={siteData.hero?.btn1Target || '_self'}
+                              onChange={e => updateHero({ btn1Target: e.target.value })}
+                            >
+                              <option value="_self">หน้าต่างเดิม (_self)</option>
+                              <option value="_blank">หน้าต่างใหม่ (_blank) ↗</option>
+                            </select>
+                          </div>
+                        </div>
                       </div>
-                      <div className="form-group" style={{ margin: 0 }}>
-                        <label style={{ fontSize: '0.82rem', fontWeight: 600 }}>ปุ่มที่ 2 (ดูกิจกรรม & ข่าวสาร):</label>
-                        <input 
-                          type="text" className="form-input"
-                          placeholder="ดูกิจกรรม"
-                          value={siteData.hero?.btn2Text || siteData.hero?.primaryCta || 'ดูกิจกรรม'}
-                          onChange={e => updateHero({ btn2Text: e.target.value, primaryCta: e.target.value })}
-                        />
+
+                      {/* ปุ่มที่ 2 */}
+                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <label style={{ fontSize: '0.86rem', fontWeight: 700, color: '#1e293b', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', borderRadius: '50%', background: '#0284c7', color: '#fff', fontSize: '0.72rem', fontWeight: 800 }}>2</span>
+                            ปุ่มที่ 2 (ดูกิจกรรม & ข่าวสาร)
+                          </label>
+                          <span style={{ fontSize: '0.72rem', color: '#0284c7', background: '#f0f9ff', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>ปุ่มรองสไตล์กลาส</span>
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 600, marginBottom: '4px', display: 'block' }}>ข้อความบนปุ่ม:</label>
+                          <input 
+                            type="text" className="form-input"
+                            placeholder="สำรวจกิจกรรม & ทัวร์นาเมนต์"
+                            value={siteData.hero?.btn2Text !== undefined ? siteData.hero.btn2Text : (siteData.hero?.primaryCta || 'สำรวจกิจกรรม & ทัวร์นาเมนต์')}
+                            onChange={e => updateHero({ btn2Text: e.target.value, primaryCta: e.target.value })}
+                          />
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 140px', gap: '8px' }}>
+                          <div>
+                            <label style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 600, marginBottom: '4px', display: 'block' }}>ลิงก์ปลายทาง (URL หรือ Path):</label>
+                            <input 
+                              type="text" className="form-input"
+                              placeholder="/activities หรือใส่ URL ภายนอก"
+                              value={siteData.hero?.btn2Link !== undefined ? siteData.hero.btn2Link : '/activities'}
+                              onChange={e => updateHero({ btn2Link: e.target.value })}
+                            />
+                          </div>
+                          <div>
+                            <label style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 600, marginBottom: '4px', display: 'block' }}>การเปิดหน้าต่าง:</label>
+                            <select 
+                              className="form-input"
+                              value={siteData.hero?.btn2Target || '_self'}
+                              onChange={e => updateHero({ btn2Target: e.target.value })}
+                            >
+                              <option value="_self">หน้าต่างเดิม (_self)</option>
+                              <option value="_blank">หน้าต่างใหม่ (_blank) ↗</option>
+                            </select>
+                          </div>
+                        </div>
                       </div>
-                      <div className="form-group" style={{ margin: 0 }}>
-                        <label style={{ fontSize: '0.82rem', fontWeight: 600 }}>ปุ่มที่ 3 (ทัวร์นาเมนต์ & ปฏิทิน):</label>
-                        <input 
-                          type="text" className="form-input"
-                          placeholder="ทัวร์นาเมนต์"
-                          value={siteData.hero?.btn3Text || siteData.hero?.secondaryCtaText || 'ทัวร์นาเมนต์'}
-                          onChange={e => updateHero({ btn3Text: e.target.value, secondaryCtaText: e.target.value })}
-                        />
+
+                      {/* ปุ่มที่ 3 */}
+                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <label style={{ fontSize: '0.86rem', fontWeight: 700, color: '#1e293b', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', borderRadius: '50%', background: '#d97706', color: '#fff', fontSize: '0.72rem', fontWeight: 800 }}>3</span>
+                            ปุ่มที่ 3 (ทัวร์นาเมนต์ & ปฏิทิน)
+                          </label>
+                          <span style={{ fontSize: '0.72rem', color: '#d97706', background: '#fffbeb', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>ปุ่มรองสไตล์กลาส</span>
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 600, marginBottom: '4px', display: 'block' }}>ข้อความบนปุ่ม:</label>
+                          <input 
+                            type="text" className="form-input"
+                            placeholder="ทัวร์นาเมนต์"
+                            value={siteData.hero?.btn3Text !== undefined ? siteData.hero.btn3Text : (siteData.hero?.secondaryCtaText || 'ทัวร์นาเมนต์')}
+                            onChange={e => updateHero({ btn3Text: e.target.value, secondaryCtaText: e.target.value })}
+                          />
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 140px', gap: '8px' }}>
+                          <div>
+                            <label style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 600, marginBottom: '4px', display: 'block' }}>ลิงก์ปลายทาง (URL หรือ Path):</label>
+                            <input 
+                              type="text" className="form-input"
+                              placeholder="/tournaments หรือใส่ URL ภายนอก"
+                              value={siteData.hero?.btn3Link !== undefined ? siteData.hero.btn3Link : '/tournaments'}
+                              onChange={e => updateHero({ btn3Link: e.target.value })}
+                            />
+                          </div>
+                          <div>
+                            <label style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 600, marginBottom: '4px', display: 'block' }}>การเปิดหน้าต่าง:</label>
+                            <select 
+                              className="form-input"
+                              value={siteData.hero?.btn3Target || '_self'}
+                              onChange={e => updateHero({ btn3Target: e.target.value })}
+                            >
+                              <option value="_self">หน้าต่างเดิม (_self)</option>
+                              <option value="_blank">หน้าต่างใหม่ (_blank) ↗</option>
+                            </select>
+                          </div>
+                        </div>
                       </div>
-                      <div className="form-group" style={{ margin: 0 }}>
-                        <label style={{ fontSize: '0.82rem', fontWeight: 600 }}>ปุ่มที่ 4 (ติดต่อเปิดร้านเกมแฟรนไชส์):</label>
-                        <input 
-                          type="text" className="form-input"
-                          placeholder="ติดต่อเปิดร้านเกม"
-                          value={siteData.hero?.btn4Text || siteData.hero?.secondaryCta || 'ติดต่อเปิดร้านเกม'}
-                          onChange={e => updateHero({ btn4Text: e.target.value, secondaryCta: e.target.value })}
-                        />
+
+                      {/* ปุ่มที่ 4 */}
+                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <label style={{ fontSize: '0.86rem', fontWeight: 700, color: '#1e293b', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', borderRadius: '50%', background: '#475569', color: '#fff', fontSize: '0.72rem', fontWeight: 800 }}>4</span>
+                            ปุ่มที่ 4 (ติดต่อเปิดร้านเกมแฟรนไชส์)
+                          </label>
+                          <span style={{ fontSize: '0.72rem', color: '#475569', background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>ปุ่มรองสไตล์กลาส</span>
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 600, marginBottom: '4px', display: 'block' }}>ข้อความบนปุ่ม:</label>
+                          <input 
+                            type="text" className="form-input"
+                            placeholder="ติดต่อเปิดร้านเกมของคุณ"
+                            value={siteData.hero?.btn4Text !== undefined ? siteData.hero.btn4Text : (siteData.hero?.secondaryCta || 'ติดต่อเปิดร้านเกมของคุณ')}
+                            onChange={e => updateHero({ btn4Text: e.target.value, secondaryCta: e.target.value })}
+                          />
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 140px', gap: '8px' }}>
+                          <div>
+                            <label style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 600, marginBottom: '4px', display: 'block' }}>ลิงก์ปลายทาง (URL หรือ Path):</label>
+                            <input 
+                              type="text" className="form-input"
+                              placeholder="/franchise หรือใส่ URL ภายนอก"
+                              value={siteData.hero?.btn4Link !== undefined ? siteData.hero.btn4Link : '/franchise'}
+                              onChange={e => updateHero({ btn4Link: e.target.value })}
+                            />
+                          </div>
+                          <div>
+                            <label style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 600, marginBottom: '4px', display: 'block' }}>การเปิดหน้าต่าง:</label>
+                            <select 
+                              className="form-input"
+                              value={siteData.hero?.btn4Target || '_self'}
+                              onChange={e => updateHero({ btn4Target: e.target.value })}
+                            >
+                              <option value="_self">หน้าต่างเดิม (_self)</option>
+                              <option value="_blank">หน้าต่างใหม่ (_blank) ↗</option>
+                            </select>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -12690,8 +12854,8 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                           port: '465',
                           encryption: 'SSL/TLS',
                           senderName: 'GLP : G-Speed Living Plus',
-                          senderEmail: siteData.smtpConfig?.senderEmail || 'contact@gspeedlivingplus.com',
-                          user: siteData.smtpConfig?.user || 'contact@gspeedlivingplus.com'
+                          senderEmail: siteData.smtpConfig?.senderEmail || 'gspeedlivingplus35@gmail.com',
+                          user: siteData.smtpConfig?.user || 'gspeedlivingplus35@gmail.com'
                         });
                         triggerSaveToast();
                       }}
@@ -12810,7 +12974,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                     <input 
                       type="text" 
                       className="form-input"
-                      placeholder="contact@gspeedlivingplus.com"
+                      placeholder="gspeedlivingplus35@gmail.com"
                       value={siteData.smtpConfig?.user || ''}
                       onChange={e => updateSmtpConfig({ user: e.target.value })}
                     />
@@ -12856,7 +13020,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                     <input 
                       type="email" 
                       className="form-input"
-                      placeholder="contact@gspeedlivingplus.com"
+                      placeholder="gspeedlivingplus35@gmail.com"
                       value={siteData.smtpConfig?.senderEmail || ''}
                       onChange={e => updateSmtpConfig({ senderEmail: e.target.value })}
                     />
@@ -12931,11 +13095,11 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                   {/* 5 Staff Email Slots */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
                     {(siteData.smtpConfig?.staffAlertEmails || [
-                      { id: 1, email: 'management@gspeedlivingplus.com', role: 'ผู้บริหาร / เจ้าของร้าน (Owner/Executive)', active: true },
-                      { id: 2, email: 'sales@gspeedlivingplus.com', role: 'ฝ่ายขาย & ที่ปรึกษาแฟรนไชส์ (Sales & Franchise)', active: true },
-                      { id: 3, email: 'engineering@gspeedlivingplus.com', role: 'ทีมวิศวกร & เทคนิค 3D (Engineering)', active: true },
-                      { id: 4, email: 'support@gspeedlivingplus.com', role: 'ฝ่ายบริการลูกค้า & นัดหมาย (Customer Support)', active: true },
-                      { id: 5, email: 'manager@gspeedlivingplus.com', role: 'ผู้จัดการสาขารามคำแหง (Store Manager)', active: true }
+                      { id: 1, email: 'gspeedlivingplus35@gmail.com', role: 'ผู้บริหาร / เจ้าของร้าน (Owner/Executive)', active: true },
+                      { id: 2, email: '', role: 'ฝ่ายขาย & ที่ปรึกษาแฟรนไชส์ (Sales & Franchise)', active: false },
+                      { id: 3, email: '', role: 'ทีมวิศวกร & เทคนิค 3D (Engineering)', active: false },
+                      { id: 4, email: '', role: 'ฝ่ายบริการลูกค้า & นัดหมาย (Customer Support)', active: false },
+                      { id: 5, email: '', role: 'ผู้จัดการสาขารามคำแหง (Store Manager)', active: false }
                     ]).map((staff, sIdx) => (
                       <div 
                         key={staff.id || sIdx} 
@@ -12974,7 +13138,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                             type="email" 
                             className="form-input" 
                             style={{ height: '34px', fontSize: '0.82rem', background: '#fff' }} 
-                            placeholder="staff@gspeedlivingplus.com"
+                            placeholder="gspeedlivingplus35@gmail.com"
                             value={staff.email || ''}
                             onChange={e => {
                               if (typeof updateStaffAlertEmail === 'function') {
@@ -13052,7 +13216,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                       <span className="status-pill status-pill-success">{smtpTestResult.latency}</span>
                     </div>
                     <div style={{ marginTop: '6px', fontSize: '0.76rem', color: '#475569' }}>
-                      Host: <code>{siteData.smtpConfig?.host || 'smtp.hostinger.com'}:{siteData.smtpConfig?.port || '465'}</code> | Protocol: <code>{siteData.smtpConfig?.encryption || 'SSL/TLS'}</code> | User: <code>{siteData.smtpConfig?.user || 'contact@gspeedlivingplus.com'}</code>
+                      Host: <code>{siteData.smtpConfig?.host || 'smtp.hostinger.com'}:{siteData.smtpConfig?.port || '465'}</code> | Protocol: <code>{siteData.smtpConfig?.encryption || 'SSL/TLS'}</code> | User: <code>{siteData.smtpConfig?.user || 'gspeedlivingplus35@gmail.com'}</code>
                     </div>
                   </div>
                 )}
@@ -13304,9 +13468,9 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
 
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.78rem', color: '#64748b' }}>
                         <div>
-                          <div><strong>From:</strong> {siteData.smtpConfig?.senderName || 'GLP : G-Speed Living Plus'} &lt;{siteData.smtpConfig?.senderEmail || 'franchise@gspeed-esport.com'}&gt;</div>
+                          <div><strong>From:</strong> {siteData.smtpConfig?.senderName || 'GLP : G-Speed Living Plus'} &lt;{siteData.smtpConfig?.senderEmail || 'gspeedlivingplus35@gmail.com'}&gt;</div>
                           <div style={{ marginTop: '2px' }}>
-                            <strong>To:</strong> {activeEmailTemplateKey === 'franchiseAutoReply' ? 'คุณสมเกียรติ มั่นคง <investor@example.com>' : (siteData.smtpConfig?.adminCcEmail || 'engineering@gspeed-esport.com')}
+                            <strong>To:</strong> {activeEmailTemplateKey === 'franchiseAutoReply' ? 'คุณสมเกียรติ มั่นคง <investor@example.com>' : (siteData.smtpConfig?.adminCcEmail || 'gspeedlivingplus35@gmail.com')}
                           </div>
                         </div>
                         <div style={{ textAlign: 'right' }}>
@@ -13359,7 +13523,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                         <div style={{ marginTop: '24px', paddingTop: '14px', borderTop: '1px solid #e2e8f0', fontSize: '0.72rem', color: '#94a3b8', lineHeight: '1.6' }}>
                           <strong>บริษัท จี-สปีด ลิฟวิ่ง พลัส จำกัด (GLP : G Speed Living Plus)</strong><br />
                           {siteData.footer?.address || '79 ซ. รามคำแหง 53 แขวงพลับพลา เขตวังทองหลาง กรุงเทพฯ 10310'}<br />
-                          โทรศัพท์: {siteData.footer?.phone || '063 793 7704'} | อีเมล: {siteData.footer?.email || 'contact@gspeedarena.com'}
+                          โทรศัพท์: {siteData.footer?.phone || '063-793-7704'} | อีเมล: {siteData.footer?.email || 'gspeedlivingplus35@gmail.com'}
                         </div>
                       </div>
                     </div>

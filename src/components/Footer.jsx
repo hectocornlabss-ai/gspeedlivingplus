@@ -52,7 +52,11 @@ export default function Footer({ setActiveTab, onNavigate }) {
           <div className="footer-col brand-col">
             <div className="footer-logo" onClick={() => handleLink('/')} style={{ cursor: 'pointer' }}>
               <div className="logo-icon-box small">
-                <span className="logo-letter">G</span>
+                <img 
+                  src="/glp-logo-badge.png" 
+                  alt="GLP Esports" 
+                  className="brand-logo-img" 
+                />
               </div>
               <span className="footer-brand-title">{footer.companyName || 'GLP : G Speed Living Plus'}</span>
             </div>
@@ -70,7 +74,7 @@ export default function Footer({ setActiveTab, onNavigate }) {
               <div className="footer-social-row">
                 {/* 1. Facebook */}
                 <a 
-                  href={footer.socialLinks?.facebook || 'https://www.facebook.com/GLP.Gspeedlivingplus'} 
+                  href={(footer.socialLinks?.facebook && !footer.socialLinks.facebook.includes('gspeedesport')) ? footer.socialLinks.facebook : 'https://www.facebook.com/GLP.Gspeedlivingplus'} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="footer-social-circle fb"

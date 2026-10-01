@@ -1,5 +1,7 @@
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
+import fs from 'fs'
+import path from 'path'
 
 // Middleware to force Content-Disposition attachment header for rock-solid file downloads in Chrome
 const downloadServerPlugin = () => {
@@ -99,6 +101,98 @@ const downloadServerPlugin = () => {
           res.end();
         }
       });
+      // Persistent Local Site Data Middleware for development
+      server.middlewares.use('/api/site-data', (req, res, next) => {
+        const localDataDir = path.resolve(process.cwd(), 'server', 'data');
+        const localBackupsDir = path.join(localDataDir, 'backups');
+        const localDataFile = path.join(localDataDir, 'site-data.json');
+
+        if (!fs.existsSync(localDataDir)) fs.mkdirSync(localDataDir, { recursive: true });
+        if (!fs.existsSync(localBackupsDir)) fs.mkdirSync(localBackupsDir, { recursive: true });
+
+        const urlPath = req.url ? req.url.split('?')[0] : '';
+
+        if (urlPath === '/backups' && req.method === 'GET') {
+          try {
+            const files = fs.readdirSync(localBackupsDir)
+              .filter(f => f.startsWith('site-data-') && f.endsWith('.json'))
+              .map(f => {
+                const s = fs.statSync(path.join(localBackupsDir, f));
+                return { filename: f, sizeBytes: s.size, mtime: s.mtime };
+              })
+              .sort((a, b) => new Date(b.mtime) - new Date(a.mtime));
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ success: true, backups: files }));
+          } catch (e) {
+            res.statusCode = 500;
+            res.end(JSON.stringify({ success: false, error: e.message }));
+          }
+          return;
+        }
+
+        if (req.method === 'GET') {
+          if (!fs.existsSync(localDataFile)) {
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ success: true, siteData: null }));
+            return;
+          }
+          try {
+            const content = fs.readFileSync(localDataFile, 'utf8');
+            const stats = fs.statSync(localDataFile);
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({
+              success: true,
+              siteData: JSON.parse(content),
+              updatedAt: stats.mtime,
+              sizeBytes: stats.size
+            }));
+          } catch (e) {
+            res.statusCode = 500;
+            res.end(JSON.stringify({ success: false, error: e.message }));
+          }
+          return;
+        }
+
+        if (req.method === 'POST') {
+          let body = '';
+          req.on('data', chunk => { body += chunk; });
+          req.on('end', () => {
+            try {
+              const parsed = JSON.parse(body);
+              if (!parsed.siteData) {
+                res.statusCode = 400;
+                res.end(JSON.stringify({ success: false, error: 'siteData is required' }));
+                return;
+              }
+
+              if (fs.existsSync(localDataFile)) {
+                try {
+                  fs.copyFileSync(localDataFile, path.join(localBackupsDir, `site-data-${Date.now()}.json`));
+                } catch (bErr) {}
+              }
+
+              const tmpFile = `${localDataFile}.tmp.${Date.now()}`;
+              fs.writeFileSync(tmpFile, JSON.stringify(parsed.siteData, null, 2), 'utf8');
+              fs.renameSync(tmpFile, localDataFile);
+
+              const stats = fs.statSync(localDataFile);
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({
+                success: true,
+                message: 'บันทึกข้อมูล CMS ลงไฟล์ฐานข้อมูล Local สำเร็จ',
+                updatedAt: stats.mtime,
+                sizeBytes: stats.size
+              }));
+            } catch (e) {
+              res.statusCode = 500;
+              res.end(JSON.stringify({ success: false, error: e.message }));
+            }
+          });
+          return;
+        }
+
+        next();
+      });
     }
   };
 };
@@ -110,6 +204,7 @@ export default defineConfig({
     port: 5899,
     host: true,
     proxy: {
+      '/api/site-data': 'http://localhost:3001',
       '/api/send-email': 'http://localhost:3001',
       '/api/test-smtp': 'http://localhost:3001',
       '/api/contact-inquiry': 'http://localhost:3001',

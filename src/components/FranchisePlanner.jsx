@@ -915,7 +915,7 @@ export default function FranchisePlanner() {
         sentAt: nowIso,
         status: 'Delivered (Hostinger SMTP 250 OK)',
         smtpServer: `${siteData?.smtpConfig?.host || 'smtp.hostinger.com'}:${siteData?.smtpConfig?.port || '465'}`,
-        sender: `${siteData?.smtpConfig?.senderName || 'GLP : G-Speed Living Plus'} <${siteData?.smtpConfig?.senderEmail || 'contact@gspeedlivingplus.com'}>`,
+        sender: `${siteData?.smtpConfig?.senderName || 'GLP : G-Speed Living Plus'} <${siteData?.smtpConfig?.senderEmail || 'gspeedlivingplus35@gmail.com'}>`,
         details: {
           stations: totalStations,
           budget: leadForm.budget || `฿${totalInvestmentCost.toLocaleString()} บาท`,
@@ -932,7 +932,7 @@ export default function FranchisePlanner() {
     
     const recipientStaff = activeStaffList.length > 0
       ? activeStaffList
-      : [{ id: 1, email: siteData?.smtpConfig?.adminCcEmail || siteData?.smtpConfig?.senderEmail || 'contact@gspeedlivingplus.com', role: 'ทีมงาน GLP' }];
+      : [{ id: 1, email: siteData?.smtpConfig?.adminCcEmail || siteData?.smtpConfig?.senderEmail || 'gspeedlivingplus35@gmail.com', role: 'ทีมงาน GLP' }];
 
     recipientStaff.forEach((staff, sIdx) => {
       newOutboxRecords.push({
@@ -945,7 +945,7 @@ export default function FranchisePlanner() {
         sentAt: nowIso,
         status: 'Delivered (Hostinger SMTP 250 OK)',
         smtpServer: `${siteData?.smtpConfig?.host || 'smtp.hostinger.com'}:${siteData?.smtpConfig?.port || '465'}`,
-        sender: `${siteData?.smtpConfig?.senderName || 'GLP Alert System'} <${siteData?.smtpConfig?.senderEmail || 'contact@gspeedlivingplus.com'}>`,
+        sender: `${siteData?.smtpConfig?.senderName || 'GLP Alert System'} <${siteData?.smtpConfig?.senderEmail || 'gspeedlivingplus35@gmail.com'}>`,
         details: {
           type: 'franchise_lead_staff_alert',
           stations: totalStations,

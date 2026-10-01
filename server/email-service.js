@@ -2,11 +2,30 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import nodemailer from 'nodemailer';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Persistent CMS Data Directory (mounted to Docker volume on production)
+const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
+const BACKUP_DIR = path.join(DATA_DIR, 'backups');
+const SITE_DATA_FILE = path.join(DATA_DIR, 'site-data.json');
+
+// Ensure database directories exist
+try {
+  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+  if (!fs.existsSync(BACKUP_DIR)) fs.mkdirSync(BACKUP_DIR, { recursive: true });
+} catch (dirErr) {
+  console.warn('[Database] Directory init warning:', dirErr.message);
+}
 
 // Middleware
 app.use(cors({
@@ -14,16 +33,21 @@ app.use(cors({
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Simple in-memory rate limiter (max 20 requests per IP per minute)
+// Simple in-memory rate limiter (exempts /api/site-data and /health)
 const rateLimitMap = new Map();
 const rateLimitMiddleware = (req, res, next) => {
+  // Never rate-limit database queries or health checks
+  if (req.path.startsWith('/api/site-data') || req.path === '/health' || req.method === 'GET') {
+    return next();
+  }
+
   const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
   const now = Date.now();
   const windowMs = 60 * 1000;
-  const maxRequests = 20;
+  const maxRequests = 30;
 
   const clientData = rateLimitMap.get(ip) || { count: 0, resetTime: now + windowMs };
 
@@ -130,7 +154,7 @@ function wrapHtmlEmail({ title, preheader, contentHtml, footerExtra = '' }) {
     </div>
     <div class="footer">
       <p style="margin: 0 0 6px;"><strong>GLP : G Speed Living Plus</strong> (รามคำแหง 53 กรุงเทพฯ)</p>
-      <p style="margin: 0 0 6px;">โทร: <a href="tel:0818299882">081-829-9882</a> • อีเมล: <a href="mailto:contact@gspeedlivingplus.com">contact@gspeedlivingplus.com</a></p>
+      <p style="margin: 0 0 6px;">โทร: <a href="tel:0637937704">063-793-7704</a> • อีเมล: <a href="mailto:gspeedlivingplus35@gmail.com">gspeedlivingplus35@gmail.com</a></p>
       <p style="margin: 0; color: #94a3b8; font-size: 11px;">ระบบส่งข้อความอัตโนมัติผ่าน Hostinger SMTP Server ปลอดภัยตามมาตรฐาน SSL/TLS</p>
       ${footerExtra}
     </div>
@@ -220,7 +244,7 @@ app.post('/api/send-email', async (req, res) => {
     const { transporter, isConfigured, configInfo } = createTransporter(smtpConfig);
 
     const senderName = smtpConfig?.senderName || process.env.SMTP_FROM_NAME || 'GLP Support';
-    const senderEmail = smtpConfig?.senderEmail || configInfo.user || process.env.SMTP_FROM_EMAIL || 'contact@gspeedlivingplus.com';
+    const senderEmail = smtpConfig?.senderEmail || configInfo.user || process.env.SMTP_FROM_EMAIL || 'gspeedlivingplus35@gmail.com';
     const fromAddress = `"${senderName}" <${senderEmail}>`;
 
     // Simulation fallback if no credentials configured yet
@@ -291,7 +315,7 @@ app.post('/api/contact-inquiry', async (req, res) => {
 
     const { transporter, isConfigured, configInfo } = createTransporter(smtpConfig);
     const senderName = smtpConfig?.senderName || 'GLP Support Team';
-    const senderEmail = smtpConfig?.senderEmail || configInfo.user || 'contact@gspeedlivingplus.com';
+    const senderEmail = smtpConfig?.senderEmail || configInfo.user || 'gspeedlivingplus35@gmail.com';
     const fromAddress = `"${senderName}" <${senderEmail}>`;
 
     let customerSent = false;
@@ -465,7 +489,7 @@ app.post('/api/franchise-quote', async (req, res) => {
 
     const { transporter, isConfigured, configInfo } = createTransporter(smtpConfig);
     const senderName = smtpConfig?.senderName || 'GLP Franchise Business Team';
-    const senderEmail = smtpConfig?.senderEmail || configInfo.user || 'contact@gspeedlivingplus.com';
+    const senderEmail = smtpConfig?.senderEmail || configInfo.user || 'gspeedlivingplus35@gmail.com';
     const fromAddress = `"${senderName}" <${senderEmail}>`;
 
     let customerSent = false;
@@ -742,6 +766,142 @@ app.get('/api/download-file', (req, res) => {
     return res.send(buffer);
   } catch (err) {
     return res.status(500).send('Error processing download: ' + err.message);
+  }
+});
+
+// ==============================================================================
+// 7. Persistent CMS Site Data Storage (Mounted Docker Volume Database)
+// ==============================================================================
+
+// Helper: Prune old backup files to keep only latest N files
+function pruneOldBackups(maxKeep = 10) {
+  try {
+    if (!fs.existsSync(BACKUP_DIR)) return;
+    const files = fs.readdirSync(BACKUP_DIR)
+      .filter(f => f.startsWith('site-data-') && f.endsWith('.json'))
+      .map(f => {
+        const fullPath = path.join(BACKUP_DIR, f);
+        const stats = fs.statSync(fullPath);
+        return { name: f, path: fullPath, mtime: stats.mtime.getTime() };
+      })
+      .sort((a, b) => b.mtime - a.mtime);
+
+    if (files.length > maxKeep) {
+      const toDelete = files.slice(maxKeep);
+      for (const item of toDelete) {
+        try {
+          fs.unlinkSync(item.path);
+          console.log(`[Database] Pruned old backup: ${item.name}`);
+        } catch (e) {
+          console.warn(`[Database] Failed to prune backup ${item.name}:`, e.message);
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('[Database] Prune error:', err.message);
+  }
+}
+
+// GET /api/site-data - Fetch current live persisted site data
+app.get('/api/site-data', (req, res) => {
+  try {
+    if (!fs.existsSync(SITE_DATA_FILE)) {
+      return res.json({
+        success: true,
+        siteData: null,
+        message: 'No server database file found yet. System will initialize on first save.'
+      });
+    }
+
+    const raw = fs.readFileSync(SITE_DATA_FILE, 'utf8');
+    const stats = fs.statSync(SITE_DATA_FILE);
+    const parsed = JSON.parse(raw);
+
+    return res.json({
+      success: true,
+      siteData: parsed,
+      updatedAt: stats.mtime,
+      sizeBytes: stats.size
+    });
+  } catch (err) {
+    console.error('[Database GET Error]:', err);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to read server database: ' + err.message
+    });
+  }
+});
+
+// POST /api/site-data - Persist site data with atomic file write and rolling backup
+app.post('/api/site-data', (req, res) => {
+  try {
+    const { siteData, author = 'admin' } = req.body || {};
+    if (!siteData || typeof siteData !== 'object') {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid siteData payload. Expected non-empty JSON object.'
+      });
+    }
+
+    const jsonString = JSON.stringify(siteData, null, 2);
+
+    // If previous database exists, save a rolling backup before overwriting
+    if (fs.existsSync(SITE_DATA_FILE)) {
+      try {
+        const backupFileName = `site-data-${Date.now()}.json`;
+        const backupFilePath = path.join(BACKUP_DIR, backupFileName);
+        fs.copyFileSync(SITE_DATA_FILE, backupFilePath);
+        pruneOldBackups(10);
+      } catch (bErr) {
+        console.warn('[Database] Backup warning:', bErr.message);
+      }
+    }
+
+    // Atomic write using temporary file to prevent corruption during writes
+    const tempFile = `${SITE_DATA_FILE}.tmp.${Date.now()}`;
+    fs.writeFileSync(tempFile, jsonString, 'utf8');
+    fs.renameSync(tempFile, SITE_DATA_FILE);
+
+    const stats = fs.statSync(SITE_DATA_FILE);
+    console.log(`[Database] Successfully saved site-data.json (${(stats.size / 1024).toFixed(1)} KB) by ${author}`);
+
+    return res.json({
+      success: true,
+      message: 'ข้อมูลและรูปภาพทั้งหมดถูกบันทึกลง Persistent Server Database เรียบร้อยแล้ว (ปลอดภัยข้ามการ Deploy 100%)',
+      updatedAt: stats.mtime,
+      sizeBytes: stats.size
+    });
+  } catch (err) {
+    console.error('[Database POST Error]:', err);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to write server database: ' + err.message
+    });
+  }
+});
+
+// GET /api/site-data/backups - List historical rolling backups
+app.get('/api/site-data/backups', (req, res) => {
+  try {
+    if (!fs.existsSync(BACKUP_DIR)) {
+      return res.json({ success: true, backups: [] });
+    }
+    const files = fs.readdirSync(BACKUP_DIR)
+      .filter(f => f.startsWith('site-data-') && f.endsWith('.json'))
+      .map(f => {
+        const fullPath = path.join(BACKUP_DIR, f);
+        const stats = fs.statSync(fullPath);
+        return {
+          filename: f,
+          sizeBytes: stats.size,
+          mtime: stats.mtime
+        };
+      })
+      .sort((a, b) => new Date(b.mtime) - new Date(a.mtime));
+
+    return res.json({ success: true, backups: files });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
   }
 });
 
