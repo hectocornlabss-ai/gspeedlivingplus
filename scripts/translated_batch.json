@@ -1,0 +1,3382 @@
+{
+  "กัปตันทีม": {
+    "en": "Team Captain",
+    "zh": "战队队长"
+  },
+  "(กัปตันทีม)": {
+    "en": "(Captain)",
+    "zh": "(队长)"
+  },
+  "SScary (กัปตันทีม)": {
+    "en": "SScary (Captain)",
+    "zh": "SScary (战队队长)"
+  },
+  "JohnOlsen (กัปตันทีม)": {
+    "en": "JohnOlsen (Captain)",
+    "zh": "JohnOlsen (战队队长)"
+  },
+  "Surf (กัปตันทีม)": {
+    "en": "Surf (Captain)",
+    "zh": "Surf (战队队长)"
+  },
+  "Kadoom (กัปตันทีม)": {
+    "en": "Kadoom (Captain)",
+    "zh": "Kadoom (战队队长)"
+  },
+  "SpeedyKnight (กัปตันทีม)": {
+    "en": "SpeedyKnight (Captain)",
+    "zh": "SpeedyKnight (战队队长)"
+  },
+  "ผู้เข้าแข่งขันทุกท่านต้องนำบัตรประชาชนหรือบัตรนักเรียน/นักศึกษามาแสดงตน ณ จุดลงทะเบียน": {
+    "en": "All competitors must present their National ID or Student ID card at the registration desk.",
+    "zh": "所有参赛选手必须在现场报到处出示身份证或学生证。"
+  },
+  "อนุญาตให้นำเมาส์ คีย์บอร์ด และหูฟังส่วนตัวมาใช้ได้ โดยต้องผ่านการตรวจจากเจ้าหน้าที่เทคนิคก่อนเริ่มแข่ง": {
+    "en": "Personal gaming gear (mouse, keyboard, headset) is permitted after inspection by technical staff.",
+    "zh": "允许使用个人电竞外设（鼠标、键盘、耳机），但须在赛前通过技术人员检验。"
+  },
+  "เครื่องคอมพิวเตอร์ที่ใช้แข่งขับเคลื่อนด้วย Intel Core i9 + NVIDIA GeForce RTX 4080 และจอ BenQ ZOWIE 360Hz": {
+    "en": "Tournament PCs powered by Intel Core i9 + NVIDIA GeForce RTX 4080 and BenQ ZOWIE 360Hz displays.",
+    "zh": "比赛用机配备 Intel Core i9 + NVIDIA GeForce RTX 4080 显卡与 BenQ ZOWIE 360Hz 电竞屏。"
+  },
+  "ห้ามใช้โปรแกรมโกง สคริปต์ช่วยเล่น หรือฉวยโอกาสจากข้อผิดพลาดของเกม (Bug Exploitation) หากตรวจพบปรับแพ้ทันที": {
+    "en": "Cheats, assistance scripts, or bug exploitation are strictly forbidden. Violators forfeit immediately.",
+    "zh": "严禁使用外挂、辅助脚本或利用游戏BUG，违者立即判负并取消资格。"
+  },
+  "คำตัดสินของหัวหน้าผู้ตัดสิน (Head Referee) ถือเป็นที่สิ้นสุดในทุกกรณี": {
+    "en": "The Head Referee decision is final and binding in all cases.",
+    "zh": "赛事主裁判的裁决为最终裁定，不接受申诉。"
+  },
+  "ลงทะเบียนหน้างาน & ตรวจสอบอุปกรณ์นักกีฬา (Player Check-in & Gear Check)": {
+    "en": "On-site Check-in & Player Gear Inspection",
+    "zh": "现场签到与选手外设检查 (Check-in & Gear Check)"
+  },
+  "รอบคัดเลือกแบ่งกลุ่ม Group Stage (Best of 1 - LAN Setup)": {
+    "en": "Group Stage Qualifiers (Best of 1 - LAN Setup)",
+    "zh": "小组循环资格赛 (BO1 局域网线下对战)"
+  },
+  "รอบ 8 ทีม และ 4 ทีมสุดท้าย (Quarter & Semi-Finals - Best of 3)": {
+    "en": "Quarter-Finals & Semi-Finals (Best of 3)",
+    "zh": "八强赛与半决赛 (BO3 三局两胜)"
+  },
+  "รอบชิงชนะเลิศ Grand Final บนเวที Main Stage (Best of 5 ถ่ายทอดสด)": {
+    "en": "Grand Final on Main Stage (Best of 5 Live Broadcast)",
+    "zh": "主舞台巅峰总决赛 (BO5 五局三胜高清直播)"
+  },
+  "32 ทีม (เหลือ 6 ทีมสุดท้าย)": {
+    "en": "32 Teams (Final 6 Slots Remaining)",
+    "zh": "32 支战队 (仅剩最后6个席位)"
+  },
+  "16:00 - 20:00 น.": {
+    "en": "16:00 - 20:00",
+    "zh": "16:00 - 20:00"
+  },
+  "11:00 - 20:00 น.": {
+    "en": "11:00 - 20:00",
+    "zh": "11:00 - 20:00"
+  },
+  "10:00 - 11:00 น.": {
+    "en": "10:00 - 11:00",
+    "zh": "10:00 - 11:00"
+  },
+  "11:15 - 14:00 น.": {
+    "en": "11:15 - 14:00",
+    "zh": "11:15 - 14:00"
+  },
+  "14:30 - 17:30 น.": {
+    "en": "14:30 - 17:30",
+    "zh": "14:30 - 17:30"
+  },
+  "18:00 - 20:30 น.": {
+    "en": "18:00 - 20:30",
+    "zh": "18:00 - 20:30"
+  },
+  "ดูตารางแข่ง": {
+    "en": "Match Schedule",
+    "zh": "查看赛程表"
+  },
+  "รายละเอียดงานแข่ง": {
+    "en": "Tournament Details",
+    "zh": "赛事详情"
+  },
+  "ฟีเจอร์ใหม่ 3D": {
+    "en": "New 3D Feature",
+    "zh": "全新3D功能"
+  },
+  "เปิดรับสมัคร GLP VALORANT CHAMPIONSHIP 2026 ชิง 100,000 บาท | ระบบจำลองผังร้าน 3D เปิดให้ทดลองใช้งานแล้ววันนี้!": {
+    "en": "Open Registration for GLP VALORANT CHAMPIONSHIP 2026 (100,000 THB Prize) | 3D Store Planner is now live!",
+    "zh": "GLP 无畏契约全国锦标赛 2026 火热报名中 (总奖金10万泰铢) | 3D门店布局系统现已正式上线！"
+  },
+  "ICAFE ATTACK LAN TOURNAMENT 2026 ระเบิดความมันส์ เสาร์-อาทิตย์นี้ ณ GLP Main Stage ลุ้นรับแรร์ไอเทมและเงินรางวัลสด": {
+    "en": "ICAFE ATTACK LAN TOURNAMENT 2026 this weekend at GLP Main Stage! Win rare items and cash prizes.",
+    "zh": "ICAFE ATTACK 线下电竞锦标赛 2026 本周末狂欢引爆！GLP 主舞台震撼开战，现场赢取稀有道具与现金大奖。"
+  },
+  "เปิดตัวแพ็กเกจแฟรนไชส์ GLP Living Plus 2026 พร้อมระบบจำลองผัง 3D คำนวณงบประมาณและผลตอบแทน ROI แบบเรียลไทม์": {
+    "en": "Launching GLP Living Plus 2026 Franchise Package with real-time 3D store simulator and ROI payback calculator.",
+    "zh": "GLP Living Plus 2026 电竞网咖加盟新模式重磅发布，搭载实时3D门店空间设计与投资回报率(ROI)预算系统。"
+  },
+  "เวทีแข่งขันหลัก 5v5 Soundproof Glass Booths": {
+    "en": "Main Tournament 5v5 Soundproof Glass Booths",
+    "zh": "主赛事 5v5 隔音玻璃对战舱"
+  },
+  "ห้องกระจกส่วนตัว 4K Broadcast Streamer Room": {
+    "en": "Private 4K Broadcast Streamer Room",
+    "zh": "独立隔音 4K 直播推流主播房"
+  },
+  "โซนหลักความจุกว่า 80 ที่นั่ง สเปกแข่ง 240Hz Fast-IPS": {
+    "en": "Main Arena 80+ Seats with 240Hz Fast-IPS Displays",
+    "zh": "主对战区 80+ 机位 240Hz Fast-IPS 竞技屏"
+  },
+  "โซน PS5 Pro จอยักษ์ 4K และซิมมูเลเตอร์พวงมาลัยแข่งรถ F1": {
+    "en": "PS5 Pro Zone with Giant 4K Display & F1 Racing Simulators",
+    "zh": "PS5 Pro 巨幕4K区与 F1 专业赛车力反馈模拟舱"
+  },
+  "โซนเครื่องเล่นเกมหลัก (Main Esports Arena)": {
+    "en": "Main Esports Arena Zone",
+    "zh": "核心电竞对战主区 (Main Esports Arena)"
+  },
+  "ห้องซ้อม VIP / Bootcamp Suite (กระจกเก็บเสียง)": {
+    "en": "VIP Bootcamp Suite (Soundproof Glass)",
+    "zh": "VIP 职业集训房 / Bootcamp (隔音玻璃)"
+  },
+  "เคาน์เตอร์แคชเชียร์ & จุดต้อนรับ (Reception)": {
+    "en": "Cashier & Reception Counter",
+    "zh": "收银服务台与迎宾接待处 (Reception)"
+  },
+  "ห้องควบคุมระบบ MDB & Diskless Server": {
+    "en": "MDB Electrical & Diskless Server Control Room",
+    "zh": "强电控制机房与无盘服务器中心 (MDB & Server)"
+  },
+  "Cafe Prep, Food & Dining Lounge": {
+    "en": "Cafe Prep, Food & Dining Lounge",
+    "zh": "水吧饮品餐饮休息区 (Cafe Prep & Lounge)"
+  },
+  "ทางสัญจร & ช่องทางหนีไฟ (Circulation & Safety)": {
+    "en": "Circulation & Safety Aisles",
+    "zh": "消防通道与公共动线 (Circulation & Safety)"
+  },
+  "โซนเครื่องเล่นเกมหลัก": {
+    "en": "Main Gaming Arena",
+    "zh": "电竞主对战区"
+  },
+  "ห้องซ้อม VIP / Bootcamp Suite": {
+    "en": "VIP Bootcamp Suite",
+    "zh": "VIP 职业训练室"
+  },
+  "เคาน์เตอร์แคชเชียร์ & จุดต้อนรับ": {
+    "en": "Cashier & Reception Counter",
+    "zh": "收银与接待柜台"
+  },
+  "ห้องควบคุมระบบ MDB & Diskless": {
+    "en": "MDB & Diskless Server Room",
+    "zh": "无盘服务器控制机房"
+  },
+  "ทางสัญจร & ช่องทางหนีไฟ": {
+    "en": "Circulation & Fire Exit Corridor",
+    "zh": "消防疏散安全通道"
+  },
+  "อุปกรณ์เกมมิ่งเกียร์และบรรยากาศการแข่งขัน": {
+    "en": "Gaming Gear & Tournament Highlights",
+    "zh": "电竞外设装备与激战实况"
+  },
+  "พิธีมอบรางวัลและเงินรางวัลชนะเลิศ": {
+    "en": "Award Ceremony & Championship Trophy Presentation",
+    "zh": "颁奖盛典与冠军奖金授予"
+  },
+  "แฟนคลับและผู้เข้าชมร่วมสนุกในกิจกรรม": {
+    "en": "Fans & Attendees Community Highlights",
+    "zh": "广大玩家与到场观众狂欢互动"
+  },
+  "ผู้ดูแลระบบสูงสุด (Master Owner)": {
+    "en": "Master Owner",
+    "zh": "主所有者"
+  },
+  "กิตติศักดิ์ (Head of Esports)": {
+    "en": "Kittisak (Head of Esports)",
+    "zh": "Kittisak （电子竞技主管）"
+  },
+  "ผู้จัดการงานแข่ง & สายการแข่งขัน": {
+    "en": "Tournament & Bracket Manager",
+    "zh": "锦标赛和组别经理"
+  },
+  "GLP : G Speed Living Plus เป็นศูนย์กีฬาอีสปอร์ตระดับ World Class และคอมมูนิตี้ครบวงจร 24 ชั่วโมง ตั้งอยู่ ณ ซอยรามคำแหง 53 กรุงเทพมหานคร\n\nจุดเด่นและสิ่งอำนวยความสะดวก:\n- เครื่องคอมพิวเตอร์สเปกทัวร์นาเมนต์ Intel Core i9 + NVIDIA GeForce RTX 40/50 Series\n- จอ BenQ ZOWIE Fast-IPS 360Hz และ 280Hz คุณภาพสูงสำหรับนักกีฬาโปรลีก\n- เวทีแข่งขัน 5v5 Soundproof Glass Arena พร้อมระบบโปรดักชันถ่ายทอดสด 4K\n- อินเทอร์เน็ต Dedicated Multi-WAN 10Gbps แบนด์วิดท์เสถียร Ping ต่ำกว่า 3ms\n- บริการให้คำปรึกษาและวางระบบแฟรนไชส์ร้านเกม 3D แบบครบวงจร คืนทุนไวใน 12-18 เดือน\n\nติดต่อสอบถาม:\n- สายด่วน: 063-793-7704\n- LINE Official: @gspeed\n- ที่อยู่: 23/1 ซอยรามคำแหง 53 แขวงพลับพลา เขตวังทองหลาง กรุงเทพฯ 10310": {
+    "en": "GLP: G Speed Living Plus is a world class esports centre and 24 hour comprehensive community located in Soi Ramkhamhaeng 53, Bangkok.\n\nHighlights & Amenities:\n- Intel Core i9 + NVIDIA GeForce RTX 40/50 Series tournament specs PC\n- High quality BenQ ZOWIE Fast-IPS 360Hz and 280Hz screen for Pro League athletes\n- 5v5 Soundproof Glass Arena with 4K live production system\n- Dedicated Multi-WAN Internet 10Gbps Stable Ping Bandwidth under 3ms\n- Fully integrated 3D game store franchise consulting and implementation service, payback in 12-18 months.\n\nInquiries:\n- Hotline: 063-793-7704\n- line Official: @ gspeed\n- Address: 23/1 Soi Ramkhamhaeng 53, Plubpla Sub-district, Wangthonglang District, Bangkok 10310",
+    "zh": "GLP ： G Speed Living Plus是世界一流的电子竞技中心和24小时综合社区，位于曼谷Soi Ramkhamhaeng 53。\n\n亮点和便利设施：\n-英特尔酷睿i9 +英伟达GeForce RTX 40/50系列锦标赛规格PC\n-适用于职业联赛运动员的高品质明基ZOWIE Fast-IPS 360Hz和280Hz屏幕\n-配备4K现场制作系统的5v5隔音玻璃竞技场\n-专用多WAN互联网10Gbps稳定Ping带宽低于3毫秒\n-完全集成的3D游戏商店特许经营咨询和实施服务，在12-18个月内回报。\n\n咨询：\n-热线： 063-793-7704\n- LINE官方账号： @ gspeed\n-地址： 23/1 Soi Ramkhamhaeng 53, Plubpla Sub-district, Wangthonglang District, Bangkok 10310"
+  },
+  "ชลธิชา (Franchise Sales Manager)": {
+    "en": "Chonthicha (Franchise Sales Manager)",
+    "zh": "Chonthicha （特许经营销售经理）"
+  },
+  "ช่างเทคนิค & จัดการสเปกคอม 3D": {
+    "en": "Technician & 3D Spectroscope Manager",
+    "zh": "技术员和3D光谱仪经理"
+  },
+  "ผู้ดูแลยอดขาย & แฟรนไชส์ Leads": {
+    "en": "Sales Administrator & Franchise Leads",
+    "zh": "销售管理员和特许经营负责人"
+  },
+  "วิศรุต (Lead Hardware Specialist)": {
+    "en": "Visarut (Lead Hardware Specialist)",
+    "zh": "Visarut （首席硬件专家）"
+  },
+  "ธนาภา (Digital Marketing & SEO)": {
+    "en": "Thanapa (Digital Marketing & SEO)",
+    "zh": "Thanapa （数字营销和SEO ）"
+  },
+  "การตลาด, SEO & คอนเทนต์": {
+    "en": "Marketing, SEO & Content",
+    "zh": "营销、搜索引擎优化和内容"
+  },
+  "คุณอาร์ม (Arm Gamer)": {
+    "en": "Mr. Arm Gamer",
+    "zh": "Mr. Arm Gamer"
+  },
+  "ขอกล้อง 4K สำหรับสตรีมแข่ง Valorant": {
+    "en": "Request 4K Camera for Valorant Racing Stream",
+    "zh": "为Valorant Racing Stream申请4K摄像头"
+  },
+  "18:00 - 22:00 น.": {
+    "en": "6:00 PM - 10:00 PM",
+    "zh": "下午6:00 -晚上10:00"
+  },
+  "คุณกิตติศักดิ์ (Talon Fan)": {
+    "en": "Khun Kittisak (Talon Fan)",
+    "zh": "Khun Kittisak （ Talon Fan ）"
+  },
+  "14:00 - 18:00 น.": {
+    "en": "2:00 PM - 6:00 PM",
+    "zh": "下午2:00 -下午6:00"
+  },
+  "ซ้อมคู่ Duo ก่อนเริ่มแมตช์ทัวร์นาเมนต์": {
+    "en": "Practice duo before the start of the tournament",
+    "zh": "比赛开始前练习二人组"
+  },
+  "23:00 - 08:00 น. (Night Owl เหมาค่ำ)": {
+    "en": "23:00 - 08:00 (Night Owl)",
+    "zh": "23:00 - 08:00 （夜猫子）"
+  },
+  "Gamer Feast Combo (ชานมพ่นไฟ + กะเพราหมูกรอบ)": {
+    "en": "Gamer Feast Combo (Flaming Milk Tea + Crispy Pork Basil)",
+    "zh": "玩家盛宴组合（火焰奶茶+酥脆猪肉罗勒）"
+  },
+  "ทีม 5 คน ซ้อมข้ามคืน": {
+    "en": "A team of five drills overnight.",
+    "zh": "一支由五人组成的团队在一夜之间进行了演习。"
+  },
+  "คุณภานุวัฒน์": {
+    "en": "Mr. Panuwat",
+    "zh": "Panuwat先生"
+  },
+  "ประกาศสำคัญ": {
+    "en": "Important Notice",
+    "zh": "重要提示"
+  },
+  "ระบบ 3D Interior Planner ใหม่! ออกแบบผังร้านเกม คำนวณขนาดโต๊ะเก้าอี้และงบลงทุนแฟรนไชส์ได้เรียลไทม์ 24 ชม.": {
+    "en": "New 3D Interior Planner System! Design game store layout, calculate table size, chairs and franchise investment budget in 24 hours.",
+    "zh": "全新3D室内规划器系统！设计游戏商店布局，在24小时内计算桌面尺寸、椅子和特许经营投资预算。"
+  },
+  "จัดแข่ง Esport": {
+    "en": "Host an Esport Match",
+    "zh": "举办电子竞技比赛"
+  },
+  "เปิดรับสมัคร GLP VALORANT CHAMPIONSHIP 2026 ชิง 100,000 บาท | ระบบจำลองผังร้าน 3D Interior Planner พร้อมใช้งานแล้ว": {
+    "en": "Application for GLP valorant Championship 2026 for 100,000 THB | 3D Interior Planner is now available",
+    "zh": "10万泰铢的2026年GLP Valorant锦标赛申请| 3D室内规划师现已推出"
+  },
+  "เปิดระบบจัดผัง 3D": {
+    "en": "Turn on 3D mapping",
+    "zh": "开启3D映射"
+  },
+  "เปิดรับจองพื้นที่ Main Stage 5v5 Soundproof Glass Arena พร้อมทีมงานสตรีมมิ่ง 4K และระบบ Tournament Manager": {
+    "en": "Main Stage 5v5 Soundproof Glass Arena with 4K Streaming Team and Tournament Manager",
+    "zh": "4K流媒体团队和锦标赛经理的主舞台5v5隔音玻璃竞技场"
+  },
+  "ติดต่อจองเวที": {
+    "en": "Contact to book the stage",
+    "zh": "联系以预订舞台"
+  },
+  "GLP : G Speed Living Plus | ศูนย์อีสปอร์ตครบวงจร & ระบบแฟรนไชส์จัดผังร้านอัจฉริยะ": {
+    "en": "GLP: G Speed Living Plus | Fully Integrated Esports Center & Smart Store Layout Franchise System",
+    "zh": "GLP ： G Speed Living Plus |完全集成的电子竞技中心和智能商店布局特许经营系统"
+  },
+  "ศูนย์รวมอีสปอร์ตครบวงจร สเปกคอมไฮเอนด์ RTX 40 Series จอ 360Hz เวทีแข่งมาตรฐานสากล พร้อมระบบจำลองผังร้านแฟรนไชส์ 3D": {
+    "en": "Fully integrated esports hub, high end specs, RTX 40 Series, 360Hz screen, international standard arena with 3D franchise store layout simulation.",
+    "zh": "完全集成的电子竞技中心，高端规格， RTX 40系列， 360Hz屏幕，具有3D特许经营店布局模拟的国际标准竞技场。"
+  },
+  "ร้านเกม, อีสปอร์ต, แฟรนไชส์ร้านเกม, GLP, G Speed Living Plus, จัดผังร้านเกม 3D, RTX 4090, BenQ 360Hz": {
+    "en": "Game Store, Esports, Game Store Franchise, GLP, G Speed Living Plus, 3D Game Store Layout, RTX 4090, BenQ 360Hz",
+    "zh": "游戏商店，电子竞技，游戏商店特许经营， GLP ， G Speed Living Plus ， 3D游戏商店布局， RTX 4090 ，明基360Hz"
+  },
+  "สำรวจกิจกรรม & ทัวร์นาเมนต์": {
+    "en": "Explore events & tournaments",
+    "zh": "探索赛事和锦标赛"
+  },
+  "ศูนย์รวมอีสปอร์ตครบวงจร & พื้นที่ประลองเกมมาตรฐานสากล": {
+    "en": "One-stop esports hub & international standard gaming arena",
+    "zh": "一站式电子竞技中心和国际标准游戏竞技场"
+  },
+  "ติดต่อเปิดร้านเกมของคุณ": {
+    "en": "Contact to open your game store.",
+    "zh": "请联系以打开您的游戏商店。"
+  },
+  "สัมผัสประสบการณ์เกมมิ่งระดับเวิลด์คลาสด้วยเครื่องสเปกไฮเอนด์ RTX 40 Series จอ 360Hz และเวทีแข่งขันมาตรฐาน Pro Circuit พร้อมระบบคำนวณและจำลองผังร้านแฟรนไชส์อัจฉริยะ": {
+    "en": "Experience world-class gaming with the high-end RTX 40 Series 360Hz spectroscope and Pro Circuit standard arena with intelligent franchise store layout calculations and simulations.",
+    "zh": "借助高端RTX 40系列360Hz光谱仪和Pro Circuit标准竞技场，通过智能特许经营店布局计算和模拟，体验世界一流的游戏。"
+  },
+  "เปิดระบบ 3D": {
+    "en": "Turn on 3D",
+    "zh": "开启3D"
+  },
+  "รวมภาพกิจกรรม & บรรยากาศสด": {
+    "en": "Overview & Live Atmosphere",
+    "zh": "概述和现场氛围"
+  },
+  "เกาะติดผลการแข่งขัน ทริกการเล่น สเปกอุปกรณ์ใหม่ และประกาศจากทางร้าน": {
+    "en": "Stick to match results, playing tricks, specs, new equipment, and shop announcements.",
+    "zh": "坚持匹配结果、耍花招、规格、新设备和商店公告。"
+  },
+  "ภาพบรรยากาศการแข่งขันเกมและกองเชียร์อีสปอร์ต ณ GLP Arena": {
+    "en": "Images of games and esports cheerleading at the GLP Arena.",
+    "zh": "GLP竞技场的游戏和电子竞技啦啦队图片。"
+  },
+  "บทความ ข่าวสาร & ไฮไลต์เกม": {
+    "en": "News Articles & Game Highlights",
+    "zh": "新闻文章和游戏亮点"
+  },
+  "ศูนย์รวมอีสปอร์ตครบวงจร GLP G-Speed Living Plus แฟรนไชส์ร้านเกม 3D": {
+    "en": "One-stop esports hub GLP G-Speed Living Plus 3D Game Store Franchise",
+    "zh": "一站式电竞中心GLP G-Speed Living Plus 3D游戏商店特许经营"
+  },
+  "อ่านบทความล่าสุด": {
+    "en": "Read the latest article",
+    "zh": "阅读最新文章"
+  },
+  "บรรยากาศและโซนการให้บริการ GLP ESPORTS": {
+    "en": "GLP Esports Service Atmosphere and Zone",
+    "zh": "GLP电子竞技服务氛围和区域"
+  },
+  "เริ่มออกแบบผังร้าน & ประเมินงบประมาณทันที": {
+    "en": "Start Designing Store Layout & Budget Assessment Immediately",
+    "zh": "立即开始设计商店布局和预算评估"
+  },
+  "บทความ ข่าวสารวงการเกม และอัปเดตสเปกฮาร์ดแวร์ GLP Esports": {
+    "en": "Articles, gaming news and GLP Esports hardware specs update",
+    "zh": "文章、游戏新闻和GLP Esports硬件规格更新"
+  },
+  "สัมผัสความพรีเมียมที่ออกแบบมาสำหรับเกมเมอร์ทุกสไตล์ ตั้งแต่ผู้เล่นทั่วไป สตรีมเมอร์ ไปจนถึงการประลองระดับแชมป์เปียนชิป": {
+    "en": "Experience a premium designed for every style of gamer, from regular streamers to chip championships.",
+    "zh": "体验专为各种风格的游戏玩家设计的高级版，从常规主播到芯片锦标赛。"
+  },
+  "เวทีประลองระดับมืออาชีพ": {
+    "en": "Professional Arena",
+    "zh": "专业竞技场"
+  },
+  "ทัศนียภาพมุมสูงของอารีน่าความจุผู้ชมกว่า 200 ที่นั่งพร้อมจอด้านข้าง": {
+    "en": "High angle view of the 200 + seat arena with side screen.",
+    "zh": "带侧屏的200多个座位竞技场的高角度视野。"
+  },
+  "ระบบแสงเวที Dynamic Light Sync เปลี่ยนสีตามสถานะการแข่งขัน": {
+    "en": "The Dynamic Light Sync stage lighting system changes color according to the match status.",
+    "zh": "动态光同步舞台照明系统根据匹配状态更改颜色。"
+  },
+  "เวทีแข่งขัน Main Stage ระบบแสงสีเสียงและจอ LED Wall 4K ขนาดยักษ์": {
+    "en": "Main Stage Light & Sound System & Giant 4K LED Wall Screen",
+    "zh": "主舞台灯光音响系统和巨型4K LED墙面屏幕"
+  },
+  "เวทีแข่งขันแยก 2 ฝั่งพร้อมระบบกระจกกันเสียงระดับสตูดิโอ จอ LED Wall ขนาดยักษ์ 4K และโต๊ะแคสเตอร์สำหรับถ่ายทอดสด Live Streaming รองรับการจัดแข่ง Official ทุกเกม": {
+    "en": "Two separate arenas with studio soundproofing, a giant 4K LED Wall screen, and a caster table for live streaming support all official games.",
+    "zh": "两个带有工作室隔音功能的独立竞技场、一个巨大的4K LED墙面屏幕和一个用于直播的脚轮桌，支持所有官方游戏。"
+  },
+  "ห้องส่วนตัว Private Gaming Suite": {
+    "en": "Private room Private Gaming Suite",
+    "zh": "独立房间独立游戏套房"
+  },
+  "สเปกคอมพิวเตอร์ระดับสตรีมเมอร์ พร้อมไฟสตูดิโอ Elgato Key Light": {
+    "en": "Streamer Computer Specs with Elgato Key Light Studio Lights",
+    "zh": "Streamer电脑规格带Elgato钥匙灯工作室灯"
+  },
+  "ไมโครโฟนระดับสตูดิโอบรอดแคสต์ Shure SM7B + RodeCaster Pro": {
+    "en": "Shure SM7B + RodeCaster Pro Broadcast Studio Level Microphone",
+    "zh": "舒尔SM7B + RodeCaster专业广播工作室级麦克风"
+  },
+  "ห้องส่วนตัว VIP Suite ผนังซับเสียง Acoustic เก็บเสียงเงียบสนิท": {
+    "en": "Private Room VIP Suite Acoustic Sound Absorption Wall Keep the sound quiet.",
+    "zh": "独立房间VIP套房吸音墙保持安静。"
+  },
+  "โซนส่วนตัว 5-6 ที่นั่ง เหมาะสำหรับทีมฝึกซ้อม (Bootcamp) หรือแก๊งเพื่อน พร้อมอุปกรณ์สตรีมมิ่งครบเซ็ต กล้อง 4K ไมโครโฟนระดับบอร์ดแคสต์ และไฟสตูดิโอ Key Light": {
+    "en": "The 5-6 seat private zone is perfect for a practice team (bootcamp) or a gang of friends, complete with full streaming equipment, 4K camera, microphone, casting board, and Key Light studio lights.",
+    "zh": "5-6个座位的私人区域非常适合练习团队（训练营）或一群朋友，配备全流媒体设备、4K摄像头、麦克风、浇铸板和Key Light工作室灯光。"
+  },
+  "หูฟังเกมมิ่ง Pro Wireless ตัดเสียงรบกวนภายนอก 100%": {
+    "en": "100% external noise-cancelling Pro Wireless gaming headphones",
+    "zh": "100%外部降噪Pro无线游戏耳机"
+  },
+  "บรรยากาศทีมบูตแคมป์ 5 คน นั่งซ้อมกลยุทธ์ส่วนตัวไม่มีเสียงรบกวน": {
+    "en": "Atmosphere 5 person boot camp team sitting in private strategy practice, no noise.",
+    "zh": "Atmosphere 5人新兵训练营团队坐在私人战略练习场，无噪音。"
+  },
+  "เก้าอี้ Secretlab TITAN Evo พรีเมียมรองรับหลัง นั่งสบายยาวนาน": {
+    "en": "Premium Titan Evo Secretlab Chair supports long-lasting comfort",
+    "zh": "高级Titan Evo Secretlab椅子支持持久的舒适性"
+  },
+  "แสงไฟนีออน Cyberpunk ปรับแต่งโปรไฟล์สีได้ตามความชอบของทีม": {
+    "en": "Cyberpunk neon lights customize the color profile according to the team's preferences.",
+    "zh": "赛博朋克霓虹灯根据团队的喜好定制颜色配置文件。"
+  },
+  "หน้าจอคู่ Dual-Monitor: จอหลัก OLED 360Hz + จอรอง 4K มอนิเตอร์แชท": {
+    "en": "Dual-Monitor Screen: 360Hz OLED Home Screen + 4K Secondary Monitor Chat",
+    "zh": "双显示器屏幕： 360Hz OLED主屏幕+ 4K辅助显示器聊天"
+  },
+  "ระบบระบายความร้อน Custom Water Cooling เงียบสนิท ไร้เสียงพัดลมรบกวน": {
+    "en": "Custom Water Cooling system is completely silent, no noise fan.",
+    "zh": "定制水冷系统完全静音，无噪音风扇。"
+  },
+  "คีย์บอร์ดกลไก Rapid Trigger ตอบสนองเร็วระดับมิลลิวินาที": {
+    "en": "Keyboard, Rapid Trigger mechanism, millisecond response",
+    "zh": "键盘，快速触发机制，毫秒响应"
+  },
+  "มุมวิเคราะห์แผนการเล่นหน้าจอสมาร์ททีวี 65 นิ้วสำหรับโค้ช": {
+    "en": "Game plan analysis corner 65 inch smart TV screen for coaches",
+    "zh": "游戏计划分析角65寸智能电视教练屏"
+  },
+  "โค้ชและนักกีฬาบรีฟแผนการเล่นก่อนการแข่งขันแมตช์สำคัญ": {
+    "en": "Coach and athlete brethren, pre-match game plan",
+    "zh": "教练和运动员兄弟，赛前比赛计划"
+  },
+  "มุมพักผ่อนและโต๊ะทำงานส่วนตัวสำหรับครีเอเตอร์และผู้จัดการทีม": {
+    "en": "Dedicated lounge corner and desk for creators and team managers",
+    "zh": "专为创作者和团队经理打造的休息室角落和办公桌"
+  },
+  "สาย LAN 10Gbps แยก Dedicated Bandwidth ไม่แชร์ความเร็วกับภายนอก": {
+    "en": "10Gbps LAN cable separates Dedicated Bandwidth and does not share speed with external",
+    "zh": "10Gbps局域网电缆分离专用带宽，不与外部共享速度"
+  },
+  "เมาส์เกมมิ่ง Pro Wireless น้ำหนักเบาพร้อมแผ่นรองเมาส์ Speed/Control": {
+    "en": "Lightweight Pro Wireless Gaming Mouse with Speed/Control Mouse Pad",
+    "zh": "轻量级专业无线游戏鼠标带速度/控制鼠标垫"
+  },
+  "มินิบาร์และตู้แช่เครื่องดื่มบริการเสิร์ฟถึงห้องพักส่วนตัว": {
+    "en": "Minibar and beverage cooler served in private room",
+    "zh": "独立房间提供迷你吧和饮料冷藏柜"
+  },
+  "มีจุดเชื่อมต่อกล้อง DSLR / Capture Card 4K พร้อมสตรีมทันที": {
+    "en": "There is a 4K DSLR/Capture Card access point with instant stream.",
+    "zh": "有一个带即时流的4K数码单反相机/采集卡接入点。"
+  },
+  "บรรยากาศการซ้อมทีมที่เต็มไปด้วยสมาธิและการประสานงานที่ยอดเยี่ยม": {
+    "en": "Team rehearsal atmosphere with great focus and coordination.",
+    "zh": "团队排练氛围，高度专注和协调。"
+  },
+  "โซนเครื่องมาตรฐานระดับแข่งขัน": {
+    "en": "Competitive Standard Machine Zone",
+    "zh": "有竞争力的标准机器区域"
+  },
+  "แถวที่นั่งเล่นเกมมาตรฐานความจุกว่า 80+ ที่นั่ง แสงไฟนีออนสบายตา": {
+    "en": "80 + standard gaming seats with comfortable neon lighting",
+    "zh": "80多个标准游戏座椅，配备舒适的霓虹灯照明"
+  },
+  "โซนหลักความจุกว่า 80+ ที่นั่ง ออกแบบระยะห่างตามหลักสรีรศาสตร์ เก้าอี้เกมมิ่งระบายอากาศ โต๊ะกว้าง 120 ซม. ลากเมาส์สะใจ พร้อมระบบเน็ตเวิร์ก 10Gbps Ping ต่ำกว่า 5ms": {
+    "en": "Main zone 80 + seats, Ergonomic spacing design, Ventilated gaming chair, 120cm wide table Drag your mouse with 10Gbps network ping below 5ms.",
+    "zh": "主区域80 +座位，符合人体工程学的间距设计，通风游戏椅， 120厘米宽的桌子使用低于5毫秒的10Gbps网络ping拖动鼠标。"
+  },
+  "ความสะดวกสบายและความเป็นส่วนตัวระดับ First-Class Gaming Lounge": {
+    "en": "First-Class Gaming Lounge Comfort and Privacy",
+    "zh": "一流的游戏休息室舒适和隐私"
+  },
+  "ระบบปรับอากาศแยกส่วน Daikin Inverter เย็นสบายและเงียบเป็นพิเศษ": {
+    "en": "Daikin Inverter split air conditioning system is cool and ultra quiet.",
+    "zh": "大金逆变器分体式空调系统凉爽安静。"
+  },
+  "โต๊ะเกมมิ่งกว้างพิเศษ 120 ซม. ออกแบบมาเพื่อลากเมาส์ได้เต็มวงกว้าง": {
+    "en": "Extra Wide 120cm Gaming Table Designed to drag the mouse in full width.",
+    "zh": "超宽120厘米游戏桌设计用于全宽拖动鼠标。"
+  },
+  "คีย์บอร์ดกลไก Blue/Red Switch กดมันส์ เสียงแน่น ทนทาน": {
+    "en": "Blue/Red Switch mechanical keyboard with strong and durable sound.",
+    "zh": "蓝色/红色开关机械键盘，声音强劲耐用。"
+  },
+  "บรรยากาศความสนุกสนานและคอมมูนิตี้คนรักเกมทุกวัยตลอด 24 ชม.": {
+    "en": "Fun atmosphere and community, game lovers of all ages, 24 hours a day.",
+    "zh": "有趣的氛围和社区，所有年龄段的游戏爱好者，一天24小时。"
+  },
+  "เมาส์เกมมิ่ง Ergonomic DPI สูง พร้อมปุ่ม Macro สำหรับเกม FPS และ MOBA": {
+    "en": "High dpi Ergonomic Gaming Mouse with Macro Button for FPS and MOBA Games",
+    "zh": "高DPI符合人体工程学的游戏鼠标，带用于FPS和MOBA游戏的宏按钮"
+  },
+  "หน้าจอ Fast-IPS 240Hz สีสันสดใส คมชัด มองสบายตาแม้เล่นนาน": {
+    "en": "240Hz Fast-IPS screen, bright and clear, comfortable to look at even when playing for a long time.",
+    "zh": "240Hz快速IPS屏幕，明亮清晰，即使在长时间玩游戏时也能舒适地观看。"
+  },
+  "ระบบอินเทอร์เน็ต Dual Fiber 10Gbps Ping ต่ำกว่า 3ms เล่นไม่กระตุก": {
+    "en": "Dual Fiber 10Gbps Internet System, Ping less than 3ms, play no jog",
+    "zh": "双光纤10Gbps互联网系统， ping小于3ms ，不慢跑播放"
+  },
+  "การเดินสายแลนแบบ Cat6A ชีลด์กันสัญญาณรบกวนใต้รางพื้นเรียบร้อย": {
+    "en": "Cat6A S.H.I.E.L.D. wiring prevents noise under floor tracks.",
+    "zh": "Cat6A S.H.I.E.L.D.布线可防止地板轨道下的噪音。"
+  },
+  "ระบบสำรองไฟระดับองค์กร UPS ไฟดับเล่นต่อได้ไม่มีเซฟหลุด": {
+    "en": "Enterprise-grade uninterruptible power supply, UPS, power outages, playback, no safeguards",
+    "zh": "企业级不间断电源， UPS ，停电，回放，无保障"
+  },
+  "หูฟังครอบหูบุนวมหนานุ่ม เบสแน่น ไมโครโฟนตัดเสียงคุยในดิสคอร์ดชัดเจน": {
+    "en": "Padded earbuds, thick and soft, tight bass, microphone, clear chatter in the discord.",
+    "zh": "带衬垫的耳机，厚实柔软，低音结实，麦克风，清晰的喋喋不休。"
+  },
+  "เคสคอมพิวเตอร์การ์ดจอ RTX 4070 SUPER ปรับกราฟิก Ultra ทุกเกม": {
+    "en": "Computer case RTX 4070 super graphics card Ultra adapt all games",
+    "zh": "电脑外壳RTX 4070超级显卡超适合所有游戏"
+  },
+  "เคาน์เตอร์แคชเชียร์และระบบสมาชิกเติมเงินออนไลน์ สะดวก รวดเร็ว": {
+    "en": "The cashier counter and online top-up membership system are convenient and fast.",
+    "zh": "收银台和在线充值会员系统方便快捷。"
+  },
+  "ระบบ Diskless และ Auto-Update เกม อัปเดตแพตช์ทันทีพร้อมเล่น": {
+    "en": "Diskless and Auto-Update system, instant patch update game, ready to play",
+    "zh": "无盘和自动更新系统，即时补丁更新游戏，随时可玩"
+  },
+  "บรรยากาศการรวมตัวเพื่อนฝูงจัดตี้เล่นเกมวันหยุดสุดสัปดาห์": {
+    "en": "The atmosphere of gathering friends, playing weekend games",
+    "zh": "聚友、玩周末游戏的气氛"
+  },
+  "เก้าอี้เกมมิ่งหุ้มหนัง PU ระบายความร้อน มีหมอนรองคอและหลัง": {
+    "en": "A heated PU leather upholstered gaming chair with a neck pillow and back.",
+    "zh": "带颈枕和背部的加热聚氨酯合成革软垫游戏椅。"
+  },
+  "ความสะอาดของอุปกรณ์ มีการฆ่าเชื้อด้วยแอลกอฮอล์ทุกรอบการใช้งาน": {
+    "en": "The cleanliness of the equipment is disinfected with alcohol every use cycle.",
+    "zh": "每次使用周期都用酒精对设备的清洁度进行消毒。"
+  },
+  "ทางเดินกว้างขวาง ปลอดโปร่ง แอร์เย็นฉ่ำ 24 องศาตลอดวัน": {
+    "en": "The corridor is spacious, clear, air-cooled, 24 degrees all day.",
+    "zh": "走廊宽敞、干净、风冷，全天24度。"
+  },
+  "ไฟส่องสว่างนวลตา ลดการเมื่อยล้าของสายตาเมื่อเล่นเกมนาน": {
+    "en": "Soft illumination reduces eye fatigue when playing long games.",
+    "zh": "柔和的照明可以减少长时间玩游戏时的眼睛疲劳。"
+  },
+  "จุดเติมพลังและคอมมูนิตี้บาร์": {
+    "en": "Refueling Spots and Community Bars",
+    "zh": "加油点和社区酒吧"
+  },
+  "พื้นที่พบปะสังสรรค์ของชาวเกมเมอร์ที่ใหญ่และทันสมัยที่สุด": {
+    "en": "The largest and most modern gamer meeting space.",
+    "zh": "最大、最现代化的游戏玩家会议空间。"
+  },
+  "โมเมนต์คว้าแชมป์ในเกมพร้อมเสียงเฮลั่นจากเพื่อนร่วมทีม": {
+    "en": "Moment of championship in the game with hissing from his teammates.",
+    "zh": "比赛中的冠军时刻，队友发出嘶嘶声。"
+  },
+  "เคาน์เตอร์บาร์เครื่องดื่ม Specialty Coffee สดใหม่พร้อมเสิร์ฟ": {
+    "en": "A specialty coffee bar counter is fresh to serve.",
+    "zh": "特色咖啡吧台很新鲜。"
+  },
+  "บาร์เครื่องดื่ม Energy Drinks นำเข้าเย็นเจี๊ยบเติมความสดชื่น": {
+    "en": "Energy Drinks Bar, Imported, Cool, Refreshing Chick",
+    "zh": "能量饮料酒吧，进口，清凉，清爽的小鸡"
+  },
+  "มุมที่นั่งพักผ่อนสไตล์โมเดิร์นคาเฟ่ แอร์เย็น บรรยากาศผ่อนคลาย": {
+    "en": "Modern lounge seating corner, cool air-conditioned cafe, relaxing atmosphere.",
+    "zh": "现代化的休息室座位角落、凉爽的空调咖啡馆、轻松的氛围。"
+  },
+  "บาร์เครื่องดื่มและอาหารปรุงสด พร้อมเสิร์ฟถึงโต๊ะผ่านระบบสั่งอาหารบนหน้าจอคอมพิวเตอร์ กาแฟสด ชานมไข่มุก เบอร์เกอร์ และมุมโซฟาชมการแข่งขันผ่านจอยักษ์": {
+    "en": "Bars, drinks, and freshly prepared food are served to the table via a computer screen ordering system, fresh coffee, tea, pearl milk, burgers, and a giant screen competition sofa corner.",
+    "zh": "酒吧、饮料和新鲜烹制的食物通过电脑屏幕订购系统、新鲜咖啡、茶、珍珠奶、汉堡和巨大的屏幕比赛沙发角落供应。"
+  },
+  "เมนูอาหารปรุงสด เบอร์เกอร์เนื้อพรีเมียม และเฟรนช์ฟรายส์กรอบ": {
+    "en": "Freshly cooked dishes, premium meat burgers and crispy French fries",
+    "zh": "新鲜烹饪的菜肴、优质肉汉堡和脆薯条"
+  },
+  "ขนมขบเคี้ยวและของหวาน ไอศกรีมหลากหลายรสชาติ": {
+    "en": "Snacks and desserts, ice cream in a variety of flavors",
+    "zh": "各种口味的小吃和甜点、冰淇淋"
+  },
+  "พื้นที่นั่งรอและจุดนัดพบสำหรับเพื่อนๆ ระหว่างรอโต๊ะว่าง": {
+    "en": "Waiting area and meeting point for friends while waiting for an empty table",
+    "zh": "等待空桌时等待好友的区域和集合点"
+  },
+  "โซฟาเลานจ์ขนาดใหญ่พร้อมจอยักษ์ ถ่ายทอดสดทัวร์นาเมนต์ระดับโลก": {
+    "en": "A large lounge sofa with a giant screen broadcasting live world tournaments.",
+    "zh": "一张大型休息室沙发，配有巨型屏幕，可直播世界锦标赛。"
+  },
+  "กาแฟอาราบิก้าแท้ คั่วบดหอมกรุ่นโดยบาริสต้าประจำร้าน": {
+    "en": "Authentic Arabica coffee, roasted, ground, fragrant by the in-house barista",
+    "zh": "正宗的阿拉比卡咖啡，由内部咖啡师烘焙、研磨、芳香"
+  },
+  "บริการส่งอาหารและเครื่องดื่มตรงถึงโต๊ะคอม ไม่ต้องลุกไปสั่ง": {
+    "en": "Food and beverage delivery directly to the computer table, no need to get up and order.",
+    "zh": "餐饮直接送到电脑桌，无需起床点餐。"
+  },
+  "บรรยากาศยามค่ำคืนกับแสงไฟ Warm Light ให้ความรู้สึกอบอุ่น": {
+    "en": "The night time atmosphere with the warm light gives a warm feeling.",
+    "zh": "夜晚的氛围和温暖的灯光给人一种温暖的感觉。"
+  },
+  "ตู้แช่เครื่องดื่มอัตโนมัติ ชำระเงินผ่านสแกน QR Code ทันใจ": {
+    "en": "Automatic beverage cooler, instant payment via QR code scan",
+    "zh": "自动饮料冷却器，通过二维码扫描即时付款"
+  },
+  "มุมฉลองความสำเร็จและปาร์ตี้วันเกิดร่วมกับเพื่อนในทีม": {
+    "en": "Achievement corner and birthday party with teammates",
+    "zh": "与队友一起体验成就角落和生日派对"
+  },
+  "คอมมูนิตี้พบปะแลกเปลี่ยนประสบการณ์ของชาวเกมเมอร์": {
+    "en": "Community Encounters Gamer Experiences",
+    "zh": "社区邂逅游戏玩家体验"
+  },
+  "เมนูเซ็ตโปรโมชันคู่คอมพิวเตอร์ สั่งเป็นชุดสุดคุ้ม": {
+    "en": "Computer pair promotion set menu, ordered as a set of great value",
+    "zh": "电脑对促销套餐，以超值套餐订购"
+  },
+  "พื้นที่นั่งทำงาน Co-working Space ทำงานไปพลาง จิบกาแฟไปพลาง": {
+    "en": "Co-working space to work while sipping coffee",
+    "zh": "共享办公空间，边喝咖啡边工作"
+  },
+  "พนักงานบริการด้วยรอยยิ้มและพร้อมให้คำแนะนำตลอด 24 ชม.": {
+    "en": "Service staff with smiles and ready to give advice 24 hours a day.",
+    "zh": "服务人员面带微笑， 24小时随时为您提供建议。"
+  },
+  "มีจุดชาร์จโทรศัพท์มือถือไร้สายและปลั๊กไฟบริการฟรีทุกโต๊ะ": {
+    "en": "There are wireless mobile phone charging points and free power outlets at all tables.",
+    "zh": "所有桌子上都有无线手机充电点和免费电源插座。"
+  },
+  "ระบบเสียงเพลงเบาๆ ช่วยผ่อนคลายความเหนื่อยล้าหลังเล่นเกม": {
+    "en": "The soft music system soothes post-game fatigue.",
+    "zh": "柔和的音乐系统可以缓解赛后的疲劳。"
+  },
+  "มาตรฐานความสะอาดระดับพรีเมียม ภาชนะผ่านการฆ่าเชื้อทุกชิ้น": {
+    "en": "Premium cleanliness standards. All containers are sterilized.",
+    "zh": "优质清洁标准。所有容器均已灭菌。"
+  },
+  "เร็วๆนี้": {
+    "en": "Coming soon",
+    "zh": "很快就会"
+  },
+  "1 กันยายน 2026": {
+    "en": "September 1, 2026",
+    "zh": "2026年9月1日"
+  },
+  "จุดเช็กอินถ่ายรูปสวยพร้อมมุมถ่ายภาพชิคๆ โพสต์ลงโซเชียล": {
+    "en": "Check-in point, take a good photo with a photo corner. Chic posted on social media.",
+    "zh": "入住点，拍一张好照片，照片角落。别致发布在社交媒体上。"
+  },
+  "ทัวร์นาเมนต์อีสปอร์ตสุดยิ่งใหญ่แห่งปี 2026 ชิงเงินรางวัลรวมกว่า ฿100,000 รวบรวม 32 ยอดทีมทั่วประเทศมาดวลความแม่นยำบนเวที LAN Final ณ G-Speed Arena รามคำแหง 53 พร้อมระบบคอมพิวเตอร์สเปกทัวร์นาเมนต์ Intel Core i9 + RTX 4080 และหน้าจอ BenQ ZOWIE 360Hz ถ่ายทอดสดด้วยทีมงานแคสเตอร์ระดับมืออาชีพ": {
+    "en": "The biggest esports tournament of 2026 for a total prize pool of more than 100,000, gathering 32 teams across the country for precision duels on the LAN Final stage at G-Speed Arena Ramkhamhaeng 53 with computer systems, Intel Core i9 + RTX 4080 tournament specs, and a BenQ ZOWIE 360Hz screen live with a team of professional casters.",
+    "zh": "2026年最大的电子竞技锦标赛，总奖池超过100,000个，汇集了全国32支球队，在G-Speed Arena Ramkhamhaeng 53的局域网决赛阶段进行精确决斗，配备计算机系统、英特尔酷睿i9 + RTX 4080锦标赛规格和明基ZOWIE 360Hz屏幕，由专业脚轮团队直播。"
+  },
+  "25 กันยายน 2026": {
+    "en": "September 25, 2026",
+    "zh": "2026年9月25日"
+  },
+  "฿25,000 + เหรียญเงิน": {
+    "en": "25,000 + Silver",
+    "zh": "25,000 +银币"
+  },
+  "฿10,000 ต่อทีม + เหรียญทองแดง": {
+    "en": "10,000 per team + Bronze",
+    "zh": "每队10,000 +铜牌"
+  },
+  "รองชนะเลิศอันดับ 2 ร่วม (2 ทีม)": {
+    "en": "Joint 2nd Runner-up (2 teams)",
+    "zh": "并列亚军（ 2支球队）"
+  },
+  "฿5,000 + หูฟัง ROG Delta S Wireless": {
+    "en": "5,000 + Rog Delta S Wireless Headphones",
+    "zh": "5,000 + ROG Delta S无线耳机"
+  },
+  "฿50,000 + ถ้วยเกียรติยศ + เหรียญทอง + ROG Gaming Gear Set": {
+    "en": "50,000 + Honor Cup + Gold Medal + Rog Gaming Gear Set",
+    "zh": "50,000 +荣誉杯+金牌+ ROG游戏装备套装"
+  },
+  "28 ก.ย. 2026 • 11:00 น.": {
+    "en": "Sep 28, 2026 • 11:00 AM",
+    "zh": "2026年9月28日•上午11:00"
+  },
+  "RoninZero (กัปตันทีม)": {
+    "en": "RoninZero (Team Captain)",
+    "zh": "RoninZero （队长）"
+  },
+  "BangkokBlade (กัปตันทีม)": {
+    "en": "BangkokBlade (Team Captain)",
+    "zh": "BangkokBlade （队长）"
+  },
+  "รอบ 8 ทีมสุดท้าย (QF 1)": {
+    "en": "Final 8 (QF 1)",
+    "zh": "决赛8 （ QF 1 ）"
+  },
+  "PredatorAim (กัปตันทีม)": {
+    "en": "PredatorAim (Team Captain)",
+    "zh": "PredatorAim （队长）"
+  },
+  "28 ก.ย. 2026 • 13:30 น.": {
+    "en": "Sep 28, 2026 • 1:30 PM",
+    "zh": "2026年9月28日•下午1:30"
+  },
+  "28 ก.ย. 2026 • 16:00 น.": {
+    "en": "Sep 28, 2026 • 4:00 PM",
+    "zh": "2026年9月28日•下午4:00"
+  },
+  "รอบ 8 ทีมสุดท้าย (QF 4)": {
+    "en": "Final 8 (QF 4)",
+    "zh": "决赛8 （ QF 4 ）"
+  },
+  "รอบ 8 ทีมสุดท้าย (QF 3)": {
+    "en": "Final 8 (QF3)",
+    "zh": "决赛8 （ QF3 ）"
+  },
+  "รอบ 8 ทีมสุดท้าย (QF 2)": {
+    "en": "Final 8 (QF2)",
+    "zh": "决赛8 （ QF2 ）"
+  },
+  "ผู้ชนะ QF 1": {
+    "en": "QF Winner 1",
+    "zh": "QF优胜者1"
+  },
+  "ผู้ชนะ QF 2": {
+    "en": "QF Winner 2",
+    "zh": "QF优胜者2"
+  },
+  "รอบ 4 ทีมสุดท้าย (Semi-Final 1)": {
+    "en": "Semi-Final 1",
+    "zh": "半决赛1"
+  },
+  "29 ก.ย. 2026 • 14:00 น.": {
+    "en": "Sep 29, 2026 • 2:00 PM",
+    "zh": "2026年9月29日•下午2:00"
+  },
+  "28 ก.ย. 2026 • 18:30 น.": {
+    "en": "Sep 28, 2026 • 6:30 PM",
+    "zh": "2026年9月28日•下午6:30"
+  },
+  "รอบ 4 ทีมสุดท้าย (Semi-Final 2)": {
+    "en": "Semi-Final 2",
+    "zh": "半决赛2"
+  },
+  "29 ก.ย. 2026 • 17:00 น.": {
+    "en": "Sep 29, 2026 • 5:00 PM",
+    "zh": "2026年9月29日•下午5:00"
+  },
+  "ผู้ชนะ QF 3": {
+    "en": "QF Winner 3",
+    "zh": "QF优胜者3"
+  },
+  "ผู้ชนะ QF 4": {
+    "en": "QF Winner 4",
+    "zh": "QF优胜者4"
+  },
+  "รอบชิงชนะเลิศ (Grand Final ชิงแชมป์ ฿50,000)": {
+    "en": "Final (Grand Final Championship 50,000)",
+    "zh": "决赛（总决赛冠军50,000 ）"
+  },
+  "ผู้ชนะ Semi-Final 1": {
+    "en": "Semi-Final 1 winner",
+    "zh": "半决赛1冠军"
+  },
+  "ผู้ชนะ Semi-Final 2": {
+    "en": "Semi-Final 2 winners",
+    "zh": "半决赛2获胜者"
+  },
+  "30 ก.ย. 2026 • 18:00 น.": {
+    "en": "Sep 30, 2026 • 6:00 PM",
+    "zh": "2026年9月30日•下午6:00"
+  },
+  "เครื่องคอมพิวเตอร์สเปก Intel i9 + RTX 4080 SUPER พร้อมจอ 360Hz": {
+    "en": "Intel i9 + RTX 4080 super spec pc with 360Hz monitor",
+    "zh": "英特尔i9 + RTX 4080超级规格PC ，带360Hz显示器"
+  },
+  "บรรยากาศนักกีฬาประจำที่นั่ง Battle Stations ซ้อมมือก่อนเริ่มแข่ง": {
+    "en": "The atmosphere of the athletes in the Battle Stations seats practicing their hands before the start of the game",
+    "zh": "战站座位上运动员在比赛开始前练手的气氛"
+  },
+  "การแข่งขันรอบ 16 ทีมสุดท้าย แข่งพร้อมกันแบบ Full LAN Setup": {
+    "en": "The last 16 matches were played at the same time as the Full LAN Setup.",
+    "zh": "最后16场比赛与全局局域网设置同时进行。"
+  },
+  "มุมมองกว้างของอารีน่า แสงไฟธีมน้ำเงิน-ส้ม สื่อถึงการปะทะสุดเข้มข้น": {
+    "en": "Wide views of the arena, blue-orange themed lights convey intense clashes.",
+    "zh": "广阔的竞技场景观，蓝橙色主题灯光传递出激烈的冲突。"
+  },
+  "ระบบเน็ตเวิร์กแลนแบบแยกวง 10Gbps Latency ต่ำกว่า 1ms": {
+    "en": "Isolated Network LAN 10Gbps Latency under 1ms",
+    "zh": "1毫秒以下的隔离网络局域网10Gbps延迟"
+  },
+  "หูฟังตัดเสียงรบกวนเกรดการแข่งขัน Pro Studio Noise-Cancelling": {
+    "en": "Pro Studio Noise-Cancelling Competition Grade Noise Cancelling Headphones",
+    "zh": "专业工作室降噪比赛级降噪耳机"
+  },
+  "การอุ่นเครื่องทดสอบความพร้อมปุ่มกดและอัตราตอบสนองอุปกรณ์": {
+    "en": "Appliance readiness and response test preheating",
+    "zh": "电器准备和响应测试预热"
+  },
+  "โต๊ะแข่งขันแบบ Ergonomic ปรับระดับความสูงและพื้นที่ลากเมาส์พิเศษ": {
+    "en": "Ergonomic race table with adjustable height and special drag area",
+    "zh": "具有可调节高度和特殊阻力区域的人体工学比赛桌"
+  },
+  "เอฟเฟกต์ไฟสเตจเปลี่ยนสีอัตโนมัติตามสถานะการวาง Spike ในเกม": {
+    "en": "Stage lighting effects automatically change color based on Spike placement status in the game.",
+    "zh": "舞台照明效果会根据游戏中的尖峰位置状态自动更改颜色。"
+  },
+  "คีย์บอร์ดกลไกสวิตช์ Hall Effect Rapid Trigger แม่นยำทุกเสี้ยววินาที": {
+    "en": "Keyboard, mechanism, switch, Hall Effect Rapid Trigger, precise every second.",
+    "zh": "键盘、机构、开关、霍尔效应快速触发器，每秒精确。"
+  },
+  "สมาธิและความมุ่งมั่นของกัปตันทีมระหว่างสั่งการแผนการบุก": {
+    "en": "Concentration and determination of the team captain during command of the plan of attack.",
+    "zh": "指挥进攻计划期间队长的专注和决心。"
+  },
+  "กองเชียร์แน่นขนัดส่งเสียงเชียร์จังหวะ Clutch 1v3 สุดระทึก": {
+    "en": "Crowded cheerleaders cheered at the thrilling Clutch 1v3.",
+    "zh": "拥挤的啦啦队员在惊心动魄的离合器1V3中欢呼雀跃。"
+  },
+  "ทางเดินเปิดตัวน����กกีฬา (Player Tunnel) พร้อมไฟสปอตไลต์อลังการ": {
+    "en": "Player Tunnel launch corridor with spectacular spotlights",
+    "zh": "带有壮观聚光灯的玩家隧道发射走廊"
+  },
+  "โต๊ะนักพากย์ (Caster Desk) พร้อมจอวิเคราะห์สถิติสดแบบเร��������ไทม์": {
+    "en": "Caster Desk with live statistical analysis screen",
+    "zh": "带实时统计分析屏幕的脚轮桌"
+  },
+  "โซนวอร์มอัพห้องกระจกกันเสียงส่วนตัวสำหรับทีมที่รอขึ้นเวที": {
+    "en": "A private soundproofed glass room warm-up zone for teams waiting to take the stage.",
+    "zh": "私人隔音玻璃房热身区，适合等待登台的团队。"
+  },
+  "เคสคอมพิวเตอร์ชุดน้ำเปิด Custom RGB โลโก้ G-SPEED ประจำเวที": {
+    "en": "Computer case, open water set, Custom RGB, stage G-SPEED logo",
+    "zh": "电脑外壳，开放水域套装，定制RGB ，舞台G-SPEED徽标"
+  },
+  "ถ้วยรางวัลเกียรติยศและเหรียญรางวัลชนะเลิศบนโพเดียม": {
+    "en": "Trophies of honour and medals of the first place on the podium",
+    "zh": "领奖台第一名的荣誉奖杯和奖牌"
+  },
+  "ทีมงานบรอดแคสต์และสวิตเชอร์ควบคุมการถ่ายทอดสดแบบ Multi-View": {
+    "en": "The Broadcast and Switcher teams control the Multi-View live broadcast.",
+    "zh": "广播和切换器团队控制多视图直播。"
+  },
+  "เมาส์เกมมิ่งน้ำหนักเบา���ิเศษ 49g สำหรับการเล็งเป้าหมายที่เฉียบคม": {
+    "en": "Lightweight gaming mouse 49g for sharp aiming",
+    "zh": "轻巧的游戏鼠标49克，瞄准清晰"
+  },
+  "หน้าจอ Replay Slow Motion จังหวะช็อตเด็ด Headshot มหัศจรรย์": {
+    "en": "Replay Slow Motion Screen Magic Headshot Rhythm",
+    "zh": "重播慢动作屏幕魔术头像节奏"
+  },
+  "อุปกรณ์ควบคุมเสียงและไมโครโฟนสำหรับการบรรยายภาษาไทยและอังกฤษ": {
+    "en": "Audio controls and microphones for Thai and English lectures",
+    "zh": "泰语和英语讲座的音频控制和麦克风"
+  },
+  "ทัศนียภาพมุมสูงของอารีน่าระหว่างเปิดการแข่งขันอย่างเป็นทางการ": {
+    "en": "High view of the arena during the official opening of the tournament.",
+    "zh": "锦标赛正式开幕期间的竞技场高景观。"
+  },
+  "โค้ชและผู้เล่นร่วมวิเคราะห์แผนที่และตัวละครระหว่างช่วงพักครึ่ง": {
+    "en": "Co-coaches and players analyze maps and characters during halftime.",
+    "zh": "教练和玩家在半场结束时分析地图和角色。"
+  },
+  "พิธีมอบเช็คเงินรางวัล ฿100,000 แก่ทีมแชมป์เปียนประจำทัวร์นาเมนต์": {
+    "en": "A cheque for 100,000 won was presented to the tournament's champion team.",
+    "zh": "向锦标赛冠军球队赠送了一张10万韩元的支票。"
+  },
+  "แฟนคลับถ่ายรูปเซลฟี่ร่วมกับนักแข่งคนโปรดหลังจบงาน": {
+    "en": "Fans take selfies with their favorite racers after the event.",
+    "zh": "活动结束后，粉丝们将与他们最喜爱的赛车手进行自拍。"
+  },
+  "การจับมือแสดงสปิริตนักกีฬาระหว่างสองทีมหลังจบการแข่งขัน": {
+    "en": "The handshake showed the athlete's spirit between the two teams after the match.",
+    "zh": "比赛结束后，握手显示了两支球队之间的运动员精神。"
+  },
+  "ช่วงเวลาดีใจสุดขีดเมื่อยิงปิดเกมคว้า Match Point สุดระทึก": {
+    "en": "The moment of extreme joy when the shot closes the game, grabbing the thrilling Match Point.",
+    "zh": "当投篮结束比赛，抓住激动人心的比赛点时，极度欢乐的时刻。"
+  },
+  "แสงเลเซอร์และไพโรเทคนิคเปิดตัวคู่ชิงชนะเลิศ Grand Final": {
+    "en": "Laser light and pyrotechnics launch Grand Final duo",
+    "zh": "激光灯和烟火推出Grand Final duo"
+  },
+  "บรรยากาศผู้ร่วมงานเข้าคิวลุ้นรับของรางวัล Lucky Draw เกมมิ่งเกียร์": {
+    "en": "The atmosphere of the participants joined the queue to win Lucky Draw Gaming Gear prizes.",
+    "zh": "参与者的气氛加入队列，赢得幸运抽奖游戏装备奖品。"
+  },
+  "ป้ายไฟเชียร์และแบนเนอร์ของเหล่าแฟนคลับที่มาร่วมให้กำลังใจ": {
+    "en": "Cheerleading fan signs and banners",
+    "zh": "啦啦队球迷标志和横幅"
+  },
+  "การแสดงดนตรีสดเปิดงานทัวร์นาเมนต์สร้างความตื่นเต้นให้แฟนๆ": {
+    "en": "Live music at the opening of the tournament excites fans.",
+    "zh": "比赛开幕式上的现场音乐让球迷们兴奋不已。"
+  },
+  "จุดลงทะเบียนนักกีฬาและการแจกไอดีการ์ดประจำตัวการแข่งขัน": {
+    "en": "Athlete Registration Point and Tournament ID Card Distribution",
+    "zh": "运动员注册积分和锦标赛身份证发放"
+  },
+  "การตรวจสอบความสมบูรณ์ของสายสัญญาณ Fiber Optic ก่อนเริ่มแข่ง": {
+    "en": "Checking the integrity of the fiber optic cable before the start of the race",
+    "zh": "在比赛开始前检查光纤电缆的完整性"
+  },
+  "คณะผู้จัดงานและตัวแทนสปอนเซอร์ร่วมถ่ายภาพเปิดทัวร์นาเมนต์": {
+    "en": "Organizers and sponsoring representatives took the opening photos of the tournament.",
+    "zh": "组织者和赞助商代表拍摄了比赛的开幕照片。"
+  },
+  "สัมภาษณ์สดผู้เล่นยอดเยี่ยม MVP บนเวทีพร้อมล่ามแปลภาษา": {
+    "en": "Live interviews with top players, MVPs on stage, and interpreters.",
+    "zh": "现场采访顶级球员、舞台上的MVP和口译员。"
+  },
+  "ทีมช่างเทคนิคดูแลความสมบูรณ์ของระบบไฟฟ้าสำรอง UPS ตลอด 24 ชม.": {
+    "en": "The technician team takes care of the integrity of the UPS backup power system 24 hours a day.",
+    "zh": "技术人员团队全天候负责UPS备用电源系统的完整性。"
+  },
+  "ห้องประชุมลับสำหรับกรรมการผู้ตัดสินเพื่อพิจารณาเทปย้อนหลัง": {
+    "en": "Secret meeting room for judges to consider the tape back.",
+    "zh": "供评委考虑录音带的秘密会议室。"
+  },
+  "ภาพความประทับใจรวมเหล่านักแข่งทั้ง 32 ทีมบนเวทีใหญ่": {
+    "en": "Impressions include 32 racers on the main stage.",
+    "zh": "印象包括主舞台上的32名赛车手。"
+  },
+  "บรรยากาศบาร์ Cyber Cafe บริการเมนูสดใหม่ตลอดคืนแข่งขัน": {
+    "en": "The Cyber Cafe bar atmosphere offers fresh menus throughout the night of the competition.",
+    "zh": "Cyber Cafe酒吧的氛围在比赛当晚提供新鲜的菜单。"
+  },
+  "ช่วงเวลาชูถ้วยรางวัลฉลองชัยชนะท่ามกลางสายฝนริบบิ้นทอง": {
+    "en": "A moment to raise the trophy to celebrate victory in the rain of gold ribbons.",
+    "zh": "在金丝带雨中举起奖杯庆祝胜利的时刻。"
+  },
+  "เหรียญรางวัลเกียรติยศเคลือบทองคำแท้สำหรับแชมป์รายการนี้": {
+    "en": "A real gold-plated Medal of Honor for this champion.",
+    "zh": "为这位冠军颁发一枚真正的镀金荣誉勋章。"
+  },
+  "มุมอาหารว่างและเครื่องดื่มเกลือแร่ฟรีสำหรับนักกีฬาทุกทีม": {
+    "en": "Free snack and mineral beverage corner for all teams of athletes.",
+    "zh": "为所有运动员提供免费小吃和矿物质饮料角。"
+  },
+  "การจับสลากแบ่งสายการแข่งขัน Group Draw ถ่ายทอดสดทั่วประเทศ": {
+    "en": "The Group Draw is live nationwide.",
+    "zh": "团体抽奖在全国范围内直播。"
+  },
+  "กราฟิก 3D Hologram แสดงสายการแข่งขันและผลคะแนนสด": {
+    "en": "3D Hologram graphics show bracket and live scores.",
+    "zh": "3D全息图形显示括号和实时分数。"
+  },
+  "โค้ชให้คำแนะนำด้านจิตวิทยาและสมาธิระหว่างเวลานอก (Tactical Timeout)": {
+    "en": "The coach provides psychological guidance and concentration during time-out (Tactical Timeout).",
+    "zh": "教练在超时（战术超时）期间提供心理指导和专注力。"
+  },
+  "ระบบคอมพิวเตอร์เซิร์ฟเวอร์ควบคุมผลคะแนนการแข่งขันแบบอัตโนมัติ": {
+    "en": "The server computer system automatically controls the results of the match scores.",
+    "zh": "服务器计算机系统自动控制比赛分数的结果。"
+  },
+  "รอยยิ้มและมิตรภาพระหว่างผู้เล่นหลังจบแมตช์สุดดุเดือด": {
+    "en": "Smiles and friendships between players after a fierce match.",
+    "zh": "激烈的比赛后，玩家之间的微笑和友谊。"
+  },
+  "ผู้บริหาร G-Speed ขึ้นกล่าวปิดงานและประกาศทัวร์นาเมนต์ซีซันถัดไป": {
+    "en": "G-Speed executives gave closing remarks and announced the next season tournament.",
+    "zh": "G-Speed高管发表了闭幕词，并宣布了下赛季的比赛。"
+  },
+  "G-SPEED VALORANT CHAMPIONSHIP 2026 | ทัวร์นาเมนต์ชิงเงินรางวัล ฿100,000": {
+    "en": "G-SPEED valorant Championship 2026 | 100,000 cash prize tournament",
+    "zh": "2026年G-SPEED VALORANT锦标赛| 100,000现金奖金锦标赛"
+  },
+  "แฟนเกมร่วมสนุกกับมินิเกมและตอบคำถามแจกของรางวัลช็อปปิ้งมอลล์": {
+    "en": "Game fans enjoy mini-games and answer questions, giveaways, shopping malls",
+    "zh": "游戏爱好者喜欢迷你游戏，解答问题、赠品、购物中心"
+  },
+  "โน้ตบุ๊กเกมมิ่งระดับท็อปสำหรับการสตรีมมุมมองบุคคลที่หนึ่ง (POV)": {
+    "en": "A top-rated gaming notebook for first-person streaming (pov).",
+    "zh": "适用于第一人称流媒体（ POV ）的顶级游戏笔记本。"
+  },
+  "ภาพความทรงจำส่งท้ายงาน แฟนคลับและนักกีฬาร่วมบันทึกประวัติศาสตร์": {
+    "en": "Images of memories at the end of the event, fans and athletes recording history.",
+    "zh": "赛事结束时的回忆、球迷和运动员记录历史的图像。"
+  },
+  "฿25,000 + silver coins": {
+    "en": "25,000 + silver coins",
+    "zh": "25,000 +枚银币"
+  },
+  "฿50,000 + Trophy + Gold Medal + ROG Gaming Gear Set": {
+    "en": "$10,000 + Trophy + Gold Medal + Rog Gaming Gear Set",
+    "zh": "$ 10,000 +奖杯+金牌+ ROG游戏装备套装"
+  },
+  "VALORANT, GSpeed, ทัวร์นาเมนต์, แข่งเกม, อีสปอร์ต, รามคำแหง 53, LAN Final, 360Hz, ร้านเกม": {
+    "en": "VALORANT, GSpeed, Tournament, Game Race, Esports, Ramkhamhaeng 53, LAN Final, 360Hz, Game Store",
+    "zh": "VALORANT、GSpeed、锦标赛、比赛、电子竞技、Ramkhamhaeng 53、LAN Final、360Hz、游戏商店"
+  },
+  "การแข่งขัน VALORANT LAN Tournament สุดยิ่งใหญ่ ณ G-Speed Arena รามคำแหง 53 เงินรางวัลรวม 100,000 บาท แข่งขันบนเวที Main Stage จอ 360Hz": {
+    "en": "The great valorant LAN Tournament at G-Speed Arena, Ramkhamhaeng 53 with a prize pool of 100,000 baht, competed on the 360Hz Main Stage.",
+    "zh": "在G-Speed竞技场Ramkhamhaeng 53举行的伟大勇敢的局域网锦标赛，奖金为10万泰铢，在360Hz主舞台上比赛。"
+  },
+  "The biggest esports tournament of 2026, competing for a total prize money of over ฿100,000, gathering 32 top teams across the country to duel with precision on the LAN Final stage at G-Speed ​​Arena, Ramkhamhaeng 53, with a tournament spec computer system Intel Core i9 + RTX 4080 and a BenQ ZOWIE 360Hz screen, broadcast live by a professional caster team.": {
+    "en": "The biggest esports tournament of 2026, competing for a total prize money of over 100,000, gathering 32 top teams across the country to duel with precision on the LAN Final stage at G-Speed Arena, Ramkhamhaeng 53, with a tournament spec computer system Intel Core i9 + RTX 4080 and a BenQ ZOWIE 360Hz screen, broadcast live by a professional caster team.",
+    "zh": "2026年最大的电子竞技锦标赛，总奖金超过10万，汇集了全国32支顶级球队，在G-Speed Arena的Ramkhamhaeng 53局域网决赛阶段精准对决，配备锦标赛规格计算机系统Intel Core i9 + RTX 4080和BenQ ZOWIE 360Hz屏幕，由专业脚轮团队现场直播。"
+  },
+  "฿25,000 + 银币": {
+    "en": "25,000 + 银币",
+    "zh": "25,000 + 银币"
+  },
+  "฿10,000 per team + bronze medal": {
+    "en": "10,000 per team + bronze medal",
+    "zh": "每队10,000 +铜牌"
+  },
+  "฿5,000 + ROG Delta S Wireless headphones": {
+    "en": "5,000 + Rog Delta S Wireless headphones",
+    "zh": "5,000 + ROG Delta S无线耳机"
+  },
+  "฿5,000 + ROG Delta S 无线耳机": {
+    "en": "5,000 + Rog Delta S 无线耳机",
+    "zh": "5,000 + ROG Delta S 无线耳机"
+  },
+  "฿50,000 + 奖杯 + 金牌 + ROG 游戏装备套装": {
+    "en": "50,000 + 奖杯 + 金牌 + Rog 游戏装备套装",
+    "zh": "50,000 + 奖杯 + 金牌 + ROG 游戏装备套装"
+  },
+  "2026 年 G-SPEED VALORANT 锦标赛 |锦标赛奖金 ฿100,000": {
+    "en": "2026 年 G-SPEED valorant 锦标赛 |锦标赛奖金 100,000",
+    "zh": "2026 年 G-SPEED VALORANT 锦标赛 |锦标赛奖金 100,000"
+  },
+  "Ceremony to present prize money checks of ฿100,000 to the tournament champion teams.": {
+    "en": "Ceremony to present prize money checks of 100,000 to the tournament champion teams.",
+    "zh": "向锦标赛冠军球队颁发10万张奖金支票的仪式。"
+  },
+  "G-SPEED VALORANT CHAMPIONSHIP 2026 | Tournament for prize money ฿100,000": {
+    "en": "G-SPEED valorant Championship 2026 | Tournament for prize money 100,000",
+    "zh": "2026年G-SPEED VALORANT锦标赛| 10万奖金锦标赛"
+  },
+  "24-25 ตุลาคม 2026": {
+    "en": "October 24-25, 2026.",
+    "zh": "2026年10月24-25日。"
+  },
+  "10:00 - 22:00 น.": {
+    "en": "10:00 AM - 10:00 PM",
+    "zh": "上午10:00 -晚上10:00"
+  },
+  "฿80,000 + โควตาทัวร์ระดับนานาชาติ": {
+    "en": "80,000 + International Tour Quota",
+    "zh": "80,000 +国际旅游名额"
+  },
+  "1 ตุลาคม 2026": {
+    "en": "October 1, 2026",
+    "zh": "2026年10月1日"
+  },
+  "G-Speed Esport Arena รามคำแหง 53 (Main Stage Soundproof Booths)": {
+    "en": "G-Speed Esport Arena Ramkhamhaeng 53 (Main Stage Soundproof Booths)",
+    "zh": "G-Speed Esport Arena Ramkhamhaeng 53 （主舞台隔音摊位）"
+  },
+  "20 ตุลาคม 2026": {
+    "en": "October 20, 2026.",
+    "zh": "2026年10月20日。"
+  },
+  "฿40,000": {
+    "en": "<g id=\"1\">40,000</g>",
+    "zh": "40,000"
+  },
+  "฿15,000 ต่อทีม": {
+    "en": "15,000 per team",
+    "zh": "每队15,000人"
+  },
+  "อันดับ 3-4": {
+    "en": "3rd-4th",
+    "zh": "第3-4名"
+  },
+  "ใช้การตั้งค่า Official Valve CS2 Tournament Ruleset (MR12 + Overtime MR3)": {
+    "en": "Use the Official Valve CS2 Tournament Ruleset (MR12 + Overtime MR3) setting.",
+    "zh": "使用官方阀门CS2锦标赛规则集（ MR12 +加班MR3 ）设置。"
+  },
+  "การแข่งขันรันบนเซิร์ฟเวอร์ LAN ในเครื่องแม่ข่ายของ G-Speed ความหน่วงต่ำกว่า 1ms": {
+    "en": "The competition runs on LAN servers on G-Speed servers with a latency of less than 1ms.",
+    "zh": "比赛在G-Speed服务器上的局域网服务器上进行，延迟小于1毫秒。"
+  },
+  "ห้ามใช้คำสั่ง Console ที่ไม่ได้รับอนุญาตหรือ Custom Aliases": {
+    "en": "Do not use unauthorized console commands or custom aliases.",
+    "zh": "请勿使用未经授权的控制台命令或自定义别名。"
+  },
+  "รอบ Quarter-Finals (Bo3)": {
+    "en": "Quarter-Finals (Bo3)",
+    "zh": "四分之一决赛(Bo3)"
+  },
+  "10:00 น.": {
+    "en": "10:00 AM",
+    "zh": "上午10:00"
+  },
+  "พิธีเปิดและการคัดเลือกแผนที่ Map Veto": {
+    "en": "Map Veto Opening and Selection Ceremony",
+    "zh": "MAP否决权开盘和选拔仪式"
+  },
+  "11:00 - 15:00 น.": {
+    "en": "11:00 AM - 3:00 PM",
+    "zh": "上午11:00 -下午3:00"
+  },
+  "16:00 - 19:00 น.": {
+    "en": "4:00 PM - 7:00 PM",
+    "zh": "下午4:00 -晚上7:00"
+  },
+  "รอบ Semi-Finals (Bo3)": {
+    "en": "Semi-Finals (Bo3)",
+    "zh": "半决赛（ Bo3 ）"
+  },
+  "รอบชิงชนะเลิศ Grand Final (Bo5)": {
+    "en": "Grand Final (Bo5)",
+    "zh": "总决赛（ Bo5 ）"
+  },
+  "19:30 - 22:00 น.": {
+    "en": "7:30 PM - 10:00 PM",
+    "zh": "晚上7:30 -晚上10:00"
+  },
+  "BnTeT (กัปตันทีม)": {
+    "en": "BnTeT (Team Captain)",
+    "zh": "BnTeT （队长）"
+  },
+  "bLitz (กัปตันทีม)": {
+    "en": "bLitz (Team Captain)",
+    "zh": "bLitz （队长）"
+  },
+  "โต๊ะนักพากย์ (Caster Desk) พร้อมจอวิเคราะห์สถิติสดแบบเรียลไทม์": {
+    "en": "Caster Desk with real-time live statistical analysis screen",
+    "zh": "带实时统计分析屏幕的脚轮桌"
+  },
+  "CS2 BANGKOK SHOWDOWN INVITATIONAL 2026 | ชิง ฿150,000": {
+    "en": "CS2 Bangkok showdown Invitational 2026 | win 150,000",
+    "zh": "CS2曼谷摊牌邀请赛2026 |赢得150,000"
+  },
+  "เมาส์เกมมิ่งน้ำหนักเบาพิเศษ 49g สำหรับการเล็งเป้าหมายที่เฉียบคม": {
+    "en": "49g ultra-light gaming mouse for sharp aiming.",
+    "zh": "49克超轻游戏鼠标，瞄准清晰。"
+  },
+  "ทางเดินเปิดตัวนักกีฬา (Player Tunnel) พร้อมไฟสปอตไลต์อลังการ": {
+    "en": "Player Tunnel launch corridor with spectacular spotlights",
+    "zh": "带有壮观聚光灯的玩家隧道发射走廊"
+  },
+  "การแข่งขัน Counter-Strike 2 ระดับนานาชาติ ชิงเงินรางวัล 150,000 บาท ณ G-Speed Arena รามคำแหง 53 Dedicated LAN Server": {
+    "en": "International Counter-Strike 2 competition for 150,000 baht prize money at G-Speed Arena Ramkhamhaeng 53 Dedicated LAN Server",
+    "zh": "在G-Speed Arena Ramkhamhaeng 53专用局域网服务器举行的国际反恐精英2比赛，奖金为15万泰铢"
+  },
+  "รองชนะเลิศอันดับ 2 ร่วม": {
+    "en": "Joint 2nd Runner-up",
+    "zh": "联合亚军"
+  },
+  "CS2, Counter-Strike 2, G-Speed, ทัวร์นาเมนต์, แข่ง LAN, รามคำแหง 53, HLTV, Bangkok Showdown": {
+    "en": "CS2, Counter-Strike 2, G-Speed, Tournament, LAN Race, Ramkhamhaeng 53, HLTV, Bangkok Showdown",
+    "zh": "CS2、反恐精英2、G-Speed、锦标赛、局域网竞赛、Ramkhamhaeng 53、HLTV、曼谷摊牌"
+  },
+  "ห้ามใช้โปรแกรมโกง สคริปต์ช่วยเล่น หรือฉวยโอกาสจากข้อผิดพลาดของเกม หากตรวจพบปรับแพ้ทันที": {
+    "en": "Do not use cheaters, help scripts, or take advantage of game errors if it detects an immediate loss.",
+    "zh": "如果检测到直接损失，请勿使用作弊者、帮助脚本或利用游戏错误。"
+  },
+  "฿5,000 + หูฟังเกมมิ่ง ROG Delta S": {
+    "en": "5,000 + Rog Delta S Gaming Headset",
+    "zh": "5,000 + ROG Delta S游戏耳机"
+  },
+  "การแข่งขันอีสปอร์ตระดับประเทศ ชิงเงินรางวัลรวมกว่า ฿100,000 รวบรวมยอดฝีมือทั่วประเทศมาดวลความแม่นยำบนเวที LAN Final ณ G-Speed Arena รามคำแหง 53": {
+    "en": "The national esports competition for a total prize fund of more than 100,000 gathered experts across the country to duel with precision on the LAN Final stage at G-Speed Arena, Ramkhamhaeng 53.",
+    "zh": "全国电子竞技比赛总奖金超过10万人，全国各地的专家齐聚一堂，在G-Speed Arena （ Ramkhamhaeng 53 ）的局域网决赛阶段精确对决。"
+  },
+  "ลงทะเบียนหน้างาน & ตรวจสอบอุปกรณ์นักกีฬา (Player Check-in)": {
+    "en": "On-site registration & Player Check-in",
+    "zh": "现场注册和球员签到"
+  },
+  "รอบชิงชนะเลิศ Grand Final บนเวที Main Stage (Best of 5)": {
+    "en": "Grand Final on Main Stage (Best of 5)",
+    "zh": "主舞台总决赛（五强）"
+  },
+  "รอบคัดเลือกแบ่งกลุ่ม Group Stage (Best of 1)": {
+    "en": "Group Stage Qualifier (Best of 1)",
+    "zh": "小组赛阶段预选赛（满分1分）"
+  },
+  "G-SPEED VALORANT TOURNAMENT 2026 | ชิงเงินรางวัล ฿100,000": {
+    "en": "G-SPEED valorant tournament 2026 | $100,000 prize pool",
+    "zh": "2026年G-SPEED Valorant锦标赛| $ 100,000奖金池"
+  },
+  "รอบ 8 ทีม และ 4 ทีมสุดท้าย (Quarter & Semi-Finals)": {
+    "en": "Quarter & Semi-Finals",
+    "zh": "四分之一决赛和半决赛"
+  },
+  "VALORANT, GSpeed, ทัวร์นาเมนต์, แข่งเกม, อีสปอร์ต, รามคำแหง 53, LAN Final, 360Hz": {
+    "en": "Valorant, GSpeed, Tournament, Game Race, Esports, Ramkhamhaeng 53, LAN Final, 360Hz",
+    "zh": "Valorant ， GSpeed ，锦标赛，比赛，电子竞技， Ramkhamhaeng 53 ，局域网决赛， 360Hz"
+  },
+  "ภาพบรรยากาศการแข่งขัน Pan-Pacific Warfare Cup 2026 จัดขึ้นที่ ร้าน Gspeed Living Plus ดูภาพบรรกาศได้ที่นี่": {
+    "en": "Photo courtesy of the Pan-Pacific Warfare Cup 2026 held at Gspeed Living Plus. View photos here.",
+    "zh": "照片由Gspeed Living Plus举办的2026年泛太平洋战争杯提供。在此处查看照片。"
+  },
+  "4 นาทีในการอ่าน": {
+    "en": "4 minutes to read",
+    "zh": "4分钟阅读"
+  },
+  "การแข่งขัน VALORANT LAN Tournament สุดยิ่งใหญ่ ณ G-Speed Arena รามคำแหง 53 เงินรางวัลรวม 100,000 บาท สมัครด่วน 32 ทีมเท่านั้น": {
+    "en": "The great VALORANT LAN Tournament at G-Speed Arena Ramkhamhaeng 53 with a prize pool of 100,000 baht. Join now. 32 teams only.",
+    "zh": "G-Speed Arena Ramkhamhaeng 53的精彩VALORANT局域网锦标赛，奖金为10万泰铢。立即加入。仅限32支队伍。"
+  },
+  "เมษายน 2026": {
+    "en": "April 2026",
+    "zh": "2026年4月"
+  },
+  "฿50,000 พร้อมอุปกรณ์เกมมิ่งเกียร์ ROG": {
+    "en": "50,000 with Rog gaming gear",
+    "zh": "配备ROG游戏装备的50,000"
+  },
+  "บรรยากาศการแข่งขัน Pan-Pacific Warfare Cup 2026": {
+    "en": "Pan-Pacific Warfare Cup 2026 atmosphere",
+    "zh": "2026年泛太平洋战杯气氛"
+  },
+  "G-Speed ร่วมกับ ASUS ROG และ NVIDIA Thailand": {
+    "en": "G-Speed joins Asus Rog and NVIDIA Thailand",
+    "zh": "G-Speed加入华硕ROG和NVIDIA泰国"
+  },
+  "320+ คน (32 ทีมทั่วประเทศ)": {
+    "en": "320 + people (32 teams nationwide)",
+    "zh": "320多人（全国32个团队）"
+  },
+  "การได้ลงแข่งในสภาพแวดล้อมที่เครื่องสเปกแรง จอ 360Hz และเน็ตไม่กระตุกเลย ทำให้ผู้เล่นสามารถปลดปล่อยศักยภาพได้ 100% สมกับเป็นสนามแข่งระดับเวิลด์คลาส": {
+    "en": "Being able to compete in an environment where the 360Hz spectroscope and the net are not twitching at all, allowing players to unleash their potential 100% of the time, as if they were a world class race track.",
+    "zh": "能够在360Hz光谱仪和网络完全不抽搐的环境中竞争，让玩家能够100 ％释放他们的潜力，就好像他们是世界级的赛道一样。"
+  },
+  "฿80,000 พร้อมสิทธิ์แข่งรอบเอเชียแปซิฟิก": {
+    "en": "80,000 with Asia-Pacific rights",
+    "zh": "80,000人拥有亚太权利"
+  },
+  "Predator Gaming Thailand ร่วมกับ Krafton Inc.": {
+    "en": "Predator Gaming Thailand in partnership with Krafton Inc.",
+    "zh": "与Krafton Inc.合作的Predator Gaming Thailand"
+  },
+  "฿50,000 including ROG gaming gear": {
+    "en": "50,000 including Rog gaming gear",
+    "zh": "50,000 ，包括ROG游戏装备"
+  },
+  "G-Speed Esport Arena (เวทีกลางและบูทกิจกรรมค่ายเกม)": {
+    "en": "G-Speed Esport Arena (Center Stage & Game Camp Activity Boot)",
+    "zh": "G-Speed电子竞技场（中心舞台和比赛训练营活动靴）"
+  },
+  "กรกฎาคม 2026": {
+    "en": "July 2026",
+    "zh": "2026年7月"
+  },
+  "450+ คน (แฟนเกมและทีมสตรีมเมอร์)": {
+    "en": "450 + people (game fans and team streamers)",
+    "zh": "450多人（游戏粉丝和团队主播）"
+  },
+  "บรรยากาศในงานคึกคักตั้งแต่ช่วงเช้าด้วยกิจกรรม Fan Meeting พบปะคอสเพลย์เยอร์ในชุดตัวละครแอร์ดรอปสุดเท่ พร้อมจุดถ่าย���ูปโฟโต้บูธสามมิติ และแจกไอเทมโค้ดลิขสิทธิ์แท้ให้กับผู้เข้าร่วมงานทุกคน": {
+    "en": "The atmosphere at the event is lively from the morning with Fan Meeting activities, cosplayers in cool airdrop character costumes with three-dimensional photobooth photo spots, and give out authentic code items to all attendees.",
+    "zh": "活动的气氛从早上开始就充满活力，有粉丝会活动，穿着凉爽的空投人物服装和三维照相亭拍照点的角色扮演者，并向所有与会者分发正宗的代码项目。"
+  },
+  "การแข่งขันรอบออฟไลน์ไฟนอลดำเนินไปอย่างตื่นเต้นเร้าใจ มีการใช้ระบบ Observer บรอดแคสต์มืออาชีพพร้อมแคสเตอร์ชื่อดังมาพากย์สดในสตูดิโอบาร์ของร้าน ผู้ชนะเลิศได้รับสิทธิ์เป็นตัวแทนประเทศไทยไปลุยต่อในเวทีระดับนานาชาติ": {
+    "en": "The Offline Finals went on excitedly, using the professional Broadcast Observer system with the famous caster to be dubbed live in the shop's studio bar. The winner was entitled to represent Thailand on the international stage.",
+    "zh": "线下总决赛兴奋地继续进行，使用专业的广播观察者系统与著名的脚轮在商店的工作室酒吧现场配音。获胜者有权在国际舞台上代表泰国。"
+  },
+  "G-Speed เป็นพาร์ตเนอ���์ร้านเกมที่มีความพร้อมด้านระบบและสถานที่สูงมาก สามารถรองรับการบรอดแคสต์ระดับออฟฟิเชียลได้อย่างไร้ที่ติ": {
+    "en": "G-Speed is a game shop partner with very high system and location availability that can support office-level broadcasting flawlessly.",
+    "zh": "G-Speed是一家游戏商店合作伙伴，拥有非常高的系统和位置可用性，可以完美支持办公室级广播。"
+  },
+  "ค่ายเกมยักษ์ใหญ่ Krafton จับมือกับ Acer Predator Gaming เลือกใช้ศูนย์ G-Speed Esport Arena เป็นสถานที่จัดศึกใหญ่ THAILAND PREDATOR LEAGUE - PUBG BATTLEGROUNDS ประจำปี โดยมีนักล่าไก่ทั่วฟ้าเมืองไทยลงทะเบียนเข้าร่วมกว่า 64 สควอด": {
+    "en": "The gaming giant Krafton teamed up with Acer Predator Gaming to use the G-Speed Esport Arena as a venue for the annual Thailand Predator League - PUBG Battlegrounds, with over 64 squads of chicken hunters registered across the Thai sky.",
+    "zh": "游戏巨头卡夫顿与宏碁捕食者游戏公司合作，将G-Speed电子竞技场用作一年一度的泰国捕食者联盟-《绝地求生》战场（ PUBG Battlegrounds ）的场地，在泰国天空中注册了超过64支猎鸡队。"
+  },
+  "เวทีหลักกับการแข่งขันรอบตัดสินชิงตั๋วสู่เอเชีย": {
+    "en": "The main stage and the finals of the ticket to Asia",
+    "zh": "亚洲之旅门票的主舞台和决赛"
+  },
+  "G-Speed Esport Arena (โซนคาเฟ่และเวท��กลาง)": {
+    "en": "G-Speed Esport Arena (Cafe & Magic Zone)",
+    "zh": "G-Speed电子竞技场（咖啡馆和魔术区）"
+  },
+  "พิธีมอบถ้วยแชมป์และเงินรางวัลสนับสนุนจาก Predator": {
+    "en": "Champion's Cup Ceremony and Predator's Prize Money",
+    "zh": "冠军杯颁奖典礼和掠夺者奖金"
+  },
+  "ผู้เข้าแข่งขันสวมหูฟังตัดเสียงรบกวน วางแผนเอาตัวรอด": {
+    "en": "Contestants wear noise-cancelling headphones and plan to survive.",
+    "zh": "参赛者佩戴降噪耳机并计划生存。"
+  },
+  "มิถุนายน 2026": {
+    "en": "June 2026",
+    "zh": "2026年6月"
+  },
+  "ไอเทมแรร์มูลค่ารวมกว่า ฿120,000": {
+    "en": "Rare items worth a total of over 120,000",
+    "zh": "总价值超过12万的稀有道具"
+  },
+  "ความอบอุ่นของแฟนเกม Zone4 ที่มารวมตัวกันที่นี่ ทำให้เรารู้ว่าคอมมูนิตี้เกมไทยยังเหนียวแน่นและพร้อมสนับสนุนกันเสมอ": {
+    "en": "The warmth of Zone4 fans gathered here lets us know that the Thai gaming community is strong and supportive.",
+    "zh": "聚集在这里的Zone4粉丝的热情让我们知道，泰国游戏社区是强大而支持的。"
+  },
+  "280+ คน": {
+    "en": "280 + people",
+    "zh": "280人以上"
+  },
+  "ผู้ร่วมงานได้ร่วมประลองฝีมือในมินิทัวร์นาเมนต์ 1v1 และ 3v3 แบบกระชับมิตร พร้อมลุ้นรับแรร์ไอเทมและฟิกเกอร์ลิมิเต็ดที่มีเฉพาะในงานนี้เท่านั้น": {
+    "en": "Participants participated in friendly 1v1 and 3v3 mini tournaments with a chance to win exclusive rare items and limited figurines.",
+    "zh": "参与者参加了友好的1v1和3v3迷你锦标赛，有机会赢得专属稀有物品和限量小雕像。"
+  },
+  "งานรวมพลสาวกเกมต่อสู้ในตำนาน Zone4 โดยค่าย Electronics Extreme เนรมิตพื้นที่ G-Speed ให้กลายเป็นสถานที่จัดแฟนมีตติ้งสุดเอ็กซ์คลูซีฟ มีการเปิดเผยแผนการอัปเดตเซิร์ฟเวอร์และระบบคลาสใหม่อย่างเป็นทางการ": {
+    "en": "Zone4 legendary fighting game discipleship gathering by Electronics Extreme Camp has created the G-Speed area to become an exclusive fan meeting place. The new server and class system update plans have been officially revealed.",
+    "zh": "Electronics Extreme Camp的Zone4传奇格斗游戏门徒聚会打造了G-Speed专区，成为粉丝专属聚会场所，全新服务器和职业系统更新方案已正式揭晓。"
+  },
+  "G-Speed Esport Arena (โซน Standard Gaming Arena)": {
+    "en": "G-Speed Esport Arena (Standard Gaming Arena Zone)",
+    "zh": "G-Speed电子竞技场（标准游戏竞技场区）"
+  },
+  "฿25,000 พร้อมมงกุฎและไอเทมปีกถาวร": {
+    "en": "25,000 with crown and wing items",
+    "zh": "25,000件带表冠和机翼的物品"
+  },
+  "แฟนเกม Zone4 ร่วมทดลองเล่นแพตช์ใหม่ในโซนเครื่อง VIP": {
+    "en": "Zone4 fans try out the new patches in the VIP zone.",
+    "zh": "Zone4粉丝在VIP区试用新补丁。"
+  },
+  "การแจกของรางวัลสุดพิเศษและของที่ระลึกจากผู้บริหารค่าย": {
+    "en": "Exclusive giveaways and souvenirs from camp administrators",
+    "zh": "营地管理员提供的独家赠品和纪念品"
+  },
+  "พฤษภาคม 2026": {
+    "en": "May 2026",
+    "zh": "2026年5月"
+  },
+  "งานแข่งขันที่เต็มไปด้วยรอยยิ้ม เสียงเพลง และมิตรภาพของเหล่านักเต้นทั่วประเทศที่มารวมตัวกัน": {
+    "en": "A competition filled with smiles, music, and the friendship of dancers all over the country.",
+    "zh": "这场比赛充满了微笑、音乐和全国舞者的友谊。"
+  },
+  "ศึกประชันความเร็วของนิ้วมือและจังหวะดนตรีกับ AUDITION LADY TOURNAMENT ครั้งที่ 7 รายการแข่งขันที่เปิดโอกาสให้นักเต้นสาวสวยทั่วประเทศมาชิงตำแหน่งราชินีฟลอร์เต้น": {
+    "en": "Finger speed and rhythm battle with the 7th audition lady tournament, a competition that allows beautiful dancers all over the country to win the title of Floor Queen.",
+    "zh": "第7届试镜女子锦标赛的手指速度和节奏比赛，让全国各地的美丽舞者赢得地板女王的称号。"
+  },
+  "ร้านเกม G-Speed ได้จัดเตรียมคีย์บอร์ดกลไกสวิตช์ความเร็วสูงและหูฟังตัดเสียง เพื่อให้นักกีฬาได้ยินบีตดนตรีและกดปุ่ม Perfect ได้อย่างแม่นยำที่สุด": {
+    "en": "G-Speed Game Store has provided keyboards, mechanics, high-speed switches, and mute headphones to enable athletes to hear music beats and press the Perfect key as accurately as possible.",
+    "zh": "G-Speed Game Store提供键盘、机械、高速开关和静音耳机，使运动员能够尽可能准确地听到音乐节拍并按下Perfect键。"
+  },
+  "ความเร็วในการรัวปุ่มคีย์บอร์ดระดับเสี้ยววินาที": {
+    "en": "Crash speed, millisecond level keyboard keys",
+    "zh": "崩溃速度，毫秒级键盘键"
+  },
+  "ผู้ได้รับรางวัลชนะเลิศรับมอบมงกุฎและเงินรางวัล": {
+    "en": "The Grand Prize Winner receives the crown and the prize money.",
+    "zh": "大奖得主将获得王冠和奖金。"
+  },
+  "กิจกรรม เปิดตัวเกม ZONE4": {
+    "en": "ZONE4 Game Launch Event",
+    "zh": "ZONE4游戏发布活动"
+  },
+  "เมษายน 2013": {
+    "en": "April 2013",
+    "zh": "2013年4月"
+  },
+  "150+ คน": {
+    "en": "150 + people",
+    "zh": "150人以上"
+  },
+  "บรรยากาศงานเปิดตัวเกม ZONE4 ที่ร้าน GSpeed Living Plus 2013": {
+    "en": "Atmosphere of the launch of ZONE4 at GSpeed Living Plus 2013",
+    "zh": "在GSpeed Living Plus 2013上推出ZONE4的氛围"
+  },
+  "2 นาทีในการอ่าน": {
+    "en": "2 minutes to read",
+    "zh": "2分钟阅读"
+  },
+  "บรรยากาศ งานแข่ง Pubg Chicken Dinner by zowie": {
+    "en": "Pubg Chicken Dinner by zowie",
+    "zh": "Zowie的Pubg鸡肉晚餐"
+  },
+  "การแข่งขันกระชับมิตรประจำเดือนของชุมชนร้านเกม G-Speed ชิงเงินรางวัลและชั่วโมงเล่นเกมฟรี บรรยากาศสนุกสนานและเป็นกันเองตลอดวันหยุดสุดสัปดาห์": {
+    "en": "Monthly friendly tournaments of the G-Speed gaming community, prize money and free game hours, fun and friendly atmosphere throughout the weekend.",
+    "zh": "G-Speed游戏社区的每月友好锦标赛、奖金和免费游戏时间、整个周末的乐趣和友好的氛围。"
+  },
+  "กิจกรรม เปิดตัวเกม ZONE4 - zone4 08": {
+    "en": "ZONE4-zone4 game launch event 08",
+    "zh": "ZONE4-zone4游戏发布活动08"
+  },
+  "มีนาคม 2013": {
+    "en": "March 2013",
+    "zh": "2013年3月"
+  },
+  "กิจกรรมคอมมูนิตี้รายเดือนที่เปิดให้ลูกค้าประจำและแฟนคลับได้มาพบปะและประลองฝีมือกันอย่างเป็นกันเอง": {
+    "en": "A monthly community event open to regular customers and fans to meet and compete in a friendly manner.",
+    "zh": "每月一次的社区活动，向常客和粉丝开放，以友好的方式见面和比赛。"
+  },
+  "ลูกค้าหมุนเวียน 800+ คน/วัน": {
+    "en": "800 + active customers/day",
+    "zh": "每天有超过800个活跃客户"
+  },
+  "งานแข่ง Pubg Chicken Dinner by zowie": {
+    "en": "Pubg Chicken Dinner by zowie",
+    "zh": "Zowie的Pubg鸡肉晚餐"
+  },
+  "G-Speed Esport Arena ทุกโซนบริการ": {
+    "en": "G-Speed Esport Arena All Service Zones",
+    "zh": "G-Speed电子竞技场所有服务区"
+  },
+  "เราใส่ใจในทุกรายละเอียด ทั้งเก้าอี้ที่นั่งสบายตลอดคืน ระบบแอร์ฟอกอากาศ PM2.5 และเมนูอาหารปรุงสดที่ส่งตรงถึงโต๊ะ": {
+    "en": "We pay attention to every detail, including comfortable chairs throughout the night, PM2.5 air purification system, and fresh-cooked dishes delivered directly to the table.",
+    "zh": "我们注重每一个细节，包括整晚舒适的椅子、PM2.5空气净化系统，以及直接送到餐桌上的新鲜烹饪的菜肴。"
+  },
+  "เก็บบรรยากาศยามค่ำคืนของ G-Speed Esport Arena ศูนย์รวมเกมเมอร์ที่เปิดให้บริการตลอด 24 ชั่วโมง ไฮไลต์คือช่วงสุดสัปดาห์ที่มีปาร์ตี้เล่นเกมกับกลุ่มเพื่อน เครื่องเต็ม 100% พร้อมบริการสั่งอาหาร เครื่องดื่มร้อน-เย็นจากบาร์เสิร์ฟถึงโต๊ะอย่างรวดเร็ว": {
+    "en": "Capture the nightlife of the G-Speed Esport Arena, a 24-hour gamer hub. Highlights include a weekend of parties, games with a group of friends, 100% full machines, and fast food, hot and cold drinks from the bar to the table.",
+    "zh": "捕捉24小时游戏中心G-Speed Esport Arena的夜生活。亮点包括周末派对、与一群朋友的游戏、100%全功能机器，以及从酒吧到餐桌的快餐、冷热饮料。"
+  },
+  "฿80,000 พร้อมตั๋วตัวแทนเอเชีย": {
+    "en": "80,000 with Asia agent ticket",
+    "zh": "80,000与亚洲代理工单"
+  },
+  "ทีมข่าวกิจกรรม G-Speed": {
+    "en": "G-Speed Activity News Team",
+    "zh": "G-Speed活动新闻团队"
+  },
+  "รวมภาพความมันส์งานแข่ง PUBG Predator League 2026 | G-Speed Arena": {
+    "en": "PUBG Predator League 2026 Overview | G-Speed Arena",
+    "zh": "PUBG Predator League 2026概览| G-Speed竞技场"
+  },
+  "การจัดแข่งบนฮาร์ดแวร์มาตรฐาน Pro Circuit ช่วยดึงศักยภาพนักกีฬาอีสปอร์ตไทยได้อย่างเต็มที่": {
+    "en": "Organizing the race on Pro Circuit standard hardware helps to capture the full potential of Thai esports athletes.",
+    "zh": "在Pro Circuit标准硬件上组织比赛有助于充分发挥泰国电子竞技运动员的潜力。"
+  },
+  "450+ คน": {
+    "en": "450 + people",
+    "zh": "450人以上"
+  },
+  "PUBG, Predator League, แข่งเกม, G-Speed, Esports Arena, ทัวร์นาเมนต์": {
+    "en": "PUBG, Predator League, Gaming, G-Speed, Esports Arena, Tournaments",
+    "zh": "《绝地求生》、捕食者联盟、游戏、G-Speed、电子竞技场、锦标赛"
+  },
+  "เกาะติดภาพบรรยากาศการแข่งขัน PUBG Predator League ศึกชิงแชมป์เงินรางวัล 80,000 บาท ณ ศูนย์ G-Speed Esport Arena": {
+    "en": "Attached to the image of the PUBG Predator League tournament, the 80,000 baht championship battle at the G-Speed Esport Arena center.",
+    "zh": "在G-Speed Esport Arena中心举行的80,000泰铢冠军争夺战附在PUBG Predator League锦标赛的形象上。"
+  },
+  "สิ้นสุดลงอย่างยิ่งใหญ่สำหรับศึกใหญ่แห่งปี THAILAND PREDATOR LEAGUE 2026 ณ ศูนย์ G-Speed Esport Arena โดยมีทีมระดับหัวแถวของประเทศกว่า 32 ทีมตบเท้าประลองฝีมือชิงเงินรางวัลรวมกว่า ฿80,000 บาท": {
+    "en": "Great end for the big battle of the year, Thailand predator league 2026 at the G-Speed Esport Arena center, with more than 32 country's top teams slapping a total prize pool of more than 80,000 baht.",
+    "zh": "在G-Speed Esport Arena中心举办的泰国捕食者联赛2026是年度大战的最佳结局，超过32支国家顶级球队总奖金超过8万泰铢。"
+  },
+  "ตลอดการขับเคี่ยว 2 วันเต็ม โซนเวที Main Stage เต็มไปด้วยเสียงเชียร์ดังกึกก้อง แฟนคลับมาร่วมชมทั้งติดขอบเวทีและผ่านจอถ่ายทอดสด LED 4K ขนาดยักษ์ใจกลางร้าน": {
+    "en": "Over the course of two full days, the Main Stage zone was filled with loud cheers. Fans came to watch both on the edge of the stage and through the giant 4K led live screen in the center of the store.",
+    "zh": "在整整两天的时间里，主舞台区充满了欢呼声，粉丝们来到舞台边缘，通过商店中心的巨型4K LED直播屏幕观看。"
+  },
+  "การแข่งขันรอบสุดท้ายเป็นไปอย่างระทึกใจ โดยทีมแชมป์สามารถเอาชีวิตรอดและเก็บคะแนนคิลสูงสุดในวงสุดท้าย คว้าถ้วยแชมป์และสิทธิ์เข้าร่วมแข่งขันระดับภูมิภาคเอเชียแปซิฟิกต่อไป": {
+    "en": "The final round was thrilling, with the championship team able to survive and collect the highest kill points in the final band, winning the championship trophy and continuing to participate in the Asia-Pacific region.",
+    "zh": "最后一轮是激动人心的，冠军球队能够生存下来，并在决赛乐队中获得最高的击杀点，赢得冠军奖杯，并继续参加亚太地区的比赛。"
+  },
+  "5 กันยายน 2026": {
+    "en": "September 5, 2026",
+    "zh": "2026年9月5日"
+  },
+  "บรรยากาศผู้เข้าแข่งขันและหน้าจอคอม 360Hz บนเวที": {
+    "en": "Participant atmosphere and 360Hz computer screen on stage",
+    "zh": "舞台上的参与者氛围和360Hz电脑屏幕"
+  },
+  "แฟนคลับส่งเสียงเชียร์รอบชิงชนะเลิศ": {
+    "en": "The fans cheered on the final.",
+    "zh": "球迷们在决赛中欢呼雀跃。"
+  },
+  "พิธีมอบเงินรางวัลและของที่ระลึกจาก Predator": {
+    "en": "Prize Ceremony and Predator Souvenirs",
+    "zh": "颁奖典礼和捕食者纪念品"
+  },
+  "กองบรรณาธิการ GLP": {
+    "en": "GLP Editorial Board",
+    "zh": "GLP编辑委员会"
+  },
+  "ไอเทมแรร์มูลค่า ฿50,000": {
+    "en": "Rare item worth 50,000",
+    "zh": "价值5万的稀有道具"
+  },
+  "GLP จับมือ Electronics Extreme จัดงาน Zone4 แจกไอเทมแท้ | G-Speed": {
+    "en": "GLP joins hands with Electronics Extreme to host Zone4 giveaway | G-Speed",
+    "zh": "GLP携手Electronics Extreme推出Zone4赠品| G-Speed"
+  },
+  "ภาพบรรยากาศงาน Electronics Extreme - Zone4 Fan Meeting กิจกรรมแจกไอเทมโค้ดและการแข่งขันมินิแมตช์ ณ G-Speed": {
+    "en": "Photos of Electronics Extreme - Zone4 Fan Meeting, Item Code Giveaway and Mini-Match at G-Speed",
+    "zh": "Electronics Extreme - Zone4粉丝会议、商品代码赠送和G-Speed迷你比赛的照片"
+  },
+  "Zone4, Electronics Extreme, แฟนมีตติ้ง, แจกไอเทม, ร้านเกม, G-Speed": {
+    "en": "Zone4, Electronics Extreme, Fan Meeting, Item Giveaway, Game Store, G-Speed",
+    "zh": "Zone4, Electronics Extreme,粉丝会议,物品赠送,游戏商店, G-Speed"
+  },
+  "ความอบอุ่นของแฟนเกม Zone4 ยังคงเหนียวแน่น และพื้นที่ของ G-Speed ตอบโจทย์งานมีตติ้งได้อย่างสมบูรณ์แบบ": {
+    "en": "Zone4 fans' warmth remains tight, and the G-Speed space perfectly meets their meeting needs.",
+    "zh": "Zone4风扇的温暖仍然紧凑， G-Speed空间完美满足了他们的需求。"
+  },
+  "ผู้เข้าร่วมงานทุกคนได้รับแพ็กเกจไอเทมโค้ดระดับ Exclusive พร้อมลุ้นรับเสื้อแจ็กเก็ตและของสะสมลิขสิทธิ์แท้จากเกาหลี": {
+    "en": "All attendees received an Exclusive coded item package with a chance to win authentic Korean jackets and collectibles.",
+    "zh": "所有与会者都获得了独家编码物品套餐，有机会赢取正宗的韩国夹克和收藏品。"
+  },
+  "งานนี้นับเป็นอีกหนึ่งเครื่องยืนยันว่า G-Speed ไม่ได้เป็นเพียงร้านเกม แต่เป็นฮับจัดอีเวนต์และศูนย์รวมคอมมูนิตี้เกมเมอร์ที่พร้อมที่สุดของกรุงเทพฯ": {
+    "en": "This event confirms that G-Speed is not just a game store, but an event hub and Bangkok's most equipped community gamer hub.",
+    "zh": "此次活动证实了G-Speed不仅仅是一家游戏商店，而是一个活动中心和曼谷设备最齐全的社区游戏玩家中心。"
+  },
+  "Electronics Extreme ร่วมกับ G-Speed Arena จัดกิจกรรมสุดพิเศษเพื่อเอาใจแฟนเกมไฟท์ติ้งระดับตำนาน Zone4 ภายในงานมีการประกวดคอมมูนิตี้และมินิทัวร์นาเมนต์กระชับมิตร": {
+    "en": "Electronics Extreme and G-Speed Arena organized a special event to please fans of the legendary fighting game Zone4. The event featured a community contest and a friendly mini tournament.",
+    "zh": "Electronics Extreme和G-Speed Arena组织了一场特别活动，以取悦传奇格斗游戏Zone4的粉丝。该活动以社区比赛和友谊迷你锦标赛为特色。"
+  },
+  "การประลองฝีมือแมตช์พิเศษบนเวที": {
+    "en": "Special Match Skill Stages",
+    "zh": "特殊比赛技能阶段"
+  },
+  "ผู้ร่วมงานลงทะเบียนรับถุงของขวัญและไอเทมโค้ด": {
+    "en": "Participants sign up for gift bags and item codes.",
+    "zh": "参与者注册礼品袋和商品代码。"
+  },
+  "28 สิงหาคม 2026": {
+    "en": "August 28, 2026.",
+    "zh": "2026年8月28日。"
+  },
+  "ทีมเทคนิคและวิศวกรรมไอที": {
+    "en": "Technical and Engineering IT Team",
+    "zh": "技术和工程IT团队"
+  },
+  "เราไม่เคยหยุดพัฒนามาตรฐาน เพื่อมอบประสบการณ์เกมมิ่งที่ดีที่สุดและลื่นที่สุดให้แก่ลูกค้าทุกคน": {
+    "en": "We never stop developing standards to deliver the best and smoothest gaming experience for all our customers.",
+    "zh": "我们从不停止制定标准，为所有客户提供最佳、最流畅的游戏体验。"
+  },
+  "อัปเกรดมูลค่ากว่า 5 ล้านบาท": {
+    "en": "Upgrades worth over 5 million baht",
+    "zh": "价值超过500万泰铢的升级"
+  },
+  "เปิดบริการแล้วทุกที่นั่ง": {
+    "en": "Open to all seats",
+    "zh": "向所有座位开放"
+  },
+  "อัปเกรดสเปกใหม่ RTX 40 Series จอ 360Hz ทุกล็อต | G-Speed Esport": {
+    "en": "Upgrade New Specs RTX 40 Series 360Hz Display All Lots | G-Speed Esport",
+    "zh": "升级全新规格RTX 40系列360Hz显示器所有批次| G-Speed Esport"
+  },
+  "สเปกคอมร้านเกม, RTX 4080, จอ 360Hz, ร้านเกมสเปกแรง, G-Speed Arena": {
+    "en": "Gaming Shop Specs, RTX 4080, 360Hz Screen, Gaming Shop Specs, G-Speed Arena",
+    "zh": "游戏商店规格， RTX 4080 ， 360Hz屏幕，游戏商店规格， G-Speed Arena"
+  },
+  "G-Speed Arena ยกเครื่องสเปกคอมใหม่ยกแผง ขุมพลัง GeForce RTX 40 Series พร้อมจอ BenQ 360Hz Fast-IPS เน็ต 10Gbps": {
+    "en": "G-Speed Arena revamped the GeForce RTX 40 Series with BenQ 360Hz Fast-IPS Net 10Gbps display.",
+    "zh": "G-Speed Arena使用明基360Hz Fast-IPS Net 10Gbps显示屏改进了GeForce RTX 40系列。"
+  },
+  "จับคู่กับซีพียู Intel Core i7 / i9 เจนเนอเรชันใหม่ แรม 32GB DDR5 ความเร็วสูง 6000MHz และหน้าจออีสปอร์ต BenQ ZOWIE 360Hz Fast-IPS ที่ให้การตอบสนอง 0.5ms คมชัดทุกการเคลื่อนไหว": {
+    "en": "Paired with a new generation Intel Core i7/i9 CPU, high-speed 32GB DDR5 6000MHz RAM, and a BenQ ZOWIE 360Hz Fast-IPS e-sports screen that delivers a crisp 0.5ms response every move.",
+    "zh": "搭配新一代英特尔酷睿i7/i9处理器、高速32GB DDR5 6000MHz RAM和明基ZOWIE 360Hz Fast-IPS电子竞技屏幕，每次移动都能提供清晰的0.5毫秒响应。"
+  },
+  "เพื่อตอกย้ำความเป็นผู้นำศูนย์กีฬาอีสปอร์ตระด��บเวิลด์คลาส G-Speed Esport Arena ทุ่มงบประมาณกว่า 5 ล้านบาท ปรับปรุงเครื่องคอมพิวเตอร์ทุกล็อตให้เป็นขุมพลังล่าสุด NVIDIA GeForce RTX 40 Series": {
+    "en": "To reinforce its leadership, Esports Center World Class G-Speed Esport Arena has invested more than 5 million baht, improving all PC lots to be the latest powerhouse, the NVIDIA GeForce RTX 40 Series.",
+    "zh": "为了巩固其领导地位， Esports Center World Class G-Speed Esport Arena已投资超过500万泰铢，改进了所有PC批次，使其成为NVIDIA GeForce RTX 40系列的最新动力源泉。"
+  },
+  "หน้าจอ 360Hz ที่ผ่านการปรับแต่งค่าสีสำหรับโปรเพลเยอร์": {
+    "en": "360Hz color-optimized display for Pro Player",
+    "zh": "适用于专业播放器的360Hz彩色优化显示屏"
+  },
+  "เกมอื่นๆ": {
+    "en": "More games",
+    "zh": "更多游戏"
+  },
+  "เคสคอมพิวเตอร์และระบบระบายความร้อนด้วยน้ำสุดเท่": {
+    "en": "Cool computer case and water-cooling system",
+    "zh": "冷却电脑机箱和水冷系统"
+  },
+  "16+ ปี": {
+    "en": "16 years old",
+    "zh": "- 十六年"
+  },
+  "นอกจากนี้ ระบบ Diskless Server ยังได้รับการอัปเกรดเป็น NVMe Gen5 Multi-tier Caching ร่วมกับระบบเน็ตเวิร์ก Dual 10Gbps Fiber Optic ช่วยให้การโหลดเกมและการเปิดเครื่องเร็วขึ้นกว่าเดิม 300%": {
+    "en": "The Diskless Server system has also been upgraded to NVMe Gen5 Multi-tier Caching in conjunction with the Dual 10Gbps Fiber Optic network, enabling 300% faster game loading and power-on times.",
+    "zh": "无盘服务器系统还与双10Gbps光纤网络一起升级到NVMe Gen5多层缓存，使游戏加载和开机时间加快300%。"
+  },
+  "มาตรฐานความถูกต้อง โปร่งใ�� และปลอดภัย": {
+    "en": "Standards for accuracy, transparency and safety",
+    "zh": "准确性、透明度和安全性标准"
+  },
+  "ยึดหลักร้านเกมสีขาว ได้รับใบอนุญาตถูกต้อง 100% ปลอดบุหรี่และโปร่งใส": {
+    "en": "Based on the principle, the white game shop is 100% licensed, non-smoking and transparent.",
+    "zh": "基于这一原则，白色游戏商店是100%许可、禁烟和透明的。"
+  },
+  "สิ่งแวดล้อมปลอดภัยและได้มาตรฐาน": {
+    "en": "Environmentally safe and up to standard",
+    "zh": "环保安全且符合标准"
+  },
+  "ระบบแฟรนไชส์ออกแบบโดยคำนึงถึงผลตอบแทนของผู้ลงทุน ควบคุมต้นทุนได้จริง": {
+    "en": "The franchise system is designed with the return of investors in mind, controlling the actual cost.",
+    "zh": "特许经营系统的设计考虑了投资者的回报，控制了实际成本。"
+  },
+  "คืนทุนไว พาร์ตเนอร์เติบโตยั่งยืน": {
+    "en": "Return capital for sustainable growth with viPartners",
+    "zh": "通过viPartners实现可持续增长的回报资本"
+  },
+  "ร้านเกมสีขาว ปลอดภัยสำหรับเยาวชน": {
+    "en": "The White Shop is safe for teens.",
+    "zh": "白色商店对青少年来说是安全的。"
+  },
+  "ระบบกล้องวงจรปิด CCTV Full HD บันทึก 30 วัน": {
+    "en": "CCTV Surveillance System Full HD 30-day recording",
+    "zh": "闭路电视监控系统全高清30天录制"
+  },
+  "G-Speed ทุกสาขาผ่านการรับรองและตรวจสอบตามพระราชบัญญัติภาพยนตร์และวีดิทัศน์ ได้รับใบอนุญาตประกอบกิจการร้านเกมอย่างถูกต้องจากกระทรวงวัฒนธรรม ใช้ระบบปฏิบัติการ Windows และลิขสิทธิ์เกมแท้ 100% หมดกังวลเรื่องปัญหาลิขสิทธิ์": {
+    "en": "All G-Speed branches are certified and audited in accordance with the Film and Video Act, have a valid gaming store license from the Ministry of Culture, use the Windows operating system and copyright 100% genuine games, no worries about copyright issues.",
+    "zh": "所有G-Speed分支机构均根据“电影和视频法”进行认证和审计，拥有文化部颁发的有效游戏商店许可证，使用Windows操作系统和版权100 ％正版游戏，无需担心版权问题。"
+  },
+  "ใบอนุญาตสถานประกอบการถูกต้องตามกฎหมาย": {
+    "en": "Legal Establishment Permit",
+    "zh": "合法营业执照"
+  },
+  "คำนวณงบลงทุน & วางระบบร้าน": {
+    "en": "Calculate investment budget & set up store system",
+    "zh": "计算投资预算并建立门店系统"
+  },
+  "ร่วมเป็นพาร์ตเนอร์แฟรนไชส์กับเรา": {
+    "en": "Become a Franchise Partner",
+    "zh": "成为特许经营合作伙伴"
+  },
+  "ขยายธุรกิจสู่ Esport Arena เต็มรูปแบบ รองรับการจัดแข่งขันระดับประเทศร่วมกับค่ายเกมใ����ญ่": {
+    "en": "Expand into a full-fledged Esport Arena, supporting national tournaments in conjunction with gaming camps.",
+    "zh": "扩展成为一个成熟的电子竞技场，与游戏营地一起支持全国锦标赛。"
+  },
+  "พิธีเปิดตัว GLP Flagship Arena รามคำแหง 53": {
+    "en": "Launch Ceremony of GLP Flagship Arena Ramkhamhaeng 53",
+    "zh": "GLP旗舰竞技场Ramkhamhaeng 53启动仪式"
+  },
+  "8 ���าขา": {
+    "en": "8. Legs",
+    "zh": "8.腿"
+  },
+  "ศูนย์กีฬาอีสปอร์ตสาขาเรือธงมาตรฐานสากล รองรับเวทีแข่งขัน 5v5 สเปก RTX 4080 SUPER และจอ 360Hz": {
+    "en": "The international flagship e-sports center supports 5v5 arena, RTX 4080 super specs and 360Hz screen.",
+    "zh": "国际旗舰电子竞技中心支持5v5竞技场、RTX 4080超级规格和360Hz屏幕。"
+  },
+  "เปิดตัวระบบ Cloud Diskless & Franchise Model": {
+    "en": "Cloud Diskless & Franchise Model Launched",
+    "zh": "推出云无盘和特许经营模式"
+  },
+  "บุกเบิกระบบเซิร์ฟเวอร์แบบไร้ฮาร์ดดิสก์ความเร็ว 10Gbps พร้อมระบบควบคุมบัญชีและสต๊อกคลาวด์": {
+    "en": "Pioneering 10Gbps hard diskless server system with account control and stock cloud",
+    "zh": "具有帐户控制和股票云的先锋10Gbps无盘服务器系统"
+  },
+  "พัฒนาการสู่ Full Esport Arena มาตรฐานทัวร์นาเมนต์": {
+    "en": "Improvement to Full Esport Arena Tournament Standard",
+    "zh": "完整电子竞技场锦标赛标准的改进"
+  },
+  "การขยายตัวสู่เครือข่าย 8 สาขา และสมาชิกกว่า 52,000 คน": {
+    "en": "Expansion into a network of 8 branches and over 52,000 members",
+    "zh": "扩展到拥有8个分支机构和超过52,000名会员的网络"
+  },
+  "ปรับเปลี่ยนโครงสร้างร้านอินเทอร์เน็ตคาเฟ่เดิมสู่สนามประลองเกมพร้อมโซนสตรีมเมอร์และเวทีแข่งขัน": {
+    "en": "Transform your old internet cafe into a gaming arena with a streamer zone and arena.",
+    "zh": "将您的旧网吧改造成带有流媒体区和竞技场的游戏竞技场。"
+  },
+  "เชื่อมต่อโครงข่ายเคเบิลใยแก้วนำแสงความเร็วสูง 10Gbps พร้อมระบบเราเตอร์สำรอง Ping ต่ำกว่า 2ms": {
+    "en": "Connect 10Gbps high speed fiber optic cable network with ping backup router system under 2ms.",
+    "zh": "将10Gbps高速光缆网络连接到2ms以下的ping备用路由器系统。"
+  },
+  "ร่วมมือกับ NVIDIA Thailand ในการติดตั้งการ์ดจอ GeForce RTX 40 Series สำหรับสนามแข่งมาตรฐาน": {
+    "en": "Collaborate with NVIDIA Thailand to install GeForce RTX 40 Series graphics cards for standard racetracks.",
+    "zh": "与NVIDIA泰国合作，为标准赛道安装GeForce RTX 40系列显卡。"
+  },
+  "ชุดอุปกรณ์เมนบอร์ดและการ์ดจอ ASUS ROG มอบความเสถียรสูงสุดตลอดการแข่งขันยาวนาน 24 ชม.": {
+    "en": "The Asus Rog motherboard kit and graphics card provide maximum stability throughout the 24-hour race.",
+    "zh": "华硕ROG主板套件和显卡在24小时比赛中提供了最大的稳定性。"
+  },
+  "ติดตั้งเก้าอี้เกมมิ่งสรีรศาสตร์ Secretlab Titan Evo รองรับสรีระนักกีฬาอีสปอร์ตทุกตำแหน่งที่นั่ง": {
+    "en": "Equipped with a Secretlab Titan Evo ergonomic gaming chair to support esports athletes in all seating positions.",
+    "zh": "配备Secretlab Titan Evo符合人体工程学的游戏椅，为所有座位位置的电子竞技运动员提供支持。"
+  },
+  "ขยายสาขาครอบคลุมย่านสถาบันการศึกษาและศูนย์การค้า พร้อมให้บริการเกมเมอร์ตลอด 24 ชั่วโมง": {
+    "en": "Expand branches to cover neighborhoods, educational institutions, and shopping centers. Available for gamers 24 hours a day.",
+    "zh": "扩展分支机构，覆盖街区、教育机构和购物中心。全天候为游戏玩家提供服务。"
+  },
+  "ศูนย์ควบคุมกล้องวงจรปิด CCTV Full HD 24 ชม.": {
+    "en": "CCTV CCTV Full HD 24hrs Control Centre",
+    "zh": "闭路电视闭路电视全高清24小时控制中心"
+  },
+  "โซนปลอดบุหรี่ & ระบบอากาศ Clean Air Circulation": {
+    "en": "Non-Smoking Zone & Clean Air Circulation",
+    "zh": "禁烟区和清洁空气循环"
+  },
+  "ผ่านการตรวจเยี่ยมและรับรองมาตรฐานสถานประกอบกิจการตาม พ.ร.บ. ภาพยนตร์และวีดิทัศน์": {
+    "en": "Has passed the inspection and certification of the workplace according to the Film and Video Act.",
+    "zh": "已通过《电影和视频法》规定的工作场所检查和认证。"
+  },
+  "ระบบกล้องวงจรปิดครอบคลุมทุกจุดภายในและภายนอกร้าน จัดเก็บข้อมูลย้อนหลัง 30 วันเพื่อความปลอดภัยสูงสุด": {
+    "en": "CCTV systems cover all points inside and outside the data store for the past 30 days for maximum security.",
+    "zh": "闭路电视系统在过去30天内覆盖了数据存储区内外的所有点，以实现最大的安全性。"
+  },
+  "ตรวจรับรองมาตรฐานร้านเกมสีขาวจากหน่วยงานภาครัฐ": {
+    "en": "Certification of white game shop standards from government agencies",
+    "zh": "政府机构白色游戏店标准认证"
+  },
+  "แยกส่วน 3 ชิ้น ขนส่งสะดวก ประกอบหน้างานภายใน 20 นาที": {
+    "en": "Disassemble 3 parts, convenient transportation, assemble on site within 20 minutes.",
+    "zh": "拆卸3个零件，运输方便， 20分钟内现场组装。"
+  },
+  "ร้านเกมปลอดบุหรี่ 100% พร้อมระบบฟอกอากาศและระบายอากาศหมุนเวียนมาตรฐานสากล": {
+    "en": "100% smoke-free game shop with international standard air purification and ventilation system",
+    "zh": "100%无烟游戏店，配备国际标准的空气净化和通风系统"
+  },
+  "โต๊ะคอมพิวเตอร์เกมมิ่ง 2 ที่นั่ง GLP Double Station โครงเหล็กคาร์บอน": {
+    "en": "GLP Double Station 2 Seater Gaming Computer Table Carbon Steel Frame",
+    "zh": "GLP双工位2座博彩电脑桌碳钢框架"
+  },
+  "ระบบแคชเชียร์และพนักงานคัดกรองเวลาให้บริการเยาวชนอย่างเคร่งครัดตามกรอบกฎหมาย": {
+    "en": "The cashier system and staff screen youth service hours strictly according to the legal framework.",
+    "zh": "收银系统和工作人员严格按照法律框架筛选青少年服务时间。"
+  },
+  "การคัดกรองเวลาและดูแลเยาวชนตามกฎหมาย": {
+    "en": "Time screening and legal supervision of juveniles",
+    "zh": "对未成年人的时间筛选和法律监督"
+  },
+  "โต๊ะเกมมิ่งเหล็กคาร์บอนยาว 2.4 ม. พร้อมรางร้อยสายไฟและฉากกั้นกลาง": {
+    "en": "2.4m long carbon steel gaming table with wiring rails and a central partition",
+    "zh": "2.4米长碳钢游戏桌配有配线栏杆和中央隔断"
+  },
+  "7 - 10 วันทำการ": {
+    "en": "7 - 10 business days",
+    "zh": "7 - 10个工作日"
+  },
+  "G-Speed Pro Racing PU Leather (ปรับเอน 160°)": {
+    "en": "G-Speed Pro Racing PU Leather (160° lean)",
+    "zh": "G-Speed Pro Racing PU皮革（ 160°倾斜）"
+  },
+  "รับประกันโครงสร้าง 5 ปี และระบบไฟ 3 ปี On-site Service": {
+    "en": "5 year structure warranty and 3 year lighting system On-site Service",
+    "zh": "5年结构保修和3年照明系统上门服务"
+  },
+  "โครงเหล็กกล้าคาร์บอนพ่นสี Powder Coat + หน้าท็อป HPL กันน้ำและรอยขีดข่วน + รางร้อยสายไฟแยก High/Low Voltage": {
+    "en": "Carbon steel frame with powder coat paint + Water and scratch resistant HPL top + High/Low Voltage isolation trunking",
+    "zh": "碳钢框架，带粉末涂料+防水和防刮HPL顶部+高/低压隔离线槽"
+  },
+  "โต๊ะแถวยาว 4.8 ม. โครงสร้างเสาคานรับน้ำหนักพิเศษ ช่องเก็บสายไฟเมน": {
+    "en": "4.8m row table Column structure, extra load beam, main cable compartment",
+    "zh": "4.8米行表柱结构、额外载荷梁、主电缆舱"
+  },
+  "7 - 12 วันทำการ": {
+    "en": "7 - 12 business days",
+    "zh": "7 - 12个工作日"
+  },
+  "G-Speed Pro Racing PU Leather (พนักพิงปรับสรีระ)": {
+    "en": "G-Speed Pro Racing PU Leather",
+    "zh": "G-Speed Pro Racing PU皮革"
+  },
+  "โครงสร้างเสาคานคู่รับน้ำหนักพิเศษ แยกส่วนขนย้าย 4 แพ็กเกจ": {
+    "en": "Column structure, double beam, special load bearing, separated, transported in 4 packages",
+    "zh": "立柱结构，双梁，特殊承重，分离， 4包运输"
+  },
+  "แถวคอมพิวเตอร์เกมมิ่ง 4 ที่นั่ง GLP Quad Station แถวยาวมาตรฐาน": {
+    "en": "4 Seater Computer Gaming Row GLP Quad Station Standard Long Row",
+    "zh": "4座电脑Gaming Row GLP四站标准长排"
+  },
+  "เกาะคอมพิวเตอร์ 6 ที่นั่ง GLP Island 6 พร้อมเสาเดินสายไฟกลาง": {
+    "en": "6 seater computer island GLP Island 6 with central wiring pole",
+    "zh": "6座电脑岛GLP岛6带中央接线柱"
+  },
+  "G-Speed Pro Racing PU Leather (เก้าอี้เกมมิ่ง 6 ตัว)": {
+    "en": "G-Speed Pro Racing PU Leather (6 Gaming Chairs)",
+    "zh": "G-Speed Pro Racing PU皮革（ 6把游戏椅）"
+  },
+  "โครงสร้างเสาคานเหล็กรับน้ำหนักพิเศษ + หน้าท็อปโมดูลาร์ 4 ช่วงต่อไร้รอยสะดุด + ถาดซ่อนเราเตอร์ Gigabit LAN": {
+    "en": "Column structure, special load-bearing steel beam + modular top 4 seamless splices + Gigabit LAN router hidden tray",
+    "zh": "立柱结构，特殊承重钢梁+模块化顶部4个无缝接头+千兆局域网路由器隐藏托盘"
+  },
+  "โต๊ะเกาะกลาง 3x3 หันหลังชนกัน พร้อมกระดูกงูร้อยสายไฟและปลั๊กไฟ 6 จุด": {
+    "en": "3x3 center island table with back to back collision with keel and 6 power outlets",
+    "zh": "3x3中心岛桌，与龙骨和6个电源插座背靠背碰撞"
+  },
+  "เกาะกลาง 6 ที่นั่ง โครงสร้างสามเหลี่ยมค้ำยัน รองรับ 1,100 กก.": {
+    "en": "6-seater central island, triangular structure, support support 1,100 kg",
+    "zh": "6座中央岛，三角形结构，支撑1100公斤"
+  },
+  "10 - 14 วันทำการ": {
+    "en": "10 - 14 business days",
+    "zh": "10 - 14个工作日"
+  },
+  "ท็อปคู่หันหลังชนกันพร้อมเสากลางเดินท่อไฟและลมแอร์ + โครงเหล็กชุบกัลวาไนซ์ + แผงกั้นอะคริลิกตัดแสง RGB": {
+    "en": "Double rear-facing, colliding central pillars, light ducts and air-conditioning + galvanized steel frame + RGB cut-out acrylic partition",
+    "zh": "双后置、碰撞中心柱、灯管、空调+镀锌钢架+ RGB剪裁亚克力隔断"
+  },
+  "ห้องวีไอพีส่วนตัว 5 ที่นั่ง VIP Private Suite กระจกเก็บเสียง": {
+    "en": "ห้องวีไอพีส่วนตัว 5 ที่นั่ง VIP Private Suite กระจกเก็บเสียง",
+    "zh": "私人VIP客房5座VIP私人套房隔音玻璃"
+  },
+  "ผนังกระจกเก็บเสียง Double Glass + ประตูบานเลื่อนกระจก + ไฟปรับอารมณ์": {
+    "en": "ผนังกระจกเก็บเสียง Double Glass + ประตูบานเลื่อนกระจก + ไฟปรับอารมณ์",
+    "zh": "双层玻璃隔音墙+滑动玻璃门+情绪调节灯"
+  },
+  "ผนังกระจกนิรภัย 2 ชั้นและโครงสร้างห้องน้ำหนักรวม 280 กก. ติดตั้งโดยทีมช่างเฉพาะทาง": {
+    "en": "ผนังกระจกนิรภัย 2 ชั้นและโครงสร้างห้องน้ำหนักรวม 280 กก. ติดตั้งโดยทีมช่างเฉพาะทาง",
+    "zh": "双层安全玻璃墙和卫生间结构共重280公斤。由专业技术人员团队安装"
+  },
+  "Secretlab TITAN Evo 2024 Series (เก้าอี้พรีเมียม 5 ตัว)": {
+    "en": "Secretlab TITAN Evo 2024 Series (เก้าอี้พรีเมียม 5 ตัว)",
+    "zh": "Secretlab TITAN Evo 2024 Series (เก้าอี้พรีเมียม 5 ตัว)"
+  },
+  "รับประกันโครงสร้างและระบบกระจก 5 ปี, ระบบไ���อารมณ์ 3 ปี": {
+    "en": "รับประกันโครงสร้างและระบบกระจก 5 ปี, ระบบไ���อารมณ์ 3 ปี",
+    "zh": "รับประกันโครงสร้างและระบบกระจก 5 ปี, ระบบไ���อารมณ์ 3 ปี"
+  },
+  "เวทีแข่งขันอีสปอร์ต 5v5 Tournament Stage 10 ที่นั่ง": {
+    "en": "เวทีแข่งขันอีสปอร์ต 5v5 Tournament Stage 10 ที่นั่ง",
+    "zh": "เวทีแข่งขันอีสปอร์ต 5v5 Tournament Stage 10 ที่นั่ง"
+  },
+  "14 - 21 วันทำการ": {
+    "en": "14 - 21 วันทำการ",
+    "zh": "14 - 21 วันทำการ"
+  },
+  "กระจกนิรภัยลามิเนตเก็บเสียง 12 มม. 2 ชั้น + โครงสร้างอะลูมิเนียมอโนไดซ์ดำด้าน + ระบบไฟ Smart RGB ควบคุมผ่านแอป": {
+    "en": "กระจกนิรภัยลามิเนตเก็บเสียง 12 มม. 2 ชั้น + โครงสร้างอะลูมิเนียมอโนไดซ์ดำด้าน + ระบบไฟ Smart RGB ควบคุมผ่านแอป",
+    "zh": "กระจกนิรภัยลามิเนตเก็บเสียง 12 มม. 2 ชั้น + โครงสร้างอะลูมิเนียมอโนไดซ์ดำด้าน + ระบบไฟ Smart RGB ควบคุมผ่านแอป"
+  },
+  "เวทียกพื้นโครงเหล็กกล่องมาตรฐาน Pro Stage รองรับน้ำหนัก 2,500 กก.": {
+    "en": "เวทียกพื้นโครงเหล็กกล่องมาตรฐาน Pro Stage รองรับน้ำหนัก 2,500 กก.",
+    "zh": "เวทียกพื้นโครงเหล็กกล่องมาตรฐาน Pro Stage รองรับน้ำหนัก 2,500 กก."
+  },
+  "รับประกันโครงสร้างเวที 7 ปี และระบบไฟเวที 3 ปี": {
+    "en": "รับประกันโครงสร้างเวที 7 ปี และระบบไฟเวที 3 ปี",
+    "zh": "รับประกันโครงสร้างเวที 7 ปี และระบบไฟเวที 3 ปี"
+  },
+  "Secretlab TITAN Evo Pro Tournament Edition (10 ตัว)": {
+    "en": "Secretlab TITAN Evo Pro Tournament Edition (10 ตัว)",
+    "zh": "Secretlab TITAN Evo Pro Tournament Edition (10 ตัว)"
+  },
+  "เวทีแข่งขัน 2 ฝั่งยกพื้นสูง 30 ซม. พร้อมโครงทรัสไฟและแบ็กดรอปจอ LED": {
+    "en": "เวทีแข่งขัน 2 ฝั่งยกพื้นสูง 30 ซม. พร้อมโครงทรัสไฟและแบ็กดรอปจอ LED",
+    "zh": "เวทีแข่งขัน 2 ฝั่งยกพื้นสูง 30 ซม. พร้อมโครงทรัสไฟและแบ็กดรอปจอ LED"
+  },
+  "21 - 30 วันทำการ": {
+    "en": "21 - 30 วันทำการ",
+    "zh": "21 - 30 วันทำการ"
+  },
+  "Ergonomic Stool สำหรับพนักงาน": {
+    "en": "Ergonomic Stool สำหรับพนักงาน",
+    "zh": "Ergonomic Stool สำหรับพนักงาน"
+  },
+  "ท็อปหินสังเคราะห์ Solid Surface รองรับแรงกดและน้ำหนัก 400 กก.": {
+    "en": "ท็อปหินสังเคราะห์ Solid Surface รองรับแรงกดและน้ำหนัก 400 กก.",
+    "zh": "ท็อปหินสังเคราะห์ Solid Surface รองรับแรงกดและน้ำหนัก 400 กก."
+  },
+  "โครงสร้างเวทีเหล็กกล่องมาตรฐาน Pro Stage รองรับน้ำหนัก 2,000 กก. + พื้นไม้อัดหนาพิเศษปูพรมกันลามไฟ + เสาทรัสไฟอลูมิเนียม": {
+    "en": "โครงสร้างเวทีเหล็กกล่องมาตรฐาน Pro Stage รองรับน้ำหนัก 2,000 กก. + พื้นไม้อัดหนาพิเศษปูพรมกันลามไฟ + เสาทรัสไฟอลูมิเนียม",
+    "zh": "โครงสร้างเวทีเหล็กกล่องมาตรฐาน Pro Stage รองรับน้ำหนัก 2,000 กก. + พื้นไม้อัดหนาพิเศษปูพรมกันลามไฟ + เสาทรัสไฟอลูมิเนียม"
+  },
+  "เคาน์เตอร์แคชเชียร์และต้อนรับ GLP Reception Counter": {
+    "en": "เคาน์เตอร์แคชเชียร์และต้อนรับ GLP Reception Counter",
+    "zh": "เคาน์เตอร์แคชเชียร์และต้อนรับ GLP Reception Counter"
+  },
+  "เคาน์เตอร์ท็อปหินสังเคราะห์ โครงไม้ลามิเนต พร้อมลิ้นชักเก็บเงินและช่อง POS": {
+    "en": "เคาน์เตอร์ท็อปหินสังเคราะห์ โครงไม้ลามิเนต พร้อมลิ้นชักเก็บเงินและช่อง POS",
+    "zh": "เคาน์เตอร์ท็อปหินสังเคราะห์ โครงไม้ลามิเนต พร้อมลิ้นชักเก็บเงินและช่อง POS"
+  },
+  "ตู้ Rack Server 42U แบบปิดทึบ มีระบบระบายความร้อน พัดลมเทอร์โบ และระบบไฟ UPS": {
+    "en": "ตู้ Rack Server 42U แบบปิดทึบ มีระบบระบายความร้อน พัดลมเทอร์โบ และระบบไฟ UPS",
+    "zh": "ตู้ Rack Server 42U แบบปิดทึบ มีระบบระบายความร้อน พัดลมเทอร์โบ และระบบไฟ UPS"
+  },
+  "ท็อปหินสังเคราะห์ Solid Surface ไร้รอยต่อ + โครงไม้ HMR เกรดทนความชื้นปิดผิว High Pressure Laminate + ช่องเดินสาย POS ซ่อนรูป": {
+    "en": "ท็อปหินสังเคราะห์ Solid Surface ไร้รอยต่อ + โครงไม้ HMR เกรดทนความชื้นปิดผิว High Pressure Laminate + ช่องเดินสาย POS ซ่อนรูป",
+    "zh": "ท็อปหินสังเคราะห์ Solid Surface ไร้รอยต่อ + โครงไม้ HMR เกรดทนความชื้นปิดผิว High Pressure Laminate + ช่องเดินสาย POS ซ่อนรูป"
+  },
+  "รับประกันโครงสร้างเคาน์เตอร์ 3 ปี และรางลิ้นชัก Soft-close 2 ปี": {
+    "en": "รับประกันโครงสร้างเคาน์เตอร์ 3 ปี และรางลิ้นชัก Soft-close 2 ปี",
+    "zh": "รับประกันโครงสร้างเคาน์เตอร์ 3 ปี และรางลิ้นชัก Soft-close 2 ปี"
+  },
+  "ห้องเซิร์ฟเวอร์ Diskless Master Rack 42U": {
+    "en": "ห้องเซิร์ฟเวอร์ Diskless Master Rack 42U",
+    "zh": "ห้องเซิร์ฟเวอร์ Diskless Master Rack 42U"
+  },
+  "ตู้ Rack SPCC 42U รับน้ำหนักเซิร์ฟเวอร์และ UPS ได้สูงสุด 800 กก.": {
+    "en": "ตู้ Rack SPCC 42U รับน้ำหนักเซิร์ฟเวอร์และ UPS ได้สูงสุด 800 กก.",
+    "zh": "ตู้ Rack SPCC 42U รับน้ำหนักเซิร์ฟเวอร์และ UPS ได้สูงสุด 800 กก."
+  },
+  "ไม่มีที่นั่ง (ระบบเซิร์ฟเวอร์ควบคุมอัตโนมัติ)": {
+    "en": "ไม่มีที่นั่ง (ระบบเซิร์ฟเวอร์ควบคุมอัตโนมัติ)",
+    "zh": "ไม่มีที่นั่ง (ระบบเซิร์ฟเวอร์ควบคุมอัตโนมัติ)"
+  },
+  "รับประกันตู้ Rack และระบบระบายความร้อน 5 ปี": {
+    "en": "รับประกันตู้ Rack และระบบระบายความร้อน 5 ปี",
+    "zh": "รับประกันตู้ Rack และระบบระบายความร้อน 5 ปี"
+  },
+  "5 - 7 วันทำการ": {
+    "en": "5 - 7 วันทำการ",
+    "zh": "5 - 7 วันทำการ"
+  },
+  "สแน็กบาร์และเคาน์เตอร์เครื่องดื่ม GLP Cafe Bar": {
+    "en": "สแน็กบาร์และเคาน์เตอร์เครื่องดื่ม GLP Cafe Bar",
+    "zh": "สแน็กบาร์และเคาน์เตอร์เครื่องดื่ม GLP Cafe Bar"
+  },
+  "ตู้ Rack มาตรฐานสากล 19 นิ้ว 42U เหล็ก SPCC หนา 2.0 มม. + ประตูกระจกนิรภัยพร้อมกุญแจดิจิทัล + พัดลมระบายอากาศ 4 ตัว": {
+    "en": "ตู้ Rack มาตรฐานสากล 19 นิ้ว 42U เหล็ก SPCC หนา 2.0 มม. + ประตูกระจกนิรภัยพร้อมกุญแจดิจิทัล + พัดลมระบายอากาศ 4 ตัว",
+    "zh": "ตู้ Rack มาตรฐานสากล 19 นิ้ว 42U เหล็ก SPCC หนา 2.0 มม. + ประตูกระจกนิรภัยพร้อมกุญแจดิจิทัล + พัดลมระบายอากาศ 4 ตัว"
+  },
+  "12 - 16 วันทำการ": {
+    "en": "12 - 16 วันทำการ",
+    "zh": "12 - 16 วันทำการ"
+  },
+  "ท็อปสแตนเลสและโครงบาร์รองรับน้ำหนักเครื่องชงกาแฟและตู้แช่ 500 กก.": {
+    "en": "ท็อปสแตนเลสและโครงบาร์รองรับน้ำหนักเครื่องชงกาแฟและตู้แช่ 500 กก.",
+    "zh": "ท็อปสแตนเลสและโครงบาร์รองรับน้ำหนักเครื่องชงกาแฟและตู้แช่ 500 กก."
+  },
+  "เคาน์เตอร์บาร์น้ำ ตู้แช่เครื่องดื่มทรงสูง และจุดจัดเตรียมอาหารสำเร็จรูป": {
+    "en": "เคาน์เตอร์บาร์น้ำ ตู้แช่เครื่องดื่มทรงสูง และจุดจัดเตรียมอาหารสำเร็จรูป",
+    "zh": "เคาน์เตอร์บาร์น้ำ ตู้แช่เครื่องดื่มทรงสูง และจุดจัดเตรียมอาหารสำเร็จรูป"
+  },
+  "ไม่มีที่นั่ง (โซนบริการ)": {
+    "en": "ไม่มีที่นั่ง (โซนบริการ)",
+    "zh": "ไม่มีที่นั่ง (โซนบริการ)"
+  },
+  "รับประกันโครงสร้างบาร์ 3 ปี และระบบประปา/ซิงก์ 2 ปี": {
+    "en": "รับประกันโครงสร้างบาร์ 3 ปี และระบบประปา/ซิงก์ 2 ปี",
+    "zh": "รับประกันโครงสร้างบาร์ 3 ปี และระบบประปา/ซิงก์ 2 ปี"
+  },
+  "ท็อปสแตนเลส Food Grade 304 ผสมผสานหินสังเคราะห์ + ซิงก์ล้างจานเดี่ยว + จุดต่อปลั๊กเครื่องชงกาแฟและหม้อทอดไร้น้ำมัน": {
+    "en": "ท็อปสแตนเลส Food Grade 304 ผสมผสานหินสังเคราะห์ + ซิงก์ล้างจานเดี่ยว + จุดต่อปลั๊กเครื่องชงกาแฟและหม้อทอดไร้น้ำมัน",
+    "zh": "ท็อปสแตนเลส Food Grade 304 ผสมผสานหินสังเคราะห์ + ซิงก์ล้างจานเดี่ยว + จุดต่อปลั๊กเครื่องชงกาแฟและหม้อทอดไร้น้ำมัน"
+  },
+  "ชุดโซฟาหนัง L-Shape 4 ที่นั่ง นุ่มสบาย": {
+    "en": "ชุดโซฟาหนัง L-Shape 4 ที่นั่ง นุ่มสบาย",
+    "zh": "ชุดโซฟาหนัง L-Shape 4 ที่นั่ง นุ่มสบาย"
+  },
+  "ชุดโซฟาพักผ่อนและกองเชียร์ Spectator Lounge 4 ที่นั่ง": {
+    "en": "ชุดโซฟาพักผ่อนและกองเชียร์ Spectator Lounge 4 ที่นั่ง",
+    "zh": "ชุดโซฟาพักผ่อนและกองเชียร์ Spectator Lounge 4 ที่นั่ง"
+  },
+  "โต๊ะก��างกระจกนิรภัยทรงโมเดิร์น": {
+    "en": "โต๊ะก��างกระจกนิรภัยทรงโมเดิร์น",
+    "zh": "โต๊ะก��างกระจกนิรภัยทรงโมเดิร์น"
+  },
+  "โซฟา L-Shape โครงไม้เนื้อแข็งรองรับน้ำหนักผู้ใช้งาน 450 กก.": {
+    "en": "โซฟา L-Shape โครงไม้เนื้อแข็งรองรับน้ำหนักผู้ใช้งาน 450 กก.",
+    "zh": "โซฟา L-Shape โครงไม้เนื้อแข็งรองรับน้ำหนักผู้ใช้งาน 450 กก."
+  },
+  "โครงไม้เนื้อแข็งอบแห้งกันมอด + เบาะหุ้มหนัง PU ทนการขูดขีดกันน้ำ + โต๊ะกลางโครงสแตนเลสท็อปกระจกเทมเปอร์ 8 มม.": {
+    "en": "โครงไม้เนื้อแข็งอบแห้งกันมอด + เบาะหุ้มหนัง PU ทนการขูดขีดกันน้ำ + โต๊ะกลางโครงสแตนเลสท็อปกระจกเทมเปอร์ 8 มม.",
+    "zh": "โครงไม้เนื้อแข็งอบแห้งกันมอด + เบาะหุ้มหนัง PU ทนการขูดขีดกันน้ำ + โต๊ะกลางโครงสแตนเลสท็อปกระจกเทมเปอร์ 8 มม."
+  },
+  "ประตูบานคู่พร้อมวงกบ ระบบโช้กอัพอัตโนมัติ และมือจับสแตนเลสทรงโมเดิร์น": {
+    "en": "ประตูบานคู่พร้อมวงกบ ระบบโช้กอัพอัตโนมัติ และมือจับสแตนเลสทรงโมเดิร์น",
+    "zh": "ประตูบานคู่พร้อมวงกบ ระบบโช้กอัพอัตโนมัติ และมือจับสแตนเลสทรงโมเดิร์น"
+  },
+  "รับประกันโครงสร้างโซฟาและฟองน้ำความหนาแน่นสูง 3 ปี": {
+    "en": "รับประกันโครงสร้างโซฟาและฟองน้ำความหนาแน่นสูง 3 ปี",
+    "zh": "รับประกันโครงสร้างโซฟาและฟองน้ำความหนาแน่นสูง 3 ปี"
+  },
+  "บานกระจกเทมเปอร์ 10 มม. พร้อมวงกบ WPC และโช้กอัพฝังพื้น Soft-Closing": {
+    "en": "บานกระจกเทมเปอร์ 10 มม. พร้อมวงกบ WPC และโช้กอัพฝังพื้น Soft-Closing",
+    "zh": "บานกระจกเทมเปอร์ 10 มม. พร้อมวงกบ WPC และโช้กอัพฝังพื้น Soft-Closing"
+  },
+  "ประตูทางเข้าหลักกระจกนิรภัยบานคู่ GLP Main Glass Door": {
+    "en": "ประตูทางเข้าหลักกระจกนิรภัยบานคู่ GLP Main Glass Door",
+    "zh": "ประตูทางเข้าหลักกระจกนิรภัยบานคู่ GLP Main Glass Door"
+  },
+  "วงกบไม้สังเคราะห์ WPC กันปลวกกันน้ำ + บานกระจกนิรภัยเทมเปอร์ตัดแสง 10 มม. + โช้กอัพฝังพื้นระบบ Soft-Closing": {
+    "en": "วงกบไม้สังเคราะห์ WPC กันปลวกกันน้ำ + บานกระจกนิรภัยเทมเปอร์ตัดแสง 10 มม. + โช้กอัพฝังพื้นระบบ Soft-Closing",
+    "zh": "วงกบไม้สังเคราะห์ WPC กันปลวกกันน้ำ + บานกระจกนิรภัยเทมเปอร์ตัดแสง 10 มม. + โช้กอัพฝังพื้นระบบ Soft-Closing"
+  },
+  "กระจกลามิเนต 12 มม. เคลือบกัน UV พร้อมเฟรมอะลูมิเนียมกันแรงลม": {
+    "en": "กระจกลามิเนต 12 มม. เคลือบกัน UV พร้อมเฟรมอะลูมิเนียมกันแรงลม",
+    "zh": "กระจกลามิเนต 12 มม. เคลือบกัน UV พร้อมเฟรมอะลูมิเนียมกันแรงลม"
+  },
+  "รับประกันวงกบและโช้กอัพประตู 3 ปี": {
+    "en": "รับประกันวงกบและโช้กอัพประตู 3 ปี",
+    "zh": "รับประกันวงกบและโช้กอัพประตู 3 ปี"
+  },
+  "โครงสร้างสถาปัตยกรรม (ไม่มีเก้าอี้)": {
+    "en": "โครงสร้างสถาปัตยกรรม (ไม่มีเก้าอี้)",
+    "zh": "โครงสร้างสถาปัตยกรรม (ไม่มีเก้าอี้)"
+  },
+  "หน้าต่างกระจกบานใหญ่ Panoramic Glass Window รับแสงธรรมชาติ": {
+    "en": "หน้าต่างกระจกบานใหญ่ Panoramic Glass Window รับแสงธรรมชาติ",
+    "zh": "หน้าต่างกระจกบานใหญ่ Panoramic Glass Window รับแสงธรรมชาติ"
+  },
+  "กระจกนิรภัยเทมเปอร์ตัดแสง 12 มม. พร้อมเฟรมอะลูมิเนียมสีดำด้าน": {
+    "en": "กระจกนิรภัยเทมเปอร์ตัดแสง 12 มม. พร้อมเฟรมอะลูมิเนียมสีดำด้าน",
+    "zh": "กระจกนิรภัยเทมเปอร์ตัดแสง 12 มม. พร้อมเฟรมอะลูมิเนียมสีดำด้าน"
+  },
+  "รับประกันโครงสร้างเฟรมและซีลกันรั่วซึม 5 ปี": {
+    "en": "รับประกันโครงสร้างเฟรมและซีลกันรั่วซึม 5 ปี",
+    "zh": "รับประกันโครงสร้างเฟรมและซีลกันรั่วซึม 5 ปี"
+  },
+  "กระจก Laminate Heat-Strengthened 12 มม. เคลือบสารสะท้อนรังสี UV + กรอบอะลูมิเนียม Powder Coat ป้องกันสนิม": {
+    "en": "กระจก Laminate Heat-Strengthened 12 มม. เคลือบสารสะท้อนรังสี UV + กรอบอะลูมิเนียม Powder Coat ป้องกันสนิม",
+    "zh": "กระจก Laminate Heat-Strengthened 12 มม. เคลือบสารสะท้อนรังสี UV + กรอบอะลูมิเนียม Powder Coat ป้องกันสนิม"
+  },
+  "ชุดโซฟาหนังพรีเมียม L-Shape 4-5 ที่นั่ง พร้อมโต๊ะกลางหินอ่อน": {
+    "en": "ชุดโซฟาหนังพรีเมียม L-Shape 4-5 ที่นั่ง พร้อมโต๊ะกลางหินอ่อน",
+    "zh": "ชุดโซฟาหนังพรีเมียม L-Shape 4-5 ที่นั่ง พร้อมโต๊ะกลางหินอ่อน"
+  },
+  "โซฟา VIP เลานจ์พร้อมโต๊ะกลางหินอ่อนและจอโค้ง 65 นิ้ว": {
+    "en": "โซฟา VIP เลานจ์พร้อมโต๊ะกลางหินอ่อนและจอโค้ง 65 นิ้ว",
+    "zh": "โซฟา VIP เลานจ์พร้อมโต๊ะกลางหินอ่อนและจอโค้ง 65 นิ้ว"
+  },
+  "โต๊ะกลางหินอ่อนสั่งผลิตพร้อมจอโค้ง Ultra-wide 65 นิ้ว และขาแขวนปรับมุมองศา": {
+    "en": "โต๊ะกลางหินอ่อนสั่งผลิตพร้อมจอโค้ง Ultra-wide 65 นิ้ว และขาแขวนปรับมุมองศา",
+    "zh": "โต๊ะกลางหินอ่อนสั่งผลิตพร้อมจอโค้ง Ultra-wide 65 นิ้ว และขาแขวนปรับมุมองศา"
+  },
+  "รับประกันโครงสร้างโซฟา 5 ปี และระบบจอดิจิทัล 3 ปี On-site": {
+    "en": "รับประกันโครงสร้างโซฟา 5 ปี และระบบจอดิจิทัล 3 ปี On-site",
+    "zh": "รับประกันโครงสร้างโซฟา 5 ปี และระบบจอดิจิทัล 3 ปี On-site"
+  },
+  "ตู้คีออสก์บริการตนเองอัจฉริยะ Smart Self-Order Kiosk 32 นิ้ว": {
+    "en": "ตู้คีออสก์บริการตนเองอัจฉริยะ Smart Self-Order Kiosk 32 นิ้ว",
+    "zh": "ตู้คีออสก์บริการตนเองอัจฉริยะ Smart Self-Order Kiosk 32 นิ้ว"
+  },
+  "ชุดโซฟาหนังพรีเมียม L-Shape 4-5 ที่นั่ง นุ่มกระชับสรีระ": {
+    "en": "ชุดโซฟาหนังพรีเมียม L-Shape 4-5 ที่นั่ง นุ่มกระชับสรีระ",
+    "zh": "ชุดโซฟาหนังพรีเมียม L-Shape 4-5 ที่นั่ง นุ่มกระชับสรีระ"
+  },
+  "โครงไม้เนื้อแข็งอบแห้งเคลือบสารกันปลวก + เบาะหนังแท้ผสม High Resilience Foam + จอแสดงผล Curved 4K 120Hz": {
+    "en": "โครงไม้เนื้อแข็งอบแห้งเคลือบสารกันปลวก + เบาะหนังแท้ผสม High Resilience Foam + จอแสดงผล Curved 4K 120Hz",
+    "zh": "โครงไม้เนื้อแข็งอบแห้งเคลือบสารกันปลวก + เบาะหนังแท้ผสม High Resilience Foam + จอแสดงผล Curved 4K 120Hz"
+  },
+  "ตัวตู้เหล็ก SPCC ฐานถ่วงน้ำหนักกันล้ม รับแรงกดหน้าจอได้ดี": {
+    "en": "ตัวตู้เหล็ก SPCC ฐานถ่วงน้ำหนักกันล้ม รับแรงกดหน้าจอได้ดี",
+    "zh": "ตัวตู้เหล็ก SPCC ฐานถ่วงน้ำหนักกันล้ม รับแรงกดหน้าจอได้ดี"
+  },
+  "ตู้ Kiosk ทัชสกรีน 32 นิ้ว พร้อมเครื่องสแกนบาร์โค้ด QR และเครื่องพิมพ์ใบเสร็จความร้อน": {
+    "en": "ตู้ Kiosk ทัชสกรีน 32 นิ้ว พร้อมเครื่องสแกนบาร์โค้ด QR และเครื่องพิมพ์ใบเสร็จความร้อน",
+    "zh": "ตู้ Kiosk ทัชสกรีน 32 นิ้ว พร้อมเครื่องสแกนบาร์โค้ด QR และเครื่องพิมพ์ใบเสร็จความร้อน"
+  },
+  "โครงสร้างแบบยืนใช้งาน (ไม่มีเก้าอี้)": {
+    "en": "โครงสร้างแบบยืนใช้งาน (ไม่มีเก้าอี้)",
+    "zh": "โครงสร้างแบบยืนใช้งาน (ไม่มีเก้าอี้)"
+  },
+  "รับประกันตัวตู้และระบบหน้าจอสัมผัส 3 ปี On-site Service": {
+    "en": "รับประกันตัวตู้และระบบหน้าจอสัมผัส 3 ปี On-site Service",
+    "zh": "รับประกันตัวตู้และระบบหน้าจอสัมผัส 3 ปี On-site Service"
+  },
+  "โครงสร้างเหล็กกล้า SPCC อบสีอุตสาหกรรม + กระจกหน้าจอทัชสกรีน Capacitive ป้องกันรอยขีดข่วน + ระบบระบายความร้อน 24 ชม.": {
+    "en": "โครงสร้างเหล็กกล้า SPCC อบสีอุตสาหกรรม + กระจกหน้าจอทัชสกรีน Capacitive ป้องกันรอยขีดข่วน + ระบบระบายความร้อน 24 ชม.",
+    "zh": "โครงสร้างเหล็กกล้า SPCC อบสีอุตสาหกรรม + กระจกหน้าจอทัชสกรีน Capacitive ป้องกันรอยขีดข่วน + ระบบระบายความร้อน 24 ชม."
+  },
+  "ป้ายไฟนีออนโลโก้ GLP อะคริลิก 3D เรืองแสง": {
+    "en": "ป้ายไฟนีออนโลโก้ GLP อะคริลิก 3D เรืองแสง",
+    "zh": "ป้ายไฟนีออนโลโก้ GLP อะคริลิก 3D เรืองแสง"
+  },
+  "ป้ายไฟอะคริลิกเลเซอร์ 3 มิติ โลโก้ GLP เรืองแสงนีออนเฟล็กซ์สีน้ำเงินและสกายบลู": {
+    "en": "ป้ายไฟอะคริลิกเลเซอร์ 3 มิติ โลโก้ GLP เรืองแสงนีออนเฟล็กซ์สีน้ำเงินและสกายบลู",
+    "zh": "ป้ายไฟอะคริลิกเลเซอร์ 3 มิติ โลโก้ GLP เรืองแสงนีออนเฟล็กซ์สีน้ำเงินและสกายบลู"
+  },
+  "ขายึดผนังรับน้ำหนักป้ายอะคริลิกและหม้อแปลงไฟได้อย่างปลอดภัย": {
+    "en": "ขายึดผนังรับน้ำหนักป้ายอะคริลิกและหม้อแปลงไฟได้อย่างปลอดภัย",
+    "zh": "ขายึดผนังรับน้ำหนักป้ายอะคริลิกและหม้อแปลงไฟได้อย่างปลอดภัย"
+  },
+  "ป้ายไฟตกแต่งผนัง (ไม่มีเก้าอี้)": {
+    "en": "ป้ายไฟตกแต่งผนัง (ไม่มีเก้าอี้)",
+    "zh": "ป้ายไฟตกแต่งผนัง (ไม่มีเก้าอี้)"
+  },
+  "รับประกันหม้อแปลงไฟ LED และตัวป้ายอะคริลิก 3 ปีเต็ม": {
+    "en": "รับประกันหม้อแปลงไฟ LED และตัวป้ายอะคริลิก 3 ปีเต็ม",
+    "zh": "รับประกันหม้อแปลงไฟ LED และตัวป้ายอะคริลิก 3 ปีเต็ม"
+  },
+  "คุ้มค่า คืนทุนเร็ว เหมาะสำหรับเล่นเกมยอดนิยมทุกเกม": {
+    "en": "คุ้มค่า คืนทุนเร็ว เหมาะสำหรับเล่นเกมยอดนิยมทุกเกม",
+    "zh": "คุ้มค่า คืนทุนเร็ว เหมาะสำหรับเล่นเกมยอดนิยมทุกเกม"
+  },
+  "แผ่นอะคริลิกหล่อหนา 10 มม. แกะสลัก CNC + ไฟซิลิโคน Neon Flex 12V คุณภาพสูงกันความร้อน + หม้อแปลง Mean Well มาตรฐานสากล": {
+    "en": "แผ่นอะคริลิกหล่อหนา 10 มม. แกะสลัก CNC + ไฟซิลิโคน Neon Flex 12V คุณภาพสูงกันความร้อน + หม้อแปลง Mean Well มาตรฐานสากล",
+    "zh": "แผ่นอะคริลิกหล่อหนา 10 มม. แกะสลัก CNC + ไฟซิลิโคน Neon Flex 12V คุณภาพสูงกันความร้อน + หม้อแปลง Mean Well มาตรฐานสากล"
+  },
+  "มุมมองโซนแข่งขันหลัก Main Arena พร้อมไฟแอลอีดีเอกลักษณ์ GLP": {
+    "en": "มุมมองโซนแข่งขันหลัก Main Arena พร้อมไฟแอลอีดีเอกลักษณ์ GLP",
+    "zh": "มุมมองโซนแข่งขันหลัก Main Arena พร้อมไฟแอลอีดีเอกลักษณ์ GLP"
+  },
+  "สเปกนักกีฬาอีสปอร์ต ลื่นไหลทุกทัวร์นาเมนต์ เฟรมเรต 300+": {
+    "en": "สเปกนักกีฬาอีสปอร์ต ลื่นไหลทุกทัวร์นาเมนต์ เฟรมเรต 300+",
+    "zh": "สเปกนักกีฬาอีสปอร์ต ลื่นไหลทุกทัวร์นาเมนต์ เฟรมเรต 300+"
+  },
+  "ไฮเอนด์ขีดสุด สตรีมเมอร์ & 4K Ray Tracing พร้อมกล้องไมค์สตูดิโอ": {
+    "en": "ไฮเอนด์ขีดสุด สตรีมเมอร์ & 4K Ray Tracing พร้อมกล้องไมค์สตูดิโอ",
+    "zh": "ไฮเอนด์ขีดสุด สตรีมเมอร์ & 4K Ray Tracing พร้อมกล้องไมค์สตูดิโอ"
+  },
+  "เคาน์เตอร์แคชเชียร์และบาร์เครื่องดื่มสไตล์ Cyberpunk Modern": {
+    "en": "เคาน์เตอร์แคชเชียร์และบาร์เครื่องดื่มสไตล์ Cyberpunk Modern",
+    "zh": "เคาน์เตอร์แคชเชียร์และบาร์เครื่องดื่มสไตล์ Cyberpunk Modern"
+  },
+  "แถวเครื่องคอ��พิวเตอร์ระดับโปร ท็อปโต๊ะคาร์บอนและเก้าอี้พรีเมียม": {
+    "en": "แถวเครื่องคอ��พิวเตอร์ระดับโปร ท็อปโต๊ะคาร์บอนและเก้าอี้พรีเมียม",
+    "zh": "แถวเครื่องคอ��พิวเตอร์ระดับโปร ท็อปโต๊ะคาร์บอนและเก้าอี้พรีเมียม"
+  },
+  "แผงซับเสียงบุผ้าลายโมโนแกรมแบรนด์ GLP ตัดเสียงก้องได้มากกว่า 65%": {
+    "en": "แผงซับเสียงบุผ้าลายโมโนแกรมแบรนด์ GLP ตัดเสียงก้องได้มากกว่า 65%",
+    "zh": "แผงซับเสียงบุผ้าลายโมโนแกรมแบรนด์ GLP ตัดเสียงก้องได้มากกว่า 65%"
+  },
+  "ไฟ Dual-tone 4000K Natural White ผสานเส้นสายไฟซ่อน Royal Blue LED strip": {
+    "en": "ไฟ Dual-tone 4000K Natural White ผสานเส้นสายไฟซ่อน Royal Blue LED strip",
+    "zh": "ไฟ Dual-tone 4000K Natural White ผสานเส้นสายไฟซ่อน Royal Blue LED strip"
+  },
+  "บรรยากาศเกาะกลาง 6 ที่นั่ง แสงไฟคมชัดสบายตา ไม่สะท้อนหน้าจอ": {
+    "en": "บรรยากาศเกาะกลาง 6 ที่นั่ง แสงไฟคมชัดสบายตา ไม่สะท้อนหน้าจอ",
+    "zh": "บรรยากาศเกาะกลาง 6 ที่นั่ง แสงไฟคมชัดสบายตา ไม่สะท้อนหน้าจอ"
+  },
+  "คาเฟ่บาร์และพื้นที่เสิร์ฟเบเกอรี่/เครื่องดื่มเกรด Specialty": {
+    "en": "คาเฟ่บาร์และพื้นที่เสิร์ฟเบเกอรี่/เครื่องดื่มเกรด Specialty",
+    "zh": "คาเฟ่บาร์และพื้นที่เสิร์ฟเบเกอรี่/เครื่องดื่มเกรด Specialty"
+  },
+  "ห้องเกมมิ่งเลานจ์สไตล์ Luxury Minimal แสงไฟธรรมชาติและ Warm White": {
+    "en": "ห้องเกมมิ่งเลานจ์สไตล์ Luxury Minimal แสงไฟธรรมชาติและ Warm White",
+    "zh": "ห้องเกมมิ่งเลานจ์สไตล์ Luxury Minimal แสงไฟธรรมชาติและ Warm White"
+  },
+  "กลุ่มนักเรียน นักศึกษา และบุคคลทั่วไป เหมาะกับพื้นที่ในห้างและอาคารพาณิชย์": {
+    "en": "กลุ่มนักเรียน นักศึกษา และบุคคลทั่วไป เหมาะกับพื้นที่ในห้างและอาคารพาณิชย์",
+    "zh": "กลุ่มนักเรียน นักศึกษา และบุคคลทั่วไป เหมาะกับพื้นที่ในห้างและอาคารพาณิชย์"
+  },
+  "โซนพักผ่อนและสเตชันเล่นเกมแบบโอ่โถง โปร่งโล่ง สบายตา": {
+    "en": "โซนพักผ่อนและสเตชันเล่นเกมแบบโอ่โถง โปร่งโล่ง สบายตา",
+    "zh": "โซนพักผ่อนและสเตชันเล่นเกมแบบโอ่โถง โปร่งโล่ง สบายตา"
+  },
+  "พื้นไม้ปาร์เกต์ก้างปลาสีเข้ม หรือพื้นอีพ็อกซี่สีเทาเงามาตรฐานการแข่งขัน": {
+    "en": "พื้นไม้ปาร์เกต์ก้างปลาสีเข้ม หรือพื้นอีพ็อกซี่สีเทาเงามาตรฐานการแข่งขัน",
+    "zh": "พื้นไม้ปาร์เกต์ก้างปลาสีเข้ม หรือพื้นอีพ็อกซี่สีเทาเงามาตรฐานการแข่งขัน"
+  },
+  "ไฟ Warm White 3000K แบบ Indirect Cove Lighting แสงนุ่มนวลไม่แยงตา": {
+    "en": "ไฟ Warm White 3000K แบบ Indirect Cove Lighting แสงนุ่มนวลไม่แยงตา",
+    "zh": "ไฟ Warm White 3000K แบบ Indirect Cove Lighting แสงนุ่มนวลไม่แยงตา"
+  },
+  "มุมทำงานและเล่นเกมส่วนตัว เน้นความเงียบสงบและเป็นส่วนตัว": {
+    "en": "มุมทำงานและเล่นเกมส่วนตัว เน้นความเงียบสงบและเป็นส่วนตัว",
+    "zh": "มุมทำงานและเล่นเกมส่วนตัว เน้นความเงียบสงบและเป็นส่วนตัว"
+  },
+  "กระเบื้องหินอ่อนสีขาวเงา Luxury Marble หรือไม้ลามิเนตทนรอยขีดข่วน": {
+    "en": "กระเบื้องหินอ่อนสีขาวเงา Luxury Marble หรือไม้ลามิเนตทนรอยขีดข่วน",
+    "zh": "กระเบื้องหินอ่อนสีขาวเงา Luxury Marble หรือไม้ลามิเนตทนรอยขีดข่วน"
+  },
+  "กลุ่มคนทำงาน วัยผู้ใหญ่ สตรีมเมอร์ และกลุ่มที่ชื่นชอบความเป็นส่วนตัวสูง": {
+    "en": "กลุ่มคนทำงาน วัยผู้ใหญ่ สตรีมเมอร์ และกลุ่มที่ชื่นชอบความเป็นส่วนตัวสูง",
+    "zh": "กลุ่มคนทำงาน วัยผู้ใหญ่ สตรีมเมอร์ และกลุ่มที่ชื่นชอบความเป็นส่วนตัวสูง"
+  },
+  "ระแนงไม้จริงติดผนังพร้อมฉนวนกันเสียงไฟเบอร์กลาส เป็นธรรมชาติและซับเสียงได้ดีเยี่ยม": {
+    "en": "ระแนงไม้จริงติดผนังพร้อมฉนวนกันเสียงไฟเบอร์กลาส เป็นธรรมชาติและซับเสียงได้ดีเยี่ยม",
+    "zh": "ระแนงไม้จริงติดผนังพร้อมฉนวนกันเสียงไฟเบอร์กลาส เป็นธรรมชาติและซับเสียงได้ดีเยี่ยม"
+  },
+  "สเตชันการแข่งทีม 5v5 พร้อมระบบไฟ Linear Sync กับเกม": {
+    "en": "สเตชันการแข่งทีม 5v5 พร้อมระบบไฟ Linear Sync กับเกม",
+    "zh": "สเตชันการแข่งทีม 5v5 พร้อมระบบไฟ Linear Sync กับเกม"
+  },
+  "ไฟ Linear 5000K ชนิด Low-glare ส่องเฉพาะจุดเล่น ไม่เกิดแสงรบกวนบนจอมอนิเตอร์": {
+    "en": "ไฟ Linear 5000K ชนิด Low-glare ส่องเฉพาะจุดเล่น ไม่เกิดแสงรบกวนบนจอมอนิเตอร์",
+    "zh": "ไฟ Linear 5000K ชนิด Low-glare ส่องเฉพาะจุดเล่น ไม่เกิดแสงรบกวนบนจอมอนิเตอร์"
+  },
+  "ตู้แร็คเซิร์ฟเวอร์และระบบ Diskless 10Gbps โชว์กระจกนิรภัย": {
+    "en": "ตู้แร็คเซิร์ฟเวอร์และระบบ Diskless 10Gbps โชว์กระจกนิรภัย",
+    "zh": "ตู้แร็คเซิร์ฟเวอร์และระบบ Diskless 10Gbps โชว์กระจกนิรภัย"
+  },
+  "ห้องซ้อมและสนามแข่งขัน Dark Stealth บรรยากาศโฟกัสระดับทัวร์นาเมนต์": {
+    "en": "ห้องซ้อมและสนามแข่งขัน Dark Stealth บรรยากาศโฟกัสระดับทัวร์นาเมนต์",
+    "zh": "ห้องซ้อมและสนามแข่งขัน Dark Stealth บรรยากาศโฟกัสระดับทัวร์นาเมนต์"
+  },
+  "ห้อง Private VIP Pod บุโฟมรังผึ้งกันเสียงมาตรฐานบอร์ดคาสต์": {
+    "en": "ห้อง Private VIP Pod บุโฟมรังผึ้งกันเสียงมาตรฐานบอร์ดคาสต์",
+    "zh": "ห้อง Private VIP Pod บุโฟมรังผึ้งกันเสียงมาตรฐานบอร์ดคาสต์"
+  },
+  "นักกีฬาอีสปอร์ต ทีมแข่ง สตรีมเมอร์ส���ยฮาร์ดคอร์ และงานแข่งขัน LAN Final": {
+    "en": "นักกีฬาอีสปอร์ต ทีมแข่ง สตรีมเมอร์ส���ยฮาร์ดคอร์ และงานแข่งขัน LAN Final",
+    "zh": "นักกีฬาอีสปอร์ต ทีมแข่ง สตรีมเมอร์ส���ยฮาร์ดคอร์ และงานแข่งขัน LAN Final"
+  },
+  "อัตราค่าบริการและโปรโมชันเวลาเล่น": {
+    "en": "อัตราค่าบริการและโปรโมชันเวลาเล่น",
+    "zh": "อัตราค่าบริการและโปรโมชันเวลาเล่น"
+  },
+  "โฟมรังผึ้งซับเสียง Hexagon Studio Foam ดูดซับเสียงกรี๊ดและเสียงเชียร์ได้ 80%": {
+    "en": "โฟมรังผึ้งซับเสียง Hexagon Studio Foam ดูดซับเสียงกรี๊ดและเสียงเชียร์ได้ 80%",
+    "zh": "โฟมรังผึ้งซับเสียง Hexagon Studio Foam ดูดซับเสียงกรี๊ดและเสียงเชียร์ได้ 80%"
+  },
+  "พรมดักเสียงสะท้อนมาตรฐานอารีนา หรือพื้นอีพ็อกซี่สีเทาเข้มเนื้อด้าน": {
+    "en": "พรมดักเสียงสะท้อนมาตรฐานอารีนา หรือพื้นอีพ็อกซี่สีเทาเข้มเนื้อด้าน",
+    "zh": "พรมดักเสียงสะท้อนมาตรฐานอารีนา หรือพื้นอีพ็อกซี่สีเทาเข้มเนื้อด้าน"
+  },
+  "โปรโมชัน": {
+    "en": "โปรโมชัน",
+    "zh": "โปรโมชัน"
+  },
+  "อัตราค่าบริการที่ G-Speed Esport Arena แบ่งเป็น: สมาชิก 25-30 บาท/ชั่วโมง, บุคคลทั่วไป 35 บาท/ชั่วโมง มีโปรโมชันเหมาเล่นกลางคืน (Night Owl 23:00 - 08:00 น.) เพียง 150 บาท สมาชิกเติมเงิน 500 บาท แถมฟรี 100 บาท, เติม 1,000 บาท แถมฟรี 300 บาท สมัครสมาชิกฟรีที่เคาน์เตอร์แคชเชียร์": {
+    "en": "อัตราค่าบริการที่ G-Speed Esport Arena แบ่งเป็น: สมาชิก 25-30 บาท/ชั่วโมง, บุคคลทั่วไป 35 บาท/ชั่วโมง มีโปรโมชันเหมาเล่นกลางคืน (Night Owl 23:00 - 08:00 น.) เพียง 150 บาท สมาชิกเติมเงิน 500 บาท แถมฟรี 100 บาท, เติม 1,000 บาท แถมฟรี 300 บาท สมัครสมาชิกฟรีที่เคาน์เตอร์แคชเชียร์",
+    "zh": "อัตราค่าบริการที่ G-Speed Esport Arena แบ่งเป็น: สมาชิก 25-30 บาท/ชั่วโมง, บุคคลทั่วไป 35 บาท/ชั่วโมง มีโปรโมชันเหมาเล่นกลางคืน (Night Owl 23:00 - 08:00 น.) เพียง 150 บาท สมาชิกเติมเงิน 500 บาท แถมฟรี 100 บาท, เติม 1,000 บาท แถมฟรี 300 บาท สมัครสมาชิกฟรีที่เคาน์เตอร์แคชเชียร์"
+  },
+  "สเปกคอมพิวเตอร์และหน้าจอเกมมิ่งประจำร้าน": {
+    "en": "สเปกคอมพิวเตอร์และหน้าจอเกมมิ่งประจำร้าน",
+    "zh": "สเปกคอมพิวเตอร์และหน้าจอเกมมิ่งประจำร้าน"
+  },
+  "เวลาเปิด-ปิด และการเดินทาง พิกัดร้าน": {
+    "en": "เวลาเปิด-ปิด และการเดินทาง พิกัดร้าน",
+    "zh": "เวลาเปิด-ปิด และการเดินทาง พิกัดร้าน"
+  },
+  "คอมพิวเตอร์ทุกเครื่องขับเคลื่อนด้วยการ์ดจอ NVIDIA GeForce RTX 4070 SUPER / RTX 4080 SUPER, ซีพียู Intel Core i7-14700K / Core i9, แรม 32GB DDR5 6000MHz พร้อมหน้าจออีสปอร์ต BenQ ZOWIE 360Hz และ 240Hz Fast-IPS ตอบสนอง 0.5ms เมาส์เกมมิ่ง Zowie/Logitech และคีย์บอร์ดกลไก Mechanical": {
+    "en": "คอมพิวเตอร์ทุกเครื่องขับเคลื่อนด้วยการ์ดจอ NVIDIA GeForce RTX 4070 SUPER / RTX 4080 SUPER, ซีพียู Intel Core i7-14700K / Core i9, แรม 32GB DDR5 6000MHz พร้อมหน้าจออีสปอร์ต BenQ ZOWIE 360Hz และ 240Hz Fast-IPS ตอบสนอง 0.5ms เมาส์เกมมิ่ง Zowie/Logitech และคีย์บอร์ดกลไก Mechanical",
+    "zh": "คอมพิวเตอร์ทุกเครื่องขับเคลื่อนด้วยการ์ดจอ NVIDIA GeForce RTX 4070 SUPER / RTX 4080 SUPER, ซีพียู Intel Core i7-14700K / Core i9, แรม 32GB DDR5 6000MHz พร้อมหน้าจออีสปอร์ต BenQ ZOWIE 360Hz และ 240Hz Fast-IPS ตอบสนอง 0.5ms เมาส์เกมมิ่ง Zowie/Logitech และคีย์บอร์ดกลไก Mechanical"
+  },
+  "เวลาเปิด": {
+    "en": "เวลาเปิด",
+    "zh": "เวลาเปิด"
+  },
+  "24ชั่วโมง": {
+    "en": "24ชั่วโมง",
+    "zh": "24ชั่วโมง"
+  },
+  "เปิดกี่โมง": {
+    "en": "เปิดกี่โมง",
+    "zh": "เปิดกี่โมง"
+  },
+  "อยู่ที่ไหน": {
+    "en": "อยู่ที่ไหน",
+    "zh": "อยู่ที่ไหน"
+  },
+  "บริการหลักของศูนย์ G-Speed Esport Arena": {
+    "en": "บริการหลักของศูนย์ G-Speed Esport Arena",
+    "zh": "บริการหลักของศูนย์ G-Speed Esport Arena"
+  },
+  "G-Speed Esport Arena เปิดให้บริการตลอด 24 ชั่วโมง ทุกวัน ตลอดทั้งปี ไม่มีวันหยุด (24/7) ที่ตั้ง: 79 ซอย รามคำแหง 53 แขวงพลับพลา เขตวังทองหลาง กรุงเทพมหานคร 10310 (เข้าออกได้ทั้งทางซอยลาดพร้าว 112 และซอยรามคำแหง 53 พิกัด 13.766999, 100.618755) แผนที่ Google Maps: https://maps.app.goo.gl/ak23az5WtsvXGWUR8 โทรศัพท์: 063-793-7704 อีเมล: gspeedlivingplus35@gmail.com มีที่จอดรถสะดวกสบายทั้งรถยนต์และมอเตอร์ไซค์ แอร์เย็นฉ่ำ 24 ชม. พร้อมระบบกรองอากาศ PM2.5 และระบบเน็ตเวิร์กความเร็วสูง 10Gbps Dual Fiber": {
+    "en": "G-Speed Esport Arena เปิดให้บริการตลอด 24 ชั่วโมง ทุกวัน ตลอดทั้งปี ไม่มีวันหยุด (24/7) ที่ตั้ง: 79 ซอย รามคำแหง 53 แขวงพลับพลา เขตวังทองหลาง กรุงเทพมหานคร 10310 (เข้าออกได้ทั้งทางซอยลาดพร้าว 112 และซอยรามคำแหง 53 พิกัด 13.766999, 100.618755) แผนที่ Google Maps: https://maps.app.goo.gl/ak23az5WtsvXGWUR8 โทรศัพท์: 063-793-7704 อีเมล: gspeedlivingplus35@gmail.com มีที่จอดรถสะดวกสบายทั้งรถยนต์และมอเตอร์ไซค์ แอร์เย็นฉ่ำ 24 ชม. พร้อมระบบกรองอากาศ PM2.5 และระบบเน็ตเวิร์กความเร็วสูง 10Gbps Dual Fiber",
+    "zh": "G-Speed Esport Arena เปิดให้บริการตลอด 24 ชั่วโมง ทุกวัน ตลอดทั้งปี ไม่มีวันหยุด (24/7) ที่ตั้ง: 79 ซอย รามคำแหง 53 แขวงพลับพลา เขตวังทองหลาง กรุงเทพมหานคร 10310 (เข้าออกได้ทั้งทางซอยลาดพร้าว 112 และซอยรามคำแหง 53 พิกัด 13.766999, 100.618755) แผนที่ Google Maps: https://maps.app.goo.gl/ak23az5WtsvXGWUR8 โทรศัพท์: 063-793-7704 อีเมล: gspeedlivingplus35@gmail.com มีที่จอดรถสะดวกสบายทั้งรถยนต์และมอเตอร์ไซค์ แอร์เย็นฉ่ำ 24 ชม. พร้อมระบบกรองอากาศ PM2.5 และระบบเน็ตเวิร์กความเร็วสูง 10Gbps Dual Fiber"
+  },
+  "บริการของเรา": {
+    "en": "บริการของเรา",
+    "zh": "บริการของเรา"
+  },
+  "มีอะไรบ้าง": {
+    "en": "มีอะไรบ้าง",
+    "zh": "มีอะไรบ้าง"
+  },
+  "เช่าจัดแข่ง": {
+    "en": "เช่าจัดแข่ง",
+    "zh": "เช่าจัดแข่ง"
+  },
+  "บริการหลักของ G-Speed Esport Arena ได้แก่: 1. ร้านเกมคอมพิวเตอร์สเปกแข่งขันอีสปอร์ต 24 ชม. (RTX 40 Series, จอ 360Hz/240Hz, โซนทั่วไปและ VIP) 2. เปิดให้เช่าร้านจัดแข่งอีสปอร์ต (เวที 5v5 Stage, จอ LED Wall ขนาดยักษ์, ระบบ Live Streaming, โต๊ะพากย์) 3. รับติดตั้งและวางระบบร้านเกมครบวงจร (Diskless Server, เน็ต 10Gbps Multi-WAN, ระบบ POS บัญชีคลาวด์ และออกแบบผังร้าน 2D/3D) ที่ตั้ง: 79 ซอย รามคำแหง 53 แขวงพลับพลา เขตวังทองหลาง กทม. 10310 แผนที่: https://maps.app.goo.gl/ak23az5WtsvXGWUR8 โทร 063-793-7704": {
+    "en": "บริการหลักของ G-Speed Esport Arena ได้แก่: 1. ร้านเกมคอมพิวเตอร์สเปกแข่งขันอีสปอร์ต 24 ชม. (RTX 40 Series, จอ 360Hz/240Hz, โซนทั่วไปและ VIP) 2. เปิดให้เช่าร้านจัดแข่งอีสปอร์ต (เวที 5v5 Stage, จอ LED Wall ขนาดยักษ์, ระบบ Live Streaming, โต๊ะพากย์) 3. รับติดตั้งและวางระบบร้านเกมครบวงจร (Diskless Server, เน็ต 10Gbps Multi-WAN, ระบบ POS บัญชีคลาวด์ และออกแบบผังร้าน 2D/3D) ที่ตั้ง: 79 ซอย รามคำแหง 53 แขวงพลับพลา เขตวังทองหลาง กทม. 10310 แผนที่: https://maps.app.goo.gl/ak23az5WtsvXGWUR8 โทร 063-793-7704",
+    "zh": "บริการหลักของ G-Speed Esport Arena ได้แก่: 1. ร้านเกมคอมพิวเตอร์สเปกแข่งขันอีสปอร์ต 24 ชม. (RTX 40 Series, จอ 360Hz/240Hz, โซนทั่วไปและ VIP) 2. เปิดให้เช่าร้านจัดแข่งอีสปอร์ต (เวที 5v5 Stage, จอ LED Wall ขนาดยักษ์, ระบบ Live Streaming, โต๊ะพากย์) 3. รับติดตั้งและวางระบบร้านเกมครบวงจร (Diskless Server, เน็ต 10Gbps Multi-WAN, ระบบ POS บัญชีคลาวด์ และออกแบบผังร้าน 2D/3D) ที่ตั้ง: 79 ซอย รามคำแหง 53 แขวงพลับพลา เขตวังทองหลาง กทม. 10310 แผนที่: https://maps.app.goo.gl/ak23az5WtsvXGWUR8 โทร 063-793-7704"
+  },
+  "บริการอาหาร เครื่องดื่ม และสแน็กบาร์เสิร์ฟถึงโต๊ะ": {
+    "en": "บริการอาหาร เครื่องดื่ม และสแน็กบาร์เสิร์ฟถึงโต๊ะ",
+    "zh": "บริการอาหาร เครื่องดื่ม และสแน็กบาร์เสิร์ฟถึงโต๊ะ"
+  },
+  "บริการห้อง VIP และ Bootcamp ซ้อมแข่ง": {
+    "en": "บริการห้อง VIP และ Bootcamp ซ้อมแข่ง",
+    "zh": "บริการห้อง VIP และ Bootcamp ซ้อมแข่ง"
+  },
+  "ห้องส่วนตัว": {
+    "en": "ห้องส่วนตัว",
+    "zh": "ห้องส่วนตัว"
+  },
+  "การจัดแข่งขันทัวร์นาเมนต์และเปิดให้เช่าสถานที่จัดแข่ง": {
+    "en": "การจัดแข่งขันทัวร์นาเมนต์และเปิดให้เช่าสถานที่จัดแข่ง",
+    "zh": "การจัดแข่งขันทัวร์นาเมนต์และเปิดให้เช่าสถานที่จัดแข่ง"
+  },
+  "ลูกค้าสามารถสั่งอาหารและเครื่องดื่มผ่านหน้าระบบคอมพิวเตอร์ได้ทันทีโดยไม่ต้องลุกจากโต๊ะ เมนูยอดนิยมได้แก่ ข้าวผัดกะเพราหมูกรอบไข่ดาว, ข้าวไข่ข้นแฮม, ไก่ป๊อปสไปซี่, เฟรนช์ฟรายส์ทอดสด, กาแฟสดอาราบิก้า, ชานมไต้หวันพ่นไฟ, และเครื่องดื่มชูกำลัง มีพนักงานนำไปเสิร์ฟถึงโต๊ะเล่นเกมทันที": {
+    "en": "ลูกค้าสามารถสั่งอาหารและเครื่องดื่มผ่านหน้าระบบคอมพิวเตอร์ได้ทันทีโดยไม่ต้องลุกจากโต๊ะ เมนูยอดนิยมได้แก่ ข้าวผัดกะเพราหมูกรอบไข่ดาว, ข้าวไข่ข้นแฮม, ไก่ป๊อปสไปซี่, เฟรนช์ฟรายส์ทอดสด, กาแฟสดอาราบิก้า, ชานมไต้หวันพ่นไฟ, และเครื่องดื่มชูกำลัง มีพนักงานนำไปเสิร์ฟถึงโต๊ะเล่นเกมทันที",
+    "zh": "ลูกค้าสามารถสั่งอาหารและเครื่องดื่มผ่านหน้าระบบคอมพิวเตอร์ได้ทันทีโดยไม่ต้องลุกจากโต๊ะ เมนูยอดนิยมได้แก่ ข้าวผัดกะเพราหมูกรอบไข่ดาว, ข้าวไข่ข้นแฮม, ไก่ป๊อปสไปซี่, เฟรนช์ฟรายส์ทอดสด, กาแฟสดอาราบิก้า, ชานมไต้หวันพ่นไฟ, และเครื่องดื่มชูกำลัง มีพนักงานนำไปเสิร์ฟถึงโต๊ะเล่นเกมทันที"
+  },
+  "มีห้อง VIP Private Suite ขนาด 5-6 ที่นั่ง เก็บเสียงสองชั้น (Double Acoustic Glass) พร้อมไมโครโฟนบรอดแคสต์ Shure, กล้อง 4K สำหรับสตรีมเมอร์ และเก้าอี้ Secretlab TITAN Evo เหมาะสำหรับทีมแข่งอีสปอร์ตมาบูตแคมป์ซ้อมก่อนแข่งใหญ่ อัตราค่าบริการเหมาห้องชั่วโมงละ 250 บาท หรือวันละ 2,000 บาท (ต้���งจองล่วงหน้า)": {
+    "en": "มีห้อง VIP Private Suite ขนาด 5-6 ที่นั่ง เก็บเสียงสองชั้น (Double Acoustic Glass) พร้อมไมโครโฟนบรอดแคสต์ Shure, กล้อง 4K สำหรับสตรีมเมอร์ และเก้าอี้ Secretlab TITAN Evo เหมาะสำหรับทีมแข่งอีสปอร์ตมาบูตแคมป์ซ้อมก่อนแข่งใหญ่ อัตราค่าบริการเหมาห้องชั่วโมงละ 250 บาท หรือวันละ 2,000 บาท (ต้���งจองล่วงหน้า)",
+    "zh": "มีห้อง VIP Private Suite ขนาด 5-6 ที่นั่ง เก็บเสียงสองชั้น (Double Acoustic Glass) พร้อมไมโครโฟนบรอดแคสต์ Shure, กล้อง 4K สำหรับสตรีมเมอร์ และเก้าอี้ Secretlab TITAN Evo เหมาะสำหรับทีมแข่งอีสปอร์ตมาบูตแคมป์ซ้อมก่อนแข่งใหญ่ อัตราค่าบริการเหมาห้องชั่วโมงละ 250 บาท หรือวันละ 2,000 บาท (ต้���งจองล่วงหน้า)"
+  },
+  "แข่งเกม": {
+    "en": "แข่งเกม",
+    "zh": "แข่งเกม"
+  },
+  "เงื่อนไขจัดแข่ง": {
+    "en": "เงื่อนไขจัดแข่ง",
+    "zh": "เงื่อนไขจัดแข่ง"
+  },
+  "เช่าร้าน": {
+    "en": "เช่าร้าน",
+    "zh": "เช่าร้าน"
+  },
+  "ร้านมีเวที 5v5 Tournament Stage พร้อมระบบถ่ายทอดสด Live Streaming จอ 4K LED Wall ขนาดยักษ์ และโต๊ะพากย์แคสเตอร์ รองรับการจัดแข่งทั้งเกม VALORANT, ROV, PUBG, CS2 สำหรับค่ายเกม สถาบันการศึกษา หรือองค์กรที่ต้องการเช่าจัดแข่งขัน เงื่อนไขและข้อมูลที่ต้องแจ้ง: 1. วันและเวลาที่ต้องการจัด 2. เกมที่ใช้แข่งขัน 3. ชื่องาน/กิจกรรม 4. ชื่อบริษัท/องค์กรผู้จัด 5. จำนวนคนและทีมโดยประมาณ 6. ข้อมูลติดต่อกลับ ติดต่อโทร 063 793 7704": {
+    "en": "ร้านมีเวที 5v5 Tournament Stage พร้อมระบบถ่ายทอดสด Live Streaming จอ 4K LED Wall ขนาดยักษ์ และโต๊ะพากย์แคสเตอร์ รองรับการจัดแข่งทั้งเกม VALORANT, ROV, PUBG, CS2 สำหรับค่ายเกม สถาบันการศึกษา หรือองค์กรที่ต้องการเช่าจัดแข่งขัน เงื่อนไขและข้อมูลที่ต้องแจ้ง: 1. วันและเวลาที่ต้องการจัด 2. เกมที่ใช้แข่งขัน 3. ชื่องาน/กิจกรรม 4. ชื่อบริษัท/องค์กรผู้จัด 5. จำนวนคนและทีมโดยประมาณ 6. ข้อมูลติดต่อกลับ ติดต่อโทร 063 793 7704",
+    "zh": "ร้านมีเวที 5v5 Tournament Stage พร้อมระบบถ่ายทอดสด Live Streaming จอ 4K LED Wall ขนาดยักษ์ และโต๊ะพากย์แคสเตอร์ รองรับการจัดแข่งทั้งเกม VALORANT, ROV, PUBG, CS2 สำหรับค่ายเกม สถาบันการศึกษา หรือองค์กรที่ต้องการเช่าจัดแข่งขัน เงื่อนไขและข้อมูลที่ต้องแจ้ง: 1. วันและเวลาที่ต้องการจัด 2. เกมที่ใช้แข่งขัน 3. ชื่องาน/กิจกรรม 4. ชื่อบริษัท/องค์กรผู้จัด 5. จำนวนคนและทีมโดยประมาณ 6. ข้อมูลติดต่อกลับ ติดต่อโทร 063 793 7704"
+  },
+  "ข้อมูลการลงทุนแฟรนไชส์ G-Speed Esport Arena": {
+    "en": "ข้อมูลการลงทุนแฟรนไชส์ G-Speed Esport Arena",
+    "zh": "ข้อมูลการลงทุนแฟรนไชส์ G-Speed Esport Arena"
+  },
+  "การติดตั้งระบบร้านเกม Diskless Server & iCafeCloud": {
+    "en": "การติดตั้งระบบร้านเกม Diskless Server & iCafeCloud",
+    "zh": "การติดตั้งระบบร้านเกม Diskless Server & iCafeCloud"
+  },
+  "ดิสเลส": {
+    "en": "ดิสเลส",
+    "zh": "ดิสเลส"
+  },
+  "ติดตั้ง��ะบบ": {
+    "en": "ติดตั้ง��ะบบ",
+    "zh": "ติดตั้ง��ะบบ"
+  },
+  "บริการติดตั้งระบบดิสเลส (Diskless Boot Server) มาตรฐานระดับอีสปอร์ต รองรับ CCBoot และ iCafeCloud ไม่ต้องมีฮาร์ดดิสก์ในเครื่องลูก อัปเดตเกมที่เซิร์ฟเวอร์แม่จุดเดียว ลูกค้าเล่นเกมได้ทันที รองรับ NVMe PCIe 4.0 RAID Array ความเร็วอ่านเขียน 14,000 MB/s บูตเครื่องเข้า Windows ภายใน 12 วินาที ทีมงานติดตั้งและเซ็ตระบบหน้างานภายใน 2-3 วัน พร้อมระบบ Auto-Failover มีเซิร์ฟเวอร์สำรองไม่ดับ": {
+    "en": "บริการติดตั้งระบบดิสเลส (Diskless Boot Server) มาตรฐานระดับอีสปอร์ต รองรับ CCBoot และ iCafeCloud ไม่ต้องมีฮาร์ดดิสก์ในเครื่องลูก อัปเดตเกมที่เซิร์ฟเวอร์แม่จุดเดียว ลูกค้าเล่นเกมได้ทันที รองรับ NVMe PCIe 4.0 RAID Array ความเร็วอ่านเขียน 14,000 MB/s บูตเครื่องเข้า Windows ภายใน 12 วินาที ทีมงานติดตั้งและเซ็ตระบบหน้างานภายใน 2-3 วัน พร้อมระบบ Auto-Failover มีเซิร์ฟเวอร์สำรองไม่ดับ",
+    "zh": "บริการติดตั้งระบบดิสเลส (Diskless Boot Server) มาตรฐานระดับอีสปอร์ต รองรับ CCBoot และ iCafeCloud ไม่ต้องมีฮาร์ดดิสก์ในเครื่องลูก อัปเดตเกมที่เซิร์ฟเวอร์แม่จุดเดียว ลูกค้าเล่นเกมได้ทันที รองรับ NVMe PCIe 4.0 RAID Array ความเร็วอ่านเขียน 14,000 MB/s บูตเครื่องเข้า Windows ภายใน 12 วินาที ทีมงานติดตั้งและเซ็ตระบบหน้างานภายใน 2-3 วัน พร้อมระบบ Auto-Failover มีเซิร์ฟเวอร์สำรองไม่ดับ"
+  },
+  "แฟรนไชส์ G-Speed Esport Arena มีให้เลือก 3 โมเดล: Size S (30-40 เครื่อง งบ 1.8-2.5 ลบ.), Size M (50-70 เครื่อง งบ 3.2-4.5 ลบ.), และ Size L Mega Arena (80-120 เครื่อง งบ 5.5-8.0 ลบ.) พร้อมระบบ Diskless Server ไม่ต้องใช้ฮาร์ดดิสก์รายเครื่อง, ระบบ POS บัญชีคลาวด์, การตกแต่ง 3D ตามแบรนด์ และการอบรมบุคลากร ระยะเวลาคืนทุนเฉลี่ย 18-24 เดือน": {
+    "en": "แฟรนไชส์ G-Speed Esport Arena มีให้เลือก 3 โมเดล: Size S (30-40 เครื่อง งบ 1.8-2.5 ลบ.), Size M (50-70 เครื่อง งบ 3.2-4.5 ลบ.), และ Size L Mega Arena (80-120 เครื่อง งบ 5.5-8.0 ลบ.) พร้อมระบบ Diskless Server ไม่ต้องใช้ฮาร์ดดิสก์รายเครื่อง, ระบบ POS บัญชีคลาวด์, การตกแต่ง 3D ตามแบรนด์ และการอบรมบุคลากร ระยะเวลาคืนทุนเฉลี่ย 18-24 เดือน",
+    "zh": "แฟรนไชส์ G-Speed Esport Arena มีให้เลือก 3 โมเดล: Size S (30-40 เครื่อง งบ 1.8-2.5 ลบ.), Size M (50-70 เครื่อง งบ 3.2-4.5 ลบ.), และ Size L Mega Arena (80-120 เครื่อง งบ 5.5-8.0 ลบ.) พร้อมระบบ Diskless Server ไม่ต้องใช้ฮาร์ดดิสก์รายเครื่อง, ระบบ POS บัญชีคลาวด์, การตกแต่ง 3D ตามแบรนด์ และการอบรมบุคลากร ระยะเวลาคืนทุนเฉลี่ย 18-24 เดือน"
+  },
+  "การเดินระบบเน็ตเวิร์ก 10Gbps Multi-WAN & Smart QoS": {
+    "en": "การเดินระบบเน็ตเวิร์ก 10Gbps Multi-WAN & Smart QoS",
+    "zh": "การเดินระบบเน็ตเวิร์ก 10Gbps Multi-WAN & Smart QoS"
+  },
+  "เดินสายแลน": {
+    "en": "เดินสายแลน",
+    "zh": "เดินสายแลน"
+  },
+  "เราเตอร์": {
+    "en": "เราเตอร์",
+    "zh": "เราเตอร์"
+  },
+  "บริการเดินระบบสายแลน CAT6A / Fiber Optic แกนหลัก 10Gbps พร้อม Switch Managed 10G SFP+ แยก VLAN ระหว่างเครื่องเล่นเกม, เครื่องคิดเงิน POS, สตรีมเมอร์ และ Wi-Fi ลูกค้า มีระบบ Multi-WAN Load Balance รวมเน็ต 2-3 ผู้ให้บริการ (AIS Fibre + True Gigatex) สลับสายอัตโนมัติหากสายใดสายหนึ่งขาด ค่า Ping ในประเทศ < 2-3ms หมดปัญหาแล็กหรือวาปในการแข่งขัน": {
+    "en": "บริการเดินระบบสายแลน CAT6A / Fiber Optic แกนหลัก 10Gbps พร้อม Switch Managed 10G SFP+ แยก VLAN ระหว่างเครื่องเล่นเกม, เครื่องคิดเงิน POS, สตรีมเมอร์ และ Wi-Fi ลูกค้า มีระบบ Multi-WAN Load Balance รวมเน็ต 2-3 ผู้ให้บริการ (AIS Fibre + True Gigatex) สลับสายอัตโนมัติหากสายใดสายหนึ่งขาด ค่า Ping ในประเทศ < 2-3ms หมดปัญหาแล็กหรือวาปในการแข่งขัน",
+    "zh": "บริการเดินระบบสายแลน CAT6A / Fiber Optic แกนหลัก 10Gbps พร้อม Switch Managed 10G SFP+ แยก VLAN ระหว่างเครื่องเล่นเกม, เครื่องคิดเงิน POS, สตรีมเมอร์ และ Wi-Fi ลูกค้า มีระบบ Multi-WAN Load Balance รวมเน็ต 2-3 ผู้ให้บริการ (AIS Fibre + True Gigatex) สลับสายอัตโนมัติหากสายใดสายหนึ่งขาด ค่า Ping ในประเทศ < 2-3ms หมดปัญหาแล็กหรือวาปในการแข่งขัน"
+  },
+  "สวิตช์": {
+    "en": "สวิตช์",
+    "zh": "สวิตช์"
+  },
+  "บริการคำนวณโหลดไฟฟ้าและติดตั้งระบบไฟฟ้า 3 เฟส (3-Phase 380V) สำหรับร้านเกมโดยเฉพาะ พร้อมตู้โหลดเซ็นเตอร์แยกเฟสป้องกันไฟตก, ติดตั้งระบบสำรองไฟ UPS True Online สำหรับเครื่อง Diskless Server และเคาน์เตอร์แคชเชียร์ เดินรางสายไฟเหล็ก Wireway ซ่อนใต้โต๊ะเกมมิ่งเรียบร้อย และระบบกราวด์สายดินค่าความต้านทานต่ำกว่า 5 โอห์ม ป้องกันอุปกรณ์ช็อตหรือเสียหาย 100%": {
+    "en": "บริการคำนวณโหลดไฟฟ้าและติดตั้งระบบไฟฟ้า 3 เฟส (3-Phase 380V) สำหรับร้านเกมโดยเฉพาะ พร้อมตู้โหลดเซ็นเตอร์แยกเฟสป้องกันไฟตก, ติดตั้งระบบสำรองไฟ UPS True Online สำหรับเครื่อง Diskless Server และเคาน์เตอร์แคชเชียร์ เดินรางสายไฟเหล็ก Wireway ซ่อนใต้โต๊ะเกมมิ่งเรียบร้อย และระบบกราวด์สายดินค่าความต้านทานต่ำกว่า 5 โอห์ม ป้องกันอุปกรณ์ช็อตหรือเสียหาย 100%",
+    "zh": "บริการคำนวณโหลดไฟฟ้าและติดตั้งระบบไฟฟ้า 3 เฟส (3-Phase 380V) สำหรับร้านเกมโดยเฉพาะ พร้อมตู้โหลดเซ็นเตอร์แยกเฟสป้องกันไฟตก, ติดตั้งระบบสำรองไฟ UPS True Online สำหรับเครื่อง Diskless Server และเคาน์เตอร์แคชเชียร์ เดินรางสายไฟเหล็ก Wireway ซ่อนใต้โต๊ะเกมมิ่งเรียบร้อย และระบบกราวด์สายดินค่าความต้านทานต่ำกว่า 5 โอห์ม ป้องกันอุปกรณ์ช็อตหรือเสียหาย 100%"
+  },
+  "งานระบบไฟฟ้า 3 เฟส รางร้อยสายไฟ และระบบความปลอดภัย": {
+    "en": "งานระบบไฟฟ้า 3 เฟส รางร้อยสายไฟ และระบบความปลอดภัย",
+    "zh": "งานระบบไฟฟ้า 3 เฟส รางร้อยสายไฟ และระบบความปลอดภัย"
+  },
+  "ไฟ3เฟส": {
+    "en": "ไฟ3เฟส",
+    "zh": "ไฟ3เฟส"
+  },
+  "สายดิน": {
+    "en": "สายดิน",
+    "zh": "สายดิน"
+  },
+  "ตู้โหลด": {
+    "en": "ตู้โหลด",
+    "zh": "ตู้โหลด"
+  },
+  "ขั้นตอนการติดต่อขอใบเสนอราคา สำรวจพื้นที่ และประเมินราคาเบื้องต้น": {
+    "en": "ขั้นตอนการติดต่อขอใบเสนอราคา สำรวจพื้นที่ และประเมินราคาเบื้องต้น",
+    "zh": "ขั้นตอนการติดต่อขอใบเสนอราคา สำรวจพื้นที่ และประเมินราคาเบื้องต้น"
+  },
+  "สำรวจหน้างาน": {
+    "en": "สำรวจหน้างาน",
+    "zh": "สำรวจหน้างาน"
+  },
+  "สำหรับเจ้าของอาคารหรือผู้สนใจเปิดร้านเกม สามารถแจ้งขนาดพื้นที่และงบประมาณเพื่อให้เจ้าหน้าที่ช่วยประเมินผังร้านและคำนวณงบเบื้องต้นได้ฟรี ทางเราพร้อมให้คำปรึกษา แนะนำสเปกเครื่อง และมีทีมวิศวกรพร้อมเข้าสำรวจหน้างานจริง ติดต่อสอบถามเพิ่มเติมได้ที่สายด่วน: 063 793 7704 หรือ LINE Official: @gspeedarena เปิดให้บริการตลอด 24 ชั่วโมง": {
+    "en": "สำหรับเจ้าของอาคารหรือผู้สนใจเปิดร้านเกม สามารถแจ้งขนาดพื้นที่และงบประมาณเพื่อให้เจ้าหน้าที่ช่วยประเมินผังร้านและคำนวณงบเบื้องต้นได้ฟรี ทางเราพร้อมให้คำปรึกษา แนะนำสเปกเครื่อง และมีทีมวิศวกรพร้อมเข้าสำรวจหน้างานจริง ติดต่อสอบถามเพิ่มเติมได้ที่สายด่วน: 063 793 7704 หรือ LINE Official: @gspeedarena เปิดให้บริการตลอด 24 ชั่วโมง",
+    "zh": "สำหรับเจ้าของอาคารหรือผู้สนใจเปิดร้านเกม สามารถแจ้งขนาดพื้นที่และงบประมาณเพื่อให้เจ้าหน้าที่ช่วยประเมินผังร้านและคำนวณงบเบื้องต้นได้ฟรี ทางเราพร้อมให้คำปรึกษา แนะนำสเปกเครื่อง และมีทีมวิศวกรพร้อมเข้าสำรวจหน้างานจริง ติดต่อสอบถามเพิ่มเติมได้ที่สายด่วน: 063 793 7704 หรือ LINE Official: @gspeedarena เปิดให้บริการตลอด 24 ชั่วโมง"
+  },
+  "ติดต่อติดตั้ง": {
+    "en": "ติดต่อติดตั้ง",
+    "zh": "ติดต่อติดตั้ง"
+  },
+  "สนใจติดตั้ง": {
+    "en": "สนใจติดตั้ง",
+    "zh": "สนใจติดตั้ง"
+  },
+  "ล็อบบี้ต้อนรับและโซนคอมพิวเตอร์เกมมิ่ง G-Speed Esport Arena": {
+    "en": "ล็อบบี้ต้อนรับและโซนคอมพิวเตอร์เกมมิ่ง G-Speed Esport Arena",
+    "zh": "ล็อบบี้ต้อนรับและโซนคอมพิวเตอร์เกมมิ่ง G-Speed Esport Arena"
+  },
+  "เวทีแข่งขันอีสปอร์ตระดับสากล GLP Arena สเปก RTX 40 Series จอ 360Hz": {
+    "en": "เวทีแข่งขันอีสปอร์ตระดับสากล GLP Arena สเปก RTX 40 Series จอ 360Hz",
+    "zh": "เวทีแข่งขันอีสปอร์ตระดับสากล GLP Arena สเปก RTX 40 Series จอ 360Hz"
+  },
+  "บรรยากาศเคาน์เตอร์และล็อบบี้ร้านเกมลักชัวรี": {
+    "en": "บรรยากาศเคาน์เตอร์และล็อบบี้ร้านเกมลักชัวรี",
+    "zh": "บรรยากาศเคาน์เตอร์และล็อบบี้ร้านเกมลักชัวรี"
+  },
+  "โถงแข่งขัน Pro Stage สว่างสากล (White Arena)": {
+    "en": "โถงแข่งขัน Pro Stage สว่างสากล (White Arena)",
+    "zh": "โถงแข่งขัน Pro Stage สว่างสากล (White Arena)"
+  },
+  "แบนเนอร์รวมภาพกิจกรรมและการแข่งขัน LAN": {
+    "en": "แบนเนอร์รวมภาพกิจกรรมและการแข่งขัน LAN",
+    "zh": "แบนเนอร์รวมภาพกิจกรรมและการแข่งขัน LAN"
+  },
+  "แบนเนอร์ข่าวสารและเทคโนโลยีฮาร์ดแวร์เกม": {
+    "en": "แบนเนอร์ข่าวสารและเทคโนโลยีฮาร์ดแวร์เกม",
+    "zh": "แบนเนอร์ข่าวสารและเทคโนโลยีฮาร์ดแวร์เกม"
+  },
+  "โซน VIP Bootcamp และสตรีมเมอร์สวีท": {
+    "en": "โซน VIP Bootcamp และสตรีมเมอร์สวีท",
+    "zh": "โซน VIP Bootcamp และสตรีมเมอร์สวีท"
+  },
+  "บทความอัปเดตสเปกเครื่องและการจัดการร้านเกมอีสปอร์ต": {
+    "en": "บทความอัปเดตสเปกเครื่องและการจัดการร้านเกมอีสปอร์ต",
+    "zh": "บทความอัปเดตสเปกเครื่องและการจัดการร้านเกมอีสปอร์ต"
+  },
+  "สเตจประลอง 5v5 Soundproof Glass": {
+    "en": "สเตจประลอง 5v5 Soundproof Glass",
+    "zh": "สเตจประลอง 5v5 Soundproof Glass"
+  },
+  "ห้องแข่งขันเก็บเสียง 5v5 สตูดิโอทัวร์นาเมนต์อีสปอร์ต": {
+    "en": "ห้องแข่งขันเก็บเสียง 5v5 สตูดิโอทัวร์นาเมนต์อีสปอร์ต",
+    "zh": "ห้องแข่งขันเก็บเสียง 5v5 สตูดิโอทัวร์นาเมนต์อีสปอร์ต"
+  },
+  "ภาพผู้บริหารและทีมงานผู้ก่อตั้ง GLP": {
+    "en": "ภาพผู้บริหารและทีมงานผู้ก่อตั้ง GLP",
+    "zh": "ภาพผู้บริหารและทีมงานผู้ก่อตั้ง GLP"
+  },
+  "คุณคือผู้ช่วย AI ประจำศูนย์ GLP : G Speed Living Plus ตอบคำถามเกี่ยวกับบริการร้านเกม อัตราค่าชั่วโมง สเปกคอม และระบบแฟรนไชส์อย่างสุภาพและถูกต้อง": {
+    "en": "คุณคือผู้ช่วย AI ประจำศูนย์ GLP : G Speed Living Plus ตอบคำถามเกี่ยวกับบริการร้านเกม อัตราค่าชั่วโมง สเปกคอม และระบบแฟรนไชส์อย่างสุภาพและถูกต้อง",
+    "zh": "คุณคือผู้ช่วย AI ประจำศูนย์ GLP : G Speed Living Plus ตอบคำถามเกี่ยวกับบริการร้านเกม อัตราค่าชั่วโมง สเปกคอม และระบบแฟรนไชส์อย่างสุภาพและถูกต้อง"
+  },
+  "ขออภั��ด้วยครับ ผมเป็นผู้ช่วย AI ประจำศูนย์ GLP : G Speed Living Plus จึงสามารถตอบได้เฉพาะข้อมูลและบริการของทางร้านเท่านั้นครับ เช่น อัตราค่าบริการ, สเปกคอมพิวเตอร์, การจองห้อง VIP, เมนูอาหาร หรือการลงทุนแฟรนไชส์ หากมีข้อสงสัยเกี่ยวกับร้าน สามารถสอบถามได้ทันทีครับ": {
+    "en": "ขออภั��ด้วยครับ ผมเป็นผู้ช่วย AI ประจำศูนย์ GLP : G Speed Living Plus จึงสามารถตอบได้เฉพาะข้อมูลและบริการของทางร้านเท่านั้นครับ เช่น อัตราค่าบริการ, สเปกคอมพิวเตอร์, การจองห้อง VIP, เมนูอาหาร หรือการลงทุนแฟรนไชส์ หากมีข้อสงสัยเกี่ยวกับร้าน สามารถสอบถามได้ทันทีครับ",
+    "zh": "ขออภั��ด้วยครับ ผมเป็นผู้ช่วย AI ประจำศูนย์ GLP : G Speed Living Plus จึงสามารถตอบได้เฉพาะข้อมูลและบริการของทางร้านเท่านั้นครับ เช่น อัตราค่าบริการ, สเปกคอมพิวเตอร์, การจองห้อง VIP, เมนูอาหาร หรือการลงทุนแฟรนไชส์ หากมีข้อสงสัยเกี่ยวกับร้าน สามารถสอบถามได้ทันทีครับ"
+  },
+  "ห้อง VIP Bootcamp เก้าอี้ Secretlab พร้อมไมค์บรอดแคสต์": {
+    "en": "ห้อง VIP Bootcamp เก้าอี้ Secretlab พร้อมไมค์บรอดแคสต์",
+    "zh": "ห้อง VIP Bootcamp เก้าอี้ Secretlab พร้อมไมค์บรอดแคสต์"
+  },
+  "คุณเกรียงศักดิ์ วิจิตรพงศ์พันธุ์ ผู้ก่อตั้งและประธานบริหาร G-Speed Living Plus": {
+    "en": "คุณเกรียงศักดิ์ วิจิตรพงศ์พันธุ์ ผู้ก่อตั้งและประธานบริหาร G-Speed Living Plus",
+    "zh": "คุณเกรียงศักดิ์ วิจิตรพงศ์พันธุ์ ผู้ก่อตั้งและประธานบริหาร G-Speed Living Plus"
+  },
+  "แต่งกลอน": {
+    "en": "แต่งกลอน",
+    "zh": "แต่งกลอน"
+  },
+  "เขียนโค้ด": {
+    "en": "เขียนโค้ด",
+    "zh": "เขียนโค้ด"
+  },
+  "พนัน": {
+    "en": "พนัน",
+    "zh": "พนัน"
+  },
+  "หวย": {
+    "en": "หวย",
+    "zh": "หวย"
+  },
+  "การเมือง": {
+    "en": "การเมือง",
+    "zh": "การเมือง"
+  },
+  "การบ้าน": {
+    "en": "การบ้าน",
+    "zh": "การบ้าน"
+  },
+  "รับจัดงานแข่งระดับมัธยมแบบเหมาวันไหม": {
+    "en": "รับจัดงานแข่งระดับมัธยมแบบเหมาวันไหม",
+    "zh": "รับจัดงานแข่งระดับมัธยมแบบเหมาวันไหม"
+  },
+  "แฮก": {
+    "en": "แฮก",
+    "zh": "แฮก"
+  },
+  "คู่แข่ง": {
+    "en": "คู่แข่ง",
+    "zh": "คู่แข่ง"
+  },
+  "มีห้องสูบบุหรี่ในร้านไหม": {
+    "en": "มีห้องสูบบุหรี่ในร้านไหม",
+    "zh": "มีห้องสูบบุหรี่ในร้านไหม"
+  },
+  "10:00 - 14:00 (เปิดบริการช่วงเช้า)": {
+    "en": "10:00 - 14:00 (เปิดบริการช่วงเช้า)",
+    "zh": "10:00 - 14:00 (เปิดบริการช่วงเช้า)"
+  },
+  "14:00 - 18:00 (ช่วงบ่าย & หลังเลิกเรียน)": {
+    "en": "14:00 - 18:00 (ช่วงบ่าย & หลังเลิกเรียน)",
+    "zh": "14:00 - 18:00 (ช่วงบ่าย & หลังเลิกเรียน)"
+  },
+  "ข้าวผัดกะเพราเนื้อวากิวไข่ดาวกรอบ": {
+    "en": "ข้าวผัดกะเพราเนื้อวากิวไข่ดาวกรอบ",
+    "zh": "ข้าวผัดกะเพราเนื้อวากิวไข่ดาวกรอบ"
+  },
+  "18:00 - 00:00 (Prime Peak Time แข่งขัน/ปาร์ตี้)": {
+    "en": "18:00 - 00:00 (Prime Peak Time แข่งขัน/ปาร์ตี้)",
+    "zh": "18:00 - 00:00 (Prime Peak Time แข่งขัน/ปาร์ตี้)"
+  },
+  "00:00 - 08:00 (Night Owl Session ยันเช้า)": {
+    "en": "00:00 - 08:00 (Night Owl Session ยันเช้า)",
+    "zh": "00:00 - 08:00 (Night Owl Session ยันเช้า)"
+  },
+  "บะหมี่เกาหลีหม้อไฟชีสดับเบิ้ล": {
+    "en": "บะหมี่เกาหลีหม้อไฟชีสดับเบิ้ล",
+    "zh": "บะหมี่เกาหลีหม้อไฟชีสดับเบิ้ล"
+  },
+  "วันนี้มีอัตราการใช้งานเฉลี่ย 78.4% โซน Stage 5v5 และห้อง VIP Suite มีคิวจองเต็ม 100% ยอดขายเครื่องดื่มและอาหารเติบโตขึ้น 28% จากการสั่งผ่านหน้าจอคอมพิวเตอร์โดยตรง ต้นทุนค่าไฟฟ้าอยู่ในเกณฑ์ปกติ (เฉลี่ย 18.2 หน่วย/เครื่อง/วัน) แนะนำให้โปรโมตแพ็กเกจเหมาค่ำคืน Night Owl สำหรับวันธรรมดาเพื่อดึงดูดลูกค้าช่วงหลังเที่ยงคืน": {
+    "en": "วันนี้มีอัตราการใช้งานเฉลี่ย 78.4% โซน Stage 5v5 และห้อง VIP Suite มีคิวจองเต็ม 100% ยอดขายเครื่องดื่มและอาหารเติบโตขึ้น 28% จากการสั่งผ่านหน้าจอคอมพิวเตอร์โดยตรง ต้นทุนค่าไฟฟ้าอยู่ในเกณฑ์ปกติ (เฉลี่ย 18.2 หน่วย/เครื่อง/วัน) แนะนำให้โปรโมตแพ็กเกจเหมาค่ำคืน Night Owl สำหรับวันธรรมดาเพื่อดึงดูดลูกค้าช่วงหลังเที่ยงคืน",
+    "zh": "วันนี้มีอัตราการใช้งานเฉลี่ย 78.4% โซน Stage 5v5 และห้อง VIP Suite มีคิวจองเต็ม 100% ยอดขายเครื่องดื่มและอาหารเติบโตขึ้น 28% จากการสั่งผ่านหน้าจอคอมพิวเตอร์โดยตรง ต้นทุนค่าไฟฟ้าอยู่ในเกณฑ์ปกติ (เฉลี่ย 18.2 หน่วย/เครื่อง/วัน) แนะนำให้โปรโมตแพ็กเกจเหมาค่ำคืน Night Owl สำหรับวันธรรมดาเพื่อดึงดูดลูกค้าช่วงหลังเที่ยงคืน"
+  },
+  "ชาเขียวมัทฉะลาเต้พรีเมียม": {
+    "en": "ชาเขียวมัทฉะลาเต้พรีเมียม",
+    "zh": "ชาเขียวมัทฉะลาเต้พรีเมียม"
+  },
+  "ไก่ทอดคาราเกะซอสสไปซี่": {
+    "en": "ไก่ทอดคาราเกะซอสสไปซี่",
+    "zh": "ไก่ทอดคาราเกะซอสสไปซี่"
+  },
+  "G-Speed Energy Elixir (สูตรพิเศษ)": {
+    "en": "G-Speed Energy Elixir (สูตรพิเศษ)",
+    "zh": "G-Speed Energy Elixir (สูตรพิเศษ)"
+  },
+  "แจ้งเตือนพนักงานและผู้จัดการร้านทันทีเมื่อ��ี��ำถามที่ AI ไม่สามารถตอบได้": {
+    "en": "แจ้งเตือนพนักงานและผู้จัดการร้านทันทีเมื่อ��ี��ำถามที่ AI ไม่สามารถตอบได้",
+    "zh": "แจ้งเตือนพนักงานและผู้จัดการร้านทันทีเมื่อ��ี��ำถามที่ AI ไม่สามารถตอบได้"
+  },
+  "ส่งข้อมูลใบเสนอราคาและไฟล์แปลนอาคารไปยัง n8n เพื่อส่งต่อ LINE / Discord / Google Sheets": {
+    "en": "ส่งข้อมูลใบเสนอราคาและไฟล์แปลนอาคารไปยัง n8n เพื่อส่งต่อ LINE / Discord / Google Sheets",
+    "zh": "ส่งข้อมูลใบเสนอราคาและไฟล์แปลนอาคารไปยัง n8n เพื่อส่งต่อ LINE / Discord / Google Sheets"
+  },
+  "สรุปยอดขายประจำวัน ค่าชั่วโมง ยอด F&B และค่าไฟ ส่งไปยังระบบบัญชี FlowAccount / Xero": {
+    "en": "สรุปยอดขายประจำวัน ค่าชั่วโมง ยอด F&B และค่าไฟ ส่งไปยังระบบบัญชี FlowAccount / Xero",
+    "zh": "สรุปยอดขายประจำวัน ค่าชั่วโมง ยอด F&B และค่าไฟ ส่งไปยังระบบบัญชี FlowAccount / Xero"
+  },
+  "รับข้อมูลการสมัครแข่งขัน ตรวจสอบรายชื่อผู้เล่น และสร้าง Team ID อัตโนมัติ": {
+    "en": "รับข้อมูลการสมัครแข่งขัน ตรวจสอบรายชื่อผู้เล่น และสร้าง Team ID อัตโนมัติ",
+    "zh": "รับข้อมูลการสมัครแข่งขัน ตรวจสอบรายชื่อผู้เล่น และสร้าง Team ID อัตโนมัติ"
+  },
+  "รับข้อความจากทุกช่องทาง (Web Widget, LINE OA, Facebook Messenger) ตรวจสอบสิทธิ์สมาชิกใน ERP และส่งต่อไปยัง OpenWebUI/LLM ตอบกลับอัตโนมัติ": {
+    "en": "รับข้อความจากทุกช่องทาง (Web Widget, LINE OA, Facebook Messenger) ตรวจสอบสิทธิ์สมาชิกใน ERP และส่งต่อไปยัง OpenWebUI/LLM ตอบกลับอัตโนมัติ",
+    "zh": "รับข้อความจากทุกช่องทาง (Web Widget, LINE OA, Facebook Messenger) ตรวจสอบสิทธิ์สมาชิกใน ERP และส่งต่อไปยัง OpenWebUI/LLM ตอบกลับอัตโนมัติ"
+  },
+  "ขอบพระคุณที่สนใจร่วมลงทุนแฟรนไชส์ GLP : G Speed Living Plus (ใบเสนอราคาเลขที่ {{quote_ref}})": {
+    "en": "ขอบพระคุณที่สนใจร่วมลงทุนแฟรนไชส์ GLP : G Speed Living Plus (ใบเสนอราคาเลขที่ {{quote_ref}})",
+    "zh": "ขอบพระคุณที่สนใจร่วมลงทุนแฟรนไชส์ GLP : G Speed Living Plus (ใบเสนอราคาเลขที่ {{quote_ref}})"
+  },
+  "ทีมวิศวกรและผู้เชี่ยวชาญ GLP ได้รับพิมพ์เขียวผังร้านของคุณเรียบร้อยแล้ว": {
+    "en": "ทีมวิศวกรและผู้เชี่ยวชาญ GLP ได้รับพิมพ์เขียวผังร้านของคุณเรียบร้อยแล้ว",
+    "zh": "ทีมวิศวกรและผู้เชี่ยวชาญ GLP ได้รับพิมพ์เขียวผังร้านของคุณเรียบร้อยแล้ว"
+  },
+  "เรียน คุณ{{customer_name}},\n\nบริษัท จี-สปีด ลิฟวิ่ง พลัส จำกัด (GLP : G Speed Living Plus) ขอขอบพระคุณเป็นอย่างยิ่งที่ท่านได้ให้ความสนใจร่วมลงทุนในธุรกิจอีสปอร์ตอารีน่าและร้านอินเทอร์เน็ตคาเฟ่มาตรฐานสากล\n\nทีมวิศวกรออกแบบระบบและที่ปรึกษาธุรกิจแฟรนไชส์ GLP ได้รับข้อมูลพิมพ์เขียวผังร้าน 3D ของท่านเรียบร้อยแล้ว โดยมีรายละเอียดสรุปเบื้องต้นดังนี้:\n\n• รหัสอ้างอิงใบเสนอราคา: {{quote_ref}}\n• ขนาดพื้นที่ร้าน: {{room_dimensions}}\n• จำนวนเครื่องที่จัดวาง: {{total_stations}} เครื่อง\n• งบประมาณลงทุนประเมินเบื้องต้น: {{total_investment}} บาท\n• ผลตอบแทนเฉลี่ยประมาณการ: {{monthly_profit}} บาท/เดือน (ระยะคืนทุน {{payback_months}} เดือน)\n\nทีมงานผู้เชี่ยวชาญกำลังดำเนินการจัดทำ \"รายงานการศึกษาความเป็นไปได้ของโครงการ (Project Feasibility Study)\" อย่างละเอียด และจะติดต่อกลับหาท่านทางเบอร์ {{customer_phone}} หรืออีเมล {{customer_email}} ภายใน 24 ชั่วโมง เพื่อส่งมอบเล่มรายงานและนัดหมายให้คำปรึกษาแบบ 1-on-1 โดยไม่มีค่าใช้จ่าย\n\nหากท่านมีข้อสงสัยเร่งด่วน สามารถติดต่อฝ่ายพัฒนาธุรกิจแฟรนไชส์ได้ทันทีที่เบอร์ {{company_phone}} หรือ Line Official: {{company_line}}\n\nขอแสดงความนับถือ,\nทีมงานฝ่ายพัฒนาธุรกิจแฟรนไชส์\nบริษัท จี-สปีด ลิฟวิ่ง พลัส จำกัด (GLP)": {
+    "en": "เรียน คุณ{{customer_name}},\n\nบริษัท จี-สปีด ลิฟวิ่ง พลัส จำกัด (GLP : G Speed Living Plus) ขอขอบพระคุณเป็นอย่างยิ่งที่ท่านได้ให้ความสนใจร่วมลงทุนในธุรกิจอีสปอร์ตอารีน่าและร้านอินเทอร์เน็ตคาเฟ่มาตรฐานสากล\n\nทีมวิศวกรออกแบบระบบและที่ปรึกษาธุรกิจแฟรนไชส์ GLP ได้รับข้อมูลพิมพ์เขียวผังร้าน 3D ของท่านเรียบร้อยแล้ว โดยมีรายละเอียดสรุปเบื้องต้นดังนี้:\n\n• รหัสอ้างอิงใบเสนอราคา: {{quote_ref}}\n• ขนาดพื้นที่ร้าน: {{room_dimensions}}\n• จำนวนเครื่องที่จัดวาง: {{total_stations}} เครื่อง\n• งบประมาณลงทุนประเมินเบื้องต้น: {{total_investment}} บาท\n• ผลตอบแทนเฉลี่ยประมาณการ: {{monthly_profit}} บาท/เดือน (ระยะคืนทุน {{payback_months}} เดือน)\n\nทีมงานผู้เชี่ยวชาญกำลังดำเนินการจัดทำ \"รายงานการศึกษาความเป็นไปได้ของโครงการ (Project Feasibility Study)\" อย่างละเอียด และจะติดต่อกลับหาท่านทางเบอร์ {{customer_phone}} หรืออีเมล {{customer_email}} ภายใน 24 ชั่วโมง เพื่อส่งมอบเล่มรายงานและนัดหมายให้คำปรึกษาแบบ 1-on-1 โดยไม่มีค่าใช้จ่าย\n\nหากท่านมีข้อสงสัยเร่งด่วน สามารถติดต่อฝ่ายพัฒนาธุรกิจแฟรนไชส์ได้ทันทีที่เบอร์ {{company_phone}} หรือ Line Official: {{company_line}}\n\nขอแสดงความนับถือ,\nทีมงานฝ่ายพัฒนาธุรกิจแฟรนไชส์\nบริษัท จี-สปีด ลิฟวิ่ง พลัส จำกัด (GLP)",
+    "zh": "เรียน คุณ{{customer_name}},\n\nบริษัท จี-สปีด ลิฟวิ่ง พลัส จำกัด (GLP : G Speed Living Plus) ขอขอบพระคุณเป็นอย่างยิ่งที่ท่านได้ให้ความสนใจร่วมลงทุนในธุรกิจอีสปอร์ตอารีน่าและร้านอินเทอร์เน็ตคาเฟ่มาตรฐานสากล\n\nทีมวิศวกรออกแบบระบบและที่ปรึกษาธุรกิจแฟรนไชส์ GLP ได้รับข้อมูลพิมพ์เขียวผังร้าน 3D ของท่านเรียบร้อยแล้ว โดยมีรายละเอียดสรุปเบื้องต้นดังนี้:\n\n• รหัสอ้างอิงใบเสนอราคา: {{quote_ref}}\n• ขนาดพื้นที่ร้าน: {{room_dimensions}}\n• จำนวนเครื่องที่จัดวาง: {{total_stations}} เครื่อง\n• งบประมาณลงทุนประเมินเบื้องต้น: {{total_investment}} บาท\n• ผลตอบแทนเฉลี่ยประมาณการ: {{monthly_profit}} บาท/เดือน (ระยะคืนทุน {{payback_months}} เดือน)\n\nทีมงานผู้เชี่ยวชาญกำลังดำเนินการจัดทำ \"รายงานการศึกษาความเป็นไปได้ของโครงการ (Project Feasibility Study)\" อย่างละเอียด และจะติดต่อกลับหาท่านทางเบอร์ {{customer_phone}} หรืออีเมล {{customer_email}} ภายใน 24 ชั่วโมง เพื่อส่งมอบเล่มรายงานและนัดหมายให้คำปรึกษาแบบ 1-on-1 โดยไม่มีค่าใช้จ่าย\n\nหากท่านมีข้อสงสัยเร่งด่วน สามารถติดต่อฝ่ายพัฒนาธุรกิจแฟรนไชส์ได้ทันทีที่เบอร์ {{company_phone}} หรือ Line Official: {{company_line}}\n\nขอแสดงความนับถือ,\nทีมงานฝ่ายพัฒนาธุรกิจแฟรนไชส์\nบริษัท จี-สปีด ลิฟวิ่ง พลัส จำกัด (GLP)"
+  },
+  "อีเมลตอบกลับคำขอแฟรนไชส์ & แปลนร้านอัตโนมัติ (Customer Auto-Reply)": {
+    "en": "อีเมลตอบกลับคำขอแฟรนไชส์ & แปลนร้านอัตโนมัติ (Customer Auto-Reply)",
+    "zh": "อีเมลตอบกลับคำขอแฟรนไชส์ & แปลนร้านอัตโนมัติ (Customer Auto-Reply)"
+  },
+  "อีเมลแจ้งเตือนทีมวิศวกร & ฝ่ายขายเมื่อมี Lead ใหม่ (Internal Staff Alert)": {
+    "en": "อีเมลแจ้งเตือนทีมวิศวกร & ฝ่ายขายเมื่อมี Lead ใหม่ (Internal Staff Alert)",
+    "zh": "อีเมลแจ้งเตือนทีมวิศวกร & ฝ่ายขายเมื่อมี Lead ใหม่ (Internal Staff Alert)"
+  },
+  "มีคำขอใบเสนอราคาใหม่จากระบบ 3D Floorplanner": {
+    "en": "มีคำขอใบเสนอราคาใหม่จากระบบ 3D Floorplanner",
+    "zh": "มีคำขอใบเสนอราคาใหม่จากระบบ 3D Floorplanner"
+  },
+  "ติดต่อเรา & แผนที่ร้าน GLP": {
+    "en": "ติดต่อเรา & แผนที่ร้าน GLP",
+    "zh": "ติดต่อเรา & แผนที่ร้าน GLP"
+  },
+  "[NEW LEAD] มีผู้สนใจเปิดร้านใหม่: คุณ{{customer_name}} ({{total_stations}} เครื่อง / {{quote_ref}})": {
+    "en": "[NEW LEAD] มีผู้สนใจเปิดร้านใหม่: คุณ{{customer_name}} ({{total_stations}} เครื่อง / {{quote_ref}})",
+    "zh": "[NEW LEAD] มีผู้สนใจเปิดร้านใหม่: คุณ{{customer_name}} ({{total_stations}} เครื่อง / {{quote_ref}})"
+  },
+  "เรียน ทีมงานวิศวกรและฝ่ายพัฒนาธุรกิจ GLP,\n\nมีลูกค้าสนใจร่วมลงทุนแฟรนไชส์รายใหม่ส่งแบบแปลนร้าน 3D เข้ามาในระบบ:\n\n• ชื่อลูกค้า: คุณ{{customer_name}}\n• เบอร์โทรติดต่อ: {{customer_phone}}\n• อีเมล: {{customer_email}}\n• เลขที่ใบเสนอราคา: {{quote_ref}}\n• จำนวนเครื่อง: {{total_stations}} เครื่อง\n• งบประมาณประเมิน: {{total_investment}} บาท\n• ขนาดพื้นที่: {{room_dimensions}}\n• รายละเอียดสถานที่: {{location_detail}}\n\nกรุณาตรวจสอบผังและติดต่อกลับลูกค้าภายใน 24 ชั่วโมง ตาม SLA ที่กำหนด": {
+    "en": "เรียน ทีมงานวิศวกรและฝ่ายพัฒนาธุรกิจ GLP,\n\nมีลูกค้าสนใจร่วมลงทุนแฟรนไชส์รายใหม่ส่งแบบแปลนร้าน 3D เข้ามาในระบบ:\n\n• ชื่อลูกค้า: คุณ{{customer_name}}\n• เบอร์โทรติดต่อ: {{customer_phone}}\n• อีเมล: {{customer_email}}\n• เลขที่ใบเสนอราคา: {{quote_ref}}\n• จำนวนเครื่อง: {{total_stations}} เครื่อง\n• งบประมาณประเมิน: {{total_investment}} บาท\n• ขนาดพื้นที่: {{room_dimensions}}\n• รายละเอียดสถานที่: {{location_detail}}\n\nกรุณาตรวจสอบผังและติดต่อกลับลูกค้าภายใน 24 ชั่วโมง ตาม SLA ที่กำหนด",
+    "zh": "เรียน ทีมงานวิศวกรและฝ่ายพัฒนาธุรกิจ GLP,\n\nมีลูกค้าสนใจร่วมลงทุนแฟรนไชส์รายใหม่ส่งแบบแปลนร้าน 3D เข้ามาในระบบ:\n\n• ชื่อลูกค้า: คุณ{{customer_name}}\n• เบอร์โทรติดต่อ: {{customer_phone}}\n• อีเมล: {{customer_email}}\n• เลขที่ใบเสนอราคา: {{quote_ref}}\n• จำนวนเครื่อง: {{total_stations}} เครื่อง\n• งบประมาณประเมิน: {{total_investment}} บาท\n• ขนาดพื้นที่: {{room_dimensions}}\n• รายละเอียดสถานที่: {{location_detail}}\n\nกรุณาตรวจสอบผังและติดต่อกลับลูกค้าภายใน 24 ชั่วโมง ตาม SLA ที่กำหนด"
+  },
+  "ศูนย์กีฬาอีสปอร์ตและร้านอินเทอร์เน็ตคาเฟ่มาตรฐานสากล บริหารงานโดย GLP Living Plus Group พร้อมระบบโซลูชันแฟรนไชส์อัจฉริยะสำหรับผู้ประกอบการรุ่นใหม่": {
+    "en": "ศูนย์กีฬาอีสปอร์ตและร้านอินเทอร์เน็ตคาเฟ่มาตรฐานสากล บริหารงานโดย GLP Living Plus Group พร้อมระบบโซลูชันแฟรนไชส์อัจฉริยะสำหรับผู้ประกอบการรุ่นใหม่",
+    "zh": "ศูนย์กีฬาอีสปอร์ตและร้านอินเทอร์เน็ตคาเฟ่มาตรฐานสากล บริหารงานโดย GLP Living Plus Group พร้อมระบบโซลูชันแฟรนไชส์อัจฉริยะสำหรับผู้ประกอบการรุ่นใหม่"
+  },
+  "ศูนย์กีฬาอีสปอร์ตและร้านอินเทอร์เน็ตคาเฟ่มาตรฐานสากล GLP : G Speed Living Plus พร้อมต้อนรับนักกีฬาอีสปอร์ต เกมเมอร์ และผู้สนใจร่วมลงทุนแฟรนไชส์ตลอด 24 ชั่วโมง": {
+    "en": "ศูนย์กีฬาอีสปอร์ตและร้านอินเทอร์เน็ตคาเฟ่มาตรฐานสากล GLP : G Speed Living Plus พร้อมต้อนรับนักกีฬาอีสปอร์ต เกมเมอร์ และผู้สนใจร่วมลงทุนแฟรนไชส์ตลอด 24 ชั่วโมง",
+    "zh": "ศูนย์กีฬาอีสปอร์ตและร้านอินเทอร์เน็ตคาเฟ่มาตรฐานสากล GLP : G Speed Living Plus พร้อมต้อนรับนักกีฬาอีสปอร์ต เกมเมอร์ และผู้สนใจร่วมลงทุนแฟรนไชส์ตลอด 24 ชั่วโมง"
+  },
+  "(ทำเลศักยภาพ เชื่อมต่อระหว่าง ซอยลาดพร้าว 112 และ ซอยรามคำแหง 53 มีที่จอดรถยนต์และจักรยานยนต์)": {
+    "en": "(ทำเลศักยภาพ เชื่อมต่อระหว่าง ซอยลาดพร้าว 112 และ ซอยรามคำแหง 53 มีที่จอดรถยนต์และจักรยานยนต์)",
+    "zh": "(ทำเลศักยภาพ เชื่อมต่อระหว่าง ซอยลาดพร้าว 112 และ ซอยรามคำแหง 53 มีที่จอดรถยนต์และจักรยานยนต์)"
+  },
+  "รถไฟฟ้า MRT": {
+    "en": "รถไฟฟ้า MRT",
+    "zh": "รถไฟฟ้า MRT"
+  },
+  "แนะนำสำหรับผู้ใช้รถไฟฟ้า": {
+    "en": "แนะนำสำหรับผู้ใช้รถไฟฟ้า",
+    "zh": "แนะนำสำหรับผู้ใช้รถไฟฟ้า"
+  },
+  "สายสีเหลือง: ลงสถานีลาดพร้าว 83 หรือ สถานีลาดพร้าว 101 จากนั้นต่อวินมอเตอร์ไซค์เข้าซอยลาดพร้าว 112 (ประมาณ 5 นาทีถึงหน้าร้าน)": {
+    "en": "สายสีเหลือง: ลงสถานีลาดพร้าว 83 หรือ สถานีลาดพร้าว 101 จากนั้นต่อวินมอเตอร์ไซค์เข้าซอยลาดพร้าว 112 (ประมาณ 5 นาทีถึงหน้าร้าน)",
+    "zh": "สายสีเหลือง: ลงสถานีลาดพร้าว 83 หรือ สถานีลาดพร้าว 101 จากนั้นต่อวินมอเตอร์ไซค์เข้าซอยลาดพร้าว 112 (ประมาณ 5 นาทีถึงหน้าร้าน)"
+  },
+  "ฝั่งลาดพร้าว: สาย 8, 27, 44, 73, 96, 137, 145, 502, 514 | ฝั่งรามคำแหง: สาย 60, 71, 92, 93, 113, 168, 501": {
+    "en": "ฝั่งลาดพร้าว: สาย 8, 27, 44, 73, 96, 137, 145, 502, 514 | ฝั่งรามคำแหง: สาย 60, 71, 92, 93, 113, 168, 501",
+    "zh": "ฝั่งลาดพร้าว: สาย 8, 27, 44, 73, 96, 137, 145, 502, 514 | ฝั่งรามคำแหง: สาย 60, 71, 92, 93, 113, 168, 501"
+  },
+  "รถยนต์ส่วนบุคคล": {
+    "en": "รถยนต์ส่วนบุคคล",
+    "zh": "รถยนต์ส่วนบุคคล"
+  },
+  "มีที่จอดรถรองรับ": {
+    "en": "มีที่จอดรถรองรับ",
+    "zh": "มีที่จอดรถรองรับ"
+  },
+  "เข้าได้จาก ถ.ลาดพร้าว (ซอย 112) หรือจาก ถ.รามคำแหง (ซอย 53) มีลานจอดรถยนต์กว้างขวาง ปลอดภัย พร้อมกล้อง CCTV ตลอด 24 ชม.": {
+    "en": "เข้าได้จาก ถ.ลาดพร้าว (ซอย 112) หรือจาก ถ.รามคำแหง (ซอย 53) มีลานจอดรถยนต์กว้างขวาง ปลอดภัย พร้อมกล้อง CCTV ตลอด 24 ชม.",
+    "zh": "เข้าได้จาก ถ.ลาดพร้าว (ซอย 112) หรือจาก ถ.รามคำแหง (ซอย 53) มีลานจอดรถยนต์กว้างขวาง ปลอดภัย พร้อมกล้อง CCTV ตลอด 24 ชม."
+  },
+  "รถโดยสารประจำทาง": {
+    "en": "รถโดยสารประจำทาง",
+    "zh": "รถโดยสารประจำทาง"
+  },
+  "เดินทางประหยัด": {
+    "en": "เดินทางประหยัด",
+    "zh": "เดินทางประหยัด"
+  },
+  "ระบบ Diskless Server & เน็ตเวิร์ก 10Gbps แข่งขันระดับโปร": {
+    "en": "ระบบ Diskless Server & เน็ตเวิร์ก 10Gbps แข่งขันระดับโปร",
+    "zh": "ระบบ Diskless Server & เน็ตเวิร์ก 10Gbps แข่งขันระดับโปร"
+  },
+  "เปิดบริก���ร 24 ชั่วโมง 365 วัน ไม่มีวันหยุด": {
+    "en": "เปิดบริก���ร 24 ชั่วโมง 365 วัน ไม่มีวันหยุด",
+    "zh": "เปิดบริก���ร 24 ชั่วโมง 365 วัน ไม่มีวันหยุด"
+  },
+  "เวทีแข่งขัน 5v5 Stage และจอ LED Wall ระดับสากล": {
+    "en": "เวทีแข่งขัน 5v5 Stage และจอ LED Wall ระดับสากล",
+    "zh": "เวทีแข่งขัน 5v5 Stage และจอ LED Wall ระดับสากล"
+  },
+  "ระบบความปลอดภัย CCTV 24 ชม. ปลอดบุหรี่ 100%": {
+    "en": "ระบบความปลอดภัย CCTV 24 ชม. ปลอดบุหรี่ 100%",
+    "zh": "ระบบความปลอดภัย CCTV 24 ชม. ปลอดบุหรี่ 100%"
+  },
+  "คุณอนุรักษ์ รัตนวิเชียร": {
+    "en": "คุณอนุรักษ์ รัตนวิเชียร",
+    "zh": "คุณอนุรักษ์ รัตนวิเชียร"
+  },
+  "ถ. นิมมานเหมินท์ อ.เมือง จ.เชียงใหม่": {
+    "en": "ถ. นิมมานเหมินท์ อ.เมือง จ.เชียงใหม่",
+    "zh": "ถ. นิมมานเหมินท์ อ.เมือง จ.เชียงใหม่"
+  },
+  "220 ตร.ม.": {
+    "en": "220 ตร.ม.",
+    "zh": "220 ตร.ม."
+  },
+  "คุณนัท (ฝ่ายขายแฟรนไชส์)": {
+    "en": "คุณนัท (ฝ่ายขายแฟรนไชส์)",
+    "zh": "คุณนัท (ฝ่ายขายแฟรนไชส์)"
+  },
+  "แฟรนไชส์ Size M (60 เครื่อง)": {
+    "en": "แฟรนไชส์ Size M (60 เครื่อง)",
+    "zh": "แฟรนไชส์ Size M (60 เครื่อง)"
+  },
+  "วิทยาเขตบางเขน กทม.": {
+    "en": "วิทยาเขตบางเขน กทม.",
+    "zh": "วิทยาเขตบางเขน กทม."
+  },
+  "ส่งแปลน 3D Interior และใบเสนอราคาระบบ Diskless ให้แล้ว ลูกค้าชอบการจัดโซน VIP Suite 2 ห้อง กำลังนัดคุยรายละเอียดสัญญา": {
+    "en": "ส่งแปลน 3D Interior และใบเสนอราคาระบบ Diskless ให้แล้ว ลูกค้าชอบการจัดโซน VIP Suite 2 ห้อง กำลังนัดคุยรายละเอียดสัญญา",
+    "zh": "ส่งแปลน 3D Interior และใบเสนอราคาระบบ Diskless ให้แล้ว ลูกค้าชอบการจัดโซน VIP Suite 2 ห้อง กำลังนัดคุยรายละเอียดสัญญา"
+  },
+  "ชมรมอีสปอร์ต มหาวิทยาลัยเกษตรศาสตร์": {
+    "en": "ชมรมอีสปอร์ต มหาวิทยาลัยเกษตรศาสตร์",
+    "zh": "ชมรมอีสปอร์ต มหาวิทยาลัยเกษตรศาสตร์"
+  },
+  "พฤศจิกายน 2026": {
+    "en": "พฤศจิกายน 2026",
+    "zh": "พฤศจิกายน 2026"
+  },
+  "คุณกัญญาณัฐ สุขสมบัติ": {
+    "en": "คุณกัญญาณัฐ สุขสมบัติ",
+    "zh": "คุณกัญญาณัฐ สุขสมบัติ"
+  },
+  "10-11 ตุลาคม 2026": {
+    "en": "10-11 ตุลาคม 2026",
+    "zh": "10-11 ตุลาคม 2026"
+  },
+  "ต้องการใช้เวทีแข่งขัน 5v5 พร้อมจอ LED Wall และโต๊ะพากย์แคสเตอร์ 2 วันเต็ม โทรคุยรายละเอียดและเสนอแพ็กเกจแล้ว รอเข้าชมสถานที่จริงวันศุกร์นี้": {
+    "en": "ต้องการใช้เวทีแข่งขัน 5v5 พร้อมจอ LED Wall และโต๊ะพากย์แคสเตอร์ 2 วันเต็ม โทรคุยรายละเอียดและเสนอแพ็กเกจแล้ว รอเข้าชมสถานที่จริงวันศุกร์นี้",
+    "zh": "ต้องการใช้เวทีแข่งขัน 5v5 พร้อมจอ LED Wall และโต๊ะพากย์แคสเตอร์ 2 วันเต็ม โทรคุยรายละเอียดและเสนอแพ็กเกจแล้ว รอเข้าชมสถานที่จริงวันศุกร์นี้"
+  },
+  "โซน Main Stage + Battleground": {
+    "en": "โซน Main Stage + Battleground",
+    "zh": "โซน Main Stage + Battleground"
+  },
+  "คุณกอล์ฟ (ฝ่ายกิจกรรม & ทัวร์นาเมนต์)": {
+    "en": "คุณกอล์ฟ (ฝ่ายกิจกรรม & ทัวร์นาเมนต์)",
+    "zh": "คุณกอล์ฟ (ฝ่ายกิจกรรม & ทัวร์นาเมนต์)"
+  },
+  "เช่าสถานที่จัดแข่ง (VALORANT Campus Cup)": {
+    "en": "เช่าสถานที่จัดแข่ง (VALORANT Campus Cup)",
+    "zh": "เช่าสถานที่จัดแข่ง (VALORANT Campus Cup)"
+  },
+  "380 ตร.ม. (ตึก 3 ชั้น)": {
+    "en": "380 ตร.ม. (ตึก 3 ชั้น)",
+    "zh": "380 ตร.ม. (ตึก 3 ชั้น)"
+  },
+  "อาคารพาณิชย์ลาดพร้าว 101": {
+    "en": "อาคารพาณิชย์ลาดพร้าว 101",
+    "zh": "อาคารพาณิชย์ลาดพร้าว 101"
+  },
+  "คุณธีรพัฒน์ อัศวเดชากุล": {
+    "en": "คุณธีรพัฒน์ อัศวเดชากุล",
+    "zh": "คุณธีรพัฒน์ อัศวเดชากุล"
+  },
+  "แฟรนไชส์ Size L Mega Arena (100 เครื่อง)": {
+    "en": "แฟรนไชส์ Size L Mega Arena (100 เครื่อง)",
+    "zh": "แฟรนไชส์ Size L Mega Arena (100 เครื่อง)"
+  },
+  "ซ.ลาดพร้าว 101 วังทองหลาง กทม.": {
+    "en": "ซ.ลาดพร้าว 101 วังทองหลาง กทม.",
+    "zh": "ซ.ลาดพร้าว 101 วังทองหลาง กทม."
+  },
+  "มกราคม 2027": {
+    "en": "มกราคม 2027",
+    "zh": "มกราคม 2027"
+  },
+  "ติดตั้งระบบ Diskless Server & 10G Multi-WAN (40 เครื่อง)": {
+    "en": "ติดตั้งระบบ Diskless Server & 10G Multi-WAN (40 เครื่อง)",
+    "zh": "ติดตั้งระบบ Diskless Server & 10G Multi-WAN (40 เครื่อง)"
+  },
+  "ลูกค้ากรอกข้อมูลผ่านระบบ 3D Planner บนเว็บ มีตึกพาณิชย์ 3 ชั้นใกล้โรงเรียนและมหาวิทยาลัย สนใจระบบไฟ 3 เฟสและ Diskless": {
+    "en": "ลูกค้ากรอกข้อมูลผ่านระบบ 3D Planner บนเว็บ มีตึกพาณิชย์ 3 ชั้นใกล้โรงเรียนและมหาวิทยาลัย สนใจระบบไฟ 3 เฟสและ Diskless",
+    "zh": "ลูกค้ากรอกข้อมูลผ่านระบบ 3D Planner บนเว็บ มีตึกพาณิชย์ 3 ชั้นใกล้โรงเรียนและมหาวิทยาลัย สนใจระบบไฟ 3 เฟสและ Diskless"
+  },
+  "บริษัท ไซเบอร์เกมส์ อารีน่า จำกัด (คุณสมชาย)": {
+    "en": "บริษัท ไซเบอร์เกมส์ อารีน่า จำกัด (คุณสมชาย)",
+    "zh": "บริษัท ไซเบอร์เกมส์ อารีน่า จำกัด (คุณสมชาย)"
+  },
+  "ถ.ลงหาดบางแสน จ.ชลบุรี": {
+    "en": "ถ.ลงหาดบางแสน จ.ชลบุรี",
+    "zh": "ถ.ลงหาดบางแสน จ.ชลบุรี"
+  },
+  "160 ตร.ม.": {
+    "en": "160 ตร.ม.",
+    "zh": "160 ตร.ม."
+  },
+  "เซ็นสัญญาและชำระมัดจำ 50% เรียบร้อยแล้ว ทีมงานเตรียมเข้าเดินสายแลน CAT6A และติดตั้งเซิร์ฟเวอร์ CCBoot/iCafeCloud วันที่ 22 ก.ย.": {
+    "en": "เซ็นสัญญาและชำระมัดจำ 50% เรียบร้อยแล้ว ทีมงานเตรียมเข้าเดินสายแลน CAT6A และติดตั้งเซิร์ฟเวอร์ CCBoot/iCafeCloud วันที่ 22 ก.ย.",
+    "zh": "เซ็นสัญญาและชำระมัดจำ 50% เรียบร้อยแล้ว ทีมงานเตรียมเข้าเดินสายแลน CAT6A และติดตั้งเซิร์ฟเวอร์ CCBoot/iCafeCloud วันที่ 22 ก.ย."
+  },
+  "ช่างเอก (วิศวกรระบบเน็ตเวิร์ก)": {
+    "en": "ช่างเอก (วิศวกรระบบเน็ตเวิร์ก)",
+    "zh": "ช่างเอก (วิศวกรระบบเน็ตเวิร์ก)"
+  },
+  "ค่าล้างแอร์ โซน VIP Suite 1-2": {
+    "en": "ค่าล้างแอร์ โซน VIP Suite 1-2",
+    "zh": "ค่าล้างแอร์ โซน VIP Suite 1-2"
+  },
+  "ซ่อมบำรุง / แอร์": {
+    "en": "ซ่อมบำรุง / แอร์",
+    "zh": "ซ่อมบำรุง / แอร์"
+  },
+  "/pay 450 ค่าล้างแอร์ โซน VIP Suite 1-2": {
+    "en": "/pay 450 ค่าล้างแอร์ โซน VIP Suite 1-2",
+    "zh": "/pay 450 ค่าล้างแอร์ โซน VIP Suite 1-2"
+  },
+  "แอดมิน กอล์ฟ (LINE)": {
+    "en": "แอดมิน กอล์ฟ (LINE)",
+    "zh": "แอดมิน กอล์ฟ (LINE)"
+  },
+  "ผู้จัดการ บอย (LINE)": {
+    "en": "ผู้จัดการ บอย (LINE)",
+    "zh": "ผู้จัดการ บอย (LINE)"
+  },
+  "วัตถุดิบอาหาร & คาเฟ่": {
+    "en": "วัตถุดิบอาหาร & คาเฟ่",
+    "zh": "วัตถุดิบอาหาร & คาเฟ่"
+  },
+  "สั่งไก่ป๊อปและเฟรนช์ฟรายส์เข้าร้าน (Lotus Express)": {
+    "en": "สั่งไก่ป๊อปและเฟรนช์ฟรายส์เข้าร้าน (Lotus Express)",
+    "zh": "สั่งไก่ป๊อปและเฟรนช์ฟรายส์เข้าร้าน (Lotus Express)"
+  },
+  "/pay 1200 สั่งไก่ป๊อปและเฟรนช์ฟรายส์เข้าร้าน": {
+    "en": "/pay 1200 สั่งไก่ป๊อปและเฟรนช์ฟรายส์เข้าร้าน",
+    "zh": "/pay 1200 สั่งไก่ป๊อปและเฟรนช์ฟรายส์เข้าร้าน"
+  },
+  "/pay 350 ค่าน้ำแข็งหลอดยูนิต 3 กระสอบ": {
+    "en": "/pay 350 ค่าน้ำแข็งหลอดยูนิต 3 กระสอบ",
+    "zh": "/pay 350 ค่าน้ำแข็งหลอดยูนิต 3 กระสอบ"
+  },
+  "อุปกรณ์ไอที / สายไฟ": {
+    "en": "อุปกรณ์ไอที / สายไฟ",
+    "zh": "อุปกรณ์ไอที / สายไฟ"
+  },
+  "พนักงาน นัท (LINE)": {
+    "en": "พนักงาน นัท (LINE)",
+    "zh": "พนักงาน นัท (LINE)"
+  },
+  "ค่าน้ำแข็งหลอดยูนิต 3 กระสอบ": {
+    "en": "ค่าน้ำแข็งหลอดยูนิต 3 กระสอบ",
+    "zh": "ค่าน้ำแข็งหลอดยูนิต 3 กระสอบ"
+  },
+  "ซื้อหัวแลน RJ45 CAT6A และสาย Patch Cord สำรอง": {
+    "en": "ซื้อหัวแลน RJ45 CAT6A และสาย Patch Cord สำรอง",
+    "zh": "ซื้อหัวแลน RJ45 CAT6A และสาย Patch Cord สำรอง"
+  },
+  "15:20 น.": {
+    "en": "15:20 น.",
+    "zh": "15:20 น."
+  },
+  "ช่างเอก (LINE)": {
+    "en": "ช่างเอก (LINE)",
+    "zh": "ช่างเอก (LINE)"
+  },
+  "/pay 680 ซื้อหัวแลน RJ45 CAT6A": {
+    "en": "/pay 680 ซื้อหัวแลน RJ45 CAT6A",
+    "zh": "/pay 680 ซื้อหัวแลน RJ45 CAT6A"
+  },
+  "ตอนนี้เครื่องโซน VIP ว่างไหมครับ จะพาเพื่อนไปซ้อม 5 คน": {
+    "en": "ตอนนี้เครื่องโซน VIP ว่างไหมครับ จะพาเพื่อนไปซ้อม 5 คน",
+    "zh": "ตอนนี้เครื่องโซน VIP ว่างไหมครับ จะพาเพื่อนไปซ้อม 5 คน"
+  },
+  "สวัสดีครับ": {
+    "en": "สวัสดีครับ",
+    "zh": "สวัสดีครับ"
+  },
+  "👤 แอดมิน กอล์ฟ (ฝ่ายบริการลูกค้า) รับเคสดูแลต่อแล้ว (AI ถูกระงับชั่วคราว 60 นาที)": {
+    "en": "👤 แอดมิน กอล์ฟ (ฝ่ายบริการลูกค้า) รับเคสดูแลต่อแล้ว (AI ถูกระงับชั่วคราว 60 นาที)",
+    "zh": "👤 แอดมิน กอล์ฟ (ฝ่ายบริการลูกค้า) รับเคสดูแลต่อแล้ว (AI ถูกระงับชั่วคราว 60 นาที)"
+  },
+  "สวัสดีครับ! ยินดีต้อนรับสู่ G-Speed Esport Arena สอบถามข้อมูลด้านใดแจ้งได้เลยครับ": {
+    "en": "สวัสดีครับ! ยินดีต้อนรับสู่ G-Speed Esport Arena สอบถามข้อมูลด้านใดแจ้งได้เลยครับ",
+    "zh": "สวัสดีครับ! ยินดีต้อนรับสู่ G-Speed Esport Arena สอบถามข้อมูลด้านใดแจ้งได้เลยครับ"
+  },
+  "แอดมิน กอล์ฟ (ฝ่ายบริการลูกค้า)": {
+    "en": "แอดมิน กอล์ฟ (ฝ่ายบริการลูกค้า)",
+    "zh": "แอดมิน กอล์ฟ (ฝ่ายบริการลูกค้า)"
+  },
+  "แอดมิน กอล์ฟ": {
+    "en": "แอดมิน กอล์ฟ",
+    "zh": "แอดมิน กอล์ฟ"
+  },
+  "กำลังดูระบบจำลองผังร้าน 3D ขนาด Size L คืนทุนเฉลี่ยกี่เดือนครับ?": {
+    "en": "กำลังดูระบบจำลองผังร้าน 3D ขนาด Size L คืนทุนเฉลี่ยกี่เดือนครับ?",
+    "zh": "กำลังดูระบบจำลองผังร้าน 3D ขนาด Size L คืนทุนเฉลี่ยกี่เดือนครับ?"
+  },
+  "คุณธีรพัฒน์ (นักลงทุน)": {
+    "en": "คุณธีรพัฒน์ (นักลงทุน)",
+    "zh": "คุณธีรพัฒน์ (นักลงทุน)"
+  },
+  "สวัสดีครับคุณอาร์ม ตอนนี้ห้อง VIP Suite 1 กำลังว่างครับ สามารถ walk-in เข้ามาได้เลย หรือให้ผมล็อกเครื่องไว้ให้ก่อน 30 นาทีไหมครับ?": {
+    "en": "สวัสดีครับคุณอาร์ม ตอนนี้ห้อง VIP Suite 1 กำลังว่างครับ สามารถ walk-in เข้ามาได้เลย หรือให้ผมล็อกเครื่องไว้ให้ก่อน 30 นาทีไหมครับ?",
+    "zh": "สวัสดีครับคุณอาร์ม ตอนนี้ห้อง VIP Suite 1 กำลังว่างครับ สามารถ walk-in เข้ามาได้เลย หรือให้ผมล็อกเครื่องไว้ให้ก่อน 30 นาทีไหมครับ?"
+  },
+  "15:25 น.": {
+    "en": "15:25 น.",
+    "zh": "15:25 น."
+  },
+  "แฟรนไชส์ Size L Mega Arena (80-120 เครื่อง) งบประมาณ 5.5 - 8.0 ลบ. มีระยะเวลาคืนทุนเฉลี่ยอยู่ที่ 18-24 เดือนครับ โดยขึ้นอยู่กับทำเลและบริการเสริม (F&B / Bootcamp) ทางเรามีระบบ Diskless และ POS บัญชีคลาวด์ช่วยบริหารต้นทุน หากต้องการใบเสนอราคาอย่างละเอียด แจ้งเบอร์โทรให้เจ้าหน้าที่ติดต่อกลับได้เลยครับ": {
+    "en": "แฟรนไชส์ Size L Mega Arena (80-120 เครื่อง) งบประมาณ 5.5 - 8.0 ลบ. มีระยะเวลาคืนทุนเฉลี่ยอยู่ที่ 18-24 เดือนครับ โดยขึ้นอยู่กับทำเลและบริการเสริม (F&B / Bootcamp) ทางเรามีระบบ Diskless และ POS บัญชีคลาวด์ช่วยบริหารต้นทุน หากต้องการใบเสนอราคาอย่างละเอียด แจ้งเบอร์โทรให้เจ้าหน้าที่ติดต่อกลับได้เลยครับ",
+    "zh": "แฟรนไชส์ Size L Mega Arena (80-120 เครื่อง) งบประมาณ 5.5 - 8.0 ลบ. มีระยะเวลาคืนทุนเฉลี่ยอยู่ที่ 18-24 เดือนครับ โดยขึ้นอยู่กับทำเลและบริการเสริม (F&B / Bootcamp) ทางเรามีระบบ Diskless และ POS บัญชีคลาวด์ช่วยบริหารต้นทุน หากต้องการใบเสนอราคาอย่างละเอียด แจ้งเบอร์โทรให้เจ้าหน้าที่ติดต่อกลับได้เลยครับ"
+  },
+  "ขอรายละเอียดระเบียบการแข่ง VALORANT ทัวร์นาเมนต์สิ้นเดือนนี้หน่อยครับ": {
+    "en": "ขอรายละเอียดระเบียบการแข่ง VALORANT ทัวร์นาเมนต์สิ้นเดือนนี้หน่อยครับ",
+    "zh": "ขอรายละเอียดระเบียบการแข่ง VALORANT ทัวร์นาเมนต์สิ้นเดือนนี้หน่อยครับ"
+  },
+  "14:50 น.": {
+    "en": "14:50 น.",
+    "zh": "14:50 น."
+  },
+  "การแข่งขัน GLP VALORANT CHAMPIONSHIP 2026 ชิงเงินรางวัลรวม 100,000 บาท แข่งขันรอบ LAN Final ณ Main Stage วันที่ 28-30 กันยายน 2026 สมัครได้ตั้งแต่วันนี้ - 25 ก.ย. รับจำกัด 32 ทีมครับ ค่าสมัครฟรี ดูรายละเอียดและกติกาบนหน้าเว็บไซต์ได้ทันทีครับ": {
+    "en": "การแข่งขัน GLP VALORANT CHAMPIONSHIP 2026 ชิงเงินรางวัลรวม 100,000 บาท แข่งขันรอบ LAN Final ณ Main Stage วันที่ 28-30 กันยายน 2026 สมัครได้ตั้งแต่วันนี้ - 25 ก.ย. รับจำกัด 32 ทีมครับ ค่าสมัครฟรี ดูรายละเอียดและกติกาบนหน้าเว็บไซต์ได้ทันทีครับ",
+    "zh": "การแข่งขัน GLP VALORANT CHAMPIONSHIP 2026 ชิงเงินรางวัลรวม 100,000 บาท แข่งขันรอบ LAN Final ณ Main Stage วันที่ 28-30 กันยายน 2026 สมัครได้ตั้งแต่วันนี้ - 25 ก.ย. รับจำกัด 32 ทีมครับ ค่าสมัครฟรี ดูรายละเอียดและกติกาบนหน้าเว็บไซต์ได้ทันทีครับ"
+  },
+  "1.2 ชม.": {
+    "en": "1.2 ชม.",
+    "zh": "1.2 ชม."
+  },
+  "3.5 ชม.": {
+    "en": "3.5 ชม.",
+    "zh": "3.5 ชม."
+  },
+  "2.0 ชม.": {
+    "en": "2.0 ชม.",
+    "zh": "2.0 ชม."
+  },
+  "หน้าจอ BenQ ZOWIE XL2566K 360Hz": {
+    "en": "หน้าจอ BenQ ZOWIE XL2566K 360Hz",
+    "zh": "หน้าจอ BenQ ZOWIE XL2566K 360Hz"
+  },
+  "0 ชม.": {
+    "en": "0 ชม.",
+    "zh": "0 ชม."
+  },
+  "4.1 ชม.": {
+    "en": "4.1 ชม.",
+    "zh": "4.1 ชม."
+  },
+  "5.0 ชม.": {
+    "en": "5.0 ชม.",
+    "zh": "5.0 ชม."
+  },
+  "ส่งศูนย์บริการแล้ว รอการตรวจสอบ": {
+    "en": "ส่งศูนย์บริการแล้ว รอการตรวจสอบ",
+    "zh": "ส่งศูนย์บริการแล้ว รอการตรวจสอบ"
+  },
+  "มีเส้นสีฟ้าพาดกลางจอ 1 เส้น (Vertical Artifact)": {
+    "en": "มีเส้นสีฟ้าพาดกลางจอ 1 เส้น (Vertical Artifact)",
+    "zh": "มีเส้นสีฟ้าพาดกลางจอ 1 เส้น (Vertical Artifact)"
+  },
+  "กำลังอยู่ระหว่างซ่อม/เปลี่ยนแผงวงจร": {
+    "en": "กำลังอยู่ระหว่างซ่อม/เปลี่ยนแผงวงจร",
+    "zh": "กำลังอยู่ระหว่างซ่อม/เปลี่ยนแผงวงจร"
+  },
+  "พัดลมตัวที่ 2 หมุนมีเสียงดังผิดปกติและรอบตก": {
+    "en": "พัดลมตัวที่ 2 หมุนมีเสียงดังผิดปกติและรอบตก",
+    "zh": "พัดลมตัวที่ 2 หมุนมีเสียงดังผิดปกติและรอบตก"
+  },
+  "การ์ดจอ NVIDIA GeForce RTX 4080 SUPER 16GB": {
+    "en": "การ์ดจอ NVIDIA GeForce RTX 4080 SUPER 16GB",
+    "zh": "การ์ดจอ NVIDIA GeForce RTX 4080 SUPER 16GB"
+  },
+  "เข้าสู่ระบบคอนโซลศูนย์ควบคุมส่วนกลางสำเร็จ": {
+    "en": "เข้าสู่ระบบคอนโซลศูนย์ควบคุมส่วนกลางสำเร็จ",
+    "zh": "เข้าสู่ระบบคอนโซลศูนย์ควบคุมส่วนกลางสำเร็จ"
+  },
+  "เข้าสู่ระบบสำเร็จในบทบาท \"Super Administrator\" (เซสชันชั่วคราว)": {
+    "en": "เข้าสู่ระบบสำเร็จในบทบาท \"Super Administrator\" (เซสชันชั่วคราว)",
+    "zh": "เข้าสู่ระบบสำเร็จในบทบาท \"Super Administrator\" (เซสชันชั่วคราว)"
+  },
+  "ตัดสิทธิ์การใช้งานอัตโนมัติเนื่องจากไม่มีการใช้งานเกิน 30 นาที": {
+    "en": "ตัดสิทธิ์การใช้งานอัตโนมัติเนื่องจากไม่มีการใช้งานเกิน 30 นาที",
+    "zh": "ตัดสิทธิ์การใช้งานอัตโนมัติเนื่องจากไม่มีการใช้งานเกิน 30 นาที"
+  },
+  "พีรภัทร วรเดชสกุล (Captain Pat)": {
+    "en": "พีรภัทร วรเดชสกุล (Captain Pat)",
+    "zh": "พีรภัทร วรเดชสกุล (Captain Pat)"
+  },
+  "ปรับปรุงข้อความและธีมส่วนหัว Banner Hero": {
+    "en": "ปรับปรุงข้อความและธีมส่วนหัว Banner Hero",
+    "zh": "ปรับปรุงข้อความและธีมส่วนหัว Banner Hero"
+  },
+  "พีรภัทร วรเดชสกุล": {
+    "en": "พีรภัทร วรเดชสกุล",
+    "zh": "พีรภัทร วรเดชสกุล"
+  },
+  "กิตติศักดิ์ มั่นคง": {
+    "en": "กิตติศักดิ์ มั่นคง",
+    "zh": "กิตติศักดิ์ มั่นคง"
+  },
+  "ธนากร ภักดีผล": {
+    "en": "ธนากร ภักดีผล",
+    "zh": "ธนากร ภักดีผล"
+  },
+  "อภิสิทธิ์ ศรีสวัสดิ์": {
+    "en": "อภิสิทธิ์ ศรีสวัสดิ์",
+    "zh": "อภิสิทธิ์ ศรีสวัสดิ์"
+  },
+  "ชัชวาล เลิศปรีชา": {
+    "en": "ชัชวาล เลิศปรีชา",
+    "zh": "ชัชวาล เลิศปรีชา"
+  },
+  "ณัฐพล พรหมเมศ": {
+    "en": "ณัฐพล พรหมเมศ",
+    "zh": "ณัฐพล พรหมเมศ"
+  },
+  "วรพล เกษมสันต์": {
+    "en": "วรพล เกษมสันต์",
+    "zh": "วรพล เกษมสันต์"
+  },
+  "พร้อมลงสนามรอบออฟไลน์ นำอุปกรณ์เมาส์/หูฟังมาเอง": {
+    "en": "พร้อมลงสนามรอบออฟไลน์ นำอุปกรณ์เมาส์/หูฟังมาเอง",
+    "zh": "พร้อมลงสนามรอบออฟไลน์ นำอุปกรณ์เมาส์/หูฟังมาเอง"
+  },
+  "ชานนท์ สิทธิชัย": {
+    "en": "ชานนท์ สิทธิชัย",
+    "zh": "ชานนท์ สิทธิชัย"
+  },
+  "ชานนท์ สิทธิชัย (Chanon)": {
+    "en": "ชานนท์ สิทธิชัย (Chanon)",
+    "zh": "ชานนท์ สิทธิชัย (Chanon)"
+  },
+  "ศุภกร แก้วมณี": {
+    "en": "ศุภกร แก้วมณี",
+    "zh": "ศุภกร แก้วมณี"
+  },
+  "ดนัย บุญมี": {
+    "en": "ดนัย บุญมี",
+    "zh": "ดนัย บุญมี"
+  },
+  "ขอสิทธิ์รอบบ่ายเนื่องจากเดินทางมาจากชลบุรี": {
+    "en": "ขอสิทธิ์รอบบ่ายเนื่องจากเดินทางมาจากชลบุรี",
+    "zh": "ขอสิทธิ์รอบบ่ายเนื่องจากเดินทางมาจากชลบุรี"
+  },
+  "11 ต.ค. 2026 • 16:30 น.": {
+    "en": "11 ต.ค. 2026 • 16:30 น.",
+    "zh": "11 ต.ค. 2026 • 16:30 น."
+  },
+  "11 ต.ค. 2026 • 14:00 น.": {
+    "en": "11 ต.ค. 2026 • 14:00 น.",
+    "zh": "11 ต.ค. 2026 • 14:00 น."
+  },
+  "รอบชิงชนะเลิศ (Grand Final ชิงแชมป์ ฿25,000)": {
+    "en": "รอบชิงชนะเลิศ (Grand Final ชิงแชมป์ ฿25,000)",
+    "zh": "รอบชิงชนะเลิศ (Grand Final ชิงแชมป์ ฿25,000)"
+  },
+  "วันแข่งขัน • 13:00 น.": {
+    "en": "วันแข่งขัน • 13:00 น.",
+    "zh": "วันแข่งขัน • 13:00 น."
+  },
+  "รอบ 4 ทีมสุดท้าย (Match 1)": {
+    "en": "รอบ 4 ทีมสุดท้าย (Match 1)",
+    "zh": "รอบ 4 ทีมสุดท้าย (Match 1)"
+  },
+  "12 ต.ค. 2026 • 18:00 น.": {
+    "en": "12 ต.ค. 2026 • 18:00 น.",
+    "zh": "12 ต.ค. 2026 • 18:00 น."
+  },
+  "รอบ 4 ทีมสุดท้าย (Match 2)": {
+    "en": "รอบ 4 ทีมสุดท้าย (Match 2)",
+    "zh": "รอบ 4 ทีมสุดท้าย (Match 2)"
+  },
+  "13:00 - 19:00 น.": {
+    "en": "13:00 - 19:00 น.",
+    "zh": "13:00 - 19:00 น."
+  },
+  "10-12 ตุลาคม 2026": {
+    "en": "10-12 ตุลาคม 2026",
+    "zh": "10-12 ตุลาคม 2026"
+  },
+  "วันแข่งขัน • 18:00 น.": {
+    "en": "วันแข่งขัน • 18:00 น.",
+    "zh": "วันแข่งขัน • 18:00 น."
+  },
+  "วันแข่งขัน • 15:30 น.": {
+    "en": "วันแข่งขัน • 15:30 น.",
+    "zh": "วันแข่งขัน • 15:30 น."
+  },
+  "รอบชิงชนะเลิศ (Grand Final)": {
+    "en": "รอบชิงชนะเลิศ (Grand Final)",
+    "zh": "รอบชิงชนะเลิศ (Grand Final)"
+  },
+  "5 ตุลาคม 2026": {
+    "en": "5 ตุลาคม 2026",
+    "zh": "5 ตุลาคม 2026"
+  },
+  "15 กันยายน 2026": {
+    "en": "15 กันยายน 2026",
+    "zh": "15 กันยายน 2026"
+  },
+  "50,000 บาท + ถ้วยรางวัลเกียรติยศ": {
+    "en": "50,000 บาท + ถ้วยรางวัลเกียรติยศ",
+    "zh": "50,000 บาท + ถ้วยรางวัลเกียรติยศ"
+  },
+  "G-Speed Esport Arena รามคำแหง 53 (Mobile Studio Arena)": {
+    "en": "G-Speed Esport Arena รามคำแหง 53 (Mobile Studio Arena)",
+    "zh": "G-Speed Esport Arena รามคำแหง 53 (Mobile Studio Arena)"
+  },
+  "64 ทีม (เต็มแล้ว)": {
+    "en": "64 ทีม (เต็มแล้ว)",
+    "zh": "64 ทีม (เต็มแล้ว)"
+  },
+  "฿25,000 + ทุนการศึกษา + ถ้วยเกียรติยศ": {
+    "en": "฿25,000 + ทุนการศึกษา + ถ้วยเกียรติยศ",
+    "zh": "฿25,000 + ทุนการศึกษา + ถ้วยเกียรติยศ"
+  },
+  "฿15,000 + เหรียญเงิน": {
+    "en": "฿15,000 + เหรียญเงิน",
+    "zh": "฿15,000 + เหรียญเงิน"
+  },
+  "฿5,000 ต่อทีม + เหรียญทองแดง": {
+    "en": "฿5,000 ต่อทีม + เหรียญทองแดง",
+    "zh": "฿5,000 ต่อทีม + เหรียญทองแดง"
+  },
+  "ใช้ระบบทัวร์นาเมนต์ Global Ban Pick (BP) ในรอบ 8 ทีมสุดท้ายเป็นต้นไป": {
+    "en": "ใช้ระบบทัวร์นาเมนต์ Global Ban Pick (BP) ในรอบ 8 ทีมสุดท้ายเป็นต้นไป",
+    "zh": "ใช้ระบบทัวร์นาเมนต์ Global Ban Pick (BP) ในรอบ 8 ทีมสุดท้ายเป็นต้นไป"
+  },
+  "สมาชิกทุกคนในทีมต้องเป็นนิสิตหรือนักศึกษาระดับปริญญาตรีและแสดงบัตรนักศึกษาที่ยังไม่หมดอายุ": {
+    "en": "สมาชิกทุกคนในทีมต้องเป็นนิสิตหรือนักศึกษาระดับปริญญาตรีและแสดงบัตรนักศึกษาที่ยังไม่หมดอายุ",
+    "zh": "สมาชิกทุกคนในทีมต้องเป็นนิสิตหรือนักศึกษาระดับปริญญาตรีและแสดงบัตรนักศึกษาที่ยังไม่หมดอายุ"
+  },
+  "การเชื่อมต่อต้องใช้ Wi-Fi 6 Dedicated Esport Network ที่ทางสนามจัดไว้เท่านั้น": {
+    "en": "การเชื่อมต่อต้องใช้ Wi-Fi 6 Dedicated Esport Network ที่ทางสนามจัดไว้เท่านั้น",
+    "zh": "การเชื่อมต่อต้องใช้ Wi-Fi 6 Dedicated Esport Network ที่ทางสนามจัดไว้เท่านั้น"
+  },
+  "พิธีเปิดและรายงานตัวนักศึกษาตัวแทนมหาวิทยาลัย": {
+    "en": "พิธีเปิดและรายงานตัวนักศึกษาตัวแทนมหาวิทยาลัย",
+    "zh": "พิธีเปิดและรายงานตัวนักศึกษาตัวแทนมหาวิทยาลัย"
+  },
+  "รอบ 8 ทีมสุดท้าย Best of 3": {
+    "en": "รอบ 8 ทีมสุดท้าย Best of 3",
+    "zh": "รอบ 8 ทีมสุดท้าย Best of 3"
+  },
+  "ห้ามใช้สมาร์ตโฟนที่มีการดัดแปลง OS หรือใช้โปรแกรมจำลอง Emulator เด็ดขาด": {
+    "en": "ห้ามใช้สมาร์ตโฟนที่มีการดัดแปลง OS หรือใช้โปรแกรมจำลอง Emulator เด็ดขาด",
+    "zh": "ห้ามใช้สมาร์ตโฟนที่มีการดัดแปลง OS หรือใช้โปรแกรมจำลอง Emulator เด็ดขาด"
+  },
+  "13:00 น.": {
+    "en": "13:00 น.",
+    "zh": "13:00 น."
+  },
+  "CU_Zeph (กัปตันทีม)": {
+    "en": "CU_Zeph (กัปตันทีม)",
+    "zh": "CU_Zeph (กัปตันทีม)"
+  },
+  "16:30 น.": {
+    "en": "16:30 น.",
+    "zh": "16:30 น."
+  },
+  "18:00 น.": {
+    "en": "18:00 น.",
+    "zh": "18:00 น."
+  },
+  "รอบชิงชนะเลิศ Grand Final Best of 7 พร้อมพิธีมอบรางวัล": {
+    "en": "รอบชิงชนะเลิศ Grand Final Best of 7 พร้อมพิธีมอบรางวัล",
+    "zh": "รอบชิงชนะเลิศ Grand Final Best of 7 พร้อมพิธีมอบรางวัล"
+  },
+  "รอบรองชนะเลิศ Semi-Final Best of 5": {
+    "en": "รอบรองชนะเลิศ Semi-Final Best of 5",
+    "zh": "รอบรองชนะเลิศ Semi-Final Best of 5"
+  },
+  "TU_Raz (กัปตันทีม)": {
+    "en": "TU_Raz (กัปตันทีม)",
+    "zh": "TU_Raz (กัปตันทีม)"
+  },
+  "KU_Lili (กัปตันทีม)": {
+    "en": "KU_Lili (กัปตันทีม)",
+    "zh": "KU_Lili (กัปตันทีม)"
+  },
+  "ROV UNIVERSITY BATTLE LEAGUE 2026 | ชิงทุนการศึกษา ฿50,000": {
+    "en": "ROV UNIVERSITY BATTLE LEAGUE 2026 | ชิงทุนการศึกษา ฿50,000",
+    "zh": "ROV UNIVERSITY BATTLE LEAGUE 2026 | ชิงทุนการศึกษา ฿50,000"
+  },
+  "การแข่งขัน RoV ระดับมหาวิทยาลัย 64 สถาบันทั่วประเทศ จัด ณ G-Speed Arena รามคำแหง 53 ชิงทุนการศึกษาและถ้วยเกียรติยศ": {
+    "en": "การแข่งขัน RoV ระดับมหาวิทยาลัย 64 สถาบันทั่วประเทศ จัด ณ G-Speed Arena รามคำแหง 53 ชิงทุนการศึกษาและถ้วยเกียรติยศ",
+    "zh": "การแข่งขัน RoV ระดับมหาวิทยาลัย 64 สถาบันทั่วประเทศ จัด ณ G-Speed Arena รามคำแหง 53 ชิงทุนการศึกษาและถ้วยเกียรติยศ"
+  },
+  "MOD_Cap (กัปตันทีม)": {
+    "en": "MOD_Cap (กัปตันทีม)",
+    "zh": "MOD_Cap (กัปตันทีม)"
+  },
+  "การแข่งขัน ICAFE ATTACK LAN TOURNAMENT ถือเป็นหนึ่งในทัวร์นาเมนต์ออฟไลน์ที่ได้รับความสนใจสูงสุดของปี 2026 โดยมีทีมแข่งอีสปอร์ตระดับแนวหน้าและผู้เล่นดาวรุ่งกว่า 32 ทีมจากทั่วประเทศ ตบเท้าเข้าร่วมประลองฝีมือในเกมยิงเชิงกลยุทธ์ยอดนิยม ณ ศูนย์ G-Speed Esport Arena สาขารามคำแหง": {
+    "en": "การแข่งขัน ICAFE ATTACK LAN TOURNAMENT ถือเป็นหนึ่งในทัวร์นาเมนต์ออฟไลน์ที่ได้รับความสนใจสูงสุดของปี 2026 โดยมีทีมแข่งอีสปอร์ตระดับแนวหน้าและผู้เล่นดาวรุ่งกว่า 32 ทีมจากทั่วประเทศ ตบเท้าเข้าร่วมประลองฝีมือในเกมยิงเชิงกลยุทธ์ยอดนิยม ณ ศูนย์ G-Speed Esport Arena สาขารามคำแหง",
+    "zh": "การแข่งขัน ICAFE ATTACK LAN TOURNAMENT ถือเป็นหนึ่งในทัวร์นาเมนต์ออฟไลน์ที่ได้รับความสนใจสูงสุดของปี 2026 โดยมีทีมแข่งอีสปอร์ตระดับแนวหน้าและผู้เล่นดาวรุ่งกว่า 32 ทีมจากทั่วประเทศ ตบเท้าเข้าร่วมประลองฝีมือในเกมยิงเชิงกลยุทธ์ยอดนิยม ณ ศูนย์ G-Speed Esport Arena สาขารามคำแหง"
+  },
+  "RoV, แข่ง RoV, มหาวิทยาลัย, G-Speed, รามคำแหง 53, อีสปอร์ต, ทุนการศึกษา": {
+    "en": "RoV, แข่ง RoV, มหาวิทยาลัย, G-Speed, รามคำแหง 53, อีสปอร์ต, ทุนการศึกษา",
+    "zh": "RoV, แข่ง RoV, มหาวิทยาลัย, G-Speed, รามคำแหง 53, อีสปอร์ต, ทุนการศึกษา"
+  },
+  "ความพิเศษของงานนี้คือการใช้เครื่องคอมพิวเตอร์สเปกทัวร์นาเมนต์ ขับเคลื่อนด้วยขุมพลัง NVIDIA GeForce RTX 4080 SUPER และหน้าจอ BenQ ZOWIE 360Hz Fast-IPS ตอบสนอง 0.5ms พร้อมระบบเราเตอร์ไฟเบอร์ 10Gbps คู่ ทำให้ค่าความหน่วง (Ping) นิ่งสนิทต่ำกว่า 2ms ตลอดการแข่งขัน": {
+    "en": "ความพิเศษของงานนี้คือการใช้เครื่องคอมพิวเตอร์สเปกทัวร์นาเมนต์ ขับเคลื่อนด้วยขุมพลัง NVIDIA GeForce RTX 4080 SUPER และหน้าจอ BenQ ZOWIE 360Hz Fast-IPS ตอบสนอง 0.5ms พร้อมระบบเราเตอร์ไฟเบอร์ 10Gbps คู่ ทำให้ค่าความหน่วง (Ping) นิ่งสนิทต่ำกว่า 2ms ตลอดการแข่งขัน",
+    "zh": "ความพิเศษของงานนี้คือการใช้เครื่องคอมพิวเตอร์สเปกทัวร์นาเมนต์ ขับเคลื่อนด้วยขุมพลัง NVIDIA GeForce RTX 4080 SUPER และหน้าจอ BenQ ZOWIE 360Hz Fast-IPS ตอบสนอง 0.5ms พร้อมระบบเราเตอร์ไฟเบอร์ 10Gbps คู่ ทำให้ค่าความหน่วง (Ping) นิ่งสนิทต่ำกว่า 2ms ตลอดการแข่งขัน"
+  },
+  "ตลอดการแข่งขันทั้ง 2 วันเต็ม โซน Battleground และเวที Main Stage ถูกเนรมิตให้เป็นสมรภูมิสุดเดือด ทั้ง 32 ทีมต่อสู้กันอย่างดุเดือดท่ามกลางเสียงเชียร์ของแฟนคลับที่มาร่วมชมอย่างหนาแน่น พร้อมการถ่ายทอดสดแบบ Multi-camera ผ่านจอ LED 4K ขนาดยักษ์ใจกลางร้าน": {
+    "en": "ตลอดการแข่งขันทั้ง 2 วันเต็ม โซน Battleground และเวที Main Stage ถูกเนรมิตให้เป็นสมรภูมิสุดเดือด ทั้ง 32 ทีมต่อสู้กันอย่างดุเดือดท่ามกลางเสียงเชียร์ของแฟนคลับที่มาร่วมชมอย่างหนาแน่น พร้อมการถ่ายทอดสดแบบ Multi-camera ผ่านจอ LED 4K ขนาดยักษ์ใจกลางร้าน",
+    "zh": "ตลอดการแข่งขันทั้ง 2 วันเต็ม โซน Battleground และเวที Main Stage ถูกเนรมิตให้เป็นสมรภูมิสุดเดือด ทั้ง 32 ทีมต่อสู้กันอย่างดุเดือดท่ามกลางเสียงเชียร์ของแฟนคลับที่มาร่วมชมอย่างหนาแน่น พร้อมการถ่ายทอดสดแบบ Multi-camera ผ่านจอ LED 4K ขนาดยักษ์ใจกลางร้าน"
+  },
+  "สิงหาคม 2026": {
+    "en": "สิงหาคม 2026",
+    "zh": "สิงหาคม 2026"
+  },
+  "นักกีฬาอีสปอร์ตกำลังขับเคี่ยวอย่างดุเดือดในรอบชิงชนะเลิศ": {
+    "en": "นักกีฬาอีสปอร์ตกำลังขับเคี่ยวอย่างดุเดือดในรอบชิงชนะเลิศ",
+    "zh": "นักกีฬาอีสปอร์ตกำลังขับเคี่ยวอย่างดุเดือดในรอบชิงชนะเลิศ"
+  },
+  "จอ LED 4K ขนาดยักษ์ถ่ายทอดสดมุมมองผู้เล่นแบบเรียลไทม์": {
+    "en": "จอ LED 4K ขนาดยักษ์ถ่ายทอดสดมุมมองผู้เล่นแบบเรียลไทม์",
+    "zh": "จอ LED 4K ขนาดยักษ์ถ่ายทอดสดมุมมองผู้เล่นแบบเรียลไทม์"
+  },
+  "บรรยากาศกองเชียร์และผู้ร่วมงานแน่นขนัดทั่วทั้งร้าน": {
+    "en": "บรรยากาศกองเชียร์และผู้ร่วมงานแน่นขนัดทั่วทั้งร้าน",
+    "zh": "บรรยากาศกองเชียร์และผู้ร่วมงานแน่นขนัดทั่วทั้งร้าน"
+  },
+  "ทีมชนะเลิศอันดับหนึ่งคว้าเงินรางวัล ฿30,000 พร้อมถ้วยเกียรติยศและเซ็ตเกมมิ่งเกียร์ไร้สายจาก ASUS ROG ไปครอง ทางทีมงานขอแสดงความยินดีกับผู้ชนะทุกทีม และขอบคุณผู้สนับสนุนที่ร่วมสร้างปรากฏการณ์สุดมันส์ในครั้งนี้": {
+    "en": "ทีมชนะเลิศอันดับหนึ่งคว้าเงินรางวัล ฿30,000 พร้อมถ้วยเกียรติยศและเซ็ตเกมมิ่งเกียร์ไร้สายจาก ASUS ROG ไปครอง ทางทีมงานขอแสดงความยินดีกับผู้ชนะทุกทีม และขอบคุณผู้สนับสนุนที่ร่วมสร้างปรากฏการณ์สุดมันส์ในครั้งนี้",
+    "zh": "ทีมชนะเลิศอันดับหนึ่งคว้าเงินรางวัล ฿30,000 พร้อมถ้วยเกียรติยศและเซ็ตเกมมิ่งเกียร์ไร้สายจาก ASUS ROG ไปครอง ทางทีมงานขอแสดงความยินดีกับผู้ชนะทุกทีม และขอบคุณผู้สนับสนุนที่ร่วมสร้างปรากฏการณ์สุดมันส์ในครั้งนี้"
+  },
+  "เครื่องคอมพิวเตอร์สเปกแข่งขัน RTX 4080 และจอ 360Hz": {
+    "en": "เครื่องคอมพิวเตอร์สเปกแข่งขัน RTX 4080 และจอ 360Hz",
+    "zh": "เครื่องคอมพิวเตอร์สเปกแข่งขัน RTX 4080 และจอ 360Hz"
+  },
+  "G-Speed เป็นพาร์ตเนอร์ร้านเกมที่มีความพร้อมด้านระบบและสถานที่สูงมาก สามารถรองรับการบรอดแคสต์ระดับออฟฟิเชียลได้อย่างไร้ที่ติ": {
+    "en": "G-Speed เป็นพาร์ตเนอร์ร้านเกมที่มีความพร้อมด้านระบบและสถานที่สูงมาก สามารถรองรับการบรอดแคสต์ระดับออฟฟิเชียลได้อย่างไร้ที่ติ",
+    "zh": "G-Speed เป็นพาร์ตเนอร์ร้านเกมที่มีความพร้อมด้านระบบและสถานที่สูงมาก สามารถรองรับการบรอดแคสต์ระดับออฟฟิเชียลได้อย่างไร้ที่ติ"
+  },
+  "บรรยากาศในงานคึกคักตั้งแต่ช่วงเช้าด้วยกิจกรรม Fan Meeting พบปะคอสเพลย์เยอร์ในชุดตัวละครแอร์ดรอปสุดเท่ พร้อมจุดถ่ายรูปโฟโต้บูธสามมิติ และแจกไอเทมโค้ดลิขสิทธิ์แท้ให้กับผู้เข้าร่วมงานทุกคน": {
+    "en": "บรรยากาศในงานคึกคักตั้งแต่ช่วงเช้าด้วยกิจกรรม Fan Meeting พบปะคอสเพลย์เยอร์ในชุดตัวละครแอร์ดรอปสุดเท่ พร้อมจุดถ่ายรูปโฟโต้บูธสามมิติ และแจกไอเทมโค้ดลิขสิทธิ์แท้ให้กับผู้เข้าร่วมงานทุกคน",
+    "zh": "บรรยากาศในงานคึกคักตั้งแต่ช่วงเช้าด้วยกิจกรรม Fan Meeting พบปะคอสเพลย์เยอร์ในชุดตัวละครแอร์ดรอปสุดเท่ พร้อมจุดถ่ายรูปโฟโต้บูธสามมิติ และแจกไอเทมโค้ดลิขสิทธิ์แท้ให้กับผู้เข้าร่วมงานทุกคน"
+  },
+  "G-Speed Esport Arena (โซนคาเฟ่และเวทีกลาง)": {
+    "en": "G-Speed Esport Arena (โซนคาเฟ่และเวทีกลาง)",
+    "zh": "G-Speed Esport Arena (โซนคาเฟ่และเวทีกลาง)"
+  },
+  "สิงหาคม 2024": {
+    "en": "สิงหาคม 2024",
+    "zh": "สิงหาคม 2024"
+  },
+  "฿5,000 พร้อมชั่วโมงเล่นฟรี 100 ชม.": {
+    "en": "฿5,000 พร้อมชั่วโมงเล่นฟรี 100 ชม.",
+    "zh": "฿5,000 พร้อมชั่วโมงเล่นฟรี 100 ชม."
+  },
+  "ผู้เข้าแข่งขันและกองเชียร์สนุกสนานร่วมกัน": {
+    "en": "ผู้เข้าแข่งขันและกองเชียร์สนุกสนานร่วมกัน",
+    "zh": "ผู้เข้าแข่งขันและกองเชียร์สนุกสนานร่วมกัน"
+  },
+  "บรรยากาศแสงไฟนีออนสลัวสบายตาระหว่างการเล่นเกมรอบดึก": {
+    "en": "บรรยากาศแสงไฟนีออนสลัวสบายตาระหว่างการเล่นเกมรอบดึก",
+    "zh": "บรรยากาศแสงไฟนีออนสลัวสบายตาระหว่างการเล่นเกมรอบดึก"
+  },
+  "มีนาคม 2026": {
+    "en": "มีนาคม 2026",
+    "zh": "มีนาคม 2026"
+  },
+  "โปรโมชันแพ็กเกจเหมาดึก Night Owl": {
+    "en": "โปรโมชันแพ็กเกจเหมาดึก Night Owl",
+    "zh": "โปรโมชันแพ็กเกจเหมาดึก Night Owl"
+  },
+  "บรรยากาศผู้ใช้บริการแน่นร้านช่วงสุดสัปดาห์ เล่นเกมพร้อมแก๊งเพื่อน เครื่องสเปกแรง แอร์เย็นฉ่ำ สั่งอาหารได้ถึงโต๊ะ": {
+    "en": "บรรยากาศผู้ใช้บริการแน่นร้านช่วงสุดสัปดาห์ เล่นเกมพร้อมแก๊งเพื่อน เครื่องสเปกแรง แอร์เย็นฉ่ำ สั่งอาหารได้ถึงโต๊ะ",
+    "zh": "บรรยากาศผู้ใช้บริการแน่นร้านช่วงสุดสัปดาห์ เล่นเกมพร้อมแก๊งเพื่อน เครื่องสเปกแรง แอร์เย็นฉ่ำ สั่งอาหารได้ถึงโต๊ะ"
+  },
+  "เพื่อตอกย้ำความเป็นผู้นำศูนย์กีฬาอีสปอร์ตระดับเวิลด์คลาส G-Speed Esport Arena ทุ่มงบประมาณกว่า 5 ล้านบาท ปรับปรุงเครื่องคอมพิวเตอร์ทุกล็อตให้เป็นขุมพลังล่าสุด NVIDIA GeForce RTX 40 Series": {
+    "en": "เพื่อตอกย้ำความเป็นผู้นำศูนย์กีฬาอีสปอร์ตระดับเวิลด์คลาส G-Speed Esport Arena ทุ่มงบประมาณกว่า 5 ล้านบาท ปรับปรุงเครื่องคอมพิวเตอร์ทุกล็อตให้เป็นขุมพลังล่าสุด NVIDIA GeForce RTX 40 Series",
+    "zh": "เพื่อตอกย้ำความเป็นผู้นำศูนย์กีฬาอีสปอร์ตระดับเวิลด์คลาส G-Speed Esport Arena ทุ่มงบประมาณกว่า 5 ล้านบาท ปรับปรุงเครื่องคอมพิวเตอร์ทุกล็อตให้เป็นขุมพลังล่าสุด NVIDIA GeForce RTX 40 Series"
+  },
+  "มาตรฐานความถูกต้อง โปร่งใส และปลอดภัย": {
+    "en": "มาตรฐานความถูกต้อง โปร่งใส และปลอดภัย",
+    "zh": "มาตรฐานความถูกต้อง โปร่งใส และปลอดภัย"
+  },
+  "ผู้เล่นเพลิดเพลินกับความลื่นไหลของจอ 360Hz และเน็ต 10Gbps": {
+    "en": "ผู้เล่นเพลิดเพลินกับความลื่นไหลของจอ 360Hz และเน็ต 10Gbps",
+    "zh": "ผู้เล่นเพลิดเพลินกับความลื่นไหลของจอ 360Hz และเน็ต 10Gbps"
+  },
+  "นักกีฬาอีสปอร์ต ทีมแข่ง สตรีมเมอร์สายฮาร์ดคอร์ และงานแข่งขัน LAN Final": {
+    "en": "นักกีฬาอีสปอร์ต ทีมแข่ง สตรีมเมอร์สายฮาร์ดคอร์ และงานแข่งขัน LAN Final",
+    "zh": "นักกีฬาอีสปอร์ต ทีมแข่ง สตรีมเมอร์สายฮาร์ดคอร์ และงานแข่งขัน LAN Final"
+  },
+  "แถวเครื่องคอมพิวเตอร์ระดับโปร ท็อปโต๊ะคาร์บอนและเก้าอี้พรีเมียม": {
+    "en": "แถวเครื่องคอมพิวเตอร์ระดับโปร ท็อปโต๊ะคาร์บอนและเก้าอี้พรีเมียม",
+    "zh": "แถวเครื่องคอมพิวเตอร์ระดับโปร ท็อปโต๊ะคาร์บอนและเก้าอี้พรีเมียม"
+  },
+  "โฟมซับเสียงสีดำด้าน สไตล์ห้องแข่งขัน Pro Circuit": {
+    "en": "โฟมซับเสียงสีดำด้าน สไตล์ห้องแข่งขัน Pro Circuit",
+    "zh": "โฟมซับเสียงสีดำด้าน สไตล์ห้องแข่งขัน Pro Circuit"
+  },
+  "ปูนเปลือยลอฟท์โมเดิร์น สไตล์สถาปัตยกรรมร่วมสมัย": {
+    "en": "ปูนเปลือยลอฟท์โมเดิร์น สไตล์สถาปัตยกรรมร่วมสมัย",
+    "zh": "ปูนเปลือยลอฟท์โมเดิร์น สไตล์สถาปัตยกรรมร่วมสมัย"
+  },
+  "ผนังสีขาวสว่าง เรียบหรู สะอาดตา สบายตา": {
+    "en": "ผนังสีขาวสว่าง เรียบหรู สะอาดตา สบายตา",
+    "zh": "ผนังสีขาวสว่าง เรียบหรู สะอาดตา สบายตา"
+  },
+  "พื้นไม้ปาร์เกต์ก้างปลา อบอุ่น พรีเมียม (ตามภาพตัวอย่าง)": {
+    "en": "พื้นไม้ปาร์เกต์ก้างปลา อบอุ่น พรีเมียม (ตามภาพตัวอย่าง)",
+    "zh": "พื้นไม้ปาร์เกต์ก้างปลา อบอุ่น พรีเมียม (ตามภาพตัวอย่าง)"
+  },
+  "แผงซับเสียงสีน้ำเงิน สัญลักษณ์แบรนด์ G-Speed": {
+    "en": "แผงซับเสียงสีน้ำเงิน สัญลักษณ์แบรนด์ G-Speed",
+    "zh": "แผงซับเสียงสีน้ำเงิน สัญลักษณ์แบรนด์ G-Speed"
+  },
+  "พรมดักเสียงสะท้อนมาตรฐานอารีนา นุ่มเท้า": {
+    "en": "พรมดักเสียงสะท้อนมาตรฐานอารีนา นุ่มเท้า",
+    "zh": "พรมดักเสียงสะท้อนมาตรฐานอารีนา นุ่มเท้า"
+  },
+  "โต๊ะกลางกระจกนิรภัยทรงโมเดิร์น": {
+    "en": "โต๊ะกลางกระจกนิรภัยทรงโมเดิร์น",
+    "zh": "โต๊ะกลางกระจกนิรภัยทรงโมเดิร์น"
+  },
+  "รับประกันโครงสร้างและระบบกระจก 5 ปี, ระบบไฟอารมณ์ 3 ปี": {
+    "en": "รับประกันโครงสร้างและระบบกระจก 5 ปี, ระบบไฟอารมณ์ 3 ปี",
+    "zh": "รับประกันโครงสร้างและระบบกระจก 5 ปี, ระบบไฟอารมณ์ 3 ปี"
+  },
+  "กระเบื้องหินอ่อนสีขาวเงา หรูหรา สว่างตา": {
+    "en": "กระเบื้องหินอ่อนสีขาวเงา หรูหรา สว่างตา",
+    "zh": "กระเบื้องหินอ่อนสีขาวเงา หรูหรา สว่างตา"
+  },
+  "พื้นอีพ็อกซี่สีเทาเข้ม ไร้รอยต่อ ทนทาน ล้อเก้าอี้ลื่นไหล": {
+    "en": "พื้นอีพ็อกซี่สีเทาเข้ม ไร้รอยต่อ ทนทาน ล้อเก้าอี้ลื่นไหล",
+    "zh": "พื้นอีพ็อกซี่สีเทาเข้ม ไร้รอยต่อ ทนทาน ล้อเก้าอี้ลื่นไหล"
+  },
+  "รับประกัน 3 ปี On-site Service 24 ชม.": {
+    "en": "รับประกัน 3 ปี On-site Service 24 ชม.",
+    "zh": "รับประกัน 3 ปี On-site Service 24 ชม."
+  },
+  "ขนาด 8x8 ม. เหมาะกับพื้นที่อาคารพาณิชย์ 2 คูหา รองรับ 20-26 เครื่อง คืนทุนเร็ว": {
+    "en": "ขนาด 8x8 ม. เหมาะกับพื้นที่อาคารพาณิชย์ 2 คูหา รองรับ 20-26 เครื่อง คืนทุนเร็ว",
+    "zh": "ขนาด 8x8 ม. เหมาะกับพื้นที่อาคารพาณิชย์ 2 คูหา รองรับ 20-26 เครื่อง คืนทุนเร็ว"
+  },
+  "รับประกัน 3 ปี VIP On-site Service พร้อมเครื่องสำรองเปลี่ยน": {
+    "en": "รับประกัน 3 ปี VIP On-site Service พร้อมเครื่องสำรองเปลี่ยน",
+    "zh": "รับประกัน 3 ปี VIP On-site Service พร้อมเครื่องสำรองเปลี่ยน"
+  },
+  "Size M: มาตรฐานอารีนา (120 ตร.ม.)": {
+    "en": "Size M: มาตรฐานอารีนา (120 ตร.ม.)",
+    "zh": "Size M: มาตรฐานอารีนา (120 ตร.ม.)"
+  },
+  "Size S: ชุมชนสปีด (64 ตร.ม.)": {
+    "en": "Size S: ชุมชนสปีด (64 ตร.ม.)",
+    "zh": "Size S: ชุมชนสปีด (64 ตร.ม.)"
+  },
+  "สำรวจหน้างาน & ออกแบบ 3D Final Blueprint": {
+    "en": "สำรวจหน้างาน & ออกแบบ 3D Final Blueprint",
+    "zh": "สำรวจหน้างาน & ออกแบบ 3D Final Blueprint"
+  },
+  "Size L: แฟลกชิปอีสปอร์ตเซ็นเตอร์ (216 ตร.ม.)": {
+    "en": "Size L: แฟลกชิปอีสปอร์ตเซ็นเตอร์ (216 ตร.ม.)",
+    "zh": "Size L: แฟลกชิปอีสปอร์ตเซ็นเตอร์ (216 ตร.ม.)"
+  },
+  "สัปดาห์ที่ 1": {
+    "en": "สัปดาห์ที่ 1",
+    "zh": "สัปดาห์ที่ 1"
+  },
+  "ขนาด 18x12 ม. อารีนาเต็มรูปแบบ รองรับ 70-90+ เครื่อง พร้อมเวทีแข่งขัน 5v5 และ 2 VIP Rooms": {
+    "en": "ขนาด 18x12 ม. อารีนาเต็มรูปแบบ รองรับ 70-90+ เครื่อง พร้อมเวทีแข่งขัน 5v5 และ 2 VIP Rooms",
+    "zh": "ขนาด 18x12 ม. อารีนาเต็มรูปแบบ รองรับ 70-90+ เครื่อง พร้อมเวทีแข่งขัน 5v5 และ 2 VIP Rooms"
+  },
+  "ขนาด 12x10 ม. เหมาะกับอาคารเดี่ยวหรือในห้าง รองรับ 40-52 เครื่อง พร้อมห้อง VIP 1 ห้อง": {
+    "en": "ขนาด 12x10 ม. เหมาะกับอาคารเดี่ยวหรือในห้าง รองรับ 40-52 เครื่อง พร้อมห้อง VIP 1 ห้อง",
+    "zh": "ขนาด 12x10 ม. เหมาะกับอาคารเดี่ยวหรือในห้าง รองรับ 40-52 เครื่อง พร้อมห้อง VIP 1 ห้อง"
+  },
+  "ทีมวิศวกรและอินทีเรียร์เข้าวัดหน้างานจริง": {
+    "en": "ทีมวิศวกรและอินทีเรียร์เข้าวัดหน้างานจริง",
+    "zh": "ทีมวิศวกรและอินทีเรียร์เข้าวัดหน้างานจริง"
+  },
+  "สรุปสเปกและจัดเตรียมอุปกรณ์": {
+    "en": "สรุปสเปกและจัดเตรียมอุปกรณ์",
+    "zh": "สรุปสเปกและจัดเตรียมอุปกรณ์"
+  },
+  "งานโครงสร้าง ตกแต่งภายใน & งานระบบ (M&E)": {
+    "en": "งานโครงสร้าง ตกแต่งภายใน & งานระบบ (M&E)",
+    "zh": "งานโครงสร้าง ตกแต่งภายใน & งานระบบ (M&E)"
+  },
+  "ทำแปลนระบบไฟฟ้า ท่อแอร์ ระบบ LAN": {
+    "en": "ทำแปลนระบบไฟฟ้า ท่อแอร์ ระบบ LAN",
+    "zh": "ทำแปลนระบบไฟฟ้า ท่อแอร์ ระบบ LAN"
+  },
+  "สัปดาห์ที่ 2-3": {
+    "en": "สัปดาห์ที่ 2-3",
+    "zh": "สัปดาห์ที่ 2-3"
+  },
+  "ติดตั้งระบบไฟอารีนา Linear Light และฝ้าเพดานสไตล์ Modern Esports": {
+    "en": "ติดตั้งระบบไฟอารีนา Linear Light และฝ้าเพดานสไตล์ Modern Esports",
+    "zh": "ติดตั้งระบบไฟอารีนา Linear Light และฝ้าเพดานสไตล์ Modern Esports"
+  },
+  "ลงเฟอร์นิเจอร์ & ประกอบเครื่องคอมพิวเตอร์": {
+    "en": "ลงเฟอร์นิเจอร์ & ประกอบเครื่องคอมพิวเตอร์",
+    "zh": "ลงเฟอร์นิเจอร์ & ประกอบเครื่องคอมพิวเตอร์"
+  },
+  "เดินสายไฟเมน 3 เฟส และสายแลน CAT6A Shielded": {
+    "en": "เดินสายไฟเมน 3 เฟส และสายแลน CAT6A Shielded",
+    "zh": "เดินสายไฟเมน 3 เฟส และสายแลน CAT6A Shielded"
+  },
+  "สัปดาห์ที่ 4": {
+    "en": "สัปดาห์ที่ 4",
+    "zh": "สัปดาห์ที่ 4"
+  },
+  "ติดตั้งแอร์คอนดิชั่นเนอร์และงานผนังเก็บเสียง": {
+    "en": "ติดตั้งแอร์คอนดิชั่นเนอร์และงานผนังเก็บเสียง",
+    "zh": "ติดตั้งแอร์คอนดิชั่นเนอร์และงานผนังเก็บเสียง"
+  },
+  "ติดตั้งโต๊ะเกมมิ่ง เก้าอี้ และเคาน์เตอร์แคชเชียร์": {
+    "en": "ติดตั้งโต๊ะเกมมิ่ง เก้าอี้ และเคาน์เตอร์แคชเชียร์",
+    "zh": "ติดตั้งโต๊ะเกมมิ่ง เก้าอี้ และเคาน์เตอร์แคชเชียร์"
+  },
+  "วางระบบ Diskless, Billing & Stress Test": {
+    "en": "วางระบบ Diskless, Billing & Stress Test",
+    "zh": "วางระบบ Diskless, Billing & Stress Test"
+  },
+  "ประกอบและจัดวางเครื่องคอมพิวเตอร์ตามผังร้าน": {
+    "en": "ประกอบและจัดวางเครื่องคอมพิวเตอร์ตามผังร้าน",
+    "zh": "ประกอบและจัดวางเครื่องคอมพิวเตอร์ตามผังร้าน"
+  },
+  "เซ็ตอัปตู้ Rack เซิร์ฟเวอร์และ UPS ระบบไฟสำรอง": {
+    "en": "เซ็ตอัปตู้ Rack เซิร์ฟเวอร์และ UPS ระบบไฟสำรอง",
+    "zh": "เซ็ตอัปตู้ Rack เซิร์ฟเวอร์และ UPS ระบบไฟสำรอง"
+  },
+  "สัปดาห์ที่ 5": {
+    "en": "สัปดาห์ที่ 5",
+    "zh": "สัปดาห์ที่ 5"
+  },
+  "Grand Opening & แคมเปญการตลาดเปิดตัว": {
+    "en": "Grand Opening & แคมเปญการตลาดเปิดตัว",
+    "zh": "Grand Opening & แคมเปญการตลาดเปิดตัว"
+  },
+  "โคลนนิ่งระบบปฏิบัติการ และคลังเกมกว่า 200+ เกม": {
+    "en": "โคลนนิ่งระบบปฏิบัติการ และคลังเกมกว่า 200+ เกม",
+    "zh": "โคลนนิ่งระบบปฏิบัติการ และคลังเกมกว่า 200+ เกม"
+  },
+  "สัปดาห์ที่ 6": {
+    "en": "สัปดาห์ที่ 6",
+    "zh": "สัปดาห์ที่ 6"
+  },
+  "เทรนนิ่งพนักงานการใช้งานระบบ POS และบริการลูกค้า": {
+    "en": "เทรนนิ่งพนักงานการใช้งานระบบ POS และบริการลูกค้า",
+    "zh": "เทรนนิ่งพนักงานการใช้งานระบบ POS และบริการลูกค้า"
+  },
+  "ทดสอบ Stress Test พร้อมกันทุกเครื่อง 24 ชั่วโมง": {
+    "en": "ทดสอบ Stress Test พร้อมกันทุกเครื่อง 24 ชั่วโมง",
+    "zh": "ทดสอบ Stress Test พร้อมกันทุกเครื่อง 24 ชั่วโมง"
+  },
+  "ยิงแคมเปญโฆษณาโซเชียลมีเดียในรัศมีรอบร้าน": {
+    "en": "ยิงแคมเปญโฆษณาโซเชียลมีเดียในรัศมีรอบร้าน",
+    "zh": "ยิงแคมเปญโฆษณาโซเชียลมีเดียในรัศมีรอบร้าน"
+  },
+  "เปิดให้บริการอย่างเป็นทางการ": {
+    "en": "เปิดให้บริการอย่างเป็นทางการ",
+    "zh": "เปิดให้บริการอย่างเป็นทางการ"
+  },
+  "จัดทัวร์นาเมนต์เปิดร้านเพื่อดึงดูดลูกค้าและสร้างกระแส": {
+    "en": "จัดทัวร์นาเมนต์เปิดร้านเพื่อดึงดูดลูกค้าและสร้างกระแส",
+    "zh": "จัดทัวร์นาเมนต์เปิดร้านเพื่อดึงดูดลูกค้าและสร้างกระแส"
+  }
+}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, Monitor, Shield, Trophy, Coffee, Check, Clock, Calendar, 
   User, Phone, Mail, Sparkles, AlertCircle, Download, Printer, 
@@ -94,9 +94,37 @@ export default function ArenaSeatBookingModal({
   const totalSeatPrice = seatCostPerStation * (selectedSeatIds.length > 0 ? selectedSeatIds.length : 1);
   const grandTotal = totalSeatPrice + (foodCost * seatsCount);
 
+  const [seatCooldown, setSeatCooldown] = useState(0);
+  const [seatHoneypot, setSeatHoneypot] = useState('');
+  const seatMountTimeRef = useRef(Date.now());
+
+  useEffect(() => {
+    if (isOpen) {
+      seatMountTimeRef.current = Date.now();
+      setSeatHoneypot('');
+    }
+  }, [isOpen]);
+
   // Submit Booking
   const handleCompleteBooking = (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
+
+    // 1. Anti-Bot Honeypot Defense
+    if (seatHoneypot && seatHoneypot.trim() !== '') {
+      console.warn('[Bot Detected] Honeypot triggered in Seat Booking.');
+      setStep(4);
+      return;
+    }
+
+    // 2. Minimum form view time (<1.5s)
+    if (Date.now() - seatMountTimeRef.current < 1500) {
+      console.warn('[Bot Detected] Submission too fast (<1.5s).');
+      setStep(4);
+      return;
+    }
+
+    if (seatCooldown > 0) return;
+
     if (selectedSeatIds.length === 0) {
       alert(language === 'th' ? 'กรุณาเลือกที่นั่งอย่างน้อย 1 ที่นั่ง' : language === 'zh' ? '请至少选择 1 个机位' : 'Please select at least 1 seat');
       setStep(1);
@@ -140,6 +168,34 @@ export default function ArenaSeatBookingModal({
         createdAt: new Date().toISOString()
       };
     }
+
+    // 3. Send email to staff & customer confirmation
+    if (customerEmail && customerEmail.includes('@')) {
+      try {
+        fetch('/api/contact-inquiry', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: customerName,
+            phone: customerPhone,
+            email: customerEmail,
+            subject: `[GLP Booking] ยืนยันการจองที่นั่งเล่นเกม ${created.bookingCode}`,
+            message: `รหัสการจอง: ${created.bookingCode}\nโซน: ${currentZone.name}\nที่นั่ง: ${selectedSeatIds.join(', ')}\nวันที่: ${selectedDate}\nเวลา: ${bookingPayload.timeSlot}\nระยะเวลา: ${durationHours} ชม.\nแพ็กเกจอาหาร: ${bookingPayload.foodPackage}\nยอดรวม: ฿${grandTotal.toLocaleString()} บาท`,
+            inquiryRef: created.bookingCode,
+            smtpConfig: siteData?.smtpConfig
+          })
+        }).catch(() => {});
+      } catch (err) {}
+    }
+
+    // 4. Start 5-second cooldown timer
+    let remaining = 5;
+    setSeatCooldown(remaining);
+    const timer = setInterval(() => {
+      remaining -= 1;
+      setSeatCooldown(remaining);
+      if (remaining <= 0) clearInterval(timer);
+    }, 1000);
 
     setConfirmedBooking(created);
     setStep(4);
@@ -747,6 +803,20 @@ export default function ArenaSeatBookingModal({
                 </div>
               </div>
 
+              {/* Honeypot field */}
+              <div style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', height: 0, width: 0, overflow: 'hidden' }} aria-hidden="true" tabIndex={-1}>
+                <label htmlFor="hp_seat_check">Security Verification (Do not fill)</label>
+                <input 
+                  id="hp_seat_check"
+                  type="text" 
+                  name="hp_seat_check" 
+                  tabIndex={-1} 
+                  autoComplete="off"
+                  value={seatHoneypot}
+                  onChange={e => setSeatHoneypot(e.target.value)}
+                />
+              </div>
+
               {/* Buttons */}
               <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '12px', borderTop: '1px solid #e2e8f0' }}>
                 <button
@@ -758,9 +828,20 @@ export default function ArenaSeatBookingModal({
                 </button>
                 <button
                   type="submit"
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '12px 28px', borderRadius: '8px', border: 'none', background: '#2563eb', color: '#ffffff', fontWeight: 800, fontSize: '0.92rem', cursor: 'pointer', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)' }}
+                  disabled={seatCooldown > 0}
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '12px 28px', borderRadius: '8px', border: 'none', background: '#2563eb', color: '#ffffff', fontWeight: 800, fontSize: '0.92rem', cursor: seatCooldown > 0 ? 'not-allowed' : 'pointer', opacity: seatCooldown > 0 ? 0.7 : 1, boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)' }}
                 >
-                  <CheckCircle2 size={18} /> {t('seatBookingModal.btnConfirm') || 'ยืนยันการจองที่นั่ง'}
+                  {seatCooldown > 0 ? (
+                    <>
+                      <Clock size={18} />
+                      <span>{language === 'zh' ? `已预订 (等待 ${seatCooldown} 秒...)` : language === 'en' ? `Reserved (Wait ${seatCooldown}s...)` : `จองแล้ว (รอคูลดาวน์ ${seatCooldown} วิ...)`}</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 size={18} />
+                      <span>{t('seatBookingModal.btnConfirm') || 'ยืนยันการจองที่นั่ง'}</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>

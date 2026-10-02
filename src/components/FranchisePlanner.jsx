@@ -379,6 +379,9 @@ export default function FranchisePlanner() {
   const [showQuotationModal, setShowQuotationModal] = useState(false);
   const [showLeadSuccess, setShowLeadSuccess] = useState(false);
   const [isSubmittingLead, setIsSubmittingLead] = useState(false);
+  const [leadCooldown, setLeadCooldown] = useState(0);
+  const [leadHoneypot, setLeadHoneypot] = useState('');
+  const leadMountTimeRef = useRef(Date.now());
   const [showThankYouPopup, setShowThankYouPopup] = useState(false);
   const [redirectCountdown, setRedirectCountdown] = useState(5);
   const [submittedLeadData, setSubmittedLeadData] = useState(null);
@@ -1024,10 +1027,26 @@ export default function FranchisePlanner() {
   const handleLeadSubmit = (e) => {
     e.preventDefault();
     // Prevent double submissions: lock button immediately
-    if (isSubmittingLead) return;
+    if (isSubmittingLead || leadCooldown > 0) return;
+
+    // 1. Anti-Bot Honeypot Defense
+    if (leadHoneypot && leadHoneypot.trim() !== '') {
+      console.warn('[Bot Detected] Honeypot triggered in Franchise Planner.');
+      setShowQuotationModal(false);
+      setShowThankYouPopup(true);
+      return;
+    }
+
+    // 2. Minimum form view time (<1.5s is likely automated)
+    if (Date.now() - leadMountTimeRef.current < 1500) {
+      console.warn('[Bot Detected] Submission too fast (<1.5s).');
+      setShowQuotationModal(false);
+      setShowThankYouPopup(true);
+      return;
+    }
 
     if (!leadForm.fullName?.trim() || !leadForm.phone?.trim() || !leadForm.email?.trim()) {
-      alert('กรุณากรอกชื่อ-นามสกุล, เบอร์โทรศัพท์ และอีเมลติดต่อให้ครบถ้วน');
+      alert(language === 'zh' ? '请完整填写姓名、电话和电子邮箱' : language === 'en' ? 'Please fill in your full name, phone number, and email address.' : 'กรุณากรอกชื่อ-นามสกุล, เบอร์โทรศัพท์ และอีเมลติดต่อให้ครบถ้วน');
       return;
     }
 
@@ -1173,6 +1192,17 @@ export default function FranchisePlanner() {
       setSubmittedLeadData(currentLeadInfo);
       setShowThankYouPopup(true);
       setRedirectCountdown(5);
+
+      // Start 5-second cooldown relay to prevent rapid double-clicks
+      let remaining = 5;
+      setLeadCooldown(remaining);
+      const timer = setInterval(() => {
+        remaining -= 1;
+        setLeadCooldown(remaining);
+        if (remaining <= 0) {
+          clearInterval(timer);
+        }
+      }, 1000);
     }, 1000);
   };
 
@@ -5260,17 +5290,36 @@ export default function FranchisePlanner() {
                     />
                   </div>
 
+                  {/* Honeypot Anti-Bot Field */}
+                  <div style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', height: 0, width: 0, overflow: 'hidden' }} aria-hidden="true" tabIndex={-1}>
+                    <label htmlFor="hp_lead_security">Security Verification (Do not fill)</label>
+                    <input 
+                      id="hp_lead_security"
+                      type="text" 
+                      name="hp_lead_security" 
+                      tabIndex={-1} 
+                      autoComplete="off"
+                      value={leadHoneypot}
+                      onChange={e => setLeadHoneypot(e.target.value)}
+                    />
+                  </div>
+
                   <div className="lead-form-modal-footer">
                     <button 
                       type="submit" 
                       className="btn-lead-submit btn-primary" 
-                      disabled={isSubmittingLead}
-                      style={isSubmittingLead ? { opacity: 0.75, cursor: 'not-allowed', pointerEvents: 'none' } : {}}
+                      disabled={isSubmittingLead || leadCooldown > 0}
+                      style={isSubmittingLead || leadCooldown > 0 ? { opacity: 0.75, cursor: 'not-allowed' } : {}}
                     >
                       {isSubmittingLead ? (
                         <>
                           <RefreshCw size={16} className="spin-icon" />
                           <span>{tp('submittingLead', 'กำลังส่งข้อมูล...')}</span>
+                        </>
+                      ) : leadCooldown > 0 ? (
+                        <>
+                          <Clock size={16} />
+                          <span>{language === 'zh' ? `已发送 (防连点冷却 ${leadCooldown} 秒...)` : language === 'en' ? `Submitted (Relay Wait ${leadCooldown}s...)` : `ส่งแล้ว (รอคูลดาวน์ ${leadCooldown} วิ...)`}</span>
                         </>
                       ) : (
                         <>

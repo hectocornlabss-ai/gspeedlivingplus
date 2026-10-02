@@ -98,7 +98,7 @@ export default function TournamentsPage({
                 <Search size={18} className="search-icon text-blue" />
                 <input 
                   type="text" 
-                  placeholder={t('tournamentsPage.searchPlaceholder') || 'ค้นหาชื่อการแข่งขัน, ชื่อเกม (VALORANT, RoV, CS2...), หรือรูปแบบ...'}
+                  placeholder={language === 'zh' ? '搜索赛事名称、游戏 (VALORANT, RoV, CS2...) 或赛制...' : language === 'en' ? 'Search tournament name, game (VALORANT, RoV, CS2...), or format...' : 'ค้นหาชื่อการแข่งขัน, ชื่อเกม (VALORANT, RoV, CS2...), หรือรูปแบบ...'}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="search-input"
@@ -159,14 +159,18 @@ export default function TournamentsPage({
           <h1 className="tournaments-hero-title">
             {language === 'th' ? (
               <>ปฏิทินการแข่งขัน & <span className="text-blue">ทัวร์นาเมนต์อีสปอร์ต</span></>
+            ) : language === 'zh' ? (
+              <>全国电竞赛事 & <span className="text-blue">锦标赛日程表</span></>
             ) : (
-              <span>{t('tournamentsPage.title')}</span>
+              <>Tournament Calendar & <span className="text-blue">Esports Leagues</span></>
             )}
           </h1>
           <p className="tournaments-hero-subtitle" style={{ marginBottom: 0 }}>
             {language === 'th'
               ? 'ศูนย์รวมการแข่งขันอีสปอร์ตระดับประเทศ ชิงเงินรางวัลรวมกว่าหลายแสนบาท พิสูจน์ฝีมือบนเวที LAN Final 4K สเปก Intel i9 + RTX 4080 จอ 360Hz พร้อมระบบ Dedicated Server 128-Tick และถ่ายทอดสดเต็มรูปแบบ'
-              : t('tournamentsPage.subtitle')}
+              : (language === 'zh'
+                ? '全国顶尖电竞赛事汇聚，争夺丰厚现金大奖。搭载 Intel i9 + RTX 4080、360Hz 电竞屏、128-Tick 局域网独立服务器及4K超清直转播系统。'
+                : 'National premier esports tournaments with massive prize pools. Battle on 4K LAN Final stage powered by Intel i9 + RTX 4080, 360Hz displays, and 128-tick dedicated servers.')}
           </p>
         </div>
       </section>
@@ -178,8 +182,10 @@ export default function TournamentsPage({
             <span>
               {language === 'th' ? (
                 <>พบทั้งหมด <strong>{filteredTournaments.length}</strong> รายการแข่งขัน</>
+              ) : language === 'zh' ? (
+                <>共找到 <strong>{filteredTournaments.length}</strong> 项赛事</>
               ) : (
-                <><strong>{filteredTournaments.length}</strong> {t('nav.tournaments')}</>
+                <>Found <strong>{filteredTournaments.length}</strong> Tournaments</>
               )}
             </span>
             {openCount > 0 && (
@@ -314,7 +320,7 @@ export default function TournamentsPage({
                               type="button"
                               className="t-btn-bracket-outline"
                               onClick={() => handleOpenTournament(tourney, 'bracket')}
-                              title="ดูสายการแข่งขัน (Tournament Bracket)"
+                              title={language === 'zh' ? '查看赛程对阵图 (Tournament Bracket)' : language === 'en' ? 'View Bracket (Tournament Bracket)' : 'ดูสายการแข่งขัน (Tournament Bracket)'}
                             >
                               <Layers size={14} />
                               <span>{t('common.bracket')}</span>

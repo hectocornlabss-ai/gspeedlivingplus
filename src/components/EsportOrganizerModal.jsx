@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, Trophy, Phone, MessageCircle, Calendar, Users, 
   Send, CheckCircle2, Monitor, Radio, ArrowRight, ExternalLink, Sparkles,
@@ -28,6 +28,10 @@ export default function EsportOrganizerModal({
   const { siteData, addLead } = useSiteData();
   const { t, language } = useTranslation();
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+  const [honeypot, setHoneypot] = useState('');
+  const mountTimeRef = useRef(Date.now());
 
   const [form, setForm] = useState({
     name: '',
@@ -44,6 +48,13 @@ export default function EsportOrganizerModal({
     addonsText: '',
     notes: initialZoneName ? `สนใจจัดงานแข่งขันในโซน: ${initialZoneName}` : ''
   });
+
+  useEffect(() => {
+    if (isOpen) {
+      mountTimeRef.current = Date.now();
+      setHoneypot('');
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (initialZoneName) {
@@ -68,8 +79,23 @@ export default function EsportOrganizerModal({
   const lineOaUrl = siteData?.footer?.lineUrl || 'https://line.me/R/ti/p/@gspeed';
   const hotlinePhone = siteData?.footer?.phone || '063-793-7704';
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // 1. Anti-Bot Honeypot Defense
+    if (honeypot && honeypot.trim() !== '') {
+      console.warn('[Bot Detected] Honeypot field triggered in Esport Organizer Modal.');
+      setSubmitted(true);
+      return;
+    }
+
+    // 2. Minimum form view time (prevent instantaneous bot submissions)
+    if (Date.now() - mountTimeRef.current < 1500) {
+      console.warn('[Bot Detected] Submission too fast (<1.5s).');
+      setSubmitted(true);
+      return;
+    }
+
     if (!form.name.trim() || !form.phone.trim()) {
       alert(language === 'th' ? 'กรุณากรอกชื่อผู้ติดต่อและเบอร์โทรศัพท์' : language === 'zh' ? '请填写联系人姓名与电话' : 'Please fill in contact name and phone number');
       return;
@@ -79,12 +105,14 @@ export default function EsportOrganizerModal({
     const addonsNote = form.addonsText?.trim() ? ` | อุปกรณ์เสริม: ${form.addonsText.trim()}` : '';
     const fullNotes = `${form.notes || '-'}${addonsNote}`;
 
+    setIsSubmitting(true);
+
     if (addLead) {
       addLead({
         name: form.name,
         company: form.organization || 'บุคคลทั่วไป / ทีมแข่งอิสระ',
         phone: form.phone,
-        email: form.email || form.lineId,
+        email: form.email || (form.lineId?.includes('@') ? form.lineId : ''),
         lineId: form.lineId,
         type: 'tournament_venue',
         typeName: `ติดต่อขอจัดงานแข่ง Esport (${selectedGame})`,
@@ -96,6 +124,38 @@ export default function EsportOrganizerModal({
         notes: `${initialZoneName ? `โซนที่เลือก: ${initialZoneName} | ` : ''}เกมที่ต้องการจัด: ${selectedGame} | ผู้เข้าร่วม: ${form.attendees} | LINE: ${form.lineId || '-'} | บันทึกเพิ่มเติม: ${fullNotes}`
       });
     }
+
+    // 3. Send email to staff & customer via backend SMTP service
+    try {
+      const emailTarget = form.email || (form.lineId?.includes('@') ? form.lineId : '');
+      await fetch('/api/contact-inquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.name,
+          phone: form.phone,
+          email: emailTarget,
+          subject: `ติดต่อขอจัดงานแข่งอีสปอร์ต (${selectedGame})`,
+          message: `เกม: ${selectedGame}\nผู้จัด/องค์กร: ${form.organization || '-'}\nกำหนดการ: ${form.expectedDate || '-'}\nจำนวนผู้เข้าร่วม: ${form.attendees}\nงบประมาณ: ${form.budget || '-'}\nLINE ID: ${form.lineId || '-'}\nอุปกรณ์เสริม: ${form.addonsText || '-'}\nรายละเอียด: ${form.notes || '-'}`,
+          inquiryRef: `GLP-ESP-${Date.now().toString().slice(-6)}`,
+          smtpConfig: siteData?.smtpConfig
+        })
+      });
+    } catch (e) {
+      console.warn('[Esport Inquiry SMTP]', e.message);
+    }
+
+    // 4. 5-Second Button Cooldown Relay
+    let remaining = 5;
+    setCooldown(remaining);
+    const timer = setInterval(() => {
+      remaining -= 1;
+      setCooldown(remaining);
+      if (remaining <= 0) {
+        clearInterval(timer);
+        setIsSubmitting(false);
+      }
+    }, 1000);
 
     setSubmitted(true);
   };
@@ -438,14 +498,38 @@ export default function EsportOrganizerModal({
                 </div>
               </div>
 
+              {/* Anti-bot Honeypot field (hidden from real users) */}
+              <div style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', height: 0, width: 0, overflow: 'hidden' }} aria-hidden="true" tabIndex={-1}>
+                <label htmlFor="hp_security_check">Security Verification (Do not fill)</label>
+                <input 
+                  id="hp_security_check"
+                  type="text" 
+                  name="hp_security_check" 
+                  tabIndex={-1} 
+                  autoComplete="off"
+                  value={honeypot}
+                  onChange={e => setHoneypot(e.target.value)}
+                />
+              </div>
+
               {/* Submit Button & Fast Contact Bar */}
               <div className="esport-submit-bar">
                 <button 
                   type="submit" 
                   className="esport-btn-submit"
+                  disabled={isSubmitting || cooldown > 0}
+                  style={cooldown > 0 ? { opacity: 0.7, cursor: 'not-allowed' } : {}}
                 >
-                  <Send size={18} />
-                  <span>{t('organizerModal.submitFull') || 'ส่งข้อมูลขอจัดงาน & รับใบเสนอราคาฟรี'}</span>
+                  {isSubmitting ? (
+                    <span>{language === 'zh' ? '正在连接安全邮件服务...' : language === 'en' ? 'Connecting SMTP & Submitting...' : 'กำลังส่งข้อมูล...'}</span>
+                  ) : cooldown > 0 ? (
+                    <span>{language === 'zh' ? `已发送 (防连点冷却 ${cooldown} 秒...)` : language === 'en' ? `Submitted (Relay Wait ${cooldown}s...)` : `ส่งข้อมูลแล้ว (รอคูลดาวน์ ${cooldown} วิ...)`}</span>
+                  ) : (
+                    <>
+                      <Send size={18} />
+                      <span>{t('organizerModal.submitFull') || 'ส่งข้อมูลขอจัดงาน & รับใบเสนอราคาฟรี'}</span>
+                    </>
+                  )}
                 </button>
 
                 <div className="esport-fast-help-box">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   MapPin, Phone, Navigation, ExternalLink, 
   Copy, Check, Send, Share2, Car, Train, Bus, 
@@ -297,15 +297,33 @@ export default function ContactPage({ onNavigateHome, onNavigateFranchise }) {
     }
   };
 
-  const handleSubmit = (e) => {
+  const [honeypot, setHoneypot] = useState('');
+  const mountTimeRef = useRef(Date.now());
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // 1. Anti-Bot Honeypot Defense
+    if (honeypot && honeypot.trim() !== '') {
+      console.warn('[Bot Detected] Honeypot triggered in Contact Form.');
+      setSubmitSuccess(true);
+      return;
+    }
+
+    // 2. Minimum submission time (<1.5s is likely automated)
+    if (Date.now() - mountTimeRef.current < 1500) {
+      console.warn('[Bot Detected] Submission too fast (<1.5s).');
+      setSubmitSuccess(true);
+      return;
+    }
+
     if (cooldownRemaining > 0) {
-      alert(language === 'en' ? `Anti-Spam Rate Limit: Please wait ${cooldownRemaining} seconds before submitting again.` : `ระบบป้องกันการส่งซ้ำ (Anti-Spam): กรุณารออีก ${cooldownRemaining} วินาทีก่อนส่งข้อความใหม่อีกครั้ง`);
+      alert(language === 'zh' ? `防频繁发送限制：请等待 ${cooldownRemaining} 秒后再提交` : language === 'en' ? `Anti-Spam Rate Limit: Please wait ${cooldownRemaining} seconds before submitting again.` : `ระบบป้องกันการส่งซ้ำ (Anti-Spam): กรุณารออีก ${cooldownRemaining} วินาทีก่อนส่งข้อความใหม่อีกครั้ง`);
       return;
     }
 
     if (!formData.name.trim() || !formData.phone.trim()) {
-      alert(language === 'en' ? 'Please enter your name and phone number.' : 'กรุณากรอกชื่อและเบอร์โทรศัพท์สำหรับติดต่อกลับ');
+      alert(language === 'zh' ? '请填写姓名和联系电话' : language === 'en' ? 'Please enter your name and phone number.' : 'กรุณากรอกชื่อและเบอร์โทรศัพท์สำหรับติดต่อกลับ');
       return;
     }
 
@@ -315,79 +333,66 @@ export default function ContactPage({ onNavigateHome, onNavigateFranchise }) {
     const inquiryRef = `INQ-${Math.floor(100000 + Math.random() * 900000)}`;
     const subjectLabel = curI18n.subjects[formData.subject] || formData.subject;
 
-    setTimeout(() => {
-      // 1. Record Lead into SiteDataContext
-      if (typeof addLead === 'function') {
-        try {
-          addLead({
-            name: formData.name.trim(),
-            phone: formData.phone.trim(),
-            email: formData.email.trim(),
-            type: formData.subject,
-            typeName: subjectLabel,
-            channel: 'contact_page',
-            notes: `[หัวข้อ: ${subjectLabel}] ${formData.message.trim() || 'ไม่มีบันทึกเพิ่มเติม'}`
-          });
-        } catch (err) {
-          console.warn('Error saving lead to SiteDataContext:', err);
-        }
-      }
-
-      // 2. Dispatch automated email and record into glp_email_outbox
-      const nowIso = new Date().toISOString();
-      const newOutboxRecords = [];
-      const smtpConfig = siteData?.smtpConfig || {};
-
-      if (formData.email.trim()) {
-        newOutboxRecords.push({
-          id: `mail-inq-${Date.now()}-1`,
-          to: formData.email.trim(),
-          customerName: formData.name.trim(),
-          quoteRef: inquiryRef,
-          subject: `[GLP Contact] ขอบพระคุณที่ติดต่อ GLP : G Speed Living Plus (เลขอ้างอิง ${inquiryRef})`,
-          sentAt: nowIso,
-          status: 'Delivered (SMTP 250 OK)',
-          smtpServer: `${smtpConfig.host || 'smtp.hostinger.com'}:${smtpConfig.port || 465} (${smtpConfig.encryption || 'SSL/TLS'})`,
-          sender: `${smtpConfig.senderName || 'GLP Support'} <${smtpConfig.senderEmail || storeEmail}>`,
-          details: {
-            type: 'customer_contact_autoreply',
-            inquiryRef,
-            subject: subjectLabel,
-            message: formData.message.trim(),
-            phone: formData.phone.trim()
-          }
+    // 1. Record Lead into SiteDataContext
+    if (typeof addLead === 'function') {
+      try {
+        addLead({
+          name: formData.name.trim(),
+          phone: formData.phone.trim(),
+          email: formData.email.trim(),
+          type: formData.subject,
+          typeName: subjectLabel,
+          channel: 'contact_page',
+          notes: `[หัวข้อ: ${subjectLabel}] ${formData.message.trim() || 'ไม่มีบันทึกเพิ่มเติม'}`
         });
+      } catch (err) {
+        console.warn('Error saving lead to SiteDataContext:', err);
       }
+    }
 
-      try {
-        const existingOutbox = JSON.parse(localStorage.getItem('glp_email_outbox') || '[]');
-        localStorage.setItem('glp_email_outbox', JSON.stringify([...newOutboxRecords, ...existingOutbox].slice(0, 50)));
-      } catch (err) {}
-
-      // Set cooldown (60 seconds)
-      const cooldownUntil = Date.now() + 60000;
-      try {
-        sessionStorage.setItem('glp_contact_cooldown_until', cooldownUntil.toString());
-      } catch (err) {}
-      setCooldownRemaining(60);
-
-      setSubmittedInfo({
-        name: formData.name.trim(),
-        inquiryRef,
-        customerEmail: formData.email.trim(),
-        hasEmail: Boolean(formData.email.trim())
+    // 2. Real SMTP Server Dispatch (Sends staff alert + customer auto-reply)
+    const smtpConfig = siteData?.smtpConfig || {};
+    try {
+      await fetch('/api/contact-inquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name.trim(),
+          phone: formData.phone.trim(),
+          email: formData.email.trim(),
+          subject: subjectLabel,
+          message: formData.message.trim(),
+          inquiryRef,
+          smtpConfig
+        })
       });
+    } catch (apiErr) {
+      console.warn('[Contact Inquiry SMTP Dispatch Warning]:', apiErr.message);
+    }
 
-      setIsSubmitting(false);
-      setSubmitSuccess(true);
-      setFormData({
-        name: '',
-        phone: '',
-        email: '',
-        subject: 'general',
-        message: ''
-      });
-    }, 700);
+    // 3. Set 5-second cooldown relay
+    const cooldownUntil = Date.now() + 5000;
+    try {
+      sessionStorage.setItem('glp_contact_cooldown_until', cooldownUntil.toString());
+    } catch (err) {}
+    setCooldownRemaining(5);
+
+    setSubmittedInfo({
+      name: formData.name.trim(),
+      inquiryRef,
+      customerEmail: formData.email.trim(),
+      hasEmail: Boolean(formData.email.trim())
+    });
+
+    setIsSubmitting(false);
+    setSubmitSuccess(true);
+    setFormData({
+      name: '',
+      phone: '',
+      email: '',
+      subject: 'general',
+      message: ''
+    });
   };
 
   return (
@@ -768,10 +773,24 @@ export default function ContactPage({ onNavigateHome, onNavigateFranchise }) {
                     />
                   </div>
 
+                  {/* Honeypot field (hidden from genuine users) */}
+                  <div style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', height: 0, width: 0, overflow: 'hidden' }} aria-hidden="true" tabIndex={-1}>
+                    <label htmlFor="hp_contact_check">Security Verification (Do not fill)</label>
+                    <input 
+                      id="hp_contact_check"
+                      type="text" 
+                      name="hp_contact_check" 
+                      tabIndex={-1} 
+                      autoComplete="off"
+                      value={honeypot}
+                      onChange={e => setHoneypot(e.target.value)}
+                    />
+                  </div>
+
                   {cooldownRemaining > 0 && (
                     <div className="form-cooldown-warning">
                       <Clock size={16} className="shrink-0" />
-                      <span>{language === 'en' ? `Anti-Spam Rate Limit: Please wait ${cooldownRemaining}s` : `ระบบป้องกันการส่งซ้ำ: กรุณารออีก ${cooldownRemaining} วินาที`}</span>
+                      <span>{language === 'zh' ? `防频繁提交冷却中：请等待 ${cooldownRemaining} 秒` : language === 'en' ? `Anti-Spam Relay: Please wait ${cooldownRemaining}s` : `ระบบป้องกันการส่งซ้ำ: กรุณารออีก ${cooldownRemaining} วินาที`}</span>
                     </div>
                   )}
 
@@ -779,11 +798,17 @@ export default function ContactPage({ onNavigateHome, onNavigateFranchise }) {
                     type="submit" 
                     className="form-submit-btn"
                     disabled={isSubmitting || cooldownRemaining > 0}
+                    style={cooldownRemaining > 0 ? { opacity: 0.7, cursor: 'not-allowed' } : {}}
                   >
                     {isSubmitting ? (
                       <>
                         <Send size={18} />
                         <span>{curI18n.submittingBtn}</span>
+                      </>
+                    ) : cooldownRemaining > 0 ? (
+                      <>
+                        <Clock size={18} />
+                        <span>{language === 'zh' ? `已发送 (等待 ${cooldownRemaining} 秒...)` : language === 'en' ? `Submitted (Wait ${cooldownRemaining}s...)` : `ส่งเรียบร้อย (รอ ${cooldownRemaining} วิ...)`}</span>
                       </>
                     ) : (
                       <>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Cpu, Zap, Layers, Monitor, Gamepad2, Plus, Trash2, Edit3, 
   Save, RefreshCw, CheckCircle2, Server, Network, 

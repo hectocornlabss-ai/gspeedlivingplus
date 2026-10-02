@@ -117,7 +117,7 @@ export default function ActivitiesPage({
                 <Search size={18} className="search-icon text-blue" />
                 <input 
                   type="text" 
-                  placeholder={t('activitiesPage.searchPlaceholder') || 'ค้นหาภาพกิจกรรม, ชื่องาน, ค่ายเกม หรือชื่อเกม...'}
+                  placeholder={language === 'zh' ? '搜索活动图集、赛事名称、厂商或游戏...' : language === 'en' ? 'Search photo galleries, event titles, publishers, or games...' : 'ค้นหาภาพกิจกรรม, ชื่องาน, ค่ายเกม หรือชื่อเกม...'}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="search-input"
@@ -173,14 +173,18 @@ export default function ActivitiesPage({
           <h1 className="activities-hero-title">
             {language === 'th' ? (
               <>ประมวลภาพกิจกรรม & <span className="text-blue">บรรยากาศความมันส์</span></>
+            ) : language === 'zh' ? (
+              <>精彩活动图集 & <span className="text-blue">热血赛事现场</span></>
             ) : (
-              <span>{t('activitiesPage.title')}</span>
+              <>Activity Highlights & <span className="text-blue">Esports Photo Gallery</span></>
             )}
           </h1>
           <p className="activities-hero-subtitle" style={{ marginBottom: 0 }}>
             {language === 'th' 
               ? 'ย้อนชมภาพความประทับใจ บรรยากาศการประลองฝีมือของเหล่านักกีฬาอีสปอร์ต งานแถลงข่าวเปิดตัวเกม และงานแฟนมีตติ้งร่วมกับค่ายเกมชั้นนำระดับประเทศ ณ GLP Esport Stadium'
-              : t('activitiesPage.subtitle')}
+              : (language === 'zh'
+                ? '重温精彩瞬间！探寻职业电竞选手高能操作、一线游戏大厂新游发布会及粉丝狂欢见面会现场实况。'
+                : 'Relive epic moments! Explore high-stakes tournament highlights, game publisher launch events, and passionate community fan meetings at GLP Arena.')}
           </p>
         </div>
       </section>
@@ -192,8 +196,10 @@ export default function ActivitiesPage({
             <span>
               {language === 'th' ? (
                 <>แสดงผล <strong>{filteredActivities.length}</strong> อัลบั้มภาพกิจกรรม</>
+              ) : language === 'zh' ? (
+                <>共展示 <strong>{filteredActivities.length}</strong> 个精彩相册</>
               ) : (
-                <><strong>{filteredActivities.length}</strong> {t('common.overview')}</>
+                <>Showing <strong>{filteredActivities.length}</strong> Photo Galleries</>
               )}
             </span>
             <span className="click-hint-badge">

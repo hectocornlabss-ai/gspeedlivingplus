@@ -284,10 +284,10 @@ export default function SingleActivityView({
   if (!activity) {
     return (
       <div className="single-activity-page container" style={{ padding: '80px 20px', textAlign: 'center' }}>
-        <h2>ไม่พบข้อมูลกิจกรรมหรือบทความที่คุณค้นหา</h2>
-        <p style={{ color: '#64748b', margin: '14px 0 24px' }}>บทความนี้อาจถูกย้าย หรือลิงก์ไม่ถูกต้อง</p>
+        <h2>{language === 'zh' ? '未找到活动或文章' : language === 'en' ? 'Activity or Article Not Found' : 'ไม่พบข้อมูลกิจกรรมหรือบทความที่คุณค้นหา'}</h2>
+        <p style={{ color: '#64748b', margin: '14px 0 24px' }}>{language === 'zh' ? '该文章可能已被移动或链接无效' : language === 'en' ? 'This article may have been moved or the link is incorrect' : 'บทความนี้อาจถูกย้าย หรือลิงก์ไม่ถูกต้อง'}</p>
         <button onClick={() => onBack('activities')} className="btn-primary">
-          <ArrowLeft size={16} /> กลับสู่หน้ารวมกิจกรรม & บทความ
+          <ArrowLeft size={16} /> {language === 'zh' ? '返回活动与文章中心' : language === 'en' ? 'Back to Activities & Articles' : 'กลับสู่หน้ารวมกิจกรรม & บทความ'}
         </button>
       </div>
     );

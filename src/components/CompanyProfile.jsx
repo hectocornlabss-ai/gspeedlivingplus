@@ -314,8 +314,8 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                   ).map((phil, pIdx) => {
                     const meta = getPhilosophyMeta(phil.title, pIdx);
                     const PhilIcon = meta.icon;
-                    const displayTitle = pIdx === 0 ? t('companyPage.pillar1Title', phil.title) : (pIdx === 1 ? t('companyPage.pillar2Title', phil.title) : t('companyPage.pillar3Title', phil.title));
-                    const displayDesc = pIdx === 0 ? t('companyPage.pillar1Desc', phil.desc) : (pIdx === 1 ? t('companyPage.pillar2Desc', phil.desc) : t('companyPage.pillar3Desc', phil.desc));
+                    const displayTitle = (pIdx === 0 ? t('companyPage.pillar1Title') : (pIdx === 1 ? t('companyPage.pillar2Title') : (pIdx === 2 ? t('companyPage.pillar3Title') : null))) || translateDynamic(phil.title);
+                    const displayDesc = (pIdx === 0 ? t('companyPage.pillar1Desc') : (pIdx === 1 ? t('companyPage.pillar2Desc') : (pIdx === 2 ? t('companyPage.pillar3Desc') : null))) || translateDynamic(phil.desc);
                     return (
                       <div key={phil.id || pIdx} className="philosophy-item-card">
                         <div 
@@ -486,7 +486,7 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                       window.open(sanitizeSafeUrl(p.website), '_blank', 'noopener,noreferrer');
                     }
                   }}
-                  title={p.website ? `เข้าสู่เว็บไซต์ ${p.name}` : p.name}
+                  title={p.website ? (language === 'zh' ? `访问网站 ${p.name}` : language === 'en' ? `Visit ${p.name} website` : `เข้าสู่เว็บไซต์ ${p.name}`) : p.name}
                   role={p.website ? 'link' : 'article'}
                   tabIndex={p.website ? 0 : undefined}
                 >
@@ -517,20 +517,30 @@ export default function CompanyProfile({ onNavigateFranchise }) {
             <div className="standards-content">
               <div className="badge-pill badge-blue">
                 <ShieldCheck size={14} />
-                <span>LEGAL & STANDARD CERTIFICATION</span>
+                <span>{language === 'zh' ? '合规与法律认证' : language === 'en' ? 'LEGAL & STANDARD CERTIFICATION' : 'LEGAL & STANDARD CERTIFICATION'}</span>
               </div>
-              <h3 className="standards-title">{translateDynamic(founder.standards?.title || 'มาตรฐานความถูกต้อง โปร่งใส และปลอดภัย', language)}</h3>
+              <h3 className="standards-title">
+                {language === 'zh' 
+                  ? '合规、透明与安全认证标准' 
+                  : language === 'en' 
+                    ? 'Compliance, Transparency & Safety Standards' 
+                    : translateDynamic(founder.standards?.title || 'มาตรฐานความถูกต้อง โปร่งใส และปลอดภัย', language)}
+              </h3>
               <p className="standards-desc">
-                {translateDynamic(founder.standards?.desc || 'G-Speed ทุกสาขาผ่านการรับรองและตรวจสอบตามพระราชบัญญัติภาพยนตร์และวีดิทัศน์ ได้รับใบอนุญาตประกอบกิจการร้านเกมอย่างถูกต้องจากกระทรวงวัฒนธรรม ใช้ระบบปฏิบัติการ Windows และลิขสิทธิ์เกมแท้ 100% หมดกังวลเรื่องปัญหาลิขสิทธิ์', language)}
+                {language === 'zh'
+                  ? 'G-Speed 所有分店均通过泰国电影与录像法案严格审核，获得文化部官方颁发的营业许可，全场采用正版操作系统与正版游戏授权，全面保障投资人与玩家权益。'
+                  : language === 'en'
+                    ? 'All G-Speed arenas are certified under the Film and Video Act, officially licensed by the Ministry of Culture, running 100% genuine OS and game licenses.'
+                    : translateDynamic(founder.standards?.desc || 'G-Speed ทุกสาขาผ่านการรับรองและตรวจสอบตามพระราชบัญญัติภาพยนตร์และวีดิทัศน์ ได้รับใบอนุญาตประกอบกิจการร้านเกมอย่างถูกต้องจากกระทรวงวัฒนธรรม ใช้ระบบปฏิบัติการ Windows และลิขสิทธิ์เกมแท้ 100% หมดกังวลเรื่องปัญหาลิขสิทธิ์', language)}
               </p>
 
               <div className="standards-pills">
                 {(founder.standards?.pills && founder.standards.pills.length > 0
                   ? founder.standards.pills
                   : [
-                      'ใบอนุญาตสถานประกอบการถูกต้องตามกฎหมาย',
-                      'ร้านเกมสีขาว ปลอดภัยสำหรับเยาวชน',
-                      'ระบบกล้องวงจรปิด CCTV Full HD บันทึก 30 วัน'
+                      language === 'zh' ? '合法合规营业牌照与文化部许可' : language === 'en' ? 'Fully licensed and legally compliant venue' : 'ใบอนุญาตสถานประกอบการถูกต้องตามกฎหมาย',
+                      language === 'zh' ? '泰国绿色健康网吧 少年儿童友好环境' : language === 'en' ? 'White Cyber Cafe standard, safe for youth' : 'ร้านเกมสีขาว ปลอดภัยสำหรับเยาวชน',
+                      language === 'zh' ? '24小时高清 CCTV 监控与30天录像存储' : language === 'en' ? '24/7 CCTV surveillance with 30-day archive' : 'ระบบกล้องวงจรปิด CCTV Full HD บันทึก 30 วัน'
                     ]
                 ).map((pill, plIdx) => (
                   <span key={plIdx} className="std-pill">
@@ -545,7 +555,7 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                 type="button"
                 onClick={onNavigateFranchise} 
                 className="btn-partner-cta"
-                title="คลิกเพื่อเปิดระบบคำนวณงบและวางแผนเปิดร้านแฟรนไชส์"
+                title={language === 'zh' ? '点击打开加盟投资预算与3D空间规划系统' : language === 'en' ? 'Click to open franchise planner & 3D layout calculator' : 'คลิกเพื่อเปิดระบบคำนวณงบและวางแผนเปิดร้านแฟรนไชส์'}
               >
                 <div className="btn-partner-icon-box">
                   <Calculator size={20} />
@@ -594,7 +604,7 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                       loading="lazy" 
                     />
                     <div className="company-gallery-tag-pill" style={{ color: '#60a5fa' }}>
-                      {item.tag || 'CERTIFIED'}
+                      {translateDynamic(item.tag || 'CERTIFIED', language)}
                     </div>
                     <div className="company-gallery-overlay">
                       <span className="company-gallery-zoom-badge">
@@ -637,7 +647,7 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                 type="button" 
                 className="lightbox-close-btn"
                 onClick={() => setLightboxData(null)}
-                title="ปิด (Esc)"
+                title={language === 'zh' ? '关闭 (Esc)' : language === 'en' ? 'Close (Esc)' : 'ปิด (Esc)'}
               >
                 <X size={20} />
               </button>
@@ -660,7 +670,7 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                       type="button" 
                       className="lightbox-nav-btn prev"
                       onClick={handlePrevPhoto}
-                      title="ภาพก่อนหน้า (ลูกศรซ้าย)"
+                      title={language === 'zh' ? '上一张 (左箭头)' : language === 'en' ? 'Previous (Left Arrow)' : 'ภาพก่อนหน้า (ลูกศรซ้าย)'}
                     >
                       <ChevronLeft size={24} />
                     </button>
@@ -668,7 +678,7 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                       type="button" 
                       className="lightbox-nav-btn next"
                       onClick={handleNextPhoto}
-                      title="ภาพถัดไป (ลูกศรขวา)"
+                      title={language === 'zh' ? '下一张 (右箭头)' : language === 'en' ? 'Next (Right Arrow)' : 'ภาพถัดไป (ลูกศรขวา)'}
                     >
                       <ChevronRight size={24} />
                     </button>

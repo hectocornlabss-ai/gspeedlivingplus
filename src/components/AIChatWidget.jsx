@@ -797,7 +797,7 @@ ${contextText}
           id="btn-open-ai-chat"
           className="btn-ai-chat-trigger"
           onClick={() => setIsOpen(true)}
-          title="สอบถามข้อมูล / แชทกับเจ้าหน้าที่ - G-Speed Arena"
+          title={language === 'zh' ? '咨询信息 / 在线客服 - G-Speed Arena' : language === 'en' ? 'Inquire Information / Live Concierge - G-Speed Arena' : 'สอบถามข้อมูล / แชทกับเจ้าหน้าที่ - G-Speed Arena'}
         >
           <div className="trigger-pulse-ring"></div>
           <div className="trigger-avatar-circle">
@@ -824,7 +824,7 @@ ${contextText}
                 <div className="chat-status-pill">
                   <span className="status-dot-green"></span>
                   <span>{t('chat.statusOnline')}</span>
-                  <span className="chat-lang-pill" title="บริการ 3 ภาษา: ไทย 🇹🇭 • English 🇬🇧 • 中文 🇨🇳">
+                  <span className="chat-lang-pill" title={language === 'zh' ? '支持3种语言服务：泰语 🇹🇭 • 英语 🇬🇧 • 中文 🇨🇳' : language === 'en' ? '3 Languages Supported: Thai 🇹🇭 • English 🇬🇧 • Chinese 🇨🇳' : 'บริการ 3 ภาษา: ไทย 🇹🇭 • English 🇬🇧 • 中文 🇨🇳'}>
                     <ThaiFlag />
                     <UKFlag />
                     <ChinaFlag />
@@ -837,7 +837,7 @@ ${contextText}
               <button 
                 className="btn-chat-action" 
                 onClick={() => setIsOpen(false)}
-                title="ปิดหน้าต่าง"
+                title={language === 'zh' ? '关闭窗口' : language === 'en' ? 'Close Window' : 'ปิดหน้าต่าง'}
               >
                 <X size={16} />
               </button>
@@ -871,7 +871,7 @@ ${contextText}
                       alignItems: 'center',
                       gap: '4px'
                     }}>
-                      <span>🇹🇭 <strong>แปลไทย (Admin):</strong> {msg.translationTh}</span>
+                      <span>{language === 'zh' ? '🇨🇳 中文翻译 (Admin):' : language === 'en' ? '🇬🇧 Translation (Admin):' : '🇹🇭 แปลไทย (Admin):'} {msg.translationTh}</span>
                     </div>
                   )}
                   
@@ -882,7 +882,12 @@ ${contextText}
                     msg.text.includes('แพ็กเกจ Turnkey') || 
                     msg.text.includes('เปิดร้านเกม') ||
                     msg.text.includes('จำลองผังร้าน') ||
-                    msg.text.includes('วางผังร้าน')
+                    msg.text.includes('วางผังร้าน') ||
+                    msg.text.includes('Floor Plan') ||
+                    msg.text.includes('franchise') ||
+                    msg.text.includes('加盟') ||
+                    msg.text.includes('开网吧') ||
+                    msg.text.includes('平面图')
                   ) && (
                     <div style={{
                       marginTop: '12px',
@@ -894,10 +899,20 @@ ${contextText}
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#1d4ed8', fontSize: '0.86rem', fontWeight: 700, marginBottom: '6px' }}>
                         <Compass size={16} color="#1d4ed8" />
-                        <span>ระบบจำลองผังร้าน 3D & คำนวณงบประมาณ</span>
+                        <span>
+                          {language === 'zh' 
+                            ? '3D 空间规划与投资预算模拟系统' 
+                            : language === 'en' 
+                              ? '3D Floor Planner & Investment Budget Calculator' 
+                              : 'ระบบจำลองผังร้าน 3D & คำนวณงบประมาณ'}
+                        </span>
                       </div>
                       <p style={{ fontSize: '0.82rem', color: '#0f172a', margin: '0 0 12px 0', lineHeight: 1.5, fontWeight: 500 }}>
-                        ทดลองใส่ขนาดพื้นที่ห้อง กว้าง x ยาว จัดวางเครื่อง สเปกคอม และคำนวณงบลงทุน ROI ได้ทันที
+                        {language === 'zh'
+                          ? '输入场地尺寸（长 x 宽），模拟排布对战席、硬件配置并即时计算投资预算与回报周期。'
+                          : language === 'en'
+                            ? 'Input room dimensions (W x L), arrange battle stations, select hardware specs, and calculate ROI immediately.'
+                            : 'ทดลองใส่ขนาดพื้นที่ห้อง กว้าง x ยาว จัดวางเครื่อง สเปกคอม และคำนวณงบลงทุน ROI ได้ทันที'}
                       </p>
                       <button
                         type="button"
@@ -926,7 +941,13 @@ ${contextText}
                         }}
                       >
                         <Compass size={15} />
-                        <span>เปิดระบบออกแบบแปลนร้าน & ใส่รายละเอียด</span>
+                        <span>
+                          {language === 'zh'
+                            ? '进入3D平面图规划系统'
+                            : language === 'en'
+                              ? 'Launch 3D Planner & Customize'
+                              : 'เปิดระบบออกแบบแปลนร้าน & ใส่รายละเอียด'}
+                        </span>
                         <ArrowRight size={14} />
                       </button>
                     </div>
@@ -935,7 +956,13 @@ ${contextText}
                   {msg.isOutOfScopeNotice && (
                     <div className="out-of-scope-badge">
                       <Shield size={11} />
-                      <span>ขอบเขตข้อมูลเจ้าหน้าที่ร้าน</span>
+                      <span>
+                        {language === 'zh' 
+                          ? '工作人员专业服务范围' 
+                          : language === 'en' 
+                            ? 'Staff Official Scope' 
+                            : 'ขอบเขตข้อมูลเจ้าหน้าที่ร้าน'}
+                      </span>
                     </div>
                   )}
                 </div>

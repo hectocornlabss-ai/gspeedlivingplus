@@ -503,7 +503,7 @@ export default function ArenaHub({
                     }}
                   >
                     <Trophy size={18} />
-                    <span>{heroData.btn1Text || 'สนใจจัดงาน'}</span>
+                    <span>{language === 'th' ? (heroData.btn1Text || t('hero.btn1')) : t('hero.btn1')}</span>
                   </button>
 
                   <button 
@@ -535,7 +535,7 @@ export default function ArenaHub({
                     }}
                   >
                     <Camera size={18} className="text-blue" />
-                    <span>{heroData.btn2Text || 'ดูกิจกรรม'}</span>
+                    <span>{language === 'th' ? (heroData.btn2Text || t('hero.btn2')) : t('hero.btn2')}</span>
                   </button>
 
                   <button 
@@ -567,7 +567,7 @@ export default function ArenaHub({
                     }}
                   >
                     <Trophy size={18} className="text-amber" />
-                    <span>{heroData.btn3Text || 'ทัวร์นาเมนต์'}</span>
+                    <span>{language === 'th' ? (heroData.btn3Text || t('hero.btn3')) : t('hero.btn3')}</span>
                   </button>
 
                   <button 
@@ -599,7 +599,7 @@ export default function ArenaHub({
                     }}
                   >
                     <Compass size={18} />
-                    <span>{heroData.btn4Text || 'ติดต่อเปิดร้านเกม'}</span>
+                    <span>{language === 'th' ? (heroData.btn4Text || t('hero.btn4')) : t('hero.btn4')}</span>
                   </button>
                 </div>
 
@@ -634,7 +634,7 @@ export default function ArenaHub({
                       }}
                     >
                       <div className="metric-number" style={{ color: isDarkHero ? '#38bdf8' : '#1d4ed8' }}>{m.number}</div>
-                      <div className="metric-label" style={{ color: isDarkHero ? '#cbd5e1' : '#64748b' }}>{m.label}</div>
+                      <div className="metric-label" style={{ color: isDarkHero ? '#cbd5e1' : '#64748b' }}>{translateDynamic(m.label, language)}</div>
                     </div>
                   ))}
                 </div>
@@ -1156,7 +1156,7 @@ export default function ArenaHub({
                         <button 
                           className="zone-slider-nav-btn prev"
                           onClick={handlePrevSlide}
-                          aria-label="ภาพก่อนหน้า"
+                          aria-label={language === 'zh' ? '上一张' : language === 'en' ? 'Previous' : 'ภาพก่อนหน้า'}
                           type="button"
                         >
                           <ChevronLeft size={20} />
@@ -1164,7 +1164,7 @@ export default function ArenaHub({
                         <button 
                           className="zone-slider-nav-btn next"
                           onClick={handleNextSlide}
-                          aria-label="ภาพถัดไป"
+                          aria-label={language === 'zh' ? '下一张' : language === 'en' ? 'Next' : 'ภาพถัดไป'}
                           type="button"
                         >
                           <ChevronRight size={20} />
@@ -1175,14 +1175,14 @@ export default function ArenaHub({
                     {/* Photo Caption Overlay */}
                     {activeSlide.caption && (
                       <div className="zone-caption-scrim">
-                        <p className="zone-caption-text">{activeSlide.caption}</p>
+                        <p className="zone-caption-text">{translateDynamic(activeSlide.caption)}</p>
                       </div>
                     )}
                   </div>
 
                   {/* Thumbnail Strip (Symmetrical 3-column preview) */}
                   {totalZoneSlides > 1 && (
-                    <div className="zone-thumbnails-strip" aria-label="แถบภาพขนาดย่อ" ref={thumbnailsRef}>
+                    <div className="zone-thumbnails-strip" aria-label={language === 'zh' ? '缩略图栏' : language === 'en' ? 'Thumbnails' : 'แถบภาพขนาดย่อ'} ref={thumbnailsRef}>
                       {currentZoneImages.map((imgObj, idx) => {
                         const fallbackThumb = defaultZoneInit?.images?.[idx]?.url || defaultZoneInit.image;
                         const thumbUrl = imgObj.url || fallbackThumb;
@@ -1193,7 +1193,7 @@ export default function ArenaHub({
                             type="button"
                             onClick={() => setZoneSlideIndex(idx)}
                             className={`zone-thumb-btn ${isCur ? 'active' : ''}`}
-                            title={`ภาพที่ ${idx + 1}: ${imgObj.caption || ''}`}
+                            title={language === 'zh' ? `第 ${idx + 1} 张: ${translateDynamic(imgObj.caption || '')}` : language === 'en' ? `Photo ${idx + 1}: ${translateDynamic(imgObj.caption || '')}` : `ภาพที่ ${idx + 1}: ${imgObj.caption || ''}`}
                           >
                             <img 
                               src={thumbUrl} 
@@ -1343,13 +1343,13 @@ export default function ArenaHub({
               </div>
               <div className="modal-details-box">
                 <div className="meta-row">
-                  <div><strong>วันที่จัดกิจกรรม:</strong> {selectedGalleryItem.date}</div>
-                  <div><strong>พาร์ตเนอร์ร่วมจัด:</strong> {selectedGalleryItem.partner}</div>
+                  <div><strong>{language === 'zh' ? '活动日期:' : language === 'en' ? 'Event Date:' : 'วันที่จัดกิจกรรม:'}</strong> {translateDynamic(selectedGalleryItem.date)}</div>
+                  <div><strong>{language === 'zh' ? '合作主办方:' : language === 'en' ? 'Organizing Partner:' : 'พาร์ตเนอร์ร่วมจัด:'}</strong> {translateDynamic(selectedGalleryItem.partner)}</div>
                 </div>
-                <p className="modal-full-desc">{selectedGalleryItem.desc}</p>
+                <p className="modal-full-desc">{translateDynamic(selectedGalleryItem.desc)}</p>
                 <div className="modal-hotline-callout">
                   <PhoneCall size={18} className="text-blue" />
-                  <span>สนใจเช่าสถานที่จัดกิจกรรม หรือจัดแข่งอีเวนต์แบบนี้ ติดต่อสายด่วน: <strong>063-793-7704</strong></span>
+                  <span>{language === 'zh' ? '如需租赁场地举办此类电竞赛事或活动，请致电专线：' : language === 'en' ? 'Interested in renting the arena or hosting an event like this? Call: ' : 'สนใจเช่าสถานที่จัดกิจกรรม หรือจัดแข่งอีเวนต์แบบนี้ ติดต่อสายด่วน: '}<strong>063-793-7704</strong></span>
                 </div>
               </div>
             </div>

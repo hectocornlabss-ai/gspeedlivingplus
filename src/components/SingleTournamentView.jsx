@@ -805,17 +805,17 @@ export default function SingleTournamentView({
                     type="button"
                     onClick={handleCopyLink}
                     className={`share-pill-btn copy ${copiedLink ? 'copied' : ''}`}
-                    title="คัดลอกลิงก์ทัวร์นาเมนต์นี้"
+                    title={language === 'zh' ? '复制此赛事链接' : language === 'en' ? 'Copy Tournament Link' : 'คัดลอกลิงก์ทัวร์นาเมนต์นี้'}
                   >
                     {copiedLink ? (
                       <>
                         <Check size={14} className="text-emerald" />
-                        <span>คัดลอกลิงก์แล้ว ✓</span>
+                        <span>{language === 'zh' ? '已复制链接 ✓' : language === 'en' ? 'Link Copied ✓' : 'คัดลอกลิงก์แล้ว ✓'}</span>
                       </>
                     ) : (
                       <>
                         <Copy size={14} />
-                        <span>คัดลอกลิงก์</span>
+                        <span>{language === 'zh' ? '复制链接' : language === 'en' ? 'Copy Link' : 'คัดลอกลิงก์'}</span>
                       </>
                     )}
                   </button>
@@ -1245,7 +1245,7 @@ export default function SingleTournamentView({
               e.stopPropagation();
               setLightboxIndex(null);
             }}
-            title="ปิดหน้าต่างภาพ (Esc)"
+            title={language === 'zh' ? '关闭 (Esc)' : language === 'en' ? 'Close (Esc)' : 'ปิดหน้าต่างภาพ (Esc)'}
             aria-label="Close lightbox"
           >
             <X size={20} />
@@ -1267,7 +1267,7 @@ export default function SingleTournamentView({
                   e.stopPropagation();
                   handlePrevLightboxPhoto();
                 }}
-                title="ภาพก่อนหน้า (ลูกศรซ้าย หรือสไลด์ขวา)"
+                title={language === 'zh' ? '上一张 (左箭头或向右滑动)' : language === 'en' ? 'Previous (Left Arrow or Swipe Right)' : 'ภาพก่อนหน้า (ลูกศรซ้าย หรือสไลด์ขวา)'}
                 aria-label="Previous image"
               >
                 <ChevronLeft size={20} />
@@ -1285,7 +1285,7 @@ export default function SingleTournamentView({
                 draggable={false}
               />
               <div className="lightbox-caption">
-                <span className="caption-text">{filteredPhotos[lightboxIndex].caption || `ภาพที่ ${lightboxIndex + 1}`}</span>
+                <span className="caption-text">{translateDynamic(filteredPhotos[lightboxIndex].caption) || (language === 'zh' ? `第 ${lightboxIndex + 1} 张` : language === 'en' ? `Photo ${lightboxIndex + 1}` : `ภาพที่ ${lightboxIndex + 1}`)}</span>
                 {filteredPhotos.length > 1 && (
                   <span className="counter-tag">{lightboxIndex + 1} / {filteredPhotos.length}</span>
                 )}
@@ -1301,7 +1301,7 @@ export default function SingleTournamentView({
                   e.stopPropagation();
                   handleNextLightboxPhoto();
                 }}
-                title="ภาพถัดไป (ลูกศรขวา หรือสไลด์ซ้าย)"
+                title={language === 'zh' ? '下一张 (右箭头或向左滑动)' : language === 'en' ? 'Next (Right Arrow or Swipe Left)' : 'ภาพถัดไป (ลูกศรขวา หรือสไลด์ซ้าย)'}
                 aria-label="Next image"
               >
                 <ChevronRight size={20} />
@@ -1338,7 +1338,7 @@ export default function SingleTournamentView({
           <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '50%', background: '#10b981', color: '#fff' }}>
             <Check size={14} />
           </span>
-          <span>คัดลอกลิงก์สำเร็จแล้ว พร้อมส่งต่อได้ทันที ✓</span>
+          <span>{language === 'zh' ? '链接已成功复制，可直接粘贴分享 ✓' : language === 'en' ? 'Link copied to clipboard! Ready to share ✓' : 'คัดลอกลิงก์สำเร็จแล้ว พร้อมส่งต่อได้ทันที ✓'}</span>
         </div>
       )}
     </div>
