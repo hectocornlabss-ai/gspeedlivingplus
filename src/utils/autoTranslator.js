@@ -100,11 +100,15 @@ export function matchPatternTranslation(rawText, lang) {
   if (!rawText || typeof rawText !== 'string' || lang === 'th') return null;
   const str = rawText.trim();
 
-  // 1. Currency & Prize formatting: e.g. "100,000 บาท" or "฿100,000"
-  const bahtRegex = /^([\d,]+)\s*บาท$/i;
-  const bahtMatch = str.match(bahtRegex);
-  if (bahtMatch) {
-    return lang === 'zh' ? `${bahtMatch[1]} 泰铢` : `${bahtMatch[1]} THB`;
+  // 1. Currency & Prize formatting: e.g. "100,000 บาท" or "เงินรางวัลรวม 100,000 บาท"
+  const prizeTotalRegex = /^(?:เงินรางวัลรวม\s*)?([\d,]+)\s*บาท$/i;
+  const prizeTotalMatch = str.match(prizeTotalRegex);
+  if (prizeTotalMatch) {
+    const hasLabel = str.includes('เงินรางวัลรวม');
+    if (hasLabel) {
+      return lang === 'zh' ? `总奖金 ${prizeTotalMatch[1]} 泰铢` : `Total Prize Pool ${prizeTotalMatch[1]} THB`;
+    }
+    return lang === 'zh' ? `${prizeTotalMatch[1]} 泰铢` : `${prizeTotalMatch[1]} THB`;
   }
 
   // 2. Reading time: e.g. "3 นาทีในการอ่าน" or "5 นาที"
@@ -124,7 +128,41 @@ export function matchPatternTranslation(rawText, lang) {
     return `${timeMatch[1]}`;
   }
 
-  // 4. Attendees formatting: e.g. "350+ คน (32 ทีม)"
+  // 4. Slots, Teams, and Registered count formatting
+  // e.g. "32 ทีม", "32 ทีม (เหลือ 6 ทีมสุดท้าย)", "16 ทีมระดับ Pro Circuit", "(1 ทีมร่วมแข่ง)", "1 ทีมร่วมแข่ง"
+  const slotRemainingRegex = /^(\d+)\s*ทีม\s*\((?:เหลือ\s*)?(\d+)\s*ทีมสุดท้าย\)$/;
+  const slotRemMatch = str.match(slotRemainingRegex);
+  if (slotRemMatch) {
+    return lang === 'zh' 
+      ? `${slotRemMatch[1]} 支战队 (剩余最后${slotRemMatch[2]}支)`
+      : `${slotRemMatch[1]} Teams (Final ${slotRemMatch[2]} remaining)`;
+  }
+
+  const slotTierRegex = /^(\d+)\s*ทีมระดับ\s*(.+)$/;
+  const slotTierMatch = str.match(slotTierRegex);
+  if (slotTierMatch) {
+    return lang === 'zh'
+      ? `${slotTierMatch[1]} 支${slotTierMatch[2]}级战队`
+      : `${slotTierMatch[1]} ${slotTierMatch[2]} Teams`;
+  }
+
+  const slotSimpleRegex = /^(\d+)\s*ทีม$/;
+  const slotSimpleMatch = str.match(slotSimpleRegex);
+  if (slotSimpleMatch) {
+    return lang === 'zh' ? `${slotSimpleMatch[1]} 支战队` : `${slotSimpleMatch[1]} Teams`;
+  }
+
+  const teamRegisteredRegex = /^\(?(\d+)\s*ทีมร่วมแข่ง\)?$/;
+  const teamRegMatch = str.match(teamRegisteredRegex);
+  if (teamRegMatch) {
+    const isParens = str.startsWith('(') && str.endsWith(')');
+    const count = teamRegMatch[1];
+    const zh = `${count} 支战队已报名`;
+    const en = `${count} teams registered`;
+    return isParens ? `(${lang === 'zh' ? zh : en})` : (lang === 'zh' ? zh : en);
+  }
+
+  // 5. Attendees formatting: e.g. "350+ คน (32 ทีม)"
   const attendeesRegex = /^(\d+\+?)\s*คน\s*\(([^\)]+)\)$/;
   const attMatch = str.match(attendeesRegex);
   if (attMatch) {
@@ -132,9 +170,31 @@ export function matchPatternTranslation(rawText, lang) {
     return `${attMatch[1]} attendees (${attMatch[2].replace('ทีม', 'teams')})`;
   }
 
-  // 5. Thai Dates formatting
+  // 6. Bullet-separated strings e.g. "12 กันยายน 2026 • 3 min read"
+  if (str.includes(' • ')) {
+    const parts = str.split(' • ');
+    const translatedParts = parts.map(p => translateDynamic(p.trim(), lang, false));
+    return translatedParts.join(' • ');
+  }
+
+  // 7. Thai Dates formatting
   // Examples: "28-30 กันยายน 2026", "28 กันยายน 2026", "ตุลาคม 2026", "15 ก.ย. 2569"
+  // Also supports time in parens: "28-30 กันยายน 2026 (11:00 - 20:00 น.)"
   for (const m of THAI_MONTHS) {
+    // Check range with optional time: "28-30 กันยายน 2026 (11:00 - 20:00 น.)"
+    const rangeWithTimeRegex = new RegExp(`^(\\d{1,2})\\s*-\\s*(\\d{1,2})\\s*(${m.full}|${m.short})\\s*(\\d{4})\\s*\\(([^\\)]+)\\)$`, 'i');
+    const rangeTimeMatch = str.match(rangeWithTimeRegex);
+    if (rangeTimeMatch) {
+      let year = parseInt(rangeTimeMatch[4], 10);
+      if (year > 2500) year -= 543;
+      const dayRange = `${rangeTimeMatch[1]}-${rangeTimeMatch[2]}`;
+      const timePart = matchPatternTranslation(rangeTimeMatch[5], lang) || rangeTimeMatch[5];
+      if (lang === 'zh') {
+        return `${year}年${m.monthNum}月${dayRange}日 (${timePart})`;
+      }
+      return `${dayRange} ${m.en} ${year} (${timePart})`;
+    }
+
     // Check range: "28-30 กันยายน 2026" or "28-30 กันยายน 2569"
     const rangeRegex = new RegExp(`^(\\d{1,2})\\s*-\\s*(\\d{1,2})\\s*(${m.full}|${m.short})\\s*(\\d{4})$`, 'i');
     const rangeMatch = str.match(rangeRegex);
@@ -146,6 +206,20 @@ export function matchPatternTranslation(rawText, lang) {
         return `${year}年${m.monthNum}月${dayRange}日`;
       }
       return `${dayRange} ${m.en} ${year}`;
+    }
+
+    // Check single day with optional time: "28 กันยายน 2026 (14:00 น.)"
+    const singleWithTimeRegex = new RegExp(`^(\\d{1,2})\\s*(${m.full}|${m.short})\\s*(\\d{4})\\s*\\(([^\\)]+)\\)$`, 'i');
+    const singleTimeMatch = str.match(singleWithTimeRegex);
+    if (singleTimeMatch) {
+      let year = parseInt(singleTimeMatch[3], 10);
+      if (year > 2500) year -= 543;
+      const day = singleTimeMatch[1];
+      const timePart = matchPatternTranslation(singleTimeMatch[4], lang) || singleTimeMatch[4];
+      if (lang === 'zh') {
+        return `${year}年${m.monthNum}月${day}日 (${timePart})`;
+      }
+      return `${day} ${m.en} ${year} (${timePart})`;
     }
 
     // Check single day: "28 กันยายน 2026"
@@ -174,7 +248,7 @@ export function matchPatternTranslation(rawText, lang) {
     }
   }
 
-  // 6. Common Rank & Prize Badges
+  // 8. Common Rank & Prize Badges
   if (str === 'แชมป์อันดับ 1' || str === 'อันดับที่ 1 (CHAMPION)' || str === '🥇 อันดับที่ 1 (Champion)') {
     return lang === 'zh' ? '🥇 冠军 (CHAMPION)' : '🥇 1st Place (Champion)';
   }
@@ -192,6 +266,68 @@ export function matchPatternTranslation(rawText, lang) {
  * Comprehensive Built-in Esports & Activities Translations
  */
 export const BUILT_IN_DICTIONARY = {
+  // Store Addresses and Location Info
+  "79 ซอย รามคำแหง 53 แขวงพลับพลา เขตวังทองหลาง กรุงเทพมหานคร 10310": {
+    en: "79 Soi Ramkhamhaeng 53, Phlabphla, Wang Thonglang, Bangkok 10310",
+    zh: "79 Soi Ramkhamhaeng 53, Phlabphla, Wang Thonglang, Bangkok 10310"
+  },
+  "79 ซอย รามคำแหง 53 แขวงพลับพลา เขตวังทองหลาง กรุงเทพมหานคร 10310 (เข้าออกได้ทั้งทางซอยลาดพร้าว 112 และซอยรามคำแหง 53)": {
+    en: "79 Soi Ramkhamhaeng 53, Phlabphla, Wang Thonglang, Bangkok 10310 (Accessible via Lat Phrao 112 & Ramkhamhaeng 53)",
+    zh: "79 Soi Ramkhamhaeng 53, Phlabphla, Wang Thonglang, Bangkok 10310"
+  },
+  "79 ซอย รามคำแหง 53 แขวงพลับพลา เขตวังทองหลาง กรุงเทพมหานคร 10310 (เข้าออกได้ทั้งทางซอยลาดพร้าว 112 และซอยรามคำแหง 53 พิกัด 13.766999, 100.618755)": {
+    en: "79 Soi Ramkhamhaeng 53, Phlabphla, Wang Thonglang, Bangkok 10310 (Accessible via Lat Phrao 112 & Ramkhamhaeng 53, GPS: 13.766999, 100.618755)",
+    zh: "79 Soi Ramkhamhaeng 53, Phlabphla, Wang Thonglang, Bangkok 10310 (GPS: 13.766999, 100.618755)"
+  },
+  "79 ซ. รามคำแหง 53 แขวงพลับพลา เขตวังทองหลาง กรุงเทพมหานคร 10310": {
+    en: "79 Soi Ramkhamhaeng 53, Phlabphla, Wang Thonglang, Bangkok 10310",
+    zh: "79 Soi Ramkhamhaeng 53, Phlabphla, Wang Thonglang, Bangkok 10310"
+  },
+  "79 ซอย รามคำแหง 53": {
+    en: "79 Soi Ramkhamhaeng 53",
+    zh: "79 Soi Ramkhamhaeng 53"
+  },
+  "ซอยรามคำแหง 53 แขวงพลับพลา เขตวังทองหลาง กรุงเทพฯ": {
+    en: "Soi Ramkhamhaeng 53, Phlabphla, Wang Thonglang, Bangkok",
+    zh: "Soi Ramkhamhaeng 53, Phlabphla, Wang Thonglang, Bangkok"
+  },
+  "ซอยรามคำแหง 53": {
+    en: "Soi Ramkhamhaeng 53",
+    zh: "Soi Ramkhamhaeng 53"
+  },
+  "ซอยลาดพร้าว 112": {
+    en: "Soi Lat Phrao 112",
+    zh: "Soi Lat Phrao 112"
+  },
+  "รามคำแหง 53": {
+    en: "Ramkhamhaeng 53",
+    zh: "Ramkhamhaeng 53"
+  },
+  "เปิดบริการตลอด 24 ชั่วโมง ทุกวัน (24/7)": {
+    en: "Open 24/7 Every Day",
+    zh: "24小时全天候营业 (24/7)"
+  },
+  "เปิดบริการตลอด 24 ชม. ทุกวัน": {
+    en: "Open 24 Hours Daily",
+    zh: "24小时营业，全年无休"
+  },
+  "เปิดบริการตลอด 24 ชม.": {
+    en: "Open 24 Hours Daily",
+    zh: "24小时全天候营业"
+  },
+  "เปิดบริการ 24 ชั่วโมง 365 วัน ไม่มีวันหยุด": {
+    en: "Open 24 Hours, 365 Days A Year",
+    zh: "365天全年无休，24小时营业"
+  },
+  "(ทำเลศักยภาพ เชื่อมต่อระหว่าง ซอยลาดพร้าว 112 และ ซอยรามคำแหง 53 พิกัด 13.766999, 100.618755 มีที่จอดรถสะดวกสบาย)": {
+    en: "(Prime location connecting Soi Lat Phrao 112 & Soi Ramkhamhaeng 53, GPS: 13.766999, 100.618755. Convenient parking available)",
+    zh: "(Prime location connecting Soi Lat Phrao 112 & Soi Ramkhamhaeng 53, GPS: 13.766999, 100.618755. 设便利停车场)"
+  },
+  "แผนที่ร้าน": { en: "Arena Location", zh: "场馆地址" },
+  "ที่ตั้งอารีนา": { en: "Arena Location", zh: "场馆地址" },
+  "เบอร์โทรติดต่อ": { en: "Phone Number", zh: "联系电话" },
+  "อีเมลติดต่อ": { en: "Email Address", zh: "电子邮箱" },
+  "เวลาทำการ": { en: "Opening Hours", zh: "营业时间" },
   "กำลังอยู่ในโหมดเดินชมร้านระดับสายตา": { en: "First-person walk-through mode active", zh: "第一人称漫游模式已启用" },
   "เดินชมร้าน": { en: "Walk Mode", zh: "漫游视角" },
   "มุมมองหน้าร้าน": { en: "Storefront View", zh: "门头视角" },
@@ -999,6 +1135,117 @@ export const BUILT_IN_DICTIONARY = {
     zh: '查看全部'
   },
 
+  // News & Articles Mock Data
+  'รวมภาพความมันส์งานแข่ง PUBG Predator League @ GLP Esports Arena': {
+    en: 'Photo Highlights: PUBG Predator League @ GLP Esports Arena',
+    zh: '精彩图集：PUBG 掠夺者联赛 @ GLP 电竞竞技场'
+  },
+  'ภาพบรรยากาศการแข่งขันศึกชิงแชมป์ระดับประเทศ ทีมผู้เข้าแข่งขันกว่า 32 ทีม ดวลปืนสุดเดือดบนเวที 5v5 Stage พร้อมผู้ร่วมงานแน่นร้าน': {
+    en: 'Championship highlights: over 32 teams battled fiercely on the 5v5 Stage with a packed house of gaming fans.',
+    zh: '全国锦标赛火爆现场：逾32支顶尖战队在5v5电竞舞台展开巅峰对决，现场座无虚席。'
+  },
+  'GLP จับมือ Electronics Extreme จัดงาน Zone4 และแจกไอเทมลิขสิทธิ์แท้': {
+    en: 'GLP Partners with Electronics Extreme for Zone4 Fan Meeting & Item Giveaways',
+    zh: 'GLP 携手 Electronics Extreme 举办 Zone4 玩家狂欢会并赠送正版限定道具'
+  },
+  'ค่ายเกมชั้นนำเนรมิตร้าน GLP เป็นสมรภูมิประลองยุทธ์ พร้อมมอบของรางวัลและถ้วยเกียรติยศแก่ผู้ชนะการแข่งขัน': {
+    en: 'Leading game publisher transformed GLP Arena into a martial arts showdown, awarding prizes and trophies to the champions.',
+    zh: '知名游戏厂商将 GLP 竞技场打造为武斗争霸赛场，为最终优胜者颁发丰厚奖励与荣耀奖杯。'
+  },
+  'อัปเกรดขุมพลังใหม่! สเปก RTX 40 Series พร้อมจอ 360Hz ทุกล็อตที่ GLP': {
+    en: 'Next-Gen Power Upgrade! RTX 40 Series & 360Hz Displays Installed Across All GLP Stations',
+    zh: '全新旗舰硬件升级！GLP 全场配备 RTX 40 系列显卡与 360Hz 电竞巨幕'
+  },
+  'ยกระดับประสบการณ์เล่นเกมให้ลื่นไหลไร้รอยต่อ เฟรมเรตนิ่ง ปิงต่ำกว่า 3ms ด้วยระบบเน็ตเวิร์กและ Diskless Server ใหม่ล่าสุด': {
+    en: 'Elevating the gaming experience with ultra-smooth performance, stable framerates, <3ms ping, powered by next-gen diskless servers.',
+    zh: '通过最新的无盘服务器系统与超高速网络，将对战体验提升至极致流畅，帧率稳定，延迟低于 3ms。'
+  },
+
+  // News Section Config
+  'บทความและข่าวสาร GLP ESPORTS': {
+    en: 'GLP ESPORTS Articles & News',
+    zh: 'GLP 电竞资讯与深度报道'
+  },
+  'อัปเดตความเคลื่อนไหววงการอีสปอร์ต เทคโนโลยีใหม่ และสรุปผลการแข่งขันที่จัดขึ้นในร้าน': {
+    en: 'Esports trends, cutting-edge gaming hardware updates, and tournament recaps hosted at GLP Arena.',
+    zh: '紧跟电竞行业最新动态、前沿硬件科技与店内精彩赛事回顾。'
+  },
+
+  // Tournaments Mock Data
+  'G-SPEED TEST CUP 2026': {
+    en: 'G-SPEED TEST CUP 2026',
+    zh: 'G-SPEED 测试邀请杯 2026'
+  },
+  'G-SPEED VALORANT CHAMPIONSHIP 2026': {
+    en: 'G-SPEED VALORANT CHAMPIONSHIP 2026',
+    zh: 'G-SPEED 无畏契约全国锦标赛 2026'
+  },
+  'CS2 BANGKOK SHOWDOWN INVITATIONAL': {
+    en: 'CS2 BANGKOK SHOWDOWN INVITATIONAL',
+    zh: 'CS2 曼谷特邀大师赛 2026'
+  },
+  'ปฏิทินการแข่งขัน อีสปอร์ตประจำเดือน': {
+    en: 'Monthly Esports Tournament Calendar',
+    zh: '月度全国电竞锦标赛赛程日历'
+  },
+  'ร่วมชิงเงินรางวัลรวมกว่าหลายแสนบาท พิสูจน์ฝีมือบนเวที LAN Final ถ่ายทอดสดสู่สายตาแฟนเกมทั่วประเทศ': {
+    en: 'Compete for national championships and major prize pools, streamed live on the 4K Main Stage.',
+    zh: '争夺全国冠军与丰厚奖金池，4K主舞台全程高清现场直播。'
+  },
+
+  // Franchise CTA Banner
+  'อยากมีร้านเกมอีสปอร์ตสเปกเทพเป็นของตัวเอง?': {
+    en: 'Want to Own Your Own High-Spec Esports Arena?',
+    zh: '想要拥有属于自己的顶级旗舰电竞网咖？'
+  },
+  'เพียงแค่คุณมีพื้นที่หรืออาคาร เรามีระบบ Interior Floor Plan Configurator ช่วยจำลองผังร้าน 2D สเกลจริง จัดวางโต๊ะคอมพิวเตอร์ เวทีแข่งขัน เคาน์เตอร์ และคำนวณต้นทุน สเปกอุปกรณ์ ระยะเวลาคืนทุน (ROI) และเวลาติดตั้งให้ทันที!': {
+    en: 'Just bring your space or building! Our 3D/2D Interior Floor Plan Configurator helps simulate real-scale layouts, battle stations, stages, counters, and calculates total budget, hardware specs, ROI payback period, and setup timeline instantly!',
+    zh: '只需提供您的场地或建筑！我们的2D/3D平面设计系统助您模拟真实比例布局、布置对战席、竞技舞台与服务台，并即时计算设备预算、投资回报率(ROI)与装修工期！'
+  },
+  'วางผังร้านและประเมินราคา': {
+    en: 'Design 3D Floor Plan & Get Quote',
+    zh: '设计3D平面图与预算评估'
+  },
+
+  // Badges & Statuses
+  'เปิดรับสมัคร': { en: 'Open for Registration', zh: '正在报名' },
+  'เปิดรับสมัครด่วน': { en: 'Open for Registration', zh: '正在报名' },
+  'เร็วๆ นี้': { en: 'Coming Soon', zh: '即将开赛' },
+  'ปิดรับสมัคร': { en: 'Registration Closed', zh: '报名截止' },
+  'กำลังแข่งขัน': { en: 'Live Now', zh: '比赛中' },
+  'จบการแข่งขันแล้ว': { en: 'Tournament Ended', zh: '比赛结束' },
+  'เงินรางวัลรวม': { en: 'Total Prize Pool', zh: '总奖金' },
+  'วันที่:': { en: 'Date:', zh: '日期:' },
+  'จำนวนทีม:': { en: 'Teams:', zh: '参赛规模:' },
+  'รูปแบบ:': { en: 'Format:', zh: '赛制:' },
+  '32 ทีม': { en: '32 Teams', zh: '32 支战队' },
+  '16 ทีมระดับ Pro Circuit': { en: '16 Pro Circuit Teams', zh: '16 支职业巡回赛战队' },
+  '100,000 บาท': { en: '100,000 THB', zh: '100,000 泰铢' },
+  '150,000 บาท': { en: '150,000 THB', zh: '150,000 泰铢' },
+  '50,000 บาท': { en: '50,000 THB', zh: '50,000 泰铢' },
+  'LAN Final @ Main Stage & Double Elimination': { en: 'LAN Final @ Main Stage & Double Elimination', zh: '主舞台线下总决赛 & 双败淘汰制' },
+  '128-Tick Dedicated Server on LAN': { en: '128-Tick Dedicated Server on LAN', zh: '局域网 128-Tick 专属对战服务器' },
+
+  // Organizer Venue in Activities Page
+  'สนใจจัดงานแฟนมีตติ้ง งานเปิดตัวเกม หรืออีเวนต์คอมมูนิตี้ที่ GLP?': {
+    en: 'Looking to Host a Fan Meeting, Game Launch, or Community Event at GLP?',
+    zh: '有意在 GLP 举办玩家见面会、游戏发布会或社区电竞赛事？'
+  },
+  'GLP Esport Arena มีพื้นที่โถงอเนกประสงค์ขนาดใหญ่ เวทีแสงสีเสียง 4K รองรับผู้เข้าร่วมงานกว่า 200+ คน พร้อมบริการอาหาร เครื่องดื่ม และทีมงานดูแลงานแถลงข่าวครบวงจร': {
+    en: 'GLP Esport Arena features a spacious multi-purpose hall, 4K lighting and sound stage accommodating 200+ guests, catering services, and comprehensive event support.',
+    zh: 'GLP 电竞中心拥有宽敞多功能大厅、4K 声光电竞技舞台，可容纳逾 200 位观众，提供高品质餐饮茶歇及全流程活动执行支持。'
+  },
+  '✓ พื้นที่จัดงาน 500 ตร.ม.': { en: '✓ 500 sq.m. Event Space', zh: '✓ 500 平方米活动场地' },
+  '✓ จอ LED ขนาดใหญ่': { en: '✓ Giant 4K LED Wall', zh: '✓ 4K 巨幕 LED 屏' },
+  '✓ ระบบแสงสีเสียง 4K': { en: '✓ 4K Pro Audio & Stage Lighting', zh: '✓ 4K 专业舞台声光系统' },
+  '✓ ที่จอดรถ 24 ชม.': { en: '✓ 24/7 Parking Facility', zh: '✓ 24小时专属停车场' },
+  'ติดต่อฝ่ายประสานงานอีเวนต์': { en: 'Contact Event Coordination Team', zh: '联系活动会务协调组' },
+  'ยินดีต้อนรับค่ายเกม แบรนด์เกมมิ่งเกียร์ และคอมมูนิตี้ทุกกลุ่ม': {
+    en: 'Welcoming game publishers, hardware brands, and all gaming communities',
+    zh: '竭诚欢迎游戏开发商、外设品牌方及各大电竞公会'
+  },
+  'ติดต่อขอเปิดแฟรนไชส์': { en: 'Franchise Inquiries', zh: '咨询电竞加盟合作' },
+
   // Hardware Specs & Rules Descriptions
   'ทุกสเตชันขับเคลื่อนด้วยขุมพลัง Intel Core i9 + NVIDIA GeForce RTX 40 Series, จอเกมมิ่ง BenQ ZOWIE 360Hz Fast-IPS พร้อมระบบ Dedicated Multi-WAN 10Gbps ลื่นไหลไร้อาการหน่วง': {
     en: 'Every station is powered by Intel Core i9 + NVIDIA GeForce RTX 40 Series, BenQ ZOWIE 360Hz Fast-IPS monitors, and dedicated 10Gbps Multi-WAN networking for ultra-smooth, zero-lag gameplay.',
@@ -1095,15 +1342,25 @@ export async function fetchOnlineTranslation(text, targetLang) {
  * Returns cached/pattern/dictionary translation instantly.
  * If unseen Thai text, kicks off background async translation and will re-render via cache update event.
  */
-export function translateDynamic(text, targetLang = 'th', triggerAsync = true) {
+export function translateDynamic(text, targetLang = null, triggerAsync = true) {
   if (!text) return '';
-  if (targetLang === 'th') return typeof text === 'string' ? text : (text.th || text.title || '');
+
+  // Auto detect active target language if not passed or default
+  let effectiveLang = targetLang;
+  if ((!effectiveLang || effectiveLang === 'th') && typeof window !== 'undefined') {
+    const detected = window.__GLP_CURRENT_LANG__ || localStorage.getItem('glp_lang') || document.documentElement.lang;
+    if (detected && detected !== 'th') {
+      effectiveLang = detected;
+    }
+  }
+  if (!effectiveLang) effectiveLang = 'th';
+  if (effectiveLang === 'th') return typeof text === 'string' ? text : (text.th || text.title || '');
 
   // If text is an object containing multilingual keys
   if (typeof text === 'object') {
-    if (text[targetLang]) return text[targetLang];
-    if (text[`title_${targetLang}`]) return text[`title_${targetLang}`];
-    if (text[`desc_${targetLang}`]) return text[`desc_${targetLang}`];
+    if (text[effectiveLang]) return text[effectiveLang];
+    if (text[`title_${effectiveLang}`]) return text[`title_${effectiveLang}`];
+    if (text[`desc_${effectiveLang}`]) return text[`desc_${effectiveLang}`];
     if (text.title) text = text.title;
     else return '';
   }
@@ -1113,29 +1370,29 @@ export function translateDynamic(text, targetLang = 'th', triggerAsync = true) {
   if (!cleanText) return '';
 
   // 1. Built-in Dictionary (Highest priority for accuracy)
-  if (BUILT_IN_DICTIONARY[cleanText] && BUILT_IN_DICTIONARY[cleanText][targetLang]) {
-    return BUILT_IN_DICTIONARY[cleanText][targetLang];
+  if (BUILT_IN_DICTIONARY[cleanText] && BUILT_IN_DICTIONARY[cleanText][effectiveLang]) {
+    return BUILT_IN_DICTIONARY[cleanText][effectiveLang];
   }
 
   // 2. Direct Cache lookup
-  if (translationCache[cleanText] && translationCache[cleanText][targetLang]) {
-    return translationCache[cleanText][targetLang];
+  if (translationCache[cleanText] && translationCache[cleanText][effectiveLang]) {
+    return translationCache[cleanText][effectiveLang];
   }
 
-  // 3. Regex / Pattern Transformer (Dates, currencies, attendees, times)
-  const patternMatch = matchPatternTranslation(cleanText, targetLang);
+  // 3. Regex / Pattern Transformer (Dates, currencies, attendees, times, slots)
+  const patternMatch = matchPatternTranslation(cleanText, effectiveLang);
   if (patternMatch) {
     if (!translationCache[cleanText]) {
       translationCache[cleanText] = {};
     }
-    translationCache[cleanText][targetLang] = patternMatch;
+    translationCache[cleanText][effectiveLang] = patternMatch;
     return patternMatch;
   }
 
   // 4. Background Auto-translate for new/unseen Thai text
   const hasThai = /[\u0E00-\u0E7F]/.test(cleanText);
   if (hasThai && triggerAsync && typeof window !== 'undefined') {
-    fetchOnlineTranslation(cleanText, targetLang).catch(() => {});
+    fetchOnlineTranslation(cleanText, effectiveLang).catch(() => {});
   }
 
   // Fallback to original text until translated
@@ -1143,20 +1400,270 @@ export function translateDynamic(text, targetLang = 'th', triggerAsync = true) {
 }
 
 /**
- * Pre-translates a CMS entity (Tournament, Activity, Article)
- * Generates _en and _zh fields and populates the cache for 0ms load times
+ * Get active AI Configuration for translation (Checks OpenRouter or Direct Gemini)
  */
+export function getActiveAiConfig() {
+  if (typeof window === 'undefined') return null;
+  try {
+    // 1. Direct explicit translation key if saved in localStorage
+    const directKey = localStorage.getItem('glp_ai_translation_key');
+    const directProvider = localStorage.getItem('glp_ai_translation_provider') || 'openrouter';
+    const directModel = localStorage.getItem('glp_ai_translation_model') || 'google/gemini-flash-3.8';
+    if (directKey && directKey.trim()) {
+      const cleanKey = directKey.trim();
+      return {
+        apiKey: cleanKey,
+        provider: cleanKey.startsWith('AIzaSy') ? 'gemini' : directProvider,
+        model: directModel
+      };
+    }
+
+    // 2. Read from siteData in localStorage (shared with AdminCMS and AIChatWidget)
+    const cmsRaw = localStorage.getItem('gspeed_site_cms_data_v2');
+    if (cmsRaw) {
+      const cms = JSON.parse(cmsRaw);
+      const or = cms.openRouterSettings;
+      if (or && or.apiKey && or.apiKey.trim()) {
+        const key = or.apiKey.trim();
+        return {
+          apiKey: key,
+          provider: key.startsWith('AIzaSy') ? 'gemini' : 'openrouter',
+          model: or.model || 'google/gemini-flash-3.8',
+          proxyUrl: or.useSecureProxy ? or.proxyUrl : null
+        };
+      }
+    }
+  } catch (e) {
+    console.warn('Error reading AI config for translation:', e);
+  }
+  return null;
+}
+
 /**
- * Pre-translates a CMS entity (Tournament, Activity, Article)
- * Generates _en and _zh fields and populates the cache for 0ms load times
+ * Save custom AI Translation config to localStorage
  */
-export async function autoTranslateEntity(entity) {
+export function saveAiTranslationConfig({ apiKey, provider, model }) {
+  if (typeof window === 'undefined') return;
+  try {
+    if (apiKey) localStorage.setItem('glp_ai_translation_key', apiKey.trim());
+    if (provider) localStorage.setItem('glp_ai_translation_provider', provider);
+    if (model) localStorage.setItem('glp_ai_translation_model', model);
+  } catch (e) {
+    console.warn('Failed to save AI translation config:', e);
+  }
+}
+
+/**
+ * Status indicator for Admin UI
+ */
+export function getAiTranslationStatus() {
+  const config = getActiveAiConfig();
+  if (config && config.apiKey) {
+    return {
+      active: true,
+      provider: config.provider,
+      model: config.model || 'Gemini Flash',
+      label: config.provider === 'gemini' 
+        ? '✨ Google Gemini Flash (Direct AI API)' 
+        : `✨ Gemini Flash / LLM (${config.model || 'OpenRouter'})`
+    };
+  }
+  return {
+    active: false,
+    provider: 'builtin',
+    model: 'Google GTX + Arena Dictionary',
+    label: '🌐 Free Auto-Translator (Built-in Engine)'
+  };
+}
+
+/**
+ * High-Precision AI Translation using Gemini Flash (via OpenRouter or Direct Gemini API)
+ * Translates article/tournament context naturally with professional esports copywriting
+ */
+export async function translateEntityWithAI(entity, customConfig = null) {
+  const config = customConfig || getActiveAiConfig();
+  if (!config || !config.apiKey) {
+    return autoTranslateEntityBuiltin(entity);
+  }
+
+  // Extract translatable text fields
+  const translatable = {};
+  if (entity.title && typeof entity.title === 'string') translatable.title = entity.title;
+  if (entity.excerpt && typeof entity.excerpt === 'string') translatable.excerpt = entity.excerpt;
+  if (entity.desc && typeof entity.desc === 'string') translatable.desc = entity.desc;
+  if (entity.venue && typeof entity.venue === 'string') translatable.venue = entity.venue;
+  if (entity.format && typeof entity.format === 'string') translatable.format = entity.format;
+  if (entity.slots && typeof entity.slots === 'string') translatable.slots = entity.slots;
+  if (entity.prizePool && typeof entity.prizePool === 'string') translatable.prizePool = entity.prizePool;
+  if (entity.tag && typeof entity.tag === 'string') translatable.tag = entity.tag;
+  if (entity.badge && typeof entity.badge === 'string') translatable.badge = entity.badge;
+
+  if (Array.isArray(entity.contentParagraphs) && entity.contentParagraphs.length > 0) {
+    translatable.contentParagraphs = entity.contentParagraphs;
+  }
+  if (Array.isArray(entity.rules) && entity.rules.length > 0) {
+    translatable.rules = entity.rules;
+  }
+
+  // Check if any Thai characters exist in payload
+  const hasThai = Object.values(translatable).some(val => 
+    typeof val === 'string' 
+      ? /[\u0E00-\u0E7F]/.test(val) 
+      : Array.isArray(val) && val.some(item => typeof item === 'string' && /[\u0E00-\u0E7F]/.test(item))
+  );
+
+  if (!hasThai) {
+    return autoTranslateEntityBuiltin(entity);
+  }
+
+  const systemPrompt = `You are an elite bilingual esports journalist, gaming content creator, and professional localization editor for "GLP : G-Speed Living Plus" (Bangkok's premier 24/7 esports tournament venue & gaming center).
+Translate the provided Thai gaming/tournament content into:
+1. Natural, engaging, native-sounding English ("en")
+2. Fluent, authentic Simplified Chinese ("zh")
+
+CRITICAL GUIDELINES:
+- Do NOT use literal word-for-word machine translation. Write compelling, high-energy gaming copy that resonates with esports players and fans (Valorant, CS2, PUBG, Apex, MOBA).
+- Retain official esports terms naturally: 5v5 Tournament Stage, LAN Final, Pro Circuit, Bootcamp, Bracket, Roster, Double Elimination, Ping, FPS, 360Hz, RTX 40 Series, Diskless Server, LED Wall, Caster Desk.
+- Keep numbers, currency figures (e.g. 100,000 THB / 100,000 泰铢), and times accurate.
+- Output MUST strictly be a valid JSON object with keys "en" and "zh", containing the exact same translated property names as the input.
+- Do NOT wrap in markdown or include text outside the JSON object.`;
+
+  const userPrompt = `Translate this JSON object into "en" and "zh":\n${JSON.stringify(translatable, null, 2)}`;
+
+  let enResult = null;
+  let zhResult = null;
+
+  try {
+    if (config.provider === 'gemini' || config.apiKey.startsWith('AIzaSy')) {
+      // Direct Google Gemini Generative Language API
+      const geminiModel = config.model?.includes('2.0') ? 'gemini-2.0-flash' : 'gemini-1.5-flash';
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${config.apiKey}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: 'user',
+              parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }]
+            }
+          ],
+          generationConfig: {
+            responseMimeType: 'application/json',
+            temperature: 0.3
+          }
+        })
+      });
+
+      if (!res.ok) throw new Error(`Gemini API HTTP ${res.status}`);
+      const data = await res.json();
+      const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (rawText) {
+        const clean = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+        const parsed = JSON.parse(clean);
+        enResult = parsed.en;
+        zhResult = parsed.zh;
+      }
+    } else {
+      // OpenRouter API (Supports google/gemini-flash-3.8, google/gemini-2.0-flash, etc.)
+      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${config.apiKey.trim()}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173',
+          'X-Title': 'GLP Esports Arena'
+        },
+        body: JSON.stringify({
+          model: config.model || 'google/gemini-flash-3.8',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt }
+          ],
+          response_format: { type: 'json_object' },
+          temperature: 0.3
+        })
+      });
+
+      if (!res.ok) throw new Error(`OpenRouter API HTTP ${res.status}`);
+      const data = await res.json();
+      const replyContent = data.choices?.[0]?.message?.content;
+      if (replyContent) {
+        const clean = replyContent.replace(/```json/gi, '').replace(/```/g, '').trim();
+        const parsed = JSON.parse(clean);
+        enResult = parsed.en;
+        zhResult = parsed.zh;
+      }
+    }
+  } catch (apiErr) {
+    console.warn('AI Translation via LLM failed, falling back to built-in translation engine:', apiErr);
+    return autoTranslateEntityBuiltin(entity);
+  }
+
+  // Merge high-grade AI translations into cloned entity
+  const cloned = { ...entity };
+
+  if (enResult && typeof enResult === 'object') {
+    if (enResult.title) { cloned.title_en = enResult.title; saveToTranslationCache(entity.title, 'en', enResult.title); }
+    if (enResult.excerpt) { cloned.excerpt_en = enResult.excerpt; saveToTranslationCache(entity.excerpt, 'en', enResult.excerpt); }
+    if (enResult.desc) { cloned.desc_en = enResult.desc; saveToTranslationCache(entity.desc, 'en', enResult.desc); }
+    if (enResult.venue) { cloned.venue_en = enResult.venue; saveToTranslationCache(entity.venue, 'en', enResult.venue); }
+    if (enResult.format) { cloned.format_en = enResult.format; saveToTranslationCache(entity.format, 'en', enResult.format); }
+    if (enResult.slots) { cloned.slots_en = enResult.slots; saveToTranslationCache(entity.slots, 'en', enResult.slots); }
+    if (enResult.prizePool) { cloned.prizePool_en = enResult.prizePool; saveToTranslationCache(entity.prizePool, 'en', enResult.prizePool); }
+    if (enResult.tag) cloned.tag_en = enResult.tag;
+    if (enResult.badge) cloned.badge_en = enResult.badge;
+    if (Array.isArray(enResult.contentParagraphs)) cloned.contentParagraphs_en = enResult.contentParagraphs;
+    if (Array.isArray(enResult.rules)) cloned.rules_en = enResult.rules;
+  }
+
+  if (zhResult && typeof zhResult === 'object') {
+    if (zhResult.title) { cloned.title_zh = zhResult.title; saveToTranslationCache(entity.title, 'zh', zhResult.title); }
+    if (zhResult.excerpt) { cloned.excerpt_zh = zhResult.excerpt; saveToTranslationCache(entity.excerpt, 'zh', zhResult.excerpt); }
+    if (zhResult.desc) { cloned.desc_zh = zhResult.desc; saveToTranslationCache(entity.desc, 'zh', zhResult.desc); }
+    if (zhResult.venue) { cloned.venue_zh = zhResult.venue; saveToTranslationCache(entity.venue, 'zh', zhResult.venue); }
+    if (zhResult.format) { cloned.format_zh = zhResult.format; saveToTranslationCache(entity.format, 'zh', zhResult.format); }
+    if (zhResult.slots) { cloned.slots_zh = zhResult.slots; saveToTranslationCache(entity.slots, 'zh', zhResult.slots); }
+    if (zhResult.prizePool) { cloned.prizePool_zh = zhResult.prizePool; saveToTranslationCache(entity.prizePool, 'zh', zhResult.prizePool); }
+    if (zhResult.tag) cloned.tag_zh = zhResult.tag;
+    if (zhResult.badge) cloned.badge_zh = zhResult.badge;
+    if (Array.isArray(zhResult.contentParagraphs)) cloned.contentParagraphs_zh = zhResult.contentParagraphs;
+    if (Array.isArray(zhResult.rules)) cloned.rules_zh = zhResult.rules;
+  }
+
+  // Pass through built-in translator for any remaining secondary fields (gallery photos, timetables, etc.)
+  return autoTranslateEntityBuiltin(cloned);
+}
+
+/**
+ * Main Auto Translation Entrypoint
+ * Intelligently uses Gemini Flash / OpenRouter AI if configured, with instant fallback to built-in engine
+ */
+export async function autoTranslateEntity(entity, options = {}) {
+  const config = options.aiConfig || getActiveAiConfig();
+  if (config && config.apiKey && !options.skipAI) {
+    try {
+      return await translateEntityWithAI(entity, config);
+    } catch (err) {
+      console.warn('AI translation failed, falling back to built-in translator:', err);
+      return autoTranslateEntityBuiltin(entity);
+    }
+  }
+  return autoTranslateEntityBuiltin(entity);
+}
+
+/**
+ * Built-in deterministic + Google GTX pre-translator
+ */
+export async function autoTranslateEntityBuiltin(entity) {
   if (!entity || typeof entity !== 'object') return entity;
   const cloned = { ...entity };
 
   const fieldsToTranslate = [
     'title', 'desc', 'venue', 'prizePool', 'quote', 'author', 
-    'partner', 'location', 'excerpt', 'attendees', 'tag'
+    'partner', 'location', 'excerpt', 'attendees', 'tag', 'badge',
+    'format', 'slots', 'date', 'time', 'regStartDate', 'regEndDate',
+    'readTime', 'category', 'streamChannel'
   ];
 
   for (const field of fieldsToTranslate) {
@@ -1219,6 +1726,127 @@ export async function autoTranslateEntity(entity) {
     }
     cloned.rules_en = enRules;
     cloned.rules_zh = zhRules;
+  }
+
+  // Translate prizeDistribution array
+  if (Array.isArray(cloned.prizeDistribution)) {
+    const enPrizes = [];
+    const zhPrizes = [];
+    for (const pz of cloned.prizeDistribution) {
+      try {
+        const [rankEn, rankZh, rewardEn, rewardZh] = await Promise.all([
+          pz.rank ? fetchOnlineTranslation(pz.rank, 'en') : Promise.resolve(''),
+          pz.rank ? fetchOnlineTranslation(pz.rank, 'zh') : Promise.resolve(''),
+          pz.reward ? fetchOnlineTranslation(pz.reward, 'en') : Promise.resolve(''),
+          pz.reward ? fetchOnlineTranslation(pz.reward, 'zh') : Promise.resolve('')
+        ]);
+        enPrizes.push({ ...pz, rank: rankEn, reward: rewardEn });
+        zhPrizes.push({ ...pz, rank: rankZh, reward: rewardZh });
+        if (pz.rank) {
+          saveToTranslationCache(pz.rank, 'en', rankEn);
+          saveToTranslationCache(pz.rank, 'zh', rankZh);
+        }
+        if (pz.reward) {
+          saveToTranslationCache(pz.reward, 'en', rewardEn);
+          saveToTranslationCache(pz.reward, 'zh', rewardZh);
+        }
+      } catch (_) {
+        enPrizes.push(pz);
+        zhPrizes.push(pz);
+      }
+    }
+    cloned.prizeDistribution_en = enPrizes;
+    cloned.prizeDistribution_zh = zhPrizes;
+  }
+
+  // Translate scheduleTimetable array
+  if (Array.isArray(cloned.scheduleTimetable)) {
+    const enSched = [];
+    const zhSched = [];
+    for (const st of cloned.scheduleTimetable) {
+      try {
+        const [timeEn, timeZh, stageEn, stageZh] = await Promise.all([
+          st.time ? fetchOnlineTranslation(st.time, 'en') : Promise.resolve(''),
+          st.time ? fetchOnlineTranslation(st.time, 'zh') : Promise.resolve(''),
+          st.stage ? fetchOnlineTranslation(st.stage, 'en') : Promise.resolve(''),
+          st.stage ? fetchOnlineTranslation(st.stage, 'zh') : Promise.resolve('')
+        ]);
+        enSched.push({ ...st, time: timeEn, stage: stageEn });
+        zhSched.push({ ...st, time: timeZh, stage: stageZh });
+        if (st.stage) {
+          saveToTranslationCache(st.stage, 'en', stageEn);
+          saveToTranslationCache(st.stage, 'zh', stageZh);
+        }
+      } catch (_) {
+        enSched.push(st);
+        zhSched.push(st);
+      }
+    }
+    cloned.scheduleTimetable_en = enSched;
+    cloned.scheduleTimetable_zh = zhSched;
+  }
+
+  // Translate galleryPhotos captions
+  if (Array.isArray(cloned.galleryPhotos)) {
+    const enPhotos = [];
+    const zhPhotos = [];
+    for (const photo of cloned.galleryPhotos) {
+      if (photo.caption && typeof photo.caption === 'string' && /[\u0E00-\u0E7F]/.test(photo.caption)) {
+        try {
+          const [capEn, capZh] = await Promise.all([
+            fetchOnlineTranslation(photo.caption, 'en'),
+            fetchOnlineTranslation(photo.caption, 'zh')
+          ]);
+          enPhotos.push({ ...photo, caption: capEn });
+          zhPhotos.push({ ...photo, caption: capZh });
+          saveToTranslationCache(photo.caption, 'en', capEn);
+          saveToTranslationCache(photo.caption, 'zh', capZh);
+        } catch (_) {
+          enPhotos.push(photo);
+          zhPhotos.push(photo);
+        }
+      } else {
+        enPhotos.push(photo);
+        zhPhotos.push(photo);
+      }
+    }
+    cloned.galleryPhotos_en = enPhotos;
+    cloned.galleryPhotos_zh = zhPhotos;
+  }
+
+  // Translate SEO fields
+  if (cloned.seo && typeof cloned.seo === 'object') {
+    const seoEn = { ...cloned.seo };
+    const seoZh = { ...cloned.seo };
+    const seoTitle = cloned.seo.metaTitle || '';
+    const seoDesc = cloned.seo.metaDesc || cloned.seo.metaDescription || '';
+
+    if (seoTitle && /[\u0E00-\u0E7F]/.test(seoTitle)) {
+      try {
+        const [tEn, tZh] = await Promise.all([
+          fetchOnlineTranslation(seoTitle, 'en'),
+          fetchOnlineTranslation(seoTitle, 'zh')
+        ]);
+        seoEn.metaTitle = tEn;
+        seoZh.metaTitle = tZh;
+      } catch (_) {}
+    }
+
+    if (seoDesc && /[\u0E00-\u0E7F]/.test(seoDesc)) {
+      try {
+        const [dEn, dZh] = await Promise.all([
+          fetchOnlineTranslation(seoDesc, 'en'),
+          fetchOnlineTranslation(seoDesc, 'zh')
+        ]);
+        seoEn.metaDesc = dEn;
+        seoEn.metaDescription = dEn;
+        seoZh.metaDesc = dZh;
+        seoZh.metaDescription = dZh;
+      } catch (_) {}
+    }
+
+    cloned.seo_en = seoEn;
+    cloned.seo_zh = seoZh;
   }
 
   // Translate contentParagraphs array

@@ -1,9 +1,11 @@
 import React, { useMemo } from 'react';
 import { Sparkles, ArrowRight, Flame, Bell, ExternalLink } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
+import { useTranslation } from '../context/LanguageContext';
 
 export default function AnnouncementTicker({ onNavigate = () => {} }) {
   const { siteData } = useSiteData();
+  const { t, language, translateDynamic } = useTranslation();
 
   const settings = siteData?.tickerSettings || {
     enabled: true,
@@ -135,7 +137,7 @@ export default function AnnouncementTicker({ onNavigate = () => {} }) {
                 key={`item-1-${item.id || idx}`} 
                 className={`ticker-scroll-item ${item.linkTarget ? 'is-clickable' : ''}`}
                 onClick={(e) => handleItemClick(e, item)}
-                title={item.linkTarget ? `คลิกเพื่อเปิด: ${item.linkText || item.linkTarget}` : item.text}
+                title={item.linkTarget ? `คลิกเพื่อเปิด: ${translateDynamic(item.linkText || item.linkTarget)}` : translateDynamic(item.text)}
               >
                 {item.badge && (
                   <span 
@@ -145,17 +147,17 @@ export default function AnnouncementTicker({ onNavigate = () => {} }) {
                       color: settings.badgeTextColor || '#1d4ed8'
                     }}
                   >
-                    {item.badge}
+                    {translateDynamic(item.badge)}
                   </span>
                 )}
                 
                 <span className="ticker-item-text">
-                  {item.text}
+                  {translateDynamic(item.text)}
                 </span>
 
                 {item.linkTarget && (
                   <span className="ticker-item-action-btn">
-                    <span>{item.linkText || 'ดูรายละเอียด'}</span>
+                    <span>{translateDynamic(item.linkText || 'ดูรายละเอียด')}</span>
                     {item.linkTarget.startsWith('http') ? <ExternalLink size={12} /> : <ArrowRight size={12} />}
                   </span>
                 )}
@@ -172,7 +174,7 @@ export default function AnnouncementTicker({ onNavigate = () => {} }) {
                 key={`item-2-${item.id || idx}`} 
                 className={`ticker-scroll-item ${item.linkTarget ? 'is-clickable' : ''}`}
                 onClick={(e) => handleItemClick(e, item)}
-                title={item.linkTarget ? `คลิกเพื่อเปิด: ${item.linkText || item.linkTarget}` : item.text}
+                title={item.linkTarget ? `คลิกเพื่อเปิด: ${translateDynamic(item.linkText || item.linkTarget)}` : translateDynamic(item.text)}
                 aria-hidden="true"
               >
                 {item.badge && (
@@ -183,17 +185,17 @@ export default function AnnouncementTicker({ onNavigate = () => {} }) {
                       color: settings.badgeTextColor || '#1d4ed8'
                     }}
                   >
-                    {item.badge}
+                    {translateDynamic(item.badge)}
                   </span>
                 )}
                 
                 <span className="ticker-item-text">
-                  {item.text}
+                  {translateDynamic(item.text)}
                 </span>
 
                 {item.linkTarget && (
                   <span className="ticker-item-action-btn">
-                    <span>{item.linkText || 'ดูรายละเอียด'}</span>
+                    <span>{translateDynamic(item.linkText || 'ดูรายละเอียด')}</span>
                     {item.linkTarget.startsWith('http') ? <ExternalLink size={12} /> : <ArrowRight size={12} />}
                   </span>
                 )}

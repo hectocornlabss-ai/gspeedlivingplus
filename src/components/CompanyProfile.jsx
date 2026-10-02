@@ -57,7 +57,7 @@ function isColorDark(hexColor) {
 
 export default function CompanyProfile({ onNavigateFranchise }) {
   const { siteData } = useSiteData();
-  const { t, language } = useTranslation();
+  const { t, language, translateDynamic } = useTranslation();
   const founder = siteData?.founder || FOUNDER_INFO;
   const founderBg = founder.bgColor || '#ffffff';
   const isDarkFounder = isColorDark(founderBg);
@@ -371,7 +371,7 @@ export default function CompanyProfile({ onNavigateFranchise }) {
               <div key={idx} className="journey-card glass-panel">
                 <div className="journey-year">{h.year}</div>
                 <div className="journey-line"></div>
-                <p className="journey-event">{h.event}</p>
+                <p className="journey-event">{translateDynamic(h.event, language)}</p>
               </div>
             ))}
           </div>
@@ -382,7 +382,7 @@ export default function CompanyProfile({ onNavigateFranchise }) {
               {(founder.stats || FOUNDER_INFO.stats).map((s, idx) => (
                 <div key={idx} className="stat-box">
                   <div className="stat-value text-blue">{s.value}</div>
-                  <div className="stat-label">{s.label}</div>
+                  <div className="stat-label">{translateDynamic(s.label, language)}</div>
                 </div>
               ))}
             </div>
@@ -397,10 +397,14 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                   <span>GROWTH & MILESTONES SHOWCASE</span>
                 </div>
                 <h3 className="company-gallery-title">
-                  อัลบั้มภาพความสำเร็จ & การเติบโตของสาขา
+                  {language === 'th' ? 'อัลบั้มภาพความสำเร็จ & การเติบโตของสาขา' : (language === 'zh' ? '成功足迹与分店拓展图集' : 'Milestones & Growth Showcase')}
                 </h3>
                 <p className="company-gallery-subtitle">
-                  ภาพบันทึกความทรงจำการเปิดสาขาใหม่ วิวัฒนาการจากร้านอินเทอร์เน็ตสู่ Esport Arena เต็มรูปแบบ และการขยายเครือข่ายครอบคลุมทั่วประเทศ
+                  {language === 'th'
+                    ? 'ภาพบันทึกความทรงจำการเปิดสาขาใหม่ วิวัฒนาการจากร้านอินเทอร์เน็ตสู่ Esport Arena เต็มรูปแบบ และการขยายเครือข่ายครอบคลุมทั่วประเทศ'
+                    : (language === 'zh'
+                      ? '记录新店开幕难忘时刻，从传统网吧转型为全功能电竞竞技场，并将网络拓展至全国各地。'
+                      : 'Memories of branch grand openings, evolving from internet cafe to full Esport Arena, expanding across Thailand.')}
                 </p>
               </div>
             </div>
@@ -425,16 +429,16 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                     <div className="company-gallery-overlay">
                       <span className="company-gallery-zoom-badge">
                         <ZoomIn size={14} />
-                        <span>ดูภาพขนาดเต็ม</span>
+                        <span>{language === 'th' ? 'ดูภาพขนาดเต็ม' : (language === 'zh' ? '查看原图' : 'View Full Image')}</span>
                       </span>
                     </div>
                   </div>
 
                   <div className="company-gallery-body">
-                    <div className="company-gallery-item-title">{item.title}</div>
-                    <p className="company-gallery-item-caption">{item.caption}</p>
+                    <div className="company-gallery-item-title">{translateDynamic(item.title, language)}</div>
+                    <p className="company-gallery-item-caption">{translateDynamic(item.caption, language)}</p>
                     <div className="company-gallery-card-footer">
-                      <span className="company-gallery-submeta">{item.year ? `ปี ${item.year}` : 'G-Speed Group'}</span>
+                      <span className="company-gallery-submeta">{item.year ? (language === 'th' ? `ปี ${item.year}` : (language === 'zh' ? `${item.year} 年` : `Year ${item.year}`)) : 'G-Speed Group'}</span>
                     </div>
                   </div>
                 </div>
@@ -453,10 +457,20 @@ export default function CompanyProfile({ onNavigateFranchise }) {
               <span>OFFICIAL HARDWARE & ECOSYSTEM PARTNERS</span>
             </div>
             <h2 className="section-title">
-              พันธมิตรเทคโนโลยี <span className="text-blue">ระดับโลก</span>
+              {language === 'th' ? (
+                <>พันธมิตรเทคโนโลยี <span className="text-blue">ระดับโลก</span></>
+              ) : (language === 'zh' ? (
+                <>全球顶级 <span className="text-blue">科技合作伙伴</span></>
+              ) : (
+                <>Global Technology <span className="text-blue">Partners</span></>
+              ))}
             </h2>
             <p className="section-subtitle">
-              ร่วมมือโดยตรงกับแบรนด์ฮาร์ดแวร์ชั้นนำ เพื่อให้ลูกค้าและผู้ร่วมลงทุนแฟรนไชส์ได้รับอุปกรณ์สเปกที่ดีที่สุดในราคาต้นทุนพันธมิตร
+              {language === 'th' 
+                ? 'ร่วมมือโดยตรงกับแบรนด์ฮาร์ดแวร์ชั้นนำ เพื่อให้ลูกค้าและผู้ร่วมลงทุนแฟรนไชส์ได้รับอุปกรณ์สเปกที่ดีที่สุดในราคาต้นทุนพันธมิตร'
+                : (language === 'zh'
+                  ? '与全球一线硬件品牌深度直合，确保顾客及加盟投资伙伴以顶级成本优势享有最强电竞赛事规格配置。'
+                  : 'Direct collaborations with global leading hardware brands, ensuring world-class tournament specs at partner-tier pricing.')}
             </p>
           </div>
 
@@ -505,9 +519,9 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                 <ShieldCheck size={14} />
                 <span>LEGAL & STANDARD CERTIFICATION</span>
               </div>
-              <h3 className="standards-title">{founder.standards?.title || 'มาตรฐานความถูกต้อง โปร่งใส และปลอดภัย'}</h3>
+              <h3 className="standards-title">{translateDynamic(founder.standards?.title || 'มาตรฐานความถูกต้อง โปร่งใส และปลอดภัย', language)}</h3>
               <p className="standards-desc">
-                {founder.standards?.desc || 'G-Speed ทุกสาขาผ่านการรับรองและตรวจสอบตามพระราชบัญญัติภาพยนตร์และวีดิทัศน์ ได้รับใบอนุญาตประกอบกิจการร้านเกมอย่างถูกต้องจากกระทรวงวัฒนธรรม ใช้ระบบปฏิบัติการ Windows และลิขสิทธิ์เกมแท้ 100% หมดกังวลเรื่องปัญหาลิขสิทธิ์'}
+                {translateDynamic(founder.standards?.desc || 'G-Speed ทุกสาขาผ่านการรับรองและตรวจสอบตามพระราชบัญญัติภาพยนตร์และวีดิทัศน์ ได้รับใบอนุญาตประกอบกิจการร้านเกมอย่างถูกต้องจากกระทรวงวัฒนธรรม ใช้ระบบปฏิบัติการ Windows และลิขสิทธิ์เกมแท้ 100% หมดกังวลเรื่องปัญหาลิขสิทธิ์', language)}
               </p>
 
               <div className="standards-pills">
@@ -520,7 +534,7 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                     ]
                 ).map((pill, plIdx) => (
                   <span key={plIdx} className="std-pill">
-                    <CheckCircle2 size={16} className="text-blue" /> {pill}
+                    <CheckCircle2 size={16} className="text-blue" /> {translateDynamic(pill, language)}
                   </span>
                 ))}
               </div>
@@ -553,10 +567,14 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                   <span>SAFETY & STANDARDS SHOWCASE</span>
                 </div>
                 <h3 className="company-gallery-title">
-                  ภาพการตรวจสอบมาตรฐาน & สภาพแวดล้อมร้านเกมสีขาว
+                  {language === 'th' ? 'ภาพการตรวจสอบมาตรฐาน & สภาพแวดล้อมร้านเกมสีขาว' : (language === 'zh' ? '合规认证与绿色健康电竞环境展示' : 'Compliance & Safe Cyber Cafe Environment')}
                 </h3>
                 <p className="company-gallery-subtitle">
-                  ความโปร่งใส ปลอดภัย ตรวจสอบได้จริงตามมาตรฐานกระทรวงวัฒนธรรม ร้านเกมสีขาว และระบบดูแลความปลอดภัยตลอด 24 ชั่วโมง
+                  {language === 'th'
+                    ? 'ความโปร่งใส ปลอดภัย ตรวจสอบได้จริงตามมาตรฐานกระทรวงวัฒนธรรม ร้านเกมสีขาว และระบบดูแลความปลอดภัยตลอด 24 ชั่วโมง'
+                    : (language === 'zh'
+                      ? '透明、安全且严格符合泰国文化部认证标准，绿色健康网吧，全天候 24 小时安防监控体系。'
+                      : 'Transparent, certified under Ministry of Culture standards, 100% smoke-free cyber cafe with 24/7 security.')}
                 </p>
               </div>
             </div>
@@ -581,16 +599,16 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                     <div className="company-gallery-overlay">
                       <span className="company-gallery-zoom-badge">
                         <ZoomIn size={14} />
-                        <span>ดูภาพขนาดเต็ม</span>
+                        <span>{language === 'th' ? 'ดูภาพขนาดเต็ม' : (language === 'zh' ? '查看原图' : 'View Full Image')}</span>
                       </span>
                     </div>
                   </div>
 
                   <div className="company-gallery-body">
-                    <div className="company-gallery-item-title">{item.title}</div>
-                    <p className="company-gallery-item-caption">{item.caption}</p>
+                    <div className="company-gallery-item-title">{translateDynamic(item.title, language)}</div>
+                    <p className="company-gallery-item-caption">{translateDynamic(item.caption, language)}</p>
                     <div className="company-gallery-card-footer">
-                      <span className="company-gallery-submeta">{item.tag || 'มาตรฐานความปลอดภัย'}</span>
+                      <span className="company-gallery-submeta">{translateDynamic(item.tag || 'มาตรฐานความปลอดภัย', language)}</span>
                     </div>
                   </div>
                 </div>
@@ -661,10 +679,10 @@ export default function CompanyProfile({ onNavigateFranchise }) {
               <div className="company-lightbox-footer">
                 <div className="lightbox-meta-info">
                   <div className="lightbox-tag-row">
-                    <span className="lightbox-tag">{curPhoto.tag || curPhoto.year || curPhoto.partner || 'SHOWCASE'}</span>
+                    <span className="lightbox-tag">{translateDynamic(curPhoto.tag || curPhoto.year || curPhoto.partner || 'SHOWCASE', language)}</span>
                   </div>
-                  <h4 className="lightbox-title">{curPhoto.title}</h4>
-                  <p className="lightbox-caption">{curPhoto.caption}</p>
+                  <h4 className="lightbox-title">{translateDynamic(curPhoto.title, language)}</h4>
+                  <p className="lightbox-caption">{translateDynamic(curPhoto.caption, language)}</p>
                 </div>
 
                 <div className="lightbox-counter">

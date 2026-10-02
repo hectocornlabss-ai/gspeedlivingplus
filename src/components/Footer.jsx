@@ -2,6 +2,7 @@ import React from 'react';
 import { ShieldCheck, MapPin, Phone, Mail, Award, Clock, Navigation } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 import { useTranslation } from '../context/LanguageContext';
+import { translateDynamic } from '../utils/autoTranslator';
 
 export default function Footer({ setActiveTab, onNavigate }) {
   const { siteData } = useSiteData();
@@ -45,6 +46,18 @@ export default function Footer({ setActiveTab, onNavigate }) {
   const cleanCopyright = rawCopyright.replace(/^©\s*/, '');
 
   const phoneDigits = (footer.phone || '063-793-7704').replace(/[^0-9+]/g, '');
+
+  const defaultThAddress = '79 ซอย รามคำแหง 53 แขวงพลับพลา เขตวังทองหลาง กรุงเทพมหานคร 10310';
+  const defaultEnAddress = '79 Soi Ramkhamhaeng 53, Phlabphla, Wang Thonglang, Bangkok 10310';
+  const currentRawAddress = footer.address || defaultThAddress;
+  const localizedAddress = language === 'th'
+    ? currentRawAddress
+    : (footer.address_en || translateDynamic(currentRawAddress, language) || defaultEnAddress);
+
+  const currentRawHours = footer.hours || 'เปิดบริการตลอด 24 ชั่วโมง ทุกวัน (24/7)';
+  const localizedHours = language === 'th'
+    ? currentRawHours
+    : (footer.hours_en || translateDynamic(currentRawHours, language) || (language === 'zh' ? '全天24小时营业，全年无休 (24/7)' : 'Open 24 Hours Daily (24/7)'));
 
   return (
     <footer className="footer-wrapper">
@@ -171,7 +184,10 @@ export default function Footer({ setActiveTab, onNavigate }) {
               <li>
                 <MapPin size={18} className="text-blue shrink-0" />
                 <div>
-                  <span>{language === 'th' ? `แผนที่ร้าน: ${footer.address}` : `${t('contactPage.address')}: ${footer.address}`}</span>
+                  <span style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: '2px' }}>
+                    {language === 'th' ? 'ที่ตั้งอารีนา:' : language === 'zh' ? '场馆地址:' : 'Arena Location:'}
+                  </span>
+                  <span style={{ lineHeight: '1.5', display: 'block' }}>{localizedAddress}</span>
                   <div style={{ marginTop: '6px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     <a 
                       href={footer.googleMapUrl || 'https://maps.app.goo.gl/ak23az5WtsvXGWUR8'} 
@@ -193,7 +209,7 @@ export default function Footer({ setActiveTab, onNavigate }) {
                     {language === 'th' ? 'เบอร์โทรติดต่อ:' : language === 'zh' ? '联系电话:' : 'Phone Number:'}
                   </span>
                   <a href={`tel:${phoneDigits}`} className="footer-direct-link">
-                    {footer.phone}
+                    {footer.phone || '063-793-7704'}
                   </a>
                 </div>
               </li>
@@ -203,16 +219,19 @@ export default function Footer({ setActiveTab, onNavigate }) {
                   <span style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8' }}>
                     {language === 'th' ? 'อีเมลติดต่อ:' : language === 'zh' ? '电子邮箱:' : 'Email Address:'}
                   </span>
-                  <a href={`mailto:${footer.email}`} className="footer-direct-link">
-                    {footer.email}
+                  <a href={`mailto:${footer.email || 'gspeedlivingplus35@gmail.com'}`} className="footer-direct-link">
+                    {footer.email || 'gspeedlivingplus35@gmail.com'}
                   </a>
                 </div>
               </li>
               <li>
                 <Clock size={18} className="text-blue shrink-0" />
-                <span>
-                  {language === 'th' ? `เวลาทำการ: ${footer.hours || 'เปิดบริการตลอด 24 ชม.'}` : `${t('contactPage.hours')}: ${footer.hours || 'Open 24/7'}`}
-                </span>
+                <div>
+                  <span style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: '2px' }}>
+                    {language === 'th' ? 'เวลาทำการ:' : language === 'zh' ? '营业时间:' : 'Opening Hours:'}
+                  </span>
+                  <span style={{ lineHeight: '1.5', display: 'block' }}>{localizedHours}</span>
+                </div>
               </li>
             </ul>
           </div>

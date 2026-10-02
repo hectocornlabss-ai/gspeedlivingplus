@@ -5,8 +5,10 @@ import {
   Gamepad2, ExternalLink
 } from 'lucide-react';
 import { getGameSlidesForTournament } from '../data/tournamentSlidesData';
+import { useTranslation } from '../context/LanguageContext';
 
 export default function TournamentOverviewSlider({ tournament }) {
+  const { t, language, translateDynamic } = useTranslation();
   const slides = getGameSlidesForTournament(tournament).slice(0, 20);
   
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -154,7 +156,7 @@ export default function TournamentOverviewSlider({ tournament }) {
             <span className="game-cat-dim">{gameCategory}</span>
           </div>
           <h3 className="showcase-title-text">
-            <span>ภาพบรรยากาศสมรภูมิ & ไฮไลต์การแข่งขัน</span>
+            <span>{language === 'th' ? 'ภาพบรรยากาศสมรภูมิ & ไฮไลต์การแข่งขัน' : language === 'zh' ? '对战舞台实景与赛事高能瞬间' : 'Arena Battleground & Match Highlights'}</span>
             <span className="showcase-sub-badge">16:9 Cinematic Slideshow</span>
           </h3>
         </div>
@@ -165,11 +167,11 @@ export default function TournamentOverviewSlider({ tournament }) {
             type="button"
             className={`btn-slider-ctrl-action ${isPlaying ? 'active' : ''}`}
             onClick={() => setIsPlaying(!isPlaying)}
-            title={isPlaying ? 'หยุดเล่นสไลด์ชั่วคราว' : 'เล่นสไลด์อัตโนมัติ (ทุก 3.8 วินาที)'}
+            title={isPlaying ? (language === 'th' ? 'หยุดเล่นสไลด์ชั่วคราว' : language === 'zh' ? '暂停幻灯片' : 'Pause slideshow') : (language === 'th' ? 'เล่นสไลด์อัตโนมัติ' : language === 'zh' ? '自动播放' : 'Play slideshow')}
             aria-label={isPlaying ? 'Pause slideshow' : 'Play slideshow'}
           >
             {isPlaying ? <Pause size={14} /> : <Play size={14} />}
-            <span className="ctrl-btn-text">{isPlaying ? 'กำลังสไลด์' : 'หยุดชั่วคราว'}</span>
+            <span className="ctrl-btn-text">{isPlaying ? (language === 'th' ? 'กำลังสไลด์' : language === 'zh' ? '播放中' : 'Playing') : (language === 'th' ? 'หยุดชั่วคราว' : language === 'zh' ? '暂停' : 'Paused')}</span>
           </button>
 
           {/* Slide Counter e.g. 01 / 20 */}
@@ -184,7 +186,7 @@ export default function TournamentOverviewSlider({ tournament }) {
             type="button"
             className="btn-slider-ctrl-action btn-expand-modal"
             onClick={() => setIsLightboxOpen(true)}
-            title="ขยายดูภาพสไลด์ขนาดใหญ่เต็มหน้าจอ"
+            title={language === 'th' ? 'ขยายดูภาพสไลด์ขนาดใหญ่เต็มหน้าจอ' : language === 'zh' ? '全屏查看高清幻灯片' : 'Expand full screen'}
             aria-label="Expand fullscreen"
           >
             <Maximize2 size={14} />
@@ -223,14 +225,14 @@ export default function TournamentOverviewSlider({ tournament }) {
           {/* Top Left Slide Floating Badge */}
           <div className="slide-floating-tag-badge">
             <Flame size={13} className="text-amber" />
-            <span>{currentSlide.tag || 'ไฮไลต์เกม'}</span>
+            <span>{translateDynamic(currentSlide.tag || 'ไฮไลต์เกม')}</span>
           </div>
 
           {/* Top Right Mini Counter Pill & Tap Hint */}
           <div className="slide-top-right-group">
-            <div className="slide-mobile-tap-hint" title="แตะที่ภาพเพื่อขยายดูเต็มจอ">
+            <div className="slide-mobile-tap-hint" title={language === 'th' ? 'แตะที่ภาพเพื่อขยายดูเต็มจอ' : language === 'zh' ? '点击全屏查看' : 'Tap to expand'}>
               <Maximize2 size={11} />
-              <span>แตะเพื่อขยาย</span>
+              <span>{language === 'th' ? 'แตะเพื่อขยาย' : language === 'zh' ? '点击全屏' : 'Tap to expand'}</span>
             </div>
             <div className="slide-mini-counter-floating">
               <span>{currentIndex + 1} / {slides.length}</span>
@@ -280,10 +282,10 @@ export default function TournamentOverviewSlider({ tournament }) {
                   e.stopPropagation();
                   setIsLightboxOpen(true);
                 }}
-                title="คลิกเพื่อขยายดูภาพแบบคมชัด Full Screen"
+                title={language === 'th' ? 'คลิกเพื่อขยายดูภาพแบบคมชัด Full Screen' : language === 'zh' ? '全屏查看高清大图' : 'Click to view Full Screen'}
               >
                 <Maximize2 size={13} />
-                <span>ขยายภาพ</span>
+                <span>{language === 'th' ? 'ขยายภาพ' : language === 'zh' ? '全屏' : 'Expand'}</span>
               </button>
             </div>
           </div>
@@ -323,9 +325,9 @@ export default function TournamentOverviewSlider({ tournament }) {
         <div className="thumbnail-strip-header">
           <span className="thumb-strip-lbl">
             <Layers size={13} className="text-blue" />
-            <span>สารบัญ 20 ภาพสไลด์บรรยากาศ & ไฮไลต์ (คลิกเพื่อเลือกภาพ)</span>
+            <span>{language === 'th' ? `สารบัญ ${slides.length} ภาพสไลด์บรรยากาศ & ไฮไลต์ (คลิกเพื่อเลือกภาพ)` : language === 'zh' ? `共 ${slides.length} 张精彩实景与高能图集 (点击切换)` : `All ${slides.length} Photos & Highlights (Click to select)`}</span>
           </span>
-          <span className="thumb-strip-hint">เลื่อนซ้าย-ขวาเพื่อเลือกดูได้ทุกรูป</span>
+          <span className="thumb-strip-hint">{language === 'th' ? 'เลื่อนซ้าย-ขวาเพื่อเลือกดูได้ทุกรูป' : language === 'zh' ? '左右滑动查看全部图集' : 'Scroll left/right to view all'}</span>
         </div>
 
         <div className="tourney-thumbnail-scrollable">
@@ -370,7 +372,7 @@ export default function TournamentOverviewSlider({ tournament }) {
                 type="button" 
                 className="btn-lightbox-close"
                 onClick={() => setIsLightboxOpen(false)}
-                title="ปิด (ESC)"
+                title={t('nav.close') || (language === 'zh' ? '关闭 (ESC)' : 'Close (ESC)')}
               >
                 <X size={20} />
               </button>

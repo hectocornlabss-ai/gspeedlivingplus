@@ -810,7 +810,7 @@ export default function ArenaHub({
                   className="btn-clear-all-filters"
                   onClick={() => { setSelectedCategory('all'); setSelectedTag('all'); setSearchQuery(''); }}
                 >
-                  ล้างตัวกรองทั้งหมด
+                  {language === 'th' ? 'ล้างตัวกรองทั้งหมด' : (language === 'zh' ? '清除所有筛选' : 'Clear All Filters')}
                 </button>
               </div>
             )}
@@ -857,7 +857,7 @@ export default function ArenaHub({
                 <h3>{language === 'th' ? 'ไม่พบกิจกรรมที่ค้นหา' : (language === 'zh' ? '未找到相关活动' : 'No Events Found')}</h3>
                 <p>{language === 'th' ? 'ลองเปลี่ยนคำค้นหาหรือเลือกหมวดหมู่อื่นเพื่อดูกิจกรรมที่น่าสนใจ' : (language === 'zh' ? '请尝试调整搜索关键词或选择其他分类' : 'Try adjusting your search or select another category.')}</p>
                 <button className="btn-secondary" onClick={() => { setSearchQuery(''); setSelectedCategory('all'); setSelectedTag('all'); }}>
-                  ล้างตัวกรองทั้งหมด
+                  {language === 'th' ? 'ล้างตัวกรองทั้งหมด' : (language === 'zh' ? '清除所有筛选' : 'Clear All Filters')}
                 </button>
               </div>
             )}
@@ -870,7 +870,7 @@ export default function ArenaHub({
               className="btn-enter-dedicated-page"
               onClick={() => onNavigateActivities ? onNavigateActivities() : (window.history.pushState(null, '', '/activities'), window.dispatchEvent(new PopStateEvent('popstate')))}
             >
-              <span>ดูทั้งหมด</span>
+              <span>{t('common.viewAll')}</span>
               <ArrowRight size={16} />
             </button>
           </div>
@@ -951,11 +951,11 @@ export default function ArenaHub({
                                 <span className="live-ping-ring" />
                                 <span className="live-ping-core" />
                               </span>
-                              <span>{tourney.badge || 'เปิดรับสมัครด่วน'}</span>
+                              <span>{translateDynamic(tourney.badge || 'เปิดรับสมัครด่วน')}</span>
                             </span>
                           ) : (
                             <span className={`badge-pill badge-${tourney.badgeType === 'cyan' ? 'blue' : tourney.badgeType === 'magenta' ? 'white' : 'amber'}`} style={{ whiteSpace: 'nowrap', flexShrink: 0 }}>
-                              {tourney.badge}
+                              {translateDynamic(tourney.badge)}
                             </span>
                           )}
                           {tourney.gameCategory && (
@@ -981,17 +981,17 @@ export default function ArenaHub({
                             onClick={() => handleOpenTournament(tourney, 'overview')}
                             style={{ cursor: 'pointer' }}
                           >
-                            {tourney.title}
+                            {translateDynamic(tourney.title)}
                           </h3>
 
                           {/* High-impact Prize Banner */}
                           <div className="t-prize-banner" style={{ marginTop: '14px' }}>
                             <div className="t-prize-label">
                               <Trophy size={16} className="text-amber" />
-                              <span>เงินรางวัลรวม</span>
+                              <span>{t('common.prizePool') || (language === 'zh' ? '总奖金' : language === 'en' ? 'Total Prize Pool' : 'เงินรางวัลรวม')}</span>
                             </div>
                             <div className="t-prize-amount">
-                              {tourney.prizePool}
+                              {translateDynamic(tourney.prizePool)}
                             </div>
                           </div>
 
@@ -999,15 +999,15 @@ export default function ArenaHub({
                           <div className="t-details-list" style={{ marginTop: '12px' }}>
                             <div className="t-detail-item">
                               <Calendar size={15} className="text-cyan" style={{ flexShrink: 0 }} />
-                              <span><strong>วันที่:</strong> {tourney.date} ({tourney.time})</span>
+                              <span><strong>{language === 'zh' ? '日期:' : language === 'en' ? 'Date:' : 'วันที่:'}</strong> {translateDynamic(tourney.date)} ({translateDynamic(tourney.time)})</span>
                             </div>
                             <div className="t-detail-item">
                               <Users size={15} className="text-blue" style={{ flexShrink: 0 }} />
-                              <span><strong>จำนวนทีม:</strong> {tourney.slots} ({teamCount} ทีมร่วมแข่ง)</span>
+                              <span><strong>{language === 'zh' ? '参赛规模:' : language === 'en' ? 'Teams:' : 'จำนวนทีม:'}</strong> {translateDynamic(tourney.slots)} ({teamCount} {language === 'zh' ? '支战队已报名' : language === 'en' ? 'teams registered' : 'ทีมร่วมแข่ง'})</span>
                             </div>
                             <div className="t-detail-item">
                               <Zap size={15} className="text-amber" style={{ flexShrink: 0 }} />
-                              <span><strong>รูปแบบ:</strong> {tourney.format}</span>
+                              <span><strong>{language === 'zh' ? '赛制:' : language === 'en' ? 'Format:' : 'รูปแบบ:'}</strong> {translateDynamic(tourney.format)}</span>
                             </div>
                           </div>
                         </div>
@@ -1063,7 +1063,7 @@ export default function ArenaHub({
                   className="btn-enter-dedicated-page amber-theme"
                   onClick={() => onNavigateTournaments ? onNavigateTournaments() : (window.history.pushState(null, '', '/tournaments'), window.dispatchEvent(new PopStateEvent('popstate')))}
                 >
-                  <span>ดูทั้งหมด</span>
+                  <span>{t('common.viewAll')}</span>
                   <ArrowRight size={16} />
                 </button>
               </div>
@@ -1293,13 +1293,13 @@ export default function ArenaHub({
               <div className="section-header">
                 <div className="badge-pill badge-blue">
                   <Newspaper size={14} />
-                  <span>{siteData?.newsSection?.badge || 'ARTICLES & UPDATES'}</span>
+                  <span>{translateDynamic(siteData?.newsSection?.badge || 'ARTICLES & UPDATES')}</span>
                 </div>
                 <h2 className="section-title" style={{ color: siteData?.newsSection?.titleColor || (isDarkNews ? '#ffffff' : '#0f172a') }}>
-                  {siteData?.newsSection?.title || 'บทความและข่าวสาร GLP ESPORTS'}
+                  {isThai ? (siteData?.newsSection?.title || 'บทความและข่าวสาร GLP ESPORTS') : (siteData?.newsSection?.title_en || translateDynamic(siteData?.newsSection?.title || 'บทความและข่าวสาร GLP ESPORTS'))}
                 </h2>
                 <p className="section-subtitle" style={{ color: siteData?.newsSection?.subtitleColor || (isDarkNews ? '#cbd5e1' : '#475569') }}>
-                  {siteData?.newsSection?.subtitle || 'อัปเดตความเคลื่อนไหววงการอีสปอร์ต เทคโนโลยีใหม่ และสรุปผลการแข่งขันที่จัดขึ้นในร้าน'}
+                  {isThai ? (siteData?.newsSection?.subtitle || 'อัปเดตความเคลื่อนไหววงการอีสปอร์ต เทคโนโลยีใหม่ และสรุปผลการแข่งขันที่จัดขึ้นในร้าน') : (siteData?.newsSection?.subtitle_en || translateDynamic(siteData?.newsSection?.subtitle || 'อัปเดตความเคลื่อนไหววงการอีสปอร์ต เทคโนโลยีใหม่ และสรุปผลการแข่งขันที่จัดขึ้นในร้าน'))}
                 </p>
               </div>
 
@@ -1318,16 +1318,16 @@ export default function ArenaHub({
                   >
                     <div className="news-thumb-wrapper">
                       <img src={news.image} alt={news.imageAlt || news.title} className="news-img" />
-                      <span className="news-cat-pill">{news.tag || news.category}</span>
+                      <span className="news-cat-pill">{translateDynamic(news.tag || news.category)}</span>
                     </div>
                     <div className="news-body">
                       <div className="news-meta">
-                        <span>{news.date}</span>
+                        <span>{translateDynamic(news.date)}</span>
                         <span>•</span>
                         <span>{language === 'th' ? `อ่าน ${news.readTime}` : `${translateDynamic(news.readTime)}`}</span>
                       </div>
                       <h3 className="news-title">{translateDynamic(news.title)}</h3>
-                      <p className="news-excerpt">{news.excerpt || news.desc}</p>
+                      <p className="news-excerpt">{translateDynamic(news.excerpt || news.desc)}</p>
                       <div className="news-read-more-link text-blue">
                         <span>{language === 'th' ? 'อ่านบทความเต็ม' : (language === 'zh' ? '阅读完整文章' : 'Read Full Article')}</span>
                         <ExternalLink size={14} />
@@ -1364,13 +1364,13 @@ export default function ArenaHub({
                 <div className="cta-content">
                   <div className="badge-pill badge-blue">
                     <Layers size={14} />
-                    <span>{siteData?.franchiseBanner?.badge || 'G-SPEED FRANCHISE & INTERIOR PLANNER'}</span>
+                    <span>{translateDynamic(siteData?.franchiseBanner?.badge || 'G-SPEED FRANCHISE & INTERIOR PLANNER')}</span>
                   </div>
                   <h2 className="cta-heading" style={{ color: siteData?.franchiseBanner?.headingColor || siteData?.franchiseBanner?.titleColor || (isDarkF ? '#ffffff' : '#0f172a') }}>
-                    {siteData?.franchiseBanner?.heading || 'อยากมีร้านเกมอีสปอร์ตสเปกเทพเป็นของตัวเอง?'}
+                    {isThai ? (siteData?.franchiseBanner?.heading || 'อยากมีร้านเกมอีสปอร์ตสเปกเทพเป็นของตัวเอง?') : (siteData?.franchiseBanner?.heading_en || translateDynamic(siteData?.franchiseBanner?.heading || 'อยากมีร้านเกมอีสปอร์ตสเปกเทพเป็นของตัวเอง?'))}
                   </h2>
                   <p className="cta-desc" style={{ color: siteData?.franchiseBanner?.descColor || siteData?.franchiseBanner?.textColor || (isDarkF ? '#bfdbfe' : '#475569') }}>
-                    {siteData?.franchiseBanner?.desc || 'เพียงแค่คุณมีพื้นที่หรืออาคาร เรามีระบบ Interior Floor Plan Configurator ช่วยจำลองผังร้าน 2D สเกลจริง จัดวางโต๊ะคอมพิวเตอร์ เวทีแข่งขัน เคาน์เตอร์ และคำนวณต้นทุน สเปกอุปกรณ์ ระยะเวลาคืนทุน (ROI) และเวลาติดตั้งให้ทันที!'}
+                    {isThai ? (siteData?.franchiseBanner?.desc || 'เพียงแค่คุณมีพื้นที่หรืออาคาร เรามีระบบ Interior Floor Plan Configurator ช่วยจำลองผังร้าน 2D สเกลจริง จัดวางโต๊ะคอมพิวเตอร์ เวทีแข่งขัน เคาน์เตอร์ และคำนวณต้นทุน สเปกอุปกรณ์ ระยะเวลาคืนทุน (ROI) และเวลาติดตั้งให้ทันที!') : (siteData?.franchiseBanner?.desc_en || translateDynamic(siteData?.franchiseBanner?.desc || 'เพียงแค่คุณมีพื้นที่หรืออาคาร เรามีระบบ Interior Floor Plan Configurator ช่วยจำลองผังร้าน 2D สเกลจริง จัดวางโต๊ะคอมพิวเตอร์ เวทีแข่งขัน เคาน์เตอร์ และคำนวณต้นทุน สเปกอุปกรณ์ ระยะเวลาคืนทุน (ROI) และเวลาติดตั้งให้ทันที!'))}
                   </p>
                   <div className="cta-buttons">
                     <button 
@@ -1378,7 +1378,7 @@ export default function ArenaHub({
                       onClick={onNavigateFranchise} 
                       className="btn-primary cta-btn-large"
                     >
-                      <span>{siteData?.franchiseBanner?.buttonText && siteData?.franchiseBanner?.buttonText !== 'เริ่มออกแบบผังร้าน & ประเมินงบประมาณทันที' ? siteData.franchiseBanner.buttonText : 'วางผังร้านและประเมินราคา'}</span>
+                      <span>{isThai ? (siteData?.franchiseBanner?.buttonText && siteData?.franchiseBanner?.buttonText !== 'เริ่มออกแบบผังร้าน & ประเมินงบประมาณทันที' ? siteData.franchiseBanner.buttonText : 'วางผังร้านและประเมินราคา') : (language === 'zh' ? '设计3D门店与预算评估' : '3D Store Planner & Price Quote')}</span>
                       <ArrowRight size={18} />
                     </button>
                   </div>

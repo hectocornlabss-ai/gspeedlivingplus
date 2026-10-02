@@ -6,7 +6,7 @@ import {
 import ArticleBlockEditor from './ArticleBlockEditor';
 import { compressAndConvertToWebP } from '../utils/imageOptimizer';
 import { EVENT_CATEGORIES, DEFAULT_ARTICLE_TAGS } from '../data/mockData';
-import { autoTranslateEntity } from '../utils/autoTranslator';
+import { autoTranslateEntity, getAiTranslationStatus } from '../utils/autoTranslator';
 
 const DEFAULT_NEW_ACTIVITY = {
   title: '',
@@ -323,8 +323,12 @@ export default function ActivityFormModal({
     }
     setIsTranslating(true);
     try {
-      await autoTranslateEntity(draft);
-      alert('แปลภาษาอัตโนมัติ (อังกฤษ & จีน) เรียบร้อยแล้ว! ข้อมูลถูกจัดเก็บลงแคชพร้อมใช้งานทันที');
+      const translated = await autoTranslateEntity(draft);
+      if (translated) {
+        setDraft(translated);
+      }
+      const aiStatus = getAiTranslationStatus();
+      alert(`✨ แปลภาษาอัตโนมัติ (อังกฤษ & จีน) เรียบร้อยแล้ว!\n\nโหมดที่ใช้งาน: ${aiStatus.label}\nบทความและเนื้อหาทุกย่อหน้าถูกแปลด้วยสำนวนสละสลวย พร้อมแสดงผลในเวอร์ชัน EN / ZH ทันที`);
     } catch (err) {
       alert('การแปลภาษาขัดข้อง: ' + err.message);
     } finally {
@@ -855,13 +859,26 @@ export default function ActivityFormModal({
         </div>
 
         {/* Modal Footer - Single Clear Save Button */}
-        <div className="modal-footer-btns" style={{ flexShrink: 0, padding: '14px 20px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
+        <div className="modal-footer-btns" style={{ flexShrink: 0, padding: '14px 20px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', flexWrap: 'wrap', gap: '10px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: '#64748b' }}>
-            <Info size={15} className="text-blue" />
-            <span>กดปุ่มบันทึกเพื่ออัปเดตและบันทึกลงฐานข้อมูลเซิร์ฟเวอร์โดยตรง</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 10px', borderRadius: '12px', background: getAiTranslationStatus().active ? '#eff6ff' : '#f1f5f9', color: getAiTranslationStatus().active ? '#1d4ed8' : '#475569', fontSize: '0.76rem', fontWeight: 600 }}>
+              <Sparkles size={13} className={getAiTranslationStatus().active ? 'text-blue' : 'text-muted'} />
+              <span>{getAiTranslationStatus().label}</span>
+            </span>
           </div>
 
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <button 
+              type="button" 
+              className="btn-secondary"
+              onClick={handleManualTranslate}
+              disabled={isTranslating || isSaving}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#f0fdf4', borderColor: '#86efac', color: '#166534', fontWeight: 600, padding: '8px 14px' }}
+              title="สั่งแปลภาษาอังกฤษและจีนอัตโนมัติด้วย AI ทันที"
+            >
+              {isTranslating ? <RefreshCw size={14} className="spin-icon" /> : <Sparkles size={14} />}
+              <span>{isTranslating ? 'กำลังแปลด้วย AI...' : '✨ แปลภาษา EN & ZH'}</span>
+            </button>
             <button 
               type="button" 
               className="btn-secondary" 
@@ -875,7 +892,7 @@ export default function ActivityFormModal({
               type="button" 
               className="btn-primary" 
               onClick={handleSubmit}
-              disabled={isSaving}
+              disabled={isSaving || isTranslating}
               style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#10b981', borderColor: '#10b981', fontWeight: 700, padding: '8px 18px' }}
             >
               {isSaving ? <RefreshCw size={15} className="spin-icon" /> : <Save size={15} />}

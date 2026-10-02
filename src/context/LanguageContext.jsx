@@ -3098,6 +3098,9 @@ export function LanguageProvider({ children }) {
 
   useEffect(() => {
     document.documentElement.lang = language;
+    if (typeof window !== 'undefined') {
+      window.__GLP_CURRENT_LANG__ = language;
+    }
   }, [language]);
 
   // Deep key lookup helper: t('nav.home') or t('home.zones.title')
@@ -3170,6 +3173,10 @@ export function LanguageProvider({ children }) {
 
 export const CONTENT_TRANSLATIONS = {
   // Tournaments
+  'G-SPEED TEST CUP 2026': {
+    en: 'G-SPEED TEST CUP 2026',
+    zh: 'G-SPEED 测试邀请杯 2026'
+  },
   'GLP VALORANT CHAMPIONSHIP 2026': {
     en: 'GLP VALORANT CHAMPIONSHIP 2026',
     zh: 'GLP 无畏契约全国锦标赛 2026'
@@ -3177,6 +3184,108 @@ export const CONTENT_TRANSLATIONS = {
   'G-SPEED VALORANT CHAMPIONSHIP 2026': {
     en: 'G-SPEED VALORANT CHAMPIONSHIP 2026',
     zh: 'G-SPEED 无畏契约全国锦标赛 2026'
+  },
+  'CS2 BANGKOK SHOWDOWN INVITATIONAL': {
+    en: 'CS2 BANGKOK SHOWDOWN INVITATIONAL',
+    zh: 'CS2 曼谷特邀大师赛 2026'
+  },
+
+  // News Mock Items
+  'รวมภาพความมันส์งานแข่ง PUBG Predator League @ GLP Esports Arena': {
+    en: 'Photo Highlights: PUBG Predator League @ GLP Esports Arena',
+    zh: '精彩图集：PUBG 掠夺者联赛 @ GLP 电竞竞技场'
+  },
+  'ภาพบรรยากาศการแข่งขันศึกชิงแชมป์ระดับประเทศ ทีมผู้เข้าแข่งขันกว่า 32 ทีม ดวลปืนสุดเดือดบนเวที 5v5 Stage พร้อมผู้ร่วมงานแน่นร้าน': {
+    en: 'Championship highlights: over 32 teams battled fiercely on the 5v5 Stage with a packed house of gaming fans.',
+    zh: '全国锦标赛火爆现场：逾32支顶尖战队在5v5电竞舞台展开巅峰对决，现场座无虚席。'
+  },
+  'GLP จับมือ Electronics Extreme จัดงาน Zone4 และแจกไอเทมลิขสิทธิ์แท้': {
+    en: 'GLP Partners with Electronics Extreme for Zone4 Fan Meeting & Item Giveaways',
+    zh: 'GLP 携手 Electronics Extreme 举办 Zone4 玩家狂欢会并赠送正版限定道具'
+  },
+  'ค่ายเกมชั้นนำเนรมิตร้าน GLP เป็นสมรภูมิประลองยุทธ์ พร้อมมอบของรางวัลและถ้วยเกียรติยศแก่ผู้ชนะการแข่งขัน': {
+    en: 'Leading game publisher transformed GLP Arena into a martial arts showdown, awarding prizes and trophies to the champions.',
+    zh: '知名游戏厂商将 GLP 竞技场打造为武斗争霸赛场，为最终优胜者颁发丰厚奖励与荣耀奖杯。'
+  },
+  'อัปเกรดขุมพลังใหม่! สเปก RTX 40 Series พร้อมจอ 360Hz ทุกล็อตที่ GLP': {
+    en: 'Next-Gen Power Upgrade! RTX 40 Series & 360Hz Displays Installed Across All GLP Stations',
+    zh: '全新旗舰硬件升级！GLP 全场配备 RTX 40 系列显卡与 360Hz 电竞巨幕'
+  },
+  'ยกระดับประสบการณ์เล่นเกมให้ลื่นไหลไร้รอยต่อ เฟรมเรตนิ่ง ปิงต่ำกว่า 3ms ด้วยระบบเน็ตเวิร์กและ Diskless Server ใหม่ล่าสุด': {
+    en: 'Elevating the gaming experience with ultra-smooth performance, stable framerates, <3ms ping, powered by next-gen diskless servers.',
+    zh: '通过最新的无盘服务器系统与超高速网络，将对战体验提升至极致流畅，帧率稳定，延迟低于 3ms。'
+  },
+  'บทความและข่าวสาร GLP ESPORTS': {
+    en: 'GLP ESPORTS Articles & News',
+    zh: 'GLP 电竞资讯与深度报道'
+  },
+  'อัปเดตความเคลื่อนไหววงการอีสปอร์ต เทคโนโลยีใหม่ และสรุปผลการแข่งขันที่จัดขึ้นในร้าน': {
+    en: 'Esports trends, cutting-edge gaming hardware updates, and tournament recaps hosted at GLP Arena.',
+    zh: '紧跟电竞行业最新动态、前沿硬件科技与店内精彩赛事回顾。'
+  },
+  'อยากมีร้านเกมอีสปอร์ตสเปกเทพเป็นของตัวเอง?': {
+    en: 'Want to Own Your Own High-Spec Esports Arena?',
+    zh: '想要拥有属于自己的顶级旗舰电竞网咖？'
+  },
+  'เพียงแค่คุณมีพื้นที่หรืออาคาร เรามีระบบ Interior Floor Plan Configurator ช่วยจำลองผังร้าน 2D สเกลจริง จัดวางโต๊ะคอมพิวเตอร์ เวทีแข่งขัน เคาน์เตอร์ และคำนวณต้นทุน สเปกอุปกรณ์ ระยะเวลาคืนทุน (ROI) และเวลาติดตั้งให้ทันที!': {
+    en: 'Just bring your space or building! Our 3D/2D Interior Floor Plan Configurator helps simulate real-scale layouts, battle stations, stages, counters, and calculates total budget, hardware specs, ROI payback period, and setup timeline instantly!',
+    zh: '只需提供您的场地或建筑！我们的2D/3D平面设计系统助您模拟真实比例布局、布置对战席、竞技舞台与服务台，并即时计算设备预算、投资回报率(ROI)与装修工期！'
+  },
+  'วางผังร้านและประเมินราคา': {
+    en: 'Design 3D Floor Plan & Get Quote',
+    zh: '设计3D平面图与预算评估'
+  },
+  'เงินรางวัลรวม': {
+    en: 'Total Prize Pool',
+    zh: '总奖金'
+  },
+  'วันที่:': {
+    en: 'Date:',
+    zh: '日期:'
+  },
+  'จำนวนทีม:': {
+    en: 'Teams:',
+    zh: '参赛规模:'
+  },
+  'รูปแบบ:': {
+    en: 'Format:',
+    zh: '赛制:'
+  },
+  'เปิดรับสมัคร': {
+    en: 'Open for Registration',
+    zh: '正在报名'
+  },
+  'เปิดรับสมัครด่วน': {
+    en: 'Open for Registration',
+    zh: '正在报名'
+  },
+  'เร็วๆ นี้': {
+    en: 'Coming Soon',
+    zh: '即将开赛'
+  },
+  'ปิดรับสมัคร': {
+    en: 'Registration Closed',
+    zh: '报名截止'
+  },
+  '100,000 บาท': {
+    en: '100,000 THB',
+    zh: '100,000 泰铢'
+  },
+  '150,000 บาท': {
+    en: '150,000 THB',
+    zh: '150,000 泰铢'
+  },
+  '50,000 บาท': {
+    en: '50,000 THB',
+    zh: '50,000 泰铢'
+  },
+  '32 ทีม': {
+    en: '32 Teams',
+    zh: '32 支战队'
+  },
+  '16 ทีมระดับ Pro Circuit': {
+    en: '16 Pro Circuit Teams',
+    zh: '16 支职业巡回赛战队'
   },
   'การแข่งขัน LAN ทัวร์นาเมนต์เกม VALORANT ชิงเงินรางวัล 100,000 บาท แข่งขัน ณ GLP Main Stage พร้อมถ่ายทอดสด 4K': {
     en: 'VALORANT LAN Championship with 100,000 THB prize pool, hosted live on GLP Main Stage with 4K broadcast.',

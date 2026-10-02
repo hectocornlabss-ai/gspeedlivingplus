@@ -350,7 +350,7 @@ export default function TournamentsPage({
                   setGameFilter('all');
                 }}
               >
-                แสดงทัวร์นาเมนต์ทั้งหมด
+                {language === 'zh' ? '查看所有赛事' : language === 'en' ? 'Show All Tournaments' : 'แสดงทัวร์นาเมนต์ทั้งหมด'}
               </button>
             </div>
           )}
@@ -367,34 +367,42 @@ export default function TournamentsPage({
                 <span>FOR TOURNAMENT ORGANIZERS & PUBLISHERS</span>
               </div>
               <h3 className="organizer-title">
-                ต้องการจัดแข่งทัวร์นาเมนต์ หรือเช่าเวทีแข่งขันอีสปอร์ตที่ GLP?
+                {language === 'zh' 
+                  ? '有意举办赛事或包场租用 GLP 电竞对战舞台？' 
+                  : language === 'en' 
+                  ? 'Interested in hosting a tournament or renting GLP Esport Stage?' 
+                  : 'ต้องการจัดแข่งทัวร์นาเมนต์ หรือเช่าเวทีแข่งขันอีสปอร์ตที่ GLP?'}
               </h3>
               <p className="organizer-desc">
-                GLP Esport Stadium พร้อมสนับสนุนค่ายเกม แบรนด์สปอนเซอร์ และออร์แกไนเซอร์ ด้วยเวทีแข่งขัน 5v5 มาตรฐานสากล, ระบบสตรีมมิ่ง 4K, ห้องพากย์แคสเตอร์เก็บเสียง, ระบบเซิร์ฟเวอร์ LAN 128-Tick และทีมงานเทคนิคอีสปอร์ตมืออาชีพ
+                {language === 'zh'
+                  ? 'GLP 电竞馆配备专业 5v5 对战舞台、4K 高清直转播推流系统、隔音解说演播厅、128-Tick 赛事专用 LAN 服务器与职业技术团队，全力支持赛事承办与品牌发布。'
+                  : language === 'en'
+                  ? 'GLP Esport Stadium supports publishers, sponsors, and organizers with pro 5v5 stage, 4K streaming production, soundproof caster booth, 128-tick LAN server, and dedicated technical crew.'
+                  : 'GLP Esport Stadium พร้อมสนับสนุนค่ายเกม แบรนด์สปอนเซอร์ และออร์แกไนเซอร์ ด้วยเวทีแข่งขัน 5v5 มาตรฐานสากล, ระบบสตรีมมิ่ง 4K, ห้องพากย์แคสเตอร์เก็บเสียง, ระบบเซิร์ฟเวอร์ LAN 128-Tick และทีมงานเทคนิคอีสปอร์ตมืออาชีพ'}
               </p>
               <div className="organizer-specs-chips">
-                <span className="spec-chip">✓ เวทีแข่งขัน 5v5</span>
-                <span className="spec-chip">✓ เครื่องแข่งสเปคสูง</span>
-                <span className="spec-chip">✓ ระบบถ่ายทอดสด 4K</span>
-                <span className="spec-chip">✓ ห้องพากย์ Caster Studio</span>
+                <span className="spec-chip">{language === 'zh' ? '✓ 5v5 职业电竞舞台' : language === 'en' ? '✓ 5v5 Pro Stage' : '✓ เวทีแข่งขัน 5v5'}</span>
+                <span className="spec-chip">{language === 'zh' ? '✓ 顶配职业竞技机台' : language === 'en' ? '✓ High-End Pro Stations' : '✓ เครื่องแข่งสเปคสูง'}</span>
+                <span className="spec-chip">{language === 'zh' ? '✓ 4K超清直转播系统' : language === 'en' ? '✓ 4K Live Broadcast System' : '✓ ระบบถ่ายทอดสด 4K'}</span>
+                <span className="spec-chip">{language === 'zh' ? '✓ 隔音解说演播厅' : language === 'en' ? '✓ Soundproof Caster Studio' : '✓ ห้องพากย์ Caster Studio'}</span>
               </div>
             </div>
 
             <div className="organizer-right">
               <div className="organizer-contact-card">
-                <div className="contact-card-title">ติดต่อฝ่ายบริหารงานแข่งขัน</div>
+                <div className="contact-card-title">{language === 'zh' ? '联系赛事活动筹备组' : language === 'en' ? 'Tournament Events Team' : 'ติดต่อฝ่ายบริหารงานแข่งขัน'}</div>
                 <div className="contact-hotline">
                   <PhoneCall size={18} className="text-blue pulse-icon" />
                   <a href="tel:0637937704">063-793-7704</a>
                 </div>
-                <p className="contact-subtext">เปิดบริการให้คำปรึกษาและจองคิวจัดงานทุกวัน</p>
+                <p className="contact-subtext">{language === 'zh' ? '每日提供赛事咨询与场地预约服务' : language === 'en' ? 'Available daily for tournament consulting & bookings' : 'เปิดบริการให้คำปรึกษาและจองคิวจัดงานทุกวัน'}</p>
                 {onNavigateFranchise && (
                   <button 
                     type="button" 
                     className="btn-organizer-plan"
                     onClick={onNavigateFranchise}
                   >
-                    <span>ติดต่อขอเปิดแฟรนไชส์</span>
+                    <span>{language === 'zh' ? '咨询加盟与开店合作' : language === 'en' ? 'Franchise & Partnership' : 'ติดต่อขอเปิดแฟรนไชส์'}</span>
                     <ArrowRight size={14} />
                   </button>
                 )}

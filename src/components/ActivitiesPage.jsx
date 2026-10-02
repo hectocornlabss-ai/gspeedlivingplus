@@ -269,34 +269,34 @@ export default function ActivitiesPage({
                 <span>COMMUNITY & EVENT VENUE</span>
               </div>
               <h3 className="organizer-title">
-                สนใจจัดงานแฟนมีตติ้ง งานเปิดตัวเกม หรืออีเวนต์คอมมูนิตี้ที่ GLP?
+                {translateDynamic('สนใจจัดงานแฟนมีตติ้ง งานเปิดตัวเกม หรืออีเวนต์คอมมูนิตี้ที่ GLP?')}
               </h3>
               <p className="organizer-desc">
-                GLP Esport Arena มีพื้นที่โถงอเนกประสงค์ขนาดใหญ่ เวทีแสงสีเสียง 4K รองรับผู้เข้าร่วมงานกว่า 200+ คน พร้อมบริการอาหาร เครื่องดื่ม และทีมงานดูแลงานแถลงข่าวครบวงจร
+                {translateDynamic('GLP Esport Arena มีพื้นที่โถงอเนกประสงค์ขนาดใหญ่ เวทีแสงสีเสียง 4K รองรับผู้เข้าร่วมงานกว่า 200+ คน พร้อมบริการอาหาร เครื่องดื่ม และทีมงานดูแลงานแถลงข่าวครบวงจร')}
               </p>
               <div className="organizer-specs-chips">
-                <span className="spec-chip">✓ พื้นที่จัดงาน 500 ตร.ม.</span>
-                <span className="spec-chip">✓ จอ LED ขนาดใหญ่</span>
-                <span className="spec-chip">✓ ระบบแสงสีเสียง 4K</span>
-                <span className="spec-chip">✓ ที่จอดรถ 24 ชม.</span>
+                <span className="spec-chip">{translateDynamic('✓ พื้นที่จัดงาน 500 ตร.ม.')}</span>
+                <span className="spec-chip">{translateDynamic('✓ จอ LED ขนาดใหญ่')}</span>
+                <span className="spec-chip">{translateDynamic('✓ ระบบแสงสีเสียง 4K')}</span>
+                <span className="spec-chip">{translateDynamic('✓ ที่จอดรถ 24 ชม.')}</span>
               </div>
             </div>
 
             <div className="organizer-right">
               <div className="organizer-contact-card">
-                <div className="contact-card-title">ติดต่อฝ่ายประสานงานอีเวนต์</div>
+                <div className="contact-card-title">{translateDynamic('ติดต่อฝ่ายประสานงานอีเวนต์')}</div>
                 <div className="contact-hotline">
                   <PhoneCall size={18} className="text-blue pulse-icon" />
                   <a href="tel:0637937704">063-793-7704</a>
                 </div>
-                <p className="contact-subtext">ยินดีต้อนรับค่ายเกม แบรนด์เกมมิ่งเกียร์ และคอมมูนิตี้ทุกกลุ่ม</p>
+                <p className="contact-subtext">{translateDynamic('ยินดีต้อนรับค่ายเกม แบรนด์เกมมิ่งเกียร์ และคอมมูนิตี้ทุกกลุ่ม')}</p>
                 {onNavigateFranchise && (
                   <button 
                     type="button" 
                     className="btn-organizer-plan"
                     onClick={onNavigateFranchise}
                   >
-                    <span>ติดต่อขอเปิดแฟรนไชส์</span>
+                    <span>{translateDynamic('ติดต่อขอเปิดแฟรนไชส์')}</span>
                     <ArrowRight size={14} />
                   </button>
                 )}

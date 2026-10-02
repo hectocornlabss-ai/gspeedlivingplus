@@ -30,7 +30,7 @@ import AnnouncementTickerCMS from './AnnouncementTickerCMS';
 import ContactPageCMS from './ContactPageCMS';
 import { analyzeProductPhoto, parseSpecSheetText } from '../utils/aiSpecParser';
 import { sanitizeSafeUrl, isSafeExternalUrl } from '../utils/security';
-import { autoTranslateEntity } from '../utils/autoTranslator';
+import { autoTranslateEntity, getAiTranslationStatus } from '../utils/autoTranslator';
 
 // Reusable Component: Section Image Field with Guidelines, Live Preview, SEO Alt Text & Media Library
 function SectionImageUploader({
@@ -1082,6 +1082,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
   const [activeZoneEditTab, setActiveZoneEditTab] = useState('all');
   const [isEditingTournament, setIsEditingTournament] = useState(false);
   const [activeTournamentDraft, setActiveTournamentDraft] = useState(null);
+  const [isTranslatingTournament, setIsTranslatingTournament] = useState(false);
   const [batchPhotoUrls, setBatchPhotoUrls] = useState('');
   const [showBatchImporter, setShowBatchImporter] = useState(false);
   const [galleryCategoryFilter, setGalleryCategoryFilter] = useState('all');
@@ -1388,6 +1389,26 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
         teams: updated
       });
       triggerSaveToast();
+    }
+  };
+
+  const handleManualTournamentTranslate = async () => {
+    if (!activeTournamentDraft?.title?.trim()) {
+      alert('กรุณากรอกชื่อรายการแข่งขันก่อนแปลภาษา');
+      return;
+    }
+    setIsTranslatingTournament(true);
+    try {
+      const translated = await autoTranslateEntity(activeTournamentDraft);
+      if (translated) {
+        setActiveTournamentDraft(translated);
+      }
+      const aiStatus = getAiTranslationStatus();
+      alert(`✨ แปลภาษาการแข่งขัน (อังกฤษ & จีน) สำเร็จแล้ว!\n\nโหมดที่ใช้งาน: ${aiStatus.label}\nข้อมูลทัวร์นาเมนต์ กติกา และตารางแข่งถูกแปลเรียบร้อย พร้อมใช้งานทันที`);
+    } catch (err) {
+      alert('การแปลภาษาขัดข้อง: ' + err.message);
+    } finally {
+      setIsTranslatingTournament(false);
     }
   };
 
@@ -14796,6 +14817,29 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <button type="button" className="btn-secondary" onClick={() => setIsTournamentModalOpen(false)}>
                           ยกเลิก
+                        </button>
+                        <button 
+                          type="button" 
+                          onClick={handleManualTournamentTranslate}
+                          disabled={isTranslatingTournament}
+                          style={{
+                            background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '8px',
+                            padding: '8px 14px',
+                            fontSize: '0.85rem',
+                            fontWeight: 650,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            cursor: isTranslatingTournament ? 'wait' : 'pointer',
+                            boxShadow: '0 2px 8px rgba(99, 102, 241, 0.35)'
+                          }}
+                          title="คลิกเพื่อแปลชื่อ กติกา รายละเอียด และรางวัลเป็นภาษาอังกฤษและจีนอัตโนมัติ"
+                        >
+                          <Globe size={15} />
+                          <span>{isTranslatingTournament ? 'กำลังแปล EN & ZH...' : 'AI Auto-Translate (แปลภาษา EN & ZH)'}</span>
                         </button>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

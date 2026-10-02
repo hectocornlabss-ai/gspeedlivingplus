@@ -223,11 +223,11 @@ export default function TournamentDetailModal({
                     <span className="live-ping-ring" />
                     <span className="live-ping-core" />
                   </span>
-                  <span>{tournament.badge || 'เปิดรับสมัครด่วน'}</span>
+                  <span>{translateDynamic(tournament.badge || 'เปิดรับสมัครด่วน')}</span>
                 </span>
               ) : (
                 <span className="t-status-full-tag">
-                  {tournament.badge || 'เต็มแล้ว'}
+                  {translateDynamic(tournament.badge || 'เต็มแล้ว')}
                 </span>
               )}
             </div>
@@ -237,7 +237,7 @@ export default function TournamentDetailModal({
               className="btn-icon-close" 
               onClick={onClose}
               style={{ background: 'rgba(0,0,0,0.5)', color: '#fff', border: '1px solid rgba(255,255,255,0.25)', width: '38px', height: '38px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}
-              title="ปิดหน้าต่าง"
+              title={language === 'zh' ? '关闭 (Esc)' : language === 'en' ? 'Close (Esc)' : 'ปิดหน้าต่าง'}
             >
               <X size={18} />
             </button>
@@ -250,18 +250,18 @@ export default function TournamentDetailModal({
                 type="button" 
                 className="tourney-breadcrumb-link"
                 onClick={onNavigateHome}
-                title="คลิกเพื่อกลับไปยังหน้าแรก"
+                title={language === 'zh' ? '返回首页' : language === 'en' ? 'Back to Home' : 'คลิกเพื่อกลับไปยังหน้าแรก'}
               >
-                <span>หน้าหลัก</span>
+                <span>{t('nav.home') || 'Home'}</span>
               </button>
               <span className="tourney-breadcrumb-sep">/</span>
               <button 
                 type="button" 
                 className="tourney-breadcrumb-link"
                 onClick={onNavigateTournaments}
-                title="คลิกเพื่อไปที่ตารางการแข่งขัน"
+                title={language === 'zh' ? '前往赛事赛程' : language === 'en' ? 'Go to Tournaments' : 'คลิกเพื่อไปที่ตารางการแข่งขัน'}
               >
-                <span>การแข่งขัน & อีเวนต์</span>
+                <span>{t('nav.tournaments') || 'Tournaments'}</span>
               </button>
               <span className="tourney-breadcrumb-sep">/</span>
               <span className="tourney-breadcrumb-current">
@@ -566,10 +566,10 @@ export default function TournamentDetailModal({
                 <div>
                   <h4 style={{ margin: 0, fontSize: '1.1rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <GitBranch size={20} color="#2563eb" />
-                    <span>ผังสายการแข่งขัน & ผลสด (Tournament Bracket)</span>
+                    <span>{language === 'zh' ? '对阵赛程表与实时比分 (Tournament Bracket)' : language === 'en' ? 'Tournament Bracket & Live Scores' : 'ผังสายการแข่งขัน & ผลสด (Tournament Bracket)'}</span>
                   </h4>
                   <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: '#64748b' }}>
-                    รูปแบบ: {tournament.format || 'Double Elimination LAN'} • ระบบ Best of 3 / 5
+                    {language === 'zh' ? '赛制: ' : language === 'en' ? 'Format: ' : 'รูปแบบ: '}{translateDynamic(tournament.format || 'Double Elimination LAN')} • {language === 'zh' ? 'BO3 / BO5 赛制' : language === 'en' ? 'Best of 3 / 5' : 'ระบบ Best of 3 / 5'}
                   </p>
                 </div>
 
@@ -593,7 +593,7 @@ export default function TournamentDetailModal({
                         background: '#ef4444', 
                         boxShadow: '0 0 8px #ef4444' 
                       }} />
-                      <span>มีการแข่งขันสด {liveMatches.length} แมตช์</span>
+                      <span>{language === 'zh' ? `正在进行 ${liveMatches.length} 场对决` : language === 'en' ? `${liveMatches.length} Live Matches` : `มีการแข่งขันสด ${liveMatches.length} แมตช์`}</span>
                     </div>
                   )}
 
@@ -618,7 +618,7 @@ export default function TournamentDetailModal({
                       }}
                     >
                       <GitBranch size={14} />
-                      <span>ผังต้นไม้ (Tree)</span>
+                      <span>{language === 'zh' ? '树状图 (Tree)' : language === 'en' ? 'Bracket (Tree)' : 'ผังต้นไม้ (Tree)'}</span>
                     </button>
                     <button
                       type="button"
@@ -639,7 +639,7 @@ export default function TournamentDetailModal({
                       }}
                     >
                       <Swords size={14} />
-                      <span>รายการแมตช์ (Cards)</span>
+                      <span>{language === 'zh' ? '对决卡片 (Cards)' : language === 'en' ? 'Match Cards' : 'รายการแมตช์ (Cards)'}</span>
                     </button>
                   </div>
                 </div>
@@ -675,7 +675,7 @@ export default function TournamentDetailModal({
                         fontSize: '0.85rem',
                         fontWeight: 700
                       }}>
-                        <span>รอบ 8 ทีม (Quarter-Finals)</span>
+                        <span>{language === 'zh' ? '8强赛 (Quarter-Finals)' : language === 'en' ? 'Quarter-Finals' : 'รอบ 8 ทีม (Quarter-Finals)'}</span>
                         <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>BO3 LAN</span>
                       </div>
 
@@ -705,7 +705,7 @@ export default function TournamentDetailModal({
                               </span>
                             ) : match.status === 'Finished' ? (
                               <span style={{ color: '#10b981', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '3px' }}>
-                                <Check size={12} /> จบแล้ว
+                                <Check size={12} /> {language === 'zh' ? '已结束' : language === 'en' ? 'Finished' : 'จบแล้ว'}
                               </span>
                             ) : (
                               <span style={{ color: '#64748b' }}>{match.time}</span>
@@ -779,7 +779,7 @@ export default function TournamentDetailModal({
                           <div style={{ marginTop: '8px', paddingTop: '6px', borderTop: '1px solid rgba(51, 65, 85, 0.5)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.72rem', color: '#64748b' }}>
                             <span>{match.stage || 'Main Stage'}</span>
                             <span style={{ color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '2px' }}>
-                              คลิกดูรายละเอียด <ChevronRight size={12} />
+                              {language === 'zh' ? '查看详情' : language === 'en' ? 'Details' : 'คลิกดูรายละเอียด'} <ChevronRight size={12} />
                             </span>
                           </div>
                         </div>
@@ -800,7 +800,7 @@ export default function TournamentDetailModal({
                         fontSize: '0.85rem',
                         fontWeight: 700
                       }}>
-                        <span>รอบรองชนะเลิศ (Semi-Finals)</span>
+                        <span>{language === 'zh' ? '半决赛 (Semi-Finals)' : language === 'en' ? 'Semi-Finals' : 'รอบรองชนะเลิศ (Semi-Finals)'}</span>
                         <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>BO3 LAN</span>
                       </div>
 
@@ -842,7 +842,7 @@ export default function TournamentDetailModal({
                                 <div style={{ width: '24px', height: '24px', borderRadius: '4px', background: '#334155', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: '0.7rem' }}>A</div>
                               )}
                               <span style={{ color: match.teamA?.name ? '#f8fafc' : '#64748b', fontWeight: match.teamA?.isWinner ? 700 : 500, fontSize: '0.88rem' }}>
-                                {match.teamA?.name || 'ผู้ชนะ QF'}
+                                {match.teamA?.name ? translateDynamic(match.teamA.name) : (language === 'zh' ? '8强晋级者' : language === 'en' ? 'QF Winner' : 'ผู้ชนะ QF')}
                               </span>
                             </div>
                             <span style={{ fontWeight: 800, fontSize: '1rem', color: match.teamA?.isWinner ? '#a855f7' : '#94a3b8' }}>
@@ -866,7 +866,7 @@ export default function TournamentDetailModal({
                                 <div style={{ width: '24px', height: '24px', borderRadius: '4px', background: '#334155', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: '0.7rem' }}>B</div>
                               )}
                               <span style={{ color: match.teamB?.name ? '#f8fafc' : '#64748b', fontWeight: match.teamB?.isWinner ? 700 : 500, fontSize: '0.88rem' }}>
-                                {match.teamB?.name || 'ผู้ชนะ QF'}
+                                {match.teamB?.name ? translateDynamic(match.teamB.name) : (language === 'zh' ? '8强晋级者' : language === 'en' ? 'QF Winner' : 'ผู้ชนะ QF')}
                               </span>
                             </div>
                             <span style={{ fontWeight: 800, fontSize: '1rem', color: match.teamB?.isWinner ? '#a855f7' : '#94a3b8' }}>
@@ -892,7 +892,7 @@ export default function TournamentDetailModal({
                         fontWeight: 700
                       }}>
                         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <Crown size={16} color="#eab308" /> รอบชิงชนะเลิศ (Grand Final)
+                          <Crown size={16} color="#eab308" /> {language === 'zh' ? '总决赛 (Grand Final)' : language === 'en' ? 'Grand Final' : 'รอบชิงชนะเลิศ (Grand Final)'}
                         </span>
                         <span style={{ fontSize: '0.75rem', color: '#fef08a' }}>BO5</span>
                       </div>
@@ -919,7 +919,7 @@ export default function TournamentDetailModal({
 
                           <div style={{ textAlign: 'center', marginBottom: '12px' }}>
                             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(234, 179, 8, 0.2)', color: '#fef08a', padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700 }}>
-                              <Trophy size={13} /> ชิงเงินรางวัล ฿{tournament.prizePool || '100,000'}
+                              <Trophy size={13} /> {language === 'zh' ? '争夺总奖金 ' : language === 'en' ? 'Prize Pool ' : 'ชิงเงินรางวัล '}฿{translateDynamic(tournament.prizePool || '100,000')}
                             </div>
                             <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '6px' }}>
                               {match.time} • {match.stage}
@@ -932,7 +932,7 @@ export default function TournamentDetailModal({
                               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 <Crown size={16} color="#eab308" />
                                 <span style={{ color: '#ffffff', fontWeight: 600, fontSize: '0.92rem' }}>
-                                  {match.teamA?.name || 'ผู้ชนะ Semi-Final 1'}
+                                  {match.teamA?.name ? translateDynamic(match.teamA.name) : (language === 'zh' ? '半决赛 1 晋级者' : language === 'en' ? 'Semi-Final 1 Winner' : 'ผู้ชนะ Semi-Final 1')}
                                 </span>
                               </div>
                               <span style={{ fontSize: '1.2rem', fontWeight: 900, color: '#eab308' }}>
@@ -946,7 +946,7 @@ export default function TournamentDetailModal({
                               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 <Crown size={16} color="#eab308" />
                                 <span style={{ color: '#ffffff', fontWeight: 600, fontSize: '0.92rem' }}>
-                                  {match.teamB?.name || 'ผู้ชนะ Semi-Final 2'}
+                                  {match.teamB?.name ? translateDynamic(match.teamB.name) : (language === 'zh' ? '半决赛 2 晋级者' : language === 'en' ? 'Semi-Final 2 Winner' : 'ผู้ชนะ Semi-Final 2')}
                                 </span>
                               </div>
                               <span style={{ fontSize: '1.2rem', fontWeight: 900, color: '#eab308' }}>
@@ -957,7 +957,7 @@ export default function TournamentDetailModal({
 
                           <div style={{ marginTop: '14px', textAlign: 'center' }}>
                             <span style={{ fontSize: '0.75rem', color: '#38bdf8', fontWeight: 600 }}>
-                              คลิกเพื่อดูสถิติและช่องทางสตรีมสด
+                              {language === 'zh' ? '点击查看数据与直播频道' : language === 'en' ? 'Click for stats & live stream' : 'คลิกเพื่อดูสถิติและช่องทางสตรีมสด'}
                             </span>
                           </div>
                         </div>
@@ -973,10 +973,10 @@ export default function TournamentDetailModal({
                   {/* Round Filter Tabs */}
                   <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
                     {[
-                      { id: 'all', label: 'แมตช์ทั้งหมด' },
-                      { id: 'Quarter-Finals', label: 'รอบ 8 ทีม (Quarter-Finals)' },
-                      { id: 'Semi-Finals', label: 'รอบ 4 ทีม (Semi-Finals)' },
-                      { id: 'Grand Final', label: 'รอบชิงชนะเลิศ (Grand Final)' }
+                      { id: 'all', label: language === 'zh' ? '全部对决' : language === 'en' ? 'All Matches' : 'แมตช์ทั้งหมด' },
+                      { id: 'Quarter-Finals', label: language === 'zh' ? '8强赛 (Quarter-Finals)' : language === 'en' ? 'Quarter-Finals' : 'รอบ 8 ทีม (Quarter-Finals)' },
+                      { id: 'Semi-Finals', label: language === 'zh' ? '半决赛 (Semi-Finals)' : language === 'en' ? 'Semi-Finals' : 'รอบ 4 ทีม (Semi-Finals)' },
+                      { id: 'Grand Final', label: language === 'zh' ? '总决赛 (Grand Final)' : language === 'en' ? 'Grand Final' : 'รอบชิงชนะเลิศ (Grand Final)' }
                     ].map(tab => (
                       <button
                         key={tab.id}
@@ -1029,7 +1029,7 @@ export default function TournamentDetailModal({
                               </span>
                             ) : match.status === 'Finished' ? (
                               <span style={{ background: '#ecfdf5', color: '#059669', padding: '2px 8px', borderRadius: '12px', fontSize: '0.72rem', fontWeight: 700 }}>
-                                จบการแข่งขัน
+                                {language === 'zh' ? '比赛结束' : language === 'en' ? 'Finished' : 'จบการแข่งขัน'}
                               </span>
                             ) : (
                               <span style={{ background: '#f1f5f9', color: '#64748b', padding: '2px 8px', borderRadius: '12px', fontSize: '0.72rem', fontWeight: 600 }}>
@@ -1092,7 +1092,7 @@ export default function TournamentDetailModal({
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <strong style={{ fontSize: '1rem', color: '#0f172a' }}>
-                    ทีมที่ได้รับการยืนยันสิทธิ์ ({(tournament.teams || []).length} ทีม)
+                    {language === 'zh' ? `已确认参赛战队 (${(tournament.teams || []).length} 支)` : language === 'en' ? `Confirmed Teams (${(tournament.teams || []).length})` : `ทีมที่ได้รับการยืนยันสิทธิ์ (${(tournament.teams || []).length} ทีม)`}
                   </strong>
                 </div>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -1100,7 +1100,7 @@ export default function TournamentDetailModal({
                     type="text" 
                     className="form-input" 
                     style={{ width: '220px', padding: '6px 12px', fontSize: '0.85rem' }}
-                    placeholder="ค้นหาทีม หรือชื่อผู้เล่น..."
+                    placeholder={language === 'zh' ? '搜索战队或选手姓名...' : language === 'en' ? 'Search team or player...' : 'ค้นหาทีม หรือชื่อผู้เล่น...'}
                     value={rosterSearch}
                     onChange={e => setRosterSearch(e.target.value)}
                   />
@@ -1109,7 +1109,7 @@ export default function TournamentDetailModal({
                     className="btn-primary btn-sm"
                     onClick={() => setTourneyModalTab('register')}
                   >
-                    <Plus size={14} /> สมัครทีมเพิ่ม
+                    <Plus size={14} /> {language === 'zh' ? '报名战队' : language === 'en' ? 'Register Team' : 'สมัครทีมเพิ่ม'}
                   </button>
                 </div>
               </div>
@@ -1165,12 +1165,12 @@ export default function TournamentDetailModal({
 
                       <div style={{ background: '#f8fafc', padding: '8px 12px', borderRadius: '6px', fontSize: '0.82rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <Crown size={14} className="text-amber" />
-                        <span><strong>กัปตันทีม:</strong> {team.captain || 'ไม่ระบุ'}</span>
+                        <span><strong>{language === 'zh' ? '队长: ' : language === 'en' ? 'Captain: ' : 'กัปตันทีม: '}</strong>{team.captain || (language === 'zh' ? '未指定' : language === 'en' ? 'Unspecified' : 'ไม่ระบุ')}</span>
                       </div>
 
                       <div>
                         <div className="text-xs text-muted" style={{ fontWeight: 600, marginBottom: '6px' }}>
-                          รายชื่อผู้เล่นตัวจริง 5 คน (Lineup):
+                          {language === 'zh' ? '首发主力队员名单 (Lineup):' : language === 'en' ? 'Main Roster (Lineup):' : 'รายชื่อผู้เล่นตัวจริง 5 คน (Lineup):'}
                         </div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
                           {(team.players || []).map((player, pidx) => (
@@ -1222,10 +1222,10 @@ export default function TournamentDetailModal({
                   <Camera size={22} className="text-blue" style={{ flexShrink: 0 }} />
                   <div>
                     <strong style={{ fontSize: '1.02rem', color: '#0f172a' }}>
-                      คลังภาพบรรยากาศการแข่งขัน: {(tournament.galleryPhotos || []).length} ภาพ
+                      {language === 'zh' ? `赛事现场精彩画廊: ${(tournament.galleryPhotos || []).length} 张` : language === 'en' ? `Tournament Gallery: ${(tournament.galleryPhotos || []).length} Photos` : `คลังภาพบรรยากาศการแข่งขัน: ${(tournament.galleryPhotos || []).length} ภาพ`}
                     </strong>
                     <span className="text-xs text-muted block" style={{ marginTop: '2px' }}>
-                      คลิกที่รูปภาพเพื่อเปิดชมภาพขยายเต็มจอ (Fullscreen Lightbox) ความละเอียดสูง
+                      {language === 'zh' ? '点击照片可打开超清全屏灯箱 (Lightbox) 预览' : language === 'en' ? 'Click any photo to open fullscreen high-res lightbox' : 'คลิกที่รูปภาพเพื่อเปิดชมภาพขยายเต็มจอ (Fullscreen Lightbox) ความละเอียดสูง'}
                     </span>
                   </div>
                 </div>
@@ -1233,13 +1233,13 @@ export default function TournamentDetailModal({
                 {/* Category Filter Pills - Smooth Horizontal Scroll */}
                 <div className="tourney-gallery-filters">
                   {[
-                    { id: 'all', label: 'ทั้งหมด' },
-                    { id: 'stage', label: 'เวที & แสงสี' },
-                    { id: 'players', label: 'นักกีฬา' },
-                    { id: 'gear', label: 'อุปกรณ์' },
-                    { id: 'crowd', label: 'กองเชียร์' },
-                    { id: 'trophy', label: 'มอบรางวัล' },
-                    { id: 'caster', label: 'แคสเตอร์' }
+                    { id: 'all', label: language === 'zh' ? '全部' : language === 'en' ? 'All' : 'ทั้งหมด' },
+                    { id: 'stage', label: language === 'zh' ? '舞台与灯光' : language === 'en' ? 'Stage & Lights' : 'เวที & แสงสี' },
+                    { id: 'players', label: language === 'zh' ? '参赛选手' : language === 'en' ? 'Players' : 'นักกีฬา' },
+                    { id: 'gear', label: language === 'zh' ? '电竞外设' : language === 'en' ? 'Gaming Gear' : 'อุปกรณ์' },
+                    { id: 'crowd', label: language === 'zh' ? '现场观众' : language === 'en' ? 'Crowd' : 'กองเชียร์' },
+                    { id: 'trophy', label: language === 'zh' ? '颁奖典礼' : language === 'en' ? 'Trophy & Awards' : 'มอบรางวัล' },
+                    { id: 'caster', label: language === 'zh' ? '解说主持' : language === 'en' ? 'Casters' : 'แคสเตอร์' }
                   ].map(cat => (
                     <button 
                       key={cat.id}
@@ -1294,10 +1294,16 @@ export default function TournamentDetailModal({
                     <Check size={36} />
                   </div>
                   <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0f172a', margin: '0 0 8px 0' }}>
-                    ลงทะเบียนเข้าร่วมแข่งขันสำเร็จ!
+                    {language === 'zh' ? '战队报名成功！' : language === 'en' ? 'Registration Successful!' : 'ลงทะเบียนเข้าร่วมแข่งขันสำเร็จ!'}
                   </h3>
                   <p style={{ color: '#475569', fontSize: '0.92rem', lineHeight: 1.6, margin: '0 0 20px 0' }}>
-                    ทีม <strong>{teamRegForm.teamName}</strong> ได้รับการบันทึกเข้าสู่ระบบการแข่งขันเรียบร้อยแล้ว ทีมงานจะทำการส่งข้อมูลห้อง Discord และกำหนดการอุ่นเครื่องไปยังเบอร์โทรศัพท์และ Discord ที่ระบุไว้
+                    {language === 'zh' ? (
+                      <>战队 <strong>{teamRegForm.teamName}</strong> 已成功录入赛事系统。我们的工作人员将通过预留电话和 Discord 发送赛事房间与热身赛程。</>
+                    ) : language === 'en' ? (
+                      <>Team <strong>{teamRegForm.teamName}</strong> has been registered. Our staff will send Discord channel invites and match briefing to the registered phone and Discord tag.</>
+                    ) : (
+                      <>ทีม <strong>{teamRegForm.teamName}</strong> ได้รับการบันทึกเข้าสู่ระบบการแข่งขันเรียบร้อยแล้ว ทีมงานจะทำการส่งข้อมูลห้อง Discord และกำหนดการอุ่นเครื่องไปยังเบอร์โทรศัพท์และ Discord ที่ระบุไว้</>
+                    )}
                   </p>
                   <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
                     <button 
@@ -1308,14 +1314,14 @@ export default function TournamentDetailModal({
                         setRegisterSuccess(false);
                       }}
                     >
-                      <Users size={15} /> ดูรายชื่อทีมในสายแข่ง
+                      <Users size={15} /> {language === 'zh' ? '查看参赛战队列表' : language === 'en' ? 'View Confirmed Roster' : 'ดูรายชื่อทีมในสายแข่ง'}
                     </button>
                     <button 
                       type="button" 
                       className="btn-secondary"
                       onClick={onClose}
                     >
-                      ปิดหน้าต่าง
+                      {language === 'zh' ? '关闭窗口' : language === 'en' ? 'Close' : 'ปิดหน้าต่าง'}
                     </button>
                   </div>
                 </div>
@@ -1323,16 +1329,16 @@ export default function TournamentDetailModal({
                 <form onSubmit={handleRegisterSubmit} style={{ background: '#ffffff', padding: '24px', borderRadius: '14px', border: '1px solid #e2e8f0' }}>
                   <div style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '12px', marginBottom: '16px' }}>
                     <h4 style={{ margin: '0 0 4px 0', fontSize: '1.1rem', color: '#0f172a' }}>
-                      แบบฟอร์มสมัครเข้าร่วมแข่งขัน: {tournament.title}
+                      {language === 'zh' ? `赛事报名表: ${translateDynamic(tournament.title)}` : language === 'en' ? `Tournament Registration: ${translateDynamic(tournament.title)}` : `แบบฟอร์มสมัครเข้าร่วมแข่งขัน: ${tournament.title}`}
                     </h4>
                     <span className="text-xs text-muted">
-                      กรุณากรอกข้อมูลทีม กัปตัน และรายชื่อผู้เล่นตัวจริง 5 คนให้ครบถ้วนเพื่อความรวดเร็วในการยืนยันสิทธิ์
+                      {language === 'zh' ? '请完整填写战队信息、队长联络方式及 5 位首发主力队员名单，以便官方快速核准资格。' : language === 'en' ? 'Please complete team details, captain contact info, and 5 starting lineup IGNs for rapid qualification approval.' : 'กรุณากรอกข้อมูลทีม กัปตัน และรายชื่อผู้เล่นตัวจริง 5 คนให้ครบถ้วนเพื่อความรวดเร็วในการยืนยันสิทธิ์'}
                     </span>
                   </div>
 
                   <div className="form-row-2">
                     <div className="form-group">
-                      <label>ชื่อทีม (Team Name) *</label>
+                      <label>{language === 'zh' ? '战队名称 (Team Name) *' : language === 'en' ? 'Team Name *' : 'ชื่อทีม (Team Name) *'}</label>
                       <input 
                         type="text" required className="form-input"
                         placeholder="เช่น G-Speed Slayer Esports"
@@ -1341,7 +1347,7 @@ export default function TournamentDetailModal({
                       />
                     </div>
                     <div className="form-group">
-                      <label>แท็กทีม (Team Tag)</label>
+                      <label>{language === 'zh' ? '战队前缀简写 (Team Tag)' : language === 'en' ? 'Team Tag' : 'แท็กทีม (Team Tag)'}</label>
                       <input 
                         type="text" className="form-input"
                         placeholder="เช่น GLP"
@@ -1353,7 +1359,7 @@ export default function TournamentDetailModal({
 
                   <div className="form-row-2">
                     <div className="form-group">
-                      <label>ชื่อ-นามสกุล และ IGN หัวหน้าทีม (Captain) *</label>
+                      <label>{language === 'zh' ? '队长姓名与游戏内 IGN (Captain) *' : language === 'en' ? 'Captain Full Name & IGN *' : 'ชื่อ-นามสกุล และ IGN หัวหน้าทีม (Captain) *'}</label>
                       <input 
                         type="text" required className="form-input"
                         placeholder="เช่น สมชาย มีชัย (CaptainSpeed)"
@@ -1362,7 +1368,7 @@ export default function TournamentDetailModal({
                       />
                     </div>
                     <div className="form-group">
-                      <label>เบอร์โทรศัพท์ติดต่อหัวหน้าทีม *</label>
+                      <label>{language === 'zh' ? '队长联络电话 *' : language === 'en' ? 'Captain Phone Number *' : 'เบอร์โทรศัพท์ติดต่อหัวหน้าทีม *'}</label>
                       <input 
                         type="tel" required className="form-input"
                         placeholder="08X-XXX-XXXX"
@@ -1374,7 +1380,7 @@ export default function TournamentDetailModal({
 
                   <div className="form-row-2">
                     <div className="form-group">
-                      <label>อีเมลติดต่อ *</label>
+                      <label>{language === 'zh' ? '电子邮箱 *' : language === 'en' ? 'Email Address *' : 'อีเมลติดต่อ *'}</label>
                       <input 
                         type="email" required className="form-input"
                         placeholder="captain@example.com"
@@ -1383,7 +1389,7 @@ export default function TournamentDetailModal({
                       />
                     </div>
                     <div className="form-group">
-                      <label>Discord Tag (สำหรับดึงเข้าห้องแข่งขัน) *</label>
+                      <label>{language === 'zh' ? 'Discord 标签 (用于加入赛事群) *' : language === 'en' ? 'Discord Tag (for match room) *' : 'Discord Tag (สำหรับดึงเข้าห้องแข่งขัน) *'}</label>
                       <input 
                         type="text" required className="form-input"
                         placeholder="captain#1234 หรือ username"
@@ -1395,25 +1401,25 @@ export default function TournamentDetailModal({
 
                   {/* 5 Starting Players */}
                   <div className="form-group" style={{ marginTop: '10px' }}>
-                    <label>รายชื่อผู้เล่นคนที่ 2 - 5 (IGN ในเกม)</label>
+                    <label>{language === 'zh' ? '第 2 - 5 名首发队员游戏内 IGN (In-Game Name)' : language === 'en' ? 'Players 2 - 5 (In-Game IGN)' : 'รายชื่อผู้เล่นคนที่ 2 - 5 (IGN ในเกม)'}</label>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px' }}>
                       <input 
-                        type="text" className="form-input" placeholder="ผู้เล่นคนที่ 2"
+                        type="text" className="form-input" placeholder={language === 'zh' ? '选手 2' : language === 'en' ? 'Player 2' : 'ผู้เล่นคนที่ 2'}
                         value={teamRegForm.player2}
                         onChange={e => setTeamRegForm({ ...teamRegForm, player2: e.target.value })}
                       />
                       <input 
-                        type="text" className="form-input" placeholder="ผู้เล่นคนที่ 3"
+                        type="text" className="form-input" placeholder={language === 'zh' ? '选手 3' : language === 'en' ? 'Player 3' : 'ผู้เล่นคนที่ 3'}
                         value={teamRegForm.player3}
                         onChange={e => setTeamRegForm({ ...teamRegForm, player3: e.target.value })}
                       />
                       <input 
-                        type="text" className="form-input" placeholder="ผู้เล่นคนที่ 4"
+                        type="text" className="form-input" placeholder={language === 'zh' ? '选手 4' : language === 'en' ? 'Player 4' : 'ผู้เล่นคนที่ 4'}
                         value={teamRegForm.player4}
                         onChange={e => setTeamRegForm({ ...teamRegForm, player4: e.target.value })}
                       />
                       <input 
-                        type="text" className="form-input" placeholder="ผู้เล่นคนที่ 5"
+                        type="text" className="form-input" placeholder={language === 'zh' ? '选手 5' : language === 'en' ? 'Player 5' : 'ผู้เล่นคนที่ 5'}
                         value={teamRegForm.player5}
                         onChange={e => setTeamRegForm({ ...teamRegForm, player5: e.target.value })}
                       />
@@ -1421,10 +1427,10 @@ export default function TournamentDetailModal({
                   </div>
 
                   <div className="form-group">
-                    <label>ผู้เล่นตัวสำรอง (Substitute IGN - ถ้ามี)</label>
+                    <label>{language === 'zh' ? '替补队员 IGN (Substitute - 可选)' : language === 'en' ? 'Substitute IGN (Optional)' : 'ผู้เล่นตัวสำรอง (Substitute IGN - ถ้ามี)'}</label>
                     <input 
                       type="text" className="form-input"
-                      placeholder="ชื่อในเกมผู้เล่นตัวสำรอง"
+                      placeholder={language === 'zh' ? '替补选手游戏内代号' : language === 'en' ? 'Substitute player IGN' : 'ชื่อในเกมผู้เล่นตัวสำรอง'}
                       value={teamRegForm.substitute}
                       onChange={e => setTeamRegForm({ ...teamRegForm, substitute: e.target.value })}
                     />
@@ -1436,11 +1442,11 @@ export default function TournamentDetailModal({
                       className="btn-secondary" 
                       onClick={onClose}
                     >
-                      ยกเลิก
+                      {language === 'zh' ? '取消' : language === 'en' ? 'Cancel' : 'ยกเลิก'}
                     </button>
                     <button type="submit" className="btn-primary">
                       <Send size={15} />
-                      <span>ยืนยันการลงทะเบียนแข่งขัน</span>
+                      <span>{language === 'zh' ? '确认提交报名' : language === 'en' ? 'Confirm Registration' : 'ยืนยันการลงทะเบียนแข่งขัน'}</span>
                     </button>
                   </div>
                 </form>
@@ -1645,7 +1651,7 @@ export default function TournamentDetailModal({
                   {selectedMatchDetail.roundLabel || selectedMatchDetail.round}
                 </div>
                 <h3 style={{ margin: '4px 0 0 0', fontSize: '1.2rem', color: '#ffffff' }}>
-                  รายละเอียดการแข่งขันแมตช์
+                  {language === 'zh' ? '比赛详情对决' : language === 'en' ? 'Match Details' : 'รายละเอียดการแข่งขันแมตช์'}
                 </h3>
               </div>
               <button
@@ -1672,12 +1678,12 @@ export default function TournamentDetailModal({
               }}>
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontWeight: 800, fontSize: '1.05rem', color: selectedMatchDetail.teamA?.isWinner ? '#2563eb' : '#0f172a' }}>
-                    {selectedMatchDetail.teamA?.name || 'TBD'}
+                    {selectedMatchDetail.teamA?.name ? translateDynamic(selectedMatchDetail.teamA.name) : 'TBD'}
                   </div>
                   <span style={{ fontSize: '0.75rem', color: '#64748b' }}>[{selectedMatchDetail.teamA?.tag || 'A'}]</span>
                   {selectedMatchDetail.teamA?.isWinner && (
                     <div style={{ color: '#eab308', fontSize: '0.7rem', fontWeight: 700, marginTop: '2px' }}>
-                      👑 ชนะแมตช์นี้
+                      👑 {language === 'zh' ? '本场获胜' : language === 'en' ? 'Match Winner' : 'ชนะแมตช์นี้'}
                     </div>
                   )}
                 </div>
@@ -1687,18 +1693,18 @@ export default function TournamentDetailModal({
                     {selectedMatchDetail.teamA?.score ?? 0} - {selectedMatchDetail.teamB?.score ?? 0}
                   </div>
                   <span style={{ fontSize: '0.7rem', color: selectedMatchDetail.status === 'LIVE' ? '#ef4444' : '#64748b', fontWeight: 700 }}>
-                    {selectedMatchDetail.status === 'LIVE' ? '🔴 กำลังแข่งสด' : (selectedMatchDetail.format || 'BO3')}
+                    {selectedMatchDetail.status === 'LIVE' ? (language === 'zh' ? '🔴 现场对战中' : language === 'en' ? '🔴 LIVE' : '🔴 กำลังแข่งสด') : (selectedMatchDetail.format || 'BO3')}
                   </span>
                 </div>
 
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontWeight: 800, fontSize: '1.05rem', color: selectedMatchDetail.teamB?.isWinner ? '#2563eb' : '#0f172a' }}>
-                    {selectedMatchDetail.teamB?.name || 'TBD'}
+                    {selectedMatchDetail.teamB?.name ? translateDynamic(selectedMatchDetail.teamB.name) : 'TBD'}
                   </div>
                   <span style={{ fontSize: '0.75rem', color: '#64748b' }}>[{selectedMatchDetail.teamB?.tag || 'B'}]</span>
                   {selectedMatchDetail.teamB?.isWinner && (
                     <div style={{ color: '#eab308', fontSize: '0.7rem', fontWeight: 700, marginTop: '2px' }}>
-                      👑 ชนะแมตช์นี้
+                      👑 {language === 'zh' ? '本场获胜' : language === 'en' ? 'Match Winner' : 'ชนะแมตช์นี้'}
                     </div>
                   )}
                 </div>
@@ -1707,12 +1713,12 @@ export default function TournamentDetailModal({
               {/* Match Meta: Time & Stage */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div style={{ padding: '10px 14px', background: '#f1f5f9', borderRadius: '8px' }}>
-                  <span style={{ fontSize: '0.72rem', color: '#64748b', display: 'block' }}>วันและเวลาแข่งขัน</span>
-                  <strong style={{ fontSize: '0.85rem', color: '#0f172a' }}>{selectedMatchDetail.time}</strong>
+                  <span style={{ fontSize: '0.72rem', color: '#64748b', display: 'block' }}>{language === 'zh' ? '比赛时间' : language === 'en' ? 'Match Time' : 'วันและเวลาแข่งขัน'}</span>
+                  <strong style={{ fontSize: '0.85rem', color: '#0f172a' }}>{translateDynamic(selectedMatchDetail.time)}</strong>
                 </div>
                 <div style={{ padding: '10px 14px', background: '#f1f5f9', borderRadius: '8px' }}>
-                  <span style={{ fontSize: '0.72rem', color: '#64748b', display: 'block' }}>สถานที่แข่ง / เวที</span>
-                  <strong style={{ fontSize: '0.85rem', color: '#0f172a' }}>{selectedMatchDetail.stage || 'Main Stage LAN'}</strong>
+                  <span style={{ fontSize: '0.72rem', color: '#64748b', display: 'block' }}>{language === 'zh' ? '比赛舞台 / 场地' : language === 'en' ? 'Venue / Stage' : 'สถานที่แข่ง / เวที'}</span>
+                  <strong style={{ fontSize: '0.85rem', color: '#0f172a' }}>{translateDynamic(selectedMatchDetail.stage || 'Main Stage LAN')}</strong>
                 </div>
               </div>
 
@@ -1720,7 +1726,7 @@ export default function TournamentDetailModal({
               {selectedMatchDetail.maps && selectedMatchDetail.maps.length > 0 && (
                 <div>
                   <h5 style={{ margin: '0 0 8px 0', fontSize: '0.88rem', color: '#334155' }}>
-                    ผลคะแนนรายแผนที่ (Map Breakdown)
+                    {language === 'zh' ? '小局比分表 (Map Breakdown)' : language === 'en' ? 'Map Breakdown' : 'ผลคะแนนรายแผนที่ (Map Breakdown)'}
                   </h5>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     {selectedMatchDetail.maps.map((mp, idx) => (
@@ -1738,10 +1744,10 @@ export default function TournamentDetailModal({
                         }}
                       >
                         <span style={{ fontWeight: 600, color: mp.isCurrent ? '#b91c1c' : '#0f172a' }}>
-                          Map {idx + 1}: {mp.mapName} {mp.isCurrent ? '(กำลังแข่ง)' : ''}
+                          Map {idx + 1}: {mp.mapName} {mp.isCurrent ? (language === 'zh' ? '(进行中)' : language === 'en' ? '(Live)' : '(กำลังแข่ง)') : ''}
                         </span>
                         <span style={{ fontWeight: 800, color: mp.winner ? '#16a34a' : '#0f172a' }}>
-                          {mp.scoreA} - {mp.scoreB} {mp.winner ? `(ชนะ: ${mp.winner})` : ''}
+                          {mp.scoreA} - {mp.scoreB} {mp.winner ? (language === 'zh' ? `(获胜: ${mp.winner})` : language === 'en' ? `(Win: ${mp.winner})` : `(ชนะ: ${mp.winner})`) : ''}
                         </span>
                       </div>
                     ))}
@@ -1810,7 +1816,7 @@ export default function TournamentDetailModal({
                   }}
                 >
                   <Play size={16} />
-                  <span>รับชมการถ่ายทอดสด (Watch Stream)</span>
+                  <span>{language === 'zh' ? '观看现场直播 (Watch Stream)' : language === 'en' ? 'Watch Live Stream' : 'รับชมการถ่ายทอดสด (Watch Stream)'}</span>
                   <ExternalLink size={14} />
                 </a>
                 <button
@@ -1827,7 +1833,7 @@ export default function TournamentDetailModal({
                     cursor: 'pointer'
                   }}
                 >
-                  ปิด
+                  {language === 'zh' ? '关闭' : language === 'en' ? 'Close' : 'ปิด'}
                 </button>
               </div>
             </div>
