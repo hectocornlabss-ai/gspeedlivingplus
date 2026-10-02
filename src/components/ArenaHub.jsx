@@ -51,7 +51,7 @@ export default function ArenaHub({
   initialTag = 'all'
 }) {
   const { siteData, updateTournament } = useSiteData();
-  const { t, language } = useTranslation();
+  const { t, language, translateDynamic } = useTranslation();
   const isThai = language === 'th';
 
   const rawHeroData = siteData?.hero || {};
@@ -370,7 +370,7 @@ export default function ArenaHub({
             <Search size={18} className="search-icon text-blue" />
             <input 
               type="text" 
-              placeholder="ค้นหากิจกรรม, ทัวร์นาเมนต์, ค่ายเกม หรือชื่อเกม (เช่น PUBG, Audition, Zone4)..."
+              placeholder={language === 'zh' ? '搜索赛事、活动、游戏厂商或游戏名称 (如 PUBG, Audition, Zone4)...' : language === 'en' ? 'Search activities, tournaments, game publishers or titles (e.g. PUBG, Audition, Zone4)...' : 'ค้นหากิจกรรม, ทัวร์นาเมนต์, ค่ายเกม หรือชื่อเกม (เช่น PUBG, Audition, Zone4)...'}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="activity-search-input"
@@ -384,7 +384,7 @@ export default function ArenaHub({
 
           <div className="activity-hotline-badge">
             <PhoneCall size={16} className="text-blue pulse-icon" />
-            <span>สายด่วนติดต่อขอจัดงานแข่ง Esport:</span>
+            <span>{language === 'zh' ? '电竞赛事策划与承办热线:' : language === 'en' ? 'Esports Tournament Hotline:' : 'สายด่วนติดต่อขอจัดงานแข่ง Esport:'}</span>
             <a href="tel:0637937704" className="hotline-phone-link">063-793-7704</a>
           </div>
         </div>
@@ -784,26 +784,26 @@ export default function ArenaHub({
             {(selectedCategory !== 'all' || selectedTag !== 'all' || searchQuery) && (
               <div className="hub-active-filters-summary glass-panel">
                 <div className="summary-tags-group">
-                  <span className="summary-title">กำลังกรองบทความ:</span>
+                  <span className="summary-title">{language === 'th' ? 'กำลังกรองบทความ:' : (language === 'zh' ? '当前筛选条件:' : 'Filtering Articles:')}</span>
                   {selectedCategory !== 'all' && (
                     <span className="summary-pill category">
-                      หมวดหมู่: <strong>{categories.find(c => c.id === selectedCategory)?.label || selectedCategory}</strong>
+                      <span>{language === 'th' ? 'หมวดหมู่:' : (language === 'zh' ? '分类:' : 'Category:')} <strong>{categories.find(c => c.id === selectedCategory)?.label || selectedCategory}</strong></span>
                       <X size={12} className="btn-x-clear" onClick={() => setSelectedCategory('all')} />
                     </span>
                   )}
                   {selectedTag !== 'all' && (
                     <span className="summary-pill tag">
-                      แท็ก: <strong>{selectedTag}</strong>
+                      <span>{language === 'th' ? 'แท็ก:' : (language === 'zh' ? '标签:' : 'Tag:')} <strong>{selectedTag}</strong></span>
                       <X size={12} className="btn-x-clear" onClick={() => setSelectedTag('all')} />
                     </span>
                   )}
                   {searchQuery && (
                     <span className="summary-pill search">
-                      คำค้น: "{searchQuery}"
+                      <span>{language === 'th' ? 'คำค้น:' : (language === 'zh' ? '搜索词:' : 'Search:')} "{searchQuery}"</span>
                       <X size={12} className="btn-x-clear" onClick={() => setSearchQuery('')} />
                     </span>
                   )}
-                  <span className="summary-count">({filteredActivities.length} บทความ)</span>
+                  <span className="summary-count">({filteredActivities.length} {language === 'th' ? 'บทความ' : (language === 'zh' ? '篇文章' : 'Articles')})</span>
                 </div>
                 <button 
                   type="button" 
@@ -833,19 +833,19 @@ export default function ArenaHub({
                 >
                   <div className="gallery-thumb-wrapper">
                     <img src={item.image} alt={item.imageAlt || item.title} className="gallery-thumb-img" />
-                    <span className="gallery-tag-pill">{item.tag || item.category}</span>
+                    <span className="gallery-tag-pill">{translateDynamic(item.tag || item.category)}</span>
                   </div>
 
                   <div className="gallery-info">
                     <div className="gallery-meta">
-                      <span className="gallery-date">{item.date}</span>
-                      <span className="gallery-partner">{item.partner}</span>
+                      <span className="gallery-date">{translateDynamic(item.date)}</span>
+                      <span className="gallery-partner">{translateDynamic(item.partner)}</span>
                     </div>
-                    <h3 className="gallery-title">{item.title}</h3>
-                    <p className="gallery-desc">{item.desc}</p>
+                    <h3 className="gallery-title">{translateDynamic(item.title)}</h3>
+                    <p className="gallery-desc">{translateDynamic(item.desc)}</p>
 
                     <div className="gallery-view-link text-blue">
-                      <span>อ่านบทความ & ชมภาพกิจกรรมเต็ม</span>
+                      <span>{language === 'th' ? 'อ่านบทความ & ชมภาพกิจกรรมเต็ม' : (language === 'zh' ? '阅读文章 & 查看完整相册' : 'Read Article & View Full Gallery')}</span>
                       <ExternalLink size={14} />
                     </div>
                   </div>
@@ -854,8 +854,8 @@ export default function ArenaHub({
             ) : (
               <div className="no-events-found glass-panel">
                 <Search size={32} className="text-muted" />
-                <h3>ไม่พบกิจกรรมที่ค้นหา</h3>
-                <p>ลองเปลี่ยนคำค้นหาหรือเลือกหมวดหมู่อื่นเพื่อดูกิจกรรมที่น่าสนใจ</p>
+                <h3>{language === 'th' ? 'ไม่พบกิจกรรมที่ค้นหา' : (language === 'zh' ? '未找到相关活动' : 'No Events Found')}</h3>
+                <p>{language === 'th' ? 'ลองเปลี่ยนคำค้นหาหรือเลือกหมวดหมู่อื่นเพื่อดูกิจกรรมที่น่าสนใจ' : (language === 'zh' ? '请尝试调整搜索关键词或选择其他分类' : 'Try adjusting your search or select another category.')}</p>
                 <button className="btn-secondary" onClick={() => { setSearchQuery(''); setSelectedCategory('all'); setSelectedTag('all'); }}>
                   ล้างตัวกรองทั้งหมด
                 </button>
@@ -1022,7 +1022,7 @@ export default function ArenaHub({
                               onClick={() => handleOpenTournament(tourney, 'roster')}
                             >
                               <Users size={14} />
-                              <span>รายชื่อทีม ({teamCount})</span>
+                              <span>{language === 'th' ? `รายชื่อทีม (${teamCount})` : (language === 'zh' ? `战队名单 (${teamCount})` : `Teams List (${teamCount})`)}</span>
                             </button>
                           </div>
 
@@ -1035,7 +1035,7 @@ export default function ArenaHub({
                               onClick={() => handleOpenTournament(tourney, 'register')}
                             >
                               <Zap size={16} className="text-amber-300" style={{ filter: 'drop-shadow(0 0 4px rgba(251, 191, 36, 0.8))' }} />
-                              <span>สมัครเข้าร่วมแข่งขัน</span>
+                              <span>{language === 'th' ? 'สมัครเข้าร่วมแข่งขัน' : (language === 'zh' ? '报名参赛' : 'Register Now')}</span>
                               <ArrowRight size={17} className="btn-arrow-icon" />
                             </button>
                           ) : (
@@ -1045,7 +1045,7 @@ export default function ArenaHub({
                               onClick={() => handleOpenTournament(tourney, 'bracket')}
                             >
                               <Trophy size={15} />
-                              <span>ดูสายการแข่งขัน & สกอร์สด (Brackets)</span>
+                              <span>{language === 'th' ? 'ดูสายการแข่งขัน & สกอร์สด (Brackets)' : (language === 'zh' ? '查看对阵图与比分' : 'Tournament Brackets & Scores')}</span>
                               <ArrowRight size={16} />
                             </button>
                           )}
@@ -1324,12 +1324,12 @@ export default function ArenaHub({
                       <div className="news-meta">
                         <span>{news.date}</span>
                         <span>•</span>
-                        <span>อ่าน {news.readTime}</span>
+                        <span>{language === 'th' ? `อ่าน ${news.readTime}` : `${translateDynamic(news.readTime)}`}</span>
                       </div>
-                      <h3 className="news-title">{news.title}</h3>
+                      <h3 className="news-title">{translateDynamic(news.title)}</h3>
                       <p className="news-excerpt">{news.excerpt || news.desc}</p>
                       <div className="news-read-more-link text-blue">
-                        <span>อ่านบทความเต็ม</span>
+                        <span>{language === 'th' ? 'อ่านบทความเต็ม' : (language === 'zh' ? '阅读完整文章' : 'Read Full Article')}</span>
                         <ExternalLink size={14} />
                       </div>
                     </div>

@@ -2421,87 +2421,33 @@ export default function Room3DStudio({
           </div>
         </div>
       ) : (
-        /* Top Gaming HUD Bar in Walk Mode - Only show if not in fullscreen or walk mode to prevent duplicates */
-        (!isPlannerFullscreen && !isWalkMode) && (
-          <div className="studio-3d-gamer-hud">
-            {/* Top-Left Gaming Title Badge */}
-            <div className="walk-hud-brand">
-              <div className="walk-hud-pill">
-                <span className="live-game-dot"></span>
-                <Footprints size={15} />
-                <span>3D FPS WALK MODE</span>
-              </div>
-              <span className="walk-hud-store-title">{doorConfig?.storeName || 'GLP : G SPEED LIVING PLUS'}</span>
-            </div>
-
-            {/* Quick Camera Angle Switchers */}
-            <div className="walk-hud-cam-switchers">
-              <button 
-                type="button" 
-                className="btn-walk-hud-cam active"
-                title={tp('walkModeActive', 'กำลังอยู่ในโหมดเดินชมร้านระดับสายตา')}
-              >
-                <Footprints size={13} />
-                <span>{tp('walkModeBtn', 'เดินชมร้าน')}</span>
-              </button>
-              <button 
-                type="button" 
-                className="btn-walk-hud-cam"
-                onClick={() => setCameraView('storefront')}
-                title={tp('storefrontViewTooltip', 'มุมมองหน้าร้าน')}
-              >
-                <Sparkles size={13} />
-                <span>{tp('storefrontViewBtn', 'หน้าร้าน')}</span>
-              </button>
-              <button 
-                type="button" 
-                className="btn-walk-hud-cam"
-                onClick={() => {
-                  setCameraView('iso');
-                  onWalkModeChange(false);
-                  onRequestFullscreen(false);
-                }}
-                title={tp('switchTo3DTooltip', 'สลับเป็นมุมมอง 3D')}
-              >
-                <Eye size={13} />
-                <span>3D</span>
-              </button>
-              <button 
-                type="button" 
-                className="btn-walk-hud-cam"
-                onClick={() => {
-                  setCameraView('top');
-                  onWalkModeChange(false);
-                  onRequestFullscreen(false);
-                }}
-                title={tp('switchTo2DTooltip', 'สลับเป็นมุมมองแปลนด้านบน')}
-              >
-                <Layers size={13} />
-                <span>Top-Down</span>
-              </button>
-            </div>
-
-            {/* Top-Right Exit Button */}
-            <button 
-              type="button" 
-              id="btn-walk-hud-exit"
-              className="btn-walk-hud-exit"
-              onClick={() => {
-                wasPointerLockedRef.current = false;
-                if (document.exitPointerLock && document.pointerLockElement) {
-                  document.exitPointerLock();
-                }
-                setCameraView('iso');
-                onWalkModeChange(false);
-                onRequestFullscreen(false);
-              }}
-              title={tp('exitWalkModeTooltip', 'ออกจากโหมดเดินชมร้าน (กด ESC ได้)')}
-            >
-              <Minimize2 size={15} />
-              <span>{tp('exitWalkModeBtn', 'ออกจากโหมดเดิน (ESC)')}</span>
-            </button>
+        /* Top Gaming HUD in Walk Mode: Pure minimal floating controls */
+        <div className="walk-minimal-topbar">
+          <div className="walk-minimal-pill">
+            <span className="live-game-dot"></span>
+            <Footprints size={14} />
+            <span>{tp('walkMode', 'เดินชมร้าน 3D')}</span>
           </div>
-        )
+
+          <button 
+            type="button" 
+            id="btn-walk-minimal-exit"
+            className="btn-walk-minimal-exit"
+            onClick={() => {
+              wasPointerLockedRef.current = false;
+              if (document.exitPointerLock && document.pointerLockElement) {
+                document.exitPointerLock();
+              }
+              setCameraView('iso');
+              onWalkModeChange(false);
+              onRequestFullscreen(false);
+            }}
+            title={tp('exitWalkModeTooltip', 'ออกจากโหมดเดินชมร้าน (กด ESC ได้)')}
+          >
+            <X size={16} />
+            <span>{tp('exitWalkModeBtn', 'ออกจากโหมดเดิน (ESC)')}</span>
+          </button>
+        </div>
       )}
 
       {/* Main 3D WebGL Canvas */}
@@ -2525,70 +2471,16 @@ export default function Room3DStudio({
           </div>
         )}
 
-        {/* 2.1 Mobile & Tablet Walk Touch Hint */}
-        {activeCamPreset === 'walk' && (
-          <div className="walk-hud-touch-hint">
-            <span>{tp('touchWalkHint', '👆 ลากนิ้วบนหน้าจอเพื่อเดินชม หรือกดปุ่มควบคุมด้านล่าง')}</span>
-          </div>
-        )}
-
-        {/* 2.2 Click to Lock FPS Aim Floating Prompt (Desktop) */}
+        {/* Click to Lock FPS Aim Floating Prompt (Desktop only) */}
         {activeCamPreset === 'walk' && !isPointerLocked && (
           <div 
             id="walk-hud-lock-prompt"
-            className="walk-hud-lock-prompt"
+            className="walk-hud-lock-prompt hide-mobile"
             onClick={triggerPointerLock}
             title={tp('lockMouseHint', "คลิกเพื่อล็อคเมาส์หันมองรอบทิศ 360° แบบเกม FPS (กด ESC เพื่อออก)")}
           >
             <span className="prompt-icon">🎯</span>
             <span className="prompt-text">{tp('lockMouseHint', 'คลิกบนหน้าจอเพื่อล็อคเมาส์หันมองแบบเกม FPS')}</span>
-            <span className="prompt-badge">360° FPS</span>
-          </div>
-        )}
-
-        {/* 3. Walk Mode Immersion: Floating Bottom Controls Banner */}
-        {activeCamPreset === 'walk' && !isPlannerFullscreen && (
-          <div className="walk-hud-controls-pill">
-            <div className="hud-ctrl-item">
-              <span className="hud-key">W</span>
-              <span className="hud-key">A</span>
-              <span className="hud-key">S</span>
-              <span className="hud-key">D</span>
-              <span className="hud-txt">{tp('orText', 'หรือ')}</span>
-              <span className="hud-key">↑</span>
-              <span className="hud-key">←</span>
-              <span className="hud-key">↓</span>
-              <span className="hud-key">→</span>
-              <span className="hud-txt">{tp('walkThroughVenue', 'เดินชมในร้าน')}</span>
-            </div>
-            <div className="hud-ctrl-sep">•</div>
-            <div className="hud-ctrl-item">
-              <span className="hud-key">{isPointerLocked ? tp('mouse360', 'เมาส์ 360°') : tp('clickMouse', 'คลิกเมาส์')}</span>
-              <span className="hud-txt">{isPointerLocked ? tp('mouseLookLocked', 'ขยับเมาส์หันมองรอบทิศ (FPS Lock)') : tp('mouseLookUnlocked', 'คลิกเพื่อล็อคเมาส์หันมอง 360°')}</span>
-            </div>
-            <div className="hud-ctrl-sep">•</div>
-            <div className="hud-ctrl-item">
-              <span className="hud-key">Shift</span>
-              <span className="hud-txt">{tp('sprintKey', 'วิ่งเร็ว')}</span>
-            </div>
-            <div className="hud-ctrl-sep">•</div>
-            <div className="hud-ctrl-item">
-              <span className="hud-key">ESC</span>
-              <span className="hud-txt">{tp('exitWalkOrUnlock', 'ออกจากโหมดเดิน / ปลดล็อค')}</span>
-            </div>
-          </div>
-        )}
-
-        {/* 4. Walk Mode Immersion: Bottom-Left Live Coords & Info */}
-        {activeCamPreset === 'walk' && !isPlannerFullscreen && (
-          <div className="walk-hud-stats-pill">
-            <span className={`hud-stat-badge ${isPointerLocked ? 'locked' : ''}`}>
-              {isPointerLocked ? '🔒 FPS MOUSE ACTIVE' : 'FPS WALK'}
-            </span>
-            <span className="hud-stat-level">{tp('eyeLevel', 'สายตา 1.65ม.')}</span>
-            <span className="hud-stat-coord">
-              X: {fpsCoords.x >= 0 ? `+${fpsCoords.x.toFixed(1)}` : fpsCoords.x.toFixed(1)}{tp('unitM', 'ม.')} | Z: {fpsCoords.z >= 0 ? `+${fpsCoords.z.toFixed(1)}` : fpsCoords.z.toFixed(1)}{tp('unitM', 'ม.')}
-            </span>
           </div>
         )}
 

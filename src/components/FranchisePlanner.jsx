@@ -2863,6 +2863,7 @@ export default function FranchisePlanner() {
           )}
 
           {/* Top Control Bar: View Switcher & Material Customization */}
+          {!isWalkMode && (
           <div className="planner-top-controls glass-panel">
             {/* View Mode Toggle */}
             <div className="view-mode-toggle-group">
@@ -2986,11 +2987,13 @@ export default function FranchisePlanner() {
               </button>
             </div>
           </div>
+          )}
 
           <div className="planner-canvas-layout">
             {/* ========================================================================= */}
             {/* LEFT SIDEBAR: UNIFIED MANAGEMENT STUDIO (Details, Door, Materials, Add)  */}
             {/* ========================================================================= */}
+            {!isWalkMode && (
             <div className="studio-management-sidebar glass-panel">
               {/* 4-Tab Segmented Header */}
               <div className="inspector-tabs-nav">
@@ -3982,10 +3985,12 @@ export default function FranchisePlanner() {
                 </div>
               )}
             </div>
+            )}
 
             {/* Center: 3D Studio or 2D Canvas */}
             <div className="canvas-main-col">
               {/* Canvas Toolbar & Stats Header */}
+              {!isWalkMode && (
               <div className="canvas-stats-toolbar glass-panel">
                 <div className="canvas-stat-item">
                   <span className="stat-lbl">{tp('roomSize', 'ขนาดห้อง:')}</span>
@@ -4034,6 +4039,7 @@ export default function FranchisePlanner() {
                   </button>
                 )}
               </div>
+              )}
 
               {/* Viewport: 3D Studio or 2D Blueprint */}
               {viewMode === '3d' ? (
