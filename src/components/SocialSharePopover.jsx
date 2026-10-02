@@ -1,26 +1,101 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
-  Share2, Copy, Check, X, ExternalLink, Smartphone, MessageSquare
+  Share2, Copy, Check, X, Smartphone
 } from 'lucide-react';
+import { useTranslation } from '../context/LanguageContext';
 
 /**
  * SocialSharePopover
- * Sleek popover & mobile bottom-sheet for sharing tournaments & events across popular platforms:
- * Facebook, LINE, Messenger, Instagram, and direct Link Copy with toast feedback.
+ * High-performance, portal-rendered sharing bottom sheet (mobile) and anchored popover (desktop).
+ * Renders directly into document.body to prevent any parent sticky / backdrop-filter clipping.
  */
 export default function SocialSharePopover({
-  url = window.location.href,
-  title = 'G-Speed Living Plus Tournament',
-  subtitle = 'ศูนย์กีฬาและคอมมูนิตี้อีสปอร์ตครบวงจร',
+  url = typeof window !== 'undefined' ? window.location.href : '',
+  title = 'G-Speed Living Plus',
+  subtitle = '',
+  contentType = 'auto', // 'tournament' | 'activity' | 'auto'
   isOpen,
   onClose,
   triggerRef
 }) {
+  const { language } = useTranslation();
   const [copied, setCopied] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => (typeof window !== 'undefined' ? window.innerWidth <= 768 : false));
+  const [desktopCoords, setDesktopCoords] = useState({ top: 0, left: 0, width: 340 });
+
   const popoverRef = useRef(null);
 
-  // Click outside to close
+  // Client-side mount check for portals
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Responsive breakpoint tracking
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Compute anchored position for desktop
+  useLayoutEffect(() => {
+    if (!isOpen || isMobile || typeof window === 'undefined') return;
+
+    const updatePosition = () => {
+      if (!triggerRef?.current) return;
+      const rect = triggerRef.current.getBoundingClientRect();
+      const popoverWidth = 340;
+      const popoverHeight = popoverRef.current ? popoverRef.current.offsetHeight : 380;
+      const padding = 12;
+
+      // Align right edge of popover with right edge of trigger, or clamp to viewport
+      let left = rect.right - popoverWidth;
+      if (left < padding) left = padding;
+      if (left + popoverWidth > window.innerWidth - padding) {
+        left = window.innerWidth - popoverWidth - padding;
+      }
+
+      // Check vertical placement: default below, flip above if tight below
+      let top = rect.bottom + 8;
+      if (top + popoverHeight > window.innerHeight - padding) {
+        const flippedTop = rect.top - popoverHeight - 8;
+        if (flippedTop >= padding) {
+          top = flippedTop;
+        }
+      }
+
+      setDesktopCoords({
+        top: Math.round(top),
+        left: Math.round(left),
+        width: popoverWidth
+      });
+    };
+
+    updatePosition();
+    window.addEventListener('scroll', updatePosition, true);
+    window.addEventListener('resize', updatePosition);
+    return () => {
+      window.removeEventListener('scroll', updatePosition, true);
+      window.removeEventListener('resize', updatePosition);
+    };
+  }, [isOpen, isMobile, triggerRef]);
+
+  // Lock mobile body scroll when bottom sheet is open
+  useEffect(() => {
+    if (!isOpen || !isMobile || typeof document === 'undefined') return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isOpen, isMobile]);
+
+  // Click outside to close (desktop & backdrop)
   useEffect(() => {
     function handleClickOutside(event) {
       if (
@@ -54,7 +129,28 @@ export default function SocialSharePopover({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted || typeof document === 'undefined') return null;
+
+  // I18n text resolution
+  const isTournament = contentType === 'tournament' || 
+    (contentType === 'auto' && (
+      (typeof url === 'string' && url.includes('tournament')) ||
+      (typeof title === 'string' && (title.includes('Tournament') || title.includes('ทัวร์นาเมนต์') || title.includes('Championship') || title.includes('VALORANT') || title.includes('ROV') || title.includes('PUBG') || title.includes('Free Fire')))
+    ));
+
+  const modalTitle = isTournament
+    ? (language === 'zh' ? '分享赛事' : language === 'en' ? 'Share Tournament' : 'แชร์ทัวร์นาเมนต์')
+    : (language === 'zh' ? '分享活动' : language === 'en' ? 'Share Activity' : 'แชร์กิจกรรม');
+
+  const modalSubtitle = language === 'zh' 
+    ? '转发给好友或分享到社交平台' 
+    : language === 'en' 
+      ? 'Share with friends or to social media' 
+      : 'ส่งต่อให้เพื่อนหรือแชร์ลงโซเชียลมีเดีย';
+
+  const copyLabel = language === 'zh' ? '复制链接' : language === 'en' ? 'Copy link' : 'คัดลอกลิงก์';
+  const copiedLabel = language === 'zh' ? '已复制 ✓' : language === 'en' ? 'Copied ✓' : 'คัดลอกแล้ว ✓';
+  const nativeShareLabel = language === 'zh' ? '系统原生分享 / 其他应用' : language === 'en' ? 'Share via Device / Other Apps' : 'เปิดแชร์ผ่านระบบโทรศัพท์ / แอปอื่น ๆ';
 
   const showToast = (msg) => {
     setToastMessage(msg);
@@ -65,16 +161,17 @@ export default function SocialSharePopover({
     if (navigator?.clipboard?.writeText) {
       navigator.clipboard.writeText(url);
     } else {
-      // Fallback
       const textArea = document.createElement('textarea');
       textArea.value = url;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-9999px';
       document.body.appendChild(textArea);
       textArea.select();
       document.execCommand('copy');
       document.body.removeChild(textArea);
     }
     setCopied(true);
-    showToast('คัดลอกลิงก์สำเร็จแล้ว พร้อมส่งต่อได้ทันที ✓');
+    showToast(language === 'zh' ? '链接已成功复制！✓' : language === 'en' ? 'Link copied to clipboard! ✓' : 'คัดลอกลิงก์สำเร็จแล้ว พร้อมส่งต่อได้ทันที ✓');
     setTimeout(() => setCopied(false), 2500);
   };
 
@@ -89,9 +186,8 @@ export default function SocialSharePopover({
   };
 
   const shareToMessenger = () => {
-    // Attempt mobile scheme or fallback to web dialog
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    if (isMobile) {
+    const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isMobileDevice) {
       window.location.href = `fb-messenger://share?link=${encodeURIComponent(url)}`;
     } else {
       const msgUrl = `https://www.facebook.com/dialog/send?link=${encodeURIComponent(url)}&app_id=291494419107518&redirect_uri=${encodeURIComponent(url)}`;
@@ -100,9 +196,8 @@ export default function SocialSharePopover({
   };
 
   const shareToInstagram = () => {
-    // Copy link first since Instagram does not support direct URL injection on web
     handleCopyLink();
-    showToast('คัดลอกลิงก์แล้ว! เปิด Instagram เพื่อแชร์ใน Story หรือ DM 📸');
+    showToast(language === 'zh' ? '链接已复制！正在打开 Instagram... 📸' : language === 'en' ? 'Link copied! Opening Instagram... 📸' : 'คัดลอกลิงก์แล้ว! เปิด Instagram เพื่อแชร์ใน Story หรือ DM 📸');
     setTimeout(() => {
       window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
     }, 600);
@@ -113,7 +208,7 @@ export default function SocialSharePopover({
       try {
         await navigator.share({
           title,
-          text: `${title} - ${subtitle}`,
+          text: subtitle ? `${title} - ${subtitle}` : title,
           url
         });
       } catch (err) {
@@ -126,23 +221,36 @@ export default function SocialSharePopover({
     }
   };
 
-  return (
-    <>
-      {/* Backdrop for mobile */}
+  const content = (
+    <div className="social-share-portal-container">
+      {/* Full Viewport Backdrop */}
       <div 
         className="social-share-backdrop" 
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* Popover Card */}
+      {/* Popover / Mobile Bottom Sheet Card */}
       <div 
         ref={popoverRef} 
-        className="social-share-popover-box"
+        className={`social-share-popover-box ${isMobile ? 'is-mobile-bottom-sheet' : 'is-desktop-popover'}`}
+        style={!isMobile && desktopCoords.top > 0 ? {
+          position: 'fixed',
+          top: `${desktopCoords.top}px`,
+          left: `${desktopCoords.left}px`,
+          width: `${desktopCoords.width}px`
+        } : undefined}
         role="dialog"
         aria-modal="true"
-        aria-label="แชร์ทัวร์นาเมนต์นี้"
+        aria-label={modalTitle}
       >
+        {/* Mobile Drag Handle */}
+        {isMobile && (
+          <div className="sheet-drag-handle-bar" onClick={onClose} title="แตะเพื่อปิด">
+            <div className="sheet-drag-handle" />
+          </div>
+        )}
+
         {/* Header */}
         <div className="share-popover-header">
           <div className="share-header-left">
@@ -150,8 +258,8 @@ export default function SocialSharePopover({
               <Share2 size={16} className="text-blue" />
             </div>
             <div>
-              <h4 className="share-title">แชร์ทัวร์นาเมนต์</h4>
-              <p className="share-subtitle">ส่งต่อให้เพื่อนหรือแชร์ลงโซเชียลมีเดีย</p>
+              <h4 className="share-title">{modalTitle}</h4>
+              <p className="share-subtitle">{modalSubtitle}</p>
             </div>
           </div>
           <button 
@@ -160,7 +268,7 @@ export default function SocialSharePopover({
             onClick={onClose}
             aria-label="ปิดหน้าต่างแชร์"
           >
-            <X size={16} />
+            <X size={18} />
           </button>
         </div>
 
@@ -171,7 +279,7 @@ export default function SocialSharePopover({
           </div>
         )}
 
-        {/* Social Buttons Grid */}
+        {/* Social Channels Grid */}
         <div className="share-channels-grid">
           {/* Facebook */}
           <button 
@@ -247,29 +355,31 @@ export default function SocialSharePopover({
             {copied ? (
               <>
                 <Check size={14} className="text-emerald-500" />
-                <span>คัดลอกแล้ว ✓</span>
+                <span>{copiedLabel}</span>
               </>
             ) : (
               <>
                 <Copy size={14} />
-                <span>คัดลอกลิงก์</span>
+                <span>{copyLabel}</span>
               </>
             )}
           </button>
         </div>
 
         {/* Native Mobile Share Button (if supported) */}
-        {typeof navigator !== 'undefined' && navigator.share && (
+        {typeof navigator !== 'undefined' && Boolean(navigator.share) && (
           <button
             type="button"
             onClick={handleNativeShare}
             className="btn-share-native-mobile"
           >
             <Smartphone size={14} />
-            <span>เปิดแชร์ผ่านระบบโทรศัพท์ / แอปอื่น ๆ</span>
+            <span>{nativeShareLabel}</span>
           </button>
         )}
       </div>
-    </>
+    </div>
   );
+
+  return createPortal(content, document.body);
 }

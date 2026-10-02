@@ -25474,22 +25474,81 @@
   border-color: #38bdf8;
 }
 
+.social-share-portal-container {
+  position: relative;
+  z-index: 100040;
+}
+
 .social-share-backdrop {
-  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 100040;
+  display: block;
+  animation: shareBackdropFadeIn 0.2s ease-out;
+}
+
+@keyframes shareBackdropFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .social-share-popover-box {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  width: 320px;
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 16px;
-  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.16);
-  z-index: 1000;
+  box-sizing: border-box;
+}
+
+.social-share-popover-box.is-desktop-popover {
+  position: fixed;
+  width: 340px;
+  border-radius: 18px;
+  padding: 16px 18px 18px;
+  box-shadow: 0 20px 48px -8px rgba(15, 23, 42, 0.28), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  z-index: 100050;
   animation: sharePopoverFadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.social-share-popover-box.is-mobile-bottom-sheet {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: auto !important;
+  width: 100% !important;
+  max-width: 500px !important;
+  margin: 0 auto !important;
+  border-radius: 24px 24px 0 0 !important;
+  border-bottom: none !important;
+  padding: 8px 20px max(24px, env(safe-area-inset-bottom, 20px)) 20px !important;
+  box-shadow: 0 -12px 48px rgba(0, 0, 0, 0.35) !important;
+  z-index: 100050 !important;
+  animation: shareSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  max-height: 88vh !important;
+  overflow-y: auto !important;
+}
+
+.sheet-drag-handle-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 0 14px 0;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.sheet-drag-handle {
+  width: 44px;
+  height: 5px;
+  background: #cbd5e1;
+  border-radius: 999px;
+  transition: background 0.15s ease;
+}
+
+.sheet-drag-handle-bar:hover .sheet-drag-handle {
+  background: #94a3b8;
 }
 
 @keyframes sharePopoverFadeIn {
@@ -26590,26 +26649,7 @@
     gap: 4px;
   }
   
-  /* Mobile Share Popover as Modal / Bottom-Sheet */
-  .social-share-backdrop {
-    display: block;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 999;
-  }
-  .social-share-popover-box {
-    position: fixed;
-    top: auto;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    border-radius: 20px 20px 0 0;
-    padding: 20px;
-    z-index: 1000;
-    animation: shareSlideUp 0.25s ease-out;
-  }
+  /* Mobile Share Popover as Modal / Bottom-Sheet (handled via portal & is-mobile-bottom-sheet) */
   @keyframes shareSlideUp {
     from { transform: translateY(100%); }
     to { transform: translateY(0); }

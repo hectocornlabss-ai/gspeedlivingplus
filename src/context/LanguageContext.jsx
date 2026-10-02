@@ -3131,15 +3131,22 @@ export function LanguageProvider({ children }) {
     { code: 'zh', label: '中文', flag: '🇨🇳', short: 'CN' }
   ];
 
-  // Listen for translation cache updates to trigger reactive re-render
+  // Listen for translation cache updates to trigger reactive re-render (debounced)
   const [, setCacheRevision] = useState(0);
   useEffect(() => {
+    let debounceTimer = null;
     const handleCacheUpdate = () => {
-      setCacheRevision(prev => prev + 1);
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        setCacheRevision(prev => prev + 1);
+      }, 150);
     };
     if (typeof window !== 'undefined') {
       window.addEventListener('glp_translation_cache_updated', handleCacheUpdate);
-      return () => window.removeEventListener('glp_translation_cache_updated', handleCacheUpdate);
+      return () => {
+        if (debounceTimer) clearTimeout(debounceTimer);
+        window.removeEventListener('glp_translation_cache_updated', handleCacheUpdate);
+      };
     }
   }, []);
 

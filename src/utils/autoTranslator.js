@@ -44,27 +44,53 @@ if (typeof window !== 'undefined') {
 // In-flight request deduplication map
 const pendingRequests = new Map();
 
+// Debounce state for localStorage persistence and event dispatching
+let cacheSaveTimer = null;
+let cacheDispatchTimer = null;
+const changedKeysInBatch = new Set();
+
+function scheduleCachePersistence() {
+  if (typeof window === 'undefined') return;
+
+  if (!cacheSaveTimer) {
+    cacheSaveTimer = setTimeout(() => {
+      cacheSaveTimer = null;
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(translationCache));
+      } catch (e) {
+        console.warn('Failed to save to translations cache:', e);
+      }
+    }, 400);
+  }
+
+  if (!cacheDispatchTimer) {
+    cacheDispatchTimer = setTimeout(() => {
+      cacheDispatchTimer = null;
+      window.dispatchEvent(new CustomEvent('glp_translation_cache_updated', {
+        detail: { count: changedKeysInBatch.size }
+      }));
+      changedKeysInBatch.clear();
+    }, 150);
+  }
+}
+
 /**
- * Save translation entry to persistent cache and notify listeners
+ * Save translation entry to persistent cache and notify listeners (debounced and batched)
  */
 export function saveToTranslationCache(text, lang, translatedText) {
   if (!text || !lang || !translatedText || text === translatedText) return;
   const key = text.trim();
+  if (translationCache[key] && translationCache[key][lang] === translatedText) {
+    return; // Already in cache, avoid redundant writes and events
+  }
+
   if (!translationCache[key]) {
     translationCache[key] = {};
   }
   translationCache[key][lang] = translatedText;
+  changedKeysInBatch.add(key);
 
-  if (typeof window !== 'undefined') {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(translationCache));
-      window.dispatchEvent(new CustomEvent('glp_translation_cache_updated', {
-        detail: { text: key, lang, translated: translatedText }
-      }));
-    } catch (e) {
-      console.warn('Failed to save to translations cache:', e);
-    }
-  }
+  scheduleCachePersistence();
 }
 
 /**
@@ -1099,7 +1125,10 @@ export function translateDynamic(text, targetLang = 'th', triggerAsync = true) {
   // 3. Regex / Pattern Transformer (Dates, currencies, attendees, times)
   const patternMatch = matchPatternTranslation(cleanText, targetLang);
   if (patternMatch) {
-    saveToTranslationCache(cleanText, targetLang, patternMatch);
+    if (!translationCache[cleanText]) {
+      translationCache[cleanText] = {};
+    }
+    translationCache[cleanText][targetLang] = patternMatch;
     return patternMatch;
   }
 
