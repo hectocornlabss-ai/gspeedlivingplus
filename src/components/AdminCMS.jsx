@@ -1515,14 +1515,13 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
     category: 'tournament',
     author: 'กองบรรณาธิการ G-Speed',
     date: 'กันยายน 2026',
-    readTime: '3 นาทีในการอ่าน',
     desc: '',
     image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80',
     imageAlt: 'ภาพบรรยากาศการแข่งขันอีสปอร์ต ณ G-Speed Arena',
     tag: 'LAN TOURNAMENT',
     tagsText: '#VALORANT, #LAN, #EsportsThailand, #GspeedArena',
     partner: 'ASUS ROG & NVIDIA',
-    location: 'G-Speed Esport Arena รามคำแหง (Main Stage)',
+    location: 'G-Speed Esport Arena รามคำแหง 53 กรุงเทพฯ',
     organizer: 'G-Speed Operations Team',
     prizePool: '฿50,000 พร้อมถ้วยรางวัล',
     attendees: '300+ คน',
@@ -2769,7 +2768,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
             {hasTabPermission('hardware-pricing') && <option value="hardware-pricing">04. สเปกคอม & ราคาโครงสร้าง</option>}
             {hasTabPermission('tourney-apps') && <option value="tourney-apps">05. ทัวร์นาเมนต์ & สายแข่ง</option>}
             {hasTabPermission('arena-bookings') && <option value="arena-bookings">06. คำขอจัดงานแข่ง Esport</option>}
-            {hasTabPermission('articles') && <option value="articles">07. กิจกรรม & บทความ (Articles)</option>}
+            {hasTabPermission('articles') && <option value="articles">07. อัลบั้มภาพกิจกรรม (Activities)</option>}
             {hasTabPermission('ai-rag') && <option value="ai-rag">08. ระบบ AI & คลังความรู้ RAG</option>}
             {hasTabPermission('seo-tools') && <option value="seo-tools">09. เครื่องมือ SEO & Marketing</option>}
             {hasTabPermission('sections') && <option value="sections">10. เนื้อหาแต่ละ Section</option>}
@@ -2896,7 +2895,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
               >
                 <FileText size={18} />
                 <div>
-                  <strong>07. กิจกรรม & บทความ (Articles)</strong>
+                  <strong>07. อัลบั้มภาพกิจกรรม (Activities)</strong>
                   <span>กำหนด URL Slug, ลิงก์แยก, รูปภาพ</span>
                 </div>
               </button>
@@ -6849,7 +6848,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                         <label>หัวข้อแบนเนอร์</label>
                         <input 
                           type="text" className="form-input"
-                          value={siteData.featureBanners?.bannerLeft?.title || ''}
+                          value={siteData.featureBanners?.bannerLeft?.title || 'รวมภาพกิจกรรม'}
                           onChange={e => updateSectionConfig('featureBanners', {
                             ...siteData.featureBanners,
                             bannerLeft: { ...siteData.featureBanners?.bannerLeft, title: e.target.value }
@@ -6861,7 +6860,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                         <label>คำบรรยายสั้น</label>
                         <textarea 
                           className="form-input form-textarea" rows="2"
-                          value={siteData.featureBanners?.bannerLeft?.desc || ''}
+                          value={siteData.featureBanners?.bannerLeft?.desc || 'ภาพงานแข่ง LAN, งานเปิดตัวเกม, มีตติ้ง และพิธีมอบรางวัลชนะเลิศตลอดทั้งปี'}
                           onChange={e => updateSectionConfig('featureBanners', {
                             ...siteData.featureBanners,
                             bannerLeft: { ...siteData.featureBanners?.bannerLeft, desc: e.target.value }
@@ -6874,7 +6873,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                           <label>ข้อความปุ่มลิงก์</label>
                           <input 
                             type="text" className="form-input"
-                            value={siteData.featureBanners?.bannerLeft?.linkText || ''}
+                            value={siteData.featureBanners?.bannerLeft?.linkText || 'สำรวจอัลบั้มภาพกิจกรรม'}
                             onChange={e => updateSectionConfig('featureBanners', {
                               ...siteData.featureBanners,
                               bannerLeft: { ...siteData.featureBanners?.bannerLeft, linkText: e.target.value }
@@ -6885,7 +6884,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                           <label>URL ปลายทาง</label>
                           <input 
                             type="text" className="form-input"
-                            value={siteData.featureBanners?.bannerLeft?.linkTarget || '#activities'}
+                            value={siteData.featureBanners?.bannerLeft?.linkTarget || '/activities'}
                             onChange={e => updateSectionConfig('featureBanners', {
                               ...siteData.featureBanners,
                               bannerLeft: { ...siteData.featureBanners?.bannerLeft, linkTarget: e.target.value }
@@ -6949,15 +6948,15 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                     {/* Right Banner: News */}
                     <div className="form-subblock">
                       <h5 className="form-subblock-title">
-                        <FileText size={14} className="text-blue" />
-                        <span>แบนเนอร์ฝั่งขวา: บทความ & ข่าวสาร (Blog & News)</span>
+                        <Trophy size={14} className="text-blue" />
+                        <span>แบนเนอร์ฝั่งขวา: ทัวร์นาเมนต์ (Tournaments)</span>
                       </h5>
 
                       <div className="form-group">
                         <label>ป้ายหัวข้อเล็ก</label>
                         <input 
                           type="text" className="form-input"
-                          value={siteData.featureBanners?.bannerRight?.badge || 'GLP BLOG & NEWS'}
+                          value={siteData.featureBanners?.bannerRight?.badge || 'GLP TOURNAMENTS'}
                           onChange={e => updateSectionConfig('featureBanners', {
                             ...siteData.featureBanners,
                             bannerRight: { ...siteData.featureBanners?.bannerRight, badge: e.target.value }
@@ -6969,7 +6968,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                         <label>หัวข้อแบนเนอร์</label>
                         <input 
                           type="text" className="form-input"
-                          value={siteData.featureBanners?.bannerRight?.title || ''}
+                          value={siteData.featureBanners?.bannerRight?.title || 'ทัวร์นาเมนต์การแข่งขัน'}
                           onChange={e => updateSectionConfig('featureBanners', {
                             ...siteData.featureBanners,
                             bannerRight: { ...siteData.featureBanners?.bannerRight, title: e.target.value }
@@ -6981,7 +6980,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                         <label>คำบรรยายสั้น</label>
                         <textarea 
                           className="form-input form-textarea" rows="2"
-                          value={siteData.featureBanners?.bannerRight?.desc || ''}
+                          value={siteData.featureBanners?.bannerRight?.desc || 'เกาะติดผลการแข่งขัน สายแข่งสด (Brackets) และลงทะเบียนประลองฝีมือระดับประเทศ'}
                           onChange={e => updateSectionConfig('featureBanners', {
                             ...siteData.featureBanners,
                             bannerRight: { ...siteData.featureBanners?.bannerRight, desc: e.target.value }
@@ -6994,7 +6993,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                           <label>ข้อความปุ่มลิงก์</label>
                           <input 
                             type="text" className="form-input"
-                            value={siteData.featureBanners?.bannerRight?.linkText || ''}
+                            value={siteData.featureBanners?.bannerRight?.linkText || 'สำรวจทัวร์นาเมนต์ทั้งหมด'}
                             onChange={e => updateSectionConfig('featureBanners', {
                               ...siteData.featureBanners,
                               bannerRight: { ...siteData.featureBanners?.bannerRight, linkText: e.target.value }
@@ -7005,7 +7004,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                           <label>URL ปลายทาง</label>
                           <input 
                             type="text" className="form-input"
-                            value={siteData.featureBanners?.bannerRight?.linkTarget || '#news'}
+                            value={siteData.featureBanners?.bannerRight?.linkTarget || '/tournaments'}
                             onChange={e => updateSectionConfig('featureBanners', {
                               ...siteData.featureBanners,
                               bannerRight: { ...siteData.featureBanners?.bannerRight, linkTarget: e.target.value }
@@ -9062,10 +9061,10 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                 <div>
                   <h3 className="panel-title">
                     <FileText size={20} className="text-blue" />
-                    <span>จัดการกิจกรรม & บทความ (WordPress-like Articles CMS)</span>
+                    <span>จัดการอัลบั้มภาพกิจกรรม (Activities & Gallery CMS)</span>
                   </h3>
                   <p className="panel-desc">
-                    จัดการข้อมูลกิจกรรม กำหนด URL ปลายทาง (Slug) สำหรับแชร์ลิงก์แยกเหมือนบทความ WordPress พร้อมรูปภาพ แกลเลอรี และข้อมูลพาร์ตเนอร์
+                    จัดการข้อมูลอัลบั้มภาพกิจกรรม กำหนด URL ปลายทาง (Slug) สำหรับแชร์ลิงก์แยก พร้อมรูปภาพ แกลเลอรี และข้อมูลพาร์ตเนอร์
                   </p>
                 </div>
                 <button 
@@ -9074,7 +9073,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                   onClick={() => setShowAddActivityModal(true)}
                 >
                   <Plus size={15} />
-                  <span>เพิ่มกิจกรรม / บทความใหม่</span>
+                  <span>เพิ่มอัลบั้มภาพกิจกรรมใหม่</span>
                 </button>
               </div>
 

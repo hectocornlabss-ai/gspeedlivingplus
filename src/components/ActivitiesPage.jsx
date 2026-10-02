@@ -191,17 +191,17 @@ export default function ActivitiesPage({
           <div className="activities-count-heading">
             <span>
               {language === 'th' ? (
-                <>แสดงผล <strong>{filteredActivities.length}</strong> บทความ & อัลบั้มภาพกิจกรรม</>
+                <>แสดงผล <strong>{filteredActivities.length}</strong> อัลบั้มภาพกิจกรรม</>
               ) : (
                 <><strong>{filteredActivities.length}</strong> {t('common.overview')}</>
               )}
             </span>
             <span className="click-hint-badge">
               {language === 'th' 
-                ? '💡 คลิกที่การ์ดเพื่ออ่านบทความและชมภาพขนาดเต็ม' 
+                ? '💡 คลิกที่การ์ดเพื่อชมภาพบรรยากาศขนาดเต็ม' 
                 : language === 'zh'
-                ? '💡 点击卡片查看完整文章与高清相册'
-                : '💡 Click card to read full article & view high-res gallery'}
+                ? '💡 点击卡片查看高清活动相册'
+                : '💡 Click card to view high-res photo gallery'}
             </span>
           </div>
 
@@ -235,7 +235,7 @@ export default function ActivitiesPage({
                     <p className="gallery-desc">{translateDynamic(item.desc)}</p>
 
                     <div className="gallery-view-link text-blue">
-                      <span>{language === 'th' ? 'อ่านบทความ & ชมภาพกิจกรรมเต็ม' : (language === 'zh' ? '阅读文章 & 查看完整相册' : 'Read Article & View Full Gallery')}</span>
+                      <span>{language === 'th' ? 'ชมภาพกิจกรรมเต็ม' : (language === 'zh' ? '查看完整相册' : 'View Full Gallery')}</span>
                       <ExternalLink size={14} />
                     </div>
                   </div>

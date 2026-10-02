@@ -795,10 +795,10 @@ export const DEFAULT_SITE_DATA = {
   featureBanners: {
     bannerLeft: {
       badge: 'GLP OUR EVENTS',
-      title: 'รวมภาพกิจกรรม & บรรยากาศสด',
+      title: 'รวมภาพกิจกรรม',
       desc: 'ภาพงานแข่ง LAN, งานเปิดตัวเกม, มีตติ้ง และพิธีมอบรางวัลชนะเลิศตลอดทั้งปี',
       linkText: 'สำรวจอัลบั้มภาพกิจกรรม',
-      linkTarget: '#activities',
+      linkTarget: '/activities',
       bgColor: '#1e3a8a',
       titleColor: '#ffffff',
       descColor: '#cbd5e1',
@@ -807,17 +807,17 @@ export const DEFAULT_SITE_DATA = {
       alt: 'ภาพบรรยากาศการแข่งขันเกมและกองเชียร์อีสปอร์ต ณ GLP Arena'
     },
     bannerRight: {
-      badge: 'GLP BLOG & NEWS',
-      title: 'บทความ ข่าวสาร & ไฮไลต์เกม',
-      desc: 'เกาะติดผลการแข่งขัน ทริกการเล่น สเปกอุปกรณ์ใหม่ และประกาศจากทางร้าน',
-      linkText: 'อ่านบทความล่าสุด',
-      linkTarget: '#news',
+      badge: 'GLP TOURNAMENTS',
+      title: 'ทัวร์นาเมนต์การแข่งขัน',
+      desc: 'เกาะติดผลการแข่งขัน สายแข่งสด (Brackets) และลงทะเบียนประลองฝีมือระดับประเทศ',
+      linkText: 'สำรวจทัวร์นาเมนต์ทั้งหมด',
+      linkTarget: '/tournaments',
       bgColor: '#1e293b',
       titleColor: '#ffffff',
       descColor: '#cbd5e1',
       bgGradient: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
       image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80',
-      alt: 'บทความ ข่าวสารวงการเกม และอัปเดตสเปกฮาร์ดแวร์ GLP Esports'
+      alt: 'ตารางการแข่งขันและทัวร์นาเมนต์อีสปอร์ต GLP Esports Arena'
     }
   },
   tournamentsSection: {
@@ -1603,20 +1603,33 @@ export function SiteDataProvider({ children }) {
           }
         }
         if (merged.featureBanners) {
-          if (!merged.featureBanners.bannerLeft?.image) {
-            merged.featureBanners.bannerLeft = {
-              ...DEFAULT_SITE_DATA.featureBanners.bannerLeft,
-              ...(merged.featureBanners.bannerLeft || {}),
-              image: DEFAULT_SITE_DATA.featureBanners.bannerLeft.image
-            };
-          }
-          if (!merged.featureBanners.bannerRight?.image) {
-            merged.featureBanners.bannerRight = {
-              ...DEFAULT_SITE_DATA.featureBanners.bannerRight,
-              ...(merged.featureBanners.bannerRight || {}),
-              image: DEFAULT_SITE_DATA.featureBanners.bannerRight.image
-            };
-          }
+          // Check if bannerRight still has old 'บทความ' / '#news' content and migrate
+          const isOldRight = !merged.featureBanners.bannerRight?.title || 
+            merged.featureBanners.bannerRight.title.includes('บทความ') || 
+            merged.featureBanners.bannerRight.badge?.includes('BLOG') ||
+            merged.featureBanners.bannerRight.linkTarget === '#news';
+
+          merged.featureBanners.bannerRight = {
+            ...DEFAULT_SITE_DATA.featureBanners.bannerRight,
+            ...(merged.featureBanners.bannerRight || {}),
+            badge: isOldRight ? 'GLP TOURNAMENTS' : (merged.featureBanners.bannerRight.badge || 'GLP TOURNAMENTS'),
+            title: isOldRight ? 'ทัวร์นาเมนต์การแข่งขัน' : (merged.featureBanners.bannerRight.title || 'ทัวร์นาเมนต์การแข่งขัน'),
+            desc: isOldRight ? 'เกาะติดผลการแข่งขัน สายแข่งสด (Brackets) และลงทะเบียนประลองฝีมือระดับประเทศ' : (merged.featureBanners.bannerRight.desc || 'เกาะติดผลการแข่งขัน สายแข่งสด (Brackets) และลงทะเบียนประลองฝีมือระดับประเทศ'),
+            linkText: isOldRight ? 'สำรวจทัวร์นาเมนต์ทั้งหมด' : (merged.featureBanners.bannerRight.linkText || 'สำรวจทัวร์นาเมนต์ทั้งหมด'),
+            linkTarget: isOldRight ? '/tournaments' : (merged.featureBanners.bannerRight.linkTarget || '/tournaments'),
+            image: merged.featureBanners.bannerRight?.image || DEFAULT_SITE_DATA.featureBanners.bannerRight.image
+          };
+
+          const isOldLeft = merged.featureBanners.bannerLeft?.title?.includes('บรรยากาศสด') || 
+            merged.featureBanners.bannerLeft?.linkTarget === '#activities';
+
+          merged.featureBanners.bannerLeft = {
+            ...DEFAULT_SITE_DATA.featureBanners.bannerLeft,
+            ...(merged.featureBanners.bannerLeft || {}),
+            title: isOldLeft ? 'รวมภาพกิจกรรม' : (merged.featureBanners.bannerLeft?.title || 'รวมภาพกิจกรรม'),
+            linkTarget: isOldLeft ? '/activities' : (merged.featureBanners.bannerLeft?.linkTarget || '/activities'),
+            image: merged.featureBanners.bannerLeft?.image || DEFAULT_SITE_DATA.featureBanners.bannerLeft.image
+          };
         }
 
         if (!Array.isArray(merged.activityCategories) || merged.activityCategories.length === 0) {
@@ -1652,7 +1665,11 @@ export function SiteDataProvider({ children }) {
         if (Array.isArray(merged.gallery)) {
           merged.gallery = merged.gallery.map(g => ({
             ...g,
-            tags: Array.isArray(g.tags) && g.tags.length > 0 ? g.tags : (INITIAL_GALLERY.find(ig => ig.id === g.id)?.tags || ['#EsportsThailand', '#GLP2026', '#Tournament', '#GamingArena'])
+            tags: Array.isArray(g.tags) && g.tags.length > 0 ? g.tags : (INITIAL_GALLERY.find(ig => ig.id === g.id)?.tags || ['#EsportsThailand', '#GLP2026', '#Tournament', '#GamingArena']),
+            location: (g.location && g.location.trim() && g.location !== 'G-Speed Esport Arena รามคำแหง (โซนเวที Main Stage)')
+              ? g.location
+              : 'G-Speed Esport Arena รามคำแหง 53 กรุงเทพฯ',
+            attendees: g.attendees || '300+ คน'
           }));
         }
 

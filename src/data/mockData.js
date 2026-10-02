@@ -1038,7 +1038,7 @@ export const GALLERY_ACTIVITIES = [
     tag: 'LAN TOURNAMENT',
     tags: ['#EsportsThailand', '#GLP2026', '#Tournament', '#GamingArena', '#LANParty'],
     partner: 'ASUS ROG & NVIDIA',
-    location: 'G-Speed Esport Arena รามคำแหง (โซนเวที Main Stage)',
+    location: 'G-Speed Esport Arena รามคำแหง 53 กรุงเทพฯ',
     organizer: 'G-Speed ร่วมกับ ASUS ROG และ NVIDIA Thailand',
     prizePool: '฿50,000 พร้อมอุปกรณ์เกมมิ่งเกียร์ ROG',
     attendees: '320+ คน (32 ทีมทั่วประเทศ)',

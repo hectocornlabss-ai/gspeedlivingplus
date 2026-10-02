@@ -301,7 +301,7 @@ export default function CMSLivePreviewModal({
                           {siteData?.featureBanners?.bannerLeft?.badge || 'GLP OUR EVENTS'}
                         </span>
                         <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: siteData?.featureBanners?.bannerLeft?.titleColor || (isDarkLeft ? '#fff' : '#0f172a'), marginBottom: '8px' }}>
-                          {siteData?.featureBanners?.bannerLeft?.title || 'รวมภาพกิจกรรม & บรรยากาศสด'}
+                          {siteData?.featureBanners?.bannerLeft?.title || 'รวมภาพกิจกรรม'}
                         </h3>
                         <p style={{ fontSize: '0.84rem', color: siteData?.featureBanners?.bannerLeft?.descColor || (isDarkLeft ? '#cbd5e1' : '#475569'), lineHeight: '1.5', margin: 0 }}>
                           {siteData?.featureBanners?.bannerLeft?.desc || 'ภาพงานแข่ง LAN, งานเปิดตัวเกม, มีตติ้ง และพิธีมอบรางวัลชนะเลิศตลอดทั้งปี'}
@@ -313,7 +313,7 @@ export default function CMSLivePreviewModal({
                       </div>
                     </div>
 
-                    {/* Right Banner: News */}
+                    {/* Right Banner: Tournaments */}
                     <div style={{
                       padding: '28px 24px',
                       borderRadius: '16px',
@@ -328,17 +328,17 @@ export default function CMSLivePreviewModal({
                     }}>
                       <div>
                         <span style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '999px', background: 'rgba(255, 255, 255, 0.15)', color: '#fff', fontSize: '0.72rem', fontWeight: 700, marginBottom: '12px' }}>
-                          {siteData?.featureBanners?.bannerRight?.badge || 'GLP BLOG & NEWS'}
+                          {siteData?.featureBanners?.bannerRight?.badge || 'GLP TOURNAMENTS'}
                         </span>
                         <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: siteData?.featureBanners?.bannerRight?.titleColor || (isDarkRight ? '#fff' : '#0f172a'), marginBottom: '8px' }}>
-                          {siteData?.featureBanners?.bannerRight?.title || 'บทความ ข่าวสาร & ไฮไลต์เกม'}
+                          {siteData?.featureBanners?.bannerRight?.title || 'ทัวร์นาเมนต์การแข่งขัน'}
                         </h3>
                         <p style={{ fontSize: '0.84rem', color: siteData?.featureBanners?.bannerRight?.descColor || (isDarkRight ? '#cbd5e1' : '#475569'), lineHeight: '1.5', margin: 0 }}>
-                          {siteData?.featureBanners?.bannerRight?.desc || 'เกาะติดผลการแข่งขัน ทริกการเล่น สเปกอุปกรณ์ใหม่ และประกาศจากทางร้าน'}
+                          {siteData?.featureBanners?.bannerRight?.desc || 'เกาะติดผลการแข่งขัน สายแข่งสด (Brackets) และลงทะเบียนประลองฝีมือระดับประเทศ'}
                         </p>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#38bdf8', fontWeight: 600, fontSize: '0.86rem', marginTop: '20px' }}>
-                        <span>{siteData?.featureBanners?.bannerRight?.linkText || 'อ่านบทความล่าสุด'}</span>
+                        <span>{siteData?.featureBanners?.bannerRight?.linkText || 'สำรวจทัวร์นาเมนต์ทั้งหมด'}</span>
                         <ArrowRight size={16} />
                       </div>
                     </div>

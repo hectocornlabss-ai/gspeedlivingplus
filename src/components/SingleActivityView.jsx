@@ -418,11 +418,6 @@ export default function SingleActivityView({
               <span>{translateDynamic(activity.date)}</span>
             </span>
 
-            <span className="article-read-badge">
-              <Clock size={14} />
-              <span>{activity.readTime ? translateDynamic(activity.readTime) : `3 ${t('singleActivity.minutes')}`}</span>
-            </span>
-
             {activity.partner && (
               <span className="article-partner-badge">
                 <ShieldCheck size={14} className="text-blue" />
@@ -686,7 +681,7 @@ export default function SingleActivityView({
                     <ImageIcon size={14} />
                     <span>PHOTO HIGHLIGHTS ({galleryPhotos.length} {language === 'zh' ? '张照片' : language === 'en' ? 'Photos' : 'ภาพ'})</span>
                   </div>
-                  <h3>{language === 'zh' ? '高清现场精彩瞬间图集' : language === 'en' ? 'High-Resolution Atmosphere Photo Gallery' : 'แกลเลอรีภาพบรรยากาศความละเอียดสูง'}</h3>
+                  <h3>{language === 'zh' ? '超燃现场精彩瞬间图集' : language === 'en' ? 'High-Octane Atmosphere Photo Gallery' : 'แกลเลอรีภาพบรรยากาศความมันส์'}</h3>
                   <p>{language === 'zh' ? '点击照片开启全屏超清预览' : language === 'en' ? 'Click image to open full-screen HD preview' : 'คลิกที่รูปภาพเพื่อเปิดดูขนาดใหญ่แบบ Full-Screen HD'}</p>
                 </div>
               </div>
@@ -832,7 +827,7 @@ export default function SingleActivityView({
                   <div className="fact-icon-box"><MapPin size={16} /></div>
                   <div className="fact-content">
                     <span className="fact-lbl">{t('common.location')}</span>
-                    <strong className="fact-val">{translateDynamic(activity.location || 'G-Speed Esport Arena (Main Stage Zone)')}</strong>
+                    <strong className="fact-val">{translateDynamic(activity.location || 'G-Speed Esport Arena รามคำแหง 53 กรุงเทพฯ')}</strong>
                   </div>
                 </li>
 
@@ -848,7 +843,7 @@ export default function SingleActivityView({
                   <div className="fact-icon-box"><Users size={16} /></div>
                   <div className="fact-content">
                     <span className="fact-lbl">{language === 'th' ? 'ผู้เข้าร่วมงาน' : (language === 'zh' ? '参赛规模' : 'Attendees & Teams')}</span>
-                    <strong className="fact-val">{translateDynamic(activity.attendees || '350+ คน (32 ทีม)')}</strong>
+                    <strong className="fact-val">{translateDynamic(activity.attendees || '300+ คน')}</strong>
                   </div>
                 </li>
 

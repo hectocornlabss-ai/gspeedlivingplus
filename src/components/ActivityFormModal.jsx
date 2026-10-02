@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
   X, Save, RefreshCw, Upload, Image as ImageIcon, Tag, Plus, Trash2, 
-  ChevronUp, ChevronDown, Check, Star, AlertCircle, Info, ExternalLink, Globe, Sparkles
+  ChevronUp, ChevronDown, Check, Star, AlertCircle, Info, ExternalLink, Globe, Sparkles,
+  MapPin, Users
 } from 'lucide-react';
 import ArticleBlockEditor from './ArticleBlockEditor';
 import { compressAndConvertToWebP } from '../utils/imageOptimizer';
@@ -16,8 +17,9 @@ const DEFAULT_NEW_ACTIVITY = {
   partner: 'G-Speed Living Plus',
   tags: ['#EsportsThailand', '#GLP2026', '#GamingArena'],
   date: 'ตุลาคม 2026',
-  readTime: '3 นาทีในการอ่าน',
   prizePool: '',
+  location: 'G-Speed Esport Arena รามคำแหง 53 กรุงเทพฯ',
+  attendees: '300+ คน',
   image: '',
   imageAlt: '',
   desc: '',
@@ -55,6 +57,8 @@ export default function ActivityFormModal({
       return {
         ...DEFAULT_NEW_ACTIVITY,
         ...initialData,
+        location: initialData.location || 'G-Speed Esport Arena รามคำแหง 53 กรุงเทพฯ',
+        attendees: initialData.attendees || '300+ คน',
         galleryPhotos: parsedPhotos
       };
     }
@@ -86,6 +90,8 @@ export default function ActivityFormModal({
         setDraft({
           ...DEFAULT_NEW_ACTIVITY,
           ...initialData,
+          location: initialData.location || 'G-Speed Esport Arena รามคำแหง 53 กรุงเทพฯ',
+          attendees: initialData.attendees || '300+ คน',
           galleryPhotos: parsedPhotos
         });
       } else {
@@ -548,8 +554,8 @@ export default function ActivityFormModal({
             </div>
           </div>
 
-          {/* Row 4: Date, Read Time, Prize Pool */}
-          <div className="form-row-3">
+          {/* Row 4: Date & Prize Pool */}
+          <div className="form-row-2">
             <div className="form-group">
               <label>วันที่จัดกิจกรรม (เช่น ตุลาคม 2026)</label>
               <input 
@@ -557,16 +563,6 @@ export default function ActivityFormModal({
                 className="form-input"
                 value={draft.date || ''}
                 onChange={e => updateField('date', e.target.value)}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>เวลาที่ใช้ในการอ่าน (เช่น 3 นาที)</label>
-              <input 
-                type="text" 
-                className="form-input"
-                value={draft.readTime || '3 นาทีในการอ่าน'}
-                onChange={e => updateField('readTime', e.target.value)}
               />
             </div>
 
@@ -579,6 +575,89 @@ export default function ActivityFormModal({
                 value={draft.prizePool || ''}
                 onChange={e => updateField('prizePool', e.target.value)}
               />
+            </div>
+          </div>
+
+          {/* Row 4.5: Location & Attendees (Customizable & Preset Supported) */}
+          <div className="form-row-2" style={{ marginTop: '4px', marginBottom: '14px' }}>
+            <div className="form-group" style={{ margin: 0 }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, color: '#0f172a' }}>
+                <MapPin size={15} style={{ color: '#0284c7' }} />
+                <span>สถานที่จัดกิจกรรม (Location / Venue)</span>
+              </label>
+              <input 
+                type="text" 
+                className="form-input"
+                placeholder="G-Speed Esport Arena รามคำแหง 53 กรุงเทพฯ"
+                value={draft.location || ''}
+                onChange={e => updateField('location', e.target.value)}
+              />
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: '6px' }}>
+                {[
+                  'G-Speed Esport Arena รามคำแหง 53 กรุงเทพฯ',
+                  'G-Speed Esport Arena รามคำแหง 53 (โซนเวที Main Stage)',
+                  'G-Speed Esport Arena รามคำแหง 53 (โซน Battleground)',
+                  'G-Speed Esport Arena รามคำแหง 53 (โซน VIP Lounge)'
+                ].map((locPreset, lpIdx) => (
+                  <button
+                    key={lpIdx}
+                    type="button"
+                    onClick={() => updateField('location', locPreset)}
+                    style={{
+                      background: draft.location === locPreset ? '#0284c7' : '#f1f5f9',
+                      color: draft.location === locPreset ? '#ffffff' : '#334155',
+                      border: '1px solid ' + (draft.location === locPreset ? '#0284c7' : '#cbd5e1'),
+                      borderRadius: '14px',
+                      fontSize: '0.72rem',
+                      padding: '3px 8px',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    {locPreset}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="form-group" style={{ margin: 0 }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, color: '#0f172a' }}>
+                <Users size={15} style={{ color: '#16a34a' }} />
+                <span>ผู้เข้าร่วมงาน / สเกลงาน (Attendees & Scale)</span>
+              </label>
+              <input 
+                type="text" 
+                className="form-input"
+                placeholder="300+ คน หรือ 350+ คน (32 ทีม)"
+                value={draft.attendees || ''}
+                onChange={e => updateField('attendees', e.target.value)}
+              />
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: '6px' }}>
+                {[
+                  '300+ คน',
+                  '350+ คน (32 ทีม)',
+                  '500+ คน',
+                  '1,000+ คน'
+                ].map((attPreset, apIdx) => (
+                  <button
+                    key={apIdx}
+                    type="button"
+                    onClick={() => updateField('attendees', attPreset)}
+                    style={{
+                      background: draft.attendees === attPreset ? '#16a34a' : '#ffffff',
+                      color: draft.attendees === attPreset ? '#ffffff' : '#334155',
+                      border: '1px solid ' + (draft.attendees === attPreset ? '#16a34a' : '#cbd5e1'),
+                      borderRadius: '14px',
+                      fontSize: '0.72rem',
+                      padding: '3px 8px',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    {attPreset}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 

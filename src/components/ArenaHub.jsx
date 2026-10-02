@@ -668,13 +668,13 @@ export default function ArenaHub({
               <div className="banner-content">
                 <span className="badge-pill badge-blue">{isThai ? (siteData?.featureBanners?.bannerLeft?.badge || 'GLP OUR EVENTS') : t('home.featureEvents.badge')}</span>
                 <h3 className="banner-title" style={{ color: '#ffffff' }}>
-                  {isThai ? (siteData?.featureBanners?.bannerLeft?.title || 'รวมภาพกิจกรรม & บรรยากาศสด') : t('home.featureEvents.title')}
+                  {isThai ? (siteData?.featureBanners?.bannerLeft?.title || 'รวมภาพกิจกรรม') : t('home.featureEvents.title')}
                 </h3>
                 <p className="banner-desc" style={{ color: '#cbd5e1' }}>
                   {isThai ? (siteData?.featureBanners?.bannerLeft?.desc || 'ภาพงานแข่ง LAN, งานเปิดตัวเกม, มีตติ้ง และพิธีมอบรางวัลชนะเลิศตลอดทั้งปี') : t('home.featureEvents.desc')}
                 </p>
                 <div className="banner-link-row text-blue">
-                  <span style={{ color: '#60a5fa' }}>{isThai ? (siteData?.featureBanners?.bannerLeft?.linkText || 'เข้าสู่หน้ารวมภาพกิจกรรม & แกลเลอรี') : t('home.featureEvents.link')}</span>
+                  <span style={{ color: '#60a5fa' }}>{isThai ? (siteData?.featureBanners?.bannerLeft?.linkText || 'สำรวจอัลบั้มภาพกิจกรรม') : t('home.featureEvents.link')}</span>
                   <ArrowRight size={18} color="#60a5fa" />
                 </div>
               </div>
@@ -700,13 +700,13 @@ export default function ArenaHub({
               <div className="banner-content">
                 <span className="badge-pill badge-white">{isThai ? (siteData?.featureBanners?.bannerRight?.badge || 'GLP TOURNAMENTS') : t('home.featureTournaments.badge')}</span>
                 <h3 className="banner-title" style={{ color: '#ffffff' }}>
-                  {isThai ? (siteData?.featureBanners?.bannerRight?.title || 'ปฏิทินแข่ง & ชิงรางวัล LAN') : t('home.featureTournaments.title')}
+                  {isThai ? (siteData?.featureBanners?.bannerRight?.title || 'ทัวร์นาเมนต์การแข่งขัน') : t('home.featureTournaments.title')}
                 </h3>
                 <p className="banner-desc" style={{ color: '#cbd5e1' }}>
                   {isThai ? (siteData?.featureBanners?.bannerRight?.desc || 'เกาะติดผลการแข่งขัน สายแข่งสด (Brackets) และลงทะเบียนประลองฝีมือระดับประเทศ') : t('home.featureTournaments.desc')}
                 </p>
                 <div className="banner-link-row text-blue">
-                  <span style={{ color: '#60a5fa' }}>{isThai ? (siteData?.featureBanners?.bannerRight?.linkText || 'เข้าสู่หน้าปฏิทินทัวร์นาเมนต์ทั้งหมด') : t('home.featureTournaments.link')}</span>
+                  <span style={{ color: '#60a5fa' }}>{isThai ? (siteData?.featureBanners?.bannerRight?.linkText || 'สำรวจทัวร์นาเมนต์ทั้งหมด') : t('home.featureTournaments.link')}</span>
                   <ArrowRight size={18} color="#60a5fa" />
                 </div>
               </div>
@@ -845,7 +845,7 @@ export default function ArenaHub({
                     <p className="gallery-desc">{translateDynamic(item.desc)}</p>
 
                     <div className="gallery-view-link text-blue">
-                      <span>{language === 'th' ? 'อ่านบทความ & ชมภาพกิจกรรมเต็ม' : (language === 'zh' ? '阅读文章 & 查看完整相册' : 'Read Article & View Full Gallery')}</span>
+                      <span>{language === 'th' ? 'ชมภาพกิจกรรมเต็ม' : (language === 'zh' ? '查看完整相册' : 'View Full Gallery')}</span>
                       <ExternalLink size={14} />
                     </div>
                   </div>
@@ -1275,73 +1275,7 @@ export default function ArenaHub({
         );
       })()}
 
-      {/* 7. GAME NEWS & ARTICLES (บทความและข่าวสาร) */}
-      {(() => {
-        const newsBg = siteData?.newsSection?.bgColor || '#ffffff';
-        const isDarkNews = isColorDark(newsBg);
-        return (
-          <section 
-            className="news-section" 
-            id="news"
-            style={{ 
-              background: newsBg,
-              backgroundColor: newsBg,
-              backgroundImage: 'none'
-            }}
-          >
-            <div className="container">
-              <div className="section-header">
-                <div className="badge-pill badge-blue">
-                  <Newspaper size={14} />
-                  <span>{translateDynamic(siteData?.newsSection?.badge || 'ARTICLES & UPDATES')}</span>
-                </div>
-                <h2 className="section-title" style={{ color: siteData?.newsSection?.titleColor || (isDarkNews ? '#ffffff' : '#0f172a') }}>
-                  {isThai ? (siteData?.newsSection?.title || 'บทความและข่าวสาร GLP ESPORTS') : (siteData?.newsSection?.title_en || translateDynamic(siteData?.newsSection?.title || 'บทความและข่าวสาร GLP ESPORTS'))}
-                </h2>
-                <p className="section-subtitle" style={{ color: siteData?.newsSection?.subtitleColor || (isDarkNews ? '#cbd5e1' : '#475569') }}>
-                  {isThai ? (siteData?.newsSection?.subtitle || 'อัปเดตความเคลื่อนไหววงการอีสปอร์ต เทคโนโลยีใหม่ และสรุปผลการแข่งขันที่จัดขึ้นในร้าน') : (siteData?.newsSection?.subtitle_en || translateDynamic(siteData?.newsSection?.subtitle || 'อัปเดตความเคลื่อนไหววงการอีสปอร์ต เทคโนโลยีใหม่ และสรุปผลการแข่งขันที่จัดขึ้นในร้าน'))}
-                </p>
-              </div>
-
-              <div className="news-grid">
-                {newsList.map(news => (
-                  <div 
-                    key={news.id} 
-                    className="news-card glass-panel clickable-article-card"
-                    onClick={() => {
-                      if (onSelectActivitySlug) {
-                        onSelectActivitySlug(news.slug || news.id);
-                      } else {
-                        window.history.pushState(null, '', `/activities/${news.slug || news.id}`);
-                      }
-                    }}
-                  >
-                    <div className="news-thumb-wrapper">
-                      <img src={news.image} alt={news.imageAlt || news.title} className="news-img" />
-                      <span className="news-cat-pill">{translateDynamic(news.tag || news.category)}</span>
-                    </div>
-                    <div className="news-body">
-                      <div className="news-meta">
-                        <span>{translateDynamic(news.date)}</span>
-                        <span>•</span>
-                        <span>{language === 'th' ? `อ่าน ${news.readTime}` : `${translateDynamic(news.readTime)}`}</span>
-                      </div>
-                      <h3 className="news-title">{translateDynamic(news.title)}</h3>
-                      <p className="news-excerpt">{translateDynamic(news.excerpt || news.desc)}</p>
-                      <div className="news-read-more-link text-blue">
-                        <span>{language === 'th' ? 'อ่านบทความเต็ม' : (language === 'zh' ? '阅读完整文章' : 'Read Full Article')}</span>
-                        <ExternalLink size={14} />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        );
-      })()}
-
-      {/* 8. FRANCHISE CTA SECTION */}
+      {/* 7. FRANCHISE CTA SECTION */}
       {(() => {
         const fBg = siteData?.franchiseBanner?.bgColor || '#1e3a8a';
         const fImg = siteData?.franchiseBanner?.bgImage;

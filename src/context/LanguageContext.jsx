@@ -77,15 +77,15 @@ export const translations = {
       hotlineLabel: 'สายด่วนติดต่อขอจัดงานแข่ง Esport:',
       featureEvents: {
         badge: 'GLP OUR EVENTS',
-        title: 'รวมภาพกิจกรรม & บรรยากาศสด',
+        title: 'รวมภาพกิจกรรม',
         desc: 'ภาพงานแข่ง LAN, งานเปิดตัวเกม, มีตติ้ง และพิธีมอบรางวัลชนะเลิศตลอดทั้งปี',
-        link: 'เข้าสู่หน้ารวมภาพกิจกรรม & แกลเลอรี'
+        link: 'สำรวจอัลบั้มภาพกิจกรรม'
       },
       featureTournaments: {
         badge: 'GLP TOURNAMENTS',
-        title: 'ปฏิทินแข่ง & ชิงรางวัล LAN',
+        title: 'ทัวร์นาเมนต์การแข่งขัน',
         desc: 'เกาะติดผลการแข่งขัน สายแข่งสด (Brackets) และลงทะเบียนประลองฝีมือระดับประเทศ',
-        link: 'เข้าสู่ปฏิทินการแข่งขันทั้งหมด'
+        link: 'สำรวจทัวร์นาเมนต์ทั้งหมด'
       },
       zones: {
         badge: 'VENUE ATMOSPHERE & ZONES',
@@ -1098,15 +1098,15 @@ export const translations = {
       hotlineLabel: 'Esports Event Booking Hotline:',
       featureEvents: {
         badge: 'GLP OUR EVENTS',
-        title: 'Activities & Live Atmosphere',
+        title: 'Event Photo Gallery',
         desc: 'Photos from LAN championships, game launch events, community meetups, and victory ceremonies.',
-        link: 'Enter Photo & Community Gallery'
+        link: 'Explore Photo Gallery'
       },
       featureTournaments: {
         badge: 'GLP TOURNAMENTS',
-        title: 'Tournament Calendar & Prize Pools',
+        title: 'Esports Tournaments',
         desc: 'Track tournament brackets, live match results, and register your team for national esports leagues.',
-        link: 'View All Esports Tournaments'
+        link: 'Explore All Tournaments'
       },
       zones: {
         badge: 'VENUE ATMOSPHERE & ZONES',
@@ -2119,15 +2119,15 @@ export const translations = {
       hotlineLabel: '电竞赛事活动预订热线:',
       featureEvents: {
         badge: 'GLP 精彩活动',
-        title: '活动图集与现场实况',
+        title: '精彩活动相册',
         desc: '汇集全年度线下LAN锦标赛、游戏新作发布会、玩家见面会及颁奖典礼精彩瞬间。',
-        link: '进入活动图集与玩家社区'
+        link: '浏览活动相册'
       },
       featureTournaments: {
         badge: 'GLP 电竞赛事',
-        title: '赛事日程与奖金争夺',
+        title: '电竞赛事与锦标赛',
         desc: '实时掌握赛事晋级表（Bracket）、战队比分，并直接报名参加全国性专业电竞锦标赛。',
-        link: '查看全部赛事日程'
+        link: '浏览所有电竞赛事'
       },
       zones: {
         badge: '场馆环境与功能分区',

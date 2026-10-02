@@ -1072,9 +1072,65 @@ export const BUILT_IN_DICTIONARY = {
     en: '(Click tag to explore related articles)',
     zh: '(点击标签探索相关文章)'
   },
+  'แกลเลอรีภาพบรรยากาศความมันส์': {
+    en: 'High-Octane Atmosphere Photo Gallery',
+    zh: '超燃现场精彩瞬间图集'
+  },
+  'แกลเลอรีภาพบรรยากาศความมันส์.': {
+    en: 'High-Octane Atmosphere Photo Gallery',
+    zh: '超燃现场精彩瞬间图集'
+  },
+  'รวมภาพกิจกรรม': {
+    en: 'Event Photo Gallery',
+    zh: '精彩活动相册'
+  },
+  'ทัวร์นาเมนต์การแข่งขัน': {
+    en: 'Esports Tournaments',
+    zh: '电竞赛事与锦标赛'
+  },
+  'สำรวจทัวร์นาเมนต์ทั้งหมด': {
+    en: 'Explore All Tournaments',
+    zh: '浏览所有赛事'
+  },
+  'ชมภาพกิจกรรมเต็ม': {
+    en: 'View Full Photo Gallery',
+    zh: '查看完整相册'
+  },
   'แกลเลอรีภาพบรรยากาศความละเอียดสูง': {
     en: 'High-Resolution Photo Highlights Gallery',
     zh: '高清现场活动图集'
+  },
+  'G-Speed Esport Arena รามคำแหง 53 กรุงเทพฯ': {
+    en: 'G-Speed Esport Arena Ramkhamhaeng 53, Bangkok',
+    zh: 'G-Speed 电竞馆 曼谷兰甘亨53巷'
+  },
+  'G-Speed Esport Arena รามคำแหง 53 (โซนเวที Main Stage)': {
+    en: 'G-Speed Esport Arena Ramkhamhaeng 53 (Main Stage Zone)',
+    zh: 'G-Speed 电竞馆 兰甘亨53巷 (主舞台专区)'
+  },
+  'G-Speed Esport Arena รามคำแหง 53 (โซน Battleground)': {
+    en: 'G-Speed Esport Arena Ramkhamhaeng 53 (Battleground Zone)',
+    zh: 'G-Speed 电竞馆 兰甘亨53巷 (对战专区)'
+  },
+  'G-Speed Esport Arena รามคำแหง 53 (โซน VIP Lounge)': {
+    en: 'G-Speed Esport Arena Ramkhamhaeng 53 (VIP Lounge Zone)',
+    zh: 'G-Speed 电竞馆 兰甘亨53巷 (VIP休闲区)'
+  },
+  '300+ คน': {
+    en: '300+ Attendees',
+    zh: '300+ 人'
+  },
+  '350+ คน (32 ทีม)': {
+    en: '350+ Attendees (32 Teams)',
+    zh: '350+ 人 (32支战队)'
+  },
+  '500+ คน': {
+    en: '500+ Attendees',
+    zh: '500+ 人'
+  },
+  '1,000+ คน': {
+    en: '1,000+ Attendees',
+    zh: '1,000+ 人'
   },
   'คลิกที่รูปภาพเพื่อเปิดดูขนาดใหญ่แบบ Full-Screen HD': {
     en: 'Click any photo to view in Full-Screen HD',
@@ -1494,6 +1550,8 @@ export async function translateEntityWithAI(entity, customConfig = null) {
   if (entity.excerpt && typeof entity.excerpt === 'string') translatable.excerpt = entity.excerpt;
   if (entity.desc && typeof entity.desc === 'string') translatable.desc = entity.desc;
   if (entity.venue && typeof entity.venue === 'string') translatable.venue = entity.venue;
+  if (entity.location && typeof entity.location === 'string') translatable.location = entity.location;
+  if (entity.attendees && typeof entity.attendees === 'string') translatable.attendees = entity.attendees;
   if (entity.format && typeof entity.format === 'string') translatable.format = entity.format;
   if (entity.slots && typeof entity.slots === 'string') translatable.slots = entity.slots;
   if (entity.prizePool && typeof entity.prizePool === 'string') translatable.prizePool = entity.prizePool;
@@ -1610,6 +1668,8 @@ CRITICAL GUIDELINES:
     if (enResult.excerpt) { cloned.excerpt_en = enResult.excerpt; saveToTranslationCache(entity.excerpt, 'en', enResult.excerpt); }
     if (enResult.desc) { cloned.desc_en = enResult.desc; saveToTranslationCache(entity.desc, 'en', enResult.desc); }
     if (enResult.venue) { cloned.venue_en = enResult.venue; saveToTranslationCache(entity.venue, 'en', enResult.venue); }
+    if (enResult.location) { cloned.location_en = enResult.location; saveToTranslationCache(entity.location, 'en', enResult.location); }
+    if (enResult.attendees) { cloned.attendees_en = enResult.attendees; saveToTranslationCache(entity.attendees, 'en', enResult.attendees); }
     if (enResult.format) { cloned.format_en = enResult.format; saveToTranslationCache(entity.format, 'en', enResult.format); }
     if (enResult.slots) { cloned.slots_en = enResult.slots; saveToTranslationCache(entity.slots, 'en', enResult.slots); }
     if (enResult.prizePool) { cloned.prizePool_en = enResult.prizePool; saveToTranslationCache(entity.prizePool, 'en', enResult.prizePool); }
@@ -1624,6 +1684,8 @@ CRITICAL GUIDELINES:
     if (zhResult.excerpt) { cloned.excerpt_zh = zhResult.excerpt; saveToTranslationCache(entity.excerpt, 'zh', zhResult.excerpt); }
     if (zhResult.desc) { cloned.desc_zh = zhResult.desc; saveToTranslationCache(entity.desc, 'zh', zhResult.desc); }
     if (zhResult.venue) { cloned.venue_zh = zhResult.venue; saveToTranslationCache(entity.venue, 'zh', zhResult.venue); }
+    if (zhResult.location) { cloned.location_zh = zhResult.location; saveToTranslationCache(entity.location, 'zh', zhResult.location); }
+    if (zhResult.attendees) { cloned.attendees_zh = zhResult.attendees; saveToTranslationCache(entity.attendees, 'zh', zhResult.attendees); }
     if (zhResult.format) { cloned.format_zh = zhResult.format; saveToTranslationCache(entity.format, 'zh', zhResult.format); }
     if (zhResult.slots) { cloned.slots_zh = zhResult.slots; saveToTranslationCache(entity.slots, 'zh', zhResult.slots); }
     if (zhResult.prizePool) { cloned.prizePool_zh = zhResult.prizePool; saveToTranslationCache(entity.prizePool, 'zh', zhResult.prizePool); }
