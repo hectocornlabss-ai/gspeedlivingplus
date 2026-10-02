@@ -5,7 +5,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { 
   Camera, Download, RotateCw, Eye, Compass, 
   ZoomIn, ZoomOut, Check, Sparkles, RefreshCw, 
-  Sun, Moon, Layers, Maximize2
+  Sun, Moon, Layers, Maximize2, Box
 } from 'lucide-react';
 import { downloadFile } from '../utils/fileDownloader';
 

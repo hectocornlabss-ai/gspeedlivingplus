@@ -328,6 +328,7 @@
   letter-spacing: 0.02em;
   color: #0f172a;
   line-height: 1.1;
+  white-space: nowrap;
 }
 
 .logo-subtitle {
@@ -335,6 +336,95 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   color: #64748b;
+  white-space: nowrap;
+}
+
+/* Responsive adjustments for Brand Logo (GLP ESPORTS) on Tablet & Mobile */
+@media (max-width: 1024px) {
+  .logo-title {
+    font-size: 1.12rem;
+  }
+  .logo-subtitle {
+    font-size: 0.64rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar-wrapper {
+    padding: 8px 0;
+  }
+  .navbar-container {
+    gap: 10px;
+    padding: 0 12px;
+  }
+  .brand-logo {
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .logo-icon-box {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+  }
+  .logo-title {
+    font-size: 0.95rem;
+    letter-spacing: 0.01em;
+  }
+  .logo-subtitle {
+    font-size: 0.58rem;
+    letter-spacing: 0.03em;
+  }
+  .header-actions {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-wrapper {
+    padding: 6px 0;
+  }
+  .navbar-container {
+    gap: 6px;
+    padding: 0 10px;
+  }
+  .brand-logo {
+    gap: 7px;
+  }
+  .logo-icon-box {
+    width: 32px;
+    height: 32px;
+    border-radius: 7px;
+  }
+  .logo-title {
+    font-size: 0.85rem;
+    letter-spacing: 0;
+  }
+  .logo-subtitle {
+    font-size: 0.50rem;
+    letter-spacing: 0.02em;
+  }
+  .header-actions {
+    gap: 5px;
+  }
+  .mobile-toggle-btn {
+    padding: 6px 10px;
+    font-size: 0.80rem;
+    gap: 4px;
+  }
+}
+
+@media (max-width: 360px) {
+  .logo-icon-box {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+  }
+  .logo-title {
+    font-size: 0.78rem;
+  }
+  .logo-subtitle {
+    font-size: 0.46rem;
+  }
 }
 
 .text-blue { color: var(--gspeed-blue); }
@@ -474,6 +564,12 @@
   font-weight: 800;
   font-size: 1.15rem;
   color: #0f172a;
+}
+
+@media (max-width: 480px) {
+  .mobile-drawer-title {
+    font-size: 1rem;
+  }
 }
 
 .mobile-drawer-close {

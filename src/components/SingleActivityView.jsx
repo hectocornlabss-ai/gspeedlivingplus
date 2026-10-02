@@ -139,18 +139,6 @@ export default function SingleActivityView({
     };
   }, [activity, siteData]);
 
-  if (!activity) {
-    return (
-      <div className="single-activity-page container" style={{ padding: '80px 20px', textAlign: 'center' }}>
-        <h2>ไม่พบข้อมูลกิจกรรมหรือบทความที่คุณค้นหา</h2>
-        <p style={{ color: '#64748b', margin: '14px 0 24px' }}>บทความนี้อาจถูกย้าย หรือลิงก์ไม่ถูกต้อง</p>
-        <button onClick={() => onBack('activities')} className="btn-primary">
-          <ArrowLeft size={16} /> กลับสู่หน้ารวมกิจกรรม & บทความ
-        </button>
-      </div>
-    );
-  }
-
   // Handle Share / Copy Link with reliable fallback and visual feedback
   const handleCopyLink = () => {
     const fullUrl = typeof window !== 'undefined' ? window.location.href : '';
@@ -193,21 +181,21 @@ export default function SingleActivityView({
 
   const handleShareLine = () => {
     const url = encodeURIComponent(window.location.href);
-    const title = encodeURIComponent(activity.title);
+    const title = encodeURIComponent(activity?.title || '');
     window.open(`https://social-plugins.line.me/lineit/share?url=${url}&text=${title}`, '_blank', 'width=600,height=400');
   };
 
   const handleShareTwitter = () => {
     const url = encodeURIComponent(window.location.href);
-    const text = encodeURIComponent(`${activity.title} | G-Speed Esport Arena`);
+    const text = encodeURIComponent(`${activity?.title || ''} | G-Speed Esport Arena`);
     window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank', 'width=600,height=400');
   };
 
   // Gallery Photos Fallback
-  const galleryPhotos = activity.galleryPhotos && activity.galleryPhotos.length > 0 
+  const galleryPhotos = activity?.galleryPhotos && activity.galleryPhotos.length > 0 
     ? activity.galleryPhotos 
     : [
-        { url: activity.image, caption: 'บรรยากาศผู้ร่วมงานและนักกีฬาอีสปอร์ตบนเวทีหลัก' },
+        { url: activity?.image || '', caption: 'บรรยากาศผู้ร่วมงานและนักกีฬาอีสปอร์ตบนเวทีหลัก' },
         { url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80', caption: 'การประลองฝีมือสุดเดือดในโซน Battleground' },
         { url: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80', caption: 'จอแสดงผลถ่ายทอดสด 4K LED Wall ขนาดยักษ์' },
         { url: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80', caption: 'อุปกรณ์เกมมิ่งเกียร์และสเปกคอมพิวเตอร์ระดับทัวร์นาเมนต์' }
@@ -292,6 +280,18 @@ export default function SingleActivityView({
       document.body.style.overflow = origOverflow;
     };
   }, [activePhotoIdx, lightboxImage, galleryPhotos.length]);
+
+  if (!activity) {
+    return (
+      <div className="single-activity-page container" style={{ padding: '80px 20px', textAlign: 'center' }}>
+        <h2>ไม่พบข้อมูลกิจกรรมหรือบทความที่คุณค้นหา</h2>
+        <p style={{ color: '#64748b', margin: '14px 0 24px' }}>บทความนี้อาจถูกย้าย หรือลิงก์ไม่ถูกต้อง</p>
+        <button onClick={() => onBack('activities')} className="btn-primary">
+          <ArrowLeft size={16} /> กลับสู่หน้ารวมกิจกรรม & บทความ
+        </button>
+      </div>
+    );
+  }
 
   // Content Paragraphs Fallback
   const contentParagraphs = activity.contentParagraphs && activity.contentParagraphs.length > 0

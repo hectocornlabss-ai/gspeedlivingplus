@@ -3,7 +3,8 @@ import {
   Eye, X, Smartphone, Tablet, Monitor, Save, CheckCircle2, Trophy, Flame, 
   FileText, Layers, ShieldCheck, Palette, Globe, ExternalLink, ArrowRight, 
   Compass, Sparkles, MapPin, Calendar, Clock, Tag, Award, Quote, TrendingUp,
-  Share2, Check, Shield, Coffee, ChevronRight, Zap, Info, RefreshCw
+  Share2, Check, Shield, Coffee, ChevronRight, Zap, Info, RefreshCw,
+  Camera, Menu
 } from 'lucide-react';
 import SingleActivityView from './SingleActivityView';
 

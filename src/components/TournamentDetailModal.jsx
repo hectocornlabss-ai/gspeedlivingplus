@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, Trophy, Calendar, MapPin, Globe, Copy, Check, Award, 
   Users, Camera, Send, Zap, Clock, Shield, CheckCircle2, 
   Crown, Plus, ArrowRight, ChevronLeft, ChevronRight, Home,
-  GitBranch, Flame, Play, ExternalLink, RefreshCw, Radio, Swords, Eye
+  GitBranch, Flame, Play, ExternalLink, RefreshCw, Radio, Swords, Eye,
+  Share2
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
+import { useTranslation } from '../context/LanguageContext';
 import { generateDefaultBracket } from '../data/mockData';
 import { isTournamentRegistrationOpen } from '../utils/tournamentUtils';
 
@@ -17,9 +19,8 @@ export default function TournamentDetailModal({
   onNavigateTournaments = () => {},
   onRegisterTeam
 }) {
-  if (!tournament) return null;
-
   const { addTournamentApplication } = useSiteData();
+  const { t, language, translateDynamic } = useTranslation();
   const [tourneyModalTab, setTourneyModalTab] = useState(initialTab);
   const [lightboxIndex, setLightboxIndex] = useState(null);
   const [tourneyGalleryCategory, setTourneyGalleryCategory] = useState('all');
@@ -106,12 +107,6 @@ export default function TournamentDetailModal({
     };
   }, [lightboxIndex, galleryList.length]);
 
-  const matches = (tournament.bracketMatches && tournament.bracketMatches.length > 0)
-    ? tournament.bracketMatches
-    : generateDefaultBracket(tournament.teams, tournament.title);
-
-  const liveMatches = matches.filter(m => m.status === 'LIVE');
-
   // Registration Form State
   const [teamRegForm, setTeamRegForm] = useState({
     teamName: '',
@@ -126,6 +121,14 @@ export default function TournamentDetailModal({
     player5: '',
     substitute: ''
   });
+
+  if (!tournament) return null;
+
+  const matches = (tournament.bracketMatches && tournament.bracketMatches.length > 0)
+    ? tournament.bracketMatches
+    : generateDefaultBracket(tournament.teams, tournament.title);
+
+  const liveMatches = matches.filter(m => m.status === 'LIVE');
 
   const handleRegisterSubmit = (e) => {
     e.preventDefault();
@@ -298,20 +301,20 @@ export default function TournamentDetailModal({
           {/* Title & Metadata chips */}
           <div style={{ position: 'relative', zIndex: 2 }}>
             <h2 style={{ fontSize: '1.5rem', fontWeight: 650, margin: '2px 0 10px 0', textShadow: '0 2px 10px rgba(0,0,0,0.7)', color: '#ffffff', letterSpacing: '-0.3px' }}>
-              {tournament.title}
+              {translateDynamic(tournament.title)}
             </h2>
             <div className="tourney-meta-chips">
               <div className="tourney-meta-chip">
                 <Trophy size={15} className="text-amber" />
-                <span>เงินรางวัลรวม: <strong className="text-amber" style={{ fontSize: '0.92rem' }}>{tournament.prizePool}</strong></span>
+                <span>{t('tournamentModal.prizePool')}: <strong className="text-amber" style={{ fontSize: '0.92rem' }}>{translateDynamic(tournament.prizePool)}</strong></span>
               </div>
               <div className="tourney-meta-chip">
                 <Calendar size={15} className="text-cyan" />
-                <span>{tournament.date} ({tournament.time})</span>
+                <span>{translateDynamic(tournament.date)} ({tournament.time})</span>
               </div>
               <div className="tourney-meta-chip">
                 <MapPin size={15} className="text-blue" />
-                <span>{tournament.venue || 'GLP : G Speed Living Plus รามคำแหง 53'}</span>
+                <span>{tournament.venue || t('tournamentModal.venueDefault')}</span>
               </div>
             </div>
           </div>
@@ -320,16 +323,16 @@ export default function TournamentDetailModal({
         {/* 2. Modal Navigation Tabs - Stable and Locked in place */}
         <div className="tourney-hub-nav">
           {[
-            { id: 'overview', label: 'ภาพรวม & กติกา & รางวัล', icon: <Award size={15} /> },
-            { id: 'schedule', label: 'กำหนดการ & วันที่', icon: <Calendar size={15} /> },
+            { id: 'overview', label: t('tournamentModal.tabOverview'), icon: <Award size={15} /> },
+            { id: 'schedule', label: t('tournamentModal.tabSchedule'), icon: <Calendar size={15} /> },
             { 
               id: 'bracket', 
-              label: liveMatches.length > 0 ? `สายแข่ง & ผลสด (${matches.length}) 🔴 LIVE` : `สายแข่ง & ผลสด (${matches.length})`, 
+              label: liveMatches.length > 0 ? `${t('tournamentModal.tabBracket')} (${matches.length}) 🔴 LIVE` : `${t('tournamentModal.tabBracket')} (${matches.length})`, 
               icon: <GitBranch size={15} />,
               highlight: liveMatches.length > 0
             },
-            { id: 'roster', label: `รายชื่อทีม (${(tournament.teams || []).length})`, icon: <Users size={15} /> },
-            { id: 'register', label: 'ลงทะเบียนแข่งขัน', icon: <Send size={15} />, highlight: true }
+            { id: 'roster', label: `${t('tournamentModal.tabRoster')} (${(tournament.teams || []).length})`, icon: <Users size={15} /> },
+            { id: 'register', label: t('tournamentModal.tabRegister'), icon: <Send size={15} />, highlight: true }
           ].map(tab => (
             <button 
               key={tab.id}

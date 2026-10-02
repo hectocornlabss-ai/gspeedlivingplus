@@ -164,35 +164,10 @@ export default function SingleTournamentView({
     };
   }, [tournament, siteData]);
 
-  if (!tournament) {
-    return (
-      <div className="single-tournament-page container" style={{ padding: '90px 20px', textAlign: 'center' }}>
-        <div style={{ maxWidth: '520px', margin: '0 auto', background: '#ffffff', padding: '40px 30px', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 16px rgba(0,0,0,0.04)' }}>
-          <AlertCircle size={48} className="text-amber" style={{ margin: '0 auto 16px' }} />
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 650, color: '#0f172a', marginBottom: '8px' }}>
-            ไม่พบข้อมูลรายการแข่งขัน
-          </h2>
-          <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '24px', lineHeight: 1.6 }}>
-            รายการแข่งขันนี้อาจเสร็จสิ้นไปแล้ว ลิงก์ไม่ถูกต้อง หรือยังไม่ได้เปิดเผยต่อสาธารณะ
-          </p>
-          <button 
-            type="button" 
-            onClick={onBack} 
-            className="btn-primary"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 22px' }}
-          >
-            <ArrowLeft size={16} />
-            <span>กลับไปหน้ารวมทัวร์นาเมนต์ทั้งหมด</span>
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const isRegistrationOpen = tournament.status === 'Open';
-  const rawMatches = (tournament.bracketMatches && tournament.bracketMatches.length > 0)
+  const isRegistrationOpen = tournament?.status === 'Open';
+  const rawMatches = (tournament?.bracketMatches && tournament.bracketMatches.length > 0)
     ? tournament.bracketMatches
-    : generateDefaultBracket(tournament.teams, tournament.title);
+    : generateDefaultBracket(tournament?.teams || [], tournament?.title || '');
 
   // If tournament is Open for registration, matches have not happened yet (no finished scores, no live state)
   const matches = rawMatches.map(m => {
@@ -210,12 +185,12 @@ export default function SingleTournamentView({
   });
 
   const liveMatches = isRegistrationOpen ? [] : matches.filter(m => m.status === 'LIVE' || m.status === 'Live');
-  const cleanSlug = tournament.slug || tournament.seo?.slug || tournament.id;
+  const cleanSlug = tournament?.slug || tournament?.seo?.slug || tournament?.id || '';
   const canonicalUrl = `${window.location.origin}/tournaments/${cleanSlug}`;
-  const lineOaUrl = tournament.regUrl || siteData?.footer?.lineUrl || 'https://line.me/R/ti/p/@gspeed';
+  const lineOaUrl = tournament?.regUrl || siteData?.footer?.lineUrl || 'https://line.me/R/ti/p/@gspeed';
 
   // Filtered Roster Teams
-  const teamsList = tournament.teams || [];
+  const teamsList = tournament?.teams || [];
   const filteredTeams = teamsList.filter(tm => {
     if (!rosterSearch.trim()) return true;
     const q = rosterSearch.toLowerCase();
@@ -227,7 +202,7 @@ export default function SingleTournamentView({
   });
 
   // Filtered Gallery Photos
-  const photosList = tournament.galleryPhotos || [];
+  const photosList = tournament?.galleryPhotos || [];
   const filteredPhotos = photosList.filter(p => {
     if (galleryCategory === 'all') return true;
     return p.category === galleryCategory;
@@ -310,11 +285,40 @@ export default function SingleTournamentView({
   }, [lightboxIndex, filteredPhotos.length]);
 
   // Related Tournaments
-  const relatedTournaments = allTournaments.filter(t => t.id !== tournament.id);
+  const relatedTournaments = allTournaments.filter(t => t.id !== tournament?.id);
 
   // Bottom Social Share State & Handlers
   const [bottomShareOpen, setBottomShareOpen] = useState(false);
   const bottomShareBtnRef = useRef(null);
+
+  if (!tournament) {
+    return (
+      <div className="single-tournament-page container" style={{ padding: '90px 20px', textAlign: 'center' }}>
+        <div style={{ maxWidth: '520px', margin: '0 auto', background: '#ffffff', padding: '40px 30px', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 16px rgba(0,0,0,0.04)' }}>
+          <AlertCircle size={48} className="text-amber" style={{ margin: '0 auto 16px' }} />
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 650, color: '#0f172a', marginBottom: '8px' }}>
+            {language === 'th' ? 'ไม่พบข้อมูลรายการแข่งขัน' : language === 'zh' ? '未找到赛事信息' : 'Tournament Not Found'}
+          </h2>
+          <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '24px', lineHeight: 1.6 }}>
+            {language === 'th' 
+              ? 'รายการแข่งขันนี้อาจเสร็จสิ้นไปแล้ว ลิงก์ไม่ถูกต้อง หรือยังไม่ได้เปิดเผยต่อสาธารณะ'
+              : language === 'zh'
+              ? '该赛事可能已结束，或链接无效。'
+              : 'This tournament may have ended or the link is invalid.'}
+          </p>
+          <button 
+            type="button" 
+            onClick={onBack} 
+            className="btn-primary"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 22px' }}
+          >
+            <ArrowLeft size={16} />
+            <span>{language === 'th' ? 'กลับไปหน้ารวมทัวร์นาเมนต์ทั้งหมด' : language === 'zh' ? '返回赛事列表' : 'Back to Tournaments'}</span>
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Handle Share / Copy Link with reliable fallback and visual feedback
   const handleCopyLink = () => {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, Save, RefreshCw, Upload, Image as ImageIcon, Tag, Plus, Trash2, 
   ChevronUp, ChevronDown, Check, Star, AlertCircle, Info, ExternalLink
@@ -35,8 +35,6 @@ export default function ActivityFormModal({
   availableTags = DEFAULT_ARTICLE_TAGS,
   onAddNewTag
 }) {
-  if (!isOpen) return null;
-
   const isEdit = Boolean(initialData && initialData.id);
 
   // Isolated local state - Keystrokes only re-render this modal component (0ms latency, 60 FPS)
@@ -68,6 +66,31 @@ export default function ActivityFormModal({
   const [uploadProgress, setUploadProgress] = useState(null); // { current, total, filename }
   const [isSaving, setIsSaving] = useState(false);
   const [coverCompressing, setCoverCompressing] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      if (initialData) {
+        const parsedPhotos = (initialData.galleryPhotos || []).map(p => {
+          if (typeof p === 'string') {
+            return { url: p, caption: initialData.title || '', alt: initialData.imageAlt || initialData.title || '' };
+          }
+          return {
+            url: p?.url || '',
+            caption: p?.caption || initialData.title || '',
+            alt: p?.alt || p?.caption || initialData.imageAlt || initialData.title || ''
+          };
+        }).filter(p => Boolean(p.url));
+
+        setDraft({
+          ...DEFAULT_NEW_ACTIVITY,
+          ...initialData,
+          galleryPhotos: parsedPhotos
+        });
+      } else {
+        setDraft({ ...DEFAULT_NEW_ACTIVITY });
+      }
+    }
+  }, [isOpen, initialData]);
 
   // Helper to update draft field
   const updateField = (field, value) => {
@@ -282,6 +305,8 @@ export default function ActivityFormModal({
       setIsSaving(false);
     }
   };
+
+  if (!isOpen) return null;
 
   return (
     <div 

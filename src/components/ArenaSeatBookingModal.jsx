@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, Monitor, Shield, Trophy, Coffee, Check, Clock, Calendar, 
   User, Phone, Mail, Sparkles, AlertCircle, Download, Printer, 
@@ -6,6 +6,7 @@ import {
   CreditCard, Flame, Award, Gamepad2, Info, Copy
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
+import { useTranslation } from '../context/LanguageContext';
 import { ARENA_SEATING_ZONES } from '../data/mockData';
 
 export default function ArenaSeatBookingModal({ 
@@ -13,9 +14,8 @@ export default function ArenaSeatBookingModal({
   onClose, 
   initialZoneId = 'stage' 
 }) {
-  if (!isOpen) return null;
-
   const { siteData, createArenaBooking } = useSiteData();
+  const { t, language } = useTranslation();
   const seatingZones = siteData?.arenaSeatingZones || ARENA_SEATING_ZONES;
 
   // Step state: 1: Seats & Zone, 2: Time & Duration, 3: Details & Food, 4: Confirmed Ticket
@@ -28,7 +28,7 @@ export default function ArenaSeatBookingModal({
     const d = new Date();
     return d.toISOString().split('T')[0];
   });
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState('14:00 - 18:00 น.');
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState('14:00 - 18:00');
   const [durationPackage, setDurationPackage] = useState('4'); // '2', '4', '6', 'night'
   
   // Customer & F&B state
@@ -71,10 +71,22 @@ export default function ArenaSeatBookingModal({
   }
 
   const foodPackages = {
-    none: { name: 'ไม่รับอาหารและเครื่องดื่ม', price: 0 },
-    energy: { name: 'Energy Boost Combo (Red Bull + ข้าวไข่ข้นแฮม)', price: 89 },
-    feast: { name: 'Gamer Feast Combo (ชานมพ่นไฟ + ข้าวผัดกะเพราหมูกรอบ + เฟรนช์ฟรายส์)', price: 149 },
-    coffee: { name: 'Specialty Coffee Combo (กาแฟอาราบิก้าคั่วสดเย็น + ครัวซองต์เนยสด)', price: 65 }
+    none: { 
+      name: t('seatBookingModal.foodNone') || 'ไม่รับอาหารและเครื่องดื่ม (0 บาท)', 
+      price: 0 
+    },
+    energy: { 
+      name: t('seatBookingModal.foodEnergy') || 'Energy Boost Combo (Red Bull + ข้าวไข่ข้นแฮม)', 
+      price: 89 
+    },
+    feast: { 
+      name: t('seatBookingModal.foodFeast') || 'Gamer Feast Combo (ชานมพ่นไฟ + ข้าวผัดกะเพรา + เฟรนช์ฟรายส์)', 
+      price: 149 
+    },
+    coffee: { 
+      name: t('seatBookingModal.foodCoffee') || 'Specialty Coffee Combo (กาแฟคั่วสดเย็น + ครัวซองต์)', 
+      price: 65 
+    }
   };
 
   const foodCost = foodPackages[selectedFoodPackage]?.price || 0;
@@ -86,12 +98,12 @@ export default function ArenaSeatBookingModal({
   const handleCompleteBooking = (e) => {
     e.preventDefault();
     if (selectedSeatIds.length === 0) {
-      alert('กรุณาเลือกที่นั่งอย่างน้อย 1 ที่นั่ง');
+      alert(language === 'th' ? 'กรุณาเลือกที่นั่งอย่างน้อย 1 ที่นั่ง' : language === 'zh' ? '请至少选择 1 个机位' : 'Please select at least 1 seat');
       setStep(1);
       return;
     }
     if (!customerName || !customerPhone) {
-      alert('กรุณากรอกชื่อและเบอร์โทรศัพท์ติดต่อ');
+      alert(language === 'th' ? 'กรุณากรอกชื่อและเบอร์โทรศัพท์ติดต่อ' : language === 'zh' ? '请填写姓名和联系电话' : 'Please enter your name and phone number');
       return;
     }
 
@@ -105,7 +117,7 @@ export default function ArenaSeatBookingModal({
       zoneName: currentZone.name,
       seatNumbers: selectedSeatIds,
       date: selectedDate,
-      timeSlot: isNightOwl ? '23:00 - 08:00 น. (Night Owl)' : selectedTimeSlot,
+      timeSlot: isNightOwl ? '23:00 - 08:00 (Night Owl)' : selectedTimeSlot,
       durationHours,
       hardwareTier: currentZone.specs,
       foodPackage: foodPackages[selectedFoodPackage].name,
@@ -136,6 +148,8 @@ export default function ArenaSeatBookingModal({
   const handlePrint = () => {
     window.print();
   };
+
+  if (!isOpen) return null;
 
   return (
     <div 
@@ -183,10 +197,10 @@ export default function ArenaSeatBookingModal({
               }}>
                 GLP ARENA LIVE SEATING
               </span>
-              <span style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>• รามคำแหง 53</span>
+              <span style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>• Ramkhamhaeng 53</span>
             </div>
             <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#ffffff', fontWeight: 800 }}>
-              ระบบจองที่นั่งอารีน่า & เช็กสถานะเครื่องสด
+              {t('seatBookingModal.title') || 'ระบบจองที่นั่งอารีน่า & เช็กสถานะเครื่องสด'}
             </h3>
           </div>
 
@@ -205,6 +219,7 @@ export default function ArenaSeatBookingModal({
               justifyContent: 'center',
               cursor: 'pointer'
             }}
+            aria-label={t('nav.close') || 'ปิด'}
           >
             <X size={18} />
           </button>
@@ -222,9 +237,9 @@ export default function ArenaSeatBookingModal({
             flexShrink: 0
           }}>
             {[
-              { num: 1, label: '1. เลือกโซนและที่นั่ง' },
-              { num: 2, label: '2. วันที่และระยะเวลา' },
-              { num: 3, label: '3. อาหารและข้อมูลผู้จอง' }
+              { num: 1, label: t('seatBookingModal.step1') || '1. โซน & ที่นั่ง' },
+              { num: 2, label: t('seatBookingModal.step2') || '2. วันและเวลา' },
+              { num: 3, label: t('seatBookingModal.step3') || '3. ผู้จอง & เมนู' }
             ].map(s => (
               <button
                 key={s.num}
@@ -260,7 +275,7 @@ export default function ArenaSeatBookingModal({
               {/* Zone Selector Pills */}
               <div>
                 <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>
-                  เลือกโซนการใช้งานในอารีน่า (Select Arena Zone):
+                  {t('seatBookingModal.selectZone') || 'เลือกโซนที่ต้องการ'}:
                 </label>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
                   {seatingZones.map(zone => (
@@ -291,7 +306,7 @@ export default function ArenaSeatBookingModal({
                         </span>
                       </div>
                       <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
-                        ฿{zone.pricePerHour}/ชม. (สมาชิก ฿{zone.memberPricePerHour})
+                        ฿{zone.pricePerHour}/{language === 'th' ? 'ชม.' : language === 'zh' ? '小时' : 'hr'} ({language === 'th' ? 'สมาชิก' : language === 'zh' ? '会员' : 'Member'} ฿{zone.memberPricePerHour})
                       </div>
                     </button>
                   ))}
@@ -311,7 +326,7 @@ export default function ArenaSeatBookingModal({
                 <Monitor size={22} color="#2563eb" style={{ flexShrink: 0 }} />
                 <div>
                   <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1d4ed8', textTransform: 'uppercase' }}>
-                    สเปกฮาร์ดแวร์ประจำโซน ({currentZone.name})
+                    {t('seatBookingModal.hardwareSpecs') || 'สเปกฮาร์ดแวร์ประจำโซน'} ({currentZone.name})
                   </div>
                   <div style={{ fontSize: '0.84rem', color: '#334155', fontWeight: 500 }}>
                     {currentZone.specs}
@@ -323,15 +338,15 @@ export default function ArenaSeatBookingModal({
               <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', fontSize: '0.78rem', color: '#64748b', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <div style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(30, 41, 59, 0.8)', border: '1px solid #334155' }} />
-                  <span>ที่นั่งว่าง (Available)</span>
+                  <span>{t('seatBookingModal.available') || 'ที่นั่งว่าง'}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <div style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid #ef4444' }} />
-                  <span style={{ color: '#ef4444' }}>มีผู้ใช้งาน (Occupied)</span>
+                  <span style={{ color: '#ef4444' }}>{t('seatBookingModal.occupied') || 'มีผู้ใช้งาน'}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <div style={{ width: '16px', height: '16px', borderRadius: '4px', background: '#2563eb', border: '1px solid #60a5fa' }} />
-                  <span style={{ color: '#1d4ed8', fontWeight: 700 }}>ที่คุณเลือก (Selected)</span>
+                  <span style={{ color: '#1d4ed8', fontWeight: 700 }}>{t('seatBookingModal.selected') || 'ที่คุณเลือก'}</span>
                 </div>
               </div>
 
@@ -344,7 +359,7 @@ export default function ArenaSeatBookingModal({
                 boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.5)'
               }}>
                 <div style={{ textAlign: 'center', color: '#64748b', fontSize: '0.75rem', marginBottom: '16px', letterSpacing: '0.05em' }}>
-                  ─── เวที / ด้านหน้าสนามแข่ง ARENA MAIN STAGE DISPLAY ───
+                  {t('seatBookingModal.stageFront') || '─── เวที / ด้านหน้าสนามแข่ง ARENA MAIN STAGE DISPLAY ───'}
                 </div>
 
                 <div style={{
@@ -377,21 +392,23 @@ export default function ArenaSeatBookingModal({
                           background: isSelected 
                             ? '#2563eb' 
                             : isOccupied 
-                              ? 'rgba(239, 68, 68, 0.15)' 
+                              ? 'rgba(239, 68, 68, 0.12)' 
                               : 'rgba(30, 41, 59, 0.8)',
-                          color: isSelected ? '#ffffff' : isOccupied ? '#f87171' : '#f1f5f9',
+                          color: isSelected 
+                            ? '#ffffff' 
+                            : isOccupied 
+                              ? '#ef4444' 
+                              : '#cbd5e1',
                           cursor: isOccupied ? 'not-allowed' : 'pointer',
+                          position: 'relative',
                           transition: 'all 0.15s ease',
                           transform: isSelected ? 'scale(1.05)' : 'none',
                           boxShadow: isSelected ? '0 0 14px rgba(37, 99, 235, 0.6)' : 'none'
                         }}
                       >
-                        <Monitor size={18} />
-                        <span style={{ fontSize: '0.75rem', fontWeight: 800, marginTop: '4px' }}>
-                          {seat.id}
-                        </span>
+                        <span style={{ fontSize: '0.88rem', fontWeight: 800 }}>{seat.name}</span>
                         <span style={{ fontSize: '0.62rem', opacity: 0.8 }}>
-                          {isOccupied ? 'ไม่ว่าง' : isSelected ? 'เลือกแล้ว' : 'ว่าง'}
+                          {isOccupied ? (language === 'th' ? 'ไม่ว่าง' : language === 'zh' ? '占用' : 'Occupied') : (language === 'th' ? 'ว่าง' : language === 'zh' ? '空闲' : 'Free')}
                         </span>
                       </button>
                     );
@@ -399,38 +416,28 @@ export default function ArenaSeatBookingModal({
                 </div>
               </div>
 
-              {/* Selected Seats summary & Next button */}
+              {/* Bottom Next Bar */}
               <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                paddingTop: '12px',
-                borderTop: '1px solid #e2e8f0',
-                flexWrap: 'wrap',
-                gap: '12px'
+                paddingTop: '16px',
+                borderTop: '1px solid #e2e8f0'
               }}>
                 <div>
-                  <div style={{ fontSize: '0.84rem', color: '#64748b' }}>
-                    ที่นั่งที่เลือก ({selectedSeatIds.length} ที่):
-                  </div>
-                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '4px' }}>
-                    {selectedSeatIds.length > 0 ? (
-                      selectedSeatIds.map(id => (
-                        <span key={id} style={{ background: '#dbeafe', color: '#1d4ed8', padding: '3px 10px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 700 }}>
-                          {id}
-                        </span>
-                      ))
-                    ) : (
-                      <span style={{ color: '#94a3b8', fontSize: '0.82rem' }}>ยังไม่ได้เลือกที่นั่ง (คลิกที่เครื่องด้านบน)</span>
-                    )}
-                  </div>
+                  <span style={{ fontSize: '0.85rem', color: '#64748b' }}>
+                    {t('seatBookingModal.selectedSeatsCount') || 'ที่นั่งที่เลือก:'}{' '}
+                  </span>
+                  <strong style={{ fontSize: '1rem', color: '#0f172a' }}>
+                    {selectedSeatIds.length > 0 ? selectedSeatIds.join(', ') : (language === 'th' ? 'ยังไม่ได้เลือก' : language === 'zh' ? '尚未选择' : 'None')}
+                  </strong>
                 </div>
 
                 <button
                   type="button"
                   onClick={() => {
                     if (selectedSeatIds.length === 0) {
-                      alert('กรุณาเลือกที่นั่งอย่างน้อย 1 ที่นั่งเพื่อดำเนินการต่อ');
+                      alert(language === 'th' ? 'กรุณาเลือกที่นั่งอย่างน้อย 1 ที่นั่งเพื่อดำเนินการต่อ' : language === 'zh' ? '请至少选择 1 个机位以继续' : 'Please select at least 1 seat to continue');
                       return;
                     }
                     setStep(2);
@@ -450,7 +457,7 @@ export default function ArenaSeatBookingModal({
                     boxShadow: selectedSeatIds.length > 0 ? '0 4px 12px rgba(37, 99, 235, 0.25)' : 'none'
                   }}
                 >
-                  <span>ขั้นตอนถัดไป (กำหนดเวลา)</span>
+                  <span>{t('seatBookingModal.btnNext') || 'ถัดไป'}</span>
                   <ArrowRight size={16} />
                 </button>
               </div>
@@ -464,7 +471,7 @@ export default function ArenaSeatBookingModal({
                 {/* Date Picker */}
                 <div>
                   <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>
-                    วันที่ต้องการเข้าใช้งาน (Booking Date):
+                    {t('seatBookingModal.dateLabel') || 'วันที่ต้องการใช้บริการ:'}
                   </label>
                   <input 
                     type="date" 
@@ -479,7 +486,7 @@ export default function ArenaSeatBookingModal({
                 {/* Duration Packages */}
                 <div>
                   <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>
-                    แพ็กเกจระยะเวลา (Duration Package):
+                    {t('seatBookingModal.durationLabel') || 'แพ็กเกจระยะเวลาชั่วโมง:'}
                   </label>
                   <select
                     className="form-input"
@@ -487,10 +494,10 @@ export default function ArenaSeatBookingModal({
                     onChange={e => setDurationPackage(e.target.value)}
                     style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', width: '100%' }}
                   >
-                    <option value="2">2 ชั่วโมง (Quick Play) • ฿{ratePerHour * 2}/เครื่อง</option>
-                    <option value="4">4 ชั่วโมง (Pro Session - แนะนำ) • ฿{ratePerHour * 4}/เครื่อง</option>
-                    <option value="6">6 ชั่วโมง (Rank Push Marathon) • ฿{ratePerHour * 6}/เครื่อง</option>
-                    <option value="night">🌙 เหมาข้ามคืน Night Owl (23:00 - 08:00 น.) • ฿150/เครื่อง</option>
+                    <option value="2">{t('seatBookingModal.package2hr') || '2 ชั่วโมง (ชิวๆ สบายๆ)'} • ฿{ratePerHour * 2}</option>
+                    <option value="4">{t('seatBookingModal.package4hr') || '4 ชั่วโมง (ยอดนิยม - กำลังดี)'} • ฿{ratePerHour * 4}</option>
+                    <option value="6">{t('seatBookingModal.package6hr') || '6 ชั่วโมง (สายลุย แบกแรงค์)'} • ฿{ratePerHour * 6}</option>
+                    <option value="night">🌙 {t('seatBookingModal.packageNight') || 'Night Owl เหมาคืน 23:00 - 08:00 (150 บาท)'}</option>
                   </select>
                 </div>
               </div>
@@ -499,16 +506,16 @@ export default function ArenaSeatBookingModal({
               {durationPackage !== 'night' && (
                 <div>
                   <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>
-                    เลือกรอบเวลาเริ่มต้น (Start Time Slot):
+                    {t('seatBookingModal.timeSlotLabel') || 'ช่วงเวลาที่เริ่มใช้บริการ:'}
                   </label>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px' }}>
                     {[
-                      '10:00 - 14:00 น.',
-                      '12:00 - 16:00 น.',
-                      '14:00 - 18:00 น.',
-                      '16:00 - 20:00 น.',
-                      '18:00 - 22:00 น.',
-                      '20:00 - 24:00 น.'
+                      '10:00 - 14:00',
+                      '12:00 - 16:00',
+                      '14:00 - 18:00',
+                      '16:00 - 20:00',
+                      '18:00 - 22:00',
+                      '20:00 - 24:00'
                     ].map(slot => (
                       <button
                         key={slot}
@@ -536,15 +543,15 @@ export default function ArenaSeatBookingModal({
               {/* Booking Summary Box */}
               <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.85rem' }}>
-                  <span style={{ color: '#64748b' }}>โซนที่เลือก:</span>
+                  <span style={{ color: '#64748b' }}>{language === 'th' ? 'โซนที่เลือก:' : language === 'zh' ? '所选区域:' : 'Selected Zone:'}</span>
                   <strong style={{ color: '#0f172a' }}>{currentZone.name}</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.85rem' }}>
-                  <span style={{ color: '#64748b' }}>จำนวนที่นั่ง ({selectedSeatIds.length} เครื่อง):</span>
+                  <span style={{ color: '#64748b' }}>{t('seatBookingModal.selectedSeatsCount') || 'ที่นั่งที่เลือก:'} ({selectedSeatIds.length})</span>
                   <strong style={{ color: '#0f172a' }}>{selectedSeatIds.join(', ')}</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-                  <span style={{ color: '#64748b' }}>รวมค่าชั่วโมงเล่น:</span>
+                  <span style={{ color: '#64748b' }}>{language === 'th' ? 'รวมค่าชั่วโมงเล่น:' : language === 'zh' ? '机位费用小计:' : 'Seat Subtotal:'}</span>
                   <strong style={{ color: '#1d4ed8', fontSize: '1.05rem' }}>฿{totalSeatPrice.toLocaleString()}</strong>
                 </div>
               </div>
@@ -556,14 +563,14 @@ export default function ArenaSeatBookingModal({
                   onClick={() => setStep(1)}
                   style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 18px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#475569', fontWeight: 600, cursor: 'pointer' }}
                 >
-                  <ChevronLeft size={16} /> ย้อนกลับ
+                  <ChevronLeft size={16} /> {t('seatBookingModal.btnBack') || 'ย้อนกลับ'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setStep(3)}
                   style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 22px', borderRadius: '8px', border: 'none', background: '#2563eb', color: '#ffffff', fontWeight: 700, cursor: 'pointer' }}
                 >
-                  ถัดไป (ระบุข้อมูลผู้จอง) <ChevronRight size={16} />
+                  {t('seatBookingModal.btnNext') || 'ถัดไป'} <ChevronRight size={16} />
                 </button>
               </div>
             </div>
@@ -586,10 +593,10 @@ export default function ArenaSeatBookingModal({
                   <Award size={22} color={isMember ? '#2563eb' : '#64748b'} />
                   <div>
                     <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a' }}>
-                      สิทธิ์สมาชิก GLP Member (ลดค่าชั่วโมงทันที)
+                      {t('seatBookingModal.memberCheck') || 'สิทธิ์สมาชิก GLP Member'}
                     </div>
                     <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                      ประหยัดสูงสุด 10-15 บาท/ชม. พร้อมสะสมแต้มแลกชั่วโมงฟรี
+                      {language === 'th' ? 'รับส่วนลดชั่วโมงละ 10 บาท' : language === 'zh' ? '每小时立减 10 泰铢' : 'Get 10 THB discount per hour'}
                     </div>
                   </div>
                 </div>
@@ -601,7 +608,7 @@ export default function ArenaSeatBookingModal({
                     onChange={e => setIsMember(e.target.checked)}
                     style={{ width: '18px', height: '18px' }}
                   />
-                  <span>ใช้สิทธิ์สมาชิก</span>
+                  <span>{t('seatBookingModal.isMemberLabel') || 'ฉันเป็นสมาชิก GLP'}</span>
                 </label>
               </div>
 
@@ -609,12 +616,12 @@ export default function ArenaSeatBookingModal({
               {isMember && (
                 <div className="form-group">
                   <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>
-                    รหัสสมาชิก GLP Member ID:
+                    {t('seatBookingModal.memberId') || 'รหัสสมาชิก GLP:'}
                   </label>
                   <input 
                     type="text" 
                     className="form-input" 
-                    placeholder="เช่น GLP-VIP-042 หรือ เบอร์โทรที่สมัครสมาชิก"
+                    placeholder="GLP-VIP-XXXX"
                     value={memberId}
                     onChange={e => setMemberId(e.target.value)}
                     style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', width: '100%' }}
@@ -626,13 +633,13 @@ export default function ArenaSeatBookingModal({
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
                 <div className="form-group">
                   <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>
-                    ชื่อผู้จอง / Gamer Tag *
+                    {t('seatBookingModal.custName') || 'ชื่อ - นามสกุล ผู้จอง:'} *
                   </label>
                   <input 
                     type="text" 
                     required 
                     className="form-input"
-                    placeholder="เช่น คุณกอล์ฟ หรือ SScary"
+                    placeholder={language === 'th' ? 'เช่น คุณกอล์ฟ หรือ SScary' : language === 'zh' ? '例如 张三' : 'e.g. Alex Johnson'}
                     value={customerName}
                     onChange={e => setCustomerName(e.target.value)}
                     style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', width: '100%' }}
@@ -641,7 +648,7 @@ export default function ArenaSeatBookingModal({
 
                 <div className="form-group">
                   <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>
-                    เบอร์โทรศัพท์ติดต่อ *
+                    {t('seatBookingModal.custPhone') || 'เบอร์โทรศัพท์ติดต่อ (จำเป็น):'} *
                   </label>
                   <input 
                     type="tel" 
@@ -656,12 +663,12 @@ export default function ArenaSeatBookingModal({
 
                 <div className="form-group">
                   <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>
-                    อีเมล หรือ Discord Tag (สำหรับรับตั๋ว E-Ticket)
+                    {t('seatBookingModal.custEmail') || 'อีเมลติดต่อ (ถ้ามี):'}
                   </label>
                   <input 
                     type="text" 
                     className="form-input"
-                    placeholder="name@example.com หรือ user#1234"
+                    placeholder="name@example.com"
                     value={customerEmail}
                     onChange={e => setCustomerEmail(e.target.value)}
                     style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', width: '100%' }}
@@ -672,7 +679,7 @@ export default function ArenaSeatBookingModal({
               {/* F&B Snack Add-ons */}
               <div>
                 <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>
-                  สั่งชุดอาหาร & เครื่องดื่มเสิร์ฟถึงโต๊ะล่วงหน้า (F&B Combos):
+                  {t('seatBookingModal.foodLabel') || 'เลือกแพ็กเกจอาหารและเครื่องดื่ม:'}
                 </label>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
                   {Object.entries(foodPackages).map(([key, item]) => (
@@ -697,7 +704,7 @@ export default function ArenaSeatBookingModal({
                         {item.name}
                       </span>
                       <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#2563eb' }}>
-                        {item.price > 0 ? `+฿${item.price}` : 'ฟรี / ไม่รับ'}
+                        {item.price > 0 ? `+฿${item.price}` : (language === 'th' ? 'ฟรี / ไม่รับ' : language === 'zh' ? '免费/不选' : 'Free / None')}
                       </span>
                     </button>
                   ))}
@@ -707,12 +714,12 @@ export default function ArenaSeatBookingModal({
               {/* Special Notes */}
               <div className="form-group">
                 <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>
-                  หมายเหตุเพิ่มเติม (เช่น ยืมเมาส์/คีย์บอร์ดพิเศษ, สตรีมมิ่ง 4K):
+                  {t('seatBookingModal.notes') || 'หมายเหตุเพิ่มเติม (ถ้ามี):'}
                 </label>
                 <input 
                   type="text" 
                   className="form-input"
-                  placeholder="เช่น ต้องการสาย LAN สำรอง หรือไมโครโฟนสำหรับสตรีมสด"
+                  placeholder={language === 'th' ? 'เช่น ต้องการสาย LAN สำรอง หรือไมโครโฟนสำหรับสตรีมสด' : language === 'zh' ? '例如 需要备用网线或独立声卡麦克风' : 'e.g. Spare LAN cable or streaming mic'}
                   value={bookingNotes}
                   onChange={e => setBookingNotes(e.target.value)}
                   style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', width: '100%' }}
@@ -730,13 +737,13 @@ export default function ArenaSeatBookingModal({
                 alignItems: 'center'
               }}>
                 <div>
-                  <span style={{ fontSize: '0.78rem', color: '#94a3b8', display: 'block' }}>ยอดชำระสุทธิ (รวมอาหารและส่วนลดสมาชิก)</span>
+                  <span style={{ fontSize: '0.78rem', color: '#94a3b8', display: 'block' }}>{t('seatBookingModal.totalEstimated') || 'ยอดรวมประมาณการ:'}</span>
                   <span style={{ fontSize: '1.4rem', fontWeight: 900, color: '#38bdf8' }}>
                     ฿{grandTotal.toLocaleString()}
                   </span>
                 </div>
                 <div style={{ textAlign: 'right', fontSize: '0.75rem', color: '#cbd5e1' }}>
-                  ชำระหน้าเคาน์เตอร์แคชเชียร์ หรือโอนผ่านพร้อมเพย์เมื่อถึงร้าน
+                  {language === 'th' ? 'ชำระหน้าเคาน์เตอร์แคชเชียร์ หรือโอนผ่านพร้อมเพย์เมื่อถึงร้าน' : language === 'zh' ? '到店前台扫码或现金支付' : 'Pay at the counter upon arrival'}
                 </div>
               </div>
 
@@ -747,13 +754,13 @@ export default function ArenaSeatBookingModal({
                   onClick={() => setStep(2)}
                   style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 18px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#475569', fontWeight: 600, cursor: 'pointer' }}
                 >
-                  <ChevronLeft size={16} /> ย้อนกลับ
+                  <ChevronLeft size={16} /> {t('seatBookingModal.btnBack') || 'ย้อนกลับ'}
                 </button>
                 <button
                   type="submit"
                   style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '12px 28px', borderRadius: '8px', border: 'none', background: '#2563eb', color: '#ffffff', fontWeight: 800, fontSize: '0.92rem', cursor: 'pointer', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)' }}
                 >
-                  <CheckCircle2 size={18} /> ยืนยันการจอง & ออกบัตร E-Ticket
+                  <CheckCircle2 size={18} /> {t('seatBookingModal.btnConfirm') || 'ยืนยันการจองที่นั่ง'}
                 </button>
               </div>
             </form>
@@ -778,10 +785,10 @@ export default function ArenaSeatBookingModal({
                   <CheckCircle2 size={32} />
                 </div>
                 <h3 style={{ margin: '0 0 4px 0', fontSize: '1.3rem', color: '#0f172a', fontWeight: 800 }}>
-                  การจองที่นั่งอารีน่าเสร็จสมบูรณ์!
+                  {t('seatBookingModal.ticketSuccess') || 'จองที่นั่งสำเร็จแล้ว!'}
                 </h3>
                 <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>
-                  กรุณาบันทึกหรือแสดงตั๋ว Digital E-Ticket นี้แก่พนักงาน ณ จุดเคาน์เตอร์แคชเชียร์
+                  {t('seatBookingModal.ticketSubtitle') || 'ขอบคุณที่ใช้บริการ G-SPEED ARENA กรุณาบันทึกตั๋วหรือถ่ายรูปไว้แสดงหน้าเคาน์เตอร์'}
                 </p>
               </div>
 
@@ -821,7 +828,9 @@ export default function ArenaSeatBookingModal({
                 <div style={{ padding: '20px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                     <div>
-                      <span style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase' }}>รหัสบัตรการจอง (Booking ID)</span>
+                      <span style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase' }}>
+                        {t('seatBookingModal.ticketCode') || 'รหัสการจอง (Booking Code):'}
+                      </span>
                       <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#38bdf8', letterSpacing: '1px' }}>
                         {confirmedBooking.bookingCode}
                       </div>
@@ -856,38 +865,38 @@ export default function ArenaSeatBookingModal({
                     fontSize: '0.8rem'
                   }}>
                     <div>
-                      <span style={{ color: '#94a3b8', display: 'block', fontSize: '0.7rem' }}>ชื่อผู้จอง</span>
+                      <span style={{ color: '#94a3b8', display: 'block', fontSize: '0.7rem' }}>{language === 'th' ? 'ชื่อผู้จอง' : language === 'zh' ? '预订人姓名' : 'Customer Name'}</span>
                       <strong style={{ color: '#ffffff' }}>{confirmedBooking.customerName}</strong>
                     </div>
                     <div>
-                      <span style={{ color: '#94a3b8', display: 'block', fontSize: '0.7rem' }}>เบอร์โทรศัพท์</span>
+                      <span style={{ color: '#94a3b8', display: 'block', fontSize: '0.7rem' }}>{language === 'th' ? 'เบอร์โทรศัพท์' : language === 'zh' ? '电话' : 'Phone'}</span>
                       <strong style={{ color: '#ffffff' }}>{confirmedBooking.phone}</strong>
                     </div>
                     <div>
-                      <span style={{ color: '#94a3b8', display: 'block', fontSize: '0.7rem' }}>โซนที่นั่ง</span>
+                      <span style={{ color: '#94a3b8', display: 'block', fontSize: '0.7rem' }}>{language === 'th' ? 'โซนที่นั่ง' : language === 'zh' ? '所选区域' : 'Zone'}</span>
                       <strong style={{ color: '#38bdf8' }}>{confirmedBooking.zoneName}</strong>
                     </div>
                     <div>
-                      <span style={{ color: '#94a3b8', display: 'block', fontSize: '0.7rem' }}>หมายเลขที่นั่ง</span>
+                      <span style={{ color: '#94a3b8', display: 'block', fontSize: '0.7rem' }}>{language === 'th' ? 'หมายเลขที่นั่ง' : language === 'zh' ? '机位号' : 'Seat Numbers'}</span>
                       <strong style={{ color: '#fbbf24', fontSize: '0.95rem' }}>
                         {(confirmedBooking.seatNumbers || []).join(', ')}
                       </strong>
                     </div>
                     <div>
-                      <span style={{ color: '#94a3b8', display: 'block', fontSize: '0.7rem' }}>วันที่</span>
+                      <span style={{ color: '#94a3b8', display: 'block', fontSize: '0.7rem' }}>{language === 'th' ? 'วันที่' : language === 'zh' ? '日期' : 'Date'}</span>
                       <strong style={{ color: '#ffffff' }}>{confirmedBooking.date}</strong>
                     </div>
                     <div>
-                      <span style={{ color: '#94a3b8', display: 'block', fontSize: '0.7rem' }}>เวลา & ระยะเวลา</span>
+                      <span style={{ color: '#94a3b8', display: 'block', fontSize: '0.7rem' }}>{language === 'th' ? 'เวลา & ระยะเวลา' : language === 'zh' ? '时段与时长' : 'Time & Duration'}</span>
                       <strong style={{ color: '#ffffff' }}>{confirmedBooking.timeSlot}</strong>
                     </div>
                   </div>
 
                   {/* Hardware & Food summary */}
                   <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '14px', lineHeight: 1.5 }}>
-                    <div>⚡ สเปก: <span style={{ color: '#cbd5e1' }}>{confirmedBooking.hardwareTier}</span></div>
-                    {confirmedBooking.foodPackage && confirmedBooking.foodPackage !== 'ไม่รับอาหารและเครื่องดื่ม' && (
-                      <div style={{ marginTop: '2px' }}>🍔 เมนูเสริม: <span style={{ color: '#fef08a' }}>{confirmedBooking.foodPackage}</span></div>
+                    <div>⚡ {language === 'th' ? 'สเปก:' : language === 'zh' ? '配置:' : 'Specs:'} <span style={{ color: '#cbd5e1' }}>{confirmedBooking.hardwareTier}</span></div>
+                    {confirmedBooking.foodPackage && !confirmedBooking.foodPackage.includes('ไม่รับ') && !confirmedBooking.foodPackage.includes('None') && !confirmedBooking.foodPackage.includes('不选') && (
+                      <div style={{ marginTop: '2px' }}>🍔 {language === 'th' ? 'เมนูเสริม:' : language === 'zh' ? '配套餐饮:' : 'F&B:'} <span style={{ color: '#fef08a' }}>{confirmedBooking.foodPackage}</span></div>
                     )}
                   </div>
 
@@ -899,7 +908,7 @@ export default function ArenaSeatBookingModal({
                     paddingTop: '10px',
                     borderTop: '1px dashed rgba(255,255,255,0.2)'
                   }}>
-                    <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>ยอดชำระเงิน</span>
+                    <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{language === 'th' ? 'ยอดชำระเงิน' : language === 'zh' ? '应付总额' : 'Total Amount'}</span>
                     <span style={{ fontSize: '1.25rem', fontWeight: 900, color: '#38bdf8' }}>
                       ฿{confirmedBooking.totalPrice?.toLocaleString()}
                     </span>
@@ -926,7 +935,7 @@ export default function ArenaSeatBookingModal({
                     cursor: 'pointer'
                   }}
                 >
-                  <Printer size={16} /> พิมพ์ตั๋ว E-Ticket
+                  <Printer size={16} /> {t('seatBookingModal.btnPrintTicket') || 'พิมพ์ใบจอง / ตั๋ว'}
                 </button>
                 <button
                   type="button"
@@ -949,7 +958,7 @@ export default function ArenaSeatBookingModal({
                     cursor: 'pointer'
                   }}
                 >
-                  <Copy size={16} /> {copiedCode ? 'คัดลอกแล้ว!' : 'คัดลอกรหัสตั๋ว'}
+                  <Copy size={16} /> {copiedCode ? (language === 'th' ? 'คัดลอกแล้ว!' : language === 'zh' ? '已复制！' : 'Copied!') : (t('seatBookingModal.btnCopyCode') || 'คัดลอกรหัส')}
                 </button>
                 <button
                   type="button"
@@ -969,7 +978,7 @@ export default function ArenaSeatBookingModal({
                     boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)'
                   }}
                 >
-                  เรียบร้อย (เสร็จสิ้น)
+                  {t('seatBookingModal.btnClose') || 'เสร็จสิ้น / ปิดหน้าต่าง'}
                 </button>
               </div>
             </div>
