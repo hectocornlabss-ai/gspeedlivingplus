@@ -773,7 +773,7 @@ export default function ArenaHub({
                       className={`cat-pill-btn ${selectedCategory === cat.id ? 'active' : ''}`}
                     >
                       <CategoryIcon size={15} />
-                      <span>{cat.label}</span>
+                      <span>{translateDynamic(cat.label)}</span>
                     </button>
                   );
                 })}

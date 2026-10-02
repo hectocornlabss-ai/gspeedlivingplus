@@ -98,41 +98,9 @@ function SectionImageUploader({
 
         {/* Input & Upload Controls */}
         <div className="siu-controls-col">
-          <div className="siu-input-row">
-            <input 
-              type="url" 
-              className="form-input"
-              placeholder="วาง URL รูปภาพภายนอก หรือกดเลือกจากคลัง/อัปโหลด..."
-              value={value || ''}
-              onChange={e => onChange(e.target.value)}
-            />
-
-            {/* Media Library Picker Button */}
-            {onOpenMediaLibrary && (
-              <button 
-                type="button" 
-                onClick={onOpenMediaLibrary}
-                className="btn-secondary"
-                style={{ 
-                  whiteSpace: 'nowrap', 
-                  display: 'inline-flex', 
-                  alignItems: 'center', 
-                  gap: '6px',
-                  padding: '7px 12px',
-                  fontSize: '0.82rem',
-                  color: '#2563eb',
-                  borderColor: '#bfdbfe',
-                  background: '#eff6ff',
-                  cursor: 'pointer'
-                }}
-                title="เลือกภาพจากคลังสื่อ Media Library ที่เคยอัปโหลดไว้ ประหยัดพื้นที่ ไม่ต้องอัปใหม่"
-              >
-                <HardDrive size={14} className="text-blue" />
-                <span>เลือกจากคลังสื่อ</span>
-              </button>
-            )}
-
-            <label className="btn-upload-file" title="เลือกไฟล์ภาพ ระบบจะย่อขนาดและแปลงเป็น WebP บีบอัดอัตโนมัติ">
+          {/* Action Buttons Toolbar Row */}
+          <div className="siu-actions-row" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', width: '100%' }}>
+            <label className="btn-upload-file" title="เลือกไฟล์ภาพ ระบบจะย่อขนาดและแปลงเป็น WebP บีบอัดอัตโนมัติ" style={{ margin: 0, cursor: 'pointer' }}>
               {compressingItemId === uploadKey ? (
                 <>
                   <RefreshCw size={14} className="spin-icon" />
@@ -159,6 +127,32 @@ function SectionImageUploader({
                 }}
               />
             </label>
+
+            {/* Media Library Picker Button */}
+            {onOpenMediaLibrary && (
+              <button 
+                type="button" 
+                onClick={onOpenMediaLibrary}
+                className="btn-secondary"
+                style={{ 
+                  whiteSpace: 'nowrap', 
+                  display: 'inline-flex', 
+                  alignItems: 'center', 
+                  gap: '6px',
+                  padding: '7px 12px',
+                  fontSize: '0.82rem',
+                  color: '#2563eb',
+                  borderColor: '#bfdbfe',
+                  background: '#eff6ff',
+                  cursor: 'pointer'
+                }}
+                title="เลือกภาพจากคลังสื่อ Media Library ที่เคยอัปโหลดไว้ ประหยัดพื้นที่ ไม่ต้องอัปใหม่"
+              >
+                <HardDrive size={14} className="text-blue" />
+                <span>เลือกจากคลังสื่อ</span>
+              </button>
+            )}
+
             {value && (
               <button 
                 type="button" 
@@ -184,8 +178,20 @@ function SectionImageUploader({
             )}
           </div>
 
+          {/* Direct URL Input Row */}
+          <div className="siu-url-row" style={{ display: 'flex', width: '100%', marginTop: '2px' }}>
+            <input 
+              type="url" 
+              className="form-input"
+              style={{ width: '100%', fontSize: '0.82rem', height: '36px' }}
+              placeholder="หรือวาง URL รูปภาพภายนอกโดยตรง..."
+              value={value || ''}
+              onChange={e => onChange(e.target.value)}
+            />
+          </div>
+
           {/* SEO ALT Text Field */}
-          <div className="siu-alt-input-wrap" style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div className="siu-alt-input-wrap" style={{ marginTop: '2px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', width: '100%' }}>
             <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#475569', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
               <Tag size={12} className="text-blue" />
               <span>ALT Text (สำหรับ SEO)*:</span>
@@ -193,7 +199,7 @@ function SectionImageUploader({
             <input 
               type="text" 
               className="form-input"
-              style={{ fontSize: '0.82rem', height: '32px', flex: 1 }}
+              style={{ fontSize: '0.82rem', height: '32px', flex: 1, minWidth: '180px' }}
               placeholder="ใส่ข้อความกำกับภาพเพื่อเพิ่มคะแนน Google SEO เช่น เวทีแข่งอีสปอร์ต 5v5 สเปก RTX 40 Series..."
               value={altValue || ''}
               onChange={e => onAltChange && onAltChange(e.target.value)}
@@ -7037,7 +7043,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                       />
 
                       <SectionImageUploader 
-                        label="ภาพพื้นหลังแบนเนอร์บทความ & ข่าวสาร (Right Banner Image)"
+                        label="ภาพพื้นหลังแบนเนอร์ทัวร์นาเมนต์การแข่งขัน (Right Banner Image)"
                         value={siteData.featureBanners?.bannerRight?.image || ''}
                         onChange={val => updateSectionConfig('featureBanners', {
                           ...siteData.featureBanners,
@@ -7056,7 +7062,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                         }, siteData.featureBanners?.bannerRight?.image)}
                         recommendedSize="1200 x 600 px"
                         aspectRatio="2:1 (แนวนอนมาตรฐาน)"
-                        description="ภาพพื้นหลังแบนเนอร์ฝั่งขวา (บทความ ข่าวสาร & ไฮไลต์) แนะนำรูปอุปกรณ์เกมมิ่ง, มุมคอมพิวเตอร์ หรือบรรยากาศร้านโมเดิร์น"
+                        description="ภาพพื้นหลังแบนเนอร์ฝั่งขวา (ทัวร์นาเมนต์การแข่งขัน & ชิงเงินรางวัล) แนะนำรูปเวทีการแข่งขัน, ถ้วยรางวัล หรือบรรยากาศนักกีฬาอีสปอร์ต"
                         uploadKey="banner-right-img"
                         compressingItemId={compressingItemId}
                         handleImageUpload={handleImageUpload}

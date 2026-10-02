@@ -369,7 +369,7 @@ export default function CompanyProfile({ onNavigateFranchise }) {
           <div className="timeline-journey-grid">
             {(founder.history || FOUNDER_INFO.history).map((h, idx) => (
               <div key={idx} className="journey-card glass-panel">
-                <div className="journey-year">{h.year}</div>
+                <div className="journey-year">{translateDynamic(h.year, language)}</div>
                 <div className="journey-line"></div>
                 <p className="journey-event">{translateDynamic(h.event, language)}</p>
               </div>
@@ -381,7 +381,7 @@ export default function CompanyProfile({ onNavigateFranchise }) {
             <div className="stats-grid">
               {(founder.stats || FOUNDER_INFO.stats).map((s, idx) => (
                 <div key={idx} className="stat-box">
-                  <div className="stat-value text-blue">{s.value}</div>
+                  <div className="stat-value text-blue">{translateDynamic(s.value, language)}</div>
                   <div className="stat-label">{translateDynamic(s.label, language)}</div>
                 </div>
               ))}

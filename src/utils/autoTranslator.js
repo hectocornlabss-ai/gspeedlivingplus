@@ -111,6 +111,21 @@ export function matchPatternTranslation(rawText, lang) {
     return lang === 'zh' ? `${prizeTotalMatch[1]} 泰铢` : `${prizeTotalMatch[1]} THB`;
   }
 
+  // 1b. Currency Range: e.g. "1,500,000 - 3,000,000 บาท" or "1,000,000 - 2,000,000 บาท"
+  const prizeRangeRegex = /^([\d,]+)\s*-\s*([\d,]+)\s*บาท$/i;
+  const prizeRangeMatch = str.match(prizeRangeRegex);
+  if (prizeRangeMatch) {
+    return lang === 'zh' ? `${prizeRangeMatch[1]} - ${prizeRangeMatch[2]} 泰铢` : `${prizeRangeMatch[1]} - ${prizeRangeMatch[2]} THB`;
+  }
+
+  // 1c. Currency with plus/min: e.g. "5,000,000 บาทขึ้นไป"
+  const prizePlusRegex = /^([\d,]+)\s*บาท(?:ขึ้นไป)?(?:\s*\((.+)\))?$/i;
+  const prizePlusMatch = str.match(prizePlusRegex);
+  if (prizePlusMatch) {
+    const note = prizePlusMatch[2] ? ` (${translateDynamic(prizePlusMatch[2], lang, false)})` : '';
+    return lang === 'zh' ? `${prizePlusMatch[1]} 泰铢以上${note}` : `${prizePlusMatch[1]}+ THB${note}`;
+  }
+
   // 2. Reading time: e.g. "3 นาทีในการอ่าน" or "5 นาที"
   const readTimeRegex = /^(\d+)\s*นาที(ในการอ่าน)?$/;
   const readMatch = str.match(readTimeRegex);
@@ -259,6 +274,41 @@ export function matchPatternTranslation(rawText, lang) {
     return lang === 'zh' ? '🥉 季军 (3rd Place)' : '🥉 3rd Place';
   }
 
+  // 9. Timeline year ranges: e.g. "2024-ปัจจุบัน"
+  const timelineYearRegex = /^(\d{4})\s*-\s*ปัจจุบัน$/;
+  const timelineYearMatch = str.match(timelineYearRegex);
+  if (timelineYearMatch) {
+    return lang === 'zh' ? `${timelineYearMatch[1]}-至今` : `${timelineYearMatch[1]}-Present`;
+  }
+  if (str === 'ปัจจุบัน') {
+    return lang === 'zh' ? '至今' : 'Present';
+  }
+
+  // 10. Quantities with units: e.g. "8 สาขา", "750+ เครื่อง", "52,000+ คน", "180+ รายการ"
+  const branchesRegex = /^(\d+[\d,]*\+?)\s*สาขา$/;
+  const brMatch = str.match(branchesRegex);
+  if (brMatch) {
+    return lang === 'zh' ? `${brMatch[1]} 家分店` : `${brMatch[1]} Branches`;
+  }
+
+  const pcsRegex = /^(\d+[\d,]*\+?)\s*เครื่อง$/;
+  const pcsMatch = str.match(pcsRegex);
+  if (pcsMatch) {
+    return lang === 'zh' ? `${pcsMatch[1]} 台` : `${pcsMatch[1]} PCs`;
+  }
+
+  const membersRegex = /^(\d+[\d,]*\+?)\s*คน$/;
+  const memMatch = str.match(membersRegex);
+  if (memMatch) {
+    return lang === 'zh' ? `${memMatch[1]} 位` : `${memMatch[1]} Members`;
+  }
+
+  const tourneysRegex = /^(\d+[\d,]*\+?)\s*รายการ$/;
+  const tourMatch = str.match(tourneysRegex);
+  if (tourMatch) {
+    return lang === 'zh' ? `${tourMatch[1]} 场` : `${tourMatch[1]} Tournaments`;
+  }
+
   return null;
 }
 
@@ -266,6 +316,101 @@ export function matchPatternTranslation(rawText, lang) {
  * Comprehensive Built-in Esports & Activities Translations
  */
 export const BUILT_IN_DICTIONARY = {
+  // Category Filter Tabs
+  "ทั้งหมด": { en: "All", zh: "全部" },
+  "การแข่งขัน & ทัวร์นาเมนต์": { en: "Tournaments & Pro Circuit", zh: "电竞赛事与锦标赛" },
+  "งานเปิดตัวเกม & ค่ายเกม": { en: "Game Launch & Publisher Events", zh: "新作发布与厂商活动" },
+  "กิจกรรมคอมมูนิตี้ & แจกรางวัล": { en: "Community Meetups & Awards", zh: "社区聚会与颁奖典礼" },
+  "บรรยากาศร้าน & แข่ง LAN 24 ชม.": { en: "Arena Atmosphere & 24h LAN", zh: "场馆氛围与24小时LAN" },
+  "รวมกิจกรรมและการแข่งขันอีสปอร์ตทุกประเภทของ GLP": { en: "All GLP esports activities and tournaments", zh: "汇聚 GLP 旗下的所有电竞赛事与特色活动" },
+  "ทัวร์นาเมนต์ชิงเงินรางวัลระดับประเทศ ทั้ง LAN และ Online": { en: "Nationwide prize-pool tournaments, both LAN and Online", zh: "全国高额奖金锦标赛，涵盖线下LAN与线上对决" },
+  "งานแถลงข่าว เปิดแพตช์ใหม่ และความร่วมมือกับค่ายเกมชั้นนำ": { en: "Press conferences, game patch debuts, and top publisher partnerships", zh: "新作发布会、重大版本更新体验与顶尖游戏厂商联动" },
+  "มีตติ้งแฟนคลับ กิจกรรมกระชับมิตร แจกของรางวัลเกมมิ่งเกียร์": { en: "Fan meetups, friendly scrims, and gaming gear giveaways", zh: "粉丝见面会、友谊赛及豪华电竞外设福利派发" },
+  "ภาพบรรยากาศผู้ใช้บริการ สเปกเครื่องเทพ และบริการ 24 ชั่วโมง": { en: "Gamer atmosphere, elite PC specs, and 24-hour service highlights", zh: "现场玩家火爆氛围、旗舰配置体验与24小时全天候运营" },
+
+  // Franchise Decor Styles & Taglines
+  "Official Standard": { en: "Official Standard", zh: "官方标准形象" },
+  "Premium Lifestyle": { en: "Premium Lifestyle", zh: "高端轻奢格调" },
+  "Hardcore Esports": { en: "Hardcore Esports", zh: "硬核职业电竞" },
+  "G-Speed Royal Modern": { en: "G-Speed Royal Modern", zh: "G-Speed 皇家现代风 (Royal Modern)" },
+  "Minimal Clean Luxury": { en: "Minimal Clean Luxury", zh: "极简轻奢风 (Clean Luxury)" },
+  "Stealth Pro Circuit": { en: "Stealth Pro Circuit", zh: "暗黑赛博竞速风 (Stealth Pro)" },
+  "โทนขาว-น้ำเงิน มาตรฐานแบรนด์ GLP สว่าง สบายตา ทันสมัย": { 
+    en: "White-blue GLP signature palette, bright, comfortable and modern", 
+    zh: "白蓝 GLP 经典品牌色调，明亮舒适、科技现代" 
+  },
+  "โทนขาว-เทาอ่อน ไฟ Warm White สะอาดตา หรูหรา เรียบหรู": { 
+    en: "White-light grey tone with warm white lighting, clean, luxurious and elegant", 
+    zh: "白浅灰暖白光，清爽雅致，高端轻奢" 
+  },
+  "ดำ-กราไฟต์ ดุดัน ไฟ Linear สีเดียว สไตล์นักกีฬา Pro Circuit": { 
+    en: "Aggressive dark graphite with monochrome linear lighting, Pro Circuit athlete style", 
+    zh: "黑石墨色调硬核冷峻，单色线性氛围灯，专为职业电竞打造" 
+  },
+  "การตกแต่งระดับแฟล็กชิปที่ผสมผสานความโมเดิร์นกับจิตวิญญาณอีสปอร์ต ไฟ LED สีน้ำเงินสลับขาว สว่างเพียงพอสำหรับทุกเพศทุกวัย ถ่ายรูปสวย โดดเด่นเป็นเอกลักษณ์": {
+    en: "Flagship decoration blending modern aesthetics with esports spirit, blue-white LED lighting, bright and welcoming for all ages, photogenic and iconic.",
+    zh: "旗舰级装饰风格，融合现代美学与电竞精神，蓝白交织LED照明，全年龄段明亮舒适，打卡出片极具辨识度。"
+  },
+  "ดีไซน์สไตล์มินิมอลคาเฟ่ชั้นนำ ผสมผสานวัสดุไม้ธรรมชาติ หินอ่อน และแสงไฟ Warm White อบอุ่น เหมาะกับผู้เล่นระดับพรีเมียม สตรีมเมอร์ และกลุ่มที่ต้องการบรรยากาศผ่อนคลายระดับสูง": {
+    en: "Top cafe-style minimalist design combining natural wood, marble, and warm white lighting, ideal for premium gamers, streamers, and guests seeking high relaxation.",
+    zh: "顶级咖啡馆极简设计，融合天然木质、大理石与柔和暖白光，极佳契合高端玩家、主播及追求轻奢私密体验的客群。"
+  },
+  "ดีไซน์สนามแข่งขันระดับโลกสไตล์ Dark Stealth เน้นการควบคุมสมาธิสูงสุด ผนังสีดำด้าน แผงซับเสียงทรงรังผึ้ง และไฟแถบเส้นตรง (Linear Light) ปราศจากแสงสะท้อนรบกวนสายตา": {
+    en: "World-class tournament arena styling in Dark Stealth, focused on peak concentration with matte black walls, honeycomb acoustic panels, and glare-free linear lighting.",
+    zh: "世界级电竞赛场Dark Stealth暗黑风格，极度注重专注力，哑光黑墙面、蜂窝吸音隔音板及线性矩阵赛博灯带，杜绝眩光反光。"
+  },
+
+  // Locations & Store Types
+  "กรุงเทพฯ และปริมณฑล": { en: "Bangkok & Metropolitan Area", zh: "曼谷及周边都会区" },
+  "กรุงเทพฯ และปริมณฑล (ย่านมหาวิทยาลัย/ชุมชน)": { en: "Bangkok & Vicinity (University/Residential)", zh: "曼谷及周边都会区 (大学城/核心商圈)" },
+  "เชียงใหม่ / ภาคเหนือ": { en: "Chiang Mai / Northern Region", zh: "清迈 / 泰国北部地区" },
+  "ขอนแก่น / โคราช / ภาคอีสาน": { en: "Khon Kaen / Korat / Isan Region", zh: "孔敬 / 呵叻 / 泰国东北部" },
+  "ชลบุรี / พัทยา / ภาคตะวันออก": { en: "Chonburi / Pattaya / Eastern Region", zh: "春武里 / 芭提雅 / 泰国东部" },
+  "ภูเก็ต / สงขลา / ภาคใต้": { en: "Phuket / Songkhla / Southern Region", zh: "普吉 / 宋卡 / 泰国南部地区" },
+  "อาคารพาณิชย์ (Commercial Building)": { en: "Commercial Building (Shophouse)", zh: "商业排屋 (Shophouse)" },
+  "อาคารพาณิชย์ 2-3 คูหา (Commercial Shophouse)": { en: "2-3 Unit Commercial Shophouse", zh: "2-3 联排商业排屋 (Shophouse)" },
+  "พื้นที่เช่าในศูนย์การค้า (Mall)": { en: "Shopping Mall Rental Space", zh: "购物中心商铺 (Shopping Mall)" },
+  "พื้นที่เช่าในศูนย์การค้า / ไลฟ์สไตล์มอลล์ (Shopping Mall)": { en: "Shopping Mall / Lifestyle Mall", zh: "商场 / 生活购物中心 (Shopping Mall)" },
+  "อาคารเดี่ยว (Standalone)": { en: "Standalone Commercial Building", zh: "独栋商业建筑 (Standalone)" },
+  "อาคารเดี่ยว Standalone หรือโกดัง Renovate": { en: "Standalone Building or Renovated Warehouse", zh: "独栋建筑或翻新仓储 (Standalone)" },
+  "ใกล้มหาวิทยาลัย": { en: "Near University / Student District", zh: "大学周边 / 大学城商圈" },
+  "ใกล้มหาวิทยาลัย / หอพักนักศึกษา": { en: "Near University / Student Dormitories", zh: "大学周边 / 学生公寓生活圈" },
+  "ผู้สนใจลงทุนแฟรนไชส์ (Franchise Investor)": { en: "Franchise Investor", zh: "意向加盟投资人 (Franchise Investor)" },
+  "1,500,000 - 3,000,000 บาท": { en: "1,500,000 - 3,000,000 THB", zh: "1,500,000 - 3,000,000 泰铢" },
+  "1,000,000 - 2,000,000 บาท": { en: "1,000,000 - 2,000,000 THB", zh: "1,000,000 - 2,000,000 泰铢" },
+  "2,000,000 - 3,500,000 บาท": { en: "2,000,000 - 3,500,000 THB", zh: "2,000,000 - 3,500,000 泰铢" },
+  "3,500,000 - 5,000,000 บาท": { en: "3,500,000 - 5,000,000 THB", zh: "3,500,000 - 5,000,000 泰铢" },
+  "5,000,000 บาทขึ้นไป (Flagship Arena)": { en: "5,000,000+ THB (Flagship Arena)", zh: "5,000,000 泰铢以上 (旗舰电竞中心)" },
+  "มีงบประมาณเฉพาะ / ปรึกษาผู้เชี่ยวชาญ": { en: "Custom Budget / Consult Specialists", zh: "有特定投资预算 / 专属专家咨询" },
+
+  // Company Profile Milestones & Stats
+  "2024-ปัจจุบัน": { en: "2024-Present", zh: "2024-至今" },
+  "ปัจจุบัน": { en: "Present", zh: "至今" },
+  "8 สาขา": { en: "8 Branches", zh: "8 家分店" },
+  "750+ เครื่อง": { en: "750+ PCs", zh: "750+ 台" },
+  "52,000+ คน": { en: "52,000+ Members", zh: "52,000+ 位" },
+  "180+ รายการ": { en: "180+ Tournaments", zh: "180+ 场" },
+  "สาขาที่เปิดให้บริการ": { en: "Active Branches", zh: "正式运营门店" },
+  "จำนวนเครื่องในระบบ": { en: "Total Gaming PCs", zh: "系统中的机器数量" },
+  "สมาชิกในเครือข่าย": { en: "Network Members", zh: "网络成员" },
+  "ทัวร์นาเมนต์ที่จัดแล้ว": { en: "Tournaments Hosted", zh: "举办比赛" },
+  "มีสาขาในเครือ 8 สาขาทั่วกรุงเทพฯ และปริมณฑล พร้อมขยายสู่หัวเมืองใหญ่ทั่วประเทศ": {
+    en: "Expanded to 8 operating branches across Bangkok metropolitan area, with upcoming expansion to major provincial cities nationwide.",
+    zh: "在曼谷及周边都会区拓展至8家运营分店，并稳步向全泰核心重点城市辐射布局。"
+  },
+  "เปิดตัวสาขาแรกในย่านมหาวิทยาลัย นำระบบ Diskless Server มาตรฐานใหม่มาใช้เป็นเจ้าแรกๆ": {
+    en: "Launched the first branch near university campus, pioneering diskless server high-speed system.",
+    zh: "于大学商圈开设首家门店，行业内率先引进万兆无盘系统新标准。"
+  },
+  "ขยายธุรกิจสู่ Esport Arena เต็มรูปแบบ รองรับการจัดแข่งขันระดับประเทศร่วมกับค่ายเกมใหญ่": {
+    en: "Scaled up into full-scale Esports Arena, hosting major nationwide tournaments in partnership with leading publishers.",
+    zh: "升级打造全能型电竞馆，携手顶级游戏厂商承办全国级专业电子竞技大赛。"
+  },
+  "เปิดตัวระบบเฟรนไชส์ G-Speed Express & Arena พร้อมระบบควบคุมการเงินและสต๊อกแบบคลาวด์": {
+    en: "Launched G-Speed Express & Arena franchise model with cloud billing and real-time ERP inventory management.",
+    zh: "正式发布 G-Speed Express & Arena 加盟体系，整合云端计费系统与集中化财务库存管理。"
+  },
+
   // Store Addresses and Location Info
   "79 ซอย รามคำแหง 53 แขวงพลับพลา เขตวังทองหลาง กรุงเทพมหานคร 10310": {
     en: "79 Soi Ramkhamhaeng 53, Phlabphla, Wang Thonglang, Bangkok 10310",

@@ -2782,7 +2782,7 @@ export default function FranchisePlanner() {
                           style={{ background: primaryColor }}
                         />
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '8px', flexWrap: 'wrap' }}>
-                          <strong>{theme.name}</strong>
+                          <strong>{translateDynamic(theme.name)}</strong>
                           {theme.badge && (
                             <span style={{ 
                               fontSize: '0.68rem', 
@@ -2794,11 +2794,11 @@ export default function FranchisePlanner() {
                               border: `1px solid ${primaryColor}33`,
                               display: 'inline-block'
                             }}>
-                              {theme.badge}
+                              {translateDynamic(theme.badge)}
                             </span>
                           )}
                         </div>
-                        <span>{theme.tagline || theme.description}</span>
+                        <span>{translateDynamic(theme.tagline || theme.description)}</span>
                       </div>
                     );
                   })}
@@ -4935,7 +4935,14 @@ export default function FranchisePlanner() {
                     <div className="sheet-meta-box">
                       <div className="meta-doc-badge">{tp('quoteDocBadge', 'ใบเสนอราคา / ESTIMATED QUOTATION')}</div>
                       <div className="meta-line"><strong>{tp('quoteRefNo', 'เลขที่ใบเสนอราคา:')}</strong> GS-QT-{new Date().toISOString().slice(0, 10).replace(/-/g, '')}-{Date.now().toString().slice(-4)}</div>
-                      <div className="meta-line"><strong>{tp('quoteIssueDate', 'วันที่ออกเอกสาร:')}</strong> {new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                      <div className="meta-line">
+                        <strong>{tp('quoteIssueDate', 'วันที่ออกเอกสาร:')}</strong>{' '}
+                        {language === 'zh'
+                          ? `${new Date().getFullYear()}年${new Date().getMonth() + 1}月${new Date().getDate()}日`
+                          : language === 'en'
+                          ? new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+                          : new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}
+                      </div>
                       <div className="meta-line"><strong>{tp('quoteValidity', 'กำหนดยืนราคา:')}</strong> {tp('quoteValidityVal', '30 วันนับจากวันที่ระบุ')}</div>
                     </div>
                   </div>
@@ -4946,7 +4953,7 @@ export default function FranchisePlanner() {
                       <div className="info-section-title">{tp('customerInfoTitle', 'ข้อมูลลูกค้า / ผู้ขอรับสิทธิ์แฟรนไชส์ (CUSTOMER INFO)')}</div>
                       <div className="info-detail-row">
                         <span className="info-lbl">{tp('customerNameLabel', 'ชื่อลูกค้า / นิติบุคคล:')}</span>
-                        <span className="info-val"><strong>{leadForm.fullName || tp('leadDefaultInvestor', 'ผู้สนใจลงทุนแฟรนไชส์ (Franchise Investor)')}</strong></span>
+                        <span className="info-val"><strong>{translateDynamic(leadForm.fullName || tp('leadDefaultInvestor', 'ผู้สนใจลงทุนแฟรนไชส์ (Franchise Investor)'))}</strong></span>
                       </div>
                       <div className="info-detail-row">
                         <span className="info-lbl">{tp('customerPhoneLabel', 'เบอร์โทรศัพท์ติดต่อ:')}</span>
@@ -4958,18 +4965,18 @@ export default function FranchisePlanner() {
                       </div>
                       <div className="info-detail-row">
                         <span className="info-lbl">{tp('customerBudgetLabel', 'งบประมาณที่เตรียมไว้:')}</span>
-                        <span className="info-val">{leadForm.budget}</span>
+                        <span className="info-val">{translateDynamic(leadForm.budget)}</span>
                       </div>
                     </div>
                     <div className="quote-info-col">
                       <div className="info-section-title">{tp('projectSpecsTitle', 'ข้อมูลโครงการสาขา (PROJECT SPECIFICATIONS)')}</div>
                       <div className="info-detail-row">
                         <span className="info-lbl">{tp('storeLocationLabel', 'ทำเลที่ตั้งสาขา:')}</span>
-                        <span className="info-val"><strong>{storeLocation}</strong></span>
+                        <span className="info-val"><strong>{translateDynamic(storeLocation)}</strong></span>
                       </div>
                       <div className="info-detail-row">
                         <span className="info-lbl">{tp('storeTypeLabel', 'รูปแบบพื้นที่:')}</span>
-                        <span className="info-val">{storeType} {leadForm.locationDetail ? `(${leadForm.locationDetail})` : ''}</span>
+                        <span className="info-val">{translateDynamic(storeType)} {leadForm.locationDetail ? `(${translateDynamic(leadForm.locationDetail)})` : ''}</span>
                       </div>
                       <div className="info-detail-row">
                         <span className="info-lbl">{tp('roomDimensionsLabel', 'ขนาดพื้นที่ร้าน:')}</span>
@@ -4977,7 +4984,7 @@ export default function FranchisePlanner() {
                       </div>
                       <div className="info-detail-row">
                         <span className="info-lbl">{tp('pcSpecsLabel', 'สเปกคอมพิวเตอร์:')}</span>
-                        <span className="info-val text-blue"><strong>{currentTierInfo.name} ({totalStations} {tp('stationsCountUnit', 'เครื่อง')})</strong></span>
+                        <span className="info-val text-blue"><strong>{translateDynamic(currentTierInfo.name)} ({totalStations} {tp('stationsCountUnit', 'เครื่อง')})</strong></span>
                       </div>
                     </div>
                   </div>
@@ -4986,7 +4993,7 @@ export default function FranchisePlanner() {
                   <div className="quote-summary-badges">
                     <div className="qs-badge">{tp('areaSizeLabel', 'ขนาดพื้นที่:')} <strong>{roomWidth}x{roomHeight} {tp('metersUnit', 'ม.')} ({roomAreaSqM} {tp('sqmUnit', 'ตร.ม.')})</strong></div>
                     <div className="qs-badge">{tp('stationsCountLabel', 'จำนวนเครื่อง:')} <strong>{totalStations} Stations</strong></div>
-                    <div className="qs-badge">{tp('bottomNavSpecs', 'สเปก:')} <strong>{currentTierInfo.name}</strong></div>
+                    <div className="qs-badge">{tp('bottomNavSpecs', 'สเปก:')} <strong>{translateDynamic(currentTierInfo.name)}</strong></div>
                     <div className="qs-badge">{tp('installDurationLabel', 'ระยะเวลาติดตั้ง:')} <strong>{tp('installDurationVal', '4-6 สัปดาห์')}</strong></div>
                     <div className="qs-badge">{tp('paybackEstLabel', 'จุดคุ้มทุนประเมิน:')} <strong>~{paybackMonths} {tp('months', 'เดือน')}</strong></div>
                     {uploadedBlueprint && (
