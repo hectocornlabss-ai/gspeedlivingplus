@@ -185,7 +185,7 @@ export default function Footer({ setActiveTab, onNavigate }) {
                 <MapPin size={18} className="text-blue shrink-0" />
                 <div>
                   <span style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: '2px' }}>
-                    {language === 'th' ? 'ที่ตั้งอารีนา:' : language === 'zh' ? '场馆地址:' : 'Arena Location:'}
+                    {language === 'th' ? 'ที่อยู่:' : language === 'zh' ? '地址:' : 'Address:'}
                   </span>
                   <span style={{ lineHeight: '1.5', display: 'block' }}>{localizedAddress}</span>
                   <div style={{ marginTop: '6px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>

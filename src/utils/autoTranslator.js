@@ -325,6 +325,8 @@ export const BUILT_IN_DICTIONARY = {
   },
   "แผนที่ร้าน": { en: "Arena Location", zh: "场馆地址" },
   "ที่ตั้งอารีนา": { en: "Arena Location", zh: "场馆地址" },
+  "ที่อยู่": { en: "Address", zh: "地址" },
+  "ที่อยู่:": { en: "Address:", zh: "地址:" },
   "เบอร์โทรติดต่อ": { en: "Phone Number", zh: "联系电话" },
   "อีเมลติดต่อ": { en: "Email Address", zh: "电子邮箱" },
   "เวลาทำการ": { en: "Opening Hours", zh: "营业时间" },
