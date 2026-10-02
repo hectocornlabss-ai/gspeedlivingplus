@@ -35,7 +35,11 @@ export default function Room3DStudio({
   onRequestFullscreen = () => {}
 }) {
   const { t, language, translateDynamic } = useTranslation();
-  const tp = (key, fallback) => t?.franchisePlanner?.[key] || (language === 'th' ? fallback : translateDynamic(fallback || key));
+  const tp = (key, fallback = '') => {
+    const res = t(`franchisePlanner.${key}`, '');
+    if (res && res !== `franchisePlanner.${key}`) return res;
+    return language === 'th' ? (fallback || key) : translateDynamic(fallback || key);
+  };
 
   const [isDoorPopoverOpen, setIsDoorPopoverOpen] = useState(false);
   const doorPopoverRef = useRef(null);
@@ -306,7 +310,7 @@ export default function Room3DStudio({
     // Thai & English Entrance Text
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 72px "Inter", "Prompt", sans-serif';
-    ctx.fillText('ทางเข้าร้าน', 512, 205);
+    ctx.fillText(tp('mainEntranceCanvas', 'ทางเข้าร้าน'), 512, 205);
 
     ctx.fillStyle = '#34d399';
     ctx.font = 'bold 40px "Inter", sans-serif';
@@ -397,7 +401,7 @@ export default function Room3DStudio({
       // Subtitle
       ctx.fillStyle = '#34d399';
       ctx.font = 'bold 28px "Inter", "Prompt", sans-serif';
-      ctx.fillText('ทางเข้าร้าน | MAIN ENTRANCE', 512, 188);
+      ctx.fillText(tp('mainEntranceCanvas', 'ทางเข้าร้าน') + ' | MAIN ENTRANCE', 512, 188);
     }
 
     const texture = new THREE.CanvasTexture(canvas);
@@ -458,7 +462,7 @@ export default function Room3DStudio({
     // "PULL / ดึง"
     ctx.font = 'bold 22px "Inter", "Prompt", sans-serif';
     ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.fillText('ดึง • PULL', 256, 435);
+    ctx.fillText(tp('pullDoorSign', 'ดึง • PULL'), 256, 435);
 
     const texture = new THREE.CanvasTexture(canvas);
     texture.colorSpace = THREE.SRGBColorSpace;
@@ -2435,19 +2439,19 @@ export default function Room3DStudio({
               <button 
                 type="button" 
                 className="btn-walk-hud-cam active"
-                title="กำลังอยู่ในโหมดเดินชมร้านระดับสายตา"
+                title={tp('walkModeActive', 'กำลังอยู่ในโหมดเดินชมร้านระดับสายตา')}
               >
                 <Footprints size={13} />
-                <span>เดินชมร้าน</span>
+                <span>{tp('walkModeBtn', 'เดินชมร้าน')}</span>
               </button>
               <button 
                 type="button" 
                 className="btn-walk-hud-cam"
                 onClick={() => setCameraView('storefront')}
-                title="มุมมองหน้าร้าน"
+                title={tp('storefrontViewTooltip', 'มุมมองหน้าร้าน')}
               >
                 <Sparkles size={13} />
-                <span>หน้าร้าน</span>
+                <span>{tp('storefrontViewBtn', 'หน้าร้าน')}</span>
               </button>
               <button 
                 type="button" 
@@ -2457,7 +2461,7 @@ export default function Room3DStudio({
                   onWalkModeChange(false);
                   onRequestFullscreen(false);
                 }}
-                title="สลับเป็นมุมมอง 3D"
+                title={tp('switchTo3DTooltip', 'สลับเป็นมุมมอง 3D')}
               >
                 <Eye size={13} />
                 <span>3D</span>
@@ -2470,7 +2474,7 @@ export default function Room3DStudio({
                   onWalkModeChange(false);
                   onRequestFullscreen(false);
                 }}
-                title="สลับเป็นมุมมองแปลนด้านบน"
+                title={tp('switchTo2DTooltip', 'สลับเป็นมุมมองแปลนด้านบน')}
               >
                 <Layers size={13} />
                 <span>Top-Down</span>
@@ -2491,10 +2495,10 @@ export default function Room3DStudio({
                 onWalkModeChange(false);
                 onRequestFullscreen(false);
               }}
-              title="ออกจากโหมดเดินชมร้าน (กด ESC ได้)"
+              title={tp('exitWalkModeTooltip', 'ออกจากโหมดเดินชมร้าน (กด ESC ได้)')}
             >
               <Minimize2 size={15} />
-              <span>ออกจากโหมดเดิน (ESC)</span>
+              <span>{tp('exitWalkModeBtn', 'ออกจากโหมดเดิน (ESC)')}</span>
             </button>
           </div>
         )
@@ -2550,27 +2554,27 @@ export default function Room3DStudio({
               <span className="hud-key">A</span>
               <span className="hud-key">S</span>
               <span className="hud-key">D</span>
-              <span className="hud-txt">หรือ</span>
+              <span className="hud-txt">{tp('orText', 'หรือ')}</span>
               <span className="hud-key">↑</span>
               <span className="hud-key">←</span>
               <span className="hud-key">↓</span>
               <span className="hud-key">→</span>
-              <span className="hud-txt">เดินชมในร้าน</span>
+              <span className="hud-txt">{tp('walkThroughVenue', 'เดินชมในร้าน')}</span>
             </div>
             <div className="hud-ctrl-sep">•</div>
             <div className="hud-ctrl-item">
-              <span className="hud-key">{isPointerLocked ? 'เมาส์ 360°' : 'คลิกเมาส์'}</span>
-              <span className="hud-txt">{isPointerLocked ? 'ขยับเมาส์หันมองรอบทิศ (FPS Lock)' : 'คลิกเพื่อล็อคเมาส์หันมอง 360°'}</span>
+              <span className="hud-key">{isPointerLocked ? tp('mouse360', 'เมาส์ 360°') : tp('clickMouse', 'คลิกเมาส์')}</span>
+              <span className="hud-txt">{isPointerLocked ? tp('mouseLookLocked', 'ขยับเมาส์หันมองรอบทิศ (FPS Lock)') : tp('mouseLookUnlocked', 'คลิกเพื่อล็อคเมาส์หันมอง 360°')}</span>
             </div>
             <div className="hud-ctrl-sep">•</div>
             <div className="hud-ctrl-item">
               <span className="hud-key">Shift</span>
-              <span className="hud-txt">วิ่งเร็ว</span>
+              <span className="hud-txt">{tp('sprintKey', 'วิ่งเร็ว')}</span>
             </div>
             <div className="hud-ctrl-sep">•</div>
             <div className="hud-ctrl-item">
               <span className="hud-key">ESC</span>
-              <span className="hud-txt">ออกจากโหมดเดิน / ปลดล็อค</span>
+              <span className="hud-txt">{tp('exitWalkOrUnlock', 'ออกจากโหมดเดิน / ปลดล็อค')}</span>
             </div>
           </div>
         )}
@@ -2581,9 +2585,9 @@ export default function Room3DStudio({
             <span className={`hud-stat-badge ${isPointerLocked ? 'locked' : ''}`}>
               {isPointerLocked ? '🔒 FPS MOUSE ACTIVE' : 'FPS WALK'}
             </span>
-            <span className="hud-stat-level">สายตา 1.65ม.</span>
+            <span className="hud-stat-level">{tp('eyeLevel', 'สายตา 1.65ม.')}</span>
             <span className="hud-stat-coord">
-              X: {fpsCoords.x >= 0 ? `+${fpsCoords.x.toFixed(1)}` : fpsCoords.x.toFixed(1)}ม. | Z: {fpsCoords.z >= 0 ? `+${fpsCoords.z.toFixed(1)}` : fpsCoords.z.toFixed(1)}ม.
+              X: {fpsCoords.x >= 0 ? `+${fpsCoords.x.toFixed(1)}` : fpsCoords.x.toFixed(1)}{tp('unitM', 'ม.')} | Z: {fpsCoords.z >= 0 ? `+${fpsCoords.z.toFixed(1)}` : fpsCoords.z.toFixed(1)}{tp('unitM', 'ม.')}
             </span>
           </div>
         )}
@@ -2602,7 +2606,7 @@ export default function Room3DStudio({
                 onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); fpsStateRef.current.keys.w = true; }}
                 onTouchEnd={(e) => { e.preventDefault(); fpsStateRef.current.keys.w = false; }}
                 onTouchCancel={() => { fpsStateRef.current.keys.w = false; }}
-                title="เดินหน้า (Forward)"
+                title={tp('forwardTitle', 'เดินหน้า (Forward)')}
               >
                 <ChevronUp size={26} />
               </button>
@@ -2616,7 +2620,7 @@ export default function Room3DStudio({
                   onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); fpsStateRef.current.keys.a = true; }}
                   onTouchEnd={(e) => { e.preventDefault(); fpsStateRef.current.keys.a = false; }}
                   onTouchCancel={() => { fpsStateRef.current.keys.a = false; }}
-                  title="สเต็ปซ้าย (Strafe Left)"
+                  title={tp('strafeLeftTitle', 'สเต็ปซ้าย (Strafe Left)')}
                 >
                   <ChevronLeft size={26} />
                 </button>
@@ -2632,7 +2636,7 @@ export default function Room3DStudio({
                   onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); fpsStateRef.current.keys.d = true; }}
                   onTouchEnd={(e) => { e.preventDefault(); fpsStateRef.current.keys.d = false; }}
                   onTouchCancel={() => { fpsStateRef.current.keys.d = false; }}
-                  title="สเต็ปขวา (Strafe Right)"
+                  title={tp('strafeRightTitle', 'สเต็ปขวา (Strafe Right)')}
                 >
                   <ChevronRight size={26} />
                 </button>
@@ -2646,7 +2650,7 @@ export default function Room3DStudio({
                 onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); fpsStateRef.current.keys.s = true; }}
                 onTouchEnd={(e) => { e.preventDefault(); fpsStateRef.current.keys.s = false; }}
                 onTouchCancel={() => { fpsStateRef.current.keys.s = false; }}
-                title="ถอยหลัง (Backward)"
+                title={tp('backwardTitle', 'ถอยหลัง (Backward)')}
               >
                 <ChevronDown size={26} />
               </button>
@@ -2675,10 +2679,10 @@ export default function Room3DStudio({
                     return next;
                   });
                 }}
-                title="สลับวิ่งเร็ว / เดิน"
+                title={tp('sprintToggleTitle', 'สลับวิ่งเร็ว / เดิน')}
               >
                 <Zap size={16} />
-                <span>{isSprinting ? 'วิ่งเร็ว (เปิด)' : 'วิ่งเร็ว'}</span>
+                <span>{isSprinting ? tp('sprintOn', 'วิ่งเร็ว (เปิด)') : tp('sprintKey', 'วิ่งเร็ว')}</span>
               </button>
               <div className="touch-turn-buttons">
                 <button
@@ -2690,10 +2694,10 @@ export default function Room3DStudio({
                   onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); fpsStateRef.current.keys.turnLeft = true; }}
                   onTouchEnd={(e) => { e.preventDefault(); fpsStateRef.current.keys.turnLeft = false; }}
                   onTouchCancel={() => { fpsStateRef.current.keys.turnLeft = false; }}
-                  title="หมุนมุมมองซ้าย"
+                  title={tp('turnLeftTitle', 'หมุนมุมมองซ้าย')}
                 >
                   <RotateCcw size={18} />
-                  <span>หันซ้าย</span>
+                  <span>{tp('turnLeftBtn', 'หันซ้าย')}</span>
                 </button>
                 <button
                   type="button"
@@ -2704,10 +2708,10 @@ export default function Room3DStudio({
                   onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); fpsStateRef.current.keys.turnRight = true; }}
                   onTouchEnd={(e) => { e.preventDefault(); fpsStateRef.current.keys.turnRight = false; }}
                   onTouchCancel={() => { fpsStateRef.current.keys.turnRight = false; }}
-                  title="หมุนมุมมองขวา"
+                  title={tp('turnRightTitle', 'หมุนมุมมองขวา')}
                 >
                   <RotateCw size={18} />
-                  <span>หันขวา</span>
+                  <span>{tp('turnRightBtn', 'หันขวา')}</span>
                 </button>
               </div>
             </div>
@@ -2924,8 +2928,8 @@ export default function Room3DStudio({
           {!selectedItemData && (
             <div className="hint-pill">
               <Compass size={14} className="text-blue" />
-              <span className="hint-text-desktop">คลิกซ้ายค้างเพื่อหมุนรอบห้อง • คลิกขวาเพื่อเลื่อน • กดปุ่มลูกศรเพื่อย้ายโต๊ะ</span>
-              <span className="hint-text-mobile">แตะเลื่อนเพื่อหมุน 360° • สองนิ้วเพื่อซูม</span>
+              <span className="hint-text-desktop">{tp('hintDesktop3D', 'คลิกซ้ายค้างเพื่อหมุนรอบห้อง • คลิกขวาเพื่อเลื่อน • กดปุ่มลูกศรเพื่อย้ายโต๊ะ')}</span>
+              <span className="hint-text-mobile">{tp('hintMobile3D', 'แตะเลื่อนเพื่อหมุน 360° • สองนิ้วเพื่อซูม')}</span>
             </div>
           )}
 
@@ -2934,13 +2938,13 @@ export default function Room3DStudio({
               <span className="selected-tag">{selectedItemData.catalog?.name.split(' ')[0]}</span>
 
               {/* D-Pad Nudge Buttons */}
-              <div className="nudge-3d-group" title="เลื่อนตำแหน่งวัตถุใน 3D (หรือกดปุ่มลูกศรบนคีย์บอร์ด)">
-                <span className="nudge-lbl">ย้าย:</span>
+              <div className="nudge-3d-group" title={tp('nudge3DGroupTitle', 'เลื่อนตำแหน่งวัตถุใน 3D (หรือกดปุ่มลูกศรบนคีย์บอร์ด)')}>
+                <span className="nudge-lbl">{tp('moveLabel', 'ย้าย:')}</span>
                 <button 
                   type="button"
                   className="nudge-btn-mini" 
                   onClick={() => onNudgeItem(selectedItemData.id, -0.5, 0)}
-                  title="เลื่อนซ้าย (-0.5ม.) หรือกดปุ่ม ←"
+                  title={tp('nudgeLeft3DTooltip', 'เลื่อนซ้าย (-0.5ม.) หรือกดปุ่ม ←')}
                 >
                   <ArrowLeft size={12} />
                 </button>
@@ -2948,7 +2952,7 @@ export default function Room3DStudio({
                   type="button"
                   className="nudge-btn-mini" 
                   onClick={() => onNudgeItem(selectedItemData.id, 0.5, 0)}
-                  title="เลื่อนขวา (+0.5ม.) หรือกดปุ่ม →"
+                  title={tp('nudgeRight3DTooltip', 'เลื่อนขวา (+0.5ม.) หรือกดปุ่ม →')}
                 >
                   <ArrowRight size={12} />
                 </button>
@@ -2956,7 +2960,7 @@ export default function Room3DStudio({
                   type="button"
                   className="nudge-btn-mini" 
                   onClick={() => onNudgeItem(selectedItemData.id, 0, -0.5)}
-                  title="เลื่อนขึ้น/ลึก (-0.5ม.) หรือกดปุ่ม ↑"
+                  title={tp('nudgeUp3DTooltip', 'เลื่อนขึ้น/ลึก (-0.5ม.) หรือกดปุ่ม ↑')}
                 >
                   <ArrowUp size={12} />
                 </button>
@@ -2964,7 +2968,7 @@ export default function Room3DStudio({
                   type="button"
                   className="nudge-btn-mini" 
                   onClick={() => onNudgeItem(selectedItemData.id, 0, 0.5)}
-                  title="เลื่อนลง/หน้า (+0.5ม.) หรือกดปุ่ม ↓"
+                  title={tp('nudgeDown3DTooltip', 'เลื่อนลง/หน้า (+0.5ม.) หรือกดปุ่ม ↓')}
                 >
                   <ArrowDown size={12} />
                 </button>
@@ -2973,26 +2977,26 @@ export default function Room3DStudio({
               <button 
                 className="btn-quick-action" 
                 onClick={() => onRotateItem(selectedItemData.id)}
-                title="หมุน 90 องศา (กด R)"
+                title={tp('rotateTooltip', 'หมุน 90 องศา (กด R)')}
               >
                 <RotateCw size={14} />
-                <span>หมุน 90°</span>
+                <span>{tp('rotate90Btn', 'หมุน 90°')}</span>
               </button>
               <button 
                 className="btn-quick-action" 
                 onClick={() => onDuplicateItem(selectedItemData.id)}
-                title="คัดลอก"
+                title={tp('duplicateBtn', 'คัดลอก')}
               >
                 <Copy size={14} />
-                <span>คัดลอก</span>
+                <span>{tp('duplicateBtn', 'คัดลอก')}</span>
               </button>
               <button 
                 className="btn-quick-action delete" 
                 onClick={() => onDeleteItem(selectedItemData.id)}
-                title="ลบออก (กด Delete)"
+                title={tp('deleteTooltip', 'ลบออก (กด Delete)')}
               >
                 <Trash2 size={14} />
-                <span>ลบ</span>
+                <span>{tp('deleteBtnShort', 'ลบ')}</span>
               </button>
             </div>
           )}

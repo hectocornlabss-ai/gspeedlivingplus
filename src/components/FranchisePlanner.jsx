@@ -263,7 +263,40 @@ const generateAutoLayout = (w, h, catalog, doorConfig = { wall: 'right', offsetR
 export default function FranchisePlanner() {
   const { siteData, addLead } = useSiteData();
   const { t, language, translateDynamic } = useTranslation();
-  const tp = (key, fallback) => t?.franchisePlanner?.[key] || (language === 'th' ? fallback : translateDynamic(fallback || key));
+  const tp = (key, fallback = '') => {
+    const res = t(`franchisePlanner.${key}`, '');
+    if (res && res !== `franchisePlanner.${key}`) return res;
+    return language === 'th' ? (fallback || key) : translateDynamic(fallback || key);
+  };
+
+  const getItemName = (item) => {
+    if (!item) return '';
+    const key = `item_${item.type}`;
+    return tp(key, item.name);
+  };
+
+  const getItemDesc = (item) => {
+    if (!item) return '';
+    const key = `desc_${item.type}`;
+    return tp(key, item.desc);
+  };
+
+  const getCategoryName = (cat) => {
+    if (cat === 'stations') return tp('cat_stations', 'โซนเกมมิ่ง');
+    if (cat === 'facilities') return tp('cat_facilities', 'งานบริการ/ระบบ');
+    if (cat === 'stage') return tp('cat_stage', 'เวทีแข่งขัน');
+    if (cat === 'architectural') return tp('cat_architectural', 'โครงสร้าง & ทางเข้า');
+    if (cat === 'amenities') return tp('cat_amenities', 'โซนพักผ่อน & ตกแต่ง');
+    if (cat === 'vip') return tp('cat_vip', 'ห้อง VIP & สตรีมเมอร์');
+    return tp(`cat_${cat}`, cat || 'อุปกรณ์');
+  };
+
+  const getWallName = (wall) => {
+    if (wall === 'front') return tp('wallFront', 'ด้านหน้า');
+    if (wall === 'left') return tp('wallLeft', 'ผนังซ้าย');
+    if (wall === 'back') return tp('wallBack', 'ผนังหลัง');
+    return tp('wallRight', 'ผนังขวา');
+  };
   const catalogItems = siteData?.catalogItems || CATALOG_ITEMS;
   const hardwareTiers = siteData?.hardwareTiers || HARDWARE_TIERS;
   const fixedInfrastructure = siteData?.fixedInfrastructure || FIXED_INFRASTRUCTURE;
@@ -1168,6 +1201,7 @@ export default function FranchisePlanner() {
   // High-Resolution 2D Architectural & Engineering Blueprint Exporter for Contractors
   const handleExportBlueprintImage = () => {
     const canvas = document.createElement('canvas');
+    const tBp = (th, en, zh) => language === 'en' ? en : (language === 'zh' ? (zh || en) : th);
     const canvasWidth = 3200;
     const canvasHeight = 2000;
     canvas.width = canvasWidth;
@@ -1537,7 +1571,7 @@ export default function FranchisePlanner() {
       // Chair Label
       ctx.fillStyle = '#ffffff';
       ctx.font = 'bold 10px "Inter", sans-serif';
-      ctx.fillText('เก้าอี้', chairCenterX, chairCenterY + 4);
+      ctx.fillText(tBp('เก้าอี้', 'Chair', '电竞椅'), chairCenterX, chairCenterY + 4);
 
       ctx.textAlign = 'left'; // reset
     };
@@ -1595,7 +1629,7 @@ export default function FranchisePlanner() {
           ctx.fillStyle = '#93c5fd';
           ctx.font = 'bold 12px "Inter", sans-serif';
           ctx.textAlign = 'center';
-          ctx.fillText(r === 0 ? 'ตู้แร็ค 42U: No-Disk' : 'ตู้แร็ค 42U: Switch/10G', rx + (rackW / 2), rackY + rackH + 18);
+          ctx.fillText(r === 0 ? tBp('ตู้แร็ค 42U: No-Disk', '42U Rack: Diskless', '42U 机柜: 无盘系统') : tBp('ตู้แร็ค 42U: Switch/10G', '42U Rack: 10G Switch', '42U 机柜: 10G 交换机'), rx + (rackW / 2), rackY + rackH + 18);
         }
 
         // 6kVA Online UPS Unit
@@ -1612,7 +1646,7 @@ export default function FranchisePlanner() {
         ctx.fillText('⚡ Online UPS 6kVA', upsX + 60, upsY + 22);
         ctx.font = '11px "Inter", sans-serif';
         ctx.fillStyle = '#cbd5e1';
-        ctx.fillText('สำรองไฟฉุกเฉิน 30 นาที', upsX + 60, upsY + 40);
+        ctx.fillText(tBp('สำรองไฟฉุกเฉิน 30 นาที', '30-min Emergency Backup', '应急备电 30 分钟'), upsX + 60, upsY + 40);
 
         // Server Room 24hr Precision AC Unit
         ctx.fillStyle = '#ffffff';
@@ -1622,7 +1656,7 @@ export default function FranchisePlanner() {
         ctx.strokeRect(pxX + 20, pxY + 12, 160, 24);
         ctx.fillStyle = '#0369a1';
         ctx.font = 'bold 12px "Inter", sans-serif';
-        ctx.fillText('❄ แอร์เซิร์ฟเวอร์ 18,000 BTU 24ชม.', pxX + 100, pxY + 28);
+        ctx.fillText(tBp('❄ แอร์เซิร์ฟเวอร์ 18,000 BTU 24ชม.', '❄ Server AC 18k BTU 24hr', '❄ 机房精密空调 18k BTU 24h'), pxX + 100, pxY + 28);
         ctx.textAlign = 'left';
 
       } else if (isCounter) {
@@ -1657,7 +1691,7 @@ export default function FranchisePlanner() {
           ctx.font = 'bold 12px "Inter", sans-serif';
           ctx.fillStyle = '#ffffff';
           ctx.textAlign = 'center';
-          ctx.fillText(`POS จอสัมผัส #${p + 1}`, posX + 35, posY + 17);
+          ctx.fillText(tBp(`POS จอสัมผัส #${p + 1}`, `Touch POS #${p + 1}`, `触摸POS机 #${p + 1}`), posX + 35, posY + 17);
         }
 
         // Cash Drawer & Slip Thermal Printer
@@ -1972,17 +2006,17 @@ export default function FranchisePlanner() {
     ctx.fillRect(infoPanelX, currentY, infoPanelW, 46);
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 20px "Inter", sans-serif';
-    ctx.fillText('1. ข้อมูลโครงการและงานระบบอาคาร (PROJECT & MEP METADATA)', infoPanelX + 18, currentY + 30);
+    ctx.fillText(tBp('1. ข้อมูลโครงการและงานระบบอาคาร (PROJECT & MEP METADATA)', '1. PROJECT & MEP METADATA', '1. 项目与建筑机电工程信息 (PROJECT & MEP METADATA)'), infoPanelX + 18, currentY + 30);
     currentY += 62;
 
     const metaRows = [
-      ['ชื่อโครงการ (Project Name):', 'GLP : G SPEED LIVING PLUS OFFICIAL STORE'],
-      ['ขนาดพื้นที่ร้านรวม (Total Venue):', `${roomWidth} x ${roomHeight} เมตร (${roomWidth * roomHeight} ตร.ม.)`],
-      ['จำนวนสถานีคอมพิวเตอร์ (Capacity):', `${totalStations} เครื่อง (สัดส่วน 1 PC / 2.3 ตร.ม. ตามมาตรฐาน)`],
-      ['จำนวนโมดูลเฟอร์นิเจอร์ทั้งหมด:', `${placedItems.length} โมดูลหลัก (รวมงานสั่งผลิตและระบบ)`],
-      ['ทำเลที่ตั้งสาขา (Site Location):', storeLocation],
-      ['ระบบไฟฟ้าและโหลดเมนรวม (MDB):', '3 Phase 380V / 100A พร้อมตู้ MDB แยกเบรกเกอร์ย่อย'],
-      ['โครงข่ายอินเทอร์เน็ต (Internet):', 'Dual 10Gbps SFP+ Fiber Optic Active-Active Failover']
+      [tBp('ชื่อโครงการ (Project Name):', 'Project Name:', '项目名称:'), 'GLP : G SPEED LIVING PLUS OFFICIAL STORE'],
+      [tBp('ขนาดพื้นที่ร้านรวม (Total Venue):', 'Total Venue Area:', '场地总面积:'), `${roomWidth} x ${roomHeight} ${tBp('เมตร', 'm', '米')} (${roomWidth * roomHeight} ${tBp('ตร.ม.', 'sq.m.', '平米')})`],
+      [tBp('จำนวนสถานีคอมพิวเตอร์ (Capacity):', 'Gaming Station Capacity:', '电竞工作站容量:'), `${totalStations} ${tBp('เครื่อง (สัดส่วน 1 PC / 2.3 ตร.ม.)', 'Stations (Std: 1 PC / 2.3 sq.m.)', '台 (标准: 1 PC / 2.3平米)')}`],
+      [tBp('จำนวนโมดูลเฟอร์นิเจอร์ทั้งหมด:', 'Total Placed Furniture Modules:', '总家具与设备模块数:'), `${placedItems.length} ${tBp('โมดูลหลัก (รวมงานระบบ)', 'Primary Modules (Turnkey)', '个主要模块 (含总包机电)')}`],
+      [tBp('ทำเลที่ตั้งสาขา (Site Location):', 'Branch Site Location:', '门店选址位置:'), translateDynamic(storeLocation, language)],
+      [tBp('ระบบไฟฟ้าและโหลดเมนรวม (MDB):', 'Main Electrical Distribution (MDB):', '主配电系统 (MDB):'), tBp('3 Phase 380V / 100A พร้อมตู้ MDB แยกเบรกเกอร์ย่อย', '3 Phase 380V / 100A with Sub-Breakers', '3相 380V / 100A 配电柜带独立空气开关')],
+      [tBp('โครงข่ายอินเทอร์เน็ต (Internet):', 'High-Speed Enterprise Internet:', '企业级高速网络:'), 'Dual 10Gbps SFP+ Fiber Optic Active-Active Failover']
     ];
 
     metaRows.forEach(([lbl, val]) => {
@@ -2001,18 +2035,18 @@ export default function FranchisePlanner() {
     ctx.fillRect(infoPanelX, currentY, infoPanelW, 46);
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 20px "Inter", sans-serif';
-    ctx.fillText(`2. สเปกคอมพิวเตอร์และอุปกรณ์ครบชุด (PC SPECIFICATIONS - ${currentTierInfo.name.toUpperCase()})`, infoPanelX + 18, currentY + 30);
+    ctx.fillText(tBp(`2. สเปกคอมพิวเตอร์และอุปกรณ์ครบชุด (PC SPECIFICATIONS - ${currentTierInfo.name.toUpperCase()})`, `2. PC HARDWARE & ESPORTS GEAR SPECIFICATIONS - ${(currentTierInfo.name || '').toUpperCase()}`, `2. 电竞PC硬件与外设完整规格 - ${(currentTierInfo.name || '').toUpperCase()}`), infoPanelX + 18, currentY + 30);
     currentY += 62;
 
     const pcSpecs = [
-      ['หน่วยประมวลผล (Processor CPU):', currentTierInfo.cpu || 'Intel Core i7-14700F / AMD Ryzen 7 7800X3D (Liquid Cooler)'],
-      ['การ์ดแสดงผล (Graphics Card GPU):', currentTierInfo.gpu || 'NVIDIA GeForce RTX 4070 SUPER 12GB GDDR6X Dual/Triple Fan'],
-      ['หน่วยความจำหลัก (RAM System):', currentTierInfo.ram || '32GB DDR5 6000MHz Dual-Channel Low Latency RGB'],
-      ['จอแสดงผลการแข่งขัน (Esports Monitor):', currentTierInfo.monitor || '27" Fast-IPS 280Hz - 360Hz QHD DyAc Ready (0.5ms Response)'],
-      ['ชุดเกมมิ่งเกียร์ (Gaming Gear Set):', currentTierInfo.gear || 'Custom Coiled Keyboard (Hotswap) + Ultralight 4K/8K Hz Mouse + Headset 7.1'],
-      ['เซิร์ฟเวอร์ดิสก์เลส (Diskless Boot Master):', '10G SFP+ Dual Master Server (Enterprise NVMe PCIe 4.0 Array + Auto Updater)'],
-      ['ระบบพาวเวอร์ซัพพลาย (Power Supply PSU):', '750W - 850W 80+ Gold Fully Modular Active PFC รับประกัน 5 ปี'],
-      ['การเชื่อมต่อระบบเครือข่าย (LAN Interface):', 'RJ-45 CAT6A Shielded 1000/2500 Mbps ต่อเครื่อง 1:1 เข้า Switch 10G']
+      [tBp('หน่วยประมวลผล (Processor CPU):', 'Processor (CPU):', '处理器 (CPU):'), currentTierInfo.cpu || 'Intel Core i7-14700F / AMD Ryzen 7 7800X3D (Liquid Cooler)'],
+      [tBp('การ์ดแสดงผล (Graphics Card GPU):', 'Graphics Card (GPU):', '显卡 (GPU):'), currentTierInfo.gpu || 'NVIDIA GeForce RTX 4070 SUPER 12GB GDDR6X Dual/Triple Fan'],
+      [tBp('หน่วยความจำหลัก (RAM System):', 'System Memory (RAM):', '运行内存 (RAM):'), currentTierInfo.ram || '32GB DDR5 6000MHz Dual-Channel Low Latency RGB'],
+      [tBp('จอแสดงผลการแข่งขัน (Esports Monitor):', 'Esports Gaming Monitor:', '电竞赛事显示器:'), currentTierInfo.monitor || '27" Fast-IPS 280Hz - 360Hz QHD DyAc Ready (0.5ms Response)'],
+      [tBp('ชุดเกมมิ่งเกียร์ (Gaming Gear Set):', 'Esports Gaming Gear Set:', '电竞外设套装:'), currentTierInfo.gear || 'Custom Coiled Keyboard (Hotswap) + Ultralight 4K/8K Hz Mouse + Headset 7.1'],
+      [tBp('เซิร์ฟเวอร์ดิสก์เลส (Diskless Boot Master):', 'Diskless Master Server:', '无盘主服务器:'), '10G SFP+ Dual Master Server (Enterprise NVMe PCIe 4.0 Array + Auto Updater)'],
+      [tBp('ระบบพาวเวอร์ซัพพลาย (Power Supply PSU):', 'Power Supply Unit (PSU):', '电源供应器 (PSU):'), tBp('750W - 850W 80+ Gold Fully Modular Active PFC รับประกัน 5 ปี', '750W - 850W 80+ Gold Fully Modular Active PFC (5-Yr Warranty)', '750W - 850W 80+ 金牌全模组 (5年保修)')],
+      [tBp('การเชื่อมต่อระบบเครือข่าย (LAN Interface):', 'Network Interface (LAN):', '网络接入 (LAN):'), tBp('RJ-45 CAT6A Shielded 1000/2500 Mbps ต่อเครื่อง 1:1 เข้า Switch 10G', 'RJ-45 CAT6A Shielded 1000/2500 Mbps Dedicated 1:1 to 10G Switch', 'RJ-45 CAT6A 屏蔽线 1000/2500 Mbps 1:1直连10G交换机')]
     ];
 
     pcSpecs.forEach(([part, spec]) => {
@@ -2038,18 +2072,18 @@ export default function FranchisePlanner() {
     ctx.fillRect(infoPanelX, currentY, infoPanelW, 46);
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 20px "Inter", sans-serif';
-    ctx.fillText('3. รายละเอียดสเปกโต๊ะและเก้าอี้ติดตั้ง (DESK & FURNITURE SCHEDULE)', infoPanelX + 18, currentY + 30);
+    ctx.fillText(tBp('3. รายละเอียดสเปกโต๊ะและเก้าอี้ติดตั้ง (DESK & FURNITURE SCHEDULE)', '3. DESK & ERGONOMIC FURNITURE SCHEDULE', '3. 电竞桌椅定制工程规格 (DESK & FURNITURE SCHEDULE)'), infoPanelX + 18, currentY + 30);
     currentY += 62;
 
     const deskSpecs = [
-      ['ขนาดโต๊ะต่อที่นั่ง (Station Dimensions):', 'กว้าง 1.20 x ลึก 0.80 x สูง 0.75 ม. (ระยะตามมาตรฐาน Pro Player)'],
-      ['หน้าท็อปโต๊ะ (Desk Tabletop Material):', 'ไม้สังเคราะห์เกรด HPL หนา 25 มม. ทนรอยขีดข่วน/ความร้อน/น้ำ 100%'],
-      ['การขึ้นรูปขอบโต๊ะ (Ergonomic Bevel Edge):', 'ลบมุมลาดเอียง 45 องศา ลดแรงกดทับข้อมือขณะเล่นเกมต่อเนื่อง'],
-      ['โครงสร้างขาและคาน (Steel Frame Structure):', 'เหล็กกล้าคาร์บอน (Carbon Steel) หนา 1.5 มม. อบสีพาวเดอร์โค้ตกันสนิม'],
-      ['ระบบท่อร้อยสายไฟ (Dual Wire Raceway):', 'รางเหล็กใต้โต๊ะแยกอิสระ 2 ช่อง: ช่องไฟ 220V และช่องสายสัญญาณ LAN'],
-      ['เก้าอี้เกมมิ่งมืออาชีพ (Ergonomic Chair):', currentTierInfo.chair || 'G-Speed Pro Racing PU Leather / Ergonomic Mesh'],
-      ['ระบบปรับระดับเก้าอี้ (Ergonomic Adjustability):', 'ที่พักแขน 4D ปรับได้ 4 ทิศทาง + เบาะปรับเอนนอน 160° + ปรับหนุนหลัง'],
-      ['การรับประกันสินค้า (Warranty Coverage):', 'รับประกันโครงสร้างโต๊ะ 5 ปี และเก้าอี้เกมมิ่ง 3 ปี On-site Service']
+      [tBp('ขนาดโต๊ะต่อที่นั่ง (Station Dimensions):', 'Station Dimensions:', '工位尺寸规格:'), tBp('กว้าง 1.20 x ลึก 0.80 x สูง 0.75 ม. (ระยะตามมาตรฐาน Pro Player)', 'W 1.20 x D 0.80 x H 0.75 m (Pro Esports Standard)', '宽 1.20 x 深 0.80 x 高 0.75 米 (职业电竞标准)')],
+      [tBp('หน้าท็อปโต๊ะ (Desk Tabletop Material):', 'Tabletop Material:', '桌面材质规格:'), tBp('ไม้สังเคราะห์เกรด HPL หนา 25 มม. ทนรอยขีดข่วน/ความร้อน/น้ำ 100%', '25mm Heavy-Duty HPL Composite (Scratch & Heat Resistant, 100% Waterproof)', '25mm 高耐磨HPL复合板 (耐刮擦、耐热、100%防水)')],
+      [tBp('การขึ้นรูปขอบโต๊ะ (Ergonomic Bevel Edge):', 'Ergonomic Bevel Edge:', '人体工学倾角封边:'), tBp('ลบมุมลาดเอียง 45 องศา ลดแรงกดทับข้อมือขณะเล่นเกมต่อเนื่อง', '45° Beveled Ergonomic Front Edge (Reduces wrist fatigue during extended gaming)', '45度人体工学斜切导角 (有效缓解长时间电竞腕部压力)')],
+      [tBp('โครงสร้างขาและคาน (Steel Frame Structure):', 'Steel Frame Structure:', '钢架承重结构:'), tBp('เหล็กกล้าคาร์บอน (Carbon Steel) หนา 1.5 มม. อบสีพาวเดอร์โค้ตกันสนิม', '1.5mm Carbon Steel Box Tubing with Anti-Rust Powder Coating (250kg load)', '1.5mm 高强度碳素冷轧钢管 + 防锈静电喷粉涂装 (承重250kg)')],
+      [tBp('ระบบท่อร้อยสายไฟ (Dual Wire Raceway):', 'Dual Cable Raceway:', '双通道隐藏式走线槽:'), tBp('รางเหล็กใต้โต๊ะแยกอิสระ 2 ช่อง: ช่องไฟ 220V และช่องสายสัญญาณ LAN', 'Under-Desk Dual Trunking: Separate 220V Power & Shielded LAN (Zero Interference)', '桌底双通道阻燃金属线槽: 强电220V与弱电网线隔离 (防电磁干扰)')],
+      [tBp('เก้าอี้เกมมิ่งมืออาชีพ (Ergonomic Chair):', 'Professional Esports Chair:', '职业电竞人体工学椅:'), currentTierInfo.chair || 'G-Speed Pro Racing PU Leather / Ergonomic Mesh'],
+      [tBp('ระบบปรับระดับเก้าอี้ (Ergonomic Adjustability):', 'Ergonomic Adjustability:', '全功能调节系统:'), tBp('ที่พักแขน 4D ปรับได้ 4 ทิศทาง + เบาะปรับเอนนอน 160° + ปรับหนุนหลัง', '4D Adjustable Armrests + 160° Reclining Backrest + Multi-tilt Lock', '4D全向调节扶手 + 160°大角度后仰躺倒 + 摇椅锁定机构')],
+      [tBp('การรับประกันสินค้า (Warranty Coverage):', 'Warranty Coverage:', '售后质保政策:'), tBp('รับประกันโครงสร้างโต๊ะ 5 ปี และเก้าอี้เกมมิ่ง 3 ปี On-site Service', '5-Year Desk Structural Warranty & 3-Year On-Site Chair Service', '电竞桌钢架质保5年，电竞椅上门售后质保3年')]
     ];
 
     deskSpecs.forEach(([itemTitle, itemVal]) => {
@@ -2075,12 +2109,12 @@ export default function FranchisePlanner() {
     ctx.fillRect(infoPanelX, currentY, infoPanelW, 46);
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 20px "Inter", sans-serif';
-    ctx.fillText('4. รายการโมดูลและจุดติดตั้งในผัง (EQUIPMENT SCHEDULE TABLE)', infoPanelX + 18, currentY + 30);
+    ctx.fillText(tBp('4. รายการโมดูลและจุดติดตั้งในผัง (EQUIPMENT SCHEDULE TABLE)', '4. VENUE EQUIPMENT & MODULE SCHEDULE TABLE', '4. 店面设备与家具定位明细表 (EQUIPMENT SCHEDULE TABLE)'), infoPanelX + 18, currentY + 30);
     currentY += 58;
 
     ctx.font = 'bold 15px "Inter", sans-serif';
     ctx.fillStyle = '#475569';
-    ctx.fillText('ลำดับ  ชื่อรายการโมดูล             พิกัด (X,Y)     ขนาดโมดูล        จำนวนสถานี / สเปก', infoPanelX + 18, currentY);
+    ctx.fillText(tBp('ลำดับ  ชื่อรายการโมดูล             พิกัด (X,Y)     ขนาดโมดูล        จำนวนสถานี / สเปก', 'No.    Module Name             Coord (X,Y)    Dimensions       Capacity / Specs', '序号   模块名称                坐标 (X,Y)      尺寸规格         工位数量 / 规格'), infoPanelX + 18, currentY);
     ctx.strokeStyle = '#cbd5e1';
     ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.moveTo(infoPanelX + 18, currentY + 8); ctx.lineTo(infoPanelX + infoPanelW - 18, currentY + 8); ctx.stroke();
@@ -2091,7 +2125,7 @@ export default function FranchisePlanner() {
       const name = (it.catalog?.name?.split('(')[0] || it.type).slice(0, 18);
       const coords = `(${it.x.toFixed(1)}, ${it.y.toFixed(1)})`;
       const size = `${it.catalog?.widthMeters || 1}x${it.catalog?.heightMeters || 1}m`;
-      const seatInfo = it.catalog?.seats ? `${it.catalog.seats} PCs (โต๊ะ 1.20ม.)` : 'Facility จุดบริการ';
+      const seatInfo = it.catalog?.seats ? `${it.catalog.seats} PCs (${tBp('โต๊ะ 1.20ม.', '1.2m Desk', '1.2米标准桌')})` : tBp('Facility จุดบริการ', 'Facility Service Zone', '公共配套服务区');
       ctx.fillStyle = '#0f172a';
       ctx.fillText(`#${idx + 1}    ${name.padEnd(20, ' ')} ${coords.padEnd(12, ' ')} ${size.padEnd(12, ' ')} ${seatInfo}`, infoPanelX + 18, currentY);
       currentY += 26;
@@ -2100,7 +2134,7 @@ export default function FranchisePlanner() {
     if (placedItems.length > 8) {
       ctx.fillStyle = '#64748b';
       ctx.font = 'italic 14px "Inter", sans-serif';
-      ctx.fillText(`... และยังมีอีก ${placedItems.length - 8} รายการในบัญชีรายการผลิตและการติดตั้ง`, infoPanelX + 18, currentY);
+      ctx.fillText(tBp(`... และยังมีอีก ${placedItems.length - 8} รายการในบัญชีรายการผลิตและการติดตั้ง`, `... plus ${placedItems.length - 8} additional items scheduled in full contractor manifest`, `... 另有 ${placedItems.length - 8} 项家具与设备已列入施工制造总清单`), infoPanelX + 18, currentY);
     }
 
     // 8. Bottom Contractor Notes Banner (Extra Large & Highly Detailed for Field Contractors)
@@ -2113,12 +2147,12 @@ export default function FranchisePlanner() {
 
     ctx.fillStyle = '#1e3a8a';
     ctx.font = 'bold 18px "Inter", sans-serif';
-    ctx.fillText('ข้อกำหนดสำคัญสำหรับผู้รับเหมาและวิศวกรระบบ (GENERAL CONTRACTOR & MEP SPECIFICATIONS):', 110, notesY + 28);
+    ctx.fillText(tBp('ข้อกำหนดสำคัญสำหรับผู้รับเหมาและวิศวกรระบบ (GENERAL CONTRACTOR & MEP SPECIFICATIONS):', 'GENERAL CONTRACTOR & MEP ENGINEERING SPECIFICATIONS:', '施工承包商与机电工程师核心规范 (GENERAL CONTRACTOR & MEP SPECIFICATIONS):'), 110, notesY + 28);
 
     ctx.fillStyle = '#334155';
     ctx.font = '15px "Inter", sans-serif';
-    ctx.fillText('1. ขนาดโต๊ะเกมมิ่งมาตรฐาน: กว้าง 1.20 ม. ลึก 0.80 ม. ต่อสถานี เว้นระยะทางเดินหลัก (Main Clearance) ไม่น้อยกว่า 1.20 - 1.50 ม. ตามกฎหมายอาคาร', 110, notesY + 50);
-    ctx.fillText('2. จุดเต้ารับไฟฟ้า 220V 16A เต้ารับคู่ 3 ขา มีกราวด์ (Grounding <= 5 Ohm) ต่อเครื่อง 1:1 พร้อมรางร้อยสาย LAN CAT6A แยกท่อห่างสายเมน 30 ซม.', 110, notesY + 70);
+    ctx.fillText(tBp('1. ขนาดโต๊ะเกมมิ่งมาตรฐาน: กว้าง 1.20 ม. ลึก 0.80 ม. ต่อสถานี เว้นระยะทางเดินหลัก (Main Clearance) ไม่น้อยกว่า 1.20 - 1.50 ม. ตามกฎหมายอาคาร', '1. Standard Gaming Station: W 1.20m x D 0.80m per seat. Maintain Main Aisle Clearance >= 1.20 - 1.50m per building code.', '1. 标准电竞工作站: 每工位宽1.20米、深0.80米。主通道净宽须保持不小于1.20 - 1.50米符合消防与建筑规范。'), 110, notesY + 50);
+    ctx.fillText(tBp('2. จุดเต้ารับไฟฟ้า 220V 16A เต้ารับคู่ 3 ขา มีกราวด์ (Grounding <= 5 Ohm) ต่อเครื่อง 1:1 พร้อมรางร้อยสาย LAN CAT6A แยกท่อห่างสายเมน 30 ซม.', '2. Electrical: 220V 16A grounded dual socket (Grounding <= 5 Ohm) 1:1 per PC. CAT6A LAN conduit separated 30cm from main power.', '2. 电力工程: 220V 16A带接地双三孔插座 (接地电阻<=5欧姆) 1:1专机专供。CAT6A双屏蔽网线与强电主线路间距须大于30cm。'), 110, notesY + 70);
 
     // 9. Trigger Direct Browser Download and show high-res visual preview modal
     const blueprintFilename = `GSPEED-Contractor-Blueprint-${roomWidth}x${roomHeight}m-${Date.now().toString().slice(-4)}.png`;
@@ -2153,8 +2187,8 @@ export default function FranchisePlanner() {
             >
               <span className={`step-num ${currentStep === 1 ? 'active' : ''}`}>1</span>
               <span className="step-txt">
-                <span className="hide-mobile">{tp('tabStoreSize', 'ขนาด')} {roomWidth}x{roomHeight}{tp('step1_meters', 'ม.')}</span>
-                <span className="show-mobile">{tp('tabStoreSize', 'ขนาดห้อง')}</span>
+                <span className="hide-mobile">{tp('step1_crumb', 'ขนาด')} {roomWidth}x{roomHeight} {tp('metersUnit', 'ม.')}</span>
+                <span className="show-mobile">{tp('step1_crumb_mobile', 'ขนาดห้อง')}</span>
               </span>
               {currentStep === 1 && <span className="studio-active-dot"></span>}
             </button>
@@ -2168,8 +2202,8 @@ export default function FranchisePlanner() {
             >
               <span className={`step-num ${currentStep === 2 ? 'active' : ''}`}>2</span>
               <span className="step-txt">
-                <span className="hide-mobile">{tp('tabLayout', 'จัดผัง 3D Studio')}</span>
-                <span className="show-mobile">{tp('mode3D', 'ผัง 3D')}</span>
+                <span className="hide-mobile">{tp('step2_crumb', 'จัดผัง 3D Studio')}</span>
+                <span className="show-mobile">{tp('step2_crumb_mobile', 'ผัง 3D')}</span>
               </span>
               {currentStep === 2 && <span className="studio-active-dot"></span>}
             </button>
@@ -2183,8 +2217,8 @@ export default function FranchisePlanner() {
             >
               <span className={`step-num ${currentStep === 3 ? 'active' : ''}`}>3</span>
               <span className="step-txt">
-                <span className="hide-mobile">{tp('tabHardware', 'สเปกคอม')}</span>
-                <span className="show-mobile">{tp('tabHardware', 'สเปก')}</span>
+                <span className="hide-mobile">{tp('step3_crumb', 'สเปกคอม')}</span>
+                <span className="show-mobile">{tp('step3_crumb_mobile', 'สเปก')}</span>
               </span>
               {currentStep === 3 && <span className="studio-active-dot"></span>}
             </button>
@@ -2198,8 +2232,8 @@ export default function FranchisePlanner() {
             >
               <span className={`step-num ${currentStep === 4 ? 'active' : ''}`}>4</span>
               <span className="step-txt">
-                <span className="hide-mobile">{tp('tabQuote', 'งบ & ROI')}</span>
-                <span className="show-mobile">{tp('tabQuote', 'สรุปงบ')}</span>
+                <span className="hide-mobile">{tp('step4_crumb', 'งบ & ROI')}</span>
+                <span className="show-mobile">{tp('step4_crumb_mobile', 'สรุปงบ')}</span>
               </span>
               {currentStep === 4 && <span className="studio-active-dot"></span>}
             </button>
@@ -2208,13 +2242,13 @@ export default function FranchisePlanner() {
           {/* Quick Metrics & CTA */}
           <div className="studio-compact-metrics">
             <div className="compact-metric-pill">
-              <span className="metric-tag">{currentStep === 1 ? tp('totalArea', 'พื้นที่:') : tp('recommendedStations', 'ความจุ:')}</span>
+              <span className="metric-tag">{currentStep === 1 ? tp('metricArea', 'พื้นที่:') : tp('metricCapacity', 'ความจุ:')}</span>
               <strong className="text-blue">
-                {currentStep === 1 ? `${roomAreaSqM} ${tp('step1_sqm', 'ตร.ม.')}` : `${totalStations} ${tp('unitStation', 'เครื่อง')}`}
+                {currentStep === 1 ? `${roomAreaSqM} ${tp('sqmUnit', 'ตร.ม.')}` : `${totalStations} ${tp('stationsCountUnit', 'เครื่อง')}`}
               </strong>
             </div>
             <div className="compact-metric-pill hide-mobile">
-              <span className="metric-tag">{currentStep === 4 ? tp('paybackPeriod', 'คืนทุน:') : tp('estimatedCapex', 'งบลงทุน:')}</span>
+              <span className="metric-tag">{currentStep === 4 ? tp('metricPayback', 'คืนทุน:') : tp('metricInvestment', 'งบลงทุน:')}</span>
               <strong className="text-emerald">
                 {currentStep === 4 ? `${paybackMonths} ${tp('months', 'เดือน')}` : `฿${totalInvestmentCost.toLocaleString()}`}
               </strong>
@@ -2226,7 +2260,7 @@ export default function FranchisePlanner() {
               className="btn-compact-quote"
             >
               <Download size={14} />
-              <span>{tp('requestQuote', 'สรุปใบเสนอราคา')}</span>
+              <span>{tp('quoteSummaryBtn', 'สรุปใบเสนอราคา')}</span>
             </button>
             {currentStep === 1 && (
               <button 
@@ -2246,7 +2280,7 @@ export default function FranchisePlanner() {
                 onClick={() => handleStepChange(3)} 
                 className="btn-compact-next"
               >
-                <span>{tp('step2_nextBtn', 'เลือกสเปก')}</span>
+                <span>{tp('chooseSpecsBtn', 'เลือกสเปก →')}</span>
                 <ArrowRight size={14} />
               </button>
             )}
@@ -2338,10 +2372,10 @@ export default function FranchisePlanner() {
                           onClick={() => handleLoadPreset(preset)}
                         >
                           <div className="preset-head">
-                            <strong>{preset.name}</strong>
-                            <span className="preset-dim">{preset.width}x{preset.height} ม.</span>
+                            <strong>{translateDynamic(preset.name)}</strong>
+                            <span className="preset-dim">{preset.width}x{preset.height} {tp('metersUnit', 'ม.')}</span>
                           </div>
-                          <p className="preset-info">{preset.desc}</p>
+                          <p className="preset-info">{translateDynamic(preset.desc)}</p>
                         </div>
                       ))}
                     </div>
@@ -2352,7 +2386,7 @@ export default function FranchisePlanner() {
                     <div className="slider-group">
                       <div className="slider-header">
                         <label>{tp('step1_widthM', 'ความกว้างห้อง (Width):')}</label>
-                        <span className="slider-val text-cyan">{roomWidth} เมตร</span>
+                        <span className="slider-val text-cyan">{roomWidth} {tp('metersUnit', 'เมตร')}</span>
                       </div>
                       <input 
                         type="range" 
@@ -2368,7 +2402,7 @@ export default function FranchisePlanner() {
                     <div className="slider-group">
                       <div className="slider-header">
                         <label>{tp('step1_lengthM', 'ความลึก/ความยาวห้อง (Length):')}</label>
-                        <span className="slider-val text-cyan">{roomHeight} เมตร</span>
+                        <span className="slider-val text-cyan">{roomHeight} {tp('metersUnit', 'เมตร')}</span>
                       </div>
                       <input 
                         type="range" 
@@ -2384,8 +2418,8 @@ export default function FranchisePlanner() {
 
                   {/* Area Summary Pill */}
                   <div className="area-summary-pill">
-                    <span>พื้นที่ใช้สอยรวม: <strong>{roomAreaSqM} ตารางเมตร</strong></span>
-                    <span>(รองรับได้ประมาณ <strong>{idealMaxPCs} เครื่อง</strong> แบบไม่อึดอัด)</span>
+                    <span>{tp('totalAreaLabel', 'พื้นที่ใช้สอยรวม:')} <strong>{roomAreaSqM} {tp('sqmUnit', 'ตารางเมตร')}</strong></span>
+                    <span>({tp('supportsApprox', 'รองรับได้ประมาณ')} <strong>{idealMaxPCs} {tp('stationsCountUnit', 'เครื่อง')}</strong> {tp('comfortableSeating', 'แบบไม่อึดอัด')})</span>
                   </div>
                   {/* Switch to Blueprint Mode Suggestion */}
                   <div 
@@ -2404,7 +2438,7 @@ export default function FranchisePlanner() {
                   >
                     <span style={{ color: '#0369a1', display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <Compass size={16} className="text-blue" />
-                      <span>มีแบบแปลนพิมพ์เขียวอาคารจริงของคุณอยู่แล้ว?</span>
+                      <span>{tp('haveBlueprintPrompt', 'มีแบบแปลนพิมพ์เขียวอาคารจริงของคุณอยู่แล้ว?')}</span>
                     </span>
                     <button 
                       type="button"
@@ -2412,7 +2446,7 @@ export default function FranchisePlanner() {
                       style={{ fontWeight: 700, whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                       onClick={() => setSetupMethod('blueprint')}
                     >
-                      <span>สลับไปอัปโหลดแปลน (ตัวเลือกเสริม)</span>
+                      <span>{tp('switchToBlueprint', 'สลับไปอัปโหลดแปลน (ตัวเลือกเสริม)')}</span>
                       <ArrowRight size={14} />
                     </button>
                   </div>
@@ -2440,10 +2474,10 @@ export default function FranchisePlanner() {
                         <UploadCloud size={28} />
                       </div>
                       <div className="blueprint-dropzone-title">
-                        ลากไฟล์แปลนอาคารมาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์ (ตัวเลือกเสริม)
+                        {tp('dragBlueprintHint', 'ลากไฟล์แปลนอาคารมาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์ (ตัวเลือกเสริม)')}
                       </div>
                       <p className="blueprint-dropzone-sub">
-                        รองรับไฟล์ภาพแบบแปลนพิมพ์เขียว, ภาพวาดผังร้าน, สเก็ตช์ 2D, ไฟล์สแกน (PNG, JPG, WEBP)
+                        {tp('blueprintFormatsHint', 'รองรับไฟล์ภาพแบบแปลนพิมพ์เขียว, ภาพวาดผังร้าน, สเก็ตช์ 2D, ไฟล์สแกน (PNG, JPG, WEBP)')}
                       </p>
                       <div className="blueprint-dropzone-actions" onClick={e => e.stopPropagation()}>
                         <button 
@@ -2452,7 +2486,7 @@ export default function FranchisePlanner() {
                           onClick={() => fileInputRef.current?.click()}
                         >
                           <UploadCloud size={15} />
-                          <span>เลือกไฟล์แปลนจากเครื่อง</span>
+                          <span>{tp('selectBlueprintFile', 'เลือกไฟล์แปลนจากเครื่อง')}</span>
                         </button>
                         <button 
                           type="button"
@@ -2460,7 +2494,7 @@ export default function FranchisePlanner() {
                           onClick={handleUseSampleBlueprint}
                         >
                           <Sparkles size={15} />
-                          <span>ทดลองใช้แปลนตัวอย่างอาคารพาณิชย์</span>
+                          <span>{tp('useSampleBlueprint', 'ทดลองใช้แปลนตัวอย่างอาคารพาณิชย์')}</span>
                         </button>
                       </div>
                     </div>
@@ -2470,7 +2504,7 @@ export default function FranchisePlanner() {
                   {isAnalyzingBlueprint && (
                     <div className="blueprint-analyzing-spinner">
                       <RefreshCw size={24} className="spin-icon text-cyan" />
-                      <span>AI กำลังสแกนแปลนอาคาร วัดสเกลพื้นที่ และคำนวณการจัดสรรโซนร้านเกม...</span>
+                      <span>{tp('aiScanningBlueprint', 'AI กำลังสแกนแปลนอาคาร วัดสเกลพื้นที่ และคำนวณการจัดสรรโซนร้านเกม...')}</span>
                     </div>
                   )}
 
@@ -2481,17 +2515,17 @@ export default function FranchisePlanner() {
                       <div className="blueprint-image-box" style={{ marginBottom: '16px' }}>
                         <div className="blueprint-image-tag">
                           <CheckCircle2 size={15} className="text-emerald" />
-                          <span>แนบแปลนสำเร็จ: <strong>{uploadedBlueprint.name}</strong> ({uploadedBlueprint.size})</span>
+                          <span>{tp('blueprintAttached', 'แนบแปลนสำเร็จ:')} <strong>{uploadedBlueprint.name}</strong> ({uploadedBlueprint.size})</span>
                         </div>
                         <div className="blueprint-img-frame" style={{ height: '180px' }}>
                           <img src={uploadedBlueprint.url} alt="Floor Plan Blueprint Preview" />
                         </div>
                         <div className="blueprint-image-actions">
                           <button type="button" className="btn-text-danger" onClick={handleRemoveBlueprint}>
-                            <Trash2 size={13} /> ลบแปลนนี้
+                            <Trash2 size={13} /> {tp('deleteBlueprint', 'ลบแปลนนี้')}
                           </button>
                           <button type="button" className="btn-text-blue" onClick={() => fileInputRef.current?.click()}>
-                            <RotateCw size={13} /> เปลี่ยนไฟล์ใหม่
+                            <RotateCw size={13} /> {tp('changeBlueprint', 'เปลี่ยนไฟล์ใหม่')}
                           </button>
                         </div>
                       </div>
@@ -2500,8 +2534,8 @@ export default function FranchisePlanner() {
                       <div className="dimension-sliders" style={{ marginBottom: '16px' }}>
                         <div className="slider-group">
                           <div className="slider-header">
-                            <label>ความกว้างอาคารจริง (Width):</label>
-                            <span className="slider-val text-cyan">{roomWidth} เมตร</span>
+                            <label>{tp('actualBuildingWidth', 'ความกว้างอาคารจริง (Width):')}</label>
+                            <span className="slider-val text-cyan">{roomWidth} {tp('metersUnit', 'เมตร')}</span>
                           </div>
                           <input 
                             type="range" 
@@ -2516,8 +2550,8 @@ export default function FranchisePlanner() {
 
                         <div className="slider-group">
                           <div className="slider-header">
-                            <label>ความลึก/ความยาวอาคารจริง (Length):</label>
-                            <span className="slider-val text-cyan">{roomHeight} เมตร</span>
+                            <label>{tp('actualBuildingLength', 'ความลึก/ความยาวอาคารจริง (Length):')}</label>
+                            <span className="slider-val text-cyan">{roomHeight} {tp('metersUnit', 'เมตร')}</span>
                           </div>
                           <input 
                             type="range" 
@@ -2531,43 +2565,43 @@ export default function FranchisePlanner() {
                         </div>
 
                         <div className="area-summary-pill" style={{ marginTop: '8px' }}>
-                          <span>พื้นที่ใช้สอยรวม: <strong>{roomAreaSqM} ตารางเมตร</strong></span>
+                          <span>{tp('totalAreaLabel', 'พื้นที่ใช้สอยรวม:')} <strong>{roomAreaSqM} {tp('sqmUnit', 'ตารางเมตร')}</strong></span>
                         </div>
                       </div>
 
                       {/* AI Feasibility Stats Grid */}
                       <div className="blueprint-calc-summary" style={{ marginBottom: '16px' }}>
                         <div className="calc-stat-box">
-                          <span className="lbl">ความจุเครื่องที่แนะนำ:</span>
-                          <strong className="val text-cyan">{blueprintFeasibility.recommendedStations} เครื่อง</strong>
+                          <span className="lbl">{tp('recommendedCapacity', 'ความจุเครื่องที่แนะนำ:')}</span>
+                          <strong className="val text-cyan">{blueprintFeasibility.recommendedStations} {tp('stationsCountUnit', 'เครื่อง')}</strong>
                         </div>
                         <div className="calc-stat-box">
-                          <span className="lbl">งบลงทุนประมาณการ:</span>
+                          <span className="lbl">{tp('estimatedCapex', 'งบลงทุนประมาณการ:')}</span>
                           <strong className="val text-blue">฿{blueprintFeasibility.estimatedCapex.toLocaleString()}</strong>
                         </div>
                         <div className="calc-stat-box">
-                          <span className="lbl">กำไรสุทธิคาดการณ์:</span>
-                          <strong className="val text-emerald">฿{blueprintFeasibility.estimatedMonthlyProfit.toLocaleString()} / ด.</strong>
+                          <span className="lbl">{tp('estimatedMonthlyProfit', 'กำไรสุทธิคาดการณ์:')}</span>
+                          <strong className="val text-emerald">฿{blueprintFeasibility.estimatedMonthlyProfit.toLocaleString()} / {tp('months', 'ด.')}</strong>
                         </div>
                         <div className="calc-stat-box">
-                          <span className="lbl">จุดคุ้มทุน (ROI):</span>
-                          <strong className="val text-purple">~{blueprintFeasibility.paybackMonths} เดือน</strong>
+                          <span className="lbl">{tp('roiPaybackPeriod', 'จุดคุ้มทุน (ROI):')}</span>
+                          <strong className="val text-purple">~{blueprintFeasibility.paybackMonths} {tp('months', 'เดือน')}</strong>
                         </div>
                       </div>
 
                       {/* Zone Allocation Pills */}
                       <div style={{ marginBottom: '14px' }}>
-                        <label className="form-label" style={{ marginBottom: '8px' }}>การจัดสรรสัดส่วนโซนที่คำนวณได้:</label>
+                        <label className="form-label" style={{ marginBottom: '8px' }}>{tp('calculatedZoneAllocation', 'การจัดสรรสัดส่วนโซนที่คำนวณได้:')}</label>
                         <div className="zones-breakdown-grid">
                           {blueprintFeasibility.detectedZones.map((zone, idx) => (
                             <div key={idx} className="zone-pill-item">
                               <div className="zone-color-bar" style={{ backgroundColor: zone.color }}></div>
                               <div className="zone-info">
-                                <strong>{zone.name}</strong>
+                                <strong>{translateDynamic(zone.name)}</strong>
                                 <div className="zone-meta">
-                                  <span>{zone.area}</span>
+                                  <span>{translateDynamic(zone.area)}</span>
                                   <span className="bullet">•</span>
-                                  <span className="zone-capacity text-cyan">{zone.stations}</span>
+                                  <span className="zone-capacity text-cyan">{translateDynamic(zone.stations)}</span>
                                 </div>
                               </div>
                             </div>
@@ -2579,7 +2613,7 @@ export default function FranchisePlanner() {
                       <div className="blueprint-guidelines-box">
                         <div className="guidelines-header">
                           <Sparkles size={16} className="text-cyan" />
-                          <span>คำแนะนำเชิงกลยุทธ์การจัดวางผังร้าน (Smart Layout Advice)</span>
+                          <span>{tp('smartLayoutAdviceTitle', 'คำแนะนำเชิงกลยุทธ์การจัดวางผังร้าน (Smart Layout Advice)')}</span>
                         </div>
                         <div className="guidelines-grid">
                           <div className="guideline-card">
@@ -2587,8 +2621,8 @@ export default function FranchisePlanner() {
                               <DoorOpen size={16} />
                             </div>
                             <div className="guideline-content">
-                              <h5>1. ทางเข้า & เคาน์เตอร์แคชเชียร์</h5>
-                              <p>ตั้งขนานประตูทางเข้า คุมทัศนวิสัย 180 องศา ต้อนรับลูกค้าทันทีและดูแลความปลอดภัย</p>
+                              <h5>{tp('guideline1_title', '1. ทางเข้า & เคาน์เตอร์แคชเชียร์')}</h5>
+                              <p>{tp('guideline1_desc', 'ตั้งขนานประตูทางเข้า คุมทัศนวิสัย 180 องศา ต้อนรับลูกค้าทันทีและดูแลความปลอดภัย')}</p>
                             </div>
                           </div>
 
@@ -2597,8 +2631,8 @@ export default function FranchisePlanner() {
                               <Monitor size={16} />
                             </div>
                             <div className="guideline-content">
-                              <h5>2. แนวโต๊ะคอม (Island Back-to-Back)</h5>
-                              <p>วางเกาะกลางหันหลังชนกัน ซ่อนรางสายไฟและท่อแอร์ลงกลางโต๊ะ ประหยัดสายแลน 40% เว้นทางเดิน 1.5 ม.</p>
+                              <h5>{tp('guideline2_title', '2. แนวโต๊ะคอม (Island Back-to-Back)')}</h5>
+                              <p>{tp('guideline2_desc', 'วางเกาะกลางหันหลังชนกัน ซ่อนรางสายไฟและท่อแอร์ลงกลางโต๊ะ ประหยัดสายแลน 40% เว้นทางเดิน 1.5 ม.')}</p>
                             </div>
                           </div>
 
@@ -2607,8 +2641,8 @@ export default function FranchisePlanner() {
                               <Shield size={16} />
                             </div>
                             <div className="guideline-content">
-                              <h5>3. ห้องซ้อม VIP Bootcamp Suite</h5>
-                              <p>กั้นห้องกระจกเก็บเสียงโซนด้านในสุด ลดเสียงรบกวน เหมาะกับการฝึกซ้อมทีมและสตรีมเมอร์</p>
+                              <h5>{tp('guideline3_title', '3. ห้องซ้อม VIP Bootcamp Suite')}</h5>
+                              <p>{tp('guideline3_desc', 'กั้นห้องกระจกเก็บเสียงโซนด้านในสุด ลดเสียงรบกวน เหมาะกับการฝึกซ้อมทีมและสตรีมเมอร์')}</p>
                             </div>
                           </div>
 
@@ -2617,8 +2651,8 @@ export default function FranchisePlanner() {
                               <Server size={16} />
                             </div>
                             <div className="guideline-content">
-                              <h5>4. ห้องเซิร์ฟเวอร์ & ตู้ไฟ MDB</h5>
-                              <p>วางชิดผนังมุมหลังร้าน แยกห้องล็อก ปลอดภัย ติดตั้งระบบ UPS สำรองไฟและแอร์เฉพาะตัว 24 ชม.</p>
+                              <h5>{tp('guideline4_title', '4. ห้องเซิร์ฟเวอร์ & ตู้ไฟ MDB')}</h5>
+                              <p>{tp('guideline4_desc', 'วางชิดผนังมุมหลังร้าน แยกห้องล็อก ปลอดภัย ติดตั้งระบบ UPS สำรองไฟและแอร์เฉพาะตัว 24 ชม.')}</p>
                             </div>
                           </div>
                         </div>
@@ -2633,7 +2667,7 @@ export default function FranchisePlanner() {
                           onClick={handleApplyAutoLayout}
                         >
                           <Sparkles size={18} />
-                          <span>จัดวางผังร้านอัตโนมัติ</span>
+                          <span>{tp('autoLayoutBtn', 'จัดวางผังร้านอัตโนมัติ')}</span>
                           <ArrowRight size={18} />
                         </button>
                         <button 
@@ -2643,7 +2677,7 @@ export default function FranchisePlanner() {
                           style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                         >
                           <Ruler size={15} />
-                          <span>จัดวางผังด้วยตนเอง</span>
+                          <span>{tp('manualLayoutBtn', 'จัดวางผังด้วยตนเอง')}</span>
                         </button>
                       </div>
                     </div>
@@ -2665,7 +2699,7 @@ export default function FranchisePlanner() {
                   >
                     <span style={{ color: '#475569', display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <Sliders size={15} className="text-blue" />
-                      <span>ต้องการใช้ขนาดห้องและโมเดลสำเร็จรูปมาตรฐาน?</span>
+                      <span>{tp('wantStandardPreset', 'ต้องการใช้ขนาดห้องและโมเดลสำเร็จรูปมาตรฐาน?')}</span>
                     </span>
                     <button 
                       type="button"
@@ -2673,7 +2707,7 @@ export default function FranchisePlanner() {
                       style={{ fontWeight: 700, whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                       onClick={() => setSetupMethod('preset')}
                     >
-                      <span>สลับไปใช้โมเดลสำเร็จรูป (ค่าเริ่มต้น)</span>
+                      <span>{tp('switchToStandardPreset', 'สลับไปใช้โมเดลสำเร็จรูป (ค่าเริ่มต้น)')}</span>
                       <ArrowRight size={14} />
                     </button>
                   </div>
@@ -2687,12 +2721,12 @@ export default function FranchisePlanner() {
               {uploadedBlueprint ? (
                 <div className="blueprint-source-badge">
                   <Building2 size={16} />
-                  <span>ใช้แปลนอาคาร: <strong>{uploadedBlueprint.name}</strong> ({roomWidth}x{roomHeight} ม. | {roomAreaSqM} ตร.ม.)</span>
+                  <span>{tp('usingBlueprint', 'ใช้แปลนอาคาร:')} <strong>{uploadedBlueprint.name}</strong> ({roomWidth}x{roomHeight} {tp('metersUnit', 'ม.')} | {roomAreaSqM} {tp('sqmUnit', 'ตร.ม.')})</span>
                 </div>
               ) : (
                 <div className="blueprint-source-badge">
                   <LayoutGrid size={16} />
-                  <span>ขนาดพื้นที่จำลอง: <strong>{roomWidth}x{roomHeight} เมตร ({roomAreaSqM} ตร.ม.)</strong></span>
+                  <span>{tp('simulatedSpaceSize', 'ขนาดพื้นที่จำลอง:')} <strong>{roomWidth}x{roomHeight} {tp('metersUnit', 'เมตร')} ({roomAreaSqM} {tp('sqmUnit', 'ตร.ม.')})</strong></span>
                 </div>
               )}
 
@@ -2708,11 +2742,11 @@ export default function FranchisePlanner() {
                   onChange={e => setStoreLocation(e.target.value)}
                   className="form-select"
                 >
-                  <option>กรุงเทพฯ และปริมณฑล (ย่านมหาวิทยาลัย/ชุมชน)</option>
-                  <option>เชียงใหม่ / ภาคเหนือ</option>
-                  <option>ขอนแก่น / โคราช / ภาคอีสาน</option>
-                  <option>ชลบุรี / พัทยา / ภาคตะวันออก</option>
-                  <option>ภูเก็ต / สงขลา / ภาคใต้</option>
+                  <option value="กรุงเทพฯ และปริมณฑล">{tp('loc_bkk', 'กรุงเทพฯ และปริมณฑล (ย่านมหาวิทยาลัย/ชุมชน)')}</option>
+                  <option value="เชียงใหม่ / ภาคเหนือ">{tp('loc_cm', 'เชียงใหม่ / ภาคเหนือ')}</option>
+                  <option value="ขอนแก่น / โคราช / ภาคอีสาน">{tp('loc_esan', 'ขอนแก่น / โคราช / ภาคอีสาน')}</option>
+                  <option value="ชลบุรี / พัทยา / ภาคตะวันออก">{tp('loc_east', 'ชลบุรี / พัทยา / ภาคตะวันออก')}</option>
+                  <option value="ภูเก็ต / สงขลา / ภาคใต้">{tp('loc_south', 'ภูเก็ต / สงขลา / ภาคใต้')}</option>
                 </select>
               </div>
 
@@ -2723,10 +2757,10 @@ export default function FranchisePlanner() {
                   onChange={e => setStoreType(e.target.value)}
                   className="form-select"
                 >
-                  <option>อาคารพาณิชย์ 2-3 คูหา (Commercial Shophouse)</option>
-                  <option>พื้นที่เช่าในศูนย์การค้า / ไลฟ์สไตล์มอลล์ (Shopping Mall)</option>
-                  <option>อาคารเดี่ยว Standalone หรือโกดัง Renovate</option>
-                  <option>ใกล้มหาวิทยาลัย / หอพักนักศึกษา</option>
+                  <option value="อาคารพาณิชย์ (Commercial Building)">{tp('type_shophouse', 'อาคารพาณิชย์ 2-3 คูหา (Commercial Shophouse)')}</option>
+                  <option value="พื้นที่เช่าในศูนย์การค้า (Mall)">{tp('type_mall', 'พื้นที่เช่าในศูนย์การค้า / ไลฟ์สไตล์มอลล์ (Shopping Mall)')}</option>
+                  <option value="อาคารเดี่ยว (Standalone)">{tp('type_standalone', 'อาคารเดี่ยว Standalone หรือโกดัง Renovate')}</option>
+                  <option value="ใกล้มหาวิทยาลัย">{tp('type_campus', 'ใกล้มหาวิทยาลัย / หอพักนักศึกษา')}</option>
                 </select>
               </div>
 
@@ -2884,14 +2918,14 @@ export default function FranchisePlanner() {
                   id="btn-toggle-blueprint-overlay"
                   className={`btn-toggle-overlay ${showBlueprintOverlay ? 'active' : ''}`}
                   onClick={() => setShowBlueprintOverlay(!showBlueprintOverlay)}
-                  title="เปิด/ปิดการแสดงผังแปลนที่แนบ"
+                  title={tp('toggleBlueprintHint', 'เปิด/ปิดการแสดงผังแปลนที่แนบ')}
                 >
                   <SplitSquareVertical size={14} />
-                  <span>แปลนอ้างอิง: {showBlueprintOverlay ? 'เปิดอยู่' : 'ปิด'}</span>
+                  <span>{tp('refBlueprint', 'แปลนอ้างอิง:')} {showBlueprintOverlay ? tp('stateOn', 'เปิดอยู่') : tp('stateOff', 'ปิด')}</span>
                 </button>
                 {showBlueprintOverlay && (
                   <div className="opacity-slider-box">
-                    <span className="opacity-label">ความชัด: {Math.round(blueprintOpacity * 100)}%</span>
+                    <span className="opacity-label">{tp('opacityLabel', 'ความชัด:')} {Math.round(blueprintOpacity * 100)}%</span>
                     <input 
                       type="range" 
                       min="0.1" 
@@ -2916,10 +2950,10 @@ export default function FranchisePlanner() {
                   setInspectorTab('door');
                   setSelectedItemId('store-door');
                 }}
-                title="คลิกเพื่อปรับตำแหน่งประตูทางเข้าร้านและป้ายชื่อร้าน (ในแถบซ้าย)"
+                title={tp('adjustDoorHeaderHint', 'คลิกเพื่อปรับตำแหน่งประตูทางเข้าร้านและป้ายชื่อร้าน (ในแถบซ้าย)')}
               >
                 <DoorOpen size={13} className="text-emerald" />
-                <span>ประตู: {doorConfig.wall === 'front' ? 'ด้านหน้า' : doorConfig.wall === 'left' ? 'ผนังซ้าย' : doorConfig.wall === 'back' ? 'ผนังหลัง' : 'ผนังขวา'}</span>
+                <span>{tp('quickDoor', 'ประตู: ')}{getWallName(doorConfig.wall)}</span>
                 <span className="pill-dot" style={{ backgroundColor: '#10b981' }} />
               </button>
 
@@ -2930,12 +2964,12 @@ export default function FranchisePlanner() {
                   setInspectorTab('materials');
                   if (selectedItemId === 'store-door') setSelectedItemId(null);
                 }}
-                title="คลิกเพื่อเปลี่ยนวอลเปเปอร์ผนังและวัสดุพื้น"
+                title={tp('adjustMaterialsHeaderHint', 'คลิกเพื่อเปลี่ยนวอลเปเปอร์ผนังและวัสดุพื้น')}
               >
                 <Palette size={13} className="text-blue" />
-                <span>โทนสี</span>
-                <span className="pill-dot" style={{ backgroundColor: WALLPAPERS.find(w => w.id === selectedWallpaper)?.color || '#e2e8f0' }} title="สีผนัง" />
-                <span className="pill-dot floor-dot" style={{ backgroundColor: FLOOR_MATERIALS.find(f => f.id === selectedFloorMaterial)?.color || '#b45309' }} title="สีพื้น" />
+                <span>{tp('quickTheme', 'โทนสี')}</span>
+                <span className="pill-dot" style={{ backgroundColor: WALLPAPERS.find(w => w.id === selectedWallpaper)?.color || '#e2e8f0' }} title={tp('wallColor', 'สีผนัง')} />
+                <span className="pill-dot floor-dot" style={{ backgroundColor: FLOOR_MATERIALS.find(f => f.id === selectedFloorMaterial)?.color || '#b45309' }} title={tp('floorColor', 'สีพื้น')} />
               </button>
 
               <button
@@ -2945,10 +2979,10 @@ export default function FranchisePlanner() {
                   setInspectorTab('catalog');
                   if (selectedItemId === 'store-door') setSelectedItemId(null);
                 }}
-                title="คลิกเพื่อเปิดแท็บเพิ่มอุปกรณ์ (ในแถบซ้าย)"
+                title={tp('addItemsHeaderHint', 'คลิกเพื่อเปิดแท็บเพิ่มอุปกรณ์ (ในแถบซ้าย)')}
               >
                 <PlusCircle size={13} className="text-blue" />
-                <span>+ เพิ่มอุปกรณ์</span>
+                <span>{tp('quickAdd', '+ เพิ่มอุปกรณ์')}</span>
               </button>
             </div>
           </div>
@@ -2968,10 +3002,10 @@ export default function FranchisePlanner() {
                     setInspectorTab('details');
                     if (selectedItemId === 'store-door') setSelectedItemId(null);
                   }}
-                  title="ดูรายละเอียดอุปกรณ์ที่เลือก และรายการอุปกรณ์ในร้าน"
+                  title={tp('tabItemsTooltip', 'ดูรายละเอียดอุปกรณ์ที่เลือก และรายการอุปกรณ์ในร้าน')}
                 >
                   <Sliders size={14} />
-                  <span>รายละเอียด</span>
+                  <span>{tp('tabDetails', 'รายละเอียด')}</span>
                   {placedItems.length > 0 && (
                     <span className="tab-pill-count">{placedItems.length}</span>
                   )}
@@ -2985,10 +3019,10 @@ export default function FranchisePlanner() {
                     setInspectorTab('door');
                     setSelectedItemId('store-door');
                   }}
-                  title="ปรับแต่งตำแหน่งประตูทางเข้าร้าน รูปแบบประตู และป้ายชื่อร้าน"
+                  title={tp('tabDoorTooltip', 'ปรับแต่งตำแหน่งประตูทางเข้าร้าน รูปแบบประตู และป้ายชื่อร้าน')}
                 >
                   <DoorOpen size={13} />
-                  <span>ประตูร้าน</span>
+                  <span>{tp('tabDoor', 'ประตูร้าน')}</span>
                 </button>
 
                 <button 
@@ -2999,10 +3033,10 @@ export default function FranchisePlanner() {
                     setInspectorTab('materials');
                     if (selectedItemId === 'store-door') setSelectedItemId(null);
                   }}
-                  title="ปรับแต่งวอลเปเปอร์ผนังและวัสดุปูพื้นห้อง"
+                  title={tp('tabMaterialsTooltip', 'ปรับแต่งวอลเปเปอร์ผนังและวัสดุปูพื้นห้อง')}
                 >
                   <Palette size={13} />
-                  <span>ผนัง/พื้น</span>
+                  <span>{tp('tabMaterials', 'ผนัง/พื้น')}</span>
                 </button>
 
                 <button 
@@ -3013,10 +3047,10 @@ export default function FranchisePlanner() {
                     setInspectorTab('catalog');
                     if (selectedItemId === 'store-door') setSelectedItemId(null);
                   }}
-                  title="เลือกและเพิ่มอุปกรณ์/โต๊ะคอมลงในผัง"
+                  title={tp('tabCatalogTooltip', 'เลือกและเพิ่มอุปกรณ์/โต๊ะคอมลงในผัง')}
                 >
                   <PlusCircle size={13} />
-                  <span>เพิ่มอุปกรณ์</span>
+                  <span>{tp('tabCatalogShort', 'เพิ่มอุปกรณ์')}</span>
                 </button>
               </div>
 
@@ -3028,7 +3062,7 @@ export default function FranchisePlanner() {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                           <span className="badge-pill badge-emerald">
                             <DoorOpen size={13} />
-                            <span>โครงสร้างสถาปัตยกรรม</span>
+                            <span>{tp('archStructureBadge', 'โครงสร้างสถาปัตยกรรม')}</span>
                           </span>
                           <button 
                             type="button" 
@@ -3037,14 +3071,14 @@ export default function FranchisePlanner() {
                               setSelectedItemId(null);
                               if (inspectorTab === 'door') setInspectorTab('details');
                             }}
-                            title="ปิดหน้าต่างปรับประตู"
+                            title={tp('closeDoorConfigTooltip', 'ปิดหน้าต่างปรับประตู')}
                           >
                             ✕
                           </button>
                         </div>
-                        <h4>ประตูทางเข้าร้านหลัก</h4>
+                        <h4>{tp('mainEntranceDoor', 'ประตูทางเข้าร้านหลัก')}</h4>
                         <p className="sub-desc" style={{ fontSize: '0.78rem', color: '#64748b', margin: '3px 0 0 0' }}>
-                          Store Entrance • ปรับผนัง สัดส่วนระยะ และรูปแบบประตูหน้าร้าน
+                          {tp('storeEntranceDesc', 'Store Entrance • ปรับผนัง สัดส่วนระยะ และรูปแบบประตูหน้าร้าน')}
                         </p>
                       </div>
 
@@ -3052,7 +3086,7 @@ export default function FranchisePlanner() {
                       <div className="spatial-control-card" style={{ marginTop: '12px' }}>
                         <div className="control-section-title">
                           <Compass size={14} className="text-emerald" />
-                          <span>เลือกผนังติดตั้งประตู:</span>
+                          <span>{tp('selectDoorWall', 'เลือกผนังติดตั้งประตู:')}</span>
                         </div>
                         <div className="wall-selector-grid" style={{ marginTop: '8px' }}>
                           <button 
@@ -3060,28 +3094,28 @@ export default function FranchisePlanner() {
                             className={`wall-btn ${doorConfig.wall === 'front' ? 'active' : ''}`}
                             onClick={() => setDoorConfig({ ...doorConfig, wall: 'front' })}
                           >
-                            <ArrowDown size={14} /> ด้านหน้า (Front)
+                            <ArrowDown size={14} /> {tp('wallFrontFull', 'ด้านหน้า (Front)')}
                           </button>
                           <button 
                             type="button" 
                             className={`wall-btn ${doorConfig.wall === 'right' || !doorConfig.wall ? 'active' : ''}`}
                             onClick={() => setDoorConfig({ ...doorConfig, wall: 'right' })}
                           >
-                            <ArrowRight size={14} /> ผนังขวา (Right)
+                            <ArrowRight size={14} /> {tp('wallRightFull', 'ผนังขวา (Right)')}
                           </button>
                           <button 
                             type="button" 
                             className={`wall-btn ${doorConfig.wall === 'left' ? 'active' : ''}`}
                             onClick={() => setDoorConfig({ ...doorConfig, wall: 'left' })}
                           >
-                            <ArrowLeft size={14} /> ผนังซ้าย (Left)
+                            <ArrowLeft size={14} /> {tp('wallLeftFull', 'ผนังซ้าย (Left)')}
                           </button>
                           <button 
                             type="button" 
                             className={`wall-btn ${doorConfig.wall === 'back' ? 'active' : ''}`}
                             onClick={() => setDoorConfig({ ...doorConfig, wall: 'back' })}
                           >
-                            <ArrowUp size={14} /> ผนังหลัง (Back)
+                            <ArrowUp size={14} /> {tp('wallBackFull', 'ผนังหลัง (Back)')}
                           </button>
                         </div>
                       </div>
@@ -3091,19 +3125,19 @@ export default function FranchisePlanner() {
                         <div className="control-section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <Sliders size={14} className="text-emerald" />
-                            <span>ตำแหน่งตามแนวผนัง:</span>
+                            <span>{tp('positionAlongWall', 'ตำแหน่งตามแนวผนัง:')}</span>
                           </div>
                           <span className="slider-val-mini text-emerald" style={{ fontWeight: 800 }}>{Math.round((doorConfig.offsetRatio ?? 0.75) * 100)}%</span>
                         </div>
                         <div className="door-offset-presets" style={{ marginTop: '8px' }}>
                           <button type="button" className="btn-preset-offset" onClick={() => setDoorConfig({ ...doorConfig, offsetRatio: 0.25 })}>
-                            {doorConfig.wall === 'front' || doorConfig.wall === 'back' ? 'ซ้าย 25%' : 'หลัง 25%'}
+                            {doorConfig.wall === 'front' || doorConfig.wall === 'back' ? tp('presetLeft25', 'ซ้าย 25%') : tp('presetBack25', 'หลัง 25%')}
                           </button>
                           <button type="button" className="btn-preset-offset" onClick={() => setDoorConfig({ ...doorConfig, offsetRatio: 0.50 })}>
-                            ตรงกลาง 50%
+                            {tp('presetCenter50', 'ตรงกลาง 50%')}
                           </button>
                           <button type="button" className="btn-preset-offset" onClick={() => setDoorConfig({ ...doorConfig, offsetRatio: 0.75 })}>
-                            {doorConfig.wall === 'front' || doorConfig.wall === 'back' ? 'ขวา 75%' : 'หน้า 75%'}
+                            {doorConfig.wall === 'front' || doorConfig.wall === 'back' ? tp('presetRight75', 'ขวา 75%') : tp('presetFront75', 'หน้า 75%')}
                           </button>
                         </div>
                         <input 
@@ -3122,7 +3156,7 @@ export default function FranchisePlanner() {
                       <div className="spatial-control-card" style={{ marginTop: '12px' }}>
                         <div className="control-section-title">
                           <DoorClosed size={14} className="text-emerald" />
-                          <span>รูปแบบประตู:</span>
+                          <span>{tp('doorStyleLabel', 'รูปแบบประตู:')}</span>
                         </div>
                         <div className="door-style-pills" style={{ marginTop: '8px' }}>
                           <button 
@@ -3131,7 +3165,7 @@ export default function FranchisePlanner() {
                             onClick={() => setDoorConfig({ ...doorConfig, style: 'glass-single' })}
                           >
                             <DoorClosed size={16} />
-                            <span>แบบ 1 บาน (ฟิล์มดำ)</span>
+                            <span>{tp('doorSingleOption', 'แบบ 1 บาน (ฟิล์มดำ)')}</span>
                           </button>
                           <button 
                             type="button"
@@ -3139,7 +3173,7 @@ export default function FranchisePlanner() {
                             onClick={() => setDoorConfig({ ...doorConfig, style: 'glass-double' })}
                           >
                             <SplitSquareVertical size={16} />
-                            <span>แบบ 2 บาน (ฟิล์มดำ)</span>
+                            <span>{tp('doorDoubleOption', 'แบบ 2 บาน (ฟิล์มดำ)')}</span>
                           </button>
                         </div>
                       </div>
@@ -3148,19 +3182,19 @@ export default function FranchisePlanner() {
                       <div className="spatial-control-card" style={{ marginTop: '12px' }}>
                         <div className="control-section-title">
                           <Building2 size={14} className="text-cyan" />
-                          <span>ชื่อร้าน / ป้ายกล่องไฟ 3D หน้าร้าน:</span>
+                          <span>{tp('storeNameInputLabel', 'ชื่อร้าน / ป้ายกล่องไฟ 3D หน้าร้าน:')}</span>
                         </div>
                         <input 
                           type="text"
                           value={doorConfig.storeName || 'GLP : G SPEED LIVING PLUS'}
                           onChange={(e) => setDoorConfig({ ...doorConfig, storeName: e.target.value })}
-                          placeholder="เช่น GLP : G SPEED LIVING PLUS..."
+                          placeholder={tp('storeNamePlaceholder', 'เช่น GLP : G SPEED LIVING PLUS...')}
                           className="store-name-card-input"
                           maxLength={36}
                           style={{ marginTop: '8px', width: '100%' }}
                         />
                         <div className="store-name-presets" style={{ marginTop: '6px' }}>
-                          {['GLP : G SPEED LIVING PLUS', 'G-SPEED LIVING PLUS', 'สาขา สยามสแควร์', 'GLP CYBER LOUNGE'].map((preset) => (
+                          {['GLP : G SPEED LIVING PLUS', 'G-SPEED LIVING PLUS', tp('presetSiamSquare', 'สาขา สยามสแควร์'), 'GLP CYBER LOUNGE'].map((preset) => (
                             <button 
                               key={preset}
                               type="button" 
@@ -3177,7 +3211,7 @@ export default function FranchisePlanner() {
                       <div className="spatial-control-card" style={{ marginTop: '12px' }}>
                         <div className="control-section-title">
                           <Sparkles size={14} className="text-amber" />
-                          <span>สไตล์ป้ายไฟ & สติ๊กเกอร์:</span>
+                          <span>{tp('signStyleInputLabel', 'สไตล์ป้ายไฟ & สติ๊กเกอร์:')}</span>
                         </div>
                         <div className="door-style-pills" style={{ marginTop: '8px' }}>
                           <button 
@@ -3186,7 +3220,7 @@ export default function FranchisePlanner() {
                             onClick={() => setDoorConfig({ ...doorConfig, signStyle: 'neon-lightbox' })}
                           >
                             <Sparkles size={14} />
-                            <span>นีออน LED</span>
+                            <span>{tp('signNeonLed', 'นีออน LED')}</span>
                           </button>
                           <button 
                             type="button" 
@@ -3194,7 +3228,7 @@ export default function FranchisePlanner() {
                             onClick={() => setDoorConfig({ ...doorConfig, signStyle: 'acrylic-gold' })}
                           >
                             <Award size={14} />
-                            <span>อะคริลิกทอง</span>
+                            <span>{tp('signGoldAcrylic', 'อะคริลิกทอง')}</span>
                           </button>
                           <button 
                             type="button" 
@@ -3202,7 +3236,7 @@ export default function FranchisePlanner() {
                             onClick={() => setDoorConfig({ ...doorConfig, signStyle: 'minimal-dark' })}
                           >
                             <Zap size={14} />
-                            <span>มินิมอลไซเบอร์</span>
+                            <span>{tp('signMinimalCyber', 'มินิมอลไซเบอร์')}</span>
                           </button>
                           <button 
                             type="button" 
@@ -3210,7 +3244,7 @@ export default function FranchisePlanner() {
                             onClick={() => setDoorConfig({ ...doorConfig, signStyle: 'grand-arch' })}
                           >
                             <Building2 size={14} />
-                            <span>ซุ้มแกรนด์</span>
+                            <span>{tp('signGrandArch', 'ซุ้มแกรนด์')}</span>
                           </button>
                         </div>
                       </div>
@@ -3227,7 +3261,7 @@ export default function FranchisePlanner() {
                           }}
                         >
                           <Check size={15} />
-                          <span>เสร็จสิ้น / บันทึกตำแหน่งประตู</span>
+                          <span>{tp('saveDoorPosition', 'เสร็จสิ้น / บันทึกตำแหน่งประตู')}</span>
                         </button>
                       </div>
                     </div>
@@ -3243,13 +3277,13 @@ export default function FranchisePlanner() {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <span className="badge-pill badge-blue">
                             <Box size={13} />
-                            <span>โมดูลที่เลือก</span>
+                            <span>{tp('selectedModuleBadge', 'โมดูลที่เลือก')}</span>
                           </span>
                           <button 
                             type="button" 
                             className="btn-popover-close-mini" 
                             onClick={() => setSelectedItemId(null)}
-                            title="ปิดการเลือก"
+                            title={tp('closeSelectionTooltip', 'ปิดการเลือก')}
                           >
                             ✕
                           </button>
@@ -3261,7 +3295,7 @@ export default function FranchisePlanner() {
                           <div 
                             className="insp-thumb-banner"
                             onClick={() => setSelectedCatalogModalItem(selectedItemObject.catalog)}
-                            title="คลิกเพื่อดูสเปกเต็มและภาพสินค้าขยาย"
+                            title={tp('viewSpecsAndZoomTooltip', 'คลิกเพื่อดูสเปกเต็มและภาพสินค้าขยาย')}
                           >
                             <img 
                               src={selectedItemObject.catalog.image} 
@@ -3271,7 +3305,7 @@ export default function FranchisePlanner() {
                             />
                             <div className="insp-thumb-overlay">
                               <Eye size={13} />
-                              <span>คลิกดูภาพขยาย & สเปกเต็ม</span>
+                              <span>{tp('clickFullSpecs', 'คลิกดูภาพขยาย & สเปกเต็ม')}</span>
                             </div>
                             {selectedItemObject.catalog.seats > 0 && (
                               <span className="insp-thumb-seat-badge">
@@ -3279,7 +3313,7 @@ export default function FranchisePlanner() {
                               </span>
                             )}
                             <span className="insp-thumb-dim-badge">
-                              {selectedItemObject.catalog.widthMeters} x {selectedItemObject.catalog.depth3D || selectedItemObject.catalog.heightMeters} ม.
+                              {selectedItemObject.catalog.widthMeters} x {selectedItemObject.catalog.depth3D || selectedItemObject.catalog.heightMeters} {tp('metersUnit', 'ม.')}
                             </span>
                           </div>
                         )}
@@ -3288,37 +3322,37 @@ export default function FranchisePlanner() {
                       {/* Component Breakdown Card: Desk vs Chair */}
                       <div className="component-breakdown-card">
                         <div className="breakdown-section-title">
-                          <span>รายละเอียดราคาอุปกรณ์ในโมดูล</span>
+                          <span>{tp('modulePriceBreakdown', 'รายละเอียดราคาอุปกรณ์ในโมดูล')}</span>
                         </div>
 
                         {/* Desk Price Breakdown */}
                         <div className="component-spec-box desk-box">
                           <div className="spec-box-header">
-                            <span className="box-title">โต๊ะและโครงสร้าง</span>
+                            <span className="box-title">{tp('deskAndStructure', 'โต๊ะและโครงสร้าง')}</span>
                             <strong className="box-price text-blue">
                               ฿{selectedItemObject.catalog?.deskPrice?.toLocaleString()}
                             </strong>
                           </div>
-                          <p className="box-desc">{selectedItemObject.catalog?.deskDesc}</p>
+                          <p className="box-desc">{translateDynamic(selectedItemObject.catalog?.deskDesc)}</p>
                         </div>
 
                         {/* Chair Model & Price Breakdown */}
                         <div className="component-spec-box chair-box">
                           <div className="spec-box-header">
-                            <span className="box-title">เก้าอี้เกมมิ่ง / ที่นั่ง</span>
+                            <span className="box-title">{tp('gamingChairsSeats', 'เก้าอี้เกมมิ่ง / ที่นั่ง')}</span>
                             <strong className="box-price text-blue">
                               {selectedItemObject.catalog?.chairCount > 0 
                                 ? `฿${((selectedItemObject.catalog?.chairPrice || 0) * (selectedItemObject.catalog?.chairCount || 0)).toLocaleString()}`
-                                : 'ไม่มี'}
+                                : tp('noChairs', 'ไม่มี')}
                             </strong>
                           </div>
                           <div className="chair-detail-row">
                             <span className="chair-model-name">
-                              {selectedItemObject.catalog?.chairModel}
+                              {translateDynamic(selectedItemObject.catalog?.chairModel)}
                             </span>
                             {selectedItemObject.catalog?.chairCount > 0 && (
                               <span className="chair-count-badge">
-                                {selectedItemObject.catalog?.chairCount} ตัว <span className="unit-price">(฿{selectedItemObject.catalog?.chairPrice?.toLocaleString()}/ตัว)</span>
+                                {selectedItemObject.catalog?.chairCount} {tp('unitsChairs', 'ตัว')} <span className="unit-price">(฿{selectedItemObject.catalog?.chairPrice?.toLocaleString()}/{tp('unitsPerChair', 'ตัว')})</span>
                               </span>
                             )}
                           </div>
@@ -3327,18 +3361,18 @@ export default function FranchisePlanner() {
                         {/* 3D Physical Dimensions */}
                         <div className="component-spec-box dimensions-box">
                           <div className="spec-box-header">
-                            <span className="box-title">มิติขนาด (กว้าง x ลึก x สูง)</span>
+                            <span className="box-title">{tp('dimensionsWxDxH', 'มิติขนาด (กว้าง x ลึก x สูง)')}</span>
                           </div>
                           <div className="dimensions-pills">
-                            <span className="dim-tag">กว้าง: {selectedItemObject.catalog?.widthMeters} ม.</span>
-                            <span className="dim-tag">ลึก: {selectedItemObject.catalog?.depth3D || selectedItemObject.catalog?.heightMeters} ม.</span>
-                            <span className="dim-tag">สูง: {selectedItemObject.catalog?.height3D || 1.25} ม.</span>
+                            <span className="dim-tag">{tp('dimWidth', 'กว้าง')}: {selectedItemObject.catalog?.widthMeters} {tp('metersUnit', 'ม.')}</span>
+                            <span className="dim-tag">{tp('dimDepth', 'ลึก')}: {selectedItemObject.catalog?.depth3D || selectedItemObject.catalog?.heightMeters} {tp('metersUnit', 'ม.')}</span>
+                            <span className="dim-tag">{tp('dimHeight', 'สูง')}: {selectedItemObject.catalog?.height3D || 1.25} {tp('metersUnit', 'ม.')}</span>
                           </div>
                         </div>
 
                         {/* Total Module Price */}
                         <div className="total-module-price-row">
-                          <span>ราคารวมโมดูลนี้:</span>
+                          <span>{tp('totalModulePrice', 'ราคารวมโมดูลนี้:')}</span>
                           <strong className="text-blue font-bold">
                             ฿{selectedItemObject.catalog?.baseCost?.toLocaleString()}
                           </strong>
@@ -3349,12 +3383,12 @@ export default function FranchisePlanner() {
                       <div className="spatial-controls-card">
                         <div className="spatial-title">
                           <Move size={14} className="text-blue" />
-                          <span>ตำแหน่ง & ทิศทางในห้อง</span>
+                          <span>{tp('positionOrientation', 'ตำแหน่ง & ทิศทางในห้อง')}</span>
                         </div>
                         <div className="coords-info">
-                          <span><strong>X:</strong> {selectedItemObject.x.toFixed(1)} ม.</span>
-                          <span><strong>Y:</strong> {selectedItemObject.y.toFixed(1)} ม.</span>
-                          <span><strong>มุม:</strong> {selectedItemObject.rotation}°</span>
+                          <span><strong>X:</strong> {selectedItemObject.x.toFixed(1)} {tp('metersUnit', 'ม.')}</span>
+                          <span><strong>Y:</strong> {selectedItemObject.y.toFixed(1)} {tp('metersUnit', 'ม.')}</span>
+                          <span><strong>{tp('angle', 'มุม:')}</strong> {selectedItemObject.rotation}°</span>
                         </div>
 
                         {/* Unified Quick Actions */}
@@ -3364,36 +3398,36 @@ export default function FranchisePlanner() {
                             id="btn-sidebar-rotate-item"
                             className="btn-spatial-action btn-rotate"
                             onClick={() => handleRotateItem(selectedItemObject.id)}
-                            title="หมุน 90 องศา (กด R)"
+                            title={tp('rotateTooltip', 'หมุน 90 องศา (กด R)')}
                           >
                             <RotateCw size={13} />
-                            <span>หมุน 90°</span>
+                            <span>{tp('rotate90', 'หมุน 90°')}</span>
                           </button>
                           <button 
                             type="button"
                             id="btn-sidebar-duplicate-item"
                             className="btn-spatial-action btn-duplicate"
                             onClick={() => handleDuplicateItem(selectedItemObject.id)}
-                            title="คัดลอกโมดูลนี้ (Duplicate)"
+                            title={tp('duplicateModuleTooltip', 'คัดลอกโมดูลนี้ (Duplicate)')}
                           >
                             <Copy size={13} />
-                            <span>คัดลอก</span>
+                            <span>{tp('duplicate', 'คัดลอก')}</span>
                           </button>
                           <button 
                             type="button"
                             id="btn-sidebar-delete-item"
                             className="btn-spatial-action btn-delete"
                             onClick={() => promptDeleteItem(selectedItemObject)}
-                            title="ลบโมดูลนี้ออกจากผัง (กด Delete)"
+                            title={tp('deleteModuleTooltip', 'ลบโมดูลนี้ออกจากผัง (กด Delete)')}
                           >
                             <Trash2 size={13} />
-                            <span>ลบออก</span>
+                            <span>{tp('delete', 'ลบออก')}</span>
                           </button>
                         </div>
 
                         <div className="spatial-keyboard-hint">
                           <Compass size={12} className="text-blue" />
-                          <span>คลิกลากย้ายอิสระ หรือกดปุ่มลูกศร <strong>[↑][↓][←][→]</strong> บนคีย์บอร์ด</span>
+                          <span>{tp('dragHint', 'คลิกลากย้ายอิสระ หรือกดปุ่มลูกศร [↑][↓][←][→] บนคีย์บอร์ด')}</span>
                         </div>
                       </div>
                     </div>
@@ -3404,16 +3438,16 @@ export default function FranchisePlanner() {
                         <div className="quick-items-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <span className="quick-title" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700 }}>
                             <Layers size={15} className="text-blue" />
-                            <span>อุปกรณ์ที่ติดตั้งในร้าน ({placedItems.length} ชิ้น):</span>
+                            <span>{tp('installedItemsTitle', 'อุปกรณ์ที่ติดตั้งในร้าน')} ({placedItems.length} {tp('itemsCountUnit', 'ชิ้น')}):</span>
                           </span>
                           <button
                             type="button"
                             className="btn-quick-add-link"
                             onClick={() => setInspectorTab('catalog')}
-                            title="ไปที่แท็บเพิ่มอุปกรณ์"
+                            title={tp('goToAddTabTooltip', 'ไปที่แท็บเพิ่มอุปกรณ์')}
                           >
                             <Plus size={13} />
-                            <span>เพิ่มอุปกรณ์</span>
+                            <span>{tp('addEquipmentShort', '+ เพิ่มอุปกรณ์')}</span>
                           </button>
                         </div>
 
@@ -3425,34 +3459,32 @@ export default function FranchisePlanner() {
                               setSelectedItemId('store-door');
                               setInspectorTab('door');
                             }}
-                            title="คลิกเพื่อเลือกและปรับตำแหน่งประตูทางเข้าร้าน"
+                            title={tp('selectDoorTooltip', 'คลิกเพื่อเลือกและปรับตำแหน่งประตูทางเข้าร้าน')}
                           >
                             <div className="installed-item-left">
                               <div className="installed-item-badge door-badge">
                                 <DoorOpen size={14} />
                               </div>
                               <div className="installed-item-info">
-                                <span className="installed-item-title">ประตูทางเข้าร้านหลัก</span>
+                                <span className="installed-item-title">{tp('mainEntranceDoor', 'ประตูทางเข้าร้านหลัก')}</span>
                                 <div className="installed-item-meta">
                                   <span className="installed-tag tag-emerald">
-                                    {doorConfig.wall === 'front' ? 'ด้านหน้า' :
-                                     doorConfig.wall === 'left' ? 'ผนังซ้าย' :
-                                     doorConfig.wall === 'back' ? 'ผนังหลัง' : 'ผนังขวา'} {Math.round((doorConfig.offsetRatio ?? 0.75) * 100)}%
+                                    {getWallName(doorConfig.wall)} {Math.round((doorConfig.offsetRatio ?? 0.75) * 100)}%
                                   </span>
                                   <span className="installed-tag tag-dim">
-                                    {(doorConfig.style === 'glass-double' || doorConfig.style === 'glass' || !doorConfig.style) ? 'กระจก 2 บาน (ฟิล์มดำ)' : doorConfig.style === 'auto-sliding' ? 'บานเลื่อนออโต้ (ฟิล์มดำ)' : 'กระจกฟิล์มดำ (บานเดี่ยว)'}
+                                    {(doorConfig.style === 'glass-double' || doorConfig.style === 'glass' || !doorConfig.style) ? tp('glassDoubleTint', 'กระจก 2 บาน (ฟิล์มดำ)') : doorConfig.style === 'auto-sliding' ? tp('autoSlidingTint', 'บานเลื่อนออโต้ (ฟิล์มดำ)') : tp('glassSingleTint', 'กระจก 1 บาน (ฟิล์มดำ)')}
                                   </span>
                                 </div>
                               </div>
                             </div>
                             <div className="installed-item-right">
-                              <span className="badge-door-edit">ตั้งค่า</span>
+                              <span className="badge-door-edit">{tp('settingsBtn', 'ตั้งค่า')}</span>
                             </div>
                           </div>
 
                           {placedItems.length === 0 ? (
                             <div style={{ padding: '24px 10px', textAlign: 'center', color: '#94a3b8', fontSize: '0.84rem' }}>
-                              ยังไม่มีอุปกรณ์ในผังร้าน คลิกปุ่ม <strong>"+ เพิ่มอุปกรณ์"</strong> ด้านบนเพื่อเริ่มจัดวาง
+                              <span>{tp('noItemsInLayout', 'ยังไม่มีอุปกรณ์ในผังร้าน คลิกปุ่ม "+ เพิ่มอุปกรณ์" ด้านบนเพื่อเริ่มจัดวาง')}</span>
                             </div>
                           ) : (
                             placedItems.map((item, idx) => {
@@ -3470,7 +3502,7 @@ export default function FranchisePlanner() {
                                     type="button"
                                     className="quick-item-summary-btn"
                                     onClick={() => setExpandedQuickItemId(isExpanded ? null : item.id)}
-                                    title={isExpanded ? "คลิกเพื่อย่อข้อมูล" : "คลิกเพื่อดูขนาด ราคา และจัดการอุปกรณ์"}
+                                    title={isExpanded ? tp('expandDetailsTooltip', 'คลิกเพื่อย่อข้อมูล') : tp('collapseDetailsTooltip', 'คลิกเพื่อดูขนาด ราคา และจัดการอุปกรณ์')}
                                   >
                                     <div className="quick-item-img-wrapper">
                                       {cat.image ? (
@@ -3491,21 +3523,19 @@ export default function FranchisePlanner() {
                                     <div className="quick-item-text-col">
                                       <div className="quick-item-top-meta">
                                         <span className="quick-item-type-badge">
-                                          {cat.category === 'stations' ? 'โซนเกมมิ่ง' :
-                                           cat.category === 'facilities' ? 'งานบริการ/ระบบ' :
-                                           cat.category === 'stage' ? 'เวทีแข่งขัน' : 'อุปกรณ์'}
+                                          {getCategoryName(cat.category)}
                                         </span>
                                         {cat.seats > 0 && (
                                           <span className="quick-item-seats-badge">
-                                            {cat.seats} ที่นั่ง
+                                            {cat.seats} {tp('seatsCountUnit', 'ที่นั่ง')}
                                           </span>
                                         )}
                                       </div>
-                                      <span className="quick-item-name-clean" title={cat.name || item.type}>
-                                        {cat.name || item.type}
+                                      <span className="quick-item-name-clean" title={getItemName(cat) || item.type}>
+                                        {getItemName(cat) || item.type}
                                       </span>
                                       <span className="quick-item-sub-hint">
-                                        {isExpanded ? 'คลิกเพื่อย่อรายละเอียด' : 'คลิกเพื่อดูขนาด ราคา & จัดการ'}
+                                        {isExpanded ? tp('itemActionCollapse', 'คลิกเพื่อย่อรายละเอียด') : tp('itemActionInspect', 'คลิกเพื่อดูขนาด ราคา & จัดการ')}
                                       </span>
                                     </div>
 
@@ -3523,18 +3553,18 @@ export default function FranchisePlanner() {
                                         <div className="spec-card-box">
                                           <span className="spec-lbl">
                                             <Ruler size={11} className="text-blue" />
-                                            <span>ขนาดโมดูล</span>
+                                            <span>{tp('moduleSize', 'ขนาดโมดูล')}</span>
                                           </span>
                                           <strong className="spec-val">
                                             {cat.seats > 0 
-                                              ? `${cat.seats} ที่นั่ง (${cat.widthMeters}ม.)` 
-                                              : `${cat.widthMeters || 1} × ${cat.heightMeters || 1} ม.`}
+                                              ? `${cat.seats} ${tp('seatUnit', 'ที่นั่ง')} (${cat.widthMeters}${tp('unitM', 'ม.')})` 
+                                              : `${cat.widthMeters || 1} × ${cat.heightMeters || 1} ${tp('unitM', 'ม.')}`}
                                           </strong>
                                         </div>
                                         <div className="spec-card-box">
                                           <span className="spec-lbl">
                                             <DollarSign size={11} className="text-emerald" />
-                                            <span>ราคาประเมิน</span>
+                                            <span>{tp('estimatedPrice', 'ราคาประเมิน')}</span>
                                           </span>
                                           <strong className="spec-val price-val">
                                             ฿{(cat.baseCost || 0).toLocaleString()}
@@ -3549,28 +3579,28 @@ export default function FranchisePlanner() {
                                           onClick={() => {
                                             setSelectedItemId(item.id);
                                           }}
-                                          title="เลือกและปรับตำแหน่งในมุมมอง 3D"
+                                          title={tp('selectAndNudgeIn3DTooltip', 'เลือกและปรับตำแหน่งในมุมมอง 3D')}
                                         >
                                           <Move size={12} />
-                                          <span>ปรับใน 3D</span>
+                                          <span>{tp('focusIn3D', 'ปรับใน 3D')}</span>
                                         </button>
                                         <button
                                           type="button"
                                           className="btn-quick-item-action btn-rotate-mini"
                                           onClick={() => handleRotateItem(item.id)}
-                                          title="หมุน 90 องศา"
+                                          title={tp('rotate90Tooltip', 'หมุน 90 องศา')}
                                         >
                                           <RotateCw size={12} />
-                                          <span>หมุน</span>
+                                          <span>{tp('rotateAction', 'หมุน')}</span>
                                         </button>
                                         <button
                                           type="button"
                                           className="btn-quick-item-action btn-delete-danger"
                                           onClick={() => promptDeleteItem(item)}
-                                          title="นำอุปกรณ์ชิ้นนี้ออกจากผังร้าน"
+                                          title={tp('removeItemFromLayoutTooltip', 'นำอุปกรณ์ชิ้นนี้ออกจากผังร้าน')}
                                         >
                                           <Trash2 size={12} />
-                                          <span>นำออก</span>
+                                          <span>{tp('removeAction', 'นำออก')}</span>
                                         </button>
                                       </div>
                                     </div>
@@ -3588,9 +3618,9 @@ export default function FranchisePlanner() {
                           className="mat-summary-row" 
                           style={{ cursor: 'pointer' }}
                           onClick={() => setInspectorTab('materials')}
-                          title="คลิกเพื่อเปลี่ยนวอลเปเปอร์ในแท็บ 2"
+                          title={tp('changeWallpaperInTab2Tooltip', 'คลิกเพื่อเปลี่ยนวอลเปเปอร์ในแท็บ 2')}
                         >
-                          <span className="mat-key">วอลเปเปอร์:</span>
+                          <span className="mat-key">{tp('wallpaperKey', 'วอลเปเปอร์:')}</span>
                           <strong className="mat-val text-blue" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                             <span>{WALLPAPERS.find(w => w.id === selectedWallpaper)?.name}</span>
                             <ChevronRight size={13} />
@@ -3600,9 +3630,9 @@ export default function FranchisePlanner() {
                           className="mat-summary-row" 
                           style={{ cursor: 'pointer' }}
                           onClick={() => setInspectorTab('materials')}
-                          title="คลิกเพื่อเปลี่ยนวัสดุปูพื้นในแท็บ 2"
+                          title={tp('changeFloorInTab2Tooltip', 'คลิกเพื่อเปลี่ยนวัสดุปูพื้นในแท็บ 2')}
                         >
-                          <span className="mat-key">วัสดุปูพื้น:</span>
+                          <span className="mat-key">{tp('floorKey', 'วัสดุปูพื้น:')}</span>
                           <strong className="mat-val text-blue" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                             <span>{FLOOR_MATERIALS.find(f => f.id === selectedFloorMaterial)?.name}</span>
                             <ChevronRight size={13} />
@@ -3612,14 +3642,14 @@ export default function FranchisePlanner() {
                           className="mat-summary-row" 
                           style={{ cursor: 'pointer' }}
                           onClick={() => setSelectedItemId('store-door')}
-                          title="คลิกเพื่อปรับตำแหน่งประตู"
+                          title={tp('adjustDoorWallTooltip', 'คลิกเพื่อปรับตำแหน่งประตู')}
                         >
-                          <span className="mat-key">ประตูทางเข้า:</span>
+                          <span className="mat-key">{tp('doorEntranceKey', 'ประตูทางเข้า:')}</span>
                           <strong className="mat-val text-emerald" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                             <span>
-                              {doorConfig.wall === 'front' ? 'ด้านหน้า (Front)' :
-                               doorConfig.wall === 'left' ? 'ผนังซ้าย (Left)' :
-                               doorConfig.wall === 'back' ? 'ผนังหลัง (Back)' : 'ผนังขวา (Right)'} ({Math.round((doorConfig.offsetRatio ?? 0.75) * 100)}%)
+                              {doorConfig.wall === 'front' ? `${tp('wallFront', 'ด้านหน้า')} (Front)` :
+                               doorConfig.wall === 'left' ? `${tp('wallLeft', 'ผนังซ้าย')} (Left)` :
+                               doorConfig.wall === 'back' ? `${tp('wallBack', 'ผนังหลัง')} (Back)` : `${tp('wallRight', 'ผนังขวา')} (Right)`} ({Math.round((doorConfig.offsetRatio ?? 0.75) * 100)}%)
                             </span>
                             <ChevronRight size={13} />
                           </strong>
@@ -3634,22 +3664,22 @@ export default function FranchisePlanner() {
                   <div className="mini-cost-summary">
                     <h4 className="summary-title">
                       <DollarSign size={16} className="text-blue" />
-                      <span>สรุปงบลงทุนเบื้องต้น</span>
+                      <span>{tp('initialCostSummary', 'สรุปงบลงทุนเบื้องต้น')}</span>
                     </h4>
                     <div className="cost-row">
-                      <span>ฮาร์ดแวร์ ({totalStations} เครื่อง):</span>
+                      <span>{tp('hardwareCostRow', 'ฮาร์ดแวร์')} ({totalStations} {tp('stationsCountUnit', 'เครื่อง')}):</span>
                       <strong>฿{hardwareCost.toLocaleString()}</strong>
                     </div>
                     <div className="cost-row">
-                      <span>โต๊ะ เก้าอี้ และห้อง VIP:</span>
+                      <span>{tp('furnitureCostRow', 'โต๊ะ เก้าอี้ และห้อง VIP:')}</span>
                       <strong>฿{furnitureItemsCost.toLocaleString()}</strong>
                     </div>
                     <div className="cost-row">
-                      <span>งานตกแต่ง Interior ({roomAreaSqM} ตร.ม.):</span>
+                      <span>{tp('interiorCostRow', 'งานตกแต่ง Interior')} ({roomAreaSqM} {tp('sqmUnit', 'ตร.ม.')}):</span>
                       <strong>฿{interiorDecorCost.toLocaleString()}</strong>
                     </div>
                     <div className="cost-row">
-                      <span>ระบบแอร์ & ระบายอากาศ:</span>
+                      <span>{tp('airconCostRow', 'ระบบแอร์ & ระบายอากาศ:')}</span>
                       <strong>฿{airconCost.toLocaleString()}</strong>
                     </div>
                     <div className="cost-row">
@@ -3657,18 +3687,18 @@ export default function FranchisePlanner() {
                       <strong>฿{(disklessCost + networkCost).toLocaleString()}</strong>
                     </div>
                     <div className="cost-row">
-                      <span>ค่าแฟรนไชส์ & สิทธิ์การใช้แบรนด์:</span>
+                      <span>{tp('franchiseFeeRow', 'ค่าแฟรนไชส์ & สิทธิ์การใช้แบรนด์:')}</span>
                       <strong>฿{franchiseLicenseCost.toLocaleString()}</strong>
                     </div>
 
                     <div className="cost-divider"></div>
 
                     <div className="total-cost-box">
-                      <span className="total-cost-label">งบประมาณลงทุนรวมโดยประมาณ:</span>
+                      <span className="total-cost-label">{tp('totalInvestmentEstimateLabel', 'งบประมาณลงทุนรวมโดยประมาณ:')}</span>
                       <div className="total-cost-number text-blue font-bold">
                         ฿{totalInvestmentCost.toLocaleString()}
                       </div>
-                      <span className="total-cost-note">* รวมฮาร์ดแวร์ ตกแต่ง และเปิดร้านพร้อมใช้งาน</span>
+                      <span className="total-cost-note">{tp('turnkeyIncludedNote', '* รวมฮาร์ดแวร์ ตกแต่ง และเปิดร้านพร้อมใช้งาน')}</span>
                     </div>
                   </div>
 
@@ -3680,7 +3710,7 @@ export default function FranchisePlanner() {
                       className="btn-primary full-width"
                       style={{ padding: '13px 16px', fontSize: '0.96rem', fontWeight: 700 }}
                     >
-                      <span>ถัดไป: เลือกสเปก ({totalStations} เครื่อง)</span>
+                      <span>{tp('nextChooseSpecsWithCount', 'ถัดไป: เลือกสเปก')} ({totalStations} {tp('stationsCountUnit', 'เครื่อง')})</span>
                       <ArrowRight size={16} />
                     </button>
                     <button 
@@ -3688,7 +3718,7 @@ export default function FranchisePlanner() {
                       className="btn-secondary full-width"
                       style={{ marginTop: '6px' }}
                     >
-                      ย้อนกลับ
+                      {tp('back', 'ย้อนกลับ')}
                     </button>
                   </div>
                 </div>
@@ -3701,8 +3731,8 @@ export default function FranchisePlanner() {
                     <div className="tab-section-header">
                       <Palette size={18} className="text-blue" />
                       <div>
-                        <h4>วอลเปเปอร์ผนัง & วัสดุพื้น</h4>
-                        <p>คลิกเพื่อเปลี่ยนโทนสี แสดงผล 3D จำลองแสงทันที</p>
+                        <h4>{tp('materialsHeaderTitle', 'วอลเปเปอร์ผนัง & วัสดุพื้น')}</h4>
+                        <p>{tp('materialsHeaderSubtitle', 'คลิกเพื่อเปลี่ยนโทนสี แสดงผล 3D จำลองแสงทันที')}</p>
                       </div>
                     </div>
                   </div>
@@ -3711,7 +3741,7 @@ export default function FranchisePlanner() {
                   <div className="material-group-box">
                     <div className="material-group-title">
                       <Sparkles size={14} className="text-blue" />
-                      <span>1. วอลเปเปอร์ผนังร้าน (Wall Finishes):</span>
+                      <span>{tp('wallFinishesTitle', '1. วอลเปเปอร์ผนังร้าน (Wall Finishes):')}</span>
                     </div>
                     <div className="material-cards-vertical">
                       {WALLPAPERS.map(wp => {
@@ -3733,7 +3763,7 @@ export default function FranchisePlanner() {
                                 <strong className="mat-card-name">{wp.name}</strong>
                                 {isActive && (
                                   <span className="mat-active-pill">
-                                    <Check size={11} /> ใช้งานอยู่
+                                    <Check size={11} /> {tp('currentlyActive', 'ใช้งานอยู่')}
                                   </span>
                                 )}
                               </div>
@@ -3749,7 +3779,7 @@ export default function FranchisePlanner() {
                   <div className="material-group-box" style={{ marginTop: '16px' }}>
                     <div className="material-group-title">
                       <Layers size={14} className="text-emerald" />
-                      <span>2. วัสดุปูพื้นห้อง (Floor Finishes):</span>
+                      <span>{tp('floorFinishesTitle', '2. วัสดุปูพื้นห้อง (Floor Finishes):')}</span>
                     </div>
                     <div className="material-cards-vertical">
                       {FLOOR_MATERIALS.map(fl => {
@@ -3771,7 +3801,7 @@ export default function FranchisePlanner() {
                                 <strong className="mat-card-name">{fl.name}</strong>
                                 {isActive && (
                                   <span className="mat-active-pill">
-                                    <Check size={11} /> ใช้งานอยู่
+                                    <Check size={11} /> {tp('activeInUse', 'ใช้งานอยู่')}
                                   </span>
                                 )}
                               </div>
@@ -3785,7 +3815,7 @@ export default function FranchisePlanner() {
 
                   <div className="material-tip-card">
                     <Info size={14} className="text-blue" />
-                    <span>💡 ผนังและพื้นจะคำนวณในหมวด <strong>"งานตกแต่ง Interior"</strong> ในงบลงทุนโดยอัตโนมัติ</span>
+                    <span>{tp('materialsTip', '💡 ผนังและพื้นจะคำนวณในหมวด "งานตกแต่ง Interior" ในงบลงทุนโดยอัตโนมัติ')}</span>
                   </div>
 
                   <div style={{ marginTop: '16px' }}>
@@ -3794,7 +3824,7 @@ export default function FranchisePlanner() {
                       className="btn-secondary full-width"
                       onClick={() => setInspectorTab('details')}
                     >
-                      ← กลับไปดูรายละเอียดผังร้าน
+                      ← {tp('backToDetailsTab', 'กลับไปดูรายละเอียดผังร้าน')}
                     </button>
                   </div>
                 </div>
@@ -3807,8 +3837,8 @@ export default function FranchisePlanner() {
                     <div className="tab-section-header">
                       <Layers size={18} className="text-cyan" />
                       <div>
-                        <h4>เพิ่มอุปกรณ์และโซนในร้าน</h4>
-                        <p>กดปุ่ม <span style={{ color: '#2563eb', fontWeight: 800 }}>+</span> ด้านขวา เพื่อเพิ่มโต๊ะ/อุปกรณ์ลงในห้องทันที</p>
+                        <h4>{tp('addEquipmentTitle', 'เพิ่มอุปกรณ์และโซนในร้าน')}</h4>
+                        <p>{tp('addEquipmentSubtitle', 'กดปุ่ม + ด้านขวา เพื่อเพิ่มโต๊ะ/อุปกรณ์ลงในห้องทันที')}</p>
                       </div>
                     </div>
                   </div>
@@ -3820,28 +3850,28 @@ export default function FranchisePlanner() {
                       className={`filter-tab ${catalogCategory === 'all' ? 'active' : ''}`}
                       onClick={() => setCatalogCategory('all')}
                     >
-                      ทั้งหมด
+                      {tp('cat_all', 'ทั้งหมด')}
                     </button>
                     <button 
                       type="button"
                       className={`filter-tab ${catalogCategory === 'stations' ? 'active' : ''}`}
                       onClick={() => setCatalogCategory('stations')}
                     >
-                      โต๊ะคอม
+                      {tp('cat_stations_short', 'โต๊ะคอม')}
                     </button>
                     <button 
                       type="button"
                       className={`filter-tab ${catalogCategory === 'facilities' ? 'active' : ''}`}
                       onClick={() => setCatalogCategory('facilities')}
                     >
-                      บริการ/เคาน์เตอร์
+                      {tp('cat_service_short', 'บริการ/เคาน์เตอร์')}
                     </button>
                     <button 
                       type="button"
                       className={`filter-tab ${catalogCategory === 'architectural' ? 'active' : ''}`}
                       onClick={() => setCatalogCategory('architectural')}
                     >
-                      ประตู/หน้าต่าง
+                      {tp('cat_doors_short', 'ประตู/หน้าต่าง')}
                     </button>
                   </div>
 
@@ -3860,7 +3890,7 @@ export default function FranchisePlanner() {
                           key={item.type} 
                           className="catalog-item-card"
                           onClick={() => setSelectedCatalogModalItem(item)}
-                          title="คลิกเพื่อดูสเปกเต็มและภาพสินค้า"
+                          title={tp('viewFullSpecsCardHint', 'คลิกเพื่อดูสเปกเต็มและภาพสินค้า')}
                         >
                           {/* Product Thumbnail Banner */}
                           <div className="catalog-thumb-banner">
@@ -3872,14 +3902,14 @@ export default function FranchisePlanner() {
                             />
                             <div className="catalog-thumb-hover-overlay">
                               <Eye size={13} />
-                              <span>ดูสเปกเต็ม</span>
+                              <span>{tp('viewFullSpecs', 'ดูสเปกเต็ม')}</span>
                             </div>
                             
-                            <div className="catalog-card-swatches" title="โทนสีวัสดุและไฟ">
-                              <span className="swatch-mini" style={{ backgroundColor: item.deskColor || '#0f172a' }} title="สีท็อปโต๊ะ" />
-                              <span className="swatch-mini" style={{ backgroundColor: item.accentColor || '#1d4ed8' }} title="สีไฟตกแต่ง" />
+                            <div className="catalog-card-swatches" title={tp('swatchesCardHint', 'โทนสีวัสดุและไฟ')}>
+                              <span className="swatch-mini" style={{ backgroundColor: item.deskColor || '#0f172a' }} title={tp('swatchDeskColor', 'สีท็อปโต๊ะ')} />
+                              <span className="swatch-mini" style={{ backgroundColor: item.accentColor || '#1d4ed8' }} title={tp('swatchAccentColor', 'สีไฟตกแต่ง')} />
                               {item.chairColor && (
-                                <span className="swatch-mini" style={{ backgroundColor: item.chairColor || '#0f172a' }} title="สีเก้าอี้" />
+                                <span className="swatch-mini" style={{ backgroundColor: item.chairColor || '#0f172a' }} title={tp('swatchChairColor', 'สีเก้าอี้')} />
                               )}
                             </div>
 
@@ -3892,9 +3922,9 @@ export default function FranchisePlanner() {
 
                           <div className="catalog-item-top">
                             <div className="catalog-item-info">
-                              <strong className="item-name">{item.name}</strong>
+                              <strong className="item-name">{getItemName(item)}</strong>
                               <span className="item-dim">
-                                ขนาด: {item.widthMeters} x {item.depth3D || item.heightMeters} ม. (สูง {item.height3D || 1.2}ม.)
+                                {tp('dimensionsLabel', 'ขนาด:')} {item.widthMeters} x {item.depth3D || item.heightMeters} {tp('unitM', 'ม.')} ({tp('heightLabel', 'สูง')} {item.height3D || 1.2}{tp('unitM', 'ม.')})
                               </span>
                             </div>
                             <button 
@@ -3905,7 +3935,7 @@ export default function FranchisePlanner() {
                                 e.stopPropagation();
                                 handleAddItem(item);
                               }}
-                              title="เพิ่มลงในผัง 3D ทันที"
+                              title={tp('addDirectlyTo3DTooltip', 'เพิ่มลงในผัง 3D ทันที')}
                             >
                               <Plus size={18} />
                             </button>
@@ -3914,25 +3944,25 @@ export default function FranchisePlanner() {
                           <div className="catalog-item-pricing-preview">
                             <div className="price-tag-row">
                               <span className="price-tag-badge">
-                                รวม ฿{item.baseCost.toLocaleString()}
+                                {tp('totalWithColon', 'รวม')} ฿{item.baseCost.toLocaleString()}
                               </span>
                               <span className="catalog-click-spec-hint">
-                                <Info size={11} /> ดูสเปก
+                                <Info size={11} /> {tp('viewSpecsShort', 'ดูสเปก')}
                               </span>
                             </div>
                             <span className="price-sub-badge">
-                              โต๊ะ ฿{item.deskPrice?.toLocaleString()} {item.chairCount > 0 ? `| เก้าอี้ ${item.chairCount} ตัว` : ''}
+                              {tp('deskItemPrefix', 'โต๊ะ')} ฿{item.deskPrice?.toLocaleString()} {item.chairCount > 0 ? `| ${tp('chairItemPrefix', 'เก้าอี้')} ${item.chairCount} ${tp('unitsPcs', 'ตัว')}` : ''}
                             </span>
                           </div>
 
-                          <p className="catalog-item-desc">{item.desc}</p>
+                          <p className="catalog-item-desc">{getItemDesc(item)}</p>
                         </div>
                       ))}
                   </div>
 
                   {/* Presets & Clear Section */}
                   <div className="sidebar-footer-presets" style={{ marginTop: '12px' }}>
-                    <span className="sub-label">โมเดลผังร้านสำเร็จรูป:</span>
+                    <span className="sub-label">{tp('presetLayoutModels', 'โมเดลผังร้านสำเร็จรูป:')}</span>
                     <div className="preset-quick-btns">
                       {PRESET_ROOMS.map(p => (
                         <button 
@@ -3944,7 +3974,7 @@ export default function FranchisePlanner() {
                           {p.name.split(':')[0]}
                         </button>
                       ))}
-                      <button type="button" onClick={handleClearCanvas} className="btn-mini-clear" title="ล้างผังทั้งหมด">
+                      <button type="button" onClick={handleClearCanvas} className="btn-mini-clear" title={tp('clearEntireLayoutTooltip', 'ล้างผังทั้งหมด')}>
                         <Trash2 size={14} />
                       </button>
                     </div>
@@ -3958,26 +3988,26 @@ export default function FranchisePlanner() {
               {/* Canvas Toolbar & Stats Header */}
               <div className="canvas-stats-toolbar glass-panel">
                 <div className="canvas-stat-item">
-                  <span className="stat-lbl">ขนาดห้อง:</span>
-                  <span className="stat-val text-cyan">{roomWidth} x {roomHeight} ม. ({roomAreaSqM} ตร.ม.)</span>
+                  <span className="stat-lbl">{tp('roomSize', 'ขนาดห้อง:')}</span>
+                  <span className="stat-val text-cyan">{roomWidth} x {roomHeight} {tp('metersUnit', 'ม.')} ({roomAreaSqM} {tp('sqmUnit', 'ตร.ม.')})</span>
                 </div>
                 <div className="canvas-stat-item">
-                  <span className="stat-lbl">คอมพิวเตอร์ที่วางแล้ว:</span>
-                  <span className="stat-val text-blue font-bold">{totalStations} เครื่อง</span>
+                  <span className="stat-lbl">{tp('placedStations', 'คอมพิวเตอร์ที่วางแล้ว:')}</span>
+                  <span className="stat-val text-blue font-bold">{totalStations} {tp('stationsCountUnit', 'เครื่อง')}</span>
                 </div>
                 <div className="canvas-stat-item">
-                  <span className="stat-lbl">ชิ้นส่วนในผัง:</span>
-                  <span className="stat-val">{placedItems.length} ชิ้น</span>
+                  <span className="stat-lbl">{tp('placedItemsCount', 'ชิ้นส่วนในผัง:')}</span>
+                  <span className="stat-val">{placedItems.length} {tp('itemsCountUnit', 'ชิ้น')}</span>
                 </div>
                 <div className="canvas-stat-item">
-                  <span className="stat-lbl">สถานะระยะทางเดิน:</span>
+                  <span className="stat-lbl">{tp('aisleStatus', 'สถานะระยะทางเดิน:')}</span>
                   {isOvercrowded ? (
                     <span className="stat-val status-warning text-amber">
-                      <AlertTriangle size={14} /> หนาแน่นเกินไป
+                      <AlertTriangle size={14} /> {tp('aisleCrowded', 'หนาแน่นเกินไป')}
                     </span>
                   ) : (
                     <span className="stat-val status-good text-cyan">
-                      <CheckCircle2 size={14} /> ได้มาตรฐาน ปลอดภัย
+                      <CheckCircle2 size={14} /> {tp('aisleSafe', 'ได้มาตรฐาน ปลอดภัย')}
                     </span>
                   )}
                 </div>
@@ -3986,10 +4016,10 @@ export default function FranchisePlanner() {
                   id="btn-export-blueprint-toolbar"
                   className="btn-toolbar-blueprint-export"
                   onClick={handleExportBlueprintImage}
-                  title="ส่งออกภาพแปลนสถาปัตยกรรมสำหรับช่าง (PNG)"
+                  title={tp('downloadBlueprintForContractorTooltip', 'ส่งออกภาพแปลนสถาปัตยกรรมสำหรับช่าง (PNG)')}
                 >
                   <Download size={14} />
-                  <span>แปลนช่าง (PNG)</span>
+                  <span>{tp('blueprintExport', 'แปลนช่าง (PNG)')}</span>
                 </button>
                 {!isPlannerFullscreen && (
                   <button 
@@ -4041,7 +4071,7 @@ export default function FranchisePlanner() {
                       type="button" 
                       className="btn-floorplan-ctrl btn-floorplan-zoom-out" 
                       onClick={() => setZoomMultiplier(z => Math.max(Number((z - 0.15).toFixed(2)), 0.5))} 
-                      title="ซูมย่อแปลน (-)"
+                      title={tp('zoomOutBlueprintTooltip', 'ซูมย่อแปลน (-)')}
                     >
                       <ZoomOut size={15} />
                     </button>
@@ -4049,7 +4079,7 @@ export default function FranchisePlanner() {
                       type="button"
                       className="floorplan-zoom-indicator-btn" 
                       onClick={() => setZoomMultiplier(1.0)} 
-                      title="คลิกเพื่อรีเซ็ต 100%"
+                      title={tp('zoomResetBlueprintTooltip', 'คลิกเพื่อรีเซ็ต 100%')}
                     >
                       {Math.round(zoomMultiplier * 100)}%
                     </button>
@@ -4057,7 +4087,7 @@ export default function FranchisePlanner() {
                       type="button" 
                       className="btn-floorplan-ctrl btn-floorplan-zoom-in" 
                       onClick={() => setZoomMultiplier(z => Math.min(Number((z + 0.15).toFixed(2)), 2.5))} 
-                      title="ซูมขยายแปลน (+)"
+                      title={tp('zoomInBlueprintTooltip', 'ซูมขยายแปลน (+)')}
                     >
                       <ZoomIn size={15} />
                     </button>
@@ -4066,10 +4096,10 @@ export default function FranchisePlanner() {
                       type="button" 
                       className="btn-floorplan-ctrl btn-fit-screen" 
                       onClick={() => setZoomMultiplier(1.0)} 
-                      title="รีเซ็ตพอดีหน้าจอ (Fit to Screen 100%)"
+                      title={tp('zoomFitBlueprintTooltip', 'รีเซ็ตพอดีหน้าจอ (Fit to Screen 100%)')}
                     >
                       <Maximize2 size={13} />
-                      <span className="btn-fit-text">100% พอดีจอ</span>
+                      <span className="btn-fit-text">100% {tp('fitScreen', 'พอดีจอ')}</span>
                     </button>
                   </div>
 
@@ -4093,8 +4123,8 @@ export default function FranchisePlanner() {
                     )}
 
                     {/* Scale Labels */}
-                    <div className="canvas-scale-marker top-marker">⟵ {roomWidth}.0 ม. ⟶</div>
-                    <div className="canvas-scale-marker left-marker">⟵ {roomHeight}.0 ม. ⟶</div>
+                    <div className="canvas-scale-marker top-marker">⟵ {roomWidth}.0 {tp('metersUnit', 'ม.')} ⟶</div>
+                    <div className="canvas-scale-marker left-marker">⟵ {roomHeight}.0 {tp('metersUnit', 'ม.')} ⟶</div>
 
                     {/* Doorway opening slot on perimeter border */}
                     <div 
@@ -4163,10 +4193,10 @@ export default function FranchisePlanner() {
                       <div className="entrance-label">
                         <DoorOpen size={12} />
                         <span>{
-                          doorConfig?.wall === 'right' ? '◀ ทางเข้า' :
-                          doorConfig?.wall === 'front' ? '▲ ทางเข้า' :
-                          doorConfig?.wall === 'back' ? '▼ ทางเข้า' :
-                          'ทางเข้า ▶'
+                          doorConfig?.wall === 'right' ? `◀ ${tp('entrance', 'ทางเข้า')}` :
+                          doorConfig?.wall === 'front' ? `▲ ${tp('entrance', 'ทางเข้า')}` :
+                          doorConfig?.wall === 'back' ? `▼ ${tp('entrance', 'ทางเข้า')}` :
+                          `${tp('entrance', 'ทางเข้า')} ▶`
                         }</span>
                       </div>
                     </div>
@@ -4201,7 +4231,7 @@ export default function FranchisePlanner() {
                           <div className="item-inner-content">
                             <div className="item-icon-tag" style={{ color: item.catalog?.color || '#1d4ed8' }}>
                               {item.type === 'lounge-sofa' || item.catalog?.category === 'amenities'
-                                ? 'โซฟาเลานจ์'
+                                ? tp('loungeSofa', 'โซฟาเลานจ์')
                                 : item.catalog?.seats > 0
                                   ? `${item.catalog.seats} PCs`
                                   : item.catalog?.name?.split(' ')[0]}
@@ -4220,14 +4250,14 @@ export default function FranchisePlanner() {
                               {item.catalog?.widthMeters}x{item.catalog?.heightMeters}m
                             </div>
 
-                            <div className="item-drag-handle" title="คลิกเลือก หรือลากเพื่อย้ายตำแหน่ง">
+                            <div className="item-drag-handle" title={tp('dragHandleTooltip', 'คลิกเลือก หรือลากเพื่อย้ายตำแหน่ง')}>
                               <Move size={11} />
-                              {isSelected && <span className="drag-handle-pill">เลือกอยู่</span>}
+                              {isSelected && <span className="drag-handle-pill">{tp('selectedPill', 'เลือกอยู่')}</span>}
                             </div>
 
                             {justAddedId === item.id && (
                               <div className="just-added-badge">
-                                <span>ชิ้นใหม่! ลากจัดผังได้เลย</span>
+                                <span>{tp('newItemDragPrompt', 'ชิ้นใหม่! ลากจัดผังได้เลย')}</span>
                               </div>
                             )}
                           </div>
@@ -4238,11 +4268,11 @@ export default function FranchisePlanner() {
                               className={`floorplan-selected-pill ${item.y < 1.2 ? 'pos-bottom' : 'pos-top'}`} 
                               onClick={e => e.stopPropagation()}
                             >
-                              <div className="pill-nudge-cluster" title="กดเพื่อเลื่อนตำแหน่ง (หรือใช้ปุ่มลูกศร ↑ ↓ ← → บนคีย์บอร์ด)">
+                              <div className="pill-nudge-cluster" title={tp('nudgeClusterTooltip', 'กดเพื่อเลื่อนตำแหน่ง (หรือใช้ปุ่มลูกศร ↑ ↓ ← → บนคีย์บอร์ด)')}>
                                 <button 
                                   type="button" 
                                   className="pill-nudge-btn" 
-                                  title="เลื่อนซ้าย 0.2ม. (กด ←)"
+                                  title={tp('nudgeLeftTooltip', 'เลื่อนซ้าย 0.2ม. (กด ←)')}
                                   onClick={() => handleNudgeItem(item.id, -0.2, 0)}
                                 >
                                   <ChevronLeft size={13} />
@@ -4250,7 +4280,7 @@ export default function FranchisePlanner() {
                                 <button 
                                   type="button" 
                                   className="pill-nudge-btn" 
-                                  title="เลื่อนขึ้น 0.2ม. (กด ↑)"
+                                  title={tp('nudgeUpTooltip', 'เลื่อนขึ้น 0.2ม. (กด ↑)')}
                                   onClick={() => handleNudgeItem(item.id, 0, -0.2)}
                                 >
                                   <ChevronUp size={13} />
@@ -4258,7 +4288,7 @@ export default function FranchisePlanner() {
                                 <button 
                                   type="button" 
                                   className="pill-nudge-btn" 
-                                  title="เลื่อนลง 0.2ม. (กด ↓)"
+                                  title={tp('nudgeDownTooltip', 'เลื่อนลง 0.2ม. (กด ↓)')}
                                   onClick={() => handleNudgeItem(item.id, 0, 0.2)}
                                 >
                                   <ChevronDown size={13} />
@@ -4266,7 +4296,7 @@ export default function FranchisePlanner() {
                                 <button 
                                   type="button" 
                                   className="pill-nudge-btn" 
-                                  title="เลื่อนขวา 0.2ม. (กด →)"
+                                  title={tp('nudgeRightTooltip', 'เลื่อนขวา 0.2ม. (กด →)')}
                                   onClick={() => handleNudgeItem(item.id, 0.2, 0)}
                                 >
                                   <ChevronRight size={13} />
@@ -4276,16 +4306,16 @@ export default function FranchisePlanner() {
                               <button 
                                 type="button" 
                                 className="pill-action-btn" 
-                                title="หมุน 90 องศา (กด R)"
+                                title={tp('rotateTooltip', 'หมุน 90 องศา (กด R)')}
                                 onClick={() => handleRotateItem(item.id)}
                               >
                                 <RotateCw size={12} />
-                                <span>หมุน</span>
+                                <span>{tp('rotateBtn', 'หมุน')}</span>
                               </button>
                               <button 
                                 type="button" 
                                 className="pill-action-btn" 
-                                title="คัดลอกโมดูล"
+                                title={tp('duplicateModuleTooltip', 'คัดลอกโมดูล')}
                                 onClick={() => handleDuplicateItem(item.id)}
                               >
                                 <Copy size={12} />
@@ -4293,7 +4323,7 @@ export default function FranchisePlanner() {
                               <button 
                                 type="button" 
                                 className="pill-action-btn delete-btn" 
-                                title="ลบออก (กด Delete)"
+                                title={tp('deleteTooltip', 'ลบออก (กด Delete)')}
                                 onClick={() => promptDeleteItem(item)}
                               >
                                 <Trash2 size={12} />
@@ -4307,13 +4337,13 @@ export default function FranchisePlanner() {
 
                   {/* 2D Canvas Shortcuts Strip */}
                   <div className="canvas-shortcut-pill">
-                    <span className="shortcut-tag"><strong>คลิกลาก</strong> ย้ายอิสระ</span>
+                    <span className="shortcut-tag"><strong>{tp('dragFreely', 'คลิกลาก')}</strong> {tp('moveFree', 'ย้ายอิสระ')}</span>
                     <span className="shortcut-sep">•</span>
-                    <span className="shortcut-tag">ลูกศร <strong>[↑] [↓] [←] [→]</strong> บนคีย์บอร์ด</span>
+                    <span className="shortcut-tag">{tp('arrowKeysLabel', 'ลูกศร')} <strong>[↑] [↓] [←] [→]</strong> {tp('onKeyboard', 'บนคีย์บอร์ด')}</span>
                     <span className="shortcut-sep">•</span>
-                    <span className="shortcut-tag"><strong>[R]</strong> หมุน 90°</span>
+                    <span className="shortcut-tag"><strong>[R]</strong> {tp('rotate90', 'หมุน 90°')}</span>
                     <span className="shortcut-sep">•</span>
-                    <span className="shortcut-tag"><strong>[Del]</strong> ลบ</span>
+                    <span className="shortcut-tag"><strong>[Del]</strong> {tp('delete', 'ลบ')}</span>
                   </div>
                 </div>
               )}
@@ -4323,7 +4353,7 @@ export default function FranchisePlanner() {
                 <div className="guidance-tip">
                   <Info size={15} className="text-blue" />
                   <span>
-                    <strong>การควบคุม:</strong> หมุนมุมมองอิสระ 360° ด้วยเมาส์ซ้าย • ซูมเข้า-ออกด้วยลูกกลิ้ง • คลิกเลือกวัตถุเพื่อดูราคาโต๊ะและเก้าอี้
+                    <strong>{tp('controlsGuideTitle', 'การควบคุม:')}</strong> {tp('controlsGuideDesc', 'หมุนมุมมองอิสระ 360° ด้วยเมาส์ซ้าย • ซูมเข้า-ออกด้วยลูกกลิ้ง • คลิกเลือกวัตถุเพื่อดูราคาโต๊ะและเก้าอี้')}
                   </span>
                 </div>
               </div>
@@ -4344,13 +4374,13 @@ export default function FranchisePlanner() {
               {tp('step3Title', 'เลือกระดับสเปกคอมพิวเตอร์ สำหรับทั้งร้าน')}
             </h2>
             <p className="section-subtitle max-w-700">
-              จำนวนเครื่องในผังของคุณปัจจุบันคือ <strong>{totalStations} เครื่อง</strong> สามารถเลือก Tier สเปกที่เหมาะสมกับกลุ่มลูกค้าและงบประมาณลงทุน (เก้าอี้เกมมิ่งรวมอยู่ในชุดโต๊ะแล้ว)
+              {tp('step3_stationsBanner', 'จำนวนเครื่องในผังของคุณปัจจุบันคือ')} <strong>{totalStations} {tp('stationsCountUnit', 'เครื่อง')}</strong> {tp('step3_stationsDesc', 'สามารถเลือก Tier สเปกที่เหมาะสมกับกลุ่มลูกค้าและงบประมาณลงทุน (เก้าอี้เกมมิ่งรวมอยู่ในชุดโต๊ะแล้ว)')}
             </p>
 
             {/* Admin CMS Quick Shortcut Banner */}
             <div style={{ margin: '14px auto 0 auto', maxWidth: '780px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '10px 16px', fontSize: '0.82rem', gap: '10px', flexWrap: 'wrap' }}>
               <span style={{ color: '#64748b' }}>
-                ⚙️ <strong>ผู้ดูแลระบบ:</strong> สามารถเข้าไปปรับแต่งรายละเอียดสเปก เพิ่มโมเดล หรือแก้ไขราคาต่อเครื่องและงานระบบได้ทุกจุด
+                ⚙️ <strong>{tp('adminLabel', 'ผู้ดูแลระบบ:')}</strong> {tp('adminDesc', 'สามารถเข้าไปปรับแต่งรายละเอียดสเปก เพิ่มโมเดล หรือแก้ไขราคาต่อเครื่องและงานระบบได้ทุกจุด')}
               </span>
               <a 
                 href="/admin" 
@@ -4360,7 +4390,7 @@ export default function FranchisePlanner() {
                 style={{ padding: '4px 10px', fontSize: '0.75rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
               >
                 <Sliders size={13} />
-                <span>เปิดแผงจัดการสเปก & ราคา (Admin CMS)</span>
+                <span>{tp('adminCmsBtn', 'เปิดแผงจัดการสเปก & ราคา (Admin CMS)')}</span>
               </a>
             </div>
           </div>
@@ -4378,14 +4408,14 @@ export default function FranchisePlanner() {
                 >
                   {isCurrent && <div className="tier-badge-selected">SELECTED TIER</div>}
                   <div className="tier-header">
-                    <h3 className="tier-name">{tier.name}</h3>
-                    <p className="tier-tagline">{tier.tagline}</p>
+                    <h3 className="tier-name">{translateDynamic(tier.name)}</h3>
+                    <p className="tier-tagline">{translateDynamic(tier.tagline)}</p>
                     <div className="tier-price-tag">
                       <span className="price-num">฿{tier.unitCost.toLocaleString()}</span>
-                      <span className="price-unit">/ เครื่อง (ครบชุด)</span>
+                      <span className="price-unit">/ {tp('perStationFullSet', 'เครื่อง (ครบชุด)')}</span>
                     </div>
                     <div className="tier-total-badge">
-                      รวม {totalStations} เครื่อง: ฿{tierTotal.toLocaleString()}
+                      {tp('totalForStations', 'รวม')} {totalStations} {tp('stationsCountUnit', 'เครื่อง')}: ฿{tierTotal.toLocaleString()}
                     </div>
                   </div>
 
@@ -4423,7 +4453,7 @@ export default function FranchisePlanner() {
                     <div className="tier-spec-item" style={{ background: '#ecfdf5', borderRadius: '8px', padding: '6px 8px' }}>
                       <Armchair size={15} className="text-emerald" style={{ flexShrink: 0 }} />
                       <div style={{ color: '#065f46', fontSize: '0.78rem' }}>
-                        <strong>เก้าอี้เกมมิ่ง:</strong> รวมอยู่ในชุดโต๊ะเกมมิ่งแล้ว
+                        <strong>{tp('gamingChairLabel', 'เก้าอี้เกมมิ่ง:')}</strong> {tp('gamingChairIncludedNote', 'รวมอยู่ในชุดโต๊ะเกมมิ่งแล้ว')}
                       </div>
                     </div>
                   </div>
@@ -4434,7 +4464,7 @@ export default function FranchisePlanner() {
                     onClick={(e) => { e.stopPropagation(); setSelectedTier(key); }}
                   >
                     {isCurrent ? <Check size={16} /> : null}
-                    <span>{isCurrent ? 'เลือกสเปกนี้แล้ว' : 'เลือกใช้สเปกนี้'}</span>
+                    <span>{isCurrent ? tp('selectedThisTier', 'เลือกสเปกนี้แล้ว') : tp('selectThisTier', 'เลือกใช้สเปกนี้')}</span>
                   </button>
                 </div>
               );
@@ -4445,33 +4475,33 @@ export default function FranchisePlanner() {
           <div className="infra-showcase-panel glass-panel">
             <h3 className="infra-title">
               <Server size={20} className="text-cyan" />
-              <span>ระบบเซิร์ฟเวอร์แม่ข่าย & เครือข่าย (Included Infrastructure)</span>
+              <span>{tp('includedInfraTitle', 'ระบบเซิร์ฟเวอร์แม่ข่าย & เครือข่าย (Included Infrastructure)')}</span>
             </h3>
             <div className="infra-grid">
               <div className="infra-item">
                 <strong>Diskless Server 10Gbps Master:</strong>
-                <span>แม่ข่าย NVMe Enterprise 2 เครื่อง รันเกม 200+ เกม ไม่ต้องลงเกมทีละเครื่อง อัปเดตแพทช์อัตโนมัติ 24 ชม.</span>
+                <span>{tp('disklessServerDesc', 'แม่ข่าย NVMe Enterprise 2 เครื่อง รันเกม 200+ เกม ไม่ต้องลงเกมทีละเครื่อง อัปเดตแพทช์อัตโนมัติ 24 ชม.')}</span>
               </div>
               <div className="infra-item">
                 <strong>Dual-WAN Fiber & Mikrotik:</strong>
-                <span>ระบบสำรองเน็ต 2 เส้น อัตโนมัติ ป้องกันเน็ตหลุด ปิงนิ่งระดับ 1-3ms พร้อม Cisco Managed Switch 10G</span>
+                <span>{tp('dualWanDesc', 'ระบบสำรองเน็ต 2 เส้น อัตโนมัติ ป้องกันเน็ตหลุด ปิงนิ่งระดับ 1-3ms พร้อม Cisco Managed Switch 10G')}</span>
               </div>
               <div className="infra-item">
                 <strong>Billing & Member POS System:</strong>
-                <span>ระบบบริหารจัดการสมาชิก คิดเงิน คุมเวลาหน้าจอ และสั่งเครื่องดื่มผ่านโต๊ะคอมพิวเตอร์ มีแดชบอร์ดดูยอดขายบนมือถือ</span>
+                <span>{tp('billingPosDesc', 'ระบบบริหารจัดการสมาชิก คิดเงิน คุมเวลาหน้าจอ และสั่งเครื่องดื่มผ่านโต๊ะคอมพิวเตอร์ มีแดชบอร์ดดูยอดขายบนมือถือ')}</span>
               </div>
             </div>
 
             <div className="step3-nav-actions">
               <button onClick={() => handleStepChange(2)} className="btn-secondary">
-                ย้อนกลับ
+                {tp('back', 'ย้อนกลับ')}
               </button>
               <button 
                 id="btn-step3-to-step4"
                 onClick={() => handleStepChange(4)} 
                 className="btn-primary"
               >
-                <span>ถัดไป: สรุปงบ</span>
+                <span>{tp('nextBudgetRoi', 'ถัดไป: สรุปงบ')}</span>
                 <ArrowRight size={16} />
               </button>
             </div>
@@ -4487,67 +4517,67 @@ export default function FranchisePlanner() {
             <div className="cost-table-card glass-panel">
               <h3 className="card-subheading">
                 <DollarSign size={20} className="text-amber" />
-                <span>แจกแจงรายการต้นทุน (Turnkey Breakdown)</span>
+                <span>{tp('turnkeyBreakdownTitle', 'แจกแจงรายการต้นทุน (Turnkey Breakdown)')}</span>
               </h3>
 
               <div className="cost-breakdown-list">
                 <div className="cb-row header-row">
-                  <span>หมวดหมู่งาน</span>
-                  <span>รายละเอียด</span>
-                  <span className="text-right">งบประมาณ</span>
+                  <span>{tp('workCategoryHeader', 'หมวดหมู่งาน')}</span>
+                  <span>{tp('detailsHeader', 'รายละเอียด')}</span>
+                  <span className="text-right">{tp('budgetHeader', 'งบประมาณ')}</span>
                 </div>
 
                 <div className="cb-row">
-                  <strong>1. เครื่องคอมพิวเตอร์ & เกมมิ่งเกียร์ (ไม่รวมเก้าอี้)</strong>
-                  <span>{totalStations} เครื่อง x ฿{currentTierInfo.unitCost.toLocaleString()} ({(currentTierInfo.name || '').includes(':') ? currentTierInfo.name.split(':')[1] : currentTierInfo.name})</span>
+                  <strong>{tp('costItem1_title', '1. เครื่องคอมพิวเตอร์ & เกมมิ่งเกียร์ (ไม่รวมเก้าอี้)')}</strong>
+                  <span>{totalStations} {tp('stationsCountUnit', 'เครื่อง')} x ฿{currentTierInfo.unitCost.toLocaleString()} ({(currentTierInfo.name || '').includes(':') ? currentTierInfo.name.split(':')[1] : currentTierInfo.name})</span>
                   <strong className="text-right">฿{hardwareCost.toLocaleString()}</strong>
                 </div>
 
                 <div className="cb-row">
-                  <strong>2. ชุดโต๊ะคอมเกมมิ่ง & เก้าอี้ Ergonomic ในผัง</strong>
-                  <span>โต๊ะเกมมิ่งพร้อมเก้าอี้ตามจำนวนที่นั่ง, ห้อง VIP, เวที 5v5 ({placedItems.length} รายการ)</span>
+                  <strong>{tp('costItem2_title', '2. ชุดโต๊ะคอมเกมมิ่ง & เก้าอี้ Ergonomic ในผัง')}</strong>
+                  <span>{tp('costItem2_desc', 'โต๊ะเกมมิ่งพร้อมเก้าอี้ตามจำนวนที่นั่ง, ห้อง VIP, เวที 5v5')} ({placedItems.length} {tp('itemsCountUnit', 'รายการ')})</span>
                   <strong className="text-right">฿{furnitureItemsCost.toLocaleString()}</strong>
                 </div>
 
                 <div className="cb-row">
-                  <strong>3. ตกแต่งภายใน & ไฟ Linear Modern</strong>
-                  <span>{roomAreaSqM} ตร.ม. x ฿{(fixedInfrastructure?.interiorSqMeterCost ?? FIXED_INFRASTRUCTURE.interiorSqMeterCost).toLocaleString()} (พื้น, ผนังกันเสียง, ไฟ Linear)</span>
+                  <strong>{tp('costItem3_title', '3. ตกแต่งภายใน & ไฟ Linear Modern')}</strong>
+                  <span>{roomAreaSqM} {tp('sqmUnit', 'ตร.ม.')} x ฿{(fixedInfrastructure?.interiorSqMeterCost ?? FIXED_INFRASTRUCTURE.interiorSqMeterCost).toLocaleString()} ({tp('costItem3_desc', 'พื้น, ผนังกันเสียง, ไฟ Linear')})</span>
                   <strong className="text-right">฿{interiorDecorCost.toLocaleString()}</strong>
                 </div>
 
                 <div className="cb-row">
-                  <strong>4. งานระบบแอร์ Inverter</strong>
-                  <span>{roomAreaSqM} ตร.ม. x ฿{(fixedInfrastructure?.airconSqMeterCost ?? FIXED_INFRASTRUCTURE.airconSqMeterCost).toLocaleString()} (แอร์ Cassette 4 ทิศทาง)</span>
+                  <strong>{tp('costItem4_title', '4. งานระบบแอร์ Inverter')}</strong>
+                  <span>{roomAreaSqM} {tp('sqmUnit', 'ตร.ม.')} x ฿{(fixedInfrastructure?.airconSqMeterCost ?? FIXED_INFRASTRUCTURE.airconSqMeterCost).toLocaleString()} ({tp('costItem4_desc', 'แอร์ Cassette 4 ทิศทาง')})</span>
                   <strong className="text-right">฿{airconCost.toLocaleString()}</strong>
                 </div>
 
                 <div className="cb-row">
-                  <strong>5. แม่ข่าย Diskless Server 10G</strong>
-                  <span>Server แม่ข่าย NVMe 2 ชุด + คลังเกม 200+ เกม อัปเดตอัตโนมัติ</span>
+                  <strong>{tp('costItem5_title', '5. แม่ข่าย Diskless Server 10G')}</strong>
+                  <span>{tp('costItem5_desc', 'Server แม่ข่าย NVMe 2 ชุด + คลังเกม 200+ เกม อัปเดตอัตโนมัติ')}</span>
                   <strong className="text-right">฿{disklessCost.toLocaleString()}</strong>
                 </div>
 
                 <div className="cb-row">
-                  <strong>6. เน็ตเวิร์ก Enterprise Dual-WAN</strong>
-                  <span>Cisco 10G Switches, Mikrotik Router, สายแลน Shielded, ตู้ Rack</span>
+                  <strong>{tp('costItem6_title', '6. เน็ตเวิร์ก Enterprise Dual-WAN')}</strong>
+                  <span>{tp('costItem6_desc', 'Cisco 10G Switches, Mikrotik Router, สายแลน Shielded, ตู้ Rack')}</span>
                   <strong className="text-right">฿{networkCost.toLocaleString()}</strong>
                 </div>
 
                 <div className="cb-row">
-                  <strong>7. ซอฟต์แวร์ Billing & เครื่อง POS</strong>
-                  <span>ระบบคุมเครื่อง, ลิ้นชักเก็บเงิน, สแกนเนอร์, ระบบสั่งอาหาร</span>
+                  <strong>{tp('costItem7_title', '7. ซอฟต์แวร์ Billing & เครื่อง POS')}</strong>
+                  <span>{tp('costItem7_desc', 'ระบบคุมเครื่อง, ลิ้นชักเก็บเงิน, สแกนเนอร์, ระบบสั่งอาหาร')}</span>
                   <strong className="text-right">฿{billingCost.toLocaleString()}</strong>
                 </div>
 
                 <div className="cb-row">
-                  <strong>8. ค่าแฟรนไชส์ & การอบรมเปิดร้าน</strong>
-                  <span>สิทธิ์ใช้แบรนด์ G-Speed, แบบ 3D ก่อสร้าง, อบรมพนักงาน, การตลาดวันเปิดร้าน</span>
+                  <strong>{tp('costItem8_title', '8. ค่าแฟรนไชส์ & การอบรมเปิดร้าน')}</strong>
+                  <span>{tp('costItem8_desc', 'สิทธิ์ใช้แบรนด์ G-Speed, แบบ 3D ก่อสร้าง, อบรมพนักงาน, การตลาดวันเปิดร้าน')}</span>
                   <strong className="text-right">฿{franchiseLicenseCost.toLocaleString()}</strong>
                 </div>
 
                 <div className="cb-row total-row">
-                  <strong>รวมงบประมาณลงทุนทั้งสิ้น (Turnkey Package):</strong>
-                  <span>พร้อมเปิดให้บริการ</span>
+                  <strong>{tp('costTotal_title', 'รวมงบประมาณลงทุนทั้งสิ้น (Turnkey Package):')}</strong>
+                  <span>{tp('costTotal_status', 'พร้อมเปิดให้บริการ')}</span>
                   <strong className="text-right text-blue font-large">฿{totalInvestmentCost.toLocaleString()}</strong>
                 </div>
               </div>
@@ -4558,7 +4588,7 @@ export default function FranchisePlanner() {
               <div className="roi-card-header">
                 <h3 className="card-subheading" style={{ margin: 0 }}>
                   <Sliders size={18} className="text-blue" />
-                  <span>จำลองรายได้ & ระยะเวลาคืนทุน (Interactive ROI)</span>
+                  <span>{tp('interactiveRoiTitle', 'จำลองรายได้ & ระยะเวลาคืนทุน (Interactive ROI)')}</span>
                 </h3>
                 <span className="roi-live-badge">Live Financial Model</span>
               </div>
@@ -4566,8 +4596,8 @@ export default function FranchisePlanner() {
               <div className="roi-inputs">
                 <div className="roi-input-group">
                   <div className="roi-label-row">
-                    <label>อัตราค่าบริการ (บาท / ชั่วโมง):</label>
-                    <span className="roi-val-badge text-blue">{hourlyRate} บาท/ชม.</span>
+                    <label>{tp('hourlyRateLabel', 'อัตราค่าบริการ (บาท / ชั่วโมง):')}</label>
+                    <span className="roi-val-badge text-blue">{hourlyRate} {tp('bahtPerHour', 'บาท/ชม.')}</span>
                   </div>
                   <input 
                     type="range" 
@@ -4582,7 +4612,7 @@ export default function FranchisePlanner() {
 
                 <div className="roi-input-group">
                   <div className="roi-label-row">
-                    <label>อัตราการใช้งานเฉลี่ย (Occupancy Rate):</label>
+                    <label>{tp('occupancyRateLabel', 'อัตราการใช้งานเฉลี่ย (Occupancy Rate):')}</label>
                     <span className="roi-val-badge text-blue">{occupancyRate}%</span>
                   </div>
                   <input 
@@ -4595,9 +4625,9 @@ export default function FranchisePlanner() {
                     className="custom-range"
                   />
                   <div className="range-hints">
-                    <span>30% (น้อย)</span>
-                    <span>60% (มาตรฐาน)</span>
-                    <span>85% (ทำเลทอง)</span>
+                    <span>30% ({tp('occLow', 'น้อย')})</span>
+                    <span>60% ({tp('occStandard', 'มาตรฐาน')})</span>
+                    <span>85% ({tp('occPrime', 'ทำเลทอง')})</span>
                   </div>
                 </div>
               </div>
@@ -4605,63 +4635,63 @@ export default function FranchisePlanner() {
               {/* 3 Executive KPI Mini Cards */}
               <div className="roi-kpi-summary-grid">
                 <div className="roi-kpi-mini-card">
-                  <span className="roi-kpi-lbl">รายรับต่อเดือน</span>
+                  <span className="roi-kpi-lbl">{tp('monthlyRevenueKpi', 'รายรับต่อเดือน')}</span>
                   <strong className="roi-kpi-val text-blue">฿{Math.round(totalMonthlyRevenue).toLocaleString()}</strong>
-                  <span className="roi-kpi-sub">เฉลี่ย ฿{Math.round(totalMonthlyRevenue / 30).toLocaleString()} / วัน</span>
+                  <span className="roi-kpi-sub">{tp('averagePerDay', 'เฉลี่ย')} ฿{Math.round(totalMonthlyRevenue / 30).toLocaleString()} / {tp('dayUnit', 'วัน')}</span>
                 </div>
                 <div className="roi-kpi-mini-card">
-                  <span className="roi-kpi-lbl">กำไรสุทธิต่อเดือน</span>
+                  <span className="roi-kpi-lbl">{tp('monthlyNetProfitKpi', 'กำไรสุทธิต่อเดือน')}</span>
                   <strong className="roi-kpi-val text-emerald">฿{Math.round(estimatedMonthlyNetProfit).toLocaleString()}</strong>
                   <span className="roi-kpi-sub">Margin {Math.round((estimatedMonthlyNetProfit / (totalMonthlyRevenue || 1)) * 100)}%</span>
                 </div>
                 <div className="roi-kpi-mini-card">
-                  <span className="roi-kpi-lbl">ผลตอบแทนต่อปี (ROI)</span>
+                  <span className="roi-kpi-lbl">{tp('annualRoiKpi', 'ผลตอบแทนต่อปี (ROI)')}</span>
                   <strong className="roi-kpi-val text-purple">{Math.round(((estimatedMonthlyNetProfit * 12) / (totalInvestmentCost || 1)) * 100)}%</strong>
-                  <span className="roi-kpi-sub">คืนทุนใน {paybackMonths} เดือน</span>
+                  <span className="roi-kpi-sub">{tp('paybackInMonths', 'คืนทุนใน')} {paybackMonths} {tp('months', 'เดือน')}</span>
                 </div>
               </div>
 
               {/* Monthly Breakdown Projection */}
               <div className="roi-projection-box">
                 <div className="proj-row">
-                  <span>รายได้ค่าชั่วโมงเล่นเกม ({totalStations} เครื่อง):</span>
-                  <strong>฿{Math.round(monthlyGamingRevenue).toLocaleString()} / ด.</strong>
+                  <span>{tp('gamingHourRevenue', 'รายได้ค่าชั่วโมงเล่นเกม')} ({totalStations} {tp('stationsCountUnit', 'เครื่อง')}):</span>
+                  <strong>฿{Math.round(monthlyGamingRevenue).toLocaleString()} / {tp('months', 'ด.')}</strong>
                 </div>
                 <div className="proj-row">
-                  <span>รายได้จำหน่ายเครื่องดื่ม & อาหารว่าง:</span>
-                  <strong>฿{Math.round(monthlySnackRevenue).toLocaleString()} / ด.</strong>
+                  <span>{tp('fnbRevenue', 'รายได้จำหน่ายเครื่องดื่ม & อาหารว่าง:')}</span>
+                  <strong>฿{Math.round(monthlySnackRevenue).toLocaleString()} / {tp('months', 'ด.')}</strong>
                 </div>
                 <div className="proj-row highlight-income">
-                  <span>รายรับรวมต่อเดือน (Gross Revenue):</span>
-                  <strong className="text-blue">฿{Math.round(totalMonthlyRevenue).toLocaleString()} / ด.</strong>
+                  <span>{tp('grossMonthlyRevenue', 'รายรับรวมต่อเดือน (Gross Revenue):')}</span>
+                  <strong className="text-blue">฿{Math.round(totalMonthlyRevenue).toLocaleString()} / {tp('months', 'ด.')}</strong>
                 </div>
 
                 <div className="cost-divider"></div>
 
                 <div className="proj-row text-muted">
-                  <span>ค่าไฟ & แอร์ประมาณการ:</span>
+                  <span>{tp('electricityCostEst', 'ค่าไฟ & แอร์ประมาณการ:')}</span>
                   <span>-฿{Math.round(monthlyElectricity).toLocaleString()}</span>
                 </div>
                 <div className="proj-row text-muted">
-                  <span>เงินเดือนพนักงาน (2-3 กะ):</span>
+                  <span>{tp('staffSalariesEst', 'เงินเดือนพนักงาน (2-3 กะ):')}</span>
                   <span>-฿{Math.round(monthlyStaff).toLocaleString()}</span>
                 </div>
                 <div className="proj-row text-muted">
-                  <span>ค่าอินเทอร์เน็ต & เบ็ดเตล็ด:</span>
+                  <span>{tp('internetMiscEst', 'ค่าอินเทอร์เน็ต & เบ็ดเตล็ด:')}</span>
                   <span>-฿{Math.round(monthlyInternetAndMisc).toLocaleString()}</span>
                 </div>
               </div>
 
               <div className="net-profit-card">
                 <div className="net-profit-left">
-                  <span>กำไรสุทธิโดยประมาณ (Net Profit):</span>
+                  <span>{tp('netProfitTitle', 'กำไรสุทธิโดยประมาณ (Net Profit):')}</span>
                   <h4 className="net-profit-number text-blue">
-                    ฿{Math.round(estimatedMonthlyNetProfit).toLocaleString()} <span className="per-month">/ เดือน</span>
+                    ฿{Math.round(estimatedMonthlyNetProfit).toLocaleString()} <span className="per-month">/ {tp('months', 'เดือน')}</span>
                   </h4>
                 </div>
                 <div className="net-profit-right">
-                  <span>คาดว่าจะคืนทุนใน:</span>
-                  <h3 className="payback-badge text-blue">{paybackMonths} เดือน</h3>
+                  <span>{tp('paybackEstTitle', 'คาดว่าจะคืนทุนใน:')}</span>
+                  <h3 className="payback-badge text-blue">{paybackMonths} {tp('months', 'เดือน')}</h3>
                 </div>
               </div>
             </div>
@@ -4674,22 +4704,20 @@ export default function FranchisePlanner() {
                 <Clock size={14} />
                 <span>6-WEEK IMPLEMENTATION TIMELINE</span>
               </div>
-              <h3 className="timeline-title">ระยะเวลาในการก่อสร้างและติดตั้ง (ประมาณ 6 สัปดาห์)</h3>
-              <p className="timeline-desc">
-                ขั้นตอนการดำเนินงานแบบ Turnkey ตั้งแต่สำรวจพื้นที่จนถึงวัน Grand Opening พร้อมเปิดให้บริการ
-              </p>
+              <h3 className="timeline-title">{tp('timelineTitle', 'ระยะเวลาในการก่อสร้างและติดตั้ง (ประมาณ 6 สัปดาห์)')}</h3>
+              <p className="timeline-desc">{tp('timelineDesc', 'ขั้นตอนการดำเนินงานแบบ Turnkey ตั้งแต่สำรวจพื้นที่จนถึงวัน Grand Opening พร้อมเปิดให้บริการ')}</p>
             </div>
 
             <div className="timeline-steps-grid">
               {INSTALLATION_TIMELINE.map((item, idx) => (
                 <div key={idx} className="timeline-step-card">
                   <div className="step-week-badge">{item.week}</div>
-                  <h4 className="step-week-title">{item.title}</h4>
+                  <h4 className="step-week-title">{translateDynamic(item.title)}</h4>
                   <ul className="step-tasks-list">
                     {item.tasks.map((task, tIdx) => (
                       <li key={tIdx}>
                         <Check size={14} className="text-blue" />
-                        <span>{task}</span>
+                        <span>{translateDynamic(task)}</span>
                       </li>
                     ))}
                   </ul>
@@ -4706,7 +4734,7 @@ export default function FranchisePlanner() {
               className="step4-btn-back"
             >
               <ArrowLeft size={15} />
-              <span>ย้อนกลับ</span>
+              <span>{tp('back', 'ย้อนกลับ')}</span>
             </button>
 
             <div className="step4-action-group">
@@ -4714,10 +4742,10 @@ export default function FranchisePlanner() {
                 type="button" 
                 onClick={handleExportBlueprintImage} 
                 className="step4-btn-export"
-                title="ดาวน์โหลดภาพแปลนสำหรับช่างและผู้รับเหมา (PNG)"
+                title={tp('downloadBlueprintForContractorTooltip', 'ดาวน์โหลดภาพแปลนสำหรับช่างและผู้รับเหมา (PNG)')}
               >
                 <Download size={15} />
-                <span>แปลนช่าง (PNG)</span>
+                <span>{tp('blueprintExport', 'แปลนช่าง (PNG)')}</span>
               </button>
               <button 
                 type="button"
@@ -4726,7 +4754,7 @@ export default function FranchisePlanner() {
                 className="step4-btn-submit"
               >
                 <FileText size={15} />
-                <span>ขอใบเสนอราคา</span>
+                <span>{tp('requestQuoteBtn', 'ขอใบเสนอราคา')}</span>
                 <ArrowRight size={15} />
               </button>
             </div>
@@ -4742,22 +4770,22 @@ export default function FranchisePlanner() {
           <span className="bottom-nav-info-text">
             {currentStep === 1 && (
               <>
-                <strong>ขนาดร้าน:</strong> {roomWidth}x{roomHeight} ม. ({roomAreaSqM} ตร.ม.) • แนะนำ ~{blueprintFeasibility?.recommendedStations || Math.round(roomAreaSqM / 2.5)} เครื่อง
+                <strong>{tp('bottomNavRoomSize', 'ขนาดร้าน:')}</strong> {roomWidth}x{roomHeight} {tp('metersUnit', 'ม.')} ({roomAreaSqM} {tp('sqmUnit', 'ตร.ม.')}) • {tp('bottomNavRecommended', 'แนะนำ')} ~{blueprintFeasibility?.recommendedStations || Math.round(roomAreaSqM / 2.5)} {tp('stationsCountUnit', 'เครื่อง')}
               </>
             )}
             {currentStep === 2 && (
               <>
-                <strong>ผังร้าน:</strong> {totalStations} เครื่อง • {roomAreaSqM} ตร.ม. • ฿{totalInvestmentCost.toLocaleString()}
+                <strong>{tp('bottomNavStoreLayout', 'ผังร้าน:')}</strong> {totalStations} {tp('stationsCountUnit', 'เครื่อง')} • {roomAreaSqM} {tp('sqmUnit', 'ตร.ม.')} • ฿{totalInvestmentCost.toLocaleString()}
               </>
             )}
             {currentStep === 3 && (
               <>
-                <strong>สเปก:</strong> {currentTierInfo.name} • {totalStations} เครื่อง • ฿{totalInvestmentCost.toLocaleString()}
+                <strong>{tp('bottomNavSpecs', 'สเปก:')}</strong> {currentTierInfo.name} • {totalStations} {tp('stationsCountUnit', 'เครื่อง')} • ฿{totalInvestmentCost.toLocaleString()}
               </>
             )}
             {currentStep === 4 && (
               <>
-                <strong>งบรวม:</strong> ฿{totalInvestmentCost.toLocaleString()} • คืนทุน ~{paybackMonths} ด.
+                <strong>{tp('bottomNavBudget', 'งบรวม:')}</strong> ฿{totalInvestmentCost.toLocaleString()} • {tp('bottomNavPayback', 'คืนทุน')} ~{paybackMonths} {tp('months', 'ด.')}
               </>
             )}
           </span>
@@ -4845,7 +4873,7 @@ export default function FranchisePlanner() {
             <div className="modal-header">
               <div className="modal-header-left">
                 <span className="badge-pill badge-blue">OFFICIAL ESTIMATED QUOTATION</span>
-                <h3 className="modal-title">ใบเสนอราคาประเมินเบื้องต้น: แฟรนไชส์ GLP : G Speed Living Plus</h3>
+                <h3 className="modal-title">{tp('quoteModalHeaderTitle', 'ใบเสนอราคาประเมินเบื้องต้น: แฟรนไชส์ GLP : G Speed Living Plus')}</h3>
               </div>
               <button className="btn-icon-close" onClick={() => setShowQuotationModal(false)}>
                 <X size={20} />
@@ -4857,8 +4885,8 @@ export default function FranchisePlanner() {
                 <div className="success-icon-box">
                   <Check size={40} className="text-blue" />
                 </div>
-                <h3>บันทึกข้อมูลและส่งแปลนร้านเรียบร้อย!</h3>
-                <p>ทีมวิศวกรและผู้เชี่ยวชาญแฟรนไชส์ของ GLP : G Speed Living Plus จะตรวจสอบผังที่คุณออกแบบ และติดต่อกลับเพื่อเสนอนัดสำรวจสถานที่จริงภายใน 24 ชม.</p>
+                <h3>{tp('quoteSuccessToastTitle', 'บันทึกข้อมูลและส่งแปลนร้านเรียบร้อย!')}</h3>
+                <p>{tp('quoteSuccessToastDesc', 'ทีมวิศวกรและผู้เชี่ยวชาญแฟรนไชส์ของ GLP : G Speed Living Plus จะตรวจสอบผังที่คุณออกแบบ และติดต่อกลับเพื่อเสนอนัดสำรวจสถานที่จริงภายใน 24 ชม.')}</p>
               </div>
             ) : (
               <div className="quotation-modal-content">
@@ -4869,10 +4897,10 @@ export default function FranchisePlanner() {
                     id="btn-quick-print-quotation"
                     className="btn-modal-action btn-print-primary" 
                     onClick={() => window.print()}
-                    title="สั่งพิมพ์ใบเสนอราคา หรือบันทึกเป็น PDF (Print to PDF)"
+                    title={tp('printQuotationHint', 'สั่งพิมพ์ใบเสนอราคา หรือบันทึกเป็น PDF (Print to PDF)')}
                   >
                     <Printer size={16} />
-                    <span>พิมพ์ใบเสนอราคา</span>
+                    <span>{tp('printQuotationBtn', 'พิมพ์ใบเสนอราคา')}</span>
                   </button>
                   <button 
                     type="button" 
@@ -4892,73 +4920,73 @@ export default function FranchisePlanner() {
                   <div className="quote-sheet-header">
                     <div className="sheet-brand">
                       <div className="brand-title">GLP : G SPEED LIVING PLUS</div>
-                      <div className="brand-sub">บริษัท จี-สปีด ลิฟวิ่ง พลัส จำกัด (สำนักงานใหญ่)</div>
+                      <div className="brand-sub">{tp('companyNameLegal', 'บริษัท จี-สปีด ลิฟวิ่ง พลัส จำกัด (สำนักงานใหญ่)')}</div>
                       <p className="brand-contact-info">
-                        เลขที่ 88/9 อาคารจี-สปีด ทาวเวอร์ ถนนพหลโยธิน แขวงลาดยาว เขตจตุจักร กรุงเทพฯ 10900<br />
-                        เลขประจำตัวผู้เสียภาษีอากร: 0105566012345 | โทร: 02-888-9999 | เว็บไซต์: www.gspeed-esport.com
+                        {tp('companyAddress', 'เลขที่ 88/9 อาคารจี-สปีด ทาวเวอร์ ถนนพหลโยธิน แขวงลาดยาว เขตจตุจักร กรุงเทพฯ 10900')}<br />
+                        {tp('companyTaxIdContact', 'เลขประจำตัวผู้เสียภาษีอากร: 0105566012345 | โทร: 02-888-9999 | เว็บไซต์: www.gspeed-esport.com')}
                       </p>
                     </div>
                     <div className="sheet-meta-box">
-                      <div className="meta-doc-badge">ใบเสนอราคา / ESTIMATED QUOTATION</div>
-                      <div className="meta-line"><strong>เลขที่ใบเสนอราคา:</strong> GS-QT-{new Date().toISOString().slice(0, 10).replace(/-/g, '')}-{Date.now().toString().slice(-4)}</div>
-                      <div className="meta-line"><strong>วันที่ออกเอกสาร:</strong> {new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
-                      <div className="meta-line"><strong>กำหนดยืนราคา:</strong> 30 วันนับจากวันที่ระบุ</div>
+                      <div className="meta-doc-badge">{tp('quoteDocBadge', 'ใบเสนอราคา / ESTIMATED QUOTATION')}</div>
+                      <div className="meta-line"><strong>{tp('quoteRefNo', 'เลขที่ใบเสนอราคา:')}</strong> GS-QT-{new Date().toISOString().slice(0, 10).replace(/-/g, '')}-{Date.now().toString().slice(-4)}</div>
+                      <div className="meta-line"><strong>{tp('quoteIssueDate', 'วันที่ออกเอกสาร:')}</strong> {new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                      <div className="meta-line"><strong>{tp('quoteValidity', 'กำหนดยืนราคา:')}</strong> {tp('quoteValidityVal', '30 วันนับจากวันที่ระบุ')}</div>
                     </div>
                   </div>
 
                   {/* Customer & Project Specifications Grid */}
                   <div className="quote-customer-project-grid">
                     <div className="quote-info-col">
-                      <div className="info-section-title">ข้อมูลลูกค้า / ผู้ขอรับสิทธิ์แฟรนไชส์ (CUSTOMER INFO)</div>
+                      <div className="info-section-title">{tp('customerInfoTitle', 'ข้อมูลลูกค้า / ผู้ขอรับสิทธิ์แฟรนไชส์ (CUSTOMER INFO)')}</div>
                       <div className="info-detail-row">
-                        <span className="info-lbl">ชื่อลูกค้า / นิติบุคคล:</span>
-                        <span className="info-val"><strong>{leadForm.fullName || 'ผู้สนใจลงทุนแฟรนไชส์ (Franchise Investor)'}</strong></span>
+                        <span className="info-lbl">{tp('customerNameLabel', 'ชื่อลูกค้า / นิติบุคคล:')}</span>
+                        <span className="info-val"><strong>{leadForm.fullName || tp('leadDefaultInvestor', 'ผู้สนใจลงทุนแฟรนไชส์ (Franchise Investor)')}</strong></span>
                       </div>
                       <div className="info-detail-row">
-                        <span className="info-lbl">เบอร์โทรศัพท์ติดต่อ:</span>
+                        <span className="info-lbl">{tp('customerPhoneLabel', 'เบอร์โทรศัพท์ติดต่อ:')}</span>
                         <span className="info-val">{leadForm.phone || '08X-XXX-XXXX'}</span>
                       </div>
                       <div className="info-detail-row">
-                        <span className="info-lbl">อีเมลติดต่อ:</span>
+                        <span className="info-lbl">{tp('customerEmailLabel', 'อีเมลติดต่อ:')}</span>
                         <span className="info-val">{leadForm.email || 'investor@example.com'}</span>
                       </div>
                       <div className="info-detail-row">
-                        <span className="info-lbl">งบประมาณที่เตรียมไว้:</span>
+                        <span className="info-lbl">{tp('customerBudgetLabel', 'งบประมาณที่เตรียมไว้:')}</span>
                         <span className="info-val">{leadForm.budget}</span>
                       </div>
                     </div>
                     <div className="quote-info-col">
-                      <div className="info-section-title">ข้อมูลโครงการสาขา (PROJECT SPECIFICATIONS)</div>
+                      <div className="info-section-title">{tp('projectSpecsTitle', 'ข้อมูลโครงการสาขา (PROJECT SPECIFICATIONS)')}</div>
                       <div className="info-detail-row">
-                        <span className="info-lbl">ทำเลที่ตั้งสาขา:</span>
+                        <span className="info-lbl">{tp('storeLocationLabel', 'ทำเลที่ตั้งสาขา:')}</span>
                         <span className="info-val"><strong>{storeLocation}</strong></span>
                       </div>
                       <div className="info-detail-row">
-                        <span className="info-lbl">รูปแบบพื้นที่:</span>
+                        <span className="info-lbl">{tp('storeTypeLabel', 'รูปแบบพื้นที่:')}</span>
                         <span className="info-val">{storeType} {leadForm.locationDetail ? `(${leadForm.locationDetail})` : ''}</span>
                       </div>
                       <div className="info-detail-row">
-                        <span className="info-lbl">ขนาดพื้นที่ร้าน:</span>
-                        <span className="info-val"><strong>{roomWidth} x {roomHeight} ม. ({roomAreaSqM} ตร.ม.)</strong></span>
+                        <span className="info-lbl">{tp('roomDimensionsLabel', 'ขนาดพื้นที่ร้าน:')}</span>
+                        <span className="info-val"><strong>{roomWidth} x {roomHeight} {tp('metersUnit', 'ม.')} ({roomAreaSqM} {tp('sqmUnit', 'ตร.ม.')})</strong></span>
                       </div>
                       <div className="info-detail-row">
-                        <span className="info-lbl">สเปกคอมพิวเตอร์:</span>
-                        <span className="info-val text-blue"><strong>{currentTierInfo.name} ({totalStations} เครื่อง)</strong></span>
+                        <span className="info-lbl">{tp('pcSpecsLabel', 'สเปกคอมพิวเตอร์:')}</span>
+                        <span className="info-val text-blue"><strong>{currentTierInfo.name} ({totalStations} {tp('stationsCountUnit', 'เครื่อง')})</strong></span>
                       </div>
                     </div>
                   </div>
 
                   {/* Key Highlights Pill Badges */}
                   <div className="quote-summary-badges">
-                    <div className="qs-badge">ขนาดพื้นที่: <strong>{roomWidth}x{roomHeight} ม. ({roomAreaSqM} ตร.ม.)</strong></div>
-                    <div className="qs-badge">จำนวนเครื่อง: <strong>{totalStations} Stations</strong></div>
-                    <div className="qs-badge">สเปก: <strong>{currentTierInfo.name}</strong></div>
-                    <div className="qs-badge">ระยะเวลาติดตั้ง: <strong>4-6 สัปดาห์</strong></div>
-                    <div className="qs-badge">จุดคุ้มทุนประเมิน: <strong>~{paybackMonths} เดือน</strong></div>
+                    <div className="qs-badge">{tp('areaSizeLabel', 'ขนาดพื้นที่:')} <strong>{roomWidth}x{roomHeight} {tp('metersUnit', 'ม.')} ({roomAreaSqM} {tp('sqmUnit', 'ตร.ม.')})</strong></div>
+                    <div className="qs-badge">{tp('stationsCountLabel', 'จำนวนเครื่อง:')} <strong>{totalStations} Stations</strong></div>
+                    <div className="qs-badge">{tp('bottomNavSpecs', 'สเปก:')} <strong>{currentTierInfo.name}</strong></div>
+                    <div className="qs-badge">{tp('installDurationLabel', 'ระยะเวลาติดตั้ง:')} <strong>{tp('installDurationVal', '4-6 สัปดาห์')}</strong></div>
+                    <div className="qs-badge">{tp('paybackEstLabel', 'จุดคุ้มทุนประเมิน:')} <strong>~{paybackMonths} {tp('months', 'เดือน')}</strong></div>
                     {uploadedBlueprint && (
                       <div className="qs-badge highlight-bp">
                         <CheckCircle2 size={13} className="text-emerald" />
-                        <span>แนบแปลนอาคาร: <strong>{uploadedBlueprint.name}</strong></span>
+                        <span>{tp('attachedBlueprintLabel', 'แนบแปลนอาคาร:')} <strong>{uploadedBlueprint.name}</strong></span>
                       </div>
                     )}
                   </div>
@@ -4969,9 +4997,9 @@ export default function FranchisePlanner() {
                         <img src={uploadedBlueprint.url} alt="Attached Floor Plan" />
                       </div>
                       <div className="quote-bp-info">
-                        <h5>แบบแปลนอาคารแนบพิเศษ (Custom Blueprint Attached)</h5>
+                        <h5>{tp('customBpAttachedTitle', 'แบบแปลนอาคารแนบพิเศษ (Custom Blueprint Attached)')}</h5>
                         <p>
-                          ระบบได้บันทึกไฟล์พิมพ์เขียวและสัดส่วนพื้นที่ <strong>{uploadedBlueprint.dimensions}</strong> เรียบร้อยแล้ว สถาปนิก G-Speed จะนำผังนี้ไปขึ้นแบบโครงสร้าง 3D Interior เสมือนจริงความละเอียดสูง (Photo-realistic Render) และจัดเตรียมใบเสนอราคาทางการส่งกลับให้ท่านภายใน 24 ชม.
+                          {tp('blueprintReceivedNoticePrefix', 'ระบบได้บันทึกไฟล์พิมพ์เขียวและสัดส่วนพื้นที่')} <strong>{uploadedBlueprint.dimensions}</strong> {tp('blueprintReceivedNoticeSuffix', 'เรียบร้อยแล้ว สถาปนิก G-Speed จะนำผังนี้ไปขึ้นแบบโครงสร้าง 3D Interior เสมือนจริงความละเอียดสูง (Photo-realistic Render) และจัดเตรียมใบเสนอราคาทางการส่งกลับให้ท่านภายใน 24 ชม.')}
                         </p>
                       </div>
                     </div>
@@ -4981,106 +5009,106 @@ export default function FranchisePlanner() {
                   <table className="quote-table official-boq-table">
                     <thead>
                       <tr>
-                        <th style={{ width: '45px' }}>ลำดับ</th>
-                        <th>รายการรายละเอียดอุปกรณ์และงานระบบ (BOQ ITEM DESCRIPTION)</th>
-                        <th style={{ width: '110px' }} className="text-center">จำนวน</th>
-                        <th style={{ width: '130px' }} className="text-right">ราคาต่อหน่วย</th>
-                        <th style={{ width: '140px' }} className="text-right">รวมเงิน (บาท)</th>
+                        <th style={{ width: '45px' }}>{tp('boqColNo', 'ลำดับ')}</th>
+                        <th>{tp('boqColDesc', 'รายการรายละเอียดอุปกรณ์และงานระบบ (BOQ ITEM DESCRIPTION)')}</th>
+                        <th style={{ width: '110px' }} className="text-center">{tp('boqColQty', 'จำนวน')}</th>
+                        <th style={{ width: '130px' }} className="text-right">{tp('boqColUnit', 'ราคาต่อหน่วย')}</th>
+                        <th style={{ width: '140px' }} className="text-right">{tp('boqColTotal', 'รวมเงิน (บาท)')}</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
                         <td className="text-center">1</td>
                         <td>
-                          <strong>ชุดเครื่องคอมพิวเตอร์เกมมิ่งสเปก {currentTierInfo.name}</strong>
-                          <div className="boq-item-desc">{currentTierInfo.cpu} • {currentTierInfo.gpu} • {currentTierInfo.ram} • จอ {currentTierInfo.monitor} • เกมมิ่งเกียร์ {currentTierInfo.gear} (ไม่รวมเก้าอี้ - รวมในชุดโต๊ะ)</div>
+                          <strong>{tp('boqItem1_title', 'ชุดเครื่องคอมพิวเตอร์เกมมิ่งสเปก')} {currentTierInfo.name}</strong>
+                          <div className="boq-item-desc">{currentTierInfo.cpu} • {currentTierInfo.gpu} • {currentTierInfo.ram} • {tp('monitor', 'จอ')} {currentTierInfo.monitor} • {tp('gamingGear', 'เกมมิ่งเกียร์')} {currentTierInfo.gear} {tp('boqItem1_note', '(ไม่รวมเก้าอี้ - รวมในชุดโต๊ะ)')}</div>
                         </td>
-                        <td className="text-center">{totalStations} เครื่อง</td>
+                        <td className="text-center">{totalStations} {tp('stationsCountUnit', 'เครื่อง')}</td>
                         <td className="text-right">฿{currentTierInfo.unitCost.toLocaleString()}</td>
                         <td className="text-right">฿{hardwareCost.toLocaleString()}</td>
                       </tr>
                       <tr>
                         <td className="text-center">2</td>
                         <td>
-                          <strong>ชุดโต๊ะคอมพิวเตอร์เกมมิ่งพร้อมเก้าอี้ Ergonomic และโซนพิเศษในผัง</strong>
-                          <div className="boq-item-desc">จัดวางตามผังร้าน {placedItems.length} โมดูล (รวมเก้าอี้ Ergonomic ครบตามจำนวนที่นั่ง, รางร้อยสายไฟ, และกล่องเต้ารับคู่ 3 ขา)</div>
+                          <strong>{tp('boqItem2_title', 'ชุดโต๊ะคอมพิวเตอร์เกมมิ่งพร้อมเก้าอี้ Ergonomic และโซนพิเศษในผัง')}</strong>
+                          <div className="boq-item-desc">{tp('boqItem2_desc', 'จัดวางตามผังร้าน')} {placedItems.length} {tp('modulesUnit', 'โมดูล')} {tp('boqItem2_note', '(รวมเก้าอี้ Ergonomic ครบตามจำนวนที่นั่ง, รางร้อยสายไฟ, และกล่องเต้ารับคู่ 3 ขา)')}</div>
                         </td>
-                        <td className="text-center">1 ชุด</td>
+                        <td className="text-center">1 {tp('unitSet', 'ชุด')}</td>
                         <td className="text-right">-</td>
                         <td className="text-right">฿{furnitureItemsCost.toLocaleString()}</td>
                       </tr>
                       <tr>
                         <td className="text-center">3</td>
                         <td>
-                          <strong>งานตกแต่งภายใน ระบบฝ้า ผนังกันเสียง & ไฟ Linear Modern ({selectedThemeObj?.name || selectedTheme})</strong>
-                          <div className="boq-item-desc">งานผนัง Acoustic ซับเสียง, งานพื้น Epoxy/กระเบื้องยาง Heavy-Duty, ป้ายไฟอะคริลิกเรืองแสงโลโก้แบรนด์</div>
+                          <strong>{tp('boqItem3_title', 'งานตกแต่งภายใน ระบบฝ้า ผนังกันเสียง & ไฟ Linear Modern')} ({translateDynamic(selectedThemeObj?.name || selectedTheme)})</strong>
+                          <div className="boq-item-desc">{tp('boqItem3_desc', 'งานผนัง Acoustic ซับเสียง, งานพื้น Epoxy/กระเบื้องยาง Heavy-Duty, ป้ายไฟอะคริลิกเรืองแสงโลโก้แบรนด์')}</div>
                         </td>
-                        <td className="text-center">{roomAreaSqM} ตร.ม.</td>
+                        <td className="text-center">{roomAreaSqM} {tp('sqmUnit', 'ตร.ม.')}</td>
                         <td className="text-right">฿{(fixedInfrastructure?.interiorSqMeterCost ?? FIXED_INFRASTRUCTURE.interiorSqMeterCost).toLocaleString()}</td>
                         <td className="text-right">฿{interiorDecorCost.toLocaleString()}</td>
                       </tr>
                       <tr>
                         <td className="text-center">4</td>
                         <td>
-                          <strong>งานระบบปรับอากาศ Inverter Cassette Type ประหยัดพลังงาน</strong>
-                          <div className="boq-item-desc">เครื่องปรับอากาศฝังฝ้า 4 ทิศทาง พร้อมระบบระบายอากาศ Fresh Air Circulation สำหรับบริการ 24 ชม.</div>
+                          <strong>{tp('boqItem4_title', 'งานระบบปรับอากาศ Inverter Cassette Type ประหยัดพลังงาน')}</strong>
+                          <div className="boq-item-desc">{tp('boqItem4_desc', 'เครื่องปรับอากาศฝังฝ้า 4 ทิศทาง พร้อมระบบระบายอากาศ Fresh Air Circulation สำหรับบริการ 24 ชม.')}</div>
                         </td>
-                        <td className="text-center">{roomAreaSqM} ตร.ม.</td>
+                        <td className="text-center">{roomAreaSqM} {tp('sqm', 'ตร.ม.')}</td>
                         <td className="text-right">฿{(fixedInfrastructure?.airconSqMeterCost ?? FIXED_INFRASTRUCTURE.airconSqMeterCost).toLocaleString()}</td>
                         <td className="text-right">฿{airconCost.toLocaleString()}</td>
                       </tr>
                       <tr>
                         <td className="text-center">5</td>
                         <td>
-                          <strong>ระบบแม่ข่าย Diskless Server 10Gbps NVMe High-Availability</strong>
-                          <div className="boq-item-desc">เซิร์ฟเวอร์สำรอง Dual-Host ระบบอัปเดตเกมอัตโนมัติความเร็วสูง รองรับการบูตพร้อมกันโดยไม่มีสะดุด</div>
+                          <strong>{tp('boqItem5_title', 'ระบบแม่ข่าย Diskless Server 10Gbps NVMe High-Availability')}</strong>
+                          <div className="boq-item-desc">{tp('boqItem5_desc', 'เซิร์ฟเวอร์สำรอง Dual-Host ระบบอัปเดตเกมอัตโนมัติความเร็วสูง รองรับการบูตพร้อมกันโดยไม่มีสะดุด')}</div>
                         </td>
-                        <td className="text-center">1 ระบบ</td>
+                        <td className="text-center">1 {tp('unitSystem', 'ระบบ')}</td>
                         <td className="text-right">-</td>
                         <td className="text-right">฿{disklessCost.toLocaleString()}</td>
                       </tr>
                       <tr>
                         <td className="text-center">6</td>
                         <td>
-                          <strong>ระบบโครงข่ายเน็ตเวิร์ก Enterprise Dual-WAN & Cisco 10G Switch</strong>
-                          <div className="boq-item-desc">สายสัญญาณ LAN CAT6A Shielded + ตู้ Rack 42U Server + ระบบ UPS สำรองไฟขนาด 10kVA</div>
+                          <strong>{tp('boqItem6_title', 'ระบบโครงข่ายเน็ตเวิร์ก Enterprise Dual-WAN & Cisco 10G Switch')}</strong>
+                          <div className="boq-item-desc">{tp('boqItem6_desc', 'สายสัญญาณ LAN CAT6A Shielded + ตู้ Rack 42U Server + ระบบ UPS สำรองไฟขนาด 10kVA')}</div>
                         </td>
-                        <td className="text-center">1 ระบบ</td>
+                        <td className="text-center">1 {tp('unitSystem', 'ระบบ')}</td>
                         <td className="text-right">-</td>
                         <td className="text-right">฿{networkCost.toLocaleString()}</td>
                       </tr>
                       <tr>
                         <td className="text-center">7</td>
                         <td>
-                          <strong>ระบบบริหารจัดการร้าน Billing & Cloud Member POS System</strong>
-                          <div className="boq-item-desc">โปรแกรมคิดเงิน ลิ้นชักเก็บเงิน เครื่องสแกนบาร์โค้ด และระบบสมาชิกระดับคลาวด์เชื่อมต่อส่วนกลาง</div>
+                          <strong>{tp('boqItem7_title', 'ระบบบริหารจัดการร้าน Billing & Cloud Member POS System')}</strong>
+                          <div className="boq-item-desc">{tp('boqItem7_desc', 'โปรแกรมคิดเงิน ลิ้นชักเก็บเงิน เครื่องสแกนบาร์โค้ด และระบบสมาชิกระดับคลาวด์เชื่อมต่อส่วนกลาง')}</div>
                         </td>
-                        <td className="text-center">1 ชุด</td>
+                        <td className="text-center">1 {tp('unitSet', 'ชุด')}</td>
                         <td className="text-right">-</td>
                         <td className="text-right">฿{billingCost.toLocaleString()}</td>
                       </tr>
                       <tr>
                         <td className="text-center">8</td>
                         <td>
-                          <strong>ค่าสิทธิ์แฟรนไชส์ G-SPEED & บริการ Turnkey Onboarding ครบวงจร</strong>
-                          <div className="boq-item-desc">สิทธิ์การใช้แบรนด์, แปลนก่อสร้าง 3D, จัดฝึกอบรมผู้จัดการและพนักงาน, การตลาดและโปรโมทเปิดร้าน</div>
+                          <strong>{tp('boqItem8_title', 'ค่าสิทธิ์แฟรนไชส์ G-SPEED & บริการ Turnkey Onboarding ครบวงจร')}</strong>
+                          <div className="boq-item-desc">{tp('boqItem8_desc', 'สิทธิ์การใช้แบรนด์, แปลนก่อสร้าง 3D, จัดฝึกอบรมผู้จัดการและพนักงาน, การตลาดและโปรโมทเปิดร้าน')}</div>
                         </td>
-                        <td className="text-center">1 สาขา</td>
+                        <td className="text-center">1 {tp('unitBranch', 'สาขา')}</td>
                         <td className="text-right">-</td>
                         <td className="text-right">฿{franchiseLicenseCost.toLocaleString()}</td>
                       </tr>
                     </tbody>
                     <tfoot>
                       <tr>
-                        <td colSpan="4" className="text-right"><strong>ยอดรวมประมาณการลงทุนก่อนภาษี (Subtotal):</strong></td>
+                        <td colSpan="4" className="text-right"><strong>{tp('subtotalPreTax', 'ยอดรวมประมาณการลงทุนก่อนภาษี (Subtotal):')}</strong></td>
                         <td className="text-right"><strong>฿{totalInvestmentCost.toLocaleString()}</strong></td>
                       </tr>
                       <tr>
-                        <td colSpan="4" className="text-right">ภาษีมูลค่าเพิ่ม 7% (VAT 7%):</td>
+                        <td colSpan="4" className="text-right">{tp('vat7Label', 'ภาษีมูลค่าเพิ่ม 7% (VAT 7%):')}</td>
                         <td className="text-right">฿{Math.round(totalInvestmentCost * 0.07).toLocaleString()}</td>
                       </tr>
                       <tr className="grand-total-row">
-                        <td colSpan="4" className="text-right"><strong>ยอดรวมสุทธิทั้งสิ้น (GRAND TOTAL):</strong></td>
+                        <td colSpan="4" className="text-right"><strong>{tp('boqGrandTotal', 'ยอดรวมสุทธิทั้งสิ้น (GRAND TOTAL):')}</strong></td>
                         <td className="text-right"><strong className="text-blue font-large">฿{Math.round(totalInvestmentCost * 1.07).toLocaleString()}</strong></td>
                       </tr>
                     </tfoot>
@@ -5088,12 +5116,12 @@ export default function FranchisePlanner() {
 
                   {/* Commercial Terms & Notes */}
                   <div className="quote-commercial-terms">
-                    <div className="terms-title">เงื่อนไขและข้อตกลงทางการค้า (COMMERCIAL TERMS & WARRANTY)</div>
+                    <div className="terms-title">{tp('commercialTermsTitle', 'เงื่อนไขและข้อตกลงทางการค้า (COMMERCIAL TERMS & WARRANTY)')}</div>
                     <ol className="terms-list">
-                      <li><strong>เงื่อนไขการชำระเงินแบ่ง 3 งวด:</strong> งวดที่ 1 (มัดจำลงนามสัญญา) 30% | งวดที่ 2 (จัดส่งและติดตั้งอุปกรณ์) 50% | งวดที่ 3 (ตรวจรับงานและเปิดร้าน) 20%</li>
-                      <li><strong>การรับประกัน (Warranty):</strong> อุปกรณ์คอมพิวเตอร์และเซิร์ฟเวอร์รับประกัน On-site Service 3 ปีเต็ม, ระบบ Network ดูแลตลอด 24 ชม. ผ่าน Cloud Monitoring</li>
-                      <li><strong>ระยะเวลาก่อสร้างและส่งมอบ:</strong> ดำเนินการแล้วเสร็จภายใน 4 - 6 สัปดาห์ พร้อมเปิดให้บริการเชิงพาณิชย์</li>
-                      <li><strong>ราคารวมงานแบบเบ็ดเสร็จ (Turnkey):</strong> รวมค่าขนส่ง, การติดตั้งสายระบบไฟฟ้า, สายแลน, การคอนฟิกระบบ Diskless และการอบรมบุคลากร</li>
+                      <li><strong>{tp('term1_title', 'เงื่อนไขการชำระเงินแบ่ง 3 งวด:')}</strong> {tp('term1_desc', 'งวดที่ 1 (มัดจำลงนามสัญญา) 30% | งวดที่ 2 (จัดส่งและติดตั้งอุปกรณ์) 50% | งวดที่ 3 (ตรวจรับงานและเปิดร้าน) 20%')}</li>
+                      <li><strong>{tp('term2_title', 'การรับประกัน (Warranty):')}</strong> {tp('term2_desc', 'อุปกรณ์คอมพิวเตอร์และเซิร์ฟเวอร์รับประกัน On-site Service 3 ปีเต็ม, ระบบ Network ดูแลตลอด 24 ชม. ผ่าน Cloud Monitoring')}</li>
+                      <li><strong>{tp('term3_title', 'ระยะเวลาก่อสร้างและส่งมอบ:')}</strong> {tp('term3_desc', 'ดำเนินการแล้วเสร็จภายใน 4 - 6 สัปดาห์ พร้อมเปิดให้บริการเชิงพาณิชย์')}</li>
+                      <li><strong>{tp('term4_title', 'ราคารวมงานแบบเบ็ดเสร็จ (Turnkey):')}</strong> {tp('term4_desc', 'รวมค่าขนส่ง, การติดตั้งสายระบบไฟฟ้า, สายแลน, การคอนฟิกระบบ Diskless และการอบรมบุคลากร')}</li>
                     </ol>
                   </div>
 
@@ -5130,15 +5158,15 @@ export default function FranchisePlanner() {
                       </div>
 
                       <div className="sign-line"></div>
-                      <div className="sign-name">ผู้อนุมัติเสนอราคา (Authorized Signature)</div>
-                      <div className="sign-title">ฝ่ายพัฒนาธุรกิจแฟรนไชส์ / G-Speed Living Plus Co., Ltd.</div>
-                      <div className="sign-date">วันที่: {new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'numeric', day: 'numeric' })}</div>
+                      <div className="sign-name">{tp('authorizedSignatureTitle', 'ผู้อนุมัติเสนอราคา (Authorized Signature)')}</div>
+                      <div className="sign-title">{tp('franchiseDeptTitle', 'ฝ่ายพัฒนาธุรกิจแฟรนไชส์ / G-Speed Living Plus Co., Ltd.')}</div>
+                      <div className="sign-date">{tp('datePrefix', 'วันที่:')} {new Date().toLocaleDateString(language === 'zh' ? 'zh-CN' : language === 'en' ? 'en-US' : 'th-TH', { year: 'numeric', month: 'numeric', day: 'numeric' })}</div>
                     </div>
                     <div className="signature-box">
                       <div className="sign-line"></div>
-                      <div className="sign-name">ผู้ขอรับสิทธิ์แฟรนไชส์ / ลูกค้า (Franchisee Acceptance)</div>
-                      <div className="sign-title">ผู้ตกลงยินยอมตามใบเสนอราคา</div>
-                      <div className="sign-date">วันที่: ..... / ..... / ..........</div>
+                      <div className="sign-name">{tp('franchiseeAcceptanceTitle', 'ผู้ขอรับสิทธิ์แฟรนไชส์ / ลูกค้า (Franchisee Acceptance)')}</div>
+                      <div className="sign-title">{tp('agreementTitle', 'ผู้ตกลงยินยอมตามใบเสนอราคา')}</div>
+                      <div className="sign-date">{tp('datePrefix', 'วันที่:')} ..... / ..... / ..........</div>
                     </div>
                   </div>
                 </div>
@@ -5146,7 +5174,7 @@ export default function FranchisePlanner() {
                 <form onSubmit={handleLeadSubmit} className="lead-submission-form">
                   <div className="lead-form-header">
                     <Send size={18} className="text-blue" />
-                    <h4>ต้องการให้ทีมงาน G-Speed ติดต่อกลับพร้อมส่งแปลนร้านนี้</h4>
+                    <h4>{tp('leadFormTitle', 'ต้องการให้ทีมงาน G-Speed ติดต่อกลับพร้อมส่งแปลนร้านนี้')}</h4>
                   </div>
 
                   <div className="form-row">
@@ -5155,7 +5183,7 @@ export default function FranchisePlanner() {
                       <input 
                         type="text" 
                         required 
-                        placeholder="คุณสมเกียรติ มั่นคง"
+                        placeholder={tp('leadNamePlaceholder', 'คุณสมเกียรติ มั่นคง')}
                         value={leadForm.fullName}
                         onChange={e => setLeadForm({...leadForm, fullName: e.target.value})}
                       />
@@ -5187,24 +5215,24 @@ export default function FranchisePlanner() {
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
                         <label style={{ margin: 0 }}>{tp('budgetLabel', 'งบประมาณลงทุนที่เตรียมไว้')}</label>
                         <span style={{ fontSize: '0.74rem', color: '#2563eb', fontWeight: 600 }}>
-                          ⚡ คำนวณอัตโนมัติตามแปลน
+                          ⚡ {tp('calcByLayout', 'คำนวณอัตโนมัติตามแปลน')}
                         </span>
                       </div>
                       <select 
                         value={leadForm.budget}
                         onChange={e => setLeadForm({...leadForm, budget: e.target.value})}
                       >
-                        <option value={`฿${totalInvestmentCost.toLocaleString()} บาท (คำนวณตามผังร้านและสเปค)`}>
-                          ฿{totalInvestmentCost.toLocaleString()} บาท (คำนวณอัตโนมัติตามผัง {totalStations} เครื่อง)
+                        <option value={`฿${totalInvestmentCost.toLocaleString()} (${tp('budgetCalculatedAuto', 'คำนวณตามผังร้านและสเปค')})`}>
+                          ฿{totalInvestmentCost.toLocaleString()} {tp('baht', 'บาท')} ({tp('budgetAutoOptionDesc', 'คำนวณอัตโนมัติตามผัง')} {totalStations} {tp('stationsCountUnit', 'เครื่อง')})
                         </option>
-                        <option value="1,000,000 - 2,000,000 บาท">1,000,000 - 2,000,000 บาท</option>
-                        <option value="2,000,000 - 3,500,000 บาท">2,000,000 - 3,500,000 บาท</option>
-                        <option value="3,500,000 - 5,000,000 บาท">3,500,000 - 5,000,000 บาท</option>
-                        <option value="5,000,000 บาทขึ้นไป (Flagship Arena)">5,000,000 บาทขึ้นไป (Flagship Arena)</option>
-                        <option value="มีงบประมาณเฉพาะ / ปรึกษาผู้เชี่ยวชาญ">มีงบประมาณเฉพาะ / ปรึกษาผู้เชี่ยวชาญ</option>
+                        <option value="1,000,000 - 2,000,000">{tp('budget1to2m', '1,000,000 - 2,000,000 บาท')}</option>
+                        <option value="2,000,000 - 3,500,000">{tp('budget2to35m', '2,000,000 - 3,500,000 บาท')}</option>
+                        <option value="3,500,000 - 5,000,000">{tp('budget35to5m', '3,500,000 - 5,000,000 บาท')}</option>
+                        <option value="5,000,000+">{tp('budget5mPlus', '5,000,000 บาทขึ้นไป (Flagship Arena)')}</option>
+                        <option value="มีงบประมาณเฉพาะ / ปรึกษาผู้เชี่ยวชาญ">{tp('customBudgetConsult', 'มีงบประมาณเฉพาะ / ปรึกษาผู้เชี่ยวชาญ')}</option>
                       </select>
                       <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>
-                        💡 งบประเมินรวมฮาร์ดแวร์และโครงสร้างพื้นฐาน: <strong style={{ color: '#0f172a' }}>฿{totalInvestmentCost.toLocaleString()} บาท</strong>
+                        💡 {tp('budgetSummaryLabel', 'งบประเมินรวมฮาร์ดแวร์และโครงสร้างพื้นฐาน:')} <strong style={{ color: '#0f172a' }}>฿{totalInvestmentCost.toLocaleString()} {tp('baht', 'บาท')}</strong>
                       </div>
                     </div>
                   </div>
@@ -5213,7 +5241,7 @@ export default function FranchisePlanner() {
                     <label>{tp('locationLabel', 'ทำเลหรือจังหวัดที่สนใจเปิดสาขา')}</label>
                     <textarea 
                       rows={2} 
-                      placeholder="เช่น มีอาคารพาณิชย์ 2 คูหา ย่าน ม.เกษตรศาสตร์ ติดถนนใหญ่..."
+                      placeholder={tp('leadNotesPlaceholder', 'เช่น มีอาคารพาณิชย์ 2 คูหา ย่าน ม.เกษตรศาสตร์ ติดถนนใหญ่...')}
                       value={leadForm.locationDetail}
                       onChange={e => setLeadForm({...leadForm, locationDetail: e.target.value})}
                     />
@@ -5229,12 +5257,12 @@ export default function FranchisePlanner() {
                       {isSubmittingLead ? (
                         <>
                           <RefreshCw size={16} className="spin-icon" />
-                          <span>กำลังส่งข้อมูล...</span>
+                          <span>{tp('submittingLead', 'กำลังส่งข้อมูล...')}</span>
                         </>
                       ) : (
                         <>
                           <Send size={16} />
-                          <span>ส่งแปลนขอคำปรึกษา</span>
+                          <span>{tp('submitLeadBtn', 'ส่งแปลนขอคำปรึกษา')}</span>
                         </>
                       )}
                     </button>
@@ -5243,19 +5271,19 @@ export default function FranchisePlanner() {
                         type="button" 
                         className="btn-secondary" 
                         onClick={handleExportBlueprintImage}
-                        title="ดาวน์โหลดแปลนสำหรับช่าง (PNG)"
+                        title={tp('downloadBlueprintHint', 'ดาวน์โหลดแปลนสำหรับช่าง (PNG)')}
                       >
                         <Download size={15} />
-                        <span>ดาวน์โหลดแปลน (PNG)</span>
+                        <span>{tp('downloadBlueprintPng', 'ดาวน์โหลดแปลน (PNG)')}</span>
                       </button>
                       <button 
                         type="button" 
                         className="btn-secondary" 
                         onClick={() => window.print()}
-                        title="พิมพ์ใบเสนอราคา (Print หรือ Save PDF)"
+                        title={tp('printQuotationHint', 'พิมพ์ใบเสนอราคา (Print หรือ Save PDF)')}
                       >
                         <Printer size={15} />
-                        <span>พิมพ์ใบเสนอราคา</span>
+                        <span>{tp('printQuotationBtn', 'พิมพ์ใบเสนอราคา')}</span>
                       </button>
                     </div>
                   </div>
@@ -5274,7 +5302,7 @@ export default function FranchisePlanner() {
               type="button" 
               className="btn-icon-close" 
               onClick={() => setShowThankYouPopup(false)}
-              aria-label="ปิดหน้าต่าง"
+              aria-label={tp('closeModalAria', 'ปิดหน้าต่าง')}
             >
               <X size={20} />
             </button>
@@ -5289,43 +5317,41 @@ export default function FranchisePlanner() {
 
             <div className="thank-you-badge-ref">
               <Sparkles size={14} />
-              <span>บันทึกแปลนร้านสำเร็จ • REF ID: <strong>{submittedLeadData.quoteRef}</strong></span>
+              <span>{tp('thankYouRefSaved', 'บันทึกแปลนร้านสำเร็จ • REF ID:')} <strong>{submittedLeadData.quoteRef}</strong></span>
             </div>
 
             <h2 className="thank-you-title">
-              ขอขอบพระคุณที่ให้ความไว้วางใจ<br />
+              {tp('thankYouTitle', 'ขอขอบพระคุณที่ให้ความไว้วางใจ')}<br />
               <span className="text-gradient-blue">GLP : G Speed Living Plus</span>
             </h2>
 
             <p className="thank-you-subtext">
-              ทีมวิศวกรออกแบบระบบและที่ปรึกษาการลงทุนแฟรนไชส์ GLP ได้รับข้อมูลพิมพ์เขียวผังร้านของคุณเรียบร้อยแล้ว
+              {tp('thankYouSubtitle', 'ทีมวิศวกรออกแบบระบบและที่ปรึกษาการลงทุนแฟรนไชส์ GLP ได้รับข้อมูลพิมพ์เขียวผังร้านของคุณเรียบร้อยแล้ว')}
             </p>
 
             {/* SLA Promise Highlight Card */}
             <div className="thank-you-sla-card">
               <div className="sla-card-header">
                 <Clock size={18} className="text-orange" />
-                <strong>การประสานงานติดต่อกลับภายใน 24 ชั่วโมง</strong>
+                <strong>{tp('slaTitle', 'การประสานงานติดต่อกลับภายใน 24 ชั่วโมง')}</strong>
               </div>
-              <p className="sla-card-body">
-                เรากำลังนำข้อมูลขนาดพื้นที่ <strong>{submittedLeadData.roomDimensions}</strong> และจำนวน <strong>{submittedLeadData.stations} เครื่อง</strong> ไปจัดทำ <strong>รายงานวิเคราะห์ความเป็นไปได้ของโครงการ (Feasibility Study)</strong> พร้อมประมาณการผลตอบแทนรายเดือน โดยทีมงานผู้เชี่ยวชาญจะติดต่อกลับไปยังเบอร์ <strong className="text-blue">{submittedLeadData.phone}</strong> หรืออีเมล <strong className="text-blue">{submittedLeadData.email}</strong> ภายใน 24 ชั่วโมง เพื่อส่งมอบเอกสารสรุปโครงการและนัดหมายให้คำปรึกษาแบบ 1-on-1 โดยไม่มีค่าใช้จ่าย
-              </p>
+              <p className="sla-card-body">{tp('thankYouFeasibilityBody', 'เรากำลังนำข้อมูลขนาดพื้นที่')} <strong>{submittedLeadData.roomDimensions}</strong> {tp('andCount', 'และจำนวน')} <strong>{submittedLeadData.stations} {tp('stationsCountUnit', 'เครื่อง')}</strong> {tp('toPrepareFeasibility', 'ไปจัดทำ รายงานวิเคราะห์ความเป็นไปได้ของโครงการ (Feasibility Study) พร้อมประมาณการผลตอบแทนรายเดือน โดยทีมงานผู้เชี่ยวชาญจะติดต่อกลับไปยังเบอร์')} <strong className="text-blue">{submittedLeadData.phone}</strong> {tp('orEmail', 'หรืออีเมล')} <strong className="text-blue">{submittedLeadData.email}</strong> {tp('within24Hours', 'ภายใน 24 ชั่วโมง เพื่อส่งมอบเอกสารสรุปโครงการและนัดหมายให้คำปรึกษาแบบ 1-on-1 โดยไม่มีค่าใช้จ่าย')}</p>
             </div>
 
             {/* Project Snapshot Card */}
             <div className="thank-you-project-snapshot">
               <div className="snapshot-item">
-                <span className="snapshot-label">ผังร้านที่จัดวาง</span>
-                <strong className="snapshot-value">{submittedLeadData.stations} เครื่อง</strong>
+                <span className="snapshot-label">{tp('placedLayoutLabel', 'ผังร้านที่จัดวาง')}</span>
+                <strong className="snapshot-value">{submittedLeadData.stations} {tp('stationsCountUnit', 'เครื่อง')}</strong>
               </div>
               <div className="snapshot-item">
-                <span className="snapshot-label">งบประมาณประเมิน</span>
-                <strong className="snapshot-value text-blue">฿{submittedLeadData.totalInvestment?.toLocaleString()} บ.</strong>
+                <span className="snapshot-label">{tp('estBudgetLabel', 'งบประมาณประเมิน')}</span>
+                <strong className="snapshot-value text-blue">฿{submittedLeadData.totalInvestment?.toLocaleString()} {tp('bahtShort', 'บ.')}</strong>
               </div>
               <div className="snapshot-item">
-                <span className="snapshot-label">สถานะอีเมลตอบกลับ</span>
+                <span className="snapshot-label">{tp('emailStatusLabel', 'สถานะอีเมลตอบกลับ')}</span>
                 <span className="snapshot-badge-sent">
-                  <Check size={12} /> ส่งสำเนาอัตโนมัติแล้ว
+                  <Check size={12} /> {tp('autoCopySent', 'ส่งสำเนาอัตโนมัติแล้ว')}
                 </span>
               </div>
             </div>
@@ -5333,7 +5359,7 @@ export default function FranchisePlanner() {
             {/* Auto Redirect Countdown */}
             <div className="thank-you-countdown-box">
               <div className="countdown-pulse-dot"></div>
-              <span>ระบบกำลังพาท่านกลับสู่หน้าแรกอัตโนมัติในอีก <strong className="countdown-number">{redirectCountdown}</strong> วินาที</span>
+              <span>{tp('autoRedirectCountdownPrefix', 'ระบบกำลังพาท่านกลับสู่หน้าแรกอัตโนมัติในอีก')} <strong className="countdown-number">{redirectCountdown}</strong> {tp('secondsUnit', 'วินาที')}</span>
             </div>
 
             {/* Action Buttons */}
@@ -5343,7 +5369,7 @@ export default function FranchisePlanner() {
                 className="btn-primary thank-you-btn-home"
                 onClick={handleRedirectToHome}
               >
-                <span>กลับสู่หน้าหลักทันที (Go to Home)</span>
+                <span>{tp('goToHomeBtn', 'กลับสู่หน้าหลักทันที (Go to Home)')}</span>
                 <ArrowRight size={18} />
               </button>
               <button 
@@ -5351,7 +5377,7 @@ export default function FranchisePlanner() {
                 className="btn-secondary thank-you-btn-stay"
                 onClick={() => setShowThankYouPopup(false)}
               >
-                <span>ดูแปลนจำลองต่อ</span>
+                <span>{tp('stayOnPlannerBtn', 'ดูแปลนจำลองต่อ')}</span>
               </button>
             </div>
           </div>
@@ -5371,7 +5397,7 @@ export default function FranchisePlanner() {
                 <div>
                   <div className="catalog-modal-tags">
                     <span className="modal-category-tag">
-                      {selectedCatalogModalItem.category === 'stations' ? 'โต๊ะคอมพิวเตอร์เกมมิ่ง' : (selectedCatalogModalItem.category === 'vip' ? 'ห้องซ้อม VIP Suite' : (selectedCatalogModalItem.category === 'facilities' ? 'โซนบริการและแคชเชียร์' : 'เวทีและสิ่งอำนวยความสะดวก'))}
+                      {selectedCatalogModalItem.category === 'stations' ? tp('cat_stations', 'โต๊ะคอมพิวเตอร์เกมมิ่ง') : (selectedCatalogModalItem.category === 'vip' ? tp('cat_vip', 'ห้องซ้อม VIP Suite') : (selectedCatalogModalItem.category === 'facilities' ? tp('cat_facilities', 'โซนบริการและแคชเชียร์') : tp('cat_stage', 'เวทีและสิ่งอำนวยความสะดวก')))}
                     </span>
                     <span className="modal-grade-tag">
                       {selectedCatalogModalItem.grade === 'vip' ? 'VIP Series' : (selectedCatalogModalItem.grade === 'ultimate' ? 'Ultimate Studio' : 'Pro Competitive')}
@@ -5384,7 +5410,7 @@ export default function FranchisePlanner() {
                 type="button" 
                 className="catalog-modal-close-btn"
                 onClick={() => setSelectedCatalogModalItem(null)}
-                title="ปิดหน้าต่าง"
+                title={tp('closeModalAria', 'ปิดหน้าต่าง')}
               >
                 <X size={20} />
               </button>
@@ -5402,7 +5428,7 @@ export default function FranchisePlanner() {
                   />
                   <div className="catalog-modal-img-badge">
                     <Sparkles size={13} />
-                    <span>ภาพสินค้าจริงจากโรงงานผลิต G-Speed</span>
+                    <span>{tp('realProductPhotoBadge', 'ภาพสินค้าจริงจากโรงงานผลิต G-Speed')}</span>
                   </div>
                 </div>
 
@@ -5410,29 +5436,29 @@ export default function FranchisePlanner() {
                 <div className="catalog-modal-colors-card">
                   <h5 className="modal-section-h5">
                     <Palette size={15} className="text-cyan" />
-                    <span>โทนสีและวัสดุตกแต่งจริง (Color & Finish)</span>
+                    <span>{tp('colorAndFinishTitle', 'โทนสีและวัสดุตกแต่งจริง (Color & Finish)')}</span>
                   </h5>
                   <div className="color-swatches-grid">
                     <div className="color-swatch-item">
                       <span className="color-swatch-box" style={{ backgroundColor: selectedCatalogModalItem.deskColor || '#0f172a' }} />
                       <div className="color-swatch-text">
-                        <span className="swatch-lbl">สีท็อป & ขาโต๊ะ</span>
-                        <strong className="swatch-val">{selectedCatalogModalItem.deskColor === '#0f172a' ? 'Black Obsidian (ดำด้าน)' : (selectedCatalogModalItem.deskColor === '#1e293b' ? 'Dark Slate Gray' : selectedCatalogModalItem.deskColor)}</strong>
+                        <span className="swatch-lbl">{tp('deskTopLegColor', 'สีท็อป & ขาโต๊ะ')}</span>
+                        <strong className="swatch-val">{selectedCatalogModalItem.deskColor === '#0f172a' ? tp('blackObsidianVal', 'Black Obsidian (ดำด้าน)') : (selectedCatalogModalItem.deskColor === '#1e293b' ? 'Dark Slate Gray' : selectedCatalogModalItem.deskColor)}</strong>
                       </div>
                     </div>
                     <div className="color-swatch-item">
                       <span className="color-swatch-box" style={{ backgroundColor: selectedCatalogModalItem.accentColor || '#1d4ed8' }} />
                       <div className="color-swatch-text">
-                        <span className="swatch-lbl">สีไฟนีออน / ขอบตกแต่ง</span>
-                        <strong className="swatch-val">{selectedCatalogModalItem.accentColor === '#1d4ed8' ? 'Esport Blue (น้ำเงิน)' : (selectedCatalogModalItem.accentColor === '#38bdf8' ? 'Cyber Cyan (ฟ้าสว่าง)' : (selectedCatalogModalItem.accentColor === '#8b5cf6' ? 'Aura Purple (ม่วง)' : selectedCatalogModalItem.accentColor))}</strong>
+                        <span className="swatch-lbl">{tp('neonAccentColor', 'สีไฟนีออน / ขอบตกแต่ง')}</span>
+                        <strong className="swatch-val">{selectedCatalogModalItem.accentColor === '#1d4ed8' ? tp('esportBlueVal', 'Esport Blue (น้ำเงิน)') : (selectedCatalogModalItem.accentColor === '#38bdf8' ? tp('cyberCyanVal', 'Cyber Cyan (ฟ้าสว่าง)') : (selectedCatalogModalItem.accentColor === '#8b5cf6' ? tp('auraPurpleVal', 'Aura Purple (ม่วง)') : selectedCatalogModalItem.accentColor))}</strong>
                       </div>
                     </div>
                     {selectedCatalogModalItem.chairColor && (
                       <div className="color-swatch-item">
                         <span className="color-swatch-box" style={{ backgroundColor: selectedCatalogModalItem.chairColor || '#0f172a' }} />
                         <div className="color-swatch-text">
-                          <span className="swatch-lbl">สีหนังเก้าอี้เกมมิ่ง</span>
-                          <strong className="swatch-val">Racing Black (หนัง PU ดำเดินด้ายคู่)</strong>
+                          <span className="swatch-lbl">{tp('chairLeatherColor', 'สีหนังเก้าอี้เกมมิ่ง')}</span>
+                          <strong className="swatch-val">{tp('racingBlackVal', 'Racing Black (หนัง PU ดำเดินด้ายคู่)')}</strong>
                         </div>
                       </div>
                     )}
@@ -5442,20 +5468,20 @@ export default function FranchisePlanner() {
                 {/* Dimension Metric Quick Pills */}
                 <div className="catalog-modal-dimensions-card">
                   <div className="dimension-metric-item">
-                    <span className="dim-lbl">ความกว้าง (Width)</span>
-                    <strong className="dim-val text-cyan">{selectedCatalogModalItem.widthMeters} เมตร</strong>
+                    <span className="dim-lbl">{tp('dimSizeWidth', 'ความกว้าง (Width)')}</span>
+                    <strong className="dim-val text-cyan">{selectedCatalogModalItem.widthMeters} {tp('metersUnit', 'เมตร')}</strong>
                   </div>
                   <div className="dimension-metric-item">
-                    <span className="dim-lbl">ความลึก (Depth)</span>
-                    <strong className="dim-val text-cyan">{selectedCatalogModalItem.depth3D || selectedCatalogModalItem.heightMeters} เมตร</strong>
+                    <span className="dim-lbl">{tp('dimSizeDepth', 'ความลึก (Depth)')}</span>
+                    <strong className="dim-val text-cyan">{selectedCatalogModalItem.depth3D || selectedCatalogModalItem.heightMeters} {tp('metersUnit', 'เมตร')}</strong>
                   </div>
                   <div className="dimension-metric-item">
-                    <span className="dim-lbl">ความสูง (Height)</span>
-                    <strong className="dim-val text-cyan">{selectedCatalogModalItem.height3D || 1.25} เมตร</strong>
+                    <span className="dim-lbl">{tp('dimSizeHeight', 'ความสูง (Height)')}</span>
+                    <strong className="dim-val text-cyan">{selectedCatalogModalItem.height3D || 1.25} {tp('metersUnit', 'เมตร')}</strong>
                   </div>
                   <div className="dimension-metric-item">
-                    <span className="dim-lbl">จำนวนที่นั่งในเซ็ต</span>
-                    <strong className="dim-val text-emerald">{selectedCatalogModalItem.seats > 0 ? `${selectedCatalogModalItem.seats} ที่นั่ง (โต๊ะ 1.20ม.)` : 'จุดบริการ'}</strong>
+                    <span className="dim-lbl">{tp('seatsInSet', 'จำนวนที่นั่งในเซ็ต')}</span>
+                    <strong className="dim-val text-emerald">{selectedCatalogModalItem.seats > 0 ? `${selectedCatalogModalItem.seats} ${tp('seatsUnit', 'ที่นั่ง')} (${tp('deskPrefix', 'โต๊ะ')} 1.20${tp('metersUnit', 'ม.')})` : tp('servicePoint', 'จุดบริการ')}</strong>
                   </div>
                 </div>
               </div>
@@ -5465,21 +5491,21 @@ export default function FranchisePlanner() {
                 {/* Price Breakdown Banner */}
                 <div className="catalog-modal-pricing-box">
                   <div className="pricing-box-left">
-                    <span className="pricing-title">ราคารวมเซ็ตพร้อมติดตั้ง:</span>
+                    <span className="pricing-title">{tp('setPriceWithInstall', 'ราคารวมเซ็ตพร้อมติดตั้ง:')}</span>
                     <div className="pricing-main-amount">
                       <span className="currency">฿</span>
                       <span className="amount">{selectedCatalogModalItem.baseCost?.toLocaleString()}</span>
-                      <span className="vat-note">(รวมภาษีและค่าติดตั้ง)</span>
+                      <span className="vat-note">{tp('vatAndInstallIncluded', '(รวมภาษีและค่าติดตั้ง)')}</span>
                     </div>
                   </div>
                   <div className="pricing-box-right">
                     <div className="pricing-mini-item">
-                      <span>โต๊ะสั่งผลิต:</span>
+                      <span>{tp('customDesk', 'โต๊ะสั่งผลิต:')}</span>
                       <strong>฿{selectedCatalogModalItem.deskPrice?.toLocaleString()}</strong>
                     </div>
                     {selectedCatalogModalItem.chairCount > 0 && (
                       <div className="pricing-mini-item">
-                        <span>เก้าอี้เกมมิ่ง ({selectedCatalogModalItem.chairCount} ตัว):</span>
+                        <span>{tp('gamingChairsCount', 'เก้าอี้เกมมิ่ง')} ({selectedCatalogModalItem.chairCount} {tp('unitsChairs', 'ตัว')}):</span>
                         <strong>฿{((selectedCatalogModalItem.chairPrice || 0) * (selectedCatalogModalItem.chairCount || 1)).toLocaleString()}</strong>
                       </div>
                     )}
@@ -5492,13 +5518,13 @@ export default function FranchisePlanner() {
                   <div className="modal-spec-card">
                     <div className="spec-card-header">
                       <Shield size={16} className="text-blue" />
-                      <h4>1. สเปกวัสดุและโครงสร้างทางวิศวกรรม (Material & Construction)</h4>
+                      <h4>{tp('specSection1_title', '1. สเปกวัสดุและโครงสร้างทางวิศวกรรม (Material & Construction)')}</h4>
                     </div>
                     <p className="spec-card-body-text">{selectedCatalogModalItem.material}</p>
                     <ul className="spec-bullets-list">
-                      <li><strong>หน้าท็อปโต๊ะ:</strong> ไม้สังเคราะห์ HPL (High Pressure Laminate) ความหนา 25 มม. เกรดทนความร้อน กันน้ำ 100% และกันรอยขูดขีด</li>
-                      <li><strong>ขอบโต๊ะ Ergonomic:</strong> เจียรลบมุมลาดเอียง 45 องศา (Bevel Edge) ตามหลักสรีรศาสตร์ รองรับข้อมือผู้เล่นเกมได้สบายตลอดวัน</li>
-                      <li><strong>โครงขาและคานรับแรง:</strong> เหล็กกล้าคาร์บอน (Carbon Steel Box) หนา 1.5 - 2.0 มม. พ่นสีพาวเดอร์โค้ตกันสนิม รองรับน้ำหนักได้มากกว่า 250 กก.</li>
+                      <li><strong>{tp('specHplTop', 'หน้าท็อปโต๊ะ:')}</strong> {tp('specHplTopDesc', 'ไม้สังเคราะห์ HPL (High Pressure Laminate) ความหนา 25 มม. เกรดทนความร้อน กันน้ำ 100% และกันรอยขูดขีด')}</li>
+                      <li><strong>{tp('specErgoEdge', 'ขอบโต๊ะ Ergonomic:')}</strong> {tp('specErgoEdgeDesc', 'เจียรลบมุมลาดเอียง 45 องศา (Bevel Edge) ตามหลักสรีรศาสตร์ รองรับข้อมือผู้เล่นเกมได้สบายตลอดวัน')}</li>
+                      <li><strong>{tp('specSteelFrame', 'โครงขาและคานรับแรง:')}</strong> {tp('specSteelFrameDesc', 'เหล็กกล้าคาร์บอน (Carbon Steel Box) หนา 1.5 - 2.0 มม. พ่นสีพาวเดอร์โค้ตกันสนิม รองรับน้ำหนักได้มากกว่า 250 กก.')}</li>
                     </ul>
                   </div>
 
@@ -5507,16 +5533,16 @@ export default function FranchisePlanner() {
                     <div className="modal-spec-card">
                       <div className="spec-card-header">
                         <Armchair size={16} style={{ color: '#0284c7' }} />
-                        <h4>2. สเปกเก้าอี้เกมมิ่งและอุปกรณ์ที่มาในเซ็ต (Included Furniture)</h4>
+                        <h4>{tp('specSection2_title', '2. สเปกเก้าอี้เกมมิ่งและอุปกรณ์ที่มาในเซ็ต (Included Furniture)')}</h4>
                       </div>
                       <div className="chair-spec-info-box">
-                        <strong>รุ่นเก้าอี้: {selectedCatalogModalItem.chairModel}</strong>
-                        <span className="chair-count-badge">จำนวน {selectedCatalogModalItem.chairCount} ตัว ประจำสถานี</span>
+                        <strong>{tp('chairModelLabel', 'รุ่นเก้าอี้:')} {selectedCatalogModalItem.chairModel}</strong>
+                        <span className="chair-count-badge">{tp('chairCountPrefix', 'จำนวน')} {selectedCatalogModalItem.chairCount} {tp('unitsChairs', 'ตัว')} {tp('perStationSuffix', 'ประจำสถานี')}</span>
                       </div>
                       <ul className="spec-bullets-list">
-                        <li><strong>เบาะรองนั่ง:</strong> โฟมขึ้นรูปเย็นความหนาแน่นสูง (High-Density Cold-Cure Foam) ไม่ยุบตัว รับประกันการใช้งานต่อเนื่อง</li>
-                        <li><strong>ฟังก์ชันการปรับระดับ:</strong> ปรับเอนหลังได้ 160 องศา พร้อมระบบล็อกมัลติฟังก์ชัน + ที่พักแขน 3D/4D ปรับระดับความสูงและองศาได้</li>
-                        <li><strong>ระบบรองรับน้ำหนัก:</strong> โช้กแก๊ส Class 4 ผ่านการทดสอบความปลอดภัยระดับสากล BIFMA รองรับน้ำหนักสูงสุด 150 กก./ตัว</li>
+                        <li><strong>{tp('specCushion', 'เบาะรองนั่ง:')}</strong> {tp('specCushionDesc', 'โฟมขึ้นรูปเย็นความหนาแน่นสูง (High-Density Cold-Cure Foam) ไม่ยุบตัว รับประกันการใช้งานต่อเนื่อง')}</li>
+                        <li><strong>{tp('specRecline', 'ฟังก์ชันการปรับระดับ:')}</strong> {tp('specReclineDesc', 'ปรับเอนหลังได้ 160 องศา พร้อมระบบล็อกมัลติฟังก์ชัน + ที่พักแขน 3D/4D ปรับระดับความสูงและองศาได้')}</li>
+                        <li><strong>{tp('specGasLift', 'ระบบรองรับน้ำหนัก:')}</strong> {tp('specGasLiftDesc', 'โช้กแก๊ส Class 4 ผ่านการทดสอบความปลอดภัยระดับสากล BIFMA รองรับน้ำหนักสูงสุด 150 กก./ตัว')}</li>
                       </ul>
                     </div>
                   )}
@@ -5525,12 +5551,12 @@ export default function FranchisePlanner() {
                   <div className="modal-spec-card">
                     <div className="spec-card-header">
                       <Zap size={16} className="text-amber" />
-                      <h4>3. ระบบท่อร้อยสายไฟและโครงข่ายเน็ตเวิร์ก (Electrical & LAN Raceway)</h4>
+                      <h4>{tp('specSection3_title', '3. ระบบท่อร้อยสายไฟและโครงข่ายเน็ตเวิร์ก (Electrical & LAN Raceway)')}</h4>
                     </div>
                     <ul className="spec-bullets-list">
-                      <li><strong>รางร้อยสายไฟใต้โต๊ะ (Dual Cable Raceway):</strong> รางเหล็กซ่อนสายไฟ 2 ช่องอิสระ แยกท่อไฟฟ้ากำลัง 220V และสายแลน LAN ป้องกันสัญญาณรบกวน (Zero Interference)</li>
-                      <li><strong>จุดเต้ารับไฟฟ้าต่อสถานี:</strong> เต้ารับคู่ 3 ขา มีกราวด์ (Universal Socket 220V 16A) พร้อมเบรกเกอร์กันไฟกระชาก (Surge Protection) 1:1</li>
-                      <li><strong>การเชื่อมต่อเน็ตเวิร์ก:</strong> เต้ารับ LAN RJ-45 CAT6A Shielded ความเร็ว 10Gbps Ready พร้อมท่อร้อยสายเชื่อมตรงสู่ตู้ Rack เซิร์ฟเวอร์</li>
+                      <li><strong>{tp('specRaceway', 'รางร้อยสายไฟใต้โต๊ะ (Dual Cable Raceway):')}</strong> {tp('specRacewayDesc', 'รางเหล็กซ่อนสายไฟ 2 ช่องอิสระ แยกท่อไฟฟ้ากำลัง 220V และสายแลน LAN ป้องกันสัญญาณรบกวน (Zero Interference)')}</li>
+                      <li><strong>{tp('specSocket', 'จุดเต้ารับไฟฟ้าต่อสถานี:')}</strong> {tp('specSocketDesc', 'เต้ารับคู่ 3 ขา มีกราวด์ (Universal Socket 220V 16A) พร้อมเบรกเกอร์กันไฟกระชาก (Surge Protection) 1:1')}</li>
+                      <li><strong>{tp('specLan', 'การเชื่อมต่อเน็ตเวิร์ก:')}</strong> {tp('specLanDesc', 'เต้ารับ LAN RJ-45 CAT6A Shielded ความเร็ว 10Gbps Ready พร้อมท่อร้อยสายเชื่อมตรงสู่ตู้ Rack เซิร์ฟเวอร์')}</li>
                     </ul>
                   </div>
 
@@ -5538,15 +5564,15 @@ export default function FranchisePlanner() {
                   <div className="modal-spec-card highlight-warranty">
                     <div className="spec-card-header">
                       <CheckCircle2 size={16} className="text-emerald" />
-                      <h4>4. การรับประกันและระยะเวลาผลิต (Warranty & Delivery)</h4>
+                      <h4>{tp('specSection4_title', '4. การรับประกันและระยะเวลาผลิต (Warranty & Delivery)')}</h4>
                     </div>
                     <div className="warranty-grid">
                       <div className="warranty-item">
-                        <span className="w-lbl">การรับประกัน:</span>
+                        <span className="w-lbl">{tp('warrantyLabel', 'การรับประกัน:')}</span>
                         <strong className="w-val text-emerald">{selectedCatalogModalItem.warranty}</strong>
                       </div>
                       <div className="warranty-item">
-                        <span className="w-lbl">ระยะเวลาสั่งผลิต:</span>
+                        <span className="w-lbl">{tp('leadTimeLabel', 'ระยะเวลาสั่งผลิต:')}</span>
                         <strong className="w-val text-cyan">{selectedCatalogModalItem.leadTime}</strong>
                       </div>
                     </div>
@@ -5558,8 +5584,8 @@ export default function FranchisePlanner() {
             {/* Footer */}
             <div className="catalog-modal-footer">
               <div className="modal-footer-left">
-                <span className="footer-summary-lbl">โมเดลนี้ประกอบด้วย:</span>
-                <strong>{selectedCatalogModalItem.seats > 0 ? `โต๊ะมาตรฐาน ${selectedCatalogModalItem.widthMeters}ม. + เก้าอี้ ${selectedCatalogModalItem.chairCount} ตัว + รางสายไฟครบชุด` : selectedCatalogModalItem.desc}</strong>
+                <span className="footer-summary-lbl">{tp('modelIncludes', 'โมเดลนี้ประกอบด้วย:')}</span>
+                <strong>{selectedCatalogModalItem.seats > 0 ? `${tp('standardDeskPrefix', 'โต๊ะมาตรฐาน')} ${selectedCatalogModalItem.widthMeters}${tp('metersUnit', 'ม.')} + ${tp('chairsPrefix', 'เก้าอี้')} ${selectedCatalogModalItem.chairCount} ${tp('unitsChairs', 'ตัว')} + ${tp('racewayIncluded', 'รางสายไฟครบชุด')}` : getItemDesc(selectedCatalogModalItem)}</strong>
               </div>
               <div className="modal-footer-btns">
                 <button 
@@ -5567,7 +5593,7 @@ export default function FranchisePlanner() {
                   className="btn-secondary"
                   onClick={() => setSelectedCatalogModalItem(null)}
                 >
-                  ปิดหน้าต่าง
+                  {tp('closeWindow', 'ปิดหน้าต่าง')}
                 </button>
                 <button 
                   type="button" 
@@ -5578,7 +5604,7 @@ export default function FranchisePlanner() {
                   }}
                 >
                   <Plus size={16} />
-                  <span>เพิ่มลงในผัง 3D (Add to Plan)</span>
+                  <span>{tp('addTo3dPlan', 'เพิ่มลงในผัง 3D (Add to Plan)')}</span>
                 </button>
               </div>
             </div>
@@ -5594,7 +5620,7 @@ export default function FranchisePlanner() {
               <div className="bp-modal-title-wrap">
                 <Download size={20} className="text-blue" />
                 <div>
-                  <h3 className="bp-modal-title">แบบแปลนสถาปัตยกรรม & งานระบบ (PNG)</h3>
+                  <h3 className="bp-modal-title">{tp('blueprintModalTitle', 'แบบแปลนสถาปัตยกรรม & งานระบบ (PNG)')}</h3>
                   <span className="bp-modal-subtitle">{exportedBlueprintModal.filename}</span>
                 </div>
               </div>
@@ -5602,7 +5628,7 @@ export default function FranchisePlanner() {
                 type="button"
                 className="bp-modal-close" 
                 onClick={() => setExportedBlueprintModal(null)}
-                title="ปิดหน้าต่าง"
+                title={tp('closeModalAria', 'ปิดหน้าต่าง')}
               >
                 <X size={18} />
               </button>
@@ -5611,10 +5637,10 @@ export default function FranchisePlanner() {
             <div 
               className="bp-modal-body" 
               onClick={() => setIsBlueprintZoomed(prev => !prev)}
-              title={isBlueprintZoomed ? 'คลิกเพื่อย่อมุมมองปกติ' : 'คลิกเพื่อขยายดูตัวอักษรและรายละเอียดขนาดใหญ่ (100% Zoom)'}
+              title={isBlueprintZoomed ? tp('unzoomTooltip', 'คลิกเพื่อย่อมุมมองปกติ') : tp('zoomTooltip', 'คลิกเพื่อขยายดูตัวอักษรและรายละเอียดขนาดใหญ่ (100% Zoom)')}
             >
               <div className="bp-floating-zoom-badge">
-                <span>{isBlueprintZoomed ? '🔍 กำลังซูม 100% (คลิกเพื่อย่อภาพรวม)' : '🔍 คลิกภาพเพื่อซูมดูตัวหนังสือและอุปกรณ์ 100%'}</span>
+                <span>{isBlueprintZoomed ? '🔍 ' + tp('zooming100', 'กำลังซูม 100% (คลิกเพื่อย่อภาพรวม)') : '🔍 ' + tp('clickToZoom100', 'คลิกภาพเพื่อซูมดูตัวหนังสือและอุปกรณ์ 100%')}</span>
               </div>
               <img 
                 src={exportedBlueprintModal.dataUrl} 
@@ -5625,7 +5651,7 @@ export default function FranchisePlanner() {
 
             <div className="bp-modal-footer">
               <div className="bp-modal-tip">
-                <span>💡 <strong>คำแนะนำ:</strong> {isBlueprintZoomed ? 'คลิกที่ภาพเพื่อย่อมุมมองปกติ | เลื่อนลูกกลิ้งเมาส์เพื่อดูส่วนต่างๆ' : 'คลิกที่ภาพ หรือกดปุ่ม "ขยายดูอุปกรณ์ 100%" เพื่ออ่านตัวหนังสือชัดเจน'}</span>
+                <span>💡 <strong>{tp('hintLabel', 'คำแนะนำ:')}</strong> {isBlueprintZoomed ? tp('zoomedHint', 'คลิกที่ภาพเพื่อย่อมุมมองปกติ | เลื่อนลูกกลิ้งเมาส์เพื่อดูส่วนต่างๆ') : tp('unzoomedHint', 'คลิกที่ภาพ หรือกดปุ่ม "ขยายดูอุปกรณ์ 100%" เพื่ออ่านตัวหนังสือชัดเจน')}</span>
               </div>
               <div className="bp-modal-btns">
                 <button 
@@ -5634,7 +5660,7 @@ export default function FranchisePlanner() {
                   onClick={() => downloadFile(exportedBlueprintModal.dataUrl, exportedBlueprintModal.filename, 'image/png')}
                 >
                   <Download size={16} />
-                  <span>บันทึกไฟล์ (PNG)</span>
+                  <span>{tp('saveFilePng', 'บันทึกไฟล์ (PNG)')}</span>
                 </button>
                 <div className="bp-modal-sub-btns">
                   <button 
@@ -5649,7 +5675,7 @@ export default function FranchisePlanner() {
                     onClick={() => setIsBlueprintZoomed(prev => !prev)}
                   >
                     <ZoomIn size={15} />
-                    <span>{isBlueprintZoomed ? 'ย่อมุมมอง' : 'ซูม 100%'}</span>
+                    <span>{isBlueprintZoomed ? tp('zoomFit', 'ย่อมุมมอง') : tp('zoom100', 'ซูม 100%')}</span>
                   </button>
                   <button 
                     type="button"
@@ -5662,7 +5688,7 @@ export default function FranchisePlanner() {
                     }}
                   >
                     <Eye size={15} />
-                    <span>เปิดแท็บใหม่</span>
+                    <span>{tp('openNewTab', 'เปิดแท็บใหม่')}</span>
                   </button>
                 </div>
               </div>
@@ -5691,17 +5717,15 @@ export default function FranchisePlanner() {
                 type="button" 
                 className="del-modal-close-btn"
                 onClick={cancelDeleteItem}
-                title="ปิดหน้าต่าง"
+                title={tp('closeModalAria', 'ปิดหน้าต่าง')}
               >
                 <X size={18} />
               </button>
             </div>
 
             <div className="del-modal-content">
-              <h3 className="del-modal-title">ยืนยันนำอุปกรณ์ออกจากผัง?</h3>
-              <p className="del-modal-desc">
-                คุณต้องการนำอุปกรณ์ชิ้นนี้ออกจากแบบจำลองผังร้าน 3D ใช่หรือไม่?
-              </p>
+              <h3 className="del-modal-title">{tp('delModalTitle', 'ยืนยันนำอุปกรณ์ออกจากผัง?')}</h3>
+              <p className="del-modal-desc">{tp('delModalDesc', 'คุณต้องการนำอุปกรณ์ชิ้นนี้ออกจากแบบจำลองผังร้าน 3D ใช่หรือไม่?')}</p>
 
               {/* Item preview card */}
               <div className="del-modal-item-preview">
@@ -5722,8 +5746,7 @@ export default function FranchisePlanner() {
                     <span className="del-meta-dim">
                       <Ruler size={11} />
                       {itemPendingDelete.catalog?.seats > 0 
-                        ? `${itemPendingDelete.catalog.seats} ที่นั่ง (${itemPendingDelete.catalog.widthMeters}ม.)` 
-                        : `${itemPendingDelete.catalog?.widthMeters || 1} x ${itemPendingDelete.catalog?.heightMeters || 1} ม.`}
+                        ? `${itemPendingDelete.catalog.seats} ${tp('seatsUnit', 'ที่นั่ง')} (${itemPendingDelete.catalog.widthMeters}${tp('metersUnit', 'ม.')})` : `${itemPendingDelete.catalog?.widthMeters || 1} x ${itemPendingDelete.catalog?.heightMeters || 1} ${tp('metersUnit', 'ม.')}`}
                     </span>
                     <span className="del-meta-price">
                       ฿{(itemPendingDelete.catalog?.baseCost || 0).toLocaleString()}
@@ -5734,7 +5757,7 @@ export default function FranchisePlanner() {
 
               <p className="del-modal-subtext">
                 <Info size={13} className="text-blue" />
-                <span>ท่านสามารถเลือกเพิ่มอุปกรณ์ชิ้นนี้กลับเข้ามาใหม่ได้ตลอดเวลาจากแท็บ <strong>"+ เพิ่มอุปกรณ์"</strong></span>
+                <span>{tp('delModalSubtext', 'ท่านสามารถเลือกเพิ่มอุปกรณ์ชิ้นนี้กลับเข้ามาใหม่ได้ตลอดเวลาจากแท็บ')} <strong>"{tp('addEquipmentShort', '+ เพิ่มอุปกรณ์')}"</strong></span>
               </p>
             </div>
 
@@ -5744,7 +5767,7 @@ export default function FranchisePlanner() {
                 className="btn-del-modal-cancel" 
                 onClick={cancelDeleteItem}
               >
-                ยกเลิก
+                {tp('cancel', 'ยกเลิก')}
               </button>
               <button 
                 type="button" 
@@ -5752,7 +5775,7 @@ export default function FranchisePlanner() {
                 onClick={confirmDeleteItem}
               >
                 <Trash2 size={14} />
-                <span>ยืนยันนำอุปกรณ์ออก</span>
+                <span>{tp('confirmRemove', 'ยืนยันนำอุปกรณ์ออก')}</span>
               </button>
             </div>
           </div>
