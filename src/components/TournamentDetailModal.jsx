@@ -1116,14 +1116,14 @@ export default function TournamentDetailModal({
               {/* Teams Cards Grid */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '14px' }}>
                 {(tournament.teams || [])
-                  .filter(t => {
+                  .filter(tm => {
                     if (!rosterSearch) return true;
                     const q = rosterSearch.toLowerCase();
                     return (
-                      t.name?.toLowerCase().includes(q) ||
-                      t.tag?.toLowerCase().includes(q) ||
-                      t.captain?.toLowerCase().includes(q) ||
-                      (t.players || []).some(p => p.toLowerCase().includes(q))
+                      tm.name?.toLowerCase().includes(q) ||
+                      tm.tag?.toLowerCase().includes(q) ||
+                      tm.captain?.toLowerCase().includes(q) ||
+                      (tm.players || []).some(p => p.toLowerCase().includes(q))
                     );
                   })
                   .map((team, tidx) => (

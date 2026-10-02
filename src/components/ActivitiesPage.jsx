@@ -43,14 +43,14 @@ export default function ActivitiesPage({
   const allUniqueTags = useMemo(() => {
     const set = new Set();
     if (Array.isArray(siteData?.articleTags)) {
-      siteData.articleTags.forEach(t => {
-        if (t && t.trim()) set.add(t.replace(/^#/, '').trim());
+      siteData.articleTags.forEach(tg => {
+        if (tg && tg.trim()) set.add(tg.replace(/^#/, '').trim());
       });
     }
     galleryList.forEach(item => {
       if (Array.isArray(item.tags)) {
-        item.tags.forEach(t => {
-          if (t && t.trim()) set.add(t.replace(/^#/, '').trim());
+        item.tags.forEach(tg => {
+          if (tg && tg.trim()) set.add(tg.replace(/^#/, '').trim());
         });
       } else if (item.tag && item.tag.trim()) {
         set.add(item.tag.replace(/^#/, '').trim());

@@ -921,22 +921,22 @@ export default function ArenaHub({
               </div>
 
               <div className="tournaments-grid">
-                {tournamentsList.slice(0, 3).map((t) => {
-                  const photoCount = (t.galleryPhotos || []).length;
-                  const teamCount = (t.teams || []).length;
-                  const isRegistrationOpen = isTournamentRegistrationOpen(t);
+                {tournamentsList.slice(0, 3).map((tourney) => {
+                  const photoCount = (tourney.galleryPhotos || []).length;
+                  const teamCount = (tourney.teams || []).length;
+                  const isRegistrationOpen = isTournamentRegistrationOpen(tourney);
                   return (
-                    <div key={t.id} className="tournament-card">
+                    <div key={tourney.id} className="tournament-card">
                       {/* Banner Image with Overlays - Clickable */}
                       <div 
                         className="t-banner-wrapper"
-                        onClick={() => handleOpenTournament(t, 'overview')}
+                        onClick={() => handleOpenTournament(tourney, 'overview')}
                         style={{ cursor: 'pointer' }}
-                        title={`ดูรายละเอียด ${t.title}`}
+                        title={`ดูรายละเอียด ${tourney.title}`}
                       >
                         <img 
-                          src={t.bannerImage || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80'} 
-                          alt={t.title} 
+                          src={tourney.bannerImage || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80'} 
+                          alt={tourney.title} 
                           className="t-card-img"
                           onError={(e) => {
                             e.target.src = 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80';
@@ -951,23 +951,23 @@ export default function ArenaHub({
                                 <span className="live-ping-ring" />
                                 <span className="live-ping-core" />
                               </span>
-                              <span>{t.badge || 'เปิดรับสมัครด่วน'}</span>
+                              <span>{tourney.badge || 'เปิดรับสมัครด่วน'}</span>
                             </span>
                           ) : (
-                            <span className={`badge-pill badge-${t.badgeType === 'cyan' ? 'blue' : t.badgeType === 'magenta' ? 'white' : 'amber'}`} style={{ whiteSpace: 'nowrap', flexShrink: 0 }}>
-                              {t.badge}
+                            <span className={`badge-pill badge-${tourney.badgeType === 'cyan' ? 'blue' : tourney.badgeType === 'magenta' ? 'white' : 'amber'}`} style={{ whiteSpace: 'nowrap', flexShrink: 0 }}>
+                              {tourney.badge}
                             </span>
                           )}
-                          {t.gameCategory && (
-                            <span className="t-category-badge" title={t.gameCategory}>
-                              {t.gameCategory}
+                          {tourney.gameCategory && (
+                            <span className="t-category-badge" title={tourney.gameCategory}>
+                              {tourney.gameCategory}
                             </span>
                           )}
                         </div>
 
                         <div className="t-banner-bottom">
                           <span className="t-game-tag">
-                            {t.game}
+                            {tourney.game}
                           </span>
                         </div>
                       </div>
@@ -977,11 +977,11 @@ export default function ArenaHub({
                         <div>
                           <h3 
                             className="t-card-title clickable-title" 
-                            title={t.title}
-                            onClick={() => handleOpenTournament(t, 'overview')}
+                            title={tourney.title}
+                            onClick={() => handleOpenTournament(tourney, 'overview')}
                             style={{ cursor: 'pointer' }}
                           >
-                            {t.title}
+                            {tourney.title}
                           </h3>
 
                           {/* High-impact Prize Banner */}
@@ -991,7 +991,7 @@ export default function ArenaHub({
                               <span>เงินรางวัลรวม</span>
                             </div>
                             <div className="t-prize-amount">
-                              {t.prizePool}
+                              {tourney.prizePool}
                             </div>
                           </div>
 
@@ -999,15 +999,15 @@ export default function ArenaHub({
                           <div className="t-details-list" style={{ marginTop: '12px' }}>
                             <div className="t-detail-item">
                               <Calendar size={15} className="text-cyan" style={{ flexShrink: 0 }} />
-                              <span><strong>วันที่:</strong> {t.date} ({t.time})</span>
+                              <span><strong>วันที่:</strong> {tourney.date} ({tourney.time})</span>
                             </div>
                             <div className="t-detail-item">
                               <Users size={15} className="text-blue" style={{ flexShrink: 0 }} />
-                              <span><strong>จำนวนทีม:</strong> {t.slots} ({teamCount} ทีมร่วมแข่ง)</span>
+                              <span><strong>จำนวนทีม:</strong> {tourney.slots} ({teamCount} ทีมร่วมแข่ง)</span>
                             </div>
                             <div className="t-detail-item">
                               <Zap size={15} className="text-amber" style={{ flexShrink: 0 }} />
-                              <span><strong>รูปแบบ:</strong> {t.format}</span>
+                              <span><strong>รูปแบบ:</strong> {tourney.format}</span>
                             </div>
                           </div>
                         </div>
@@ -1019,7 +1019,7 @@ export default function ArenaHub({
                               type="button"
                               className="t-btn-secondary"
                               style={{ width: '100%', justifyContent: 'center' }}
-                              onClick={() => handleOpenTournament(t, 'roster')}
+                              onClick={() => handleOpenTournament(tourney, 'roster')}
                             >
                               <Users size={14} />
                               <span>รายชื่อทีม ({teamCount})</span>
@@ -1029,10 +1029,10 @@ export default function ArenaHub({
                           {/* Action Buttons - Clean, Consistent & Aligned */}
                           {isRegistrationOpen ? (
                             <button 
-                              id={`btn-reg-${t.id}`}
+                              id={`btn-reg-${tourney.id}`}
                               className="t-btn-register"
                               style={{ width: '100%', justifyContent: 'center' }}
-                              onClick={() => handleOpenTournament(t, 'register')}
+                              onClick={() => handleOpenTournament(tourney, 'register')}
                             >
                               <Zap size={16} className="text-amber-300" style={{ filter: 'drop-shadow(0 0 4px rgba(251, 191, 36, 0.8))' }} />
                               <span>สมัครเข้าร่วมแข่งขัน</span>
@@ -1042,7 +1042,7 @@ export default function ArenaHub({
                             <button 
                               className="t-btn-full"
                               style={{ width: '100%', justifyContent: 'center' }}
-                              onClick={() => handleOpenTournament(t, 'bracket')}
+                              onClick={() => handleOpenTournament(tourney, 'bracket')}
                             >
                               <Trophy size={15} />
                               <span>ดูสายการแข่งขัน & สกอร์สด (Brackets)</span>

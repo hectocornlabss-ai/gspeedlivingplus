@@ -236,7 +236,7 @@ export default function ContactPage({ onNavigateHome, onNavigateFranchise }) {
   const heroDesc = language === 'th' ? (contactPage.heroDesc || curI18n.desc) : curI18n.desc;
 
   const transportationList = (contactPage.transportation && contactPage.transportation.length > 0)
-    ? contactPage.transportation.filter(t => t.visible !== false).map(item => {
+    ? contactPage.transportation.filter(tr => tr.visible !== false).map(item => {
         if (language === 'en') {
           if (item.type === 'train') return { ...item, title: 'MRT Yellow Line', desc: 'Exit Lat Phrao 83 or Lat Phrao 101 station, then take a 5-min motorbike taxi into Soi Lat Phrao 112.', tag: 'Public Transit' };
           if (item.type === 'car') return { ...item, title: 'Personal Vehicle', desc: 'Accessible via Lat Phrao 112 or Ramkhamhaeng 53. Spacious on-site parking with 24/7 CCTV surveillance.', tag: 'Free Parking' };

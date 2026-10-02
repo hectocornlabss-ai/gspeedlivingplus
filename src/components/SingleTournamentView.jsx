@@ -285,7 +285,7 @@ export default function SingleTournamentView({
   }, [lightboxIndex, filteredPhotos.length]);
 
   // Related Tournaments
-  const relatedTournaments = allTournaments.filter(t => t.id !== tournament?.id);
+  const relatedTournaments = allTournaments.filter(tour => tour.id !== tournament?.id);
 
   // Bottom Social Share State & Handlers
   const [bottomShareOpen, setBottomShareOpen] = useState(false);

@@ -27,8 +27,8 @@ export default function TournamentsPage({
   // Dynamic unique games list with counts
   const gamesWithCount = useMemo(() => {
     const counts = {};
-    tournamentsList.forEach(t => {
-      const g = (t.game || 'ทั่วไป').trim();
+    tournamentsList.forEach(tour => {
+      const g = (tour.game || 'ทั่วไป').trim();
       counts[g] = (counts[g] || 0) + 1;
     });
     return Object.entries(counts).map(([name, count]) => ({ name, count }));
@@ -37,18 +37,18 @@ export default function TournamentsPage({
   // Filtered and Sorted Tournaments (New / Open tournaments sorted automatically to the front, closed to the back)
   const filteredTournaments = useMemo(() => {
     return tournamentsList
-      .filter(t => {
+      .filter(tour => {
         // 1. Search Query
         const q = searchQuery.trim().toLowerCase();
         const matchSearch = !q || 
-          t.title.toLowerCase().includes(q) || 
-          t.game.toLowerCase().includes(q) ||
-          (t.gameCategory && t.gameCategory.toLowerCase().includes(q)) ||
-          (t.desc && t.desc.toLowerCase().includes(q));
+          tour.title.toLowerCase().includes(q) || 
+          tour.game.toLowerCase().includes(q) ||
+          (tour.gameCategory && tour.gameCategory.toLowerCase().includes(q)) ||
+          (tour.desc && tour.desc.toLowerCase().includes(q));
 
         // 2. Game Filter
         const matchGame = gameFilter === 'all' || 
-          (t.game && t.game.toLowerCase() === gameFilter.toLowerCase());
+          (tour.game && tour.game.toLowerCase() === gameFilter.toLowerCase());
 
         return matchSearch && matchGame;
       })
@@ -58,7 +58,7 @@ export default function TournamentsPage({
   // Aggregate stats
   const totalPrizePoolText = '฿300,000+';
   const openCount = tournamentsList.filter(isTournamentRegistrationOpen).length;
-  const totalTeams = tournamentsList.reduce((acc, t) => acc + (t.teams ? t.teams.length : 0), 0);
+  const totalTeams = tournamentsList.reduce((acc, tour) => acc + (tour.teams ? tour.teams.length : 0), 0);
 
   const handleOpenTournament = (tour) => {
     const slug = tour.slug || tour.seo?.slug || tour.id;
@@ -195,22 +195,22 @@ export default function TournamentsPage({
 
           {filteredTournaments.length > 0 ? (
             <div className="tournaments-grid">
-              {filteredTournaments.map((t) => {
-                const photoCount = (t.galleryPhotos || []).length;
-                const teamCount = (t.teams || []).length;
-                const isRegistrationOpen = isTournamentRegistrationOpen(t);
+              {filteredTournaments.map((tourney) => {
+                const photoCount = (tourney.galleryPhotos || []).length;
+                const teamCount = (tourney.teams || []).length;
+                const isRegistrationOpen = isTournamentRegistrationOpen(tourney);
 
                 return (
-                  <div key={t.id} className="tournament-card">
+                  <div key={tourney.id} className="tournament-card">
                     {/* Banner Image with Overlays */}
                     <div 
                       className="t-banner-wrapper"
-                      onClick={() => handleOpenTournament(t, 'overview')}
+                      onClick={() => handleOpenTournament(tourney, 'overview')}
                       style={{ cursor: 'pointer' }}
                     >
                       <img 
-                        src={t.bannerImage || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80'} 
-                        alt={t.title} 
+                        src={tourney.bannerImage || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80'} 
+                        alt={tourney.title} 
                         className="t-card-img"
                         onError={(e) => {
                           e.target.src = 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80';
@@ -225,23 +225,23 @@ export default function TournamentsPage({
                               <span className="live-ping-ring" />
                               <span className="live-ping-core" />
                             </span>
-                            <span>{t.badge || 'เปิดรับสมัครด่วน'}</span>
+                            <span>{tourney.badge || 'เปิดรับสมัครด่วน'}</span>
                           </span>
                         ) : (
-                          <span className={`badge-pill badge-${t.badgeType === 'cyan' ? 'blue' : t.badgeType === 'magenta' ? 'white' : 'amber'}`}>
-                            {t.badge}
+                          <span className={`badge-pill badge-${tourney.badgeType === 'cyan' ? 'blue' : tourney.badgeType === 'magenta' ? 'white' : 'amber'}`}>
+                            {tourney.badge}
                           </span>
                         )}
-                        {t.gameCategory && (
-                          <span className="t-category-badge" title={t.gameCategory}>
-                            {t.gameCategory}
+                        {tourney.gameCategory && (
+                          <span className="t-category-badge" title={tourney.gameCategory}>
+                            {tourney.gameCategory}
                           </span>
                         )}
                       </div>
 
                       <div className="t-banner-bottom">
                         <span className="t-game-tag">
-                          {t.game}
+                          {tourney.game}
                         </span>
                       </div>
                     </div>
@@ -251,10 +251,10 @@ export default function TournamentsPage({
                       <div>
                         <h3 
                           className="t-card-title clickable-title" 
-                          title={t.title}
-                          onClick={() => handleOpenTournament(t, 'overview')}
+                          title={tourney.title}
+                          onClick={() => handleOpenTournament(tourney, 'overview')}
                         >
-                          {translateDynamic(t.title)}
+                          {translateDynamic(tourney.title)}
                         </h3>
 
                         {/* High-impact Prize Banner */}
@@ -264,7 +264,7 @@ export default function TournamentsPage({
                             <span>{t('common.prizePool')}</span>
                           </div>
                           <div className="t-prize-amount">
-                            {t.prizePool}
+                            {tourney.prizePool}
                           </div>
                         </div>
 
@@ -272,15 +272,15 @@ export default function TournamentsPage({
                         <div className="t-details-list" style={{ marginTop: '12px' }}>
                           <div className="t-detail-item">
                             <Calendar size={15} className="text-cyan" style={{ flexShrink: 0 }} />
-                            <span><strong>{t('common.date')}:</strong> {t.date} ({t.time})</span>
+                            <span><strong>{t('common.date')}:</strong> {tourney.date} ({tourney.time})</span>
                           </div>
                           <div className="t-detail-item">
                             <Users size={15} className="text-blue" style={{ flexShrink: 0 }} />
-                            <span><strong>{t('common.teams')}:</strong> {t.slots} ({teamCount} {t('common.teamsCount')})</span>
+                            <span><strong>{t('common.teams')}:</strong> {tourney.slots} ({teamCount} {t('common.teamsCount')})</span>
                           </div>
                           <div className="t-detail-item">
                             <Zap size={15} className="text-amber" style={{ flexShrink: 0 }} />
-                            <span><strong>{language === 'th' ? 'รูปแบบ:' : (language === 'zh' ? '赛制:' : 'Format:')}</strong> {translateDynamic(t.format)}</span>
+                            <span><strong>{language === 'th' ? 'รูปแบบ:' : (language === 'zh' ? '赛制:' : 'Format:')}</strong> {translateDynamic(tourney.format)}</span>
                           </div>
                         </div>
                       </div>
@@ -292,7 +292,7 @@ export default function TournamentsPage({
                             type="button"
                             className="t-btn-secondary"
                             style={{ width: '100%', justifyContent: 'center' }}
-                            onClick={() => handleOpenTournament(t, 'roster')}
+                            onClick={() => handleOpenTournament(tourney, 'roster')}
                           >
                             <Users size={14} />
                             <span>{t('tournamentsPage.registeredTeams')} ({teamCount})</span>
@@ -304,7 +304,7 @@ export default function TournamentsPage({
                             <button 
                               type="button"
                               className="t-btn-register"
-                              onClick={() => handleOpenTournament(t, 'register')}
+                              onClick={() => handleOpenTournament(tourney, 'register')}
                             >
                               <Zap size={15} />
                               <span>{t('common.registerTeam')}</span>
@@ -313,7 +313,7 @@ export default function TournamentsPage({
                             <button 
                               type="button"
                               className="t-btn-bracket-outline"
-                              onClick={() => handleOpenTournament(t, 'bracket')}
+                              onClick={() => handleOpenTournament(tourney, 'bracket')}
                               title="ดูสายการแข่งขัน (Tournament Bracket)"
                             >
                               <Layers size={14} />
@@ -324,7 +324,7 @@ export default function TournamentsPage({
                           <button 
                             type="button"
                             className="t-btn-bracket-full"
-                            onClick={() => handleOpenTournament(t, 'bracket')}
+                            onClick={() => handleOpenTournament(tourney, 'bracket')}
                           >
                             <span>{language === 'th' ? 'ดูสายการแข่งขัน & สกอร์สด (Brackets)' : (language === 'zh' ? '查看赛程与比分 (Brackets)' : 'View Match Brackets & Live Scores')}</span>
                             <ArrowRight size={14} />
