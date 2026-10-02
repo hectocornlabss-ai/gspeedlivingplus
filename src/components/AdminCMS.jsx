@@ -1255,6 +1255,56 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
     alert(`โหลดภาพกิจกรรมตัวอย่างครบ 52 ภาพเรียบร้อยแล้ว!`);
   };
 
+  const handleTournamentGalleryUpload = async (files) => {
+    if (!files || files.length === 0) return;
+    setCompressingItemId('tournament-gallery-upload');
+    try {
+      const addedPhotos = [];
+      const currentTitle = activeTournamentDraft?.title || 'ทัวร์นาเมนต์';
+      const prevCount = activeTournamentDraft?.galleryPhotos?.length || 0;
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        try {
+          const res = await compressAndConvertToWebP(file, { maxWidth: 1600, maxHeight: 1600, quality: 0.82 });
+          const rawName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+          addedPhotos.push({
+            id: `p-tourn-${Date.now()}-${i}-${Math.random().toString(36).substring(2, 6)}`,
+            url: res.dataUrl,
+            caption: rawName ? `${currentTitle} - ${rawName}` : `ภาพบรรยากาศการแข่งขัน #${prevCount + i + 1}`,
+            category: 'stage',
+            alt: rawName || currentTitle
+          });
+          if (addMediaItem) {
+            addMediaItem({
+              name: rawName || `${currentTitle} Photo`,
+              alt: rawName || currentTitle,
+              category: 'tournaments',
+              url: res.dataUrl,
+              dimensions: `${res.width || 1200}x${res.height || 600} (WebP)`
+            });
+          }
+        } catch (err) {
+          console.error('Failed to compress tournament gallery photo:', err);
+        }
+      }
+      if (addedPhotos.length > 0) {
+        setActiveTournamentDraft(prev => ({
+          ...prev,
+          galleryPhotos: [...(prev?.galleryPhotos || []), ...addedPhotos]
+        }));
+        setCompressionToast({
+          original: `${addedPhotos.length} ไฟล์`,
+          compressed: 'WebP สำเร็จ',
+          ratio: 'พร้อมแสดงผลทันที',
+          format: 'WEBP'
+        });
+        setTimeout(() => setCompressionToast(null), 5000);
+      }
+    } finally {
+      setCompressingItemId(null);
+    }
+  };
+
   const handleAddTeam = () => {
     if (!newTeamDraft.name.trim()) {
       alert('กรุณากรอกชื่อทีม (Team Name)');
@@ -10492,24 +10542,68 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                       {/* Team Logo URL & Quick Presets */}
                       <div className="form-group" style={{ background: '#f8fafc', padding: '14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
                         <label style={{ fontWeight: 700, fontSize: '0.82rem', color: '#334155', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                          <span>🖼️ โลโก้ทีม (Team Logo URL)</span>
-                          <span style={{ fontSize: '0.75rem', color: '#64748b' }}>ขนาดแนะนำ 1:1 หรือ 150x150px</span>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                            <ImageIcon size={15} className="text-blue" />
+                            <span>โลโก้ทีม (Team Logo)</span>
+                          </span>
+                          <span style={{ fontSize: '0.75rem', color: '#64748b' }}>ขนาดแนะนำ 1:1 หรือ 150x150px (WebP / PNG)</span>
                         </label>
-                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
                           <img
                             src={teamFormDraft.logo || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80'}
                             alt=""
-                            style={{ width: '48px', height: '48px', borderRadius: '10px', objectFit: 'cover', border: '1px solid #cbd5e1', background: '#ffffff' }}
+                            style={{ width: '48px', height: '48px', borderRadius: '10px', objectFit: 'cover', border: '1.5px solid #cbd5e1', background: '#ffffff', flexShrink: 0 }}
                             onError={e => { e.target.src = 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80'; }}
                           />
                           <input
                             type="text"
                             className="form-input"
-                            placeholder="วางลิงก์รูปภาพโลโก้ทีม (https://...)"
+                            placeholder="วางลิงก์รูปภาพโลโก้ทีม (https://...) หรือกดอัปโหลดไฟล์..."
                             value={teamFormDraft.logo}
                             onChange={e => setTeamFormDraft({ ...teamFormDraft, logo: e.target.value })}
-                            style={{ flex: 1 }}
+                            style={{ flex: 1, minWidth: '200px' }}
                           />
+                          <label className="btn-upload-file" style={{ padding: '7px 12px', fontSize: '0.8rem', cursor: 'pointer', whiteSpace: 'nowrap' }} title="เลือกไฟล์ภาพโลโก้จากเครื่อง (ระบบแปลงเป็น WebP บีบอัดอัตโนมัติ)">
+                            {compressingItemId === 'team-app-logo' ? (
+                              <>
+                                <RefreshCw size={13} className="spin-icon" />
+                                <span>กำลังแปลง...</span>
+                              </>
+                            ) : (
+                              <>
+                                <Upload size={13} />
+                                <span>อัปโหลดภาพ (WebP)</span>
+                              </>
+                            )}
+                            <input
+                              type="file"
+                              accept="image/*,.webp,image/webp"
+                              style={{ display: 'none' }}
+                              onChange={e => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  handleImageUpload(file, (dataUrl) => {
+                                    setTeamFormDraft(prev => ({ ...prev, logo: dataUrl }));
+                                  }, 'team-app-logo');
+                                  e.target.value = '';
+                                }
+                              }}
+                            />
+                          </label>
+                          <button
+                            type="button"
+                            className="btn-secondary"
+                            style={{ padding: '7px 12px', fontSize: '0.8rem', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                            onClick={() => {
+                              openMediaLibraryForField('tournaments', (item) => {
+                                setTeamFormDraft(prev => ({ ...prev, logo: item.url }));
+                              }, teamFormDraft.logo);
+                            }}
+                            title="เลือกภาพจากคลังสื่อของระบบ"
+                          >
+                            <HardDrive size={13} className="text-blue" />
+                            <span>คลังสื่อ</span>
+                          </button>
                         </div>
                         {/* Quick Logo Presets */}
                         <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginTop: '10px', flexWrap: 'wrap' }}>
@@ -13642,6 +13736,19 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                         <Globe size={16} />
                         <span>ระบบ SEO & โซเชียล</span>
                       </button>
+
+                      <button 
+                        type="button" 
+                        className={`tourney-modal-subtab-btn tab-gallery ${tournamentModalTab === 'gallery' ? 'active' : ''}`}
+                        onClick={() => setTournamentModalTab('gallery')}
+                      >
+                        <span className="tab-step-badge">06</span>
+                        <Camera size={16} />
+                        <span>ภาพบรรยากาศ</span>
+                        <span className="tab-count-badge" style={{ background: '#10b981', color: '#fff' }}>
+                          {(activeTournamentDraft.galleryPhotos || []).length}
+                        </span>
+                      </button>
                     </div>
 
                     {/* Scrollable Modal Content */}
@@ -13862,24 +13969,22 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                             </div>
                           </div>
 
-                          <div className="form-group">
-                            <label>URL ภาพแบนเนอร์ปกทัวร์นาเมนต์ (Banner Image URL)</label>
-                            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                              <input 
-                                type="text" className="form-input" style={{ flex: 1 }}
-                                placeholder="https://images.unsplash.com/..."
-                                value={activeTournamentDraft.bannerImage || ''}
-                                onChange={e => setActiveTournamentDraft({ ...activeTournamentDraft, bannerImage: e.target.value })}
-                              />
-                              {activeTournamentDraft.bannerImage && (
-                                <img 
-                                  src={activeTournamentDraft.bannerImage} 
-                                  alt="Preview" 
-                                  style={{ width: '60px', height: '36px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #ccc' }}
-                                />
-                              )}
-                            </div>
-                          </div>
+                          <SectionImageUploader
+                            label="ภาพแบนเนอร์ปกทัวร์นาเมนต์ (Banner Image)"
+                            value={activeTournamentDraft.bannerImage || ''}
+                            onChange={val => setActiveTournamentDraft(prev => ({ ...prev, bannerImage: val }))}
+                            onOpenMediaLibrary={() => openMediaLibraryForField('tournaments', (item) => {
+                              setActiveTournamentDraft(prev => ({ ...prev, bannerImage: item.url }));
+                            }, activeTournamentDraft.bannerImage)}
+                            recommendedSize="1200 x 600 px (หรือ 1920 x 1080 Full HD)"
+                            aspectRatio="16:9 หรือ 2:1"
+                            description="ภาพโปสเตอร์หลักสำหรับแสดงหน้าแรกและหน้ารายละเอียดทัวร์นาเมนต์ สามารถกดปุ่ม 'อัปโหลดภาพ (WebP)' เพื่อเลือกไฟล์ภาพจากเครื่องได้โดยตรง หรือเลือกจากคลังสื่อได้ทันที"
+                            uploadKey="tournament-banner-upload"
+                            compressingItemId={compressingItemId}
+                            handleImageUpload={handleImageUpload}
+                            previewWidth={180}
+                            previewHeight={100}
+                          />
 
                           {/* Date System Box */}
                           <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px', marginTop: '10px' }}>
@@ -14155,9 +14260,18 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                               >
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: '#1d4ed8' }}>
-                                      {tm.tag || tm.name?.slice(0, 3)?.toUpperCase() || 'TM'}
-                                    </div>
+                                    {tm.logo ? (
+                                      <img 
+                                        src={tm.logo} 
+                                        alt={tm.name} 
+                                        style={{ width: '38px', height: '38px', borderRadius: '8px', objectFit: 'cover', border: '1px solid #cbd5e1', background: '#ffffff', flexShrink: 0 }}
+                                        onError={e => { e.target.style.display = 'none'; }}
+                                      />
+                                    ) : (
+                                      <div style={{ width: '38px', height: '38px', borderRadius: '8px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: '#1d4ed8', flexShrink: 0 }}>
+                                        {tm.tag || tm.name?.slice(0, 3)?.toUpperCase() || 'TM'}
+                                      </div>
+                                    )}
                                     <div>
                                       <strong style={{ fontSize: '0.95rem' }}>{tm.name}</strong>
                                       <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginTop: '2px' }}>
@@ -14262,6 +14376,95 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                                         value={teamEditDraft.tag}
                                         onChange={e => setTeamEditDraft({ ...teamEditDraft, tag: e.target.value })}
                                       />
+                                    </div>
+                                  </div>
+
+                                  {/* Team Logo with Direct File Upload & Media Library */}
+                                  <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                      <label style={{ fontWeight: 650, fontSize: '0.82rem', color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <ImageIcon size={14} className="text-blue" />
+                                        <span>โลโก้ทีม (Team Logo)</span>
+                                      </label>
+                                      <span style={{ fontSize: '0.72rem', color: '#64748b' }}>แนะนำภาพสัดส่วน 1:1 หรือ 150x150px</span>
+                                    </div>
+
+                                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                      <img 
+                                        src={teamEditDraft.logo || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80'} 
+                                        alt="Logo Preview" 
+                                        style={{ width: '44px', height: '44px', borderRadius: '10px', objectFit: 'cover', border: '1.5px solid #cbd5e1', background: '#ffffff', flexShrink: 0 }}
+                                        onError={e => { e.target.src = 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80'; }}
+                                      />
+                                      <input 
+                                        type="text" 
+                                        className="form-input" 
+                                        placeholder="วางลิงก์รูปภาพโลโก้ หรือกดอัปโหลดไฟล์..." 
+                                        value={teamEditDraft.logo || ''}
+                                        onChange={e => setTeamEditDraft({ ...teamEditDraft, logo: e.target.value })}
+                                        style={{ flex: 1, minWidth: '180px' }}
+                                      />
+                                      <label className="btn-upload-file" style={{ padding: '6px 12px', fontSize: '0.8rem', cursor: 'pointer', whiteSpace: 'nowrap' }} title="เลือกไฟล์ภาพโลโก้จากเครื่อง (ระบบแปลงเป็น WebP บีบอัดอัตโนมัติ)">
+                                        {compressingItemId === 'team-edit-logo' ? (
+                                          <>
+                                            <RefreshCw size={13} className="spin-icon" />
+                                            <span>กำลังแปลง...</span>
+                                          </>
+                                        ) : (
+                                          <>
+                                            <Upload size={13} />
+                                            <span>อัปโหลดภาพ (WebP)</span>
+                                          </>
+                                        )}
+                                        <input 
+                                          type="file" 
+                                          accept="image/*,.webp,image/webp" 
+                                          style={{ display: 'none' }}
+                                          onChange={e => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                              handleImageUpload(file, (dataUrl) => {
+                                                setTeamEditDraft(prev => ({ ...prev, logo: dataUrl }));
+                                              }, 'team-edit-logo');
+                                              e.target.value = '';
+                                            }
+                                          }}
+                                        />
+                                      </label>
+                                      <button 
+                                        type="button" 
+                                        className="btn-secondary" 
+                                        style={{ padding: '6px 10px', fontSize: '0.8rem', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                                        onClick={() => {
+                                          openMediaLibraryForField('tournaments', (item) => {
+                                            setTeamEditDraft(prev => ({ ...prev, logo: item.url }));
+                                          }, teamEditDraft.logo);
+                                        }}
+                                        title="เลือกภาพจากคลังสื่อของระบบ"
+                                      >
+                                        <HardDrive size={13} className="text-blue" />
+                                        <span>คลังสื่อ</span>
+                                      </button>
+                                    </div>
+
+                                    {/* Presets */}
+                                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                      <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>เลือกโลโก้ตัวอย่าง:</span>
+                                      {[
+                                        { name: 'Neon Cyber', url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80' },
+                                        { name: 'Phoenix Fire', url: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=150&q=80' },
+                                        { name: 'Dragon Shield', url: 'https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=150&q=80' },
+                                        { name: 'Vortex Blue', url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=150&q=80' }
+                                      ].map(ps => (
+                                        <button
+                                          key={ps.name}
+                                          type="button"
+                                          onClick={() => setTeamEditDraft(prev => ({ ...prev, logo: ps.url }))}
+                                          style={{ padding: '2px 7px', fontSize: '0.72rem', borderRadius: '5px', border: '1px solid #cbd5e1', background: '#ffffff', cursor: 'pointer' }}
+                                        >
+                                          {ps.name}
+                                        </button>
+                                      ))}
                                     </div>
                                   </div>
 
@@ -14777,18 +14980,44 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                             </div>
                           </div>
 
-                          <div className="form-group">
-                            <label>Social Share Image URL (OG Image สำหรับแสดงในการแชร์ Facebook/LINE/Discord)</label>
-                            <input 
-                              type="text" className="form-input"
-                              placeholder="https://images.unsplash.com/..."
-                              value={activeTournamentDraft.seo?.ogImage || activeTournamentDraft.bannerImage || ''}
-                              onChange={e => setActiveTournamentDraft({
-                                ...activeTournamentDraft,
-                                seo: { ...(activeTournamentDraft.seo || {}), ogImage: e.target.value }
-                              })}
-                            />
-                          </div>
+                          <SectionImageUploader
+                            label="Social Share Image (OG Image สำหรับแชร์ Facebook / LINE / X)"
+                            value={activeTournamentDraft.seo?.ogImage || ''}
+                            onChange={val => setActiveTournamentDraft(prev => ({
+                              ...prev,
+                              seo: { ...(prev.seo || {}), ogImage: val }
+                            }))}
+                            onOpenMediaLibrary={() => openMediaLibraryForField('tournaments', (item) => {
+                              setActiveTournamentDraft(prev => ({
+                                ...prev,
+                                seo: { ...(prev.seo || {}), ogImage: item.url }
+                              }));
+                            }, activeTournamentDraft.seo?.ogImage)}
+                            recommendedSize="1200 x 630 px (อัตราส่วนมาตรฐานโซเชียล 1.91:1)"
+                            aspectRatio="1.91:1"
+                            description="ภาพที่จะแสดงเวลาแชร์ลิงก์ทัวร์นาเมนต์นี้ใน LINE / Facebook / Twitter หากไม่ได้ระบุ ระบบจะใช้ภาพแบนเนอร์ปกทัวร์นาเมนต์โดยอัตโนมัติ"
+                            uploadKey="tournament-og-upload"
+                            compressingItemId={compressingItemId}
+                            handleImageUpload={handleImageUpload}
+                            previewWidth={180}
+                            previewHeight={95}
+                          />
+                          {activeTournamentDraft.bannerImage && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setActiveTournamentDraft(prev => ({
+                                  ...prev,
+                                  seo: { ...(prev.seo || {}), ogImage: prev.bannerImage }
+                                }));
+                              }}
+                              className="btn-secondary"
+                              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', padding: '6px 12px', marginTop: '6px', width: 'fit-content' }}
+                            >
+                              <Copy size={13} className="text-blue" />
+                              <span>ใช้ภาพเดียวกับภาพแบนเนอร์ปกทัวร์นาเมนต์</span>
+                            </button>
+                          )}
 
                           {/* Live Google Snippet Preview */}
                           <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px', marginTop: '6px' }}>
@@ -14807,6 +15036,214 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                               </div>
                             </div>
                           </div>
+                        </div>
+                      )}
+
+                      {/* ----------------- TAB 6: GALLERY PHOTOS ----------------- */}
+                      {tournamentModalTab === 'gallery' && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                            <div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <Camera size={20} className="text-blue" />
+                                <strong style={{ fontSize: '1rem', color: '#0f172a' }}>
+                                  ภาพถ่ายบรรยากาศการแข่งขัน (Tournament Gallery)
+                                </strong>
+                                <span className="tab-count-badge" style={{ background: '#10b981', color: '#fff', fontSize: '0.78rem', padding: '2px 8px', borderRadius: '12px' }}>
+                                  {(activeTournamentDraft.galleryPhotos || []).length} ภาพ
+                                </span>
+                              </div>
+                              <span style={{ fontSize: '0.82rem', color: '#64748b', display: 'block', marginTop: '3px' }}>
+                                อัปโหลดภาพถ่ายบรรยากาศเวที แฟนคลับ นักแข่ง หรือเวทีรับรางวัล ระบบแปลงไฟล์เป็น WebP ให้ทันที
+                              </span>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                              <label className="btn-primary btn-sm" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                {compressingItemId === 'tournament-gallery-upload' ? (
+                                  <>
+                                    <RefreshCw size={14} className="spin-icon" />
+                                    <span>กำลังแปลง WebP...</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Upload size={14} />
+                                    <span>+ อัปโหลดภาพถ่าย (WebP Multi)</span>
+                                  </>
+                                )}
+                                <input
+                                  type="file"
+                                  multiple
+                                  accept="image/*,.webp,image/webp"
+                                  style={{ display: 'none' }}
+                                  onChange={e => {
+                                    if (e.target.files && e.target.files.length > 0) {
+                                      handleTournamentGalleryUpload(e.target.files);
+                                      e.target.value = '';
+                                    }
+                                  }}
+                                />
+                              </label>
+
+                              <button
+                                type="button"
+                                className="btn-secondary btn-sm"
+                                onClick={() => {
+                                  openMediaLibraryForField('tournaments', (item) => {
+                                    const prevCount = activeTournamentDraft?.galleryPhotos?.length || 0;
+                                    setActiveTournamentDraft(prev => ({
+                                      ...prev,
+                                      galleryPhotos: [
+                                        ...(prev?.galleryPhotos || []),
+                                        {
+                                          id: `p-media-${Date.now()}`,
+                                          url: item.url,
+                                          caption: item.alt || item.name || `ภาพการแข่งขัน #${prevCount + 1}`,
+                                          category: 'stage'
+                                        }
+                                      ]
+                                    }));
+                                  });
+                                }}
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                              >
+                                <HardDrive size={14} className="text-blue" />
+                                <span>เลือกจากคลังสื่อ</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                className="btn-secondary btn-sm"
+                                onClick={handleLoadDemo50Photos}
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                                title="โหลดภาพตัวอย่างบรรยากาศการแข่งขัน 52 ภาพ"
+                              >
+                                <Sparkles size={14} className="text-amber" />
+                                <span>โหลดเดโม 52 ภาพ</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                className="btn-secondary btn-sm"
+                                onClick={() => setShowBatchImporter(!showBatchImporter)}
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                              >
+                                <List size={14} />
+                                <span>{showBatchImporter ? 'ปิดช่องวาง URL' : 'วาง URL หลายภาพ'}</span>
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Batch URL Importer Collapse */}
+                          {showBatchImporter && (
+                            <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                              <label style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a' }}>
+                                วางลิงก์รูปภาพ (URL ละ 1 บรรทัด):
+                              </label>
+                              <textarea
+                                className="form-input form-textarea"
+                                rows="4"
+                                placeholder="https://images.unsplash.com/...&#10;https://images.unsplash.com/..."
+                                value={batchPhotoUrls}
+                                onChange={e => setBatchPhotoUrls(e.target.value)}
+                              />
+                              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                                <button type="button" className="btn-secondary btn-sm" onClick={() => setShowBatchImporter(false)}>
+                                  ยกเลิก
+                                </button>
+                                <button type="button" className="btn-primary btn-sm" onClick={handleImportBatchPhotos}>
+                                  นำเข้า {batchPhotoUrls.split('\n').filter(s => s.trim()).length} ภาพ
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Photo Grid */}
+                          {(activeTournamentDraft.galleryPhotos || []).length === 0 ? (
+                            <div style={{ textAlign: 'center', padding: '40px 20px', background: '#f8fafc', border: '2px dashed #cbd5e1', borderRadius: '10px' }}>
+                              <Camera size={40} style={{ margin: '0 auto 10px', opacity: 0.35 }} />
+                              <p style={{ margin: '0 0 6px', fontWeight: 700, color: '#475569' }}>ยังไม่มีภาพบรรยากาศการแข่งขัน</p>
+                              <span style={{ fontSize: '0.82rem', color: '#64748b' }}>
+                                กดปุ่ม "+ อัปโหลดภาพถ่าย (WebP Multi)" ด้านบน เพื่อเลือกภาพจากคอมพิวเตอร์ของคุณ
+                              </span>
+                            </div>
+                          ) : (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px', maxHeight: '500px', overflowY: 'auto', padding: '4px' }}>
+                              {(activeTournamentDraft.galleryPhotos || []).map((photo, pIdx) => {
+                                const photoUrl = typeof photo === 'string' ? photo : (photo?.url || '');
+                                const photoCaption = typeof photo === 'string' ? '' : (photo?.caption || '');
+                                return (
+                                  <div
+                                    key={photo.id || pIdx}
+                                    style={{
+                                      background: '#ffffff',
+                                      border: '1px solid #e2e8f0',
+                                      borderRadius: '8px',
+                                      overflow: 'hidden',
+                                      boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                                      display: 'flex',
+                                      flexDirection: 'column'
+                                    }}
+                                  >
+                                    <div style={{ position: 'relative', width: '100%', height: '120px', background: '#0f172a' }}>
+                                      <img
+                                        src={photoUrl}
+                                        alt={photoCaption || 'Tournament Photo'}
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                        onError={e => { e.target.src = 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=400&q=80'; }}
+                                      />
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const nextPhotos = (activeTournamentDraft.galleryPhotos || []).filter((_, i) => i !== pIdx);
+                                          setActiveTournamentDraft({ ...activeTournamentDraft, galleryPhotos: nextPhotos });
+                                        }}
+                                        style={{
+                                          position: 'absolute',
+                                          top: '6px',
+                                          right: '6px',
+                                          background: 'rgba(239, 68, 68, 0.9)',
+                                          color: '#ffffff',
+                                          border: 'none',
+                                          borderRadius: '6px',
+                                          width: '26px',
+                                          height: '26px',
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'center',
+                                          cursor: 'pointer'
+                                        }}
+                                        title="ลบภาพนี้"
+                                      >
+                                        <Trash2 size={13} />
+                                      </button>
+                                      <span style={{ position: 'absolute', bottom: '6px', left: '6px', background: 'rgba(0,0,0,0.65)', color: '#fff', fontSize: '0.68rem', padding: '1px 6px', borderRadius: '4px', fontWeight: 600 }}>
+                                        #{pIdx + 1}
+                                      </span>
+                                    </div>
+                                    <div style={{ padding: '8px' }}>
+                                      <input
+                                        type="text"
+                                        className="form-input form-input-sm"
+                                        style={{ fontSize: '0.76rem', padding: '3px 6px' }}
+                                        placeholder="คำบรรยายภาพ..."
+                                        value={photoCaption}
+                                        onChange={e => {
+                                          const nextPhotos = [...(activeTournamentDraft.galleryPhotos || [])];
+                                          if (typeof nextPhotos[pIdx] === 'string') {
+                                            nextPhotos[pIdx] = { id: `p-${pIdx}`, url: nextPhotos[pIdx], caption: e.target.value };
+                                          } else {
+                                            nextPhotos[pIdx] = { ...nextPhotos[pIdx], caption: e.target.value };
+                                          }
+                                          setActiveTournamentDraft({ ...activeTournamentDraft, galleryPhotos: nextPhotos });
+                                        }}
+                                      />
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
                         </div>
                       )}
 

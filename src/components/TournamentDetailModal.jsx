@@ -4,12 +4,13 @@ import {
   Users, Camera, Send, Zap, Clock, Shield, CheckCircle2, 
   Crown, Plus, ArrowRight, ChevronLeft, ChevronRight, Home,
   GitBranch, Flame, Play, ExternalLink, RefreshCw, Radio, Swords, Eye,
-  Share2
+  Share2, Upload, ImageIcon
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 import { useTranslation } from '../context/LanguageContext';
 import { generateDefaultBracket } from '../data/mockData';
 import { isTournamentRegistrationOpen } from '../utils/tournamentUtils';
+import { compressAndConvertToWebP } from '../utils/imageOptimizer';
 
 export default function TournamentDetailModal({
   tournament,
@@ -111,6 +112,7 @@ export default function TournamentDetailModal({
   const [teamRegForm, setTeamRegForm] = useState({
     teamName: '',
     teamTag: '',
+    logo: '',
     captainName: '',
     captainPhone: '',
     captainEmail: '',
@@ -121,6 +123,7 @@ export default function TournamentDetailModal({
     player5: '',
     substitute: ''
   });
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
 
   if (!tournament) return null;
 
@@ -132,11 +135,13 @@ export default function TournamentDetailModal({
 
   const handleRegisterSubmit = (e) => {
     e.preventDefault();
+    const defaultLogo = 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80';
+    const finalLogo = teamRegForm.logo || defaultLogo;
     const newTeam = {
       id: `team-${Date.now()}`,
       name: teamRegForm.teamName,
       tag: teamRegForm.teamTag || teamRegForm.teamName.slice(0, 3).toUpperCase(),
-      logo: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80',
+      logo: finalLogo,
       seed: (tournament.teams || []).length + 1,
       status: 'Confirmed',
       captain: `${teamRegForm.captainName} (กัปตันทีม)`,
@@ -160,7 +165,7 @@ export default function TournamentDetailModal({
         tournamentTitle: tournament.title,
         teamName: teamRegForm.teamName,
         teamTag: teamRegForm.teamTag || teamRegForm.teamName.slice(0, 3).toUpperCase(),
-        logo: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80',
+        logo: finalLogo,
         captainName: teamRegForm.captainName,
         captainPhone: teamRegForm.captainPhone,
         captainEmail: teamRegForm.captainEmail,
@@ -1354,6 +1359,72 @@ export default function TournamentDetailModal({
                         value={teamRegForm.teamTag}
                         onChange={e => setTeamRegForm({ ...teamRegForm, teamTag: e.target.value })}
                       />
+                    </div>
+                  </div>
+
+                  {/* Team Logo Upload */}
+                  <div className="form-group" style={{ background: '#f8fafc', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', marginBottom: '14px' }}>
+                    <label style={{ fontSize: '0.82rem', fontWeight: 650, color: '#334155', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        <ImageIcon size={14} className="text-blue" />
+                        <span>{language === 'zh' ? '战队队标 / โลโก้ (可选)' : language === 'en' ? 'Team Logo (Optional)' : 'โลโก้ทีม (Team Logo - ถ้ามี)'}</span>
+                      </span>
+                      <span style={{ fontSize: '0.72rem', color: '#64748b' }}>WebP, PNG หรือ JPG (ระบบแปลงไฟล์ให้อัตโนมัติ)</span>
+                    </label>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                      {teamRegForm.logo ? (
+                        <div style={{ position: 'relative' }}>
+                          <img 
+                            src={teamRegForm.logo} 
+                            alt="Team Logo" 
+                            style={{ width: '42px', height: '42px', borderRadius: '8px', objectFit: 'cover', border: '1.5px solid #cbd5e1', background: '#ffffff' }} 
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setTeamRegForm(prev => ({ ...prev, logo: '' }))}
+                            style={{ position: 'absolute', top: '-4px', right: '-4px', background: '#ef4444', color: '#fff', border: 'none', borderRadius: '50%', width: '16px', height: '16px', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                            title="ลบภาพโลโก้"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ) : null}
+                      <label className="btn-secondary" style={{ padding: '6px 12px', fontSize: '0.8rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        {isUploadingLogo ? (
+                          <>
+                            <RefreshCw size={13} className="spin-icon" />
+                            <span>{language === 'zh' ? '正在处理图片...' : language === 'en' ? 'Optimizing...' : 'กำลังประมวลผล WebP...'}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Upload size={13} />
+                            <span>{language === 'zh' ? 'อัปโหลดภาพ Logo ทีม' : language === 'en' ? 'Upload Team Logo' : 'อัปโหลดภาพ Logo ทีม'}</span>
+                          </>
+                        )}
+                        <input 
+                          type="file" 
+                          accept="image/*,.webp,image/webp" 
+                          style={{ display: 'none' }}
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setIsUploadingLogo(true);
+                              try {
+                                const res = await compressAndConvertToWebP(file, { maxWidth: 500, maxHeight: 500, quality: 0.85 });
+                                setTeamRegForm(prev => ({ ...prev, logo: res.dataUrl }));
+                              } catch (err) {
+                                console.error('Logo upload error:', err);
+                              } finally {
+                                setIsUploadingLogo(false);
+                                e.target.value = '';
+                              }
+                            }
+                          }}
+                        />
+                      </label>
+                      <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                        {teamRegForm.logo ? (language === 'zh' ? '已选择队标图片 ✓' : language === 'en' ? 'Logo attached ✓' : 'แนบโลโก้เรียบร้อยแล้ว ✓') : (language === 'zh' ? 'คลิกปุ่มเพื่อเลือกไฟล์จากเครื่อง' : language === 'en' ? 'Click button to choose image file' : 'กดปุ่มเพื่อเลือกไฟล์จากเครื่อง')}
+                      </span>
                     </div>
                   </div>
 
