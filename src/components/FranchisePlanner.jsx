@@ -15,6 +15,7 @@ import {
   WALLPAPERS, FLOOR_MATERIALS, INTERIOR_THEMES
 } from '../data/mockData';
 import { useSiteData } from '../context/SiteDataContext';
+import { useTranslation } from '../context/LanguageContext';
 import { compressAndConvertToWebP, formatBytes } from '../utils/imageOptimizer';
 import { downloadFile } from '../utils/fileDownloader';
 
@@ -261,6 +262,8 @@ const generateAutoLayout = (w, h, catalog, doorConfig = { wall: 'right', offsetR
 
 export default function FranchisePlanner() {
   const { siteData, addLead } = useSiteData();
+  const { t, language, translateDynamic } = useTranslation();
+  const tp = (key, fallback) => t?.franchisePlanner?.[key] || (language === 'th' ? fallback : translateDynamic(fallback || key));
   const catalogItems = siteData?.catalogItems || CATALOG_ITEMS;
   const hardwareTiers = siteData?.hardwareTiers || HARDWARE_TIERS;
   const fixedInfrastructure = siteData?.fixedInfrastructure || FIXED_INFRASTRUCTURE;
@@ -374,8 +377,9 @@ export default function FranchisePlanner() {
     return calculateBlueprintFeasibility(roomWidth, roomHeight);
   }, [roomWidth, roomHeight]);
 
-  // Fullscreen Studio Mode State & Landscape Orientation
+  // Fullscreen Studio Mode & Walk Mode State & Forced Landscape Orientation
   const [isPlannerFullscreen, setIsPlannerFullscreen] = useState(false);
+  const [isWalkMode, setIsWalkMode] = useState(false);
   const [forceLandscapeRotate, setForceLandscapeRotate] = useState(false);
   const hasEnteredNativeFullscreenRef = useRef(false);
 
@@ -402,13 +406,14 @@ export default function FranchisePlanner() {
         }
       } catch (e) {}
     } else {
-      handleExitFullscreen();
+      await handleExitFullscreen();
     }
   };
 
   const handleExitFullscreen = async () => {
     hasEnteredNativeFullscreenRef.current = false;
     setIsPlannerFullscreen(false);
+    setIsWalkMode(false);
     setForceLandscapeRotate(false);
     try {
       if (document.fullscreenElement && document.exitFullscreen) {
@@ -424,6 +429,48 @@ export default function FranchisePlanner() {
     } catch (e) {}
   };
 
+  // Forced landscape detection & orientation lock for mobile / tablet in Fullscreen or Walk Mode
+  useEffect(() => {
+    const handleOrientationOrResize = () => {
+      if (!isPlannerFullscreen && !isWalkMode) {
+        setForceLandscapeRotate(false);
+        return;
+      }
+      const isMobileOrTablet = window.innerWidth <= 1024 || window.innerHeight <= 1024 || ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+      const isPortrait = window.innerHeight > window.innerWidth;
+      if (isMobileOrTablet && isPortrait) {
+        setForceLandscapeRotate(true);
+      } else {
+        setForceLandscapeRotate(false);
+      }
+    };
+
+    handleOrientationOrResize();
+    window.addEventListener('resize', handleOrientationOrResize);
+    window.addEventListener('orientationchange', handleOrientationOrResize);
+    return () => {
+      window.removeEventListener('resize', handleOrientationOrResize);
+      window.removeEventListener('orientationchange', handleOrientationOrResize);
+    };
+  }, [isPlannerFullscreen, isWalkMode]);
+
+  // Lock screen orientation to landscape when in fullscreen or walk mode
+  useEffect(() => {
+    if (isPlannerFullscreen || isWalkMode) {
+      try {
+        if (window.screen?.orientation?.lock) {
+          window.screen.orientation.lock('landscape').catch(() => {});
+        }
+      } catch (e) {}
+    } else {
+      try {
+        if (window.screen?.orientation?.unlock) {
+          window.screen.orientation.unlock();
+        }
+      } catch (e) {}
+    }
+  }, [isPlannerFullscreen, isWalkMode]);
+
   // Sync native browser ESC or fullscreen exit
   useEffect(() => {
     const handleNativeFullscreenChange = () => {
@@ -434,6 +481,7 @@ export default function FranchisePlanner() {
         // Only trigger exit if the session had actually entered browser native fullscreen
         hasEnteredNativeFullscreenRef.current = false;
         setIsPlannerFullscreen(false);
+        setIsWalkMode(false);
         setForceLandscapeRotate(false);
         try {
           if (window.screen?.orientation?.unlock) {
@@ -452,11 +500,16 @@ export default function FranchisePlanner() {
 
   useEffect(() => {
     const handleEsc = (e) => {
-      if (e.key === 'Escape' && isPlannerFullscreen) {
-        handleExitFullscreen();
+      if (e.key === 'Escape') {
+        if (isWalkMode) {
+          setIsWalkMode(false);
+        }
+        if (isPlannerFullscreen) {
+          handleExitFullscreen();
+        }
       }
     };
-    if (isPlannerFullscreen) {
+    if (isPlannerFullscreen || isWalkMode) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
@@ -466,7 +519,7 @@ export default function FranchisePlanner() {
       window.removeEventListener('keydown', handleEsc);
       document.body.style.overflow = '';
     };
-  }, [isPlannerFullscreen]);
+  }, [isPlannerFullscreen, isWalkMode]);
   const fileInputRef = useRef(null);
 
   const handleFileUpload = (e) => {
@@ -2096,12 +2149,12 @@ export default function FranchisePlanner() {
               id="btn-step-compact-1"
               className={`studio-step-pill ${currentStep === 1 ? 'active' : currentStep > 1 ? 'completed' : ''}`} 
               onClick={() => handleStepChange(1)}
-              title="ขั้นตอนที่ 1: กำหนดขนาดห้องและแปลนอาคาร"
+              title={tp('tabStoreSize', 'ขั้นตอนที่ 1: กำหนดขนาดห้องและแปลนอาคาร')}
             >
               <span className={`step-num ${currentStep === 1 ? 'active' : ''}`}>1</span>
               <span className="step-txt">
-                <span className="hide-mobile">ขนาด {roomWidth}x{roomHeight}ม.</span>
-                <span className="show-mobile">ขนาดห้อง</span>
+                <span className="hide-mobile">{tp('tabStoreSize', 'ขนาด')} {roomWidth}x{roomHeight}{tp('step1_meters', 'ม.')}</span>
+                <span className="show-mobile">{tp('tabStoreSize', 'ขนาดห้อง')}</span>
               </span>
               {currentStep === 1 && <span className="studio-active-dot"></span>}
             </button>
@@ -2111,12 +2164,12 @@ export default function FranchisePlanner() {
               id="btn-step-compact-2"
               className={`studio-step-pill ${currentStep === 2 ? 'active' : currentStep > 2 ? 'completed' : ''}`} 
               onClick={() => handleStepChange(2)}
-              title="ขั้นตอนที่ 2: จัดผังร้าน 3D Studio & แปลน 2D"
+              title={tp('tabLayout', 'ขั้นตอนที่ 2: จัดผังร้าน 3D Studio & แปลน 2D')}
             >
               <span className={`step-num ${currentStep === 2 ? 'active' : ''}`}>2</span>
               <span className="step-txt">
-                <span className="hide-mobile">จัดผัง 3D Studio</span>
-                <span className="show-mobile">ผัง 3D</span>
+                <span className="hide-mobile">{tp('tabLayout', 'จัดผัง 3D Studio')}</span>
+                <span className="show-mobile">{tp('mode3D', 'ผัง 3D')}</span>
               </span>
               {currentStep === 2 && <span className="studio-active-dot"></span>}
             </button>
@@ -2126,12 +2179,12 @@ export default function FranchisePlanner() {
               id="btn-step-compact-3"
               className={`studio-step-pill ${currentStep === 3 ? 'active' : currentStep > 3 ? 'completed' : ''}`} 
               onClick={() => handleStepChange(3)}
-              title="ขั้นตอนที่ 3: เลือกระดับสเปกฮาร์ดแวร์"
+              title={tp('tabHardware', 'ขั้นตอนที่ 3: เลือกระดับสเปกฮาร์ดแวร์')}
             >
               <span className={`step-num ${currentStep === 3 ? 'active' : ''}`}>3</span>
               <span className="step-txt">
-                <span className="hide-mobile">สเปกคอม</span>
-                <span className="show-mobile">สเปก</span>
+                <span className="hide-mobile">{tp('tabHardware', 'สเปกคอม')}</span>
+                <span className="show-mobile">{tp('tabHardware', 'สเปก')}</span>
               </span>
               {currentStep === 3 && <span className="studio-active-dot"></span>}
             </button>
@@ -2141,12 +2194,12 @@ export default function FranchisePlanner() {
               id="btn-step-compact-4"
               className={`studio-step-pill ${currentStep === 4 ? 'active' : ''}`} 
               onClick={() => handleStepChange(4)}
-              title="ขั้นตอนที่ 4: สรุปงบประมาณและผลตอบแทน ROI"
+              title={tp('tabQuote', 'ขั้นตอนที่ 4: สรุปงบประมาณและผลตอบแทน ROI')}
             >
               <span className={`step-num ${currentStep === 4 ? 'active' : ''}`}>4</span>
               <span className="step-txt">
-                <span className="hide-mobile">งบ & ROI</span>
-                <span className="show-mobile">สรุปงบ</span>
+                <span className="hide-mobile">{tp('tabQuote', 'งบ & ROI')}</span>
+                <span className="show-mobile">{tp('tabQuote', 'สรุปงบ')}</span>
               </span>
               {currentStep === 4 && <span className="studio-active-dot"></span>}
             </button>
@@ -2155,15 +2208,15 @@ export default function FranchisePlanner() {
           {/* Quick Metrics & CTA */}
           <div className="studio-compact-metrics">
             <div className="compact-metric-pill">
-              <span className="metric-tag">{currentStep === 1 ? 'พื้นที่:' : 'ความจุ:'}</span>
+              <span className="metric-tag">{currentStep === 1 ? tp('totalArea', 'พื้นที่:') : tp('recommendedStations', 'ความจุ:')}</span>
               <strong className="text-blue">
-                {currentStep === 1 ? `${roomAreaSqM} ตร.ม.` : `${totalStations} เครื่อง`}
+                {currentStep === 1 ? `${roomAreaSqM} ${tp('step1_sqm', 'ตร.ม.')}` : `${totalStations} ${tp('unitStation', 'เครื่อง')}`}
               </strong>
             </div>
             <div className="compact-metric-pill hide-mobile">
-              <span className="metric-tag">{currentStep === 4 ? 'คืนทุน:' : 'งบลงทุน:'}</span>
+              <span className="metric-tag">{currentStep === 4 ? tp('paybackPeriod', 'คืนทุน:') : tp('estimatedCapex', 'งบลงทุน:')}</span>
               <strong className="text-emerald">
-                {currentStep === 4 ? `${paybackMonths} เดือน` : `฿${totalInvestmentCost.toLocaleString()}`}
+                {currentStep === 4 ? `${paybackMonths} ${tp('months', 'เดือน')}` : `฿${totalInvestmentCost.toLocaleString()}`}
               </strong>
             </div>
             <button 
@@ -2173,7 +2226,7 @@ export default function FranchisePlanner() {
               className="btn-compact-quote"
             >
               <Download size={14} />
-              <span>สรุปใบเสนอราคา</span>
+              <span>{tp('requestQuote', 'สรุปใบเสนอราคา')}</span>
             </button>
             {currentStep === 1 && (
               <button 
@@ -2182,7 +2235,7 @@ export default function FranchisePlanner() {
                 onClick={() => handleStepChange(2)} 
                 className="btn-compact-next"
               >
-                <span>เริ่มจัดผัง 3D</span>
+                <span>{tp('step1_nextBtn', 'เริ่มจัดผัง 3D')}</span>
                 <ArrowRight size={14} />
               </button>
             )}
@@ -2193,7 +2246,7 @@ export default function FranchisePlanner() {
                 onClick={() => handleStepChange(3)} 
                 className="btn-compact-next"
               >
-                <span>เลือกสเปก</span>
+                <span>{tp('step2_nextBtn', 'เลือกสเปก')}</span>
                 <ArrowRight size={14} />
               </button>
             )}
@@ -2204,7 +2257,7 @@ export default function FranchisePlanner() {
                 onClick={() => handleStepChange(4)} 
                 className="btn-compact-next"
               >
-                <span>ดูงบ & ROI</span>
+                <span>{tp('step3_nextBtn', 'ดูงบ & ROI')}</span>
                 <ArrowRight size={14} />
               </button>
             )}
@@ -2217,7 +2270,7 @@ export default function FranchisePlanner() {
                 style={{ background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)' }}
               >
                 <Printer size={14} />
-                <span>พิมพ์ใบเสนอราคา (A4)</span>
+                <span>{tp('step4_printQuote', 'พิมพ์ใบเสนอราคา (A4)')}</span>
               </button>
             )}
           </div>
@@ -2232,10 +2285,10 @@ export default function FranchisePlanner() {
             <div className="setup-card glass-panel">
               <h3 className="setup-card-title">
                 <LayoutGrid size={20} className="text-cyan" />
-                <span>กำหนดขนาดห้องและแปลนอาคาร</span>
+                <span>{tp('step1_setupTitle', 'กำหนดขนาดห้องและแปลนอาคาร')}</span>
               </h3>
               <p className="setup-card-desc">
-                เลือกโมเดลขนาดห้องสำเร็จรูป (Preset) เป็นค่าพื้นฐานเพื่อเริ่มคำนวณและวางผังได้ทันที หรือเลือกตัวเลือกเสริมอัปโหลดแปลนพิมพ์เขียวอาคารจริง
+                {tp('step1_setupDesc', 'เลือกโมเดลขนาดห้องสำเร็จรูป (Preset) เป็นค่าพื้นฐานเพื่อเริ่มคำนวณและวางผังได้ทันที หรือเลือกตัวเลือกเสริมอัปโหลดแปลนพิมพ์เขียวอาคารจริง')}
               </p>
 
               {/* Setup Mode Switcher Tabs */}
@@ -2247,8 +2300,8 @@ export default function FranchisePlanner() {
                   onClick={() => setSetupMethod('preset')}
                 >
                   <LayoutGrid size={16} />
-                  <span>กำหนดค่า</span>
-                  <span className="badge-preset-default">ค่าเริ่มต้น</span>
+                  <span>{tp('step1_presetTab', 'กำหนดค่า')}</span>
+                  <span className="badge-preset-default">{tp('step1_defaultBadge', 'ค่าเริ่มต้น')}</span>
                 </button>
                 <button 
                   type="button"
@@ -2257,8 +2310,8 @@ export default function FranchisePlanner() {
                   onClick={() => setSetupMethod('blueprint')}
                 >
                   <UploadCloud size={16} />
-                  <span>อัปโหลดแปลนอาคาร</span>
-                  <span className="badge-optional-choice">ตัวเลือกเสริม AI</span>
+                  <span>{tp('step1_blueprintTab', 'อัปโหลดแปลนอาคาร')}</span>
+                  <span className="badge-optional-choice">{tp('step1_optionalBadge', 'ตัวเลือกเสริม AI')}</span>
                 </button>
               </div>
 
@@ -2276,7 +2329,7 @@ export default function FranchisePlanner() {
                 <div className="preset-mode-content">
                   {/* Preset Buttons */}
                   <div className="preset-selector-group">
-                    <label className="form-label">เลือกโมเดลขนาดสำเร็จรูป (Preset Models):</label>
+                    <label className="form-label">{tp('step1_roomPresets', 'เลือกโมเดลขนาดสำเร็จรูป (Preset Models):')}</label>
                     <div className="preset-cards-grid">
                       {PRESET_ROOMS.map(preset => (
                         <div 
@@ -2298,7 +2351,7 @@ export default function FranchisePlanner() {
                   <div className="dimension-sliders">
                     <div className="slider-group">
                       <div className="slider-header">
-                        <label>ความกว้างห้อง (Width):</label>
+                        <label>{tp('step1_widthM', 'ความกว้างห้อง (Width):')}</label>
                         <span className="slider-val text-cyan">{roomWidth} เมตร</span>
                       </div>
                       <input 
@@ -2314,7 +2367,7 @@ export default function FranchisePlanner() {
 
                     <div className="slider-group">
                       <div className="slider-header">
-                        <label>ความลึก/ความยาวห้อง (Length):</label>
+                        <label>{tp('step1_lengthM', 'ความลึก/ความยาวห้อง (Length):')}</label>
                         <span className="slider-val text-cyan">{roomHeight} เมตร</span>
                       </div>
                       <input 
@@ -2645,11 +2698,11 @@ export default function FranchisePlanner() {
 
               <h3 className="setup-card-title">
                 <Compass size={20} className="text-magenta" />
-                <span>ข้อมูลทำเล & ธีมการตกแต่ง</span>
+                <span>{tp('step1_locationCardTitle', 'ข้อมูลทำเล & ธีมการตกแต่ง')}</span>
               </h3>
 
               <div className="form-group">
-                <label className="form-label">จังหวัด / โซนที่ตั้งร้าน</label>
+                <label className="form-label">{tp('step1_provinceLabel', 'จังหวัด / โซนที่ตั้งร้าน')}</label>
                 <select 
                   value={storeLocation} 
                   onChange={e => setStoreLocation(e.target.value)}
@@ -2664,7 +2717,7 @@ export default function FranchisePlanner() {
               </div>
 
               <div className="form-group">
-                <label className="form-label">ประเภทอาคาร / สถานที่</label>
+                <label className="form-label">{tp('step1_storeTypeLabel', 'ประเภทอาคาร / สถานที่')}</label>
                 <select 
                   value={storeType} 
                   onChange={e => setStoreType(e.target.value)}
@@ -2678,7 +2731,7 @@ export default function FranchisePlanner() {
               </div>
 
               <div className="form-group">
-                <label className="form-label">ธีมการตกแต่งร้าน (Interior Style)</label>
+                <label className="form-label">{tp('step1_themeLabel', 'ธีมการตกแต่งร้าน (Interior Style)')}</label>
                 <div className="theme-options-grid">
                   {availableThemes.map((theme) => {
                     const primaryColor = theme.palette?.[0]?.hex || (theme.id === 'royal' ? '#1d4ed8' : theme.id === 'luxury' ? '#f59e0b' : '#10b981');
@@ -2724,7 +2777,7 @@ export default function FranchisePlanner() {
                   onClick={() => handleStepChange(2)} 
                   className="btn-primary full-width"
                 >
-                  <span>ถัดไป: จัดผังร้าน</span>
+                  <span>{tp('step1_nextBtn', 'ถัดไป: จัดผังร้าน')}</span>
                   <ArrowRight size={18} />
                 </button>
               </div>
@@ -2735,35 +2788,42 @@ export default function FranchisePlanner() {
 
       {/* 3. STEP 2: 3D INTERIOR STUDIO & 2D FLOOR PLAN */}
       {currentStep === 2 && (
-        <section className={`step-content-section container ${isPlannerFullscreen ? 'planner-fullscreen-mode' : ''} ${forceLandscapeRotate ? 'force-landscape-active' : ''}`}>
-          {/* Sticky Exit Fullscreen Button - Visible on All Screens & Devices */}
-          {isPlannerFullscreen && (
+        <section className={`step-content-section container ${isPlannerFullscreen ? 'planner-fullscreen-mode' : ''} ${isWalkMode ? 'walk-mode-active planner-walk-fullscreen' : ''} ${forceLandscapeRotate ? 'force-landscape-active' : ''}`}>
+          {/* Sticky Exit Fullscreen Button - Visible on All Screens & Devices (ONLY ONE EXIT BUTTON) */}
+          {(isPlannerFullscreen || isWalkMode) && (
             <button
               type="button"
               id="btn-sticky-exit-fullscreen"
               className="btn-sticky-exit-fullscreen"
-              onClick={handleExitFullscreen}
-              title="กดเพื่อออกจากโหมดเต็มจอ (ESC)"
+              onClick={async () => {
+                if (isWalkMode) {
+                  setIsWalkMode(false);
+                }
+                if (isPlannerFullscreen) {
+                  await handleExitFullscreen();
+                }
+              }}
+              title={isWalkMode ? tp('exitWalk', 'ออกจากโหมดเดิน (ESC)') : tp('exitFullscreen', 'ออกจากเต็มจอ (ESC)')}
             >
               <Minimize2 size={16} />
-              <span>ออกจากเต็มจอ (ESC)</span>
+              <span>{isWalkMode ? tp('exitWalk', 'ออกจากโหมดเดิน (ESC)') : tp('exitFullscreen', 'ออกจากเต็มจอ (ESC)')}</span>
             </button>
           )}
 
           {/* Landscape Orientation Guide for Tablets/Mobiles in Fullscreen Mode */}
-          {isPlannerFullscreen && (
+          {isPlannerFullscreen && !isWalkMode && (
             <div className="planner-fullscreen-landscape-bar">
               <div className="landscape-bar-info">
                 <span className="landscape-icon">🔄</span>
-                <span className="landscape-text">โหมดเต็มจอ: แนะนำหมุน iPad / แท็บเล็ต เป็นแนวนอนเพื่อมุมมองที่ดีที่สุด</span>
+                <span className="landscape-text">{tp('step2_landscapeHint', 'โหมดเต็มจอ: แนะนำหมุน iPad / แท็บเล็ต เป็นแนวนอนเพื่อมุมมองที่ดีที่สุด')}</span>
               </div>
               <button
                 type="button"
                 className="btn-landscape-rotate-toggle"
                 onClick={() => setForceLandscapeRotate(prev => !prev)}
-                title="สลับหมุนจอ 90 องศา"
+                title={tp('step2_rotateLandscape', 'สลับหมุนจอ 90°')}
               >
-                <span>{forceLandscapeRotate ? 'คืนค่ามุมมองปกติ' : 'บังคับหมุนจอ 90°'}</span>
+                <span>{forceLandscapeRotate ? tp('step2_restoreLandscape', 'คืนค่ามุมมองปกติ') : tp('step2_rotateLandscape', 'บังคับหมุนจอ 90°')}</span>
               </button>
             </div>
           )}
@@ -2772,7 +2832,7 @@ export default function FranchisePlanner() {
           <div className="planner-top-controls glass-panel">
             {/* View Mode Toggle */}
             <div className="view-mode-toggle-group">
-              <span className="control-group-label">โหมดแสดงผล:</span>
+              <span className="control-group-label">{tp('viewModeLabel', 'โหมดแสดงผล:')}</span>
               <div className="view-mode-btns">
                 <button 
                   id="btn-view-mode-3d"
@@ -2780,7 +2840,7 @@ export default function FranchisePlanner() {
                   onClick={() => setViewMode('3d')}
                 >
                   <Box size={16} />
-                  <span className="view-mode-txt-full">3D Studio</span>
+                  <span className="view-mode-txt-full">{tp('mode3D', '3D Studio')}</span>
                   <span className="view-mode-txt-short">3D</span>
                 </button>
                 <button 
@@ -2789,29 +2849,31 @@ export default function FranchisePlanner() {
                   onClick={() => setViewMode('2d')}
                 >
                   <LayoutGrid size={16} />
-                  <span className="view-mode-txt-full">2D Blueprint (แปลน 2 มิติ)</span>
-                  <span className="view-mode-txt-short">2D แปลน</span>
+                  <span className="view-mode-txt-full">{tp('mode2D', '2D Blueprint (แปลน 2 มิติ)')}</span>
+                  <span className="view-mode-txt-short">{tp('topDown', '2D แปลน')}</span>
                 </button>
                 <button 
                   type="button"
                   id="btn-step2-auto-layout"
                   className="btn-toolbar-auto-layout"
                   onClick={handleApplyAutoLayout}
-                  title="คำนวณและจัดวางโต๊ะคอมพิวเตอร์และเฟอร์นิเจอร์ใหม่อัตโนมัติ (AI Auto-Layout)"
+                  title="AI Auto-Layout"
                 >
                   <Sparkles size={14} />
-                  <span>จัดผังอัตโนมัติ</span>
+                  <span>{tp('autoLayout', 'จัดผังอัตโนมัติ')}</span>
                 </button>
-                <button 
-                  type="button"
-                  id="btn-topbar-fullscreen-toggle"
-                  className={`btn-topbar-fullscreen ${isPlannerFullscreen ? 'active' : ''}`}
-                  onClick={handleToggleFullscreen}
-                  title={isPlannerFullscreen ? 'ออกจากโหมดเต็มจอ (ESC)' : 'เปิดสตูดิโอเต็มหน้าจอ (Zen Mode)'}
-                >
-                  {isPlannerFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-                  <span>{isPlannerFullscreen ? 'ย่อหน้าต่าง (ESC)' : 'ขยายเต็มจอ'}</span>
-                </button>
+                {!isPlannerFullscreen && (
+                  <button 
+                    type="button" 
+                    id="btn-topbar-fullscreen-toggle"
+                    className="btn-topbar-fullscreen"
+                    onClick={handleToggleFullscreen}
+                    title={tp('fullscreen', 'เปิดสตูดิโอเต็มหน้าจอ (Zen Mode)')}
+                  >
+                    <Maximize2 size={14} />
+                    <span>{tp('fullscreen', 'ขยายเต็มจอ')}</span>
+                  </button>
+                )}
               </div>
             </div>
 
@@ -3929,16 +3991,18 @@ export default function FranchisePlanner() {
                   <Download size={14} />
                   <span>แปลนช่าง (PNG)</span>
                 </button>
-                <button 
-                  type="button"
-                  id="btn-toolbar-fullscreen-toggle"
-                  className={`btn-toolbar-fullscreen ${isPlannerFullscreen ? 'active' : ''}`}
-                  onClick={handleToggleFullscreen}
-                  title={isPlannerFullscreen ? 'ออกจากโหมดเต็มจอ (กด ESC ได้)' : 'เปิดสตูดิโอเต็มหน้าจอ (Zen Mode)'}
-                >
-                  {isPlannerFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-                  <span>{isPlannerFullscreen ? 'ย่อหน้าต่าง (ESC)' : 'ขยายเต็มจอ (Zen Mode)'}</span>
-                </button>
+                {!isPlannerFullscreen && (
+                  <button 
+                    type="button" 
+                    id="btn-toolbar-fullscreen-toggle"
+                    className="btn-toolbar-fullscreen"
+                    onClick={handleToggleFullscreen}
+                    title={tp('fullscreen', 'เปิดสตูดิโอเต็มหน้าจอ (Zen Mode)')}
+                  >
+                    <Maximize2 size={14} />
+                    <span>{tp('fullscreen', 'ขยายเต็มจอ (Zen Mode)')}</span>
+                  </button>
+                )}
               </div>
 
               {/* Viewport: 3D Studio or 2D Blueprint */}
@@ -3961,6 +4025,9 @@ export default function FranchisePlanner() {
                   onToggleFullscreen={handleToggleFullscreen}
                   doorConfig={doorConfig}
                   onChangeDoorConfig={setDoorConfig}
+                  isWalkMode={isWalkMode}
+                  onWalkModeChange={setIsWalkMode}
+                  onRequestFullscreen={handleToggleFullscreen}
                 />
               ) : (
                 <div 
@@ -4274,7 +4341,7 @@ export default function FranchisePlanner() {
               <span>HARDWARE SPEC & GEAR SELECTION</span>
             </div>
             <h2 className="section-title">
-              เลือกระดับสเปกคอมพิวเตอร์ <span className="text-blue">สำหรับทั้งร้าน</span>
+              {tp('step3Title', 'เลือกระดับสเปกคอมพิวเตอร์ สำหรับทั้งร้าน')}
             </h2>
             <p className="section-subtitle max-w-700">
               จำนวนเครื่องในผังของคุณปัจจุบันคือ <strong>{totalStations} เครื่อง</strong> สามารถเลือก Tier สเปกที่เหมาะสมกับกลุ่มลูกค้าและงบประมาณลงทุน (เก้าอี้เกมมิ่งรวมอยู่ในชุดโต๊ะแล้ว)
@@ -4668,6 +4735,7 @@ export default function FranchisePlanner() {
       )}
 
       {/* UNIVERSAL STICKY BOTTOM NAVIGATION BAR (UNIFIED ACROSS ALL STEPS 1-4) */}
+      {!isPlannerFullscreen && !isWalkMode && (
       <div className="planner-bottom-nav-bar glass-panel" id="planner-sticky-bottom-bar">
         <div className="bottom-nav-left-info">
           <Info size={16} className="text-blue flex-shrink-0 hide-mobile" />
@@ -4703,7 +4771,7 @@ export default function FranchisePlanner() {
               className="btn-secondary btn-nav-back"
             >
               <ArrowLeft size={16} />
-              <span>ย้อนกลับ</span>
+              <span>{tp('prevStep', 'ย้อนกลับ')}</span>
             </button>
           )}
 
@@ -4714,7 +4782,7 @@ export default function FranchisePlanner() {
               onClick={() => handleStepChange(2)} 
               className="btn-primary btn-nav-next"
             >
-              <span>ถัดไป: จัดผังร้าน</span>
+              <span>{tp('step1_nextBtn', 'ถัดไป: จัดผังร้าน')}</span>
               <ArrowRight size={16} />
             </button>
           )}
@@ -4726,7 +4794,7 @@ export default function FranchisePlanner() {
               onClick={() => handleStepChange(3)} 
               className="btn-primary btn-nav-next"
             >
-              <span>ถัดไป: เลือกสเปก</span>
+              <span>{tp('step2_nextBtn', 'ถัดไป: เลือกสเปก')}</span>
               <ArrowRight size={16} />
             </button>
           )}
@@ -4738,7 +4806,7 @@ export default function FranchisePlanner() {
               onClick={() => handleStepChange(4)} 
               className="btn-primary btn-nav-next"
             >
-              <span>ถัดไป: สรุปงบ</span>
+              <span>{tp('step3_nextBtn', 'ถัดไป: ดูงบ & ROI')}</span>
               <ArrowRight size={16} />
             </button>
           )}
@@ -4749,10 +4817,10 @@ export default function FranchisePlanner() {
                 type="button"
                 onClick={handleExportBlueprintImage} 
                 className="btn-secondary btn-export-quick hide-mobile"
-                title="ส่งออกแปลนสำหรับช่าง (PNG)"
+                title={tp('blueprintExport', 'ส่งออกแปลนสำหรับช่าง (PNG)')}
               >
                 <Download size={15} />
-                <span>แปลนช่าง (PNG)</span>
+                <span>{tp('blueprintExport', 'แปลนช่าง (PNG)')}</span>
               </button>
               <button 
                 type="button"
@@ -4761,13 +4829,14 @@ export default function FranchisePlanner() {
                 className="btn-primary btn-nav-next"
               >
                 <FileText size={15} />
-                <span>ขอใบเสนอราคา</span>
+                <span>{tp('requestQuote', 'ขอใบเสนอราคา')}</span>
                 <ArrowRight size={16} />
               </button>
             </>
           )}
         </div>
       </div>
+      )}
 
       {/* MODAL: QUOTATION & PRINT PREVIEW & LEAD GENERATION */}
       {showQuotationModal && (
@@ -4810,10 +4879,10 @@ export default function FranchisePlanner() {
                     id="btn-quick-export-blueprint"
                     className="btn-modal-action btn-blueprint-secondary" 
                     onClick={handleExportBlueprintImage}
-                    title="ส่งออกภาพแปลนสถาปัตยกรรมและระบบไฟฟ้าสำหรับช่าง (PNG 2400x1600)"
+                    title={tp('blueprintExport', 'ส่งออกภาพแปลนสถาปัตยกรรมสำหรับช่าง (PNG)')}
                   >
                     <Download size={16} />
-                    <span>ส่งออกแปลน (PNG)</span>
+                    <span>{tp('blueprintExport', 'ส่งออกแปลน (PNG)')}</span>
                   </button>
                 </div>
 
@@ -5082,7 +5151,7 @@ export default function FranchisePlanner() {
 
                   <div className="form-row">
                     <div className="form-group">
-                      <label>ชื่อ-นามสกุล *</label>
+                      <label>{tp('fullName', 'ชื่อ - นามสกุล')} *</label>
                       <input 
                         type="text" 
                         required 
@@ -5092,7 +5161,7 @@ export default function FranchisePlanner() {
                       />
                     </div>
                     <div className="form-group">
-                      <label>เบอร์โทรศัพท์ติดต่อ *</label>
+                      <label>{tp('phone', 'เบอร์โทรศัพท์ (ติดต่อกลับ)')} *</label>
                       <input 
                         type="tel" 
                         required 
@@ -5105,7 +5174,7 @@ export default function FranchisePlanner() {
 
                   <div className="form-row">
                     <div className="form-group">
-                      <label>อีเมลติดต่อ *</label>
+                      <label>{tp('email', 'อีเมล (รับใบเสนอราคา)')} *</label>
                       <input 
                         type="email" 
                         required 
@@ -5116,7 +5185,7 @@ export default function FranchisePlanner() {
                     </div>
                     <div className="form-group">
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-                        <label style={{ margin: 0 }}>งบประมาณที่เตรียมไว้ลงทุน</label>
+                        <label style={{ margin: 0 }}>{tp('budgetLabel', 'งบประมาณลงทุนที่เตรียมไว้')}</label>
                         <span style={{ fontSize: '0.74rem', color: '#2563eb', fontWeight: 600 }}>
                           ⚡ คำนวณอัตโนมัติตามแปลน
                         </span>
@@ -5141,7 +5210,7 @@ export default function FranchisePlanner() {
                   </div>
 
                   <div className="form-group">
-                    <label>รายละเอียดที่ตั้ง / ขนาดพื้นที่ที่มีอยู่เดิม (ถ้ามี)</label>
+                    <label>{tp('locationLabel', 'ทำเลหรือจังหวัดที่สนใจเปิดสาขา')}</label>
                     <textarea 
                       rows={2} 
                       placeholder="เช่น มีอาคารพาณิชย์ 2 คูหา ย่าน ม.เกษตรศาสตร์ ติดถนนใหญ่..."

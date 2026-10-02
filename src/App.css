@@ -5023,15 +5023,21 @@
    IMMERSIVE 3D FIRST-PERSON GAME MODE (โหมดเดินชมร้าน ระดับสายตา)
    ========================================================================== */
 .walk-mode-active,
-.planner-fullscreen-mode.walk-mode-active {
+.planner-fullscreen-mode.walk-mode-active,
+.planner-walk-fullscreen,
+.planner-fullscreen-mode.planner-walk-fullscreen {
   position: fixed !important;
   inset: 0 !important;
   top: 0 !important;
   left: 0 !important;
   width: 100vw !important;
+  width: 100dvw !important;
   height: 100vh !important;
+  height: 100dvh !important;
   max-width: 100vw !important;
+  max-width: 100dvw !important;
   max-height: 100vh !important;
+  max-height: 100dvh !important;
   z-index: 999999 !important;
   padding: 0 !important;
   margin: 0 !important;
@@ -5042,64 +5048,103 @@
 
 /* Hide all surrounding 2D elements in walk mode: pure 3D canvas only */
 .walk-mode-active .planner-top-controls,
+.walk-mode-active .planner-fullscreen-landscape-bar,
 .walk-mode-active .catalog-sidebar,
 .walk-mode-active .inspector-sidebar,
 .walk-mode-active .studio-management-sidebar,
 .walk-mode-active .canvas-stats-toolbar,
 .walk-mode-active .canvas-guidance-bar,
 .walk-mode-active .step-footer-bar,
-.walk-mode-active .section-header-compact {
+.walk-mode-active .section-header-compact,
+.walk-mode-active .planner-bottom-nav-bar,
+.planner-walk-fullscreen .planner-top-controls,
+.planner-walk-fullscreen .planner-fullscreen-landscape-bar,
+.planner-walk-fullscreen .catalog-sidebar,
+.planner-walk-fullscreen .inspector-sidebar,
+.planner-walk-fullscreen .studio-management-sidebar,
+.planner-walk-fullscreen .canvas-stats-toolbar,
+.planner-walk-fullscreen .canvas-guidance-bar,
+.planner-walk-fullscreen .step-footer-bar,
+.planner-walk-fullscreen .section-header-compact,
+.planner-walk-fullscreen .planner-bottom-nav-bar {
   display: none !important;
 }
 
-.walk-mode-active .planner-canvas-layout {
+.walk-mode-active .planner-canvas-layout,
+.planner-walk-fullscreen .planner-canvas-layout {
   display: block !important;
   width: 100vw !important;
+  width: 100dvw !important;
   height: 100vh !important;
+  height: 100dvh !important;
   max-width: 100vw !important;
+  max-width: 100dvw !important;
   max-height: 100vh !important;
+  max-height: 100dvh !important;
   padding: 0 !important;
   margin: 0 !important;
   border: none !important;
+  overflow: hidden !important;
 }
 
-.walk-mode-active .canvas-main-col {
+.walk-mode-active .canvas-main-col,
+.planner-walk-fullscreen .canvas-main-col {
   width: 100vw !important;
+  width: 100dvw !important;
   height: 100vh !important;
+  height: 100dvh !important;
   max-width: 100vw !important;
+  max-width: 100dvw !important;
   max-height: 100vh !important;
+  max-height: 100dvh !important;
   padding: 0 !important;
   margin: 0 !important;
   border: none !important;
+  overflow: hidden !important;
 }
 
-.walk-mode-active .room-3d-studio-wrapper {
+.walk-mode-active .room-3d-studio-wrapper,
+.planner-walk-fullscreen .room-3d-studio-wrapper {
   position: fixed !important;
   inset: 0 !important;
   top: 0 !important;
   left: 0 !important;
   width: 100vw !important;
+  width: 100dvw !important;
   height: 100vh !important;
+  height: 100dvh !important;
+  max-width: 100vw !important;
+  max-width: 100dvw !important;
+  max-height: 100vh !important;
+  max-height: 100dvh !important;
   border-radius: 0 !important;
   border: none !important;
   box-shadow: none !important;
   background: #020617 !important;
   z-index: 999999 !important;
+  overflow: hidden !important;
 }
 
-.walk-mode-active .three-canvas-container {
+.walk-mode-active .three-canvas-container,
+.planner-walk-fullscreen .three-canvas-container {
   position: absolute !important;
   inset: 0 !important;
   width: 100vw !important;
+  width: 100dvw !important;
   height: 100vh !important;
+  height: 100dvh !important;
   border-radius: 0 !important;
   border: none !important;
   background: #020617 !important;
+  overflow: hidden !important;
 }
 
-.walk-mode-active .three-canvas-viewport {
+.walk-mode-active .three-canvas-viewport,
+.planner-walk-fullscreen .three-canvas-viewport {
   width: 100vw !important;
+  width: 100dvw !important;
   height: 100vh !important;
+  height: 100dvh !important;
   border-radius: 0 !important;
   cursor: grab;
 }
@@ -6750,7 +6795,9 @@
 .btn-sticky-exit-fullscreen {
   position: fixed;
   top: 14px;
+  top: max(14px, env(safe-area-inset-top, 14px));
   right: 18px;
+  right: max(18px, env(safe-area-inset-right, 18px));
   z-index: 10000005; /* Always on top of all 3D canvas and menus */
   display: inline-flex;
   align-items: center;
@@ -6806,16 +6853,35 @@
   border-color: #334155;
 }
 
-/* Force Landscape 90 deg rotation on tablets if requested */
-.planner-fullscreen-mode.force-landscape-active {
+/* Force Landscape 90 deg rotation on tablets/mobiles in Fullscreen or Walk Mode */
+.planner-fullscreen-mode.force-landscape-active,
+.walk-mode-active.force-landscape-active,
+.planner-walk-fullscreen.force-landscape-active {
   transform: rotate(90deg) !important;
   transform-origin: top left !important;
   position: fixed !important;
   top: 0 !important;
   left: 100vw !important;
+  left: 100dvw !important;
+  width: 100vh !important;
   width: 100dvh !important;
+  height: 100vw !important;
   height: 100dvw !important;
   max-width: none !important;
+  max-height: none !important;
+  z-index: 999999 !important;
+  overflow: hidden !important;
+}
+
+.force-landscape-active .planner-canvas-layout,
+.force-landscape-active .canvas-main-col,
+.force-landscape-active .room-3d-studio-wrapper,
+.force-landscape-active .three-canvas-container,
+.force-landscape-active .three-canvas-viewport {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
 }
 
 /* Landscape reminder bar in fullscreen */
@@ -7105,12 +7171,65 @@
     margin-bottom: 24px !important;
   }
 
-  /* Walk Mode in Fullscreen on Mobile/Tablet: 100% screen immersive 3D canvas */
-  .planner-fullscreen-mode.studio-walk-fps-active .canvas-main-col,
-  .walk-mode-active.planner-fullscreen-mode .canvas-main-col {
-    height: 100% !important;
+  /* Walk Mode in Fullscreen on Mobile/Tablet: 100% screen immersive 3D canvas (pure room view) */
+  .planner-fullscreen-mode.studio-walk-fps-active,
+  .walk-mode-active.planner-fullscreen-mode,
+  .planner-walk-fullscreen.planner-fullscreen-mode {
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    width: 100vw !important;
+    width: 100dvw !important;
+    height: 100vh !important;
     height: 100dvh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+  }
+
+  .planner-fullscreen-mode.studio-walk-fps-active .canvas-main-col,
+  .walk-mode-active.planner-fullscreen-mode .canvas-main-col,
+  .planner-walk-fullscreen.planner-fullscreen-mode .canvas-main-col {
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-height: 100vh !important;
     max-height: 100dvh !important;
+    width: 100vw !important;
+    width: 100dvw !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .walk-mode-active.planner-fullscreen-mode .room-3d-studio-wrapper,
+  .planner-walk-fullscreen.planner-fullscreen-mode .room-3d-studio-wrapper {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    width: 100dvw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    border-radius: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .walk-mode-active.planner-fullscreen-mode .three-canvas-container,
+  .planner-walk-fullscreen.planner-fullscreen-mode .three-canvas-container {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    width: 100dvw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    min-height: 100vh !important;
+    border-radius: 0 !important;
+  }
+
+  .walk-mode-active.planner-fullscreen-mode .three-canvas-viewport,
+  .planner-walk-fullscreen.planner-fullscreen-mode .three-canvas-viewport {
+    width: 100vw !important;
+    width: 100dvw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    border-radius: 0 !important;
   }
 }
 

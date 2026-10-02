@@ -9,6 +9,7 @@ import {
   Sparkles, Footprints, RotateCcw, ChevronUp, ChevronDown, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { downloadFile } from '../utils/fileDownloader';
+import { useTranslation } from '../context/LanguageContext';
 
 export default function Room3DStudio({
   roomWidth = 12,
@@ -33,6 +34,9 @@ export default function Room3DStudio({
   onWalkModeChange = () => {},
   onRequestFullscreen = () => {}
 }) {
+  const { t, language, translateDynamic } = useTranslation();
+  const tp = (key, fallback) => t?.franchisePlanner?.[key] || (language === 'th' ? fallback : translateDynamic(fallback || key));
+
   const [isDoorPopoverOpen, setIsDoorPopoverOpen] = useState(false);
   const doorPopoverRef = useRef(null);
   const doorToggleBtnRef = useRef(null);
@@ -2332,15 +2336,15 @@ export default function Room3DStudio({
                 setIsDoorPopoverOpen(!isDoorPopoverOpen);
                 onSelectItem('store-door');
               }}
-              title="กำหนดตำแหน่งและรูปแบบประตูทางเข้าร้าน"
+              title={tp('doorConfigTitle', "กำหนดตำแหน่งและรูปแบบประตูทางเข้าร้าน")}
             >
               <DoorOpen size={14} className={isDoorPopoverOpen || selectedItemId === 'store-door' ? 'text-white' : 'text-emerald'} />
               <span className="door-btn-label">
-                <span className="door-btn-prefix">ทางเข้า</span>
+                <span className="door-btn-prefix">{tp('doorEntrance', 'ทางเข้า')}</span>
                 <span className="door-btn-detail">: {
-                  doorConfig?.wall === 'front' ? 'ด้านหน้า' :
-                  doorConfig?.wall === 'left' ? 'ผนังซ้าย' :
-                  doorConfig?.wall === 'back' ? 'ผนังหลัง' : 'ผนังขวา'
+                  doorConfig?.wall === 'front' ? tp('wallFront', 'ด้านหน้า') :
+                  doorConfig?.wall === 'left' ? tp('wallLeft', 'ผนังซ้าย') :
+                  doorConfig?.wall === 'back' ? tp('wallBack', 'ผนังหลัง') : tp('wallRight', 'ผนังขวา')
                 } ({Math.round((doorConfig?.offsetRatio ?? 0.75) * 100)}%)</span>
               </span>
             </button>
@@ -2351,145 +2355,149 @@ export default function Room3DStudio({
               <button 
                 className={`btn-cam-view ${activeCamPreset === 'iso' ? 'active' : ''}`}
                 onClick={() => setCameraView('iso')}
-                title="มุมมอง 3D (45°)"
+                title="3D Studio"
               >
                 <Eye size={14} />
-                <span>3D</span>
+                <span>{tp('mode3D', '3D')}</span>
               </button>
               <button 
                 className={`btn-cam-view btn-cam-storefront ${activeCamPreset === 'storefront' ? 'active' : ''}`}
                 onClick={() => setCameraView('storefront')}
-                title="มุมมองหน้าร้าน ส่องป้ายไฟและสติ๊กเกอร์ประตูทางเข้า (Storefront)"
+                title="Storefront"
               >
                 <Sparkles size={14} className="text-emerald" />
-                <span>หน้าร้าน</span>
+                <span>{tp('storefront', 'หน้าร้าน')}</span>
               </button>
               <button 
                 className={`btn-cam-view ${activeCamPreset === 'walk' ? 'active' : ''}`}
                 onClick={() => setCameraView('walk')}
-                title="มุมมองระดับสายตาคนเดินชมในร้าน (Walk-through Mode)"
+                title="Walk-through Mode"
               >
                 <Footprints size={14} />
-                <span>เดินชมร้าน</span>
+                <span>{tp('walkMode', 'เดินชมร้าน')}</span>
               </button>
               <button 
                 className={`btn-cam-view ${activeCamPreset === 'top' ? 'active' : ''}`}
                 onClick={() => setCameraView('top')}
-                title="มุมมองแปลนด้านบน 2D Top-Down"
+                title="Top-Down 2D"
               >
                 <Layers size={14} />
-                <span>แปลน 2D</span>
+                <span>{tp('topDown', 'แปลน 2D')}</span>
               </button>
             </div>
           </div>
 
           {/* Right Camera Tools Cluster - Fixed & Pinned */}
           <div className="camera-tools-cluster">
-            <button className="btn-cam-mini btn-cam-zoom-in" onClick={() => handleZoom(1)} title="ซูมเข้า (+)">
+            <button className="btn-cam-mini btn-cam-zoom-in" onClick={() => handleZoom(1)} title="Zoom In (+)">
               <ZoomIn size={15} />
             </button>
-            <button className="btn-cam-mini btn-cam-zoom-out" onClick={() => handleZoom(-1)} title="ซูมออก (-)">
+            <button className="btn-cam-mini btn-cam-zoom-out" onClick={() => handleZoom(-1)} title="Zoom Out (-)">
               <ZoomOut size={15} />
             </button>
             <button 
               type="button" 
               className="btn-cam-mini btn-cam-snapshot"
               onClick={handleExport3DSnapshot}
-              title="ถ่ายภาพเรนเดอร์ 3D (PNG Snapshot)"
+              title="Snapshot (PNG)"
             >
               <Camera size={15} />
             </button>
-            <button
-              type="button"
-              id="btn-cam-fullscreen-toggle"
-              className={`btn-cam-mini btn-cam-fullscreen ${isPlannerFullscreen ? 'active' : ''}`}
-              onClick={onToggleFullscreen}
-              title={isPlannerFullscreen ? "ออกจากโหมดเต็มจอ (ESC)" : "ขยายเต็มจอ (Zen Mode)"}
-            >
-              {isPlannerFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
-            </button>
+            {!isPlannerFullscreen && (
+              <button
+                type="button"
+                id="btn-cam-fullscreen-toggle"
+                className="btn-cam-mini btn-cam-fullscreen"
+                onClick={onToggleFullscreen}
+                title={tp('fullscreen', "ขยายเต็มจอ (Zen Mode)")}
+              >
+                <Maximize2 size={15} />
+              </button>
+            )}
           </div>
         </div>
       ) : (
-        /* Top Gaming HUD Bar in Walk Mode */
-        <div className="studio-3d-gamer-hud">
-          {/* Top-Left Gaming Title Badge */}
-          <div className="walk-hud-brand">
-            <div className="walk-hud-pill">
-              <span className="live-game-dot"></span>
-              <Footprints size={15} />
-              <span>3D FPS WALK MODE</span>
+        /* Top Gaming HUD Bar in Walk Mode - Only show if not in fullscreen or walk mode to prevent duplicates */
+        (!isPlannerFullscreen && !isWalkMode) && (
+          <div className="studio-3d-gamer-hud">
+            {/* Top-Left Gaming Title Badge */}
+            <div className="walk-hud-brand">
+              <div className="walk-hud-pill">
+                <span className="live-game-dot"></span>
+                <Footprints size={15} />
+                <span>3D FPS WALK MODE</span>
+              </div>
+              <span className="walk-hud-store-title">{doorConfig?.storeName || 'GLP : G SPEED LIVING PLUS'}</span>
             </div>
-            <span className="walk-hud-store-title">{doorConfig?.storeName || 'GLP : G SPEED LIVING PLUS'}</span>
-          </div>
 
-          {/* Quick Camera Angle Switchers */}
-          <div className="walk-hud-cam-switchers">
+            {/* Quick Camera Angle Switchers */}
+            <div className="walk-hud-cam-switchers">
+              <button 
+                type="button" 
+                className="btn-walk-hud-cam active"
+                title="กำลังอยู่ในโหมดเดินชมร้านระดับสายตา"
+              >
+                <Footprints size={13} />
+                <span>เดินชมร้าน</span>
+              </button>
+              <button 
+                type="button" 
+                className="btn-walk-hud-cam"
+                onClick={() => setCameraView('storefront')}
+                title="มุมมองหน้าร้าน"
+              >
+                <Sparkles size={13} />
+                <span>หน้าร้าน</span>
+              </button>
+              <button 
+                type="button" 
+                className="btn-walk-hud-cam"
+                onClick={() => {
+                  setCameraView('iso');
+                  onWalkModeChange(false);
+                  onRequestFullscreen(false);
+                }}
+                title="สลับเป็นมุมมอง 3D"
+              >
+                <Eye size={13} />
+                <span>3D</span>
+              </button>
+              <button 
+                type="button" 
+                className="btn-walk-hud-cam"
+                onClick={() => {
+                  setCameraView('top');
+                  onWalkModeChange(false);
+                  onRequestFullscreen(false);
+                }}
+                title="สลับเป็นมุมมองแปลนด้านบน"
+              >
+                <Layers size={13} />
+                <span>Top-Down</span>
+              </button>
+            </div>
+
+            {/* Top-Right Exit Button */}
             <button 
               type="button" 
-              className="btn-walk-hud-cam active"
-              title="กำลังอยู่ในโหมดเดินชมร้านระดับสายตา"
-            >
-              <Footprints size={13} />
-              <span>เดินชมร้าน</span>
-            </button>
-            <button 
-              type="button" 
-              className="btn-walk-hud-cam"
-              onClick={() => setCameraView('storefront')}
-              title="มุมมองหน้าร้าน"
-            >
-              <Sparkles size={13} />
-              <span>หน้าร้าน</span>
-            </button>
-            <button 
-              type="button" 
-              className="btn-walk-hud-cam"
+              id="btn-walk-hud-exit"
+              className="btn-walk-hud-exit"
               onClick={() => {
+                wasPointerLockedRef.current = false;
+                if (document.exitPointerLock && document.pointerLockElement) {
+                  document.exitPointerLock();
+                }
                 setCameraView('iso');
                 onWalkModeChange(false);
                 onRequestFullscreen(false);
               }}
-              title="สลับเป็นมุมมอง 3D"
+              title="ออกจากโหมดเดินชมร้าน (กด ESC ได้)"
             >
-              <Eye size={13} />
-              <span>3D</span>
-            </button>
-            <button 
-              type="button" 
-              className="btn-walk-hud-cam"
-              onClick={() => {
-                setCameraView('top');
-                onWalkModeChange(false);
-                onRequestFullscreen(false);
-              }}
-              title="สลับเป็นมุมมองแปลนด้านบน"
-            >
-              <Layers size={13} />
-              <span>Top-Down</span>
+              <Minimize2 size={15} />
+              <span>ออกจากโหมดเดิน (ESC)</span>
             </button>
           </div>
-
-          {/* Top-Right Exit Button */}
-          <button 
-            type="button" 
-            id="btn-walk-hud-exit"
-            className="btn-walk-hud-exit"
-            onClick={() => {
-              wasPointerLockedRef.current = false;
-              if (document.exitPointerLock && document.pointerLockElement) {
-                document.exitPointerLock();
-              }
-              setCameraView('iso');
-              onWalkModeChange(false);
-              onRequestFullscreen(false);
-            }}
-            title="ออกจากโหมดเดินชมร้าน (กด ESC ได้)"
-          >
-            <Minimize2 size={15} />
-            <span>ออกจากโหมดเดิน (ESC)</span>
-          </button>
-        </div>
+        )
       )}
 
       {/* Main 3D WebGL Canvas */}
@@ -2516,7 +2524,7 @@ export default function Room3DStudio({
         {/* 2.1 Mobile & Tablet Walk Touch Hint */}
         {activeCamPreset === 'walk' && (
           <div className="walk-hud-touch-hint">
-            <span>👆 ลากนิ้วบนหน้าจอเพื่อเดินชม หรือกดปุ่มควบคุมด้านล่าง</span>
+            <span>{tp('touchWalkHint', '👆 ลากนิ้วบนหน้าจอเพื่อเดินชม หรือกดปุ่มควบคุมด้านล่าง')}</span>
           </div>
         )}
 
@@ -2526,16 +2534,16 @@ export default function Room3DStudio({
             id="walk-hud-lock-prompt"
             className="walk-hud-lock-prompt"
             onClick={triggerPointerLock}
-            title="คลิกเพื่อล็อคเมาส์หันมองรอบทิศ 360° แบบเกม FPS (กด ESC เพื่อออก)"
+            title={tp('lockMouseHint', "คลิกเพื่อล็อคเมาส์หันมองรอบทิศ 360° แบบเกม FPS (กด ESC เพื่อออก)")}
           >
             <span className="prompt-icon">🎯</span>
-            <span className="prompt-text">คลิกบนหน้าจอเพื่อ <strong className="prompt-highlight">ล็อคเมาส์หันมองแบบเกม FPS</strong></span>
-            <span className="prompt-badge">ขยับเมาส์หันมอง 360° อิสระ</span>
+            <span className="prompt-text">{tp('lockMouseHint', 'คลิกบนหน้าจอเพื่อล็อคเมาส์หันมองแบบเกม FPS')}</span>
+            <span className="prompt-badge">360° FPS</span>
           </div>
         )}
 
         {/* 3. Walk Mode Immersion: Floating Bottom Controls Banner */}
-        {activeCamPreset === 'walk' && (
+        {activeCamPreset === 'walk' && !isPlannerFullscreen && (
           <div className="walk-hud-controls-pill">
             <div className="hud-ctrl-item">
               <span className="hud-key">W</span>
@@ -2568,7 +2576,7 @@ export default function Room3DStudio({
         )}
 
         {/* 4. Walk Mode Immersion: Bottom-Left Live Coords & Info */}
-        {activeCamPreset === 'walk' && (
+        {activeCamPreset === 'walk' && !isPlannerFullscreen && (
           <div className="walk-hud-stats-pill">
             <span className={`hud-stat-badge ${isPointerLocked ? 'locked' : ''}`}>
               {isPointerLocked ? '🔒 FPS MOUSE ACTIVE' : 'FPS WALK'}
@@ -2707,16 +2715,16 @@ export default function Room3DStudio({
         )}
 
         {/* Floating 3D Fullscreen Button at Bottom-Right */}
-        {activeCamPreset !== 'walk' && (
+        {activeCamPreset !== 'walk' && !isPlannerFullscreen && (
           <button
             type="button"
             id="btn-floating-3d-fullscreen"
-            className={`floating-3d-fullscreen-btn ${isPlannerFullscreen ? 'active' : ''}`}
+            className="floating-3d-fullscreen-btn"
             onClick={onToggleFullscreen}
-            title={isPlannerFullscreen ? "ออกจากโหมดเต็มจอ (ESC)" : "ขยายเต็มจอ (Zen Mode)"}
+            title={tp('fullscreen', "เปิดสตูดิโอเต็มหน้าจอ (Zen Mode)")}
           >
-            {isPlannerFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-            <span>{isPlannerFullscreen ? 'ย่อหน้าต่าง (ESC)' : 'ขยายเต็มจอ'}</span>
+            <Maximize2 size={16} />
+            <span>{tp('fullscreen', 'ขยายเต็มจอ')}</span>
           </button>
         )}
 
@@ -2726,13 +2734,13 @@ export default function Room3DStudio({
             <div className="door-popover-header">
               <div className="popover-title">
                 <DoorOpen size={16} className="text-emerald" />
-                <span>กำหนดประตูทางเข้าร้าน (Store Entrance)</span>
+                <span>{tp('doorConfigTitle', 'กำหนดประตูทางเข้าร้าน (Store Entrance)')}</span>
               </div>
               <button 
                 type="button" 
                 className="btn-popover-close" 
                 onClick={() => setIsDoorPopoverOpen(false)}
-                title="ปิดหน้าต่าง"
+                title="✕"
               >
                 ✕
               </button>
@@ -2741,35 +2749,35 @@ export default function Room3DStudio({
             <div className="door-popover-body">
               {/* 4 Wall Selector */}
               <div className="door-field-group">
-                <label className="field-lbl">เลือกผนังติดตั้งประตูร้าน:</label>
+                <label className="field-lbl">{tp('doorSelectWall', 'เลือกผนังติดตั้งประตูร้าน:')}</label>
                 <div className="door-wall-grid">
                   <button 
                     type="button" 
                     className={`wall-pick-btn ${doorConfig?.wall === 'front' ? 'active' : ''}`}
                     onClick={() => onChangeDoorConfig({ ...doorConfig, wall: 'front' })}
                   >
-                    <ArrowDown size={14} /> ด้านหน้า (Front)
+                    <ArrowDown size={14} /> {tp('wallFrontFull', 'ด้านหน้า (Front)')}
                   </button>
                   <button 
                     type="button" 
                     className={`wall-pick-btn ${doorConfig?.wall === 'right' || !doorConfig?.wall ? 'active' : ''}`}
                     onClick={() => onChangeDoorConfig({ ...doorConfig, wall: 'right' })}
                   >
-                    <ArrowRight size={14} /> ผนังขวา (Right)
+                    <ArrowRight size={14} /> {tp('wallRightFull', 'ผนังขวา (Right)')}
                   </button>
                   <button 
                     type="button" 
                     className={`wall-pick-btn ${doorConfig?.wall === 'left' ? 'active' : ''}`}
                     onClick={() => onChangeDoorConfig({ ...doorConfig, wall: 'left' })}
                   >
-                    <ArrowLeft size={14} /> ผนังซ้าย (Left)
+                    <ArrowLeft size={14} /> {tp('wallLeftFull', 'ผนังซ้าย (Left)')}
                   </button>
                   <button 
                     type="button" 
                     className={`wall-pick-btn ${doorConfig?.wall === 'back' ? 'active' : ''}`}
                     onClick={() => onChangeDoorConfig({ ...doorConfig, wall: 'back' })}
                   >
-                    <ArrowUp size={14} /> ผนังหลัง (Back)
+                    <ArrowUp size={14} /> {tp('wallBackFull', 'ผนังหลัง (Back)')}
                   </button>
                 </div>
               </div>
@@ -2777,7 +2785,7 @@ export default function Room3DStudio({
               {/* Position Slider */}
               <div className="door-field-group">
                 <div className="slider-header-mini">
-                  <label className="field-lbl">ตำแหน่งบนผนัง:</label>
+                  <label className="field-lbl">{tp('doorOffset', 'ตำแหน่งบนผนัง:')}</label>
                   <span className="slider-val-mini text-emerald">{Math.round((doorConfig?.offsetRatio ?? 0.75) * 100)}%</span>
                 </div>
                 <div className="door-offset-presets">
@@ -2786,21 +2794,21 @@ export default function Room3DStudio({
                     className="btn-preset-offset" 
                     onClick={() => onChangeDoorConfig({ ...doorConfig, offsetRatio: 0.25 })}
                   >
-                    {doorConfig?.wall === 'front' || doorConfig?.wall === 'back' ? 'ฝั่งซ้าย (25%)' : 'ฝั่งหลัง (25%)'}
+                    {doorConfig?.wall === 'front' || doorConfig?.wall === 'back' ? '25%' : '25%'}
                   </button>
                   <button 
                     type="button" 
                     className="btn-preset-offset" 
                     onClick={() => onChangeDoorConfig({ ...doorConfig, offsetRatio: 0.50 })}
                   >
-                    ตรงกลาง (50%)
+                    50%
                   </button>
                   <button 
                     type="button" 
                     className="btn-preset-offset" 
                     onClick={() => onChangeDoorConfig({ ...doorConfig, offsetRatio: 0.75 })}
                   >
-                    {doorConfig?.wall === 'front' || doorConfig?.wall === 'back' ? 'ฝั่งขวา (75%)' : 'ฝั่งหน้า (75%)'}
+                    75%
                   </button>
                 </div>
                 <input 
@@ -2816,7 +2824,7 @@ export default function Room3DStudio({
 
               {/* Door Style */}
               <div className="door-field-group">
-                <label className="field-lbl">รูปแบบประตู:</label>
+                <label className="field-lbl">{tp('doorStyle', 'รูปแบบประตู:')}</label>
                 <div className="door-style-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
                   <button 
                     type="button" 
@@ -2824,7 +2832,7 @@ export default function Room3DStudio({
                     onClick={() => onChangeDoorConfig({ ...doorConfig, style: 'glass-single' })}
                   >
                     <DoorClosed size={15} />
-                    <span>แบบ 1 บาน (ฟิล์มดำ)</span>
+                    <span>{tp('doorSingle', 'แบบ 1 บาน (ฟิล์มดำ)')}</span>
                   </button>
                   <button 
                     type="button" 
@@ -2832,7 +2840,7 @@ export default function Room3DStudio({
                     onClick={() => onChangeDoorConfig({ ...doorConfig, style: 'glass-double' })}
                   >
                     <SplitSquareVertical size={15} />
-                    <span>แบบ 2 บาน (ฟิล์มดำ)</span>
+                    <span>{tp('doorDouble', 'แบบ 2 บาน (ฟิล์มดำ)')}</span>
                   </button>
                 </div>
               </div>
@@ -2840,19 +2848,19 @@ export default function Room3DStudio({
               {/* Custom Store Name / Sign Text */}
               <div className="door-field-group">
                 <div className="slider-header-mini">
-                  <label className="field-lbl">ชื่อร้าน / สติ๊กเกอร์หน้าร้าน:</label>
-                  <span className="slider-val-mini text-cyan">ป้าย 3D Real-time</span>
+                  <label className="field-lbl">{tp('storeNameLabel', 'ชื่อร้าน / สติ๊กเกอร์หน้าร้าน:')}</label>
+                  <span className="slider-val-mini text-cyan">3D Sign</span>
                 </div>
                 <input 
                   type="text"
                   value={doorConfig?.storeName || 'GLP : G SPEED LIVING PLUS'}
                   onChange={(e) => onChangeDoorConfig({ ...doorConfig, storeName: e.target.value })}
-                  placeholder="เช่น GLP : G SPEED LIVING PLUS, สาขา พระราม 9..."
+                  placeholder="GLP : G SPEED LIVING PLUS"
                   className="store-name-popover-input"
                   maxLength={36}
                 />
                 <div className="store-name-presets">
-                  {['GLP : G SPEED LIVING PLUS', 'G-SPEED LIVING PLUS', 'สาขา สยามสแควร์', 'GLP CYBER LOUNGE'].map((preset) => (
+                  {['GLP : G SPEED LIVING PLUS', 'G-SPEED LIVING PLUS', 'GLP CYBER LOUNGE'].map((preset) => (
                     <button 
                       key={preset}
                       type="button" 
@@ -2867,7 +2875,7 @@ export default function Room3DStudio({
 
               {/* Signboard & Sticker Style */}
               <div className="door-field-group">
-                <label className="field-lbl">รูปแบบป้าย & สติ๊กเกอร์หน้าร้าน:</label>
+                <label className="field-lbl">{tp('signStyleLabel', 'รูปแบบป้าย & สติ๊กเกอร์หน้าร้าน:')}</label>
                 <div className="door-style-row">
                   <button 
                     type="button" 
@@ -2875,7 +2883,7 @@ export default function Room3DStudio({
                     onClick={() => onChangeDoorConfig({ ...doorConfig, signStyle: 'neon-lightbox' })}
                   >
                     <Sparkles size={15} />
-                    <span>นีออน LED</span>
+                    <span>{tp('signNeon', 'นีออน LED')}</span>
                   </button>
                   <button 
                     type="button" 
@@ -2883,7 +2891,7 @@ export default function Room3DStudio({
                     onClick={() => onChangeDoorConfig({ ...doorConfig, signStyle: 'acrylic-gold' })}
                   >
                     <Award size={15} />
-                    <span>อะคริลิกทอง</span>
+                    <span>{tp('signGold', 'อะคริลิกทอง')}</span>
                   </button>
                   <button 
                     type="button" 
@@ -2891,7 +2899,7 @@ export default function Room3DStudio({
                     onClick={() => onChangeDoorConfig({ ...doorConfig, signStyle: 'minimal-dark' })}
                   >
                     <Zap size={15} />
-                    <span>มินิมอลไซเบอร์</span>
+                    <span>{tp('signMinimal', 'มินิมอลไซเบอร์')}</span>
                   </button>
                   <button 
                     type="button" 
@@ -2899,7 +2907,7 @@ export default function Room3DStudio({
                     onClick={() => onChangeDoorConfig({ ...doorConfig, signStyle: 'grand-arch' })}
                   >
                     <Building2 size={15} />
-                    <span>ซุ้มแกรนด์</span>
+                    <span>{tp('signArch', 'ซุ้มแกรนด์')}</span>
                   </button>
                 </div>
               </div>
