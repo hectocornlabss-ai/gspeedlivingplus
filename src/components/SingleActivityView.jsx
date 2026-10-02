@@ -415,7 +415,7 @@ export default function SingleActivityView({
 
             <span className="article-date-badge">
               <Calendar size={14} />
-              <span>{activity.date}</span>
+              <span>{translateDynamic(activity.date)}</span>
             </span>
 
             <span className="article-read-badge">
@@ -426,7 +426,7 @@ export default function SingleActivityView({
             {activity.partner && (
               <span className="article-partner-badge">
                 <ShieldCheck size={14} className="text-blue" />
-                <span>{t('singleActivity.partner')}: <strong>{activity.partner}</strong></span>
+                <span>{t('singleActivity.partner')}: <strong>{translateDynamic(activity.partner)}</strong></span>
               </span>
             )}
           </div>
@@ -449,7 +449,7 @@ export default function SingleActivityView({
                     onClick={() => handleTagClick(tag)}
                     title={`คลิกเพื่อดูบทความที่เกี่ยวข้องกับ ${tag}`}
                   >
-                    #{tag.replace(/^#/, '')}
+                    #{translateDynamic(tag.replace(/^#/, ''))}
                   </button>
                 ))}
               </div>
@@ -458,7 +458,7 @@ export default function SingleActivityView({
 
           {activity.desc && (
             <div className="article-lead-card glass-panel">
-              <p className="lead-text">{activity.desc}</p>
+              <p className="lead-text">{translateDynamic(activity.desc)}</p>
             </div>
           )}
         </div>
@@ -474,7 +474,13 @@ export default function SingleActivityView({
               <img src={activity.image} alt={activity.imageAlt || activity.title} className="cover-img" />
               <div className="cover-caption-tag">
                 <ImageIcon size={14} />
-                <span>ภาพบรรยากาศสดจาก G-Speed Esport Arena • ผู้สนับสนุน: {activity.partner}</span>
+                <span>
+                  {language === 'zh' 
+                    ? `G-Speed Esport Arena 现场盛况 • 赞助商: ${translateDynamic(activity.partner || 'ASUS ROG & NVIDIA')}`
+                    : language === 'en'
+                    ? `Live atmosphere at G-Speed Esport Arena • Sponsor: ${translateDynamic(activity.partner || 'ASUS ROG & NVIDIA')}`
+                    : `ภาพบรรยากาศสดจาก G-Speed Esport Arena • ผู้สนับสนุน: ${activity.partner || 'ASUS ROG & NVIDIA'}`}
+                </span>
               </div>
             </div>
 
@@ -485,15 +491,15 @@ export default function SingleActivityView({
                   {activity.contentBlocks.map((block, bIdx) => {
                     if (block.type === 'heading') {
                       return block.level === 3 ? (
-                        <h3 key={block.id || bIdx} className="content-block-heading level-3">{block.text}</h3>
+                        <h3 key={block.id || bIdx} className="content-block-heading level-3">{translateDynamic(block.text)}</h3>
                       ) : (
-                        <h2 key={block.id || bIdx} className="content-block-heading level-2">{block.text}</h2>
+                        <h2 key={block.id || bIdx} className="content-block-heading level-2">{translateDynamic(block.text)}</h2>
                       );
                     }
                     if (block.type === 'paragraph') {
                       return (
                         <p key={block.id || bIdx} className={`content-block-paragraph ${block.align === 'center' ? 'align-center' : ''}`}>
-                          {block.text}
+                          {translateDynamic(block.text)}
                         </p>
                       );
                     }
@@ -507,15 +513,15 @@ export default function SingleActivityView({
                             <div 
                               className="media-img-wrap" 
                               onClick={() => block.imageUrl && setLightboxImage({ url: block.imageUrl, caption: block.caption || block.title, alt: block.imageAlt })}
-                              title="คลิกเพื่อดูภาพขยาย"
+                              title={language === 'zh' ? '点击查看大图' : language === 'en' ? 'Click to enlarge' : 'คลิกเพื่อดูภาพขยาย'}
                             >
                               <img src={block.imageUrl || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80'} alt={block.imageAlt || block.title || 'Media'} loading="lazy" />
                             </div>
-                            {block.caption && <div className="media-caption">{block.caption}</div>}
+                            {block.caption && <div className="media-caption">{translateDynamic(block.caption)}</div>}
                           </div>
                           <div className="text-pane">
-                            {block.title && <h3>{block.title}</h3>}
-                            {block.text && <p>{block.text}</p>}
+                            {block.title && <h3>{translateDynamic(block.title)}</h3>}
+                            {block.text && <p>{translateDynamic(block.text)}</p>}
                           </div>
                         </div>
                       );
@@ -526,11 +532,11 @@ export default function SingleActivityView({
                           <div 
                             className="img-frame" 
                             onClick={() => block.url && setLightboxImage({ url: block.url, caption: block.caption, alt: block.alt })}
-                            title="คลิกเพื่อดูภาพขยาย"
+                            title={language === 'zh' ? '点击查看大图' : language === 'en' ? 'Click to enlarge' : 'คลิกเพื่อดูภาพขยาย'}
                           >
                             <img src={block.url} alt={block.alt || block.caption || 'Image'} loading="lazy" />
                           </div>
-                          {block.caption && <div className="img-caption">{block.caption}</div>}
+                          {block.caption && <div className="img-caption">{translateDynamic(block.caption)}</div>}
                         </div>
                       );
                     }
@@ -539,12 +545,12 @@ export default function SingleActivityView({
                       return (
                         <div key={block.id || bIdx} className={`content-block-columns-2 ${ratioClass}`}>
                           <div className="col-card">
-                            {block.leftTitle && <h4>{block.leftTitle}</h4>}
-                            {block.leftText && <p>{block.leftText}</p>}
+                            {block.leftTitle && <h4>{translateDynamic(block.leftTitle)}</h4>}
+                            {block.leftText && <p>{translateDynamic(block.leftText)}</p>}
                           </div>
                           <div className="col-card">
-                            {block.rightTitle && <h4>{block.rightTitle}</h4>}
-                            {block.rightText && <p>{block.rightText}</p>}
+                            {block.rightTitle && <h4>{translateDynamic(block.rightTitle)}</h4>}
+                            {block.rightText && <p>{translateDynamic(block.rightText)}</p>}
                           </div>
                         </div>
                       );
@@ -553,16 +559,16 @@ export default function SingleActivityView({
                       return (
                         <div key={block.id || bIdx} className="content-block-columns-3">
                           <div className="col-feature-card">
-                            {block.col1Title && <h4>{block.col1Title}</h4>}
-                            {block.col1Text && <p>{block.col1Text}</p>}
+                            {block.col1Title && <h4>{translateDynamic(block.col1Title)}</h4>}
+                            {block.col1Text && <p>{translateDynamic(block.col1Text)}</p>}
                           </div>
                           <div className="col-feature-card">
-                            {block.col2Title && <h4>{block.col2Title}</h4>}
-                            {block.col2Text && <p>{block.col2Text}</p>}
+                            {block.col2Title && <h4>{translateDynamic(block.col2Title)}</h4>}
+                            {block.col2Text && <p>{translateDynamic(block.col2Text)}</p>}
                           </div>
                           <div className="col-feature-card">
-                            {block.col3Title && <h4>{block.col3Title}</h4>}
-                            {block.col3Text && <p>{block.col3Text}</p>}
+                            {block.col3Title && <h4>{translateDynamic(block.col3Title)}</h4>}
+                            {block.col3Text && <p>{translateDynamic(block.col3Text)}</p>}
                           </div>
                         </div>
                       );
@@ -571,11 +577,11 @@ export default function SingleActivityView({
                       const validItems = (block.items || []).filter(item => item && item.trim());
                       return block.style === 'numbered' ? (
                         <ol key={block.id || bIdx} className="content-block-list">
-                          {validItems.map((item, iIdx) => <li key={iIdx}>{item}</li>)}
+                          {validItems.map((item, iIdx) => <li key={iIdx}>{translateDynamic(item)}</li>)}
                         </ol>
                       ) : (
                         <ul key={block.id || bIdx} className="content-block-list">
-                          {validItems.map((item, iIdx) => <li key={iIdx}>{item}</li>)}
+                          {validItems.map((item, iIdx) => <li key={iIdx}>{translateDynamic(item)}</li>)}
                         </ul>
                       );
                     }
@@ -583,16 +589,16 @@ export default function SingleActivityView({
                       return (
                         <blockquote key={block.id || bIdx} className="article-highlight-quote">
                           <div className="quote-mark">“</div>
-                          <p className="quote-body">{block.text}</p>
-                          {block.author && <cite className="quote-author">— {block.author}</cite>}
+                          <p className="quote-body">{translateDynamic(block.text)}</p>
+                          {block.author && <cite className="quote-author">— {translateDynamic(block.author)}</cite>}
                         </blockquote>
                       );
                     }
                     if (block.type === 'callout') {
                       return (
                         <div key={block.id || bIdx} className={`content-block-callout theme-${block.style || 'info'}`}>
-                          {block.title && <h4>{block.title}</h4>}
-                          {block.text && <p>{block.text}</p>}
+                          {block.title && <h4>{translateDynamic(block.title)}</h4>}
+                          {block.text && <p>{translateDynamic(block.text)}</p>}
                         </div>
                       );
                     }
@@ -605,7 +611,7 @@ export default function SingleActivityView({
                             target={block.url?.startsWith('http') ? '_blank' : '_self'}
                             rel="noopener noreferrer"
                           >
-                            <span>{block.label || 'คลิกที่นี่'}</span>
+                            <span>{translateDynamic(block.label || 'คลิกที่นี่')}</span>
                             <ExternalLink size={16} />
                           </a>
                         </div>
@@ -619,21 +625,21 @@ export default function SingleActivityView({
                 </div>
               ) : (
                 <>
-                  <p className="story-p lead-p">{contentParagraphs[0]}</p>
+                  <p className="story-p lead-p">{translateDynamic(contentParagraphs[0])}</p>
 
                   {/* Highlight Quote Box */}
                   <blockquote className="article-highlight-quote">
                     <div className="quote-mark">“</div>
                     <p className="quote-body">
-                      {activity.quote || 'งานนี้ถือเป็นอีกหนึ่งก้าวสำคัญในการขับเคลื่อนวงการอีสปอร์ตไทยสู่มาตรฐานสากล ทั้งฮาร์ดแวร์ บรรยากาศ และพลังของคอมมูนิตี้'}
+                      {translateDynamic(activity.quote || 'งานนี้ถือเป็นอีกหนึ่งก้าวสำคัญในการขับเคลื่อนวงการอีสปอร์ตไทยสู่มาตรฐานสากล ทั้งฮาร์ดแวร์ บรรยากาศ และพลังของคอมมูนิตี้')}
                     </p>
                     <cite className="quote-author">
-                      — {activity.author || 'ฝ่ายกิจกรรมและพัฒนาการแข่งขัน G-SPEED ESPORT CO., LTD.'}
+                      — {translateDynamic(activity.author || 'ฝ่ายกิจกรรมและพัฒนาการแข่งขัน G-SPEED ESPORT CO., LTD.')}
                     </cite>
                   </blockquote>
 
                   {contentParagraphs.slice(1).map((para, idx) => (
-                    <p key={idx} className="story-p">{para}</p>
+                    <p key={idx} className="story-p">{translateDynamic(para)}</p>
                   ))}
                 </>
               )}
@@ -642,8 +648,12 @@ export default function SingleActivityView({
               <div className="article-tags-cluster">
                 <div className="tags-label-row">
                   <Tag size={15} className="text-blue" />
-                  <span className="tags-title">แท็กหัวข้อที่เกี่ยวข้อง (Article Tags):</span>
-                  <span className="tags-hint-guide">(คลิกที่แท็กเพื่อดูบทความที่เกี่ยวข้อง)</span>
+                  <span className="tags-title">
+                    {language === 'zh' ? '相关文章标签 (Article Tags):' : language === 'en' ? 'Related Article Tags:' : 'แท็กหัวข้อที่เกี่ยวข้อง (Article Tags):'}
+                  </span>
+                  <span className="tags-hint-guide">
+                    {language === 'zh' ? '(点击标签查看相关文章)' : language === 'en' ? '(Click tag to view related articles)' : '(คลิกที่แท็กเพื่อดูบทความที่เกี่ยวข้อง)'}
+                  </span>
                 </div>
                 <div className="tags-pill-list">
                   {(activity.tags && activity.tags.length > 0 
@@ -660,7 +670,7 @@ export default function SingleActivityView({
                         title={`คลิกเพื่อดูบทความทั้งหมดที่ติดแท็ก ${tag}`}
                       >
                         <span className="tag-symbol">#</span>
-                        <span>{tag.replace(/^#/, '')}</span>
+                        <span>{translateDynamic(tag.replace(/^#/, ''))}</span>
                       </button>
                     );
                   })}
@@ -674,10 +684,10 @@ export default function SingleActivityView({
                 <div className="gallery-title-group">
                   <div className="badge-pill badge-cyan">
                     <ImageIcon size={14} />
-                    <span>PHOTO HIGHLIGHTS ({galleryPhotos.length} ภาพ)</span>
+                    <span>PHOTO HIGHLIGHTS ({galleryPhotos.length} {language === 'zh' ? '张照片' : language === 'en' ? 'Photos' : 'ภาพ'})</span>
                   </div>
-                  <h3>แกลเลอรีภาพบรรยากาศความละเอียดสูง</h3>
-                  <p>คลิกที่รูปภาพเพื่อเปิดดูขนาดใหญ่แบบ Full-Screen HD</p>
+                  <h3>{language === 'zh' ? '高清现场精彩瞬间图集' : language === 'en' ? 'High-Resolution Atmosphere Photo Gallery' : 'แกลเลอรีภาพบรรยากาศความละเอียดสูง'}</h3>
+                  <p>{language === 'zh' ? '点击照片开启全屏超清预览' : language === 'en' ? 'Click image to open full-screen HD preview' : 'คลิกที่รูปภาพเพื่อเปิดดูขนาดใหญ่แบบ Full-Screen HD'}</p>
                 </div>
               </div>
 
@@ -695,7 +705,7 @@ export default function SingleActivityView({
                     />
                     <div className="photo-overlay">
                       <ZoomIn size={24} className="zoom-icon" />
-                      <span className="photo-cap-text">{photo.caption || photo.alt || 'คลิกเพื่อดูภาพขยาย'}</span>
+                      <span className="photo-cap-text">{photo.caption ? translateDynamic(photo.caption) : (language === 'zh' ? '点击查看大图' : language === 'en' ? 'Click to enlarge' : 'คลิกเพื่อดูภาพขยาย')}</span>
                     </div>
                   </div>
                 ))}
@@ -707,9 +717,9 @@ export default function SingleActivityView({
               <div className="share-strip-header">
                 <div className="share-strip-title-row">
                   <Share2 size={16} className="text-blue" />
-                  <span className="share-strip-title">แชร์กิจกรรม & บทความนี้</span>
+                  <span className="share-strip-title">{language === 'zh' ? '分享本活动与精彩文章' : language === 'en' ? 'Share This Event & Article' : 'แชร์กิจกรรม & บทความนี้'}</span>
                 </div>
-                <span className="share-strip-subtitle">ร่วมส่งต่อความมันส์และไฮไลต์กิจกรรมให้เพื่อนและคอมมูนิตี้</span>
+                <span className="share-strip-subtitle">{language === 'zh' ? '将精彩赛事与精彩瞬间转发给好友与社区' : language === 'en' ? 'Spread the excitement and highlights with friends and community' : 'ร่วมส่งต่อความมันส์และไฮไลต์กิจกรรมให้เพื่อนและคอมมูนิตี้'}</span>
               </div>
 
               <div className="share-strip-actions">
@@ -758,17 +768,17 @@ export default function SingleActivityView({
                     type="button"
                     onClick={handleCopyLink}
                     className={`share-pill-btn copy ${copiedLink ? 'copied' : ''}`}
-                    title="คัดลอกลิงก์บทความนี้"
+                    title={language === 'zh' ? '复制本文章链接' : language === 'en' ? 'Copy Article Link' : 'คัดลอกลิงก์บทความนี้'}
                   >
                     {copiedLink ? (
                       <>
                         <Check size={14} className="text-emerald" />
-                        <span>คัดลอกลิงก์แล้ว ✓</span>
+                        <span>{language === 'zh' ? '已复制链接 ✓' : language === 'en' ? 'Link Copied ✓' : 'คัดลอกลิงก์แล้ว ✓'}</span>
                       </>
                     ) : (
                       <>
                         <Copy size={14} />
-                        <span>คัดลอกลิงก์</span>
+                        <span>{language === 'zh' ? '复制链接' : language === 'en' ? 'Copy Link' : 'คัดลอกลิงก์'}</span>
                       </>
                     )}
                   </button>
@@ -814,7 +824,7 @@ export default function SingleActivityView({
                   <div className="fact-icon-box"><Calendar size={16} /></div>
                   <div className="fact-content">
                     <span className="fact-lbl">{language === 'th' ? 'ช่วงเวลาจัดกิจกรรม' : (language === 'zh' ? '活动时间' : 'Event Schedule')}</span>
-                    <strong className="fact-val">{activity.date}</strong>
+                    <strong className="fact-val">{translateDynamic(activity.date)}</strong>
                   </div>
                 </li>
 
@@ -822,7 +832,7 @@ export default function SingleActivityView({
                   <div className="fact-icon-box"><MapPin size={16} /></div>
                   <div className="fact-content">
                     <span className="fact-lbl">{t('common.location')}</span>
-                    <strong className="fact-val">{activity.location || 'G-Speed Esport Arena (Main Stage Zone)'}</strong>
+                    <strong className="fact-val">{translateDynamic(activity.location || 'G-Speed Esport Arena (Main Stage Zone)')}</strong>
                   </div>
                 </li>
 
@@ -830,7 +840,7 @@ export default function SingleActivityView({
                   <div className="fact-icon-box"><Trophy size={16} /></div>
                   <div className="fact-content">
                     <span className="fact-lbl">{t('common.prizePool')}</span>
-                    <strong className="fact-val text-blue">{activity.prizePool || '฿50,000 พร้อมถ้วยเกียรติยศ'}</strong>
+                    <strong className="fact-val text-blue">{translateDynamic(activity.prizePool || '฿50,000 พร้อมถ้วยเกียรติยศ')}</strong>
                   </div>
                 </li>
 
@@ -838,7 +848,7 @@ export default function SingleActivityView({
                   <div className="fact-icon-box"><Users size={16} /></div>
                   <div className="fact-content">
                     <span className="fact-lbl">{language === 'th' ? 'ผู้เข้าร่วมงาน' : (language === 'zh' ? '参赛规模' : 'Attendees & Teams')}</span>
-                    <strong className="fact-val">{activity.attendees || '350+ คน (32 ทีม)'}</strong>
+                    <strong className="fact-val">{translateDynamic(activity.attendees || '350+ คน (32 ทีม)')}</strong>
                   </div>
                 </li>
 
@@ -846,7 +856,7 @@ export default function SingleActivityView({
                   <div className="fact-icon-box"><ShieldCheck size={16} /></div>
                   <div className="fact-content">
                     <span className="fact-lbl">{t('singleActivity.partner')}</span>
-                    <strong className="fact-val">{activity.partner || 'ASUS ROG & NVIDIA'}</strong>
+                    <strong className="fact-val">{translateDynamic(activity.partner || 'ASUS ROG & NVIDIA')}</strong>
                   </div>
                 </li>
 
@@ -862,7 +872,7 @@ export default function SingleActivityView({
                   <li className="fact-item fact-item-tags">
                     <div className="fact-icon-box"><Tag size={16} /></div>
                     <div className="fact-content">
-                      <span className="fact-lbl">แท็กที่เกี่ยวข้อง</span>
+                      <span className="fact-lbl">{language === 'zh' ? '相关标签' : language === 'en' ? 'Related Tags' : 'แท็กที่เกี่ยวข้อง'}</span>
                       <div className="sidebar-tags-wrap">
                         {activity.tags.map((tg, idx) => (
                           <span 
@@ -871,7 +881,7 @@ export default function SingleActivityView({
                             onClick={() => handleTagClick(tg)}
                             title={`คลิกเพื่อกรองบทความแท็ก ${tg}`}
                           >
-                            {tg}
+                            #{translateDynamic(tg.replace(/^#/, ''))}
                           </span>
                         ))}
                       </div>
@@ -886,18 +896,18 @@ export default function SingleActivityView({
               <div className="inquiry-header">
                 <PhoneCall size={20} className="text-blue" />
                 <div>
-                  <h4>สนใจจัดงานหรือเช่าเวทีแข่ง?</h4>
-                  <p>ติดต่อทีมงานอีเวนต์เพื่อขอใบเสนอราคาและจองสถานที่</p>
+                  <h4>{language === 'zh' ? '有意举办赛事或租赁专业舞台？' : language === 'en' ? 'Interested in Hosting an Event or Renting the Arena?' : 'สนใจจัดงานหรือเช่าเวทีแข่ง?'}</h4>
+                  <p>{language === 'zh' ? '联系赛事团队获取场地报价与档期预约' : language === 'en' ? 'Contact our events team for custom quotation and booking' : 'ติดต่อทีมงานอีเวนต์เพื่อขอใบเสนอราคาและจองสถานที่'}</p>
                 </div>
               </div>
 
               <div className="inquiry-contacts">
                 <a href="tel:0637937704" className="inquiry-contact-btn">
                   <PhoneCall size={16} />
-                  <span>สายด่วน: 063-793-7704</span>
+                  <span>{language === 'zh' ? '热线电话: 063-793-7704' : language === 'en' ? 'Hotline: 063-793-7704' : 'สายด่วน: 063-793-7704'}</span>
                 </a>
                 <a href="mailto:gspeedlivingplus35@gmail.com" className="inquiry-contact-btn secondary">
-                  <span>อีเมล: gspeedlivingplus35@gmail.com</span>
+                  <span>{language === 'zh' ? '电子邮箱: gspeedlivingplus35@gmail.com' : language === 'en' ? 'Email: gspeedlivingplus35@gmail.com' : 'อีเมล: gspeedlivingplus35@gmail.com'}</span>
                 </a>
               </div>
             </div>
@@ -915,15 +925,15 @@ export default function SingleActivityView({
             </div>
             <h2 className="section-title">
               {activeFilterTag 
-                ? <>บทความที่เกี่ยวข้องกับแท็ก <span className="text-blue">{activeFilterTag}</span></>
+                ? <>{language === 'zh' ? '与标签相关的文章 ' : language === 'en' ? 'Articles tagged with ' : 'บทความที่เกี่ยวข้องกับแท็ก '}<span className="text-blue">#{translateDynamic(activeFilterTag.replace(/^#/, ''))}</span></>
                 : activeFilterCategory
-                ? <>บทความในหมวดหมู่ <span className="text-blue">{activity.tag || activeFilterCategory}</span></>
-                : 'กิจกรรมและบทความอื่นๆ ที่น่าสนใจ'}
+                ? <>{language === 'zh' ? '分类文章 ' : language === 'en' ? 'Articles in category ' : 'บทความในหมวดหมู่ '}<span className="text-blue">{translateDynamic(activity.tag || activeFilterCategory)}</span></>
+                : (language === 'zh' ? '更多精彩赛事与精选文章' : language === 'en' ? 'More Interesting Events & Articles' : 'กิจกรรมและบทความอื่นๆ ที่น่าสนใจ')}
             </h2>
             <p className="section-subtitle">
               {activeFilterTag || activeFilterCategory
-                ? `พบทั้งหมด ${displayRelatedActivities.length} บทความที่เกี่ยวข้อง คลิกเพื่อเปิดอ่านเนื้อหาฉบับเต็มได้ทันที`
-                : 'ย้อนชมความสนุกและข่าวสารความเคลื่อนไหวล่าสุดจาก G-Speed Esport Arena'}
+                ? (language === 'zh' ? `共找到 ${displayRelatedActivities.length} 篇相关文章，点击即刻阅读全文` : language === 'en' ? `Found ${displayRelatedActivities.length} related articles. Click to read in full.` : `พบทั้งหมด ${displayRelatedActivities.length} บทความที่เกี่ยวข้อง คลิกเพื่อเปิดอ่านเนื้อหาฉบับเต็มได้ทันที`)
+                : (language === 'zh' ? '重温精彩赛事与来自 G-Speed Esport Arena 的最新资讯' : language === 'en' ? 'Revisit the highlights and latest news from G-Speed Esport Arena' : 'ย้อนชมความสนุกและข่าวสารความเคลื่อนไหวล่าสุดจาก G-Speed Esport Arena')}
             </p>
 
             {/* Filter Active Indicator Banner */}
@@ -932,9 +942,11 @@ export default function SingleActivityView({
                 <div className="active-filter-meta">
                   <span className="filter-pill-current">
                     <Tag size={14} />
-                    <span>ตัวกรอง: <strong>{activeFilterTag || activity.tag || activeFilterCategory}</strong></span>
+                    <span>{language === 'zh' ? '当前筛选: ' : language === 'en' ? 'Filter: ' : 'ตัวกรอง: '}<strong>{translateDynamic(activeFilterTag || activity.tag || activeFilterCategory)}</strong></span>
                   </span>
-                  <span className="filter-count-label">พบ {displayRelatedActivities.length} บทความ</span>
+                  <span className="filter-count-label">
+                    {language === 'zh' ? `共找到 ${displayRelatedActivities.length} 篇文章` : language === 'en' ? `Found ${displayRelatedActivities.length} articles` : `พบ ${displayRelatedActivities.length} บทความ`}
+                  </span>
                 </div>
                 <div className="active-filter-btn-group">
                   <button 
@@ -943,7 +955,7 @@ export default function SingleActivityView({
                     onClick={() => { setActiveFilterTag(null); setActiveFilterCategory(null); }}
                   >
                     <X size={14} />
-                    <span>ล้างตัวกรอง</span>
+                    <span>{language === 'zh' ? '清除筛选' : language === 'en' ? 'Clear Filter' : 'ล้างตัวกรอง'}</span>
                   </button>
                   <button 
                     type="button" 
@@ -958,7 +970,7 @@ export default function SingleActivityView({
                       }
                     }}
                   >
-                    <span>ดูทั้งหมดในคลังกิจกรรม</span>
+                    <span>{language === 'zh' ? '查看所有活动档案' : language === 'en' ? 'View All in Archive' : 'ดูทั้งหมดในคลังกิจกรรม'}</span>
                     <ExternalLink size={13} />
                   </button>
                 </div>
@@ -979,16 +991,16 @@ export default function SingleActivityView({
                 >
                   <div className="related-thumb">
                     <img src={item.image} alt={item.imageAlt || item.title} />
-                    <span className="related-tag">{item.tag || item.category}</span>
+                    <span className="related-tag">{translateDynamic(item.tag || item.category)}</span>
                   </div>
                   <div className="related-info">
                     <div className="related-meta">
-                      <span>{item.date}</span>
+                      <span>{translateDynamic(item.date)}</span>
                       <span>•</span>
-                      <span>{item.partner}</span>
+                      <span>{translateDynamic(item.partner)}</span>
                     </div>
-                    <h4 className="related-title">{item.title}</h4>
-                    <p className="related-desc">{item.desc}</p>
+                    <h4 className="related-title">{translateDynamic(item.title)}</h4>
+                    <p className="related-desc">{translateDynamic(item.desc)}</p>
                     
                     {/* Tags on card */}
                     {item.tags && item.tags.length > 0 && (
@@ -1002,14 +1014,14 @@ export default function SingleActivityView({
                               handleTagClick(tg);
                             }}
                           >
-                            {tg}
+                            #{translateDynamic(tg.replace(/^#/, ''))}
                           </span>
                         ))}
                       </div>
                     )}
 
                     <div className="related-read-more text-blue">
-                      <span>อ่านบทความเต็ม</span>
+                      <span>{language === 'zh' ? '阅读全文' : language === 'en' ? 'Read Full Story' : 'อ่านบทความเต็ม'}</span>
                       <ChevronRight size={14} />
                     </div>
                   </div>
@@ -1019,14 +1031,14 @@ export default function SingleActivityView({
           ) : (
             <div className="no-related-articles-box glass-panel">
               <Tag size={32} className="text-muted" />
-              <h3>ไม่พบบทความอื่นที่ตรงกับตัวกรองนี้</h3>
-              <p>ลองกดล้างตัวกรองเพื่อดูบทความและกิจกรรมน่าสนใจทั้งหมด</p>
+              <h3>{language === 'zh' ? '未找到符合当前筛选条件的文章' : language === 'en' ? 'No other articles found matching this filter' : 'ไม่พบบทความอื่นที่ตรงกับตัวกรองนี้'}</h3>
+              <p>{language === 'zh' ? '请尝试清除筛选以浏览所有精彩文章与活动' : language === 'en' ? 'Try clearing the filter to explore all featured articles and activities' : 'ลองกดล้างตัวกรองเพื่อดูบทความและกิจกรรมน่าสนใจทั้งหมด'}</p>
               <button 
                 type="button" 
                 className="btn-primary"
                 onClick={() => { setActiveFilterTag(null); setActiveFilterCategory(null); }}
               >
-                ล้างตัวกรองทั้งหมด
+                {language === 'zh' ? '清除所有筛选' : language === 'en' ? 'Clear All Filters' : 'ล้างตัวกรองทั้งหมด'}
               </button>
             </div>
           )}

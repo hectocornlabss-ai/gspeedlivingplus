@@ -475,7 +475,7 @@ export default function SingleTournamentView({
                   boxShadow: '0 0 12px rgba(16,185,129,0.4)',
                   border: '1px solid #34d399'
                 }}>
-                  ✨ เปิดรับสมัคร (รับจำนวนจำกัด)
+                  {language === 'zh' ? '✨ 火热报名中 (名额有限)' : language === 'en' ? '✨ Open Registration (Limited Slots)' : '✨ เปิดรับสมัคร (รับจำนวนจำกัด)'}
                 </span>
               ) : liveMatches.length > 0 ? (
                 <span style={{ 
@@ -491,7 +491,7 @@ export default function SingleTournamentView({
                   boxShadow: '0 0 14px rgba(239,68,68,0.5)',
                   border: '1px solid #f87171'
                 }}>
-                  🔴 กำลังแข่งขันสดในสนาม ({liveMatches.length} คู่)
+                  {language === 'zh' ? `🔴 现场实时对战中 (${liveMatches.length} 场)` : language === 'en' ? `🔴 Live Matches in Arena (${liveMatches.length})` : `🔴 กำลังแข่งขันสดในสนาม (${liveMatches.length} คู่)`}
                 </span>
               ) : tournament.status === 'Completed' ? (
                 <span style={{ 
@@ -503,7 +503,7 @@ export default function SingleTournamentView({
                   fontSize: '0.82rem',
                   border: '1px solid #475569'
                 }}>
-                  🏁 การแข่งขันเสร็จสิ้นแล้ว
+                  {language === 'zh' ? '🏁 比赛已圆满结束' : language === 'en' ? '🏁 Tournament Completed' : '🏁 การแข่งขันเสร็จสิ้นแล้ว'}
                 </span>
               ) : (
                 <span style={{ 
@@ -515,7 +515,7 @@ export default function SingleTournamentView({
                   fontSize: '0.82rem',
                   border: '1px solid #f59e0b'
                 }}>
-                  🔒 ปิดรับสมัคร (ทีมเต็มแล้ว)
+                  {language === 'zh' ? '🔒 报名已截止 (满额)' : language === 'en' ? '🔒 Registration Closed (Full)' : '🔒 ปิดรับสมัคร (ทีมเต็มแล้ว)'}
                 </span>
               )}
             </div>
@@ -532,8 +532,10 @@ export default function SingleTournamentView({
                   <Trophy size={20} />
                 </div>
                 <div>
-                  <span className="metric-label" style={{ color: '#fbbf24' }}>เงินรางวัลรวม</span>
-                  <div className="metric-value text-amber">{tournament.prizePool}</div>
+                  <span className="metric-label" style={{ color: '#fbbf24' }}>
+                    {t('singleTournament.prizePool') || t('tournamentModal.prizePool')}
+                  </span>
+                  <div className="metric-value text-amber">{translateDynamic(tournament.prizePool)}</div>
                 </div>
               </div>
 
@@ -542,9 +544,11 @@ export default function SingleTournamentView({
                   <Calendar size={20} />
                 </div>
                 <div>
-                  <span className="metric-label" style={{ color: '#bae6fd' }}>วันที่จัดแข่งขัน</span>
-                  <div className="metric-value">{tournament.date}</div>
-                  <span className="metric-sub">{tournament.time}</span>
+                  <span className="metric-label" style={{ color: '#bae6fd' }}>
+                    {t('tournamentModal.date')}
+                  </span>
+                  <div className="metric-value">{translateDynamic(tournament.date)}</div>
+                  <span className="metric-sub">{translateDynamic(tournament.time)}</span>
                 </div>
               </div>
 
@@ -553,9 +557,11 @@ export default function SingleTournamentView({
                   <MapPin size={20} />
                 </div>
                 <div>
-                  <span className="metric-label" style={{ color: '#bfdbfe' }}>สถานที่จัดแข่งขัน</span>
+                  <span className="metric-label" style={{ color: '#bfdbfe' }}>
+                    {t('tournamentModal.venue')}
+                  </span>
                   <div className="metric-value" style={{ fontSize: '0.92rem' }}>
-                    {tournament.venue || 'GLP : G Speed Living Plus รามคำแหง 53'}
+                    {translateDynamic(tournament.venue || t('tournamentModal.venueDefault'))}
                   </div>
                 </div>
               </div>
@@ -625,10 +631,10 @@ export default function SingleTournamentView({
               }}>
                 <div style={{ flex: 1, minWidth: '240px' }}>
                   <h3 style={{ fontSize: '1.15rem', color: '#14532d', fontWeight: 700, margin: '0 0 6px 0' }}>
-                    ช่องทางการรับสมัคร
+                    {language === 'zh' ? '赛事报名通道' : language === 'en' ? 'Registration Channel' : 'ช่องทางการรับสมัคร'}
                   </h3>
                   <p style={{ margin: 0, color: '#166534', fontSize: '0.92rem', lineHeight: 1.55 }}>
-                    ไม่ต้องลงทะเบียนผ่านหน้าเว็บให้ยุ่งยาก เพียงทักแชตเพื่อขอรับแบบฟอร์ม ส่งรายชื่อผู้เล่น และรับการยืนยันสิทธิ์จากทีมงาน G-Speed โดยตรง
+                    {translateDynamic('ไม่ต้องลงทะเบียนผ่านหน้าเว็บให้ยุ่งยาก เพียงทักแชตเพื่อขอรับแบบฟอร์ม ส่งรายชื่อผู้เล่น และรับการยืนยันสิทธิ์จากทีมงาน G-Speed โดยตรง')}
                   </p>
                 </div>
                 <a 
@@ -651,7 +657,7 @@ export default function SingleTournamentView({
                   }}
                 >
                   <MessageCircle size={17} />
-                  <span>ลงทะเบียน</span>
+                  <span>{language === 'zh' ? '立即报名 (LINE)' : language === 'en' ? 'Register via LINE' : 'ลงทะเบียน'}</span>
                   <ExternalLink size={14} />
                 </a>
               </div>
@@ -664,10 +670,10 @@ export default function SingleTournamentView({
             <div className="tourney-card-box">
               <h3 className="section-card-title">
                 <Zap size={20} className="text-blue" />
-                <span>เกี่ยวกับรายการแข่งขัน</span>
+                <span>{language === 'zh' ? '关于赛事' : language === 'en' ? 'About Tournament' : 'เกี่ยวกับรายการแข่งขัน'}</span>
               </h3>
               <p style={{ margin: 0, lineHeight: 1.8, color: '#334155', fontSize: '1rem' }}>
-                {tournament.desc || 'การแข่งขันอีสปอร์ตสุดยิ่งใหญ่ รวบรวมยอดฝีมือทั่วประเทศมาร่วมประลองความแม่นยำบนเวที LAN Final ณ GLP : G Speed Living Plus รามคำแหง 53 ชิงเงินรางวัลและถ้วยเกียรติยศ พร้อมถ่ายทอดสดด้วยโปรดักชันระดับสตูดิโอ'}
+                {translateDynamic(tournament.desc || 'การแข่งขันอีสปอร์ตสุดยิ่งใหญ่ รวบรวมยอดฝีมือทั่วประเทศมาร่วมประลองความแม่นยำบนเวที LAN Final ณ GLP : G Speed Living Plus รามคำแหง 53 ชิงเงินรางวัลและถ้วยเกียรติยศ พร้อมถ่ายทอดสดด้วยโปรดักชันระดับสตูดิโอ')}
               </p>
             </div>
 
@@ -675,7 +681,7 @@ export default function SingleTournamentView({
             <div className="tourney-card-box">
               <h3 className="section-card-title">
                 <Trophy size={20} className="text-amber" />
-                <span>โครงสร้างเงินรางวัล (Prize Pool Distribution)</span>
+                <span>{language === 'zh' ? '赛事奖金分配体系 (Prize Pool Distribution)' : language === 'en' ? 'Prize Pool Distribution' : 'โครงสร้างเงินรางวัล (Prize Pool Distribution)'}</span>
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
                 {(tournament.prizeDistribution || [
@@ -689,10 +695,10 @@ export default function SingleTournamentView({
                     className={`prize-card ${idx === 0 ? 'prize-champion' : idx === 1 ? 'prize-runnerup' : 'prize-standard'}`}
                   >
                     <span className="prize-rank-badge">
-                      {idx === 0 ? '🥇 อันดับที่ 1 (CHAMPION)' : idx === 1 ? '🥈 อันดับที่ 2 (RUNNER-UP)' : `🎖️ ${pz.rank}`}
+                      {idx === 0 ? (language === 'zh' ? '🥇 冠军 (CHAMPION)' : language === 'en' ? '🥇 1st Place (CHAMPION)' : '🥇 อันดับที่ 1 (CHAMPION)') : idx === 1 ? (language === 'zh' ? '🥈 亚军 (RUNNER-UP)' : language === 'en' ? '🥈 2nd Place (RUNNER-UP)' : '🥈 อันดับที่ 2 (RUNNER-UP)') : `🎖️ ${translateDynamic(pz.rank)}`}
                     </span>
                     <span className="prize-reward-text">
-                      {pz.reward}
+                      {translateDynamic(pz.reward)}
                     </span>
                   </div>
                 ))}
@@ -706,10 +712,10 @@ export default function SingleTournamentView({
                   OFFICIAL TOURNAMENT SPECS
                 </span>
                 <h4 style={{ margin: '4px 0 6px 0', fontSize: '1.2rem', fontWeight: 600, color: '#ffffff' }}>
-                  มาตรฐานสนามแข่งขันระดับ World Class LAN Arena
+                  {language === 'zh' ? '世界锦标赛级线下场馆硬件标准' : language === 'en' ? 'World-Class LAN Arena Hardware Standard' : 'มาตรฐานสนามแข่งขันระดับ World Class LAN Arena'}
                 </h4>
                 <p style={{ margin: 0, fontSize: '0.92rem', color: '#cbd5e1', lineHeight: 1.6 }}>
-                  ทุกสเตชันขับเคลื่อนด้วยขุมพลัง Intel Core i9 + NVIDIA GeForce RTX 40 Series, จอเกมมิ่ง BenQ ZOWIE 360Hz Fast-IPS พร้อมระบบ Dedicated Multi-WAN 10Gbps ลื่นไหลไร้อาการหน่วง
+                  {translateDynamic('ทุกสเตชันขับเคลื่อนด้วยขุมพลัง Intel Core i9 + NVIDIA GeForce RTX 40 Series, จอเกมมิ่ง BenQ ZOWIE 360Hz Fast-IPS พร้อมระบบ Dedicated Multi-WAN 10Gbps ลื่นไหลไร้อาการหน่วง')}
                 </p>
               </div>
             </div>
@@ -718,7 +724,7 @@ export default function SingleTournamentView({
             <div className="tourney-card-box">
               <h3 className="section-card-title">
                 <Shield size={20} className="text-emerald-600" />
-                <span>กติกาและระเบียบการแข่งขัน (Rules & Regulations)</span>
+                <span>{language === 'zh' ? '比赛规则与纪律条例 (Rules & Regulations)' : language === 'en' ? 'Rules & Regulations' : 'กติกาและระเบียบการแข่งขัน (Rules & Regulations)'}</span>
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {(tournament.rules || [
@@ -732,7 +738,7 @@ export default function SingleTournamentView({
                       {rIdx + 1}
                     </div>
                     <span style={{ fontSize: '0.94rem', color: '#334155', lineHeight: 1.6 }}>
-                      {rule}
+                      {translateDynamic(rule)}
                     </span>
                   </div>
                 ))}
@@ -744,9 +750,13 @@ export default function SingleTournamentView({
               <div className="share-strip-header">
                 <div className="share-strip-title-row">
                   <Share2 size={16} className="text-blue" />
-                  <span className="share-strip-title">แชร์ทัวร์นาเมนต์นี้</span>
+                  <span className="share-strip-title">
+                    {language === 'zh' ? '分享此赛事' : language === 'en' ? 'Share Tournament' : 'แชร์ทัวร์นาเมนต์นี้'}
+                  </span>
                 </div>
-                <span className="share-strip-subtitle">ร่วมส่งต่อความมันส์และไฮไลต์การแข่งขันให้เพื่อนและคอมมูนิตี้</span>
+                <span className="share-strip-subtitle">
+                  {language === 'zh' ? '与好友及电竞社群分享精彩对决与赛事高光瞬间' : language === 'en' ? 'Share tournament excitement and highlights with friends and community' : 'ร่วมส่งต่อความมันส์และไฮไลต์การแข่งขันให้เพื่อนและคอมมูนิตี้'}
+                </span>
               </div>
 
               <div className="share-strip-actions">
@@ -845,7 +855,7 @@ export default function SingleTournamentView({
             <div className="tourney-card-box">
               <h3 className="section-card-title">
                 <Clock size={20} className="text-blue" />
-                <span>กำหนดการและลำดับเวลาแข่งขัน (Tournament Timeline)</span>
+                <span>{language === 'zh' ? '赛事赛程与时间表 (Tournament Timeline)' : language === 'en' ? 'Tournament Timeline & Schedule' : 'กำหนดการและลำดับเวลาแข่งขัน (Tournament Timeline)'}</span>
               </h3>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '16px' }}>
@@ -859,11 +869,11 @@ export default function SingleTournamentView({
                 ]).map((item, idx) => (
                   <div key={idx} style={{ display: 'flex', gap: '16px', alignItems: 'center', background: '#f8fafc', padding: '16px 20px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
                     <div style={{ minWidth: '130px', fontWeight: 650, color: '#1d4ed8', fontSize: '0.95rem' }}>
-                      {item.time}
+                      {translateDynamic(item.time)}
                     </div>
                     <div style={{ width: '2px', height: '24px', background: '#cbd5e1' }} />
                     <div style={{ flex: 1, color: '#334155', fontSize: '0.95rem', fontWeight: 500 }}>
-                      {item.stage}
+                      {translateDynamic(item.stage)}
                     </div>
                   </div>
                 ))}
@@ -879,9 +889,11 @@ export default function SingleTournamentView({
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', background: '#ffffff', padding: '14px 20px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <GitBranch size={18} className="text-blue" />
-                <strong style={{ fontSize: '1.05rem', color: '#0f172a' }}>สายการแข่งขัน & ผลคะแนน</strong>
+                <strong style={{ fontSize: '1.05rem', color: '#0f172a' }}>
+                  {language === 'zh' ? '对阵赛程表与实时比分' : language === 'en' ? 'Tournament Bracket & Live Scores' : 'สายการแข่งขัน & ผลคะแนน'}
+                </strong>
                 <span className="badge-pill" style={{ background: '#eff6ff', color: '#1d4ed8' }}>
-                  {matches.length} แมตช์
+                  {matches.length} {language === 'zh' ? '场对决' : language === 'en' ? 'Matches' : 'แมตช์'}
                 </span>
               </div>
 
@@ -892,7 +904,7 @@ export default function SingleTournamentView({
                   className={`btn-secondary ${bracketViewMode === 'tree' ? 'btn-active-filter' : ''}`}
                   style={{ padding: '6px 14px', fontSize: '0.82rem' }}
                 >
-                  ผังสายแข่ง (Tree)
+                  {language === 'zh' ? '树状图 (Tree)' : language === 'en' ? 'Bracket (Tree)' : 'ผังสายแข่ง (Tree)'}
                 </button>
                 <button 
                   type="button" 
@@ -900,7 +912,7 @@ export default function SingleTournamentView({
                   className={`btn-secondary ${bracketViewMode === 'list' ? 'btn-active-filter' : ''}`}
                   style={{ padding: '6px 14px', fontSize: '0.82rem' }}
                 >
-                  รายการแมตช์ (List)
+                  {language === 'zh' ? '列表 (List)' : language === 'en' ? 'List' : 'รายการแมตช์ (List)'}
                 </button>
               </div>
             </div>
@@ -910,7 +922,7 @@ export default function SingleTournamentView({
               <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '12px', color: '#475569', fontSize: '0.9rem' }}>
                 <Clock size={18} className="text-blue" style={{ flexShrink: 0 }} />
                 <span>
-                  <strong>สถานะ: ทัวร์นาเมนต์นี้อยู่ระหว่างเปิดรับสมัคร</strong> ตารางและสายการแข่งขันด้านล่างเป็นการวางผังรอบการแข่งขันเบื้องต้น ผลคะแนนการแข่งขันจะเริ่มอัปเดตสดเมื่อการแข่งขันเริ่มขึ้นในวันแข่งขันจริง ({tournament.date})
+                  <strong>{language === 'zh' ? '状态: 本赛事火热报名中' : language === 'en' ? 'Status: Registration is Open' : 'สถานะ: ทัวร์นาเมนต์นี้อยู่ระหว่างเปิดรับสมัคร'}</strong> {language === 'zh' ? `下方的赛程表与对阵表为预设对决，比赛实时比分将于比赛日 (${translateDynamic(tournament.date)}) 正式开赛时开启实时更新。` : language === 'en' ? `The bracket below shows the initial match layout. Real-time scores will begin updating live when matches start on tournament day (${translateDynamic(tournament.date)}).` : `ตารางและสายการแข่งขันด้านล่างเป็นการวางผังรอบการแข่งขันเบื้องต้น ผลคะแนนการแข่งขันจะเริ่มอัปเดตสดเมื่อการแข่งขันเริ่มขึ้นในวันแข่งขันจริง (${tournament.date})`}
                 </span>
               </div>
             )}
@@ -940,7 +952,7 @@ export default function SingleTournamentView({
                     {/* Match Header */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px' }}>
                       <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748b' }}>
-                        {m.roundLabel || m.round || `แมตช์ที่ ${idx + 1}`}
+                        {translateDynamic(m.roundLabel || m.round || (language === 'zh' ? `第 ${idx + 1} 场` : language === 'en' ? `Match ${idx + 1}` : `แมตช์ที่ ${idx + 1}`))}
                       </span>
                       <span 
                         style={{ 
@@ -952,7 +964,7 @@ export default function SingleTournamentView({
                           color: matchIsLive ? '#dc2626' : matchIsFinished ? '#16a34a' : '#64748b'
                         }}
                       >
-                        {matchIsLive ? '🔴 กำลังแข่งสด' : matchIsFinished ? '✓ แข่งเสร็จสิ้น' : 'รอแข่งขัน'}
+                        {matchIsLive ? (language === 'zh' ? '🔴 现场实时对战' : language === 'en' ? '🔴 Live in Arena' : '🔴 กำลังแข่งสด') : matchIsFinished ? (language === 'zh' ? '✓ 比赛已结束' : language === 'en' ? '✓ Finished' : '✓ แข่งเสร็จสิ้น') : (language === 'zh' ? '等待对决' : language === 'en' ? 'Upcoming' : 'รอแข่งขัน')}
                       </span>
                     </div>
 
@@ -961,7 +973,7 @@ export default function SingleTournamentView({
                       {/* Team A */}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: teamAWinner ? '#f0fdf4' : '#f8fafc', padding: '8px 12px', borderRadius: '8px' }}>
                         <span style={{ fontWeight: teamAWinner ? 800 : 600, color: '#0f172a', fontSize: '0.92rem' }}>
-                          {m.teamA?.name || 'รอผลการประกบคู่'}
+                          {translateDynamic(m.teamA?.name || (language === 'zh' ? '待定 (等待晋级)' : language === 'en' ? 'TBD (Waiting)' : 'รอผลการประกบคู่'))}
                         </span>
                         <strong style={{ fontSize: '1.1rem', color: teamAWinner ? '#16a34a' : '#64748b' }}>
                           {matchIsFinished || matchIsLive ? (m.teamA?.score ?? 0) : '-'}
@@ -971,7 +983,7 @@ export default function SingleTournamentView({
                       {/* Team B */}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: teamBWinner ? '#f0fdf4' : '#f8fafc', padding: '8px 12px', borderRadius: '8px' }}>
                         <span style={{ fontWeight: teamBWinner ? 800 : 600, color: '#0f172a', fontSize: '0.92rem' }}>
-                          {m.teamB?.name || 'รอผลการประกบคู่'}
+                          {translateDynamic(m.teamB?.name || (language === 'zh' ? '待定 (等待晋级)' : language === 'en' ? 'TBD (Waiting)' : 'รอผลการประกบคู่'))}
                         </span>
                         <strong style={{ fontSize: '1.1rem', color: teamBWinner ? '#16a34a' : '#64748b' }}>
                           {matchIsFinished || matchIsLive ? (m.teamB?.score ?? 0) : '-'}
@@ -979,16 +991,16 @@ export default function SingleTournamentView({
                       </div>
                     </div>
 
-                  {/* Match Footer */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: '#64748b' }}>
-                    <span>{m.time || '14:00 น.'}</span>
-                    <span>{m.format || 'BO3'}</span>
+                    {/* Match Footer */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: '#64748b' }}>
+                      <span>{translateDynamic(m.time || '14:00 น.')}</span>
+                      <span>{m.format || 'BO3'}</span>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>
         )}
 
         {/* ================= TAB 4: ROSTER & TEAMS ================= */}
@@ -1000,14 +1012,14 @@ export default function SingleTournamentView({
                 <Search size={18} className="text-muted" />
                 <input 
                   type="text"
-                  placeholder="ค้นหาชื่อทีม, กัปตัน หรือชื่อนักแข่ง..."
+                  placeholder={language === 'zh' ? '搜索战队、队长或选手姓名...' : language === 'en' ? 'Search team, captain, or player name...' : 'ค้นหาชื่อทีม, กัปตัน หรือชื่อนักแข่ง...'}
                   value={rosterSearch}
                   onChange={e => setRosterSearch(e.target.value)}
                   style={{ border: 'none', outline: 'none', width: '100%', fontSize: '0.95rem' }}
                 />
               </div>
               <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>
-                พบ {filteredTeams.length} / {teamsList.length} ทีม
+                {language === 'zh' ? `找到 ${filteredTeams.length} / ${teamsList.length} 支战队` : language === 'en' ? `Found ${filteredTeams.length} / ${teamsList.length} teams` : `พบ ${filteredTeams.length} / ${teamsList.length} ทีม`}
               </span>
             </div>
 
@@ -1034,7 +1046,7 @@ export default function SingleTournamentView({
                         )}
                       </div>
                       <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                        กัปตัน: {team.captain || 'ไม่ระบุ'}
+                        {language === 'zh' ? '队长: ' : language === 'en' ? 'Captain: ' : 'กัปตัน: '}{team.captain || (language === 'zh' ? '未指定' : language === 'en' ? 'Unspecified' : 'ไม่ระบุ')}
                       </span>
                     </div>
                     <span className="badge-pill" style={{ background: '#dcfce7', color: '#166534', fontSize: '0.75rem', fontWeight: 700 }}>
@@ -1045,7 +1057,7 @@ export default function SingleTournamentView({
                   {/* Players list */}
                   <div style={{ background: '#f8fafc', padding: '12px 14px', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
                     <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
-                      รายชื่อผู้เล่นไลน์อัปหลัก:
+                      {language === 'zh' ? '首发主力队员名单:' : language === 'en' ? 'Main Roster Players:' : 'รายชื่อผู้เล่นไลน์อัปหลัก:'}
                     </span>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                       {(team.players || []).map((p, pIdx) => (
@@ -1070,11 +1082,11 @@ export default function SingleTournamentView({
             {/* Gallery Category Filter */}
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', background: '#ffffff', padding: '14px 20px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
               {[
-                { id: 'all', label: 'ทั้งหมด (50+ ภาพ)' },
-                { id: 'stage', label: 'เวที Main Stage' },
-                { id: 'lan', label: 'บรรยากาศแข่งขัน LAN' },
-                { id: 'crowd', label: 'กองเชียร์ & แฟนคลับ' },
-                { id: 'awards', label: 'พิธีมอบรางวัล' }
+                { id: 'all', label: language === 'zh' ? '全部 (50+ 照片)' : language === 'en' ? 'All (50+ Photos)' : 'ทั้งหมด (50+ ภาพ)' },
+                { id: 'stage', label: language === 'zh' ? '主舞台实况' : language === 'en' ? 'Main Stage' : 'เวที Main Stage' },
+                { id: 'lan', label: language === 'zh' ? '线下竞技现场' : language === 'en' ? 'LAN Matches' : 'บรรยากาศแข่งขัน LAN' },
+                { id: 'crowd', label: language === 'zh' ? '现场观众与粉丝' : language === 'en' ? 'Crowd & Fans' : 'กองเชียร์ & แฟนคลับ' },
+                { id: 'awards', label: language === 'zh' ? '颁奖典礼' : language === 'en' ? 'Award Ceremony' : 'พิธีมอบรางวัล' }
               ].map(cat => (
                 <button
                   key={cat.id}
@@ -1104,7 +1116,7 @@ export default function SingleTournamentView({
                   />
                   <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%)', display: 'flex', alignItems: 'flex-end', padding: '10px' }}>
                     <span style={{ color: '#ffffff', fontSize: '0.78rem', fontWeight: 600 }}>
-                      {photo.caption || `ภาพกิจกรรม #${pIdx + 1}`}
+                      {translateDynamic(photo.caption || (language === 'zh' ? `精彩现场 #${pIdx + 1}` : language === 'en' ? `Photo #${pIdx + 1}` : `ภาพกิจกรรม #${pIdx + 1}`))}
                     </span>
                   </div>
                 </div>
@@ -1119,10 +1131,10 @@ export default function SingleTournamentView({
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <div>
                 <h3 style={{ fontSize: '1.25rem', fontWeight: 650, color: '#0f172a', margin: '0 0 4px 0' }}>
-                  รายการแข่งขันอื่นๆ ของทางร้าน (More Tournaments)
+                  {language === 'zh' ? 'GLP 更多精彩电竞赛事 (More Tournaments)' : language === 'en' ? 'More Tournaments from GLP' : 'รายการแข่งขันอื่นๆ ของทางร้าน (More Tournaments)'}
                 </h3>
                 <span style={{ fontSize: '0.88rem', color: '#64748b' }}>
-                  ติดตามงานแข่งและประลองฝีมือในสังเวียนอีสปอร์ตรายการอื่นๆ ชิงเงินรางวัลรวมกว่า ฿300,000
+                  {language === 'zh' ? '关注更多热血电竞赛事，决战 GLP 竞技场，争夺逾 300,000 泰铢总奖金' : language === 'en' ? 'Follow upcoming esports tournaments at GLP Arena and compete for over 300,000 THB in total prizes' : 'ติดตามงานแข่งและประลองฝีมือในสังเวียนอีสปอร์ตรายการอื่นๆ ชิงเงินรางวัลรวมกว่า ฿300,000'}
                 </span>
               </div>
               <button 
@@ -1131,7 +1143,7 @@ export default function SingleTournamentView({
                 className="btn-link"
                 style={{ fontSize: '0.88rem', fontWeight: 600, color: '#2563eb', display: 'flex', alignItems: 'center', gap: '4px' }}
               >
-                <span>ดูทั้งหมด</span>
+                <span>{language === 'zh' ? '查看全部' : language === 'en' ? 'View All' : 'ดูทั้งหมด'}</span>
                 <ArrowRight size={14} />
               </button>
             </div>
@@ -1149,26 +1161,20 @@ export default function SingleTournamentView({
                       src={relTour.bannerImage || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80'} 
                       alt={relTour.title}
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      loading="lazy"
                     />
                     <div style={{ position: 'absolute', top: '10px', left: '10px' }}>
-                      <span className="badge-pill badge-white" style={{ fontSize: '0.72rem' }}>
+                      <span className="badge-pill badge-blue" style={{ fontSize: '0.72rem' }}>
                         {relTour.game}
                       </span>
                     </div>
                   </div>
-                  <div style={{ padding: '16px' }}>
-                    <h4 style={{ margin: '0 0 8px 0', fontSize: '0.98rem', fontWeight: 650, color: '#0f172a', lineHeight: 1.4 }}>
-                      {relTour.title}
-                    </h4>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.82rem' }}>
-                      <span style={{ color: '#b45309', fontWeight: 600 }}>
-                        🏆 {relTour.prizePool}
-                      </span>
-                      <span style={{ color: '#2563eb', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '2px' }}>
-                        <span>ดูรายละเอียด</span>
-                        <ChevronRight size={14} />
-                      </span>
+                  <div style={{ padding: '14px' }}>
+                    <strong style={{ fontSize: '0.95rem', color: '#0f172a', display: 'block', marginBottom: '6px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {translateDynamic(relTour.title)}
+                    </strong>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem', color: '#64748b' }}>
+                      <span className="text-amber" style={{ fontWeight: 700 }}>{translateDynamic(relTour.prizePool)}</span>
+                      <span>{translateDynamic(relTour.date)}</span>
                     </div>
                   </div>
                 </div>
@@ -1186,34 +1192,34 @@ export default function SingleTournamentView({
                 <span>FOR TOURNAMENT ORGANIZERS & PUBLISHERS</span>
               </div>
               <h3 className="organizer-title">
-                ต้องการจัดแข่งทัวร์นาเมนต์ หรือเช่าเวทีแข่งขันอีสปอร์ตที่ GLP?
+                {language === 'zh' ? '有意举办赛事或包场租用 GLP 电竞对战舞台？' : language === 'en' ? 'Interested in hosting a tournament or renting GLP Esport Stage?' : 'ต้องการจัดแข่งทัวร์นาเมนต์ หรือเช่าเวทีแข่งขันอีสปอร์ตที่ GLP?'}
               </h3>
               <p className="organizer-desc">
-                GLP Esport Stadium พร้อมสนับสนุนค่ายเกม แบรนด์สปอนเซอร์ และออร์แกไนเซอร์ ด้วยเวทีแข่งขัน 5v5 มาตรฐานสากล, ระบบสตรีมมิ่ง 4K, ห้องพากย์แคสเตอร์เก็บเสียง, ระบบเซิร์ฟเวอร์ LAN 128-Tick และทีมงานเทคนิคอีสปอร์ตมืออาชีพ
+                {translateDynamic('GLP Esport Stadium พร้อมสนับสนุนค่ายเกม แบรนด์สปอนเซอร์ และออร์แกไนเซอร์ ด้วยเวทีแข่งขัน 5v5 มาตรฐานสากล, ระบบสตรีมมิ่ง 4K, ห้องพากย์แคสเตอร์เก็บเสียง, ระบบเซิร์ฟเวอร์ LAN 128-Tick และทีมงานเทคนิคอีสปอร์ตมืออาชีพ')}
               </p>
               <div className="organizer-specs-chips">
-                <span className="spec-chip">✓ เวทีแข่งขัน 5v5</span>
-                <span className="spec-chip">✓ เครื่องแข่งสเปคสูง</span>
-                <span className="spec-chip">✓ ระบบถ่ายทอดสด 4K</span>
-                <span className="spec-chip">✓ ห้องพากย์ Caster Studio</span>
+                <span className="spec-chip">{language === 'zh' ? '✓ 5v5 专业电竞舞台' : language === 'en' ? '✓ 5v5 Pro Stage' : '✓ เวทีแข่งขัน 5v5'}</span>
+                <span className="spec-chip">{language === 'zh' ? '✓ 顶配职业竞技机台' : language === 'en' ? '✓ High-End Pro Stations' : '✓ เครื่องแข่งสเปคสูง'}</span>
+                <span className="spec-chip">{language === 'zh' ? '✓ 4K超清直转播系统' : language === 'en' ? '✓ 4K Live Broadcast System' : '✓ ระบบถ่ายทอดสด 4K'}</span>
+                <span className="spec-chip">{language === 'zh' ? '✓ 隔音解说演播厅' : language === 'en' ? '✓ Soundproof Caster Studio' : '✓ ห้องพากย์ Caster Studio'}</span>
               </div>
             </div>
 
             <div className="organizer-right">
               <div className="organizer-contact-card">
-                <div className="contact-card-title">ติดต่อฝ่ายบริหารงานแข่งขัน</div>
+                <div className="contact-card-title">{language === 'zh' ? '联系赛事活动筹备组' : language === 'en' ? 'Tournament Events Team' : 'ติดต่อฝ่ายบริหารงานแข่งขัน'}</div>
                 <div className="contact-hotline">
                   <PhoneCall size={18} className="text-blue pulse-icon" />
                   <a href="tel:0637937704">063-793-7704</a>
                 </div>
-                <p className="contact-subtext">เปิดบริการให้คำปรึกษาและจองคิวจัดงานทุกวัน</p>
+                <p className="contact-subtext">{language === 'zh' ? '每日提供赛事咨询与场地预约服务' : language === 'en' ? 'Available daily for tournament consulting & bookings' : 'เปิดบริการให้คำปรึกษาและจองคิวจัดงานทุกวัน'}</p>
                 {onNavigateFranchise && (
                   <button 
                     type="button" 
                     className="btn-organizer-plan"
                     onClick={onNavigateFranchise}
                   >
-                    <span>ติดต่อขอเปิดแฟรนไชส์</span>
+                    <span>{language === 'zh' ? '咨询加盟与开店合作' : language === 'en' ? 'Franchise & Partnership' : 'ติดต่อขอเปิดแฟรนไชส์'}</span>
                     <ArrowRight size={14} />
                   </button>
                 )}

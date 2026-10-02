@@ -30,6 +30,7 @@ import AnnouncementTickerCMS from './AnnouncementTickerCMS';
 import ContactPageCMS from './ContactPageCMS';
 import { analyzeProductPhoto, parseSpecSheetText } from '../utils/aiSpecParser';
 import { sanitizeSafeUrl, isSafeExternalUrl } from '../utils/security';
+import { autoTranslateEntity } from '../utils/autoTranslator';
 
 // Reusable Component: Section Image Field with Guidelines, Live Preview, SEO Alt Text & Media Library
 function SectionImageUploader({
@@ -1390,15 +1391,22 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
     }
   };
 
-  const handleSaveTournamentDraft = () => {
+  const handleSaveTournamentDraft = async () => {
     if (!activeTournamentDraft?.title?.trim()) {
       alert('กรุณากรอกชื่อรายการแข่งขัน');
       return;
     }
+    let finalTourney = activeTournamentDraft;
+    try {
+      finalTourney = await autoTranslateEntity(activeTournamentDraft);
+    } catch (err) {
+      console.warn('Auto-translation failed during tournament save:', err);
+    }
+
     if (isEditingTournament) {
-      updateTournament(activeTournamentDraft.id, activeTournamentDraft);
+      updateTournament(finalTourney.id, finalTourney);
     } else {
-      addTournament(activeTournamentDraft);
+      addTournament(finalTourney);
     }
     setIsTournamentModalOpen(false);
     triggerSaveToast();

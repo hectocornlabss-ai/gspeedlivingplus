@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { 
   X, Save, RefreshCw, Upload, Image as ImageIcon, Tag, Plus, Trash2, 
-  ChevronUp, ChevronDown, Check, Star, AlertCircle, Info, ExternalLink
+  ChevronUp, ChevronDown, Check, Star, AlertCircle, Info, ExternalLink, Globe, Sparkles
 } from 'lucide-react';
 import ArticleBlockEditor from './ArticleBlockEditor';
 import { compressAndConvertToWebP } from '../utils/imageOptimizer';
 import { EVENT_CATEGORIES, DEFAULT_ARTICLE_TAGS } from '../data/mockData';
+import { autoTranslateEntity } from '../utils/autoTranslator';
 
 const DEFAULT_NEW_ACTIVITY = {
   title: '',
@@ -65,6 +66,7 @@ export default function ActivityFormModal({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(null); // { current, total, filename }
   const [isSaving, setIsSaving] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
   const [coverCompressing, setCoverCompressing] = useState(false);
 
   useEffect(() => {
@@ -298,11 +300,35 @@ export default function ActivityFormModal({
         galleryPhotos: (draft.galleryPhotos || []).filter(p => Boolean(p.url))
       };
 
-      await onSave(finalData);
+      // Automated multi-language translation (TH -> EN & ZH)
+      let translatedData = finalData;
+      try {
+        translatedData = await autoTranslateEntity(finalData);
+      } catch (transErr) {
+        console.warn('Auto-translation failed during save, proceeding with original data:', transErr);
+      }
+
+      await onSave(translatedData);
     } catch (err) {
       alert('บันทึกล้มเหลว: ' + err.message);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleManualTranslate = async () => {
+    if (!draft.title.trim()) {
+      alert('กรุณากรอกหัวข้อหรือเนื้อหาก่อนแปลภาษา');
+      return;
+    }
+    setIsTranslating(true);
+    try {
+      await autoTranslateEntity(draft);
+      alert('แปลภาษาอัตโนมัติ (อังกฤษ & จีน) เรียบร้อยแล้ว! ข้อมูลถูกจัดเก็บลงแคชพร้อมใช้งานทันที');
+    } catch (err) {
+      alert('การแปลภาษาขัดข้อง: ' + err.message);
+    } finally {
+      setIsTranslating(false);
     }
   };
 
@@ -331,19 +357,30 @@ export default function ActivityFormModal({
               {isEdit ? `✏️ แก้ไขบทความกิจกรรม: ${draft.title || 'ไม่มีชื่อ'}` : '➕ เพิ่มกิจกรรม & บทความใหม่ (New Article)'}
             </h4>
             <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
-              ระบบบันทึกแบบ Single-Save ตามมาตรฐาน WordPress บันทึกลงเซิร์ฟเวอร์จริงรอบเดียว
+              ระบบบันทึกแบบ Single-Save พร้อมแปลภาษาอังกฤษ & จีน อัตโนมัติ (Auto-Translate)
             </span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <button 
               type="button" 
+              onClick={handleManualTranslate} 
+              disabled={isTranslating || isSaving}
+              className="btn-secondary"
+              title="แปลภาษาอังกฤษและจีนลงในระบบล่วงหน้าทันที"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: '0.82rem' }}
+            >
+              {isTranslating ? <RefreshCw size={13} className="spin-icon text-blue" /> : <Globe size={13} className="text-blue" />}
+              <span>{isTranslating ? 'กำลังแปล...' : '🌐 แปลอัตโนมัติ (AI)'}</span>
+            </button>
+            <button 
+              type="button" 
               onClick={handleSubmit} 
-              disabled={isSaving}
+              disabled={isSaving || isTranslating}
               className="btn-primary"
               style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#10b981', borderColor: '#10b981', padding: '6px 14px' }}
             >
               {isSaving ? <RefreshCw size={14} className="spin-icon" /> : <Save size={14} />}
-              <span>{isSaving ? 'กำลังบันทึก...' : (isEdit ? 'บันทึกการแก้ไข' : 'เพิ่มบทความใหม่')}</span>
+              <span>{isSaving ? 'กำลังบันทึก & แปล...' : (isEdit ? 'บันทึกการแก้ไข' : 'เพิ่มบทความใหม่')}</span>
             </button>
             <button 
               type="button"

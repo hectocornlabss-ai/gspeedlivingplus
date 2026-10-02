@@ -225,11 +225,11 @@ export default function TournamentsPage({
                               <span className="live-ping-ring" />
                               <span className="live-ping-core" />
                             </span>
-                            <span>{tourney.badge || 'เปิดรับสมัครด่วน'}</span>
+                            <span>{translateDynamic(tourney.badge || 'เปิดรับสมัครด่วน')}</span>
                           </span>
                         ) : (
                           <span className={`badge-pill badge-${tourney.badgeType === 'cyan' ? 'blue' : tourney.badgeType === 'magenta' ? 'white' : 'amber'}`}>
-                            {tourney.badge}
+                            {translateDynamic(tourney.badge)}
                           </span>
                         )}
                         {tourney.gameCategory && (
@@ -264,7 +264,7 @@ export default function TournamentsPage({
                             <span>{t('common.prizePool')}</span>
                           </div>
                           <div className="t-prize-amount">
-                            {tourney.prizePool}
+                            {translateDynamic(tourney.prizePool)}
                           </div>
                         </div>
 
@@ -272,11 +272,11 @@ export default function TournamentsPage({
                         <div className="t-details-list" style={{ marginTop: '12px' }}>
                           <div className="t-detail-item">
                             <Calendar size={15} className="text-cyan" style={{ flexShrink: 0 }} />
-                            <span><strong>{t('common.date')}:</strong> {tourney.date} ({tourney.time})</span>
+                            <span><strong>{t('common.date')}:</strong> {translateDynamic(tourney.date)} ({translateDynamic(tourney.time)})</span>
                           </div>
                           <div className="t-detail-item">
                             <Users size={15} className="text-blue" style={{ flexShrink: 0 }} />
-                            <span><strong>{t('common.teams')}:</strong> {tourney.slots} ({teamCount} {t('common.teamsCount')})</span>
+                            <span><strong>{t('common.teams')}:</strong> {translateDynamic(tourney.slots)} ({teamCount} {t('common.teamsCount')})</span>
                           </div>
                           <div className="t-detail-item">
                             <Zap size={15} className="text-amber" style={{ flexShrink: 0 }} />

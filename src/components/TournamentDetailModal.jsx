@@ -375,18 +375,17 @@ export default function TournamentDetailModal({
         </div>
 
         {/* 3. Modal Body Content - Fixed scroll container */}
-        <div className="tourney-hub-body">
-          {/* TAB 1: OVERVIEW & RULES */}
+        <div className="tourney-hub-body" style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
           {tourneyModalTab === 'overview' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {/* About Tournament Story */}
+              {/* About Tournament */}
               <div style={{ background: '#ffffff', padding: '20px', borderRadius: '14px', border: '1px solid #e2e8f0' }}>
                 <h4 style={{ margin: '0 0 10px 0', fontSize: '1.05rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Zap size={18} className="text-blue" />
-                  <span>เกี่ยวกับรายการแข่งขัน</span>
+                  <span>{language === 'zh' ? '关于赛事' : language === 'en' ? 'About Tournament' : 'เกี่ยวกับรายการแข่งขัน'}</span>
                 </h4>
                 <p style={{ margin: 0, lineHeight: 1.7, color: '#475569', fontSize: '0.92rem' }}>
-                  {tournament.desc || 'การแข่งขันอีสปอร์ตสุดยิ่งใหญ่ รวบรวมยอดฝีมือทั่วประเทศมาร่วมประลองความแม่นยำบนเวที LAN Final ณ GLP : G Speed Living Plus รามคำแหง 53 ชิงเงินรางวัลและถ้วยเกียรติยศ พร้อมถ่ายทอดสดด้วยโปรดักชันระดับสตูดิโอ'}
+                  {translateDynamic(tournament.desc || 'การแข่งขันอีสปอร์ตสุดยิ่งใหญ่ รวบรวมยอดฝีมือทั่วประเทศมาร่วมประลองความแม่นยำบนเวที LAN Final ณ GLP : G Speed Living Plus รามคำแหง 53 ชิงเงินรางวัลและถ้วยเกียรติยศ พร้อมถ่ายทอดสดด้วยโปรดักชันระดับสตูดิโอ')}
                 </p>
               </div>
 
@@ -394,7 +393,7 @@ export default function TournamentDetailModal({
               <div style={{ background: '#ffffff', padding: '20px', borderRadius: '14px', border: '1px solid #e2e8f0' }}>
                 <h4 style={{ margin: '0 0 16px 0', fontSize: '1.05rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Trophy size={18} className="text-amber" />
-                  <span>โครงสร้างเงินรางวัล (Prize Pool Distribution)</span>
+                  <span>{language === 'zh' ? '赛事奖金分配体系 (Prize Pool Distribution)' : language === 'en' ? 'Prize Pool Distribution' : 'โครงสร้างเงินรางวัล (Prize Pool Distribution)'}</span>
                 </h4>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
                   {(tournament.prizeDistribution || [
@@ -403,7 +402,7 @@ export default function TournamentDetailModal({
                     { rank: 'รองชนะเลิศอันดับ 2 ร่วม', reward: '฿10,000 ต่อทีม + เหรียญทองแดง' }
                   ]).map((pz, idx) => (
                     <div 
-                      key={idx}
+                      key={idx} 
                       style={{ 
                         background: idx === 0 ? 'linear-gradient(135deg, #fefce8 0%, #fef08a 100%)' : '#f8fafc',
                         border: idx === 0 ? '1px solid #facc15' : '1px solid #e2e8f0',
@@ -415,10 +414,10 @@ export default function TournamentDetailModal({
                       }}
                     >
                       <span style={{ fontSize: '0.78rem', fontWeight: 600, color: idx === 0 ? '#854d0e' : '#64748b', textTransform: 'uppercase' }}>
-                        {idx === 0 ? '🥇 อันดับที่ 1 (Champion)' : idx === 1 ? '🥈 อันดับที่ 2 (Runner-Up)' : `🎖️ ${pz.rank}`}
+                        {idx === 0 ? (language === 'zh' ? '🥇 冠军 (Champion)' : language === 'en' ? '🥇 1st Place (Champion)' : '🥇 อันดับที่ 1 (Champion)') : idx === 1 ? (language === 'zh' ? '🥈 亚军 (Runner-Up)' : language === 'en' ? '🥈 2nd Place (Runner-Up)' : '🥈 อันดับที่ 2 (Runner-Up)') : `🎖️ ${translateDynamic(pz.rank)}`}
                       </span>
                       <span style={{ fontSize: '1.02rem', fontWeight: 600, color: idx === 0 ? '#713f12' : '#0f172a' }}>
-                        {pz.reward}
+                        {translateDynamic(pz.reward)}
                       </span>
                     </div>
                   ))}
@@ -432,7 +431,7 @@ export default function TournamentDetailModal({
                     OFFICIAL TOURNAMENT SPECS
                   </span>
                   <h4 style={{ margin: '4px 0 6px 0', fontSize: '1.08rem', fontWeight: 650, color: '#ffffff' }}>
-                    มาตรฐานสนามแข่งขันระดับ World Class LAN Arena
+                    {language === 'zh' ? '世界锦标赛级线下场馆硬件标准' : language === 'en' ? 'World-Class LAN Arena Hardware Standard' : 'มาตรฐานสนามแข่งขันระดับ World Class LAN Arena'}
                   </h4>
                   <span style={{ fontSize: '0.84rem', color: '#cbd5e1', lineHeight: 1.5, display: 'block' }}>
                     Intel Core i9 • RTX 4080 SUPER • BenQ ZOWIE 360Hz Fast-IPS • 10Gbps Latency 0.5ms • Soundproof Booths
@@ -447,7 +446,9 @@ export default function TournamentDetailModal({
                   title="คลิกเพื่อลงทะเบียนเข้าร่วมแข่งขัน"
                   style={{ background: '#ffffff', color: '#1d4ed8', border: '1.5px solid #e2e8f0' }}
                 >
-                  <span style={{ color: '#1d4ed8', fontWeight: 650, fontSize: '0.94rem' }}>สมัครลงแข่งรอบนี้</span>
+                  <span style={{ color: '#1d4ed8', fontWeight: 650, fontSize: '0.94rem' }}>
+                    {language === 'zh' ? '立即报名参赛' : language === 'en' ? 'Register Now' : 'สมัครลงแข่งรอบนี้'}
+                  </span>
                   <ArrowRight size={16} color="#1d4ed8" />
                 </button>
               </div>
@@ -456,7 +457,7 @@ export default function TournamentDetailModal({
               <div style={{ background: '#ffffff', padding: '20px', borderRadius: '14px', border: '1px solid #e2e8f0' }}>
                 <h4 style={{ margin: '0 0 14px 0', fontSize: '1.05rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Shield size={18} className="text-blue" />
-                  <span>กติกาและข้อบังคับอย่างเป็นทางการ (Official Tournament Rules)</span>
+                  <span>{language === 'zh' ? '比赛规则与纪律条例 (Rules & Regulations)' : language === 'en' ? 'Rules & Regulations' : 'กติกาและข้อบังคับอย่างเป็นทางการ (Official Tournament Rules)'}</span>
                 </h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {(tournament.rules || [
@@ -468,7 +469,7 @@ export default function TournamentDetailModal({
                   ]).map((rl, ridx) => (
                     <div key={ridx} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
                       <CheckCircle2 size={16} className="text-blue" style={{ marginTop: '3px', flexShrink: 0 }} />
-                      <span style={{ fontSize: '0.88rem', color: '#334155', lineHeight: 1.5 }}>{rl}</span>
+                      <span style={{ fontSize: '0.88rem', color: '#334155', lineHeight: 1.5 }}>{translateDynamic(rl)}</span>
                     </div>
                   ))}
                 </div>
@@ -484,26 +485,26 @@ export default function TournamentDetailModal({
                 <div style={{ background: '#ffffff', padding: '18px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#1d4ed8', marginBottom: '8px' }}>
                     <Clock size={16} />
-                    <strong>ช่วงเวลารับสมัคร (Registration Period)</strong>
+                    <strong>{language === 'zh' ? '报名时间 (Registration Period)' : language === 'en' ? 'Registration Period' : 'ช่วงเวลารับสมัคร (Registration Period)'}</strong>
                   </div>
                   <div style={{ fontSize: '1rem', fontWeight: 700, color: '#0f172a' }}>
-                    {tournament.regStartDate || '1 กันยายน 2026'} - {tournament.regEndDate || '25 กันยายน 2026'}
+                    {translateDynamic(tournament.regStartDate || '1 กันยายน 2026')} - {translateDynamic(tournament.regEndDate || '25 กันยายน 2026')}
                   </div>
                   <span className="text-xs text-muted block" style={{ marginTop: '4px' }}>
-                    รับสมัครจำนวนจำกัด {tournament.slots} ปิดรับเมื่อเต็ม
+                    {language === 'zh' ? `限额招募 ${tournament.slots} 满额即止` : language === 'en' ? `Limited to ${tournament.slots}, closes when full` : `รับสมัครจำนวนจำกัด ${tournament.slots} ปิดรับเมื่อเต็ม`}
                   </span>
                 </div>
 
                 <div style={{ background: '#ffffff', padding: '18px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#059669', marginBottom: '8px' }}>
                     <Calendar size={16} />
-                    <strong>วันแข่งขันจริง (Tournament Days)</strong>
+                    <strong>{language === 'zh' ? '比赛日期 (Tournament Days)' : language === 'en' ? 'Tournament Days' : 'วันแข่งขันจริง (Tournament Days)'}</strong>
                   </div>
                   <div style={{ fontSize: '1rem', fontWeight: 700, color: '#0f172a' }}>
-                    {tournament.date}
+                    {translateDynamic(tournament.date)}
                   </div>
                   <span className="text-xs text-muted block" style={{ marginTop: '4px' }}>
-                    เวลา {tournament.time} @ {tournament.venue || 'G-Speed Main Stage'}
+                    {language === 'zh' ? '比赛时间: ' : language === 'en' ? 'Time: ' : 'เวลา '}{translateDynamic(tournament.time)} @ {translateDynamic(tournament.venue || t('tournamentModal.venueDefault'))}
                   </span>
                 </div>
               </div>
@@ -512,7 +513,7 @@ export default function TournamentDetailModal({
               <div style={{ background: '#ffffff', padding: '20px', borderRadius: '14px', border: '1px solid #e2e8f0' }}>
                 <h4 style={{ margin: '0 0 16px 0', fontSize: '1.05rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Clock size={18} className="text-blue" />
-                  <span>ตารางการแข่งขันรายรอบ (Match Timetable)</span>
+                  <span>{language === 'zh' ? '赛程时间表 (Match Timetable)' : language === 'en' ? 'Match Timetable' : 'ตารางการแข่งขันรายรอบ (Match Timetable)'}</span>
                 </h4>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -523,7 +524,7 @@ export default function TournamentDetailModal({
                     { time: '18:00 - 20:30 น.', stage: 'รอบชิงชนะเลิศ Grand Final บนเวที Main Stage (Best of 5 ถ่ายทอดสด)' }
                   ]).map((st, idx) => (
                     <div 
-                      key={idx}
+                      key={idx} 
                       style={{ 
                         display: 'flex', 
                         gap: '16px', 
@@ -535,10 +536,10 @@ export default function TournamentDetailModal({
                       }}
                     >
                       <div style={{ minWidth: '130px', fontWeight: 700, color: '#1d4ed8', fontSize: '0.9rem' }}>
-                        {st.time}
+                        {translateDynamic(st.time)}
                       </div>
                       <div style={{ fontSize: '0.9rem', color: '#334155', fontWeight: 500 }}>
-                        {st.stage}
+                        {translateDynamic(st.stage)}
                       </div>
                     </div>
                   ))}

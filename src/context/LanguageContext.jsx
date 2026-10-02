@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { translateDynamic as autoTranslateDynamic } from '../utils/autoTranslator';
 
 // Translation dictionaries for Thai (th), English (en), and Chinese (zh)
 export const translations = {
@@ -1099,15 +1100,28 @@ export function LanguageProvider({ children }) {
     { code: 'zh', label: '中文', flag: '🇨🇳', short: 'CN' }
   ];
 
-  // Helper to translate mock and user content dynamically
-  const translateDynamic = (text) => {
-    if (!text || language === 'th') return text;
-    const str = typeof text === 'string' ? text.trim() : '';
-    if (CONTENT_TRANSLATIONS[str] && CONTENT_TRANSLATIONS[str][language]) {
-      return CONTENT_TRANSLATIONS[str][language];
+  // Listen for translation cache updates to trigger reactive re-render
+  const [, setCacheRevision] = useState(0);
+  useEffect(() => {
+    const handleCacheUpdate = () => {
+      setCacheRevision(prev => prev + 1);
+    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('glp_translation_cache_updated', handleCacheUpdate);
+      return () => window.removeEventListener('glp_translation_cache_updated', handleCacheUpdate);
     }
-    return text;
-  };
+  }, []);
+
+  // Helper to translate mock, CMS, and dynamic user content
+  const translateDynamic = useCallback((text, forcedLang) => {
+    const targetLang = forcedLang || language;
+    if (!text || targetLang === 'th') return text;
+    const str = typeof text === 'string' ? text.trim() : '';
+    if (str && CONTENT_TRANSLATIONS[str] && CONTENT_TRANSLATIONS[str][targetLang]) {
+      return CONTENT_TRANSLATIONS[str][targetLang];
+    }
+    return autoTranslateDynamic(text, targetLang);
+  }, [language]);
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t, supportedLanguages, translateDynamic }}>

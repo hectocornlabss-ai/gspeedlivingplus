@@ -227,9 +227,9 @@ export default function ActivitiesPage({
                     <div className="gallery-meta">
                       <span className="gallery-date">
                         <Calendar size={13} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} />
-                        {item.date}
+                        {translateDynamic(item.date)}
                       </span>
-                      <span className="gallery-partner">{item.partner}</span>
+                      <span className="gallery-partner">{translateDynamic(item.partner)}</span>
                     </div>
                     <h3 className="gallery-title">{translateDynamic(item.title)}</h3>
                     <p className="gallery-desc">{translateDynamic(item.desc)}</p>
