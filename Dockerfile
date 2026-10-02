@@ -39,6 +39,10 @@ COPY server/ ./server/
 # คัดลอก static build จาก builder stage ไปยัง Nginx Web Root
 COPY --from=builder /app/dist /usr/share/nginx/html
 
+# คัดลอกรูปภาพเริ่มต้นไปยัง data uploads ของ Backend เพื่อให้ทั้ง Nginx และ Backend มีรูปภาพครบถ้วน 100%
+RUN mkdir -p /app/server/data/uploads
+COPY --from=builder /app/public/uploads /app/server/data/uploads
+
 # คัดลอกการตั้งค่า Nginx (Reverse Proxy & Clean Path URLs & Crawler SSR)
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
@@ -52,4 +56,4 @@ ENV BACKEND_PORT=3001
 EXPOSE 80 3000
 
 # เริ่มการทำงานของ Node.js Backend พร้อม Supervisor Auto-Restart และ Nginx อย่างปลอดภัย
-CMD ["/bin/sh", "-c", "mkdir -p /app/server/data/backups && (while true; do node /app/server/email-service.js; echo '[Supervisor] Node.js exited, restarting in 2s...'; sleep 2; done) & exec nginx -g 'daemon off;'"]
+CMD ["/bin/sh", "-c", "mkdir -p /app/server/data/backups /app/server/data/uploads && (while true; do node /app/server/email-service.js; echo '[Supervisor] Node.js exited, restarting in 2s...'; sleep 2; done) & exec nginx -g 'daemon off;'"]

@@ -6,7 +6,7 @@ import AIChatWidget from './components/AIChatWidget';
 import AnnouncementTicker from './components/AnnouncementTicker';
 import ErrorBoundary from './components/ErrorBoundary';
 import { SiteDataProvider, useSiteData } from './context/SiteDataContext';
-import { LanguageProvider } from './context/LanguageContext';
+import { LanguageProvider, useTranslation } from './context/LanguageContext';
 import { getRouteMetadata } from './data/routesConfig';
 import { applySEOMetadata, applyTrackingAndVerificationScripts } from './utils/seoManager';
 import './App.css';
@@ -26,7 +26,27 @@ const TournamentsPage = lazy(() => import('./components/TournamentsPage'));
 const ActivitiesPage = lazy(() => import('./components/ActivitiesPage'));
 const ContactPage = lazy(() => import('./components/ContactPage'));
 
-function PageLoadingSpinner({ label = 'กำลังโหลดข้อมูลระบบ...' }) {
+function PageLoadingSpinner({ label }) {
+  let lang = 'th';
+  try {
+    const ctx = useTranslation();
+    if (ctx && ctx.language) lang = ctx.language;
+  } catch (e) {
+    if (typeof window !== 'undefined') {
+      lang = localStorage.getItem('glp_lang') || 'th';
+    }
+  }
+
+  const defaultLabel = lang === 'zh' 
+    ? '正在加载系统数据...' 
+    : lang === 'en' 
+    ? 'Loading system data...' 
+    : 'กำลังโหลดข้อมูลระบบ...';
+
+  const subLabel = lang === 'zh'
+    ? 'G-Speed 电竞馆智能管理系统'
+    : 'G-Speed Esport Arena System';
+
   return (
     <div style={{
       display: 'flex',
@@ -65,10 +85,10 @@ function PageLoadingSpinner({ label = 'กำลังโหลดข้อม�
         <span style={{ fontSize: '11px', fontWeight: 900, color: '#1d4ed8', letterSpacing: '0.05em' }}>GLP</span>
       </div>
       <div style={{ fontWeight: 800, fontSize: '16px', color: '#0f172a', letterSpacing: '0.02em', marginBottom: '6px' }}>
-        {label}
+        {label || defaultLabel}
       </div>
       <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 500 }}>
-        G-Speed Esport Arena System
+        {subLabel}
       </div>
     </div>
   );
