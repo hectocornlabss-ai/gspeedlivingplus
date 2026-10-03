@@ -474,46 +474,61 @@ export default function CheckoutPage({
 
       <div className="container checkout-container">
         {/* TOP STEP-BY-STEP PROGRESS BAR */}
-        <div className="checkout-steps-nav">
-          <div 
-            className={`checkout-step-pill ${checkoutStep === 'shipping' ? 'active' : activeOrder ? 'done' : ''}`}
-            onClick={() => !activeOrder && setCheckoutStep('shipping')}
-          >
-            <span className="checkout-step-num">1</span>
-            <span>1. ข้อมูลจัดส่ง & ออกบิล</span>
-          </div>
+        <div className="checkout-stepper-container">
+          <div className="checkout-stepper-bar">
+            {/* Step 1 */}
+            <div 
+              className={`checkout-step-item ${checkoutStep === 'shipping' ? 'active' : activeOrder ? 'done' : ''}`}
+              onClick={() => !activeOrder && setCheckoutStep('shipping')}
+              style={{ cursor: !activeOrder ? 'pointer' : 'default' }}
+            >
+              <div className="step-circle">
+                {activeOrder ? <Check size={14} strokeWidth={3} /> : '1'}
+              </div>
+              <span className="step-title">ข้อมูลการจัดส่ง</span>
+            </div>
 
-          <span className="checkout-step-sep">➔</span>
+            <div className={`step-connector ${activeOrder ? 'done' : ''}`} />
 
-          <div 
-            className={`checkout-step-pill ${checkoutStep === 'invoice' ? 'active' : (activeOrder && checkoutStep !== 'shipping') ? 'done' : ''}`}
-            onClick={() => activeOrder && setCheckoutStep('invoice')}
-            style={{ cursor: activeOrder ? 'pointer' : 'default' }}
-          >
-            <span className="checkout-step-num">2</span>
-            <span>2. ใบแจ้งหนี้ (Invoice) & พิมพ์</span>
-          </div>
+            {/* Step 2 */}
+            <div 
+              className={`checkout-step-item ${checkoutStep === 'invoice' ? 'active' : (activeOrder && checkoutStep !== 'shipping') ? 'done' : ''}`}
+              onClick={() => activeOrder && setCheckoutStep('invoice')}
+              style={{ cursor: activeOrder ? 'pointer' : 'default' }}
+            >
+              <div className="step-circle">
+                {(activeOrder && checkoutStep !== 'shipping' && checkoutStep !== 'invoice') ? <Check size={14} strokeWidth={3} /> : '2'}
+              </div>
+              <span className="step-title">ใบแจ้งหนี้</span>
+            </div>
 
-          <span className="checkout-step-sep">➔</span>
+            <div className={`step-connector ${(activeOrder && checkoutStep !== 'shipping' && checkoutStep !== 'invoice') ? 'done' : ''}`} />
 
-          <div 
-            className={`checkout-step-pill ${checkoutStep === 'payment' ? 'active' : (activeOrder?.hasSlipUploaded || checkoutStep === 'tracking') ? 'done' : ''}`}
-            onClick={() => activeOrder && setCheckoutStep('payment')}
-            style={{ cursor: activeOrder ? 'pointer' : 'default' }}
-          >
-            <span className="checkout-step-num">3</span>
-            <span>3. ชำระเงิน & แนบสลิป (PDF/รูป)</span>
-          </div>
+            {/* Step 3 */}
+            <div 
+              className={`checkout-step-item ${checkoutStep === 'payment' ? 'active' : (activeOrder?.hasSlipUploaded || checkoutStep === 'tracking') ? 'done' : ''}`}
+              onClick={() => activeOrder && setCheckoutStep('payment')}
+              style={{ cursor: activeOrder ? 'pointer' : 'default' }}
+            >
+              <div className="step-circle">
+                {(activeOrder?.hasSlipUploaded || checkoutStep === 'tracking') ? <Check size={14} strokeWidth={3} /> : '3'}
+              </div>
+              <span className="step-title">การชำระเงิน</span>
+            </div>
 
-          <span className="checkout-step-sep">➔</span>
+            <div className={`step-connector ${(activeOrder?.hasSlipUploaded || checkoutStep === 'tracking') ? 'done' : ''}`} />
 
-          <div 
-            className={`checkout-step-pill ${checkoutStep === 'tracking' ? 'active' : ''}`}
-            onClick={() => activeOrder && setCheckoutStep('tracking')}
-            style={{ cursor: activeOrder ? 'pointer' : 'default' }}
-          >
-            <span className="checkout-step-num">4</span>
-            <span>4. ติดตามสถานะคำสั่งซื้อ</span>
+            {/* Step 4 */}
+            <div 
+              className={`checkout-step-item ${checkoutStep === 'tracking' ? 'active' : ''}`}
+              onClick={() => activeOrder && setCheckoutStep('tracking')}
+              style={{ cursor: activeOrder ? 'pointer' : 'default' }}
+            >
+              <div className="step-circle">
+                {activeOrder?.status === 'delivered' ? <Check size={14} strokeWidth={3} /> : '4'}
+              </div>
+              <span className="step-title">ติดตาม</span>
+            </div>
           </div>
         </div>
 
