@@ -7,6 +7,8 @@ import AnnouncementTicker from './components/AnnouncementTicker';
 import ErrorBoundary from './components/ErrorBoundary';
 import { SiteDataProvider, useSiteData } from './context/SiteDataContext';
 import { LanguageProvider, useTranslation } from './context/LanguageContext';
+import { CartProvider } from './context/CartContext';
+import { CustomerAuthProvider } from './context/CustomerAuthContext';
 import { getRouteMetadata } from './data/routesConfig';
 import { applySEOMetadata, applyTrackingAndVerificationScripts } from './utils/seoManager';
 import './App.css';
@@ -19,7 +21,13 @@ if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) {
 // Code Splitting: Lazy load heavy modules for lightning fast initial load
 const AdminAuthGate = lazy(() => import('./components/AdminAuthGate'));
 const CompanyProfile = lazy(() => import('./components/CompanyProfile'));
-const FranchisePlanner = lazy(() => import('./components/FranchisePlanner'));
+const EquipmentStorePage = lazy(() => import('./components/EquipmentStore/EquipmentStorePage'));
+const CheckoutPage = lazy(() => import('./components/EquipmentStore/CheckoutPage'));
+const CartDrawer = lazy(() => import('./components/EquipmentStore/CartDrawer'));
+const QuotationModal = lazy(() => import('./components/EquipmentStore/QuotationModal'));
+const OrderTrackerModal = lazy(() => import('./components/EquipmentStore/OrderTrackerModal'));
+const CustomerAuthModal = lazy(() => import('./components/CustomerAuthModal'));
+const MyOrdersModal = lazy(() => import('./components/MyOrdersModal'));
 const SingleActivityView = lazy(() => import('./components/SingleActivityView'));
 const SingleTournamentView = lazy(() => import('./components/SingleTournamentView'));
 const TournamentsPage = lazy(() => import('./components/TournamentsPage'));
@@ -143,16 +151,24 @@ function AppContent() {
     const actMatch = path.match(/^\/(?:activities|activity|news|article)\/([^/?#]+)/i);
     const actSlug = actMatch ? decodeURIComponent(actMatch[1]) : null;
 
-    // 4. Query Params (Tags and Categories filter)
+    // 4. Query Params, Product Single Route & Order Tracking Route
     const searchParams = new URLSearchParams(window.location.search);
     const tagParam = searchParams.get('tag') ? decodeURIComponent(searchParams.get('tag')) : null;
     const catParam = searchParams.get('category') ? decodeURIComponent(searchParams.get('category')) : null;
+    const productMatch = path.match(/^\/(?:products|product|equipment|shop)\/([^/?#]+)/i);
+    const productId = productMatch ? decodeURIComponent(productMatch[1]) : (searchParams.get('product') || null);
 
-    // 5. Tab selection - Dedicated Pages for Tournaments, Activities, Franchise, Company, Contact & Arena
+    // Order Tracking clean path: /orders/:orderNo หรือ /order/:orderNo หรือ /track/:orderNo
+    const orderMatch = path.match(/^\/(?:orders|order|track)\/([^/?#]+)/i);
+    const orderNo = orderMatch ? decodeURIComponent(orderMatch[1]) : (searchParams.get('order') || null);
+
+    // 5. Tab selection - Dedicated Pages for Tournaments, Activities, Franchise/Products, Company, Contact & Arena
     let tab = 'arena';
     let sectionToScroll = null;
 
-    if (path === '/franchise' || path === '/planner') {
+    if (path === '/checkout' || path === '/payment' || path === '/order-checkout' || orderNo || path.startsWith('/orders') || path.startsWith('/order/') || path.startsWith('/track/')) {
+      tab = 'checkout';
+    } else if (path === '/franchise' || path === '/planner' || path === '/shop' || path === '/products' || path === '/equipment' || path.startsWith('/products/') || path.startsWith('/franchise/') || path.startsWith('/shop/')) {
       tab = 'franchise';
     } else if (path === '/company' || path === '/about') {
       tab = 'company';
@@ -170,6 +186,8 @@ function AppContent() {
       isAdmin,
       eventSlug,
       actSlug,
+      productId,
+      orderNo,
       tab,
       sectionToScroll,
       tagParam,
@@ -398,7 +416,19 @@ function AppContent() {
               )}
 
               {routeState.tab === 'franchise' && (
-                <FranchisePlanner />
+                <EquipmentStorePage 
+                  onNavigateHome={() => navigateTo('/')} 
+                  initialProductId={routeState.productId}
+                />
+              )}
+
+              {routeState.tab === 'checkout' && (
+                <CheckoutPage 
+                  onNavigateHome={() => navigateTo('/')}
+                  onNavigateStore={() => navigateTo('/franchise')}
+                  initialOrderNo={routeState.orderNo}
+                  initialStep={routeState.orderNo ? 'tracking' : 'shipping'}
+                />
               )}
 
               {routeState.tab === 'contact' && (
@@ -411,6 +441,15 @@ function AppContent() {
           )}
         </Suspense>
       </main>
+
+      {/* Global Store Drawers & Modals (Cart, Quotation, Tracker, Member Auth, My Orders) */}
+      <Suspense fallback={null}>
+        <CartDrawer />
+        <QuotationModal />
+        <OrderTrackerModal />
+        <CustomerAuthModal />
+        <MyOrdersModal />
+      </Suspense>
 
       {/* Global Footer (Clean Navigation) */}
       <Footer onNavigate={navigateTo} />
@@ -426,7 +465,11 @@ export default function App() {
     <ErrorBoundary>
       <SiteDataProvider>
         <LanguageProvider>
-          <AppContent />
+          <CustomerAuthProvider>
+            <CartProvider>
+              <AppContent />
+            </CartProvider>
+          </CustomerAuthProvider>
         </LanguageProvider>
       </SiteDataProvider>
     </ErrorBoundary>

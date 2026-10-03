@@ -4,7 +4,7 @@ import {
   Check, X, Eye, EyeOff, Lock, UserCheck, UserX, AlertTriangle,
   Save, CheckSquare, Square, Crown, Sliders, CheckCircle2,
   TrendingUp, MessagesSquare, Monitor, Cpu, Bot, LayoutGrid,
-  FileText, Trophy, Search, Activity, Mail, MapPin, Zap
+  FileText, Trophy, Search, Activity, Mail, MapPin, Zap, ShoppingBag
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 
@@ -12,20 +12,21 @@ import { useSiteData } from '../context/SiteDataContext';
 export const PERMISSION_TABS_LIST = [
   { id: 'erp-analytics', label: '01. ดูยอดขาย & ERP ร้านเกม', icon: TrendingUp, color: '#059669', desc: 'AI สรุปรายได้, Peak Hours, ซิงก์ POS' },
   { id: 'omnichannel-leads', label: '02. แชท & Leads แฟรนไชส์', icon: MessagesSquare, color: '#0284c7', desc: 'รวมแชท LINE/FB/Web และ Leads แฟรนไชส์' },
-  { id: 'catalog', label: '03. แต่งอุปกรณ์ & แคตตาล็อก 3D', icon: Monitor, color: '#7c3aed', desc: 'โต๊ะ, เก้าอี้, เคาน์เตอร์, หลายเกรด' },
-  { id: 'hardware-pricing', label: '04. สเปกคอม & ราคาโครงสร้าง', icon: Cpu, color: '#2563eb', desc: 'รุ่น 001, RTX 5090, Diskless, โต๊ะ' },
-  { id: 'tourney-apps', label: '05. ทัวร์นาเมนต์ & สายการแข่งขัน', icon: Users, color: '#dc2626', desc: 'อนุมัติทีมแข่ง, ควบคุมสายแข่ง, สกอร์สด' },
-  { id: 'arena-bookings', label: '06. คำขอจัดงานแข่ง Esport', icon: Trophy, color: '#d97706', desc: 'ติดต่อขอจัดงานแข่ง, เช่าเวที Main Stage, สปอนเซอร์' },
-  { id: 'articles', label: '07. กิจกรรม & บทความ (Articles)', icon: FileText, color: '#4f46e5', desc: 'กำหนด URL Slug, ลิงก์แยก, รูปภาพ' },
-  { id: 'ai-rag', label: '08. ระบบ AI แชท & คลังความรู้ RAG', icon: Bot, color: '#9333ea', desc: 'OpenRouter, Gemini Flash, เทรนข้อมูล' },
-  { id: 'seo-tools', label: '09. เครื่องมือ SEO & Marketing Tracking', icon: Search, color: '#ea580c', desc: 'Google Search, Bing, Meta Pixel, GTM, AI SEO' },
-  { id: 'sections', label: '10. เนื้อหาแต่ละ Section', icon: LayoutGrid, color: '#0d9488', desc: 'Hero, กิจกรรม, แกลเลอรี, ประวัติ' },
-  { id: 'partners', label: '11. โลโก้พันธมิตร (Partner Logos)', icon: Zap, color: '#f59e0b', desc: 'สไลเดอร์แบรนด์ โลโก้ & ชื่อสีดำ' },
-  { id: 'menu-footer', label: '12. เมนู Header & Footer', icon: LayoutGrid, color: '#64748b', desc: 'แถบประกาศ, เมนูนำทาง, ช่องทางติดต่อ' },
-  { id: 'automation', label: '13. ระบบ Automation & Webhooks', icon: Sliders, color: '#475569', desc: 'แจ้งเตือน Discord, Lead แฟรนไชส์, จัดการ SMTP' },
-  { id: 'email-templates', label: '14. แม่แบบอีเมลตอบกลับ (Email Templates)', icon: Mail, color: '#0284c7', desc: 'แก้ไขข้อความตอบกลับลูกค้า, ใบเสนอราคาอัตโนมัติ' },
-  { id: 'security', label: '15. ความปลอดภัย & จัดการแอดมิน', icon: ShieldCheck, color: '#be123c', desc: 'จัดการ Staff Roles, สิทธิ์เข้าถึง, รหัส Master' },
-  { id: 'contact-page', label: '16. ข้อมูลติดต่อ & แผนที่ร้าน', icon: MapPin, color: '#0ea5e9', desc: 'ข้อมูลร้าน, แผนที่ Google Maps, วิธีเดินทาง (เพิ่ม/ลบ), ไฮไลต์ (เพิ่ม/ลบ), และข้อความติดต่อ' }
+  { id: 'store-orders', label: '03. คำสั่งซื้อ & จัดการสินค้าในร้าน', icon: ShoppingBag, color: '#ea580c', desc: 'เช็กออเดอร์ลูกค้า, ตรวจสลิปโอนเงิน, แก้ไขสินค้า & สต็อก' },
+  { id: 'catalog', label: '04. แต่งอุปกรณ์ & แคตตาล็อก 3D', icon: Monitor, color: '#7c3aed', desc: 'โต๊ะ, เก้าอี้, เคาน์เตอร์, หลายเกรด' },
+  { id: 'hardware-pricing', label: '05. สเปกคอม & ราคาโครงสร้าง', icon: Cpu, color: '#2563eb', desc: 'รุ่น 001, RTX 5090, Diskless, โต๊ะ' },
+  { id: 'tourney-apps', label: '06. ทัวร์นาเมนต์ & สายการแข่งขัน', icon: Users, color: '#dc2626', desc: 'อนุมัติทีมแข่ง, ควบคุมสายแข่ง, สกอร์สด' },
+  { id: 'arena-bookings', label: '07. คำขอจัดงานแข่ง Esport', icon: Trophy, color: '#d97706', desc: 'ติดต่อขอจัดงานแข่ง, เช่าเวที Main Stage, สปอนเซอร์' },
+  { id: 'articles', label: '08. กิจกรรม & บทความ (Articles)', icon: FileText, color: '#4f46e5', desc: 'กำหนด URL Slug, ลิงก์แยก, รูปภาพ' },
+  { id: 'ai-rag', label: '09. ระบบ AI แชท & คลังความรู้ RAG', icon: Bot, color: '#9333ea', desc: 'OpenRouter, Gemini Flash, เทรนข้อมูล' },
+  { id: 'seo-tools', label: '10. เครื่องมือ SEO & Marketing Tracking', icon: Search, color: '#ea580c', desc: 'Google Search, Bing, Meta Pixel, GTM, AI SEO' },
+  { id: 'sections', label: '11. เนื้อหาแต่ละ Section', icon: LayoutGrid, color: '#0d9488', desc: 'Hero, กิจกรรม, แกลเลอรี, ประวัติ' },
+  { id: 'partners', label: '12. โลโก้พันธมิตร (Partner Logos)', icon: Zap, color: '#f59e0b', desc: 'สไลเดอร์แบรนด์ โลโก้ & ชื่อสีดำ' },
+  { id: 'menu-footer', label: '13. เมนู Header & Footer', icon: LayoutGrid, color: '#64748b', desc: 'แถบประกาศ, เมนูนำทาง, ช่องทางติดต่อ' },
+  { id: 'automation', label: '14. ระบบ Automation & Webhooks', icon: Sliders, color: '#475569', desc: 'แจ้งเตือน Discord, Lead แฟรนไชส์, จัดการ SMTP' },
+  { id: 'email-templates', label: '15. แม่แบบอีเมลตอบกลับ (Email Templates)', icon: Mail, color: '#0284c7', desc: 'แก้ไขข้อความตอบกลับลูกค้า, ใบเสนอราคาอัตโนมัติ' },
+  { id: 'security', label: '16. ความปลอดภัย & จัดการแอดมิน', icon: ShieldCheck, color: '#be123c', desc: 'จัดการ Staff Roles, สิทธิ์เข้าถึง, รหัส Master' },
+  { id: 'contact-page', label: '17. ข้อมูลติดต่อ & แผนที่ร้าน', icon: MapPin, color: '#0ea5e9', desc: 'ข้อมูลร้าน, แผนที่ Google Maps, วิธีเดินทาง (เพิ่ม/ลบ), ไฮไลต์ (เพิ่ม/ลบ), และข้อความติดต่อ' }
 ];
 
 // Preset Roles for Fast Selection

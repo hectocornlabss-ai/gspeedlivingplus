@@ -1,5 +1,4 @@
-// routesConfig.js - Centralized Route, Category & Pre-crafted SEO Descriptions Registry
-// รวมศูนย์เส้นทาง Clean Path, หมวดหมู่, และคำอธิบาย SEO สำเร็จรูปสำหรับทุกหน้าและทัวร์นาเมนต์
+import { EQUIPMENT_PRODUCTS } from './equipmentProducts';
 
 export const SITE_BASE_URL = 'https://gspeedesport.com';
 
@@ -53,20 +52,20 @@ export const ROUTES_CONFIG = {
     ]
   },
 
-  // 4. แฟรนไชส์ & จำลองผังร้าน 3D (3D Studio & Franchise Planner)
+  // 4. สั่งซื้อสินค้า โต๊ะ เก้าอี้ และอุปกรณ์อื่นๆ
   franchise: {
     path: '/franchise',
-    aliasPaths: ['/planner', '/3d-studio'],
-    name: 'แฟรนไชส์ & แปลนร้าน 3D',
-    sectionTitle: 'ระบบจำลองผังร้าน 3D & วิเคราะห์ผลตอบแทนแฟรนไชส์อัจฉริยะ',
-    badge: '3D PLANNER & FRANCHISE',
-    metaTitle: 'ระบบจำลองผังร้าน 3D & วางระบบแฟรนไชส์ร้านเกม | GLP : G Speed Living Plus',
-    metaDesc: 'จำลองการจัดวางผังร้านเกมเสมือนจริงแบบ 3D Interactive เลือกสเปกคอมพิวเตอร์ โต๊ะ เก้าอี้ คำนวณงบลงทุน จุดคุ้มทุน และวางระบบ Diskless Server ครบวงจร คืนทุนไวใน 12-18 เดือน',
-    keywords: 'เปิดร้านเกม, แฟรนไชส์ร้านเกม, ออกแบบร้านเกม 3D, ลงทุนร้านเน็ต, งบเปิดร้านเกม, ระบบ Diskless, สเปกคอมร้านเกม, คืนทุนไว',
-    ogImage: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1200&q=80',
+    aliasPaths: ['/planner', '/3d-studio', '/shop', '/products', '/equipment'],
+    name: 'สั่งซื้อสินค้า & ขอใบเสนอราคา',
+    sectionTitle: 'โต๊ะ เก้าอี้เกมมิ่ง และอุปกรณ์อื่นๆ | Gspeed Living Plus',
+    badge: 'GSPEED STORE',
+    metaTitle: 'โต๊ะ เก้าอี้เกมมิ่ง และอุปกรณ์อื่นๆ | GLP : G Speed Living Plus',
+    metaDesc: 'เลือกซื้อโต๊ะเกมมิ่ง เก้าอี้ Ergonomic โต๊ะปรับระดับไฟฟ้า และอุปกรณ์จัดโต๊ะคอมพิวเตอร์ระดับโปร ออกใบเสนอราคา (Quotation) ด่วนใน 1 นาที และชำระเงินครบจบในที่เดียว',
+    keywords: 'โต๊ะเกมมิ่ง, เก้าอี้เกมมิ่ง, เก้าอี้ Ergonomic, โต๊ะปรับระดับไฟฟ้า, ขาจับจอ, อุปกรณ์จัดโต๊ะคอม, ใบเสนอราคา, Gspeed Living Plus',
+    ogImage: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
     breadcrumbs: [
       { label: 'หน้าหลัก', path: '/' },
-      { label: 'ระบบแฟรนไชส์ & แปลนร้าน 3D', path: '/franchise' }
+      { label: 'สั่งซื้อสินค้า', path: '/franchise' }
     ]
   },
 
@@ -118,6 +117,24 @@ export const ROUTES_CONFIG = {
     breadcrumbs: [
       { label: 'หน้าหลัก', path: '/' },
       { label: 'ผู้ดูแลระบบ', path: '/admin' }
+    ]
+  },
+
+  // 8. หน้าสั่งซื้อและชำระเงินแยกเดี่ยว (Dedicated Checkout & Payment Page)
+  checkout: {
+    path: '/checkout',
+    aliasPaths: ['/payment', '/order-checkout'],
+    name: 'สั่งซื้อและชำระเงิน',
+    sectionTitle: 'สั่งซื้อและชำระเงิน | Gspeed Living Plus',
+    badge: 'SECURE CHECKOUT',
+    metaTitle: 'สั่งซื้อและชำระเงิน | GLP : G Speed Living Plus',
+    metaDesc: 'ระบบสั่งซื้อและชำระเงินที่ปลอดภัย GLP Store รองรับ Thai QR พร้อมเพย์, โอนผ่านธนาคาร และบัตรเครดิต พร้อมบริการจัดส่งและติดตั้งทั่วประเทศ',
+    keywords: 'ชำระเงินร้านเกม, สั่งซื้อโต๊ะเก้าอี้, จ่ายเงิน GLP, PromptPay QR, บัตรเครดิต',
+    ogImage: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
+    breadcrumbs: [
+      { label: 'หน้าหลัก', path: '/' },
+      { label: 'สั่งซื้อสินค้า', path: '/franchise' },
+      { label: 'ชำระเงิน', path: '/checkout' }
     ]
   }
 };
@@ -213,11 +230,62 @@ export function getRouteMetadata(pathname = '/', extraData = {}) {
     }
   }
 
-  // 3. Static Routes
+  // 3. Product Single Route: (/products/:id หรือ /shop/:id หรือ /equipment/:id)
+  const productMatch = cleanPath.match(/^\/(?:products|product|equipment|shop)\/([^/?#]+)/i);
+  if (productMatch) {
+    const pId = decodeURIComponent(productMatch[1]);
+    const prod = EQUIPMENT_PRODUCTS.find(p => p.id === pId || p.sku.toLowerCase() === pId.toLowerCase());
+    if (prod) {
+      return {
+        type: 'product_single',
+        path: `/products/${prod.id}`,
+        canonical: `${SITE_BASE_URL}/products/${prod.id}`,
+        name: prod.name,
+        badge: 'GSPEED STORE • PRODUCT',
+        metaTitle: `${prod.name} | โต๊ะ เก้าอี้เกมมิ่ง และอุปกรณ์อื่นๆ | GLP : G Speed Living Plus`,
+        metaDesc: `${prod.subtitle || prod.name} ราคา ฿${prod.price.toLocaleString()}.- สั่งซื้อหรือขอใบเสนอราคาด่วนทันที`,
+        keywords: `${prod.name}, โต๊ะเกมมิ่ง, เก้าอี้เกมมิ่ง, GLP, G Speed Living Plus`,
+        ogImage: prod.image,
+        breadcrumbs: [
+          { label: 'หน้าหลัก', path: '/' },
+          { label: 'โต๊ะ เก้าอี้เกมมิ่ง และอุปกรณ์อื่นๆ', path: '/franchise' },
+          { label: prod.name, path: `/products/${prod.id}` }
+        ],
+        itemData: prod
+      };
+    }
+  }
+
+  // 4. Order Tracking Single Route: (/orders/:orderNo หรือ /order/:orderNo หรือ /track/:orderNo)
+  const orderMatch = cleanPath.match(/^\/(?:orders|order|track)\/([^/?#]+)/i);
+  if (orderMatch) {
+    const oNo = decodeURIComponent(orderMatch[1]);
+    return {
+      type: 'order_tracking',
+      orderNo: oNo,
+      path: `/orders/${oNo}`,
+      canonical: `${SITE_BASE_URL}/orders/${oNo}`,
+      name: `ติดตามคำสั่งซื้อ ${oNo}`,
+      badge: 'GLP STORE • ORDER TRACKING',
+      metaTitle: `ติดตามคำสั่งซื้อ #${oNo} | GLP : G Speed Living Plus`,
+      metaDesc: `ตรวจสอบสถานะพัสดุ สลิปการชำระเงิน และใบแจ้งหนี้สำหรับคำสั่งซื้อ #${oNo}`,
+      keywords: `คำสั่งซื้อ ${oNo}, ตรวจสอบสถานะพัสดุ, GLP Store, Gspeed Living Plus`,
+      breadcrumbs: [
+        { label: 'หน้าหลัก', path: '/' },
+        { label: 'คำสั่งซื้อ', path: '/checkout' },
+        { label: oNo, path: `/orders/${oNo}` }
+      ]
+    };
+  }
+
+  // 5. Static Routes
   if (cleanPath === '/admin' || cleanPath.startsWith('/admin/')) {
     return { ...ROUTES_CONFIG.admin, type: 'admin', canonical: `${SITE_BASE_URL}/admin` };
   }
-  if (cleanPath === '/franchise' || cleanPath === '/planner' || cleanPath === '/3d-studio') {
+  if (cleanPath === '/checkout' || cleanPath === '/payment' || cleanPath === '/order-checkout') {
+    return { ...ROUTES_CONFIG.checkout, type: 'checkout', canonical: `${SITE_BASE_URL}/checkout` };
+  }
+  if (cleanPath === '/franchise' || cleanPath === '/planner' || cleanPath === '/3d-studio' || cleanPath === '/shop' || cleanPath === '/products' || cleanPath === '/equipment') {
     return { ...ROUTES_CONFIG.franchise, type: 'franchise', canonical: `${SITE_BASE_URL}/franchise` };
   }
   if (cleanPath === '/company' || cleanPath === '/about' || cleanPath === '/about-us') {

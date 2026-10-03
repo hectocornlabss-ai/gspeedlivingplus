@@ -251,8 +251,8 @@ export default function CMSLivePreviewModal({
                         <span>{siteData?.hero?.btn3Text || 'ทัวร์นาเมนต์'}</span>
                       </button>
                       <button className="btn-secondary" style={{ padding: '12px 18px', fontSize: '0.86rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: isDarkHero ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.9)', color: isDarkHero ? '#fff' : '#1e293b', border: isDarkHero ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(203,213,225,0.9)' }}>
-                        <Compass size={16} />
-                        <span>{siteData?.hero?.btn4Text || siteData?.hero?.secondaryCta || 'ติดต่อเปิดร้านเกม'}</span>
+                        <ShoppingBag size={16} />
+                        <span>{(!siteData?.hero?.btn4Text || siteData?.hero?.btn4Text.includes('เปิดร้าน')) ? (siteData?.hero?.secondaryCta && !siteData?.hero?.secondaryCta.includes('เปิดร้าน') ? siteData?.hero?.secondaryCta : 'ร้านค้า') : siteData?.hero?.btn4Text}</span>
                       </button>
                     </div>
                   </div>

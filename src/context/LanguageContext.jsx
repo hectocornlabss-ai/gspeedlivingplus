@@ -13,8 +13,8 @@ export const translations = {
       activities: 'ภาพกิจกรรม',
       company: 'เกี่ยวกับเรา',
       contact: 'ติดต่อเรา',
-      franchise: 'แฟรนไชส์ 3D',
-      cta: 'สนใจเปิดร้าน',
+      franchise: 'สินค้าทั้งหมด',
+      cta: 'สั่งซื้อสินค้า',
       menu: 'เมนู',
       close: 'ปิด',
       admin: 'ระบบจัดการ CMS'
@@ -26,7 +26,7 @@ export const translations = {
       btn1: 'สนใจจัดงาน',
       btn2: 'ดูกิจกรรม',
       btn3: 'ทัวร์นาเมนต์',
-      btn4: 'ติดต่อเปิดร้านเกม',
+      btn4: 'ร้านค้า',
       metrics: [
         { number: '750+', label: 'Battle Stations ทั่วประเทศ' },
         { number: '360Hz', label: 'Fast-IPS & OLED Displays' },
@@ -111,11 +111,11 @@ export const translations = {
       }
     },
     chat: {
-      triggerSubtitle: 'G-SPEED ARENA',
-      triggerLabel: 'สอบถามข้อมูล / แชทกับเจ้าหน้าที่',
-      cardTitle: 'ศูนย์บริการข้อมูลลูกค้า • G-SPEED ARENA',
-      statusOnline: 'Online • สอบถามข้อมูล & บริการร้าน 24 ชม.',
-      inputPlaceholder: 'สอบถามเวลาทำการ, ที่ตั้งร้าน, จัดแข่ง, หรือติดตั้งระบบ...',
+      triggerSubtitle: 'G-SPEED STORE',
+      triggerLabel: 'สอบถามสเปกสินค้า / แชทกับเจ้าหน้าที่',
+      cardTitle: 'ฝ่ายบริการลูกค้า & ปรึกษาอุปกรณ์ • G-SPEED',
+      statusOnline: 'Online • สอบถามสเปกสินค้า & ใบเสนอราคา 24 ชม.',
+      inputPlaceholder: 'สอบถามสเปกโต๊ะ, เก้าอี้, ใบเสนอราคา, สั่งซื้อราคาส่ง B2B...',
       sendBtn: 'ส่งข้อความ'
     },
     tournamentsPage: {
@@ -1034,8 +1034,8 @@ export const translations = {
       activities: 'Activities',
       company: 'About Us',
       contact: 'Contact Us',
-      franchise: '3D Franchise',
-      cta: 'Franchise Inquiry',
+      franchise: 'Products',
+      cta: 'Shop Now',
       menu: 'Menu',
       close: 'Close',
       admin: 'Admin CMS'
@@ -1047,7 +1047,7 @@ export const translations = {
       btn1: 'Host Esports Event',
       btn2: 'View Activities',
       btn3: 'Tournaments',
-      btn4: 'Franchise Store Planner',
+      btn4: 'Equipment & Quotation',
       metrics: [
         { number: '750+', label: 'Battle Stations Nationwide' },
         { number: '360Hz', label: 'Fast-IPS & OLED Displays' },
@@ -1132,11 +1132,11 @@ export const translations = {
       }
     },
     chat: {
-      triggerSubtitle: 'G-SPEED ARENA',
-      triggerLabel: 'Customer Support / Live Chat',
-      cardTitle: 'Customer Concierge • G-SPEED ARENA',
-      statusOnline: 'Online • 24/7 Information & Assistance',
-      inputPlaceholder: 'Inquire about hours, location, tournament booking, or systems...',
+      triggerSubtitle: 'G-SPEED STORE',
+      triggerLabel: 'Product Inquiries / Live Chat',
+      cardTitle: 'Equipment & Product Concierge • G-SPEED',
+      statusOnline: 'Online • 24/7 Product Specs & Quotations',
+      inputPlaceholder: 'Ask about desks, chairs, quotations, B2B wholesale...',
       sendBtn: 'Send'
     },
     tournamentsPage: {
@@ -2055,8 +2055,8 @@ export const translations = {
       activities: '精彩活动',
       company: '关于我们',
       contact: '联系我们',
-      franchise: '3D加盟设计',
-      cta: '加盟咨询',
+      franchise: '商品中心',
+      cta: '选购商品',
       menu: '菜单',
       close: '关闭',
       admin: '管理后台'
@@ -2068,7 +2068,7 @@ export const translations = {
       btn1: '承办赛事活动',
       btn2: '精彩活动',
       btn3: '电竞赛事',
-      btn4: '加盟开店规划',
+      btn4: '选购设备 / 申请报价单',
       metrics: [
         { number: '750+', label: '全国电竞对战席位' },
         { number: '360Hz', label: 'Fast-IPS & OLED 电竞屏' },
@@ -2153,11 +2153,11 @@ export const translations = {
       }
     },
     chat: {
-      triggerSubtitle: 'G-SPEED ARENA',
-      triggerLabel: '客服咨询 / 在线聊天',
-      cardTitle: '客户服务中心 • G-SPEED ARENA',
-      statusOnline: '在线 • 24小时咨询与服务',
-      inputPlaceholder: '咨询营业时间、场馆地址、赛事承办或系统配置...',
+      triggerSubtitle: 'G-SPEED 装备专营',
+      triggerLabel: '产品咨询 / 在线客服',
+      cardTitle: '电竞装备与家具咨询 • G-SPEED',
+      statusOnline: '在线 • 24小时产品规格与报价咨询',
+      inputPlaceholder: '咨询电竞桌、人体工学椅、官方报价单或B2B批量采购...',
       sendBtn: '发送'
     },
     tournamentsPage: {

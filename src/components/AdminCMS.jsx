@@ -9,7 +9,7 @@ import {
   Palette, Image as ImageIcon, Flame, Coffee, Check, Copy, Clock, Share2,
   Box, Printer, Download, Camera, Upload, CheckSquare, Zap, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Server, Info, Ruler, Scale, Wrench, FileUp, Wand2,
   Users, Calendar, Award, Target, Gamepad2, X, List, Hash, HardDrive,
-  MessagesSquare, Receipt, Crown
+  MessagesSquare, Receipt, Crown, ShoppingBag
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 import { VENUE_ZONES, DEMO_TOURNAMENT_PHOTOS_50, EVENT_CATEGORIES, DEFAULT_ARTICLE_TAGS, DEFAULT_ORGANIZER_GAMES } from '../data/mockData';
@@ -28,6 +28,8 @@ import SeoMarketingCMS from './SeoMarketingCMS';
 import AdminStaffRolesCMS, { PERMISSION_TABS_LIST } from './AdminStaffRolesCMS';
 import AnnouncementTickerCMS from './AnnouncementTickerCMS';
 import ContactPageCMS from './ContactPageCMS';
+import StoreOrdersAndProductsCMS from './StoreOrdersAndProductsCMS';
+import { useCart } from '../context/CartContext';
 import { analyzeProductPhoto, parseSpecSheetText } from '../utils/aiSpecParser';
 import { sanitizeSafeUrl, isSafeExternalUrl } from '../utils/security';
 import { autoTranslateEntity, getAiTranslationStatus } from '../utils/autoTranslator';
@@ -671,6 +673,12 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
     deleteOrganizerGame
   } = useSiteData();
 
+  // Store Orders & Slips State from CartContext
+  const { savedOrders = [] } = useCart();
+  const pendingSlipsCount = (savedOrders || []).filter(o => 
+    o.status === 'verifying_payment' || (o.hasSlipUploaded && o.status !== 'payment_verified' && o.status !== 'delivered' && o.status !== 'shipping' && o.status !== 'preparing_items')
+  ).length;
+
   // Mail Server (SMTP) & Email Templates States
   const [isSmtpTesting, setIsSmtpTesting] = useState(false);
   const [smtpTestResult, setSmtpTestResult] = useState(null);
@@ -906,7 +914,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
   // Active Admin Sub-tab
   const [activeTab, setActiveTab] = useState(() => {
     const allTabOrder = [
-      'erp-analytics', 'omnichannel-leads', 'catalog', 'hardware-pricing',
+      'erp-analytics', 'omnichannel-leads', 'store-orders', 'catalog', 'hardware-pricing',
       'tourney-apps', 'arena-bookings', 'articles', 'ai-rag', 'seo-tools',
       'sections', 'partners', 'menu-footer', 'automation', 'email-templates', 'security', 'contact-page'
     ];
@@ -958,7 +966,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
   useEffect(() => {
     if (!hasTabPermission(activeTab)) {
       const allTabOrder = [
-        'erp-analytics', 'omnichannel-leads', 'catalog', 'hardware-pricing',
+        'erp-analytics', 'omnichannel-leads', 'store-orders', 'catalog', 'hardware-pricing',
         'tourney-apps', 'arena-bookings', 'articles', 'ai-rag', 'seo-tools',
         'sections', 'partners', 'menu-footer', 'automation', 'email-templates', 'security', 'contact-page'
       ];
@@ -2829,6 +2837,24 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
               </button>
             )}
 
+            {hasTabPermission('store-orders') && (
+              <button 
+                id="cms-tab-store-orders"
+                className={`admin-nav-item ${activeTab === 'store-orders' ? 'active' : ''}`}
+                onClick={() => handleSwitchTab('store-orders')}
+              >
+                <ShoppingBag size={18} />
+                <div>
+                  <strong>03. คำสั่งซื้อ & สินค้าในร้าน {pendingSlipsCount > 0 && (
+                    <span style={{ marginLeft: '6px', background: '#ef4444', color: '#fff', fontSize: '0.72rem', padding: '1px 6px', borderRadius: '10px' }}>
+                      {pendingSlipsCount}
+                    </span>
+                  )}</strong>
+                  <span>เช็กออเดอร์, ตรวจสลิปโอน, แก้ไขสินค้า & สต็อก</span>
+                </div>
+              </button>
+            )}
+
             {hasTabPermission('catalog') && (
               <button 
                 id="cms-tab-catalog"
@@ -2837,7 +2863,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
               >
                 <Monitor size={18} />
                 <div>
-                  <strong>03. อุปกรณ์ & แคตตาล็อก 3D</strong>
+                  <strong>04. อุปกรณ์ & แคตตาล็อก 3D</strong>
                   <span>โต๊ะ, เก้าอี้, เคาน์เตอร์, หลายเกรด</span>
                 </div>
               </button>
@@ -3064,6 +3090,13 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
               ========================================================================= */}
           {activeTab === 'seo-tools' && (
             <SeoMarketingCMS />
+          )}
+
+          {/* =========================================================================
+              TAB: STORE ORDERS & EQUIPMENT PRODUCTS (คำสั่งซื้อ & จัดการสินค้าในร้าน)
+              ========================================================================= */}
+          {activeTab === 'store-orders' && (
+            <StoreOrdersAndProductsCMS />
           )}
 
           {/* =========================================================================
@@ -6640,7 +6673,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                           <label style={{ fontSize: '0.86rem', fontWeight: 700, color: '#1e293b', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', borderRadius: '50%', background: '#475569', color: '#fff', fontSize: '0.72rem', fontWeight: 800 }}>4</span>
-                            ปุ่มที่ 4 (ติดต่อเปิดร้านเกมแฟรนไชส์)
+                            ปุ่มที่ 4 (ร้านค้า / สินค้าของเรา)
                           </label>
                           <span style={{ fontSize: '0.72rem', color: '#475569', background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>ปุ่มรองสไตล์กลาส</span>
                         </div>
@@ -6648,8 +6681,8 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                           <label style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 600, marginBottom: '4px', display: 'block' }}>ข้อความบนปุ่ม:</label>
                           <input 
                             type="text" className="form-input"
-                            placeholder="ติดต่อเปิดร้านเกมของคุณ"
-                            value={siteData.hero?.btn4Text !== undefined ? siteData.hero.btn4Text : (siteData.hero?.secondaryCta || 'ติดต่อเปิดร้านเกมของคุณ')}
+                            placeholder="ร้านค้า"
+                            value={siteData.hero?.btn4Text !== undefined ? siteData.hero.btn4Text : (siteData.hero?.secondaryCta || 'ร้านค้า')}
                             onChange={e => updateHero({ btn4Text: e.target.value, secondaryCta: e.target.value })}
                           />
                         </div>

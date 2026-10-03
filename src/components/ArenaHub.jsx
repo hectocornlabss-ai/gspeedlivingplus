@@ -4,14 +4,16 @@ import {
   ArrowRight, Compass, Layers, Calculator, CheckCircle2, ChevronRight, Play, Check, Flame, X, Send,
   Search, PhoneCall, Image as ImageIcon, Newspaper, ExternalLink, Filter,
   Gamepad2, Gift, LayoutGrid, Award, Camera, Sparkles, Target, ChevronLeft, Maximize2, Crown, MapPin, Eye, Clock, Globe, Plus,
-  Share2, Copy, Link as LinkIcon
+  Share2, Copy, Link as LinkIcon, ShoppingBag, Star, ShoppingCart
 } from 'lucide-react';
 import { 
   VENUE_ZONES, TOURNAMENTS, GALLERY_ACTIVITIES, 
   EVENT_CATEGORIES, GAME_NEWS 
 } from '../data/mockData';
+import { EQUIPMENT_PRODUCTS } from '../data/equipmentProducts';
 import { useSiteData } from '../context/SiteDataContext';
 import { useTranslation } from '../context/LanguageContext';
+import { useCart } from '../context/CartContext';
 import EsportOrganizerModal from './EsportOrganizerModal';
 import ArenaSeatBookingModal from './ArenaSeatBookingModal';
 import { compareTournaments, isTournamentRegistrationOpen } from '../utils/tournamentUtils';
@@ -52,7 +54,14 @@ export default function ArenaHub({
 }) {
   const { siteData, updateTournament } = useSiteData();
   const { t, language, translateDynamic } = useTranslation();
+  const { addToCart, setIsCartOpen } = useCart();
   const isThai = language === 'th';
+
+  const handleViewProduct = (productId) => {
+    window.history.pushState(null, '', `/products/${productId}`);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const rawHeroData = siteData?.hero || {};
   const heroData = {
@@ -63,7 +72,9 @@ export default function ArenaHub({
     btn1Text: isThai ? (rawHeroData.btn1Text || 'สนใจจัดงาน') : t('hero.btn1'),
     btn2Text: isThai ? (rawHeroData.btn2Text || 'ดูกิจกรรม') : t('hero.btn2'),
     btn3Text: isThai ? (rawHeroData.btn3Text || 'ทัวร์นาเมนต์') : t('hero.btn3'),
-    btn4Text: isThai ? (rawHeroData.btn4Text || 'ติดต่อเปิดร้านเกม') : t('hero.btn4'),
+    btn4Text: isThai 
+      ? ((rawHeroData.btn4Text && !rawHeroData.btn4Text.includes('เปิดร้าน') && !rawHeroData.btn4Text.includes('ติดต่อ')) ? rawHeroData.btn4Text : 'ร้านค้า') 
+      : (t('hero.btn4') && !t('hero.btn4').includes('เปิดร้าน') ? t('hero.btn4') : 'ร้านค้า'),
     metrics: !isThai
       ? (language === 'zh'
           ? [
@@ -598,8 +609,8 @@ export default function ArenaHub({
                       color: '#1e293b'
                     }}
                   >
-                    <Compass size={18} />
-                    <span>{language === 'th' ? (heroData.btn4Text || t('hero.btn4')) : t('hero.btn4')}</span>
+                    <ShoppingBag size={18} className="text-blue" />
+                    <span>{language === 'th' ? ((heroData.btn4Text && !heroData.btn4Text.includes('เปิดร้าน') && !heroData.btn4Text.includes('ติดต่อ')) ? heroData.btn4Text : 'ร้านค้า') : (t('hero.btn4') || 'ร้านค้า')}</span>
                   </button>
                 </div>
 
@@ -1275,53 +1286,121 @@ export default function ArenaHub({
         );
       })()}
 
-      {/* 7. FRANCHISE CTA SECTION */}
-      {(() => {
-        const fBg = siteData?.franchiseBanner?.bgColor || '#1e3a8a';
-        const fImg = siteData?.franchiseBanner?.bgImage;
-        const isDarkF = isColorDark(fBg);
-        const cardBg = fImg
-          ? `linear-gradient(180deg, ${hexToRgba(fBg, 0.70)} 0%, ${hexToRgba(fBg, 0.92)} 100%), url(${fImg}) center/cover no-repeat`
-          : fBg;
+      {/* 7. OUR PRODUCTS SHOWCASE SECTION (สินค้าของเรา 6 รายการ) */}
+      <section className="home-products-showcase-section" id="home-products-section">
+        <div className="container">
+          <div className="section-header" style={{ textAlign: 'center', marginBottom: '38px' }}>
+            <div className="badge-pill badge-blue" style={{ margin: '0 auto 12px auto' }}>
+              <ShoppingBag size={14} />
+              <span>{isThai ? 'GSPEED EQUIPMENT STORE • อุปกรณ์มาตรฐานอีสปอร์ต' : (language === 'zh' ? 'GSPEED 官方商城' : 'GSPEED OFFICIAL STORE')}</span>
+            </div>
+            <h2 className="section-title" style={{ fontSize: '2.1rem', fontWeight: 900, color: '#0f172a', marginBottom: '10px' }}>
+              {isThai ? 'สินค้าของเรา' : (language === 'zh' ? '我们的商品' : 'Our Products')}
+            </h2>
+            <p className="section-subtitle" style={{ maxWidth: '640px', margin: '0 auto', color: '#64748b', fontSize: '15px' }}>
+              {isThai 
+                ? 'โต๊ะเกมมิ่งโครงเหล็กคาร์บอน เก้าอี้ Ergonomic และอุปกรณ์จัดโต๊ะคอมพิวเตอร์ระดับโปร มาตรฐานสนามแข่งอีสปอร์ต สั่งซื้อได้ทันที พร้อมออกใบเสนอราคาทางการ' 
+                : (language === 'zh' 
+                    ? '专业电竞对战桌椅、人体工学椅与电竞外设硬件，官方原厂质保，现货直发' 
+                    : 'Esports-grade battle desks, ergonomic chairs, and professional equipment. Order online with instant official quotation.')}
+            </p>
+          </div>
 
-        return (
-          <section className="franchise-callout-section">
-            <div className="container">
-              <div 
-                className="franchise-cta-card"
-                style={{ 
-                  background: cardBg,
-                  backgroundColor: fBg,
-                  backgroundImage: fImg ? undefined : 'none'
-                }}
-              >
-                <div className="cta-content">
-                  <div className="badge-pill badge-blue">
-                    <Layers size={14} />
-                    <span>{translateDynamic(siteData?.franchiseBanner?.badge || 'G-SPEED FRANCHISE & INTERIOR PLANNER')}</span>
+          <div className="home-products-grid">
+            {(siteData?.equipmentProducts || EQUIPMENT_PRODUCTS).slice(0, 6).map((prod) => {
+              const categoryName = prod.category === 'desks' ? (isThai ? 'โต๊ะเกมมิ่ง' : 'Desks')
+                : prod.category === 'chairs' ? (isThai ? 'เก้าอี้ Ergonomic' : 'Chairs')
+                : prod.category === 'accessories' ? (isThai ? 'อุปกรณ์เสริม' : 'Accessories')
+                : (isThai ? 'เซ็ตสุดคุ้ม' : 'Bundle');
+
+              return (
+                <div 
+                  key={prod.id} 
+                  className="home-product-card"
+                  onClick={() => handleViewProduct(prod.id)}
+                >
+                  <div className="home-product-image-wrap">
+                    <img 
+                      src={prod.image} 
+                      alt={prod.name} 
+                      className="home-product-thumb" 
+                      loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = 'https://images.unsplash.com/photo-1598550476439-6847785fcea6?auto=format&fit=crop&w=800&q=80';
+                      }}
+                    />
+                    {prod.badge && (
+                      <span className={`home-product-badge ${prod.badgeType || ''}`}>
+                        {prod.badge}
+                      </span>
+                    )}
                   </div>
-                  <h2 className="cta-heading" style={{ color: siteData?.franchiseBanner?.headingColor || siteData?.franchiseBanner?.titleColor || (isDarkF ? '#ffffff' : '#0f172a') }}>
-                    {isThai ? (siteData?.franchiseBanner?.heading || 'อยากมีร้านเกมอีสปอร์ตสเปกเทพเป็นของตัวเอง?') : (siteData?.franchiseBanner?.heading_en || translateDynamic(siteData?.franchiseBanner?.heading || 'อยากมีร้านเกมอีสปอร์ตสเปกเทพเป็นของตัวเอง?'))}
-                  </h2>
-                  <p className="cta-desc" style={{ color: siteData?.franchiseBanner?.descColor || siteData?.franchiseBanner?.textColor || (isDarkF ? '#bfdbfe' : '#475569') }}>
-                    {isThai ? (siteData?.franchiseBanner?.desc || 'เพียงแค่คุณมีพื้นที่หรืออาคาร เรามีระบบ Interior Floor Plan Configurator ช่วยจำลองผังร้าน 2D สเกลจริง จัดวางโต๊ะคอมพิวเตอร์ เวทีแข่งขัน เคาน์เตอร์ และคำนวณต้นทุน สเปกอุปกรณ์ ระยะเวลาคืนทุน (ROI) และเวลาติดตั้งให้ทันที!') : (siteData?.franchiseBanner?.desc_en || translateDynamic(siteData?.franchiseBanner?.desc || 'เพียงแค่คุณมีพื้นที่หรืออาคาร เรามีระบบ Interior Floor Plan Configurator ช่วยจำลองผังร้าน 2D สเกลจริง จัดวางโต๊ะคอมพิวเตอร์ เวทีแข่งขัน เคาน์เตอร์ และคำนวณต้นทุน สเปกอุปกรณ์ ระยะเวลาคืนทุน (ROI) และเวลาติดตั้งให้ทันที!'))}
-                  </p>
-                  <div className="cta-buttons">
-                    <button 
-                      id="btn-hero-interior-start"
-                      onClick={onNavigateFranchise} 
-                      className="btn-primary cta-btn-large"
-                    >
-                      <span>{isThai ? (siteData?.franchiseBanner?.buttonText && siteData?.franchiseBanner?.buttonText !== 'เริ่มออกแบบผังร้าน & ประเมินงบประมาณทันที' ? siteData.franchiseBanner.buttonText : 'วางผังร้านและประเมินราคา') : (language === 'zh' ? '设计3D门店与预算评估' : '3D Store Planner & Price Quote')}</span>
-                      <ArrowRight size={18} />
-                    </button>
+
+                  <div className="home-product-content">
+                    <div className="home-product-cat-row">
+                      <span className="home-product-cat-tag">{categoryName}</span>
+                      <div className="home-product-rating">
+                        <Star size={13} fill="#eab308" color="#eab308" />
+                        <span>{prod.rating}</span>
+                        <span className="rating-count">({prod.reviewsCount})</span>
+                      </div>
+                    </div>
+
+                    <h3 className="home-product-name">{prod.name}</h3>
+                    <p className="home-product-sub">{prod.subtitle}</p>
+
+                    <div className="home-product-footer-row">
+                      <div className="home-product-price-box">
+                        <span className="home-product-price">฿{prod.price?.toLocaleString()}</span>
+                        {prod.originalPrice && (
+                          <span className="home-product-orig-price">฿{prod.originalPrice.toLocaleString()}</span>
+                        )}
+                      </div>
+
+                      <div className="home-product-card-actions">
+                        <button 
+                          className="btn-home-quick-cart"
+                          title={isThai ? 'เพิ่มลงตะกร้า' : 'Add to cart'}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            addToCart(prod, {}, 1);
+                            setIsCartOpen(true);
+                          }}
+                        >
+                          <ShoppingCart size={16} />
+                        </button>
+                        <button 
+                          className="btn-home-buy-prod"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewProduct(prod.id);
+                          }}
+                        >
+                          <span>{isThai ? 'สั่งซื้อ' : 'Buy'}</span>
+                          <ArrowRight size={14} />
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </section>
-        );
-      })()}
+              );
+            })}
+          </div>
+
+          <div className="home-products-footer-action">
+            <button 
+              id="btn-home-view-all-products"
+              onClick={onNavigateFranchise} 
+              className="btn-primary cta-btn-large"
+            >
+              <ShoppingBag size={18} />
+              <span>{isThai ? 'ดูสินค้าทั้งหมด' : (language === 'zh' ? '查看全部商品' : 'View All Products')}</span>
+              <ArrowRight size={18} />
+            </button>
+          </div>
+        </div>
+      </section>
 
       {/* MODAL: GALLERY ITEM DETAIL (LIGHTBOX) */}
       {selectedGalleryItem && (

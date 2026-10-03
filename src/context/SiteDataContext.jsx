@@ -14,6 +14,7 @@ import {
   INTERIOR_THEMES as INITIAL_INTERIOR_THEMES,
   DEFAULT_ORGANIZER_GAMES
 } from '../data/mockData';
+import { EQUIPMENT_PRODUCTS } from '../data/equipmentProducts';
 
 // Initial Store RAG Knowledge Base Chunks
 export const INITIAL_RAG_KNOWLEDGE = [
@@ -726,6 +727,7 @@ export const INITIAL_CONTACT_PAGE = {
 };
 
 export const DEFAULT_SITE_DATA = {
+  equipmentProducts: EQUIPMENT_PRODUCTS,
   seoMarketingConfig: INITIAL_SEO_MARKETING_CONFIG,
   adminStaffList: INITIAL_ADMIN_STAFF_LIST,
   arenaSeatingZones: ARENA_SEATING_ZONES,
@@ -764,7 +766,7 @@ export const DEFAULT_SITE_DATA = {
     subtitle: 'สัมผัสประสบการณ์เกมมิ่งระดับเวิลด์คลาสด้วยเครื่องสเปกไฮเอนด์ RTX 40 Series จอ 360Hz และเวทีแข่งขันมาตรฐาน Pro Circuit พร้อมระบบคำนวณและจำลองผังร้านแฟรนไชส์อัจฉริยะ',
     primaryCta: 'สำรวจกิจกรรม & ทัวร์นาเมนต์',
     primaryCtaLink: '#activities',
-    secondaryCta: 'ติดต่อเปิดร้านเกมของคุณ',
+    secondaryCta: 'ร้านค้า',
     btn1Text: 'สนใจจัดงาน',
     btn1Link: '',
     btn1Target: '_self',
@@ -774,7 +776,7 @@ export const DEFAULT_SITE_DATA = {
     btn3Text: 'ทัวร์นาเมนต์',
     btn3Link: '/tournaments',
     btn3Target: '_self',
-    btn4Text: 'ติดต่อเปิดร้านเกมของคุณ',
+    btn4Text: 'ร้านค้า',
     btn4Link: '/franchise',
     btn4Target: '_self',
     bgColor: '#ffffff',
@@ -1261,8 +1263,11 @@ export function SiteDataProvider({ children }) {
 
         // Migrate legacy secondaryCta button text and ensure hero buttons defaults
         if (merged.hero && typeof merged.hero === 'object') {
-          if (!merged.hero.secondaryCta || merged.hero.secondaryCta.includes('จำลองผังร้าน')) {
-            merged.hero.secondaryCta = 'ติดต่อเปิดร้านเกมของคุณ';
+          if (!merged.hero.secondaryCta || merged.hero.secondaryCta.includes('จำลองผังร้าน') || merged.hero.secondaryCta.includes('ติดต่อเปิดร้าน') || merged.hero.secondaryCta.includes('เปิดร้าน')) {
+            merged.hero.secondaryCta = 'ร้านค้า';
+          }
+          if (!merged.hero.btn4Text || merged.hero.btn4Text.includes('ติดต่อเปิดร้าน') || merged.hero.btn4Text.includes('จำลองผังร้าน') || merged.hero.btn4Text.includes('เปิดร้าน')) {
+            merged.hero.btn4Text = 'ร้านค้า';
           }
           if (merged.hero.btn1Target === undefined) merged.hero.btn1Target = '_self';
           if (merged.hero.btn2Target === undefined) merged.hero.btn2Target = '_self';
@@ -1551,6 +1556,21 @@ export function SiteDataProvider({ children }) {
         }
         if (!Array.isArray(merged.arenaSeatingZones)) {
           merged.arenaSeatingZones = ARENA_SEATING_ZONES;
+        }
+
+        if (!Array.isArray(merged.equipmentProducts) || merged.equipmentProducts.length === 0) {
+          merged.equipmentProducts = EQUIPMENT_PRODUCTS;
+        } else {
+          merged.equipmentProducts = merged.equipmentProducts.map(p => {
+            if (p.id === 'prod-desk-02') {
+              const defaultDesk2 = EQUIPMENT_PRODUCTS.find(x => x.id === 'prod-desk-02');
+              return {
+                ...p,
+                gallery: defaultDesk2 ? defaultDesk2.gallery : [p.image]
+              };
+            }
+            return p;
+          });
         }
 
         // Preserve saved gallery items as-is
@@ -3643,6 +3663,57 @@ export function SiteDataProvider({ children }) {
     }));
   };
 
+  // Equipment Products Management Functions
+  const updateEquipmentProduct = (productId, updates) => {
+    setSiteData(prev => {
+      const currentList = Array.isArray(prev.equipmentProducts) ? prev.equipmentProducts : EQUIPMENT_PRODUCTS;
+      const nextList = currentList.map(p => p.id === productId ? { ...p, ...updates } : p);
+      const nextData = {
+        ...prev,
+        equipmentProducts: nextList
+      };
+      saveSiteData(nextData);
+      return nextData;
+    });
+  };
+
+  const addEquipmentProduct = (newProduct) => {
+    setSiteData(prev => {
+      const currentList = Array.isArray(prev.equipmentProducts) ? prev.equipmentProducts : EQUIPMENT_PRODUCTS;
+      const nextList = [newProduct, ...currentList];
+      const nextData = {
+        ...prev,
+        equipmentProducts: nextList
+      };
+      saveSiteData(nextData);
+      return nextData;
+    });
+  };
+
+  const deleteEquipmentProduct = (productId) => {
+    setSiteData(prev => {
+      const currentList = Array.isArray(prev.equipmentProducts) ? prev.equipmentProducts : EQUIPMENT_PRODUCTS;
+      const nextList = currentList.filter(p => p.id !== productId);
+      const nextData = {
+        ...prev,
+        equipmentProducts: nextList
+      };
+      saveSiteData(nextData);
+      return nextData;
+    });
+  };
+
+  const resetEquipmentProducts = () => {
+    setSiteData(prev => {
+      const nextData = {
+        ...prev,
+        equipmentProducts: EQUIPMENT_PRODUCTS
+      };
+      saveSiteData(nextData);
+      return nextData;
+    });
+  };
+
   const value = {
     siteData,
     setSiteData,
@@ -3762,7 +3833,11 @@ export function SiteDataProvider({ children }) {
     saveSiteData,
     syncWithServerDatabase,
     serverSyncStatus,
-    resetToDefaults
+    resetToDefaults,
+    updateEquipmentProduct,
+    addEquipmentProduct,
+    deleteEquipmentProduct,
+    resetEquipmentProducts
   };
 
   return (
