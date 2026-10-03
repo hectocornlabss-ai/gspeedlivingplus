@@ -1,5 +1,5 @@
-import React from 'react';
-import { ShieldCheck, MapPin, Phone, Mail, Award, Clock, Navigation } from 'lucide-react';
+import React, { useState } from 'react';
+import { ShieldCheck, MapPin, Phone, Mail, Award, Clock, Navigation, PackageCheck, Search } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 import { useTranslation } from '../context/LanguageContext';
 import { translateDynamic } from '../utils/autoTranslator';
@@ -7,6 +7,7 @@ import { translateDynamic } from '../utils/autoTranslator';
 export default function Footer({ setActiveTab, onNavigate }) {
   const { siteData } = useSiteData();
   const { t, language } = useTranslation();
+  const [footerTrackInput, setFooterTrackInput] = useState('');
   const footer = siteData?.footer || {
     companyName: 'GLP : G Speed Living Plus',
     description: 'ศูนย์กีฬาอีสปอร์ตและร้านอินเทอร์เน็ตคาเฟ่มาตรฐานสากล บริหารงานโดย GLP Living Plus Group พร้อมระบบโซลูชันแฟรนไชส์อัจฉริยะสำหรับผู้ประกอบการรุ่นใหม่',
@@ -41,6 +42,13 @@ export default function Footer({ setActiveTab, onNavigate }) {
     }
   };
 
+  const handleTrackSubmit = (e) => {
+    e.preventDefault();
+    if (!footerTrackInput.trim()) return;
+    const clean = footerTrackInput.trim();
+    handleLink(`/checkout?order=${encodeURIComponent(clean)}`);
+  };
+
   // Sanitize double copyright symbol
   const rawCopyright = footer.copyright || `${new Date().getFullYear()} GLP : G Speed Living Plus. All Rights Reserved.`;
   const cleanCopyright = rawCopyright.replace(/^©\s*/, '');
@@ -62,6 +70,43 @@ export default function Footer({ setActiveTab, onNavigate }) {
   return (
     <footer className="footer-wrapper">
       <div className="container">
+        {/* Prominent Order Tracking Strip in Footer */}
+        <div className="footer-order-track-strip">
+          <div className="footer-track-meta">
+            <div className="footer-track-icon-box">
+              <PackageCheck size={24} />
+            </div>
+            <div className="footer-track-texts">
+              <div className="footer-track-title-row">
+                <h4>{language === 'th' ? 'ติดตามสถานะคำสั่งซื้อ' : language === 'zh' ? '订单实时追踪' : 'Track Order Status'}</h4>
+                <span className="footer-guest-pill">
+                  {language === 'th' ? '✨ สมาชิก: ไม่จำเป็นต้องสมัครสมาชิก' : language === 'zh' ? '无需注册会员' : 'No Membership Required'}
+                </span>
+              </div>
+              <p>
+                {language === 'th' 
+                  ? 'ตรวจสอบสถานะการจัดส่งและดูใบสั่งซื้อได้ตลอด 24 ชั่วโมง เพียงระบุหมายเลขคำสั่งซื้อ (เช่น GS-ORD-...) หรือเบอร์โทรศัพท์ที่สั่งซื้อ'
+                  : language === 'zh'
+                  ? '全天24小时实时查询包裹物流与打印订单，仅需输入订单号 (如 GS-ORD-...) 或联系电话即可查询。'
+                  : 'Track delivery status or view your order 24/7. Just enter your Order No. or phone number.'}
+              </p>
+            </div>
+          </div>
+          <form onSubmit={handleTrackSubmit} className="footer-track-form">
+            <input 
+              type="text" 
+              placeholder={language === 'th' ? 'เลขคำสั่งซื้อ หรือเบอร์โทร' : 'Order No. / Phone'}
+              value={footerTrackInput}
+              onChange={(e) => setFooterTrackInput(e.target.value)}
+              className="footer-track-input"
+            />
+            <button type="submit" className="footer-track-submit-btn">
+              <Search size={15} />
+              <span>{language === 'th' ? 'เช็คสถานะ' : language === 'zh' ? '立即查询' : 'Track'}</span>
+            </button>
+          </form>
+        </div>
+
         <div className="footer-grid">
           {/* Brand Info & Socials */}
           <div className="footer-col brand-col">
@@ -162,6 +207,11 @@ export default function Footer({ setActiveTab, onNavigate }) {
               <li>
                 <button onClick={() => handleLink('/company')}>
                   {t('nav.company')}
+                </button>
+              </li>
+              <li>
+                <button onClick={() => handleLink('/checkout?step=tracking')} style={{ color: '#38bdf8', fontWeight: 700 }}>
+                  📦 {language === 'th' ? 'ติดตามสถานะคำสั่งซื้อ' : language === 'zh' ? '查询订单状态' : 'Track Order Status'}
                 </button>
               </li>
               <li>

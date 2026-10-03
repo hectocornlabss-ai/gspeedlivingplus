@@ -5,7 +5,7 @@ import {
   Phone, Mail, MapPin, ArrowRight, Download, PackageCheck,
   Clock, AlertCircle, FileText, Trash2, Plus, Minus, ShoppingBag,
   Printer, Search, FileCheck, XCircle, RotateCcw, File, RefreshCw, CheckCheck,
-  ExternalLink, Lock, Shield, Sparkles, X
+  ExternalLink, Lock, Shield, Sparkles, X, Share2
 } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useCustomerAuth } from '../../context/CustomerAuthContext';
@@ -89,6 +89,7 @@ export default function CheckoutPage({
   const [phoneUnlockError, setPhoneUnlockError] = useState(null);
   const [isUnlockedByPhone, setIsUnlockedByPhone] = useState(false);
   const [copiedOrderUrl, setCopiedOrderUrl] = useState(false);
+  const [copiedOrderNum, setCopiedOrderNum] = useState(false);
 
   // QR Timer Countdown (15 minutes)
   const [qrCountdown, setQrCountdown] = useState(900);
@@ -845,8 +846,8 @@ export default function CheckoutPage({
             <div className="invoice-actions-strip" style={{ marginBottom: '16px' }}>
               <div className="invoice-actions-left">
                 <button className="btn-inv-print" onClick={() => window.print()}>
-                  <Printer size={16} />
-                  <span>พิมพ์ใบแจ้งหนี้ / บันทึก PDF (Print / Save PDF)</span>
+                  <Download size={16} />
+                  <span>ดาวน์โหลดใบสั่งซื้อ (PDF)</span>
                 </button>
               </div>
 
@@ -1014,8 +1015,8 @@ export default function CheckoutPage({
             {/* Bottom Proceed Action Button */}
             <div className="invoice-actions-strip">
               <button className="btn-inv-print" onClick={() => window.print()}>
-                <Printer size={16} />
-                <span>พิมพ์ใบแจ้งหนี้การค้า</span>
+                <Download size={16} />
+                <span>ดาวน์โหลดใบสั่งซื้อ (PDF)</span>
               </button>
 
               <button 
@@ -1364,11 +1365,25 @@ export default function CheckoutPage({
                 {/* Header */}
                 <div className="track-header-row">
                   <div className="track-order-ident">
-                    <h2>คำสั่งซื้อเลขที่: {activeOrder.orderNo}</h2>
+                    <h2>คำสั่งซื้อเลขที่: <span style={{ color: '#2563eb' }}>{activeOrder.orderNo}</span></h2>
                     <p>สั่งซื้อเมื่อ: {new Date(activeOrder.createdAt).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })} น.</p>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <div className="track-header-buttons" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <button 
+                      type="button" 
+                      className="btn-quick-copy-num"
+                      onClick={() => {
+                        navigator.clipboard?.writeText(activeOrder.orderNo);
+                        setCopiedOrderNum(true);
+                        setTimeout(() => setCopiedOrderNum(false), 2500);
+                      }}
+                      title="คัดลอกหมายเลขคำสั่งซื้อ"
+                    >
+                      <Copy size={14} />
+                      <span>{copiedOrderNum ? '✓ คัดลอกเลขแล้ว!' : 'คัดลอกเลขคำสั่งซื้อ'}</span>
+                    </button>
+
                     <button 
                       type="button"
                       className="btn-copy-order-url"
@@ -1379,15 +1394,26 @@ export default function CheckoutPage({
                         setTimeout(() => setCopiedOrderUrl(false), 2500);
                       }}
                     >
-                      <Copy size={14} />
-                      <span>{copiedOrderUrl ? '✓ คัดลอกลิงก์แล้ว' : 'คัดลอกลิงก์ตรวจสอบสถานะ'}</span>
+                      <Share2 size={14} />
+                      <span>{copiedOrderUrl ? '✓ คัดลอกลิงก์แล้ว' : 'แชร์ลิงก์เช็คสถานะ'}</span>
                     </button>
 
                     <button className="btn-inv-print" onClick={() => setCheckoutStep('invoice')}>
-                      <FileText size={15} />
-                      <span>ดูใบแจ้งหนี้ / พิมพ์</span>
+                      <Download size={15} />
+                      <span>ดาวน์โหลดใบสั่งซื้อ</span>
                     </button>
                   </div>
+                </div>
+
+                {/* Important Notice: Membership Optional / Order No is Crucial */}
+                <div className="guest-order-notice-box">
+                  <div className="guest-notice-badge">
+                    <ShieldCheck size={16} className="text-emerald" />
+                    <span>สมาชิก: <strong>ไม่จำเป็นต้องสมัครสมาชิก</strong></span>
+                  </div>
+                  <p className="guest-notice-desc">
+                    💡 <strong>สำคัญมาก:</strong> โปรดบันทึกหรือคัดลอก <strong>หมายเลขคำสั่งซื้อ ({activeOrder.orderNo})</strong> นี้ไว้ เพื่อใช้ตรวจสอบสถานะการจัดส่ง หรือแจ้งชำระเงินภายหลังได้ตลอด 24 ชม.
+                  </p>
                 </div>
 
                 {/* 5-STEP HORIZONTAL VISUAL TIMELINE */}
@@ -1769,19 +1795,24 @@ export default function CheckoutPage({
                 {/* Bottom Actions */}
                 <div className="success-actions-row" style={{ marginTop: '24px' }}>
                   <button 
-                    className="btn-print-receipt"
-                    onClick={() => setCheckoutStep('invoice')}
+                    type="button"
+                    className="btn-download-order-doc"
+                    onClick={() => {
+                      setCheckoutStep('invoice');
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
                   >
-                    <Printer size={16} />
-                    <span>พิมพ์ใบแจ้งหนี้ / ใบเสร็จรับเงิน (Print / PDF)</span>
+                    <Download size={18} />
+                    <span>ดาวน์โหลดใบสั่งซื้อ</span>
                   </button>
 
                   <button 
+                    type="button"
                     className="btn-continue-store-primary"
                     onClick={onNavigateStore}
                   >
-                    <span>เลือกซื้อสินค้าเพิ่มเติม</span>
-                    <ArrowRight size={16} />
+                    <ShoppingBag size={18} />
+                    <span>เลือกซื้อสินค้าอื่น</span>
                   </button>
                 </div>
               </div>

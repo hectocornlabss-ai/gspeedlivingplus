@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 import { useTranslation } from '../context/LanguageContext';
+import { useCart } from '../context/CartContext';
 
 // Clean Mini SVG Flag Components (Render crisp and vibrant on all OS)
 const ThaiFlag = () => (
@@ -566,9 +567,250 @@ const translateQueryToThai = (query, lang) => {
   return `ลูกค้าสอบถาม (${lang === 'en' ? 'ภาษาอังกฤษ' : 'ภาษาจีน'}): "${query}"`;
 };
 
+// Real-Time Order Tracking Resolver for AI Chat Widget
+const checkOrderStatusQuery = (query, lang = 'th', savedOrders = []) => {
+  if (!query) return null;
+  const q = query.trim().toLowerCase();
+
+  // 1. General tracking inquiry indicators
+  const isGeneralTrackingQuery = [
+    'ติดตามออเดอร์', 'เช็คสถานะ', 'ตามของ', 'พัสดุถึงไหน', 'ของถึงไหน', 'เช็คพัสดุ', 
+    'ตามสินค้า', 'ตามเลขคำสั่งซื้อ', 'เช็คเลขออเดอร์', 'ติดตามคำสั่งซื้อ', 'เช็คคำสั่งซื้อ',
+    'track order', 'order status', 'check order', 'where is my order', 'tracking',
+    '查订单', '订单状态', '物流查询', '包裹到哪了', '查件'
+  ].some(k => q.includes(k));
+
+  // 2. Extract potential Order Number (e.g. GS-ORD-20261003-5587 or 20261003-5587)
+  const orderRegex = /(GS-ORD-[0-9A-Za-z-]+|[0-9]{8,14}|[0-9]{4}-[0-9]{4})/i;
+  const matchOrder = query.match(orderRegex);
+  const candidateNumber = matchOrder ? matchOrder[0].toLowerCase().trim() : null;
+
+  // 3. Extract potential 10-digit Phone Number (e.g. 0812345678, 0909762587)
+  const phoneDigits = query.replace(/[^0-9]/g, '');
+  const candidatePhone = (phoneDigits.length === 10 && phoneDigits.startsWith('0')) ? phoneDigits : null;
+
+  // Look up in savedOrders
+  let found = null;
+  if (candidateNumber) {
+    found = savedOrders.find(o => 
+      o.orderNo?.toLowerCase() === candidateNumber ||
+      o.orderNo?.toLowerCase().includes(candidateNumber) ||
+      candidateNumber.includes(o.orderNo?.toLowerCase())
+    );
+  }
+  if (!found && candidatePhone) {
+    found = savedOrders.find(o => 
+      (o.shipping?.phone || '').replace(/[^0-9]/g, '') === candidatePhone
+    );
+  }
+  if (!found) {
+    found = savedOrders.find(o => 
+      (o.orderNo && q.includes(o.orderNo.toLowerCase())) ||
+      (o.shipping?.phone && q.includes(o.shipping.phone.replace(/[^0-9]/g, '')))
+    );
+  }
+
+  // Fallback to localStorage directly if needed
+  if (!found && typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem('gspeed_saved_orders_v2');
+      if (raw) {
+        const localList = JSON.parse(raw);
+        if (Array.isArray(localList)) {
+          if (candidateNumber) {
+            found = localList.find(o => 
+              o.orderNo?.toLowerCase() === candidateNumber ||
+              o.orderNo?.toLowerCase().includes(candidateNumber) ||
+              candidateNumber.includes(o.orderNo?.toLowerCase())
+            );
+          }
+          if (!found && candidatePhone) {
+            found = localList.find(o => 
+              (o.shipping?.phone || '').replace(/[^0-9]/g, '') === candidatePhone
+            );
+          }
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  const getStatusInfo = (status) => {
+    switch (status) {
+      case 'order_received':
+        return {
+          title: 'รับคำสั่งซื้อแล้ว (รอการชำระเงินหรือแนบสลิป)',
+          desc: 'ระบบบันทึกคำสั่งซื้อเรียบร้อยแล้ว กำลังรอการชำระเงินและแนบหลักฐาน',
+          step: '1/5'
+        };
+      case 'verifying_payment':
+        return {
+          title: 'กำลังตรวจสอบสลิปหลักฐานการชำระเงิน (รอการตรวจสอบ)',
+          desc: 'เจ้าหน้าที่ฝ่ายการเงินกำลังดำเนินการตรวจสอบยอดเงินในบัญชี (ใช้เวลาประมาณ 5 - 15 นาที)',
+          step: '2/5'
+        };
+      case 'payment_verified':
+        return {
+          title: 'ตรวจสอบยอดเงินเรียบร้อยแล้ว (Payment Verified)',
+          desc: 'ยอดเงินถูกต้อง ส่งต่อไปยังฝ่ายคลังสินค้าเพื่อจัดเตรียมอุปกรณ์แล้ว',
+          step: '2/5 (เสร็จสมบูรณ์)'
+        };
+      case 'payment_issue':
+        return {
+          title: 'แจ้งเตือน: พบปัญหาเรื่องสลิปหรือยอดเงินไม่ตรง',
+          desc: 'กรุณาตรวจสอบสลิปหลักฐาน หรืออัปโหลดใหม่อีกครั้งผ่านหน้าติดตามสถานะ',
+          step: 'ต้องแก้ไขสลิป'
+        };
+      case 'preparing_items':
+        return {
+          title: 'กำลังจัดเตรียมอุปกรณ์ & ตรวจสอบคุณภาพ (QC)',
+          desc: 'ฝ่ายคลังสินค้ากำลังจัดของ ประกอบ ตรวจสอบสภาพ และจองคิวรถขนส่ง',
+          step: '3/5'
+        };
+      case 'shipping':
+        return {
+          title: 'กำลังจัดส่งสินค้า (On Delivery)',
+          desc: 'สินค้าอยู่ระหว่างการจัดส่งไปยังที่อยู่ของท่าน ทีมช่างจะโทรนัดหมายล่วงหน้าก่อนเข้าส่ง',
+          step: '4/5'
+        };
+      case 'delivered':
+      case 'completed':
+        return {
+          title: 'จัดส่งและประกอบติดตั้งสำเร็จเรียบร้อย (Delivered)',
+          desc: 'ตรวจรับมอบงานเรียบร้อย ขอบพระคุณที่ไว้วางใจ Gspeed Living Plus!',
+          step: '5/5'
+        };
+      default:
+        return {
+          title: 'กำลังดำเนินการในระบบ',
+          desc: 'เจ้าหน้าที่กำลังดูแลคำสั่งซื้อของท่านอย่างใกล้ชิด',
+          step: '-'
+        };
+    }
+  };
+
+  // Case 1: Order Found
+  if (found) {
+    const st = getStatusInfo(found.status);
+    const dateStr = new Date(found.createdAt).toLocaleDateString('th-TH', { 
+      year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+    });
+    const itemsList = (found.items || []).map(i => `• **${i.name}** x${i.quantity || 1}`).join('\n');
+    const carrierInfo = found.trackingNo ? `\n🚚 **บริษัทขนส่ง:** ${found.carrier || 'KEX / Flash Express'} | **เลขพัสดุ:** \`${found.trackingNo}\`` : '';
+
+    if (lang === 'zh') {
+      return `📦 **查询到您的订单信息 - 订单号: ${found.orderNo}**
+
+👤 **收件人:** ${found.shipping?.receiverName || '-'} (电话: ${found.shipping?.phone || '-'})
+📅 **下单时间:** ${dateStr}
+💰 **订单实付:** ฿${(found.pricing?.grandTotal || 0).toLocaleString()}.- (${found.hasSlipUploaded ? '已上传付款凭证' : '待付款'})
+
+📍 **当前物流状态: ${st.title}**
+• **进度:** ขั้นตอน ${st.step}
+• **详情:** ${st.desc}${carrierInfo}
+
+🛍️ **所购商品清单:**
+${itemsList}
+
+👉 [**点击查看完整订单详情与电子发票**](/orders/${found.orderNo})
+💡 *(提示：不需要注册会员，保存此订单号随时可查)*`;
+    }
+
+    if (lang === 'en') {
+      return `📦 **Found Your Order: ${found.orderNo}**
+
+👤 **Customer:** ${found.shipping?.receiverName || '-'} (Phone: ${found.shipping?.phone || '-'})
+📅 **Order Date:** ${dateStr}
+💰 **Grand Total:** ฿${(found.pricing?.grandTotal || 0).toLocaleString()}.- (${found.hasSlipUploaded ? 'Slip Attached' : 'Awaiting Payment'})
+
+📍 **Current Status: ${st.title}**
+• **Progress:** Step ${st.step}
+• **Details:** ${st.desc}${carrierInfo}
+
+🛍️ **Items in Order:**
+${itemsList}
+
+👉 [**Click here to view Full Order Details & Invoice**](/orders/${found.orderNo})
+💡 *(Note: Membership is not required. Keep your Order No. to track anytime)*`;
+    }
+
+    return `📦 **พบข้อมูลคำสั่งซื้อเลขที่: ${found.orderNo}**
+
+👤 **ผู้สั่งซื้อ:** ${found.shipping?.receiverName || '-'} (เบอร์ติดต่อ: ${found.shipping?.phone || '-'})
+📅 **วันที่สั่งซื้อ:** ${dateStr} น.
+💰 **ยอดชำระสุทธิ:** ฿${(found.pricing?.grandTotal || 0).toLocaleString()} บาท (${found.hasSlipUploaded ? '✓ แนบสลิปเรียบร้อย' : 'รอการชำระเงิน'})
+
+📍 **สถานะปัจจุบัน: ${st.title}**
+• **ความคืบหน้า:** ขั้นตอนที่ ${st.step}
+• **รายละเอียด:** ${st.desc}${carrierInfo}
+
+🛍️ **รายการสินค้าในคำสั่งซื้อ:**
+${itemsList}
+
+👉 [**คลิกที่นี่เพื่อเปิดดูใบสั่งซื้อ / รายละเอียดเต็ม**](/orders/${found.orderNo})
+💡 *(หมายเหตุ: สมาชิกไม่จำเป็นต้องสมัครครับ มีเพียงเลขคำสั่งซื้อก็ติดตามสถานะได้ตลอด 24 ชม.)*`;
+  }
+
+  // Case 2: Mentioned Order Number or Phone that wasn't found
+  if (candidateNumber || candidatePhone) {
+    if (lang === 'zh') {
+      return `🔍 **系统中未查询到该订单号 (${candidateNumber || candidatePhone})**
+
+请确认您的订单编号是否正确（示例: **GS-ORD-20261003-5587**）或提供下单时填写的10位手机号。
+*(提示：无需注册会员即可查单)*
+
+📞 客服人工热线：[063 793 7704](tel:0637937704)`;
+    }
+    if (lang === 'en') {
+      return `🔍 **Order not found for "${candidateNumber || candidatePhone}"**
+
+Please check your Order Number format (e.g., **GS-ORD-20261003-5587**) or your 10-digit phone number.
+*(Note: No membership registration needed)*
+
+📞 Support hotline: [063 793 7704](tel:0637937704)`;
+    }
+    return `🔍 **ไม่พบข้อมูลคำสั่งซื้อที่ตรงกับ "${candidateNumber || candidatePhone}" ในระบบ**
+
+รบกวนตรวจสอบหมายเลขคำสั่งซื้ออีกครั้งครับ (ตัวอย่างเช่น **GS-ORD-20261003-5587**) หรือพิมพ์เบอร์โทรศัพท์ 10 หลักที่ใช้สั่งซื้อเข้ามาได้เลยครับ
+
+💡 *(สมาชิกไม่จำเป็นต้องสมัครครับ มีแค่เลขคำสั่งซื้อก็เช็คได้ตลอดเวลา)*
+📞 หรือสอบถามเจ้าหน้าที่โดยตรง โทร [063 793 7704](tel:0637937704) ได้ตลอดครับ`;
+  }
+
+  // Case 3: General tracking question without numbers
+  if (isGeneralTrackingQuery) {
+    if (lang === 'zh') {
+      return `📦 **订单与物流追踪服务 (Order Tracking):**
+
+您只需在聊天框直接输入您的 **订单号 (如 GS-ORD-20261003-5587)** 或 **下单电话号码**，机器人将立即为您查询实时物流进度！🚀
+
+💡 *(会员无需注册，凭订单号即可全天24小时查询)*
+👉 或 [**点击前往订单搜索页面**](/checkout?step=tracking)`;
+    }
+    if (lang === 'en') {
+      return `📦 **Order Tracking Service:**
+
+Simply type your **Order Number (e.g., GS-ORD-20261003-5587)** or **Phone Number** into this chat, and we will track your package status in real time! 🚀
+
+💡 *(No registration required. Track anytime with your Order No.)*
+👉 Or [**Click here to go to Order Search Page**](/checkout?step=tracking)`;
+    }
+    return `📦 **ระบบติดตามสถานะคำสั่งซื้อ (Order Tracking):**
+
+เพียงพิมพ์ **หมายเลขคำสั่งซื้อ (เช่น GS-ORD-20261003-5587)** หรือ **เบอร์โทรศัพท์** ที่ใช้สั่งซื้อเข้ามาในช่องแชทนี้ได้เลยครับ! ทางเราจะตรวจสอบและรายงานสถานะพัสดุให้ทันทีครับ 🚀
+
+💡 *(สมาชิกไม่จำเป็นต้องสมัครครับ มีแค่เลขคำสั่งซื้อก็ติดตามสถานะได้ตลอด 24 ชม.)*
+👉 หรือ [**คลิกที่นี่เพื่อไปหน้าค้นหาคำสั่งซื้อ**](/checkout?step=tracking)`;
+  }
+
+  return null;
+};
+
 export default function AIChatWidget() {
   const { siteData, addPendingQuestion } = useSiteData();
   const { t, language } = useTranslation();
+  const { savedOrders = [] } = useCart() || {};
 
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
@@ -625,6 +867,7 @@ export default function AIChatWidget() {
 
   // Quick Prompt Suggestions with Dynamic Language adaptation
   const quickPrompts = (language === 'en') ? [
+    { label: '📦 Track My Order', query: 'Track order status' },
     { label: '🪑 Ergonomic & Gaming Chairs', query: 'Recommend ergonomic chairs and gaming chairs' },
     { label: '🖥️ Battle Desks & Standing Desks', query: 'Specs for gaming desks and electric standing desks' },
     { label: '🏢 B2B Wholesale Discounts', query: 'B2B wholesale pricing and volume discount tiers' },
@@ -633,6 +876,7 @@ export default function AIChatWidget() {
     { label: '🛡️ 3-5 Year Warranty', query: 'Product warranty details and after-sales support' },
     { label: '💳 Payment & Deposit Plans', query: 'Payment methods and deposit options' }
   ] : (language === 'zh') ? [
+    { label: '📦 查询订单物流', query: '查询订单状态' },
     { label: '🪑 人体工学椅与电竞椅', query: '推荐热销电竞椅与人体工学网椅' },
     { label: '🖥️ 电竞桌与升降桌', query: '电竞桌与智能双电机升降桌规格及尺寸' },
     { label: '🏢 B2B 批发与批量采购', query: '网咖与企业大宗采购批发折扣方案' },
@@ -641,6 +885,7 @@ export default function AIChatWidget() {
     { label: '🛡️ 3-5年原厂质保', query: '产品质保几年？售后如何保障？' },
     { label: '💳 支付方式与定金方案', query: '付款方式与定金分期方案' }
   ] : [
+    { label: '📦 ติดตามเลขออเดอร์', query: 'ติดตามสถานะคำสั่งซื้อ' },
     { label: '🪑 เก้าอี้เกมมิ่ง & สุขภาพ', query: 'แนะนำเก้าอี้เกมมิ่งและเก้าอี้สุขภาพหน่อย' },
     { label: '🖥️ โต๊ะเกมมิ่ง & โต๊ะไฟฟ้า', query: 'สเปกโต๊ะเกมมิ่งและโต๊ะปรับระดับไฟฟ้า' },
     { label: '🏢 สั่งซื้อราคาส่ง B2B / ร้านเกม', query: 'สั่งซื้อจำนวนมากราคาส่ง B2B มีส่วนลดยังไง' },
@@ -805,6 +1050,20 @@ export default function AIChatWidget() {
 
     if (lang !== 'th' && thaiTranslation) {
       addPendingQuestion(query, thaiTranslation, lang);
+    }
+
+    // 0. Order Tracking Real-Time Resolver (Instant order lookup by Order No or Phone)
+    const orderTrackingAnswer = checkOrderStatusQuery(query, lang, savedOrders);
+    if (orderTrackingAnswer) {
+      setTimeout(() => {
+        setMessages(prev => [...prev, {
+          id: `ai-${Date.now()}`,
+          role: 'assistant',
+          text: orderTrackingAnswer
+        }]);
+        setIsLoading(false);
+      }, 350);
+      return;
     }
 
     // 1. First check if query matches Core Knowledge directly (instant high-accuracy matching in 3 languages)

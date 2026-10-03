@@ -7,6 +7,7 @@ import {
   Edit3, Save, ChevronDown, PackageCheck, AlertCircle, ShoppingBag
 } from 'lucide-react';
 import { ORDER_STATUS_CONFIG } from './StoreOrdersAndProductsCMS';
+import { buildOrderStatusEmailTemplate, dispatchOrderStatusEmail } from '../utils/orderEmailService';
 import './WooCommerceOrderEditor.css';
 
 export default function WooCommerceOrderEditor({
@@ -27,6 +28,8 @@ export default function WooCommerceOrderEditor({
   const [statusNote, setStatusNote] = useState(order.statusNote || '');
   const [shippingCarrier, setShippingCarrier] = useState(order.shippingCarrier || 'Kerry Express');
   const [trackingNumber, setTrackingNumber] = useState(order.trackingNumber || '');
+  const [isPreviewingEmail, setIsPreviewingEmail] = useState(false);
+  const [emailPreviewType, setEmailPreviewType] = useState(order.status === 'shipping' ? 'shipping' : order.status === 'delivered' ? 'delivered' : 'payment_verified');
   
   // Edit toggles for Billing & Shipping
   const [isEditingBilling, setIsEditingBilling] = useState(false);
@@ -242,25 +245,43 @@ https://gspeedarena.com/orders/${order.orderNo}
     showToast('คัดลอกข้อความสรุปสำหรับส่งใน LINE เรียบร้อยแล้ว');
   };
 
-  // Send Customer Email
-  const handleSendCustomerEmail = () => {
+  // Send Customer Email (Status-Aware with carrier & tracking links)
+  const handleSendCustomerEmail = async (overrideType) => {
     const targetEmail = email || order.shipping?.email;
     if (!targetEmail) {
       showToast('ไม่พบอีเมลของลูกค้า กรุณาระบุอีเมลก่อนดำเนินการส่ง');
       return;
     }
 
-    // Add note to order
-    const noteObj = {
-      id: `note-email-${Date.now()}`,
-      content: `ส่งอีเมลแจ้งยืนยันคำสั่งซื้อและใบเสร็จไปยังลูกค้า (${targetEmail}) เรียบร้อยแล้ว (ผ่าน Hostinger SMTP)`,
-      type: 'customer',
-      createdAt: new Date().toISOString(),
-      author: 'ระบบอีเมล (SMTP)'
-    };
-    setOrderNotes(prev => [noteObj, ...prev]);
+    const typeToSend = overrideType || (status === 'shipping' ? 'shipping' : status === 'delivered' ? 'delivered' : status === 'preparing_items' ? 'preparing_items' : 'payment_verified');
 
-    showToast(`ส่งอีเมลยืนยันคำสั่งซื้อไปยัง ${targetEmail} สำเร็จ!`);
+    try {
+      await dispatchOrderStatusEmail({
+        ...order,
+        items,
+        status,
+        shippingCarrier,
+        trackingNumber,
+        customerEmail: targetEmail,
+        shipping: { receiverName, phone, email: targetEmail, address, notes },
+        pricing: { grandTotal }
+      }, typeToSend, { carrier: shippingCarrier, trackingNo: trackingNumber });
+
+      const statusTitle = ORDER_STATUS_CONFIG[status]?.label || status;
+      const noteObj = {
+        id: `note-email-${Date.now()}`,
+        content: `ส่งอีเมลแจ้งสถานะ (${statusTitle}) ไปยังลูกค้า (${targetEmail}) เรียบร้อยแล้ว ${trackingNumber ? `[ขนส่ง: ${shippingCarrier} เลขพัสดุ: ${trackingNumber}]` : ''}`,
+        type: 'customer',
+        createdAt: new Date().toISOString(),
+        author: 'ระบบอีเมล (SMTP / Relay)'
+      };
+      setOrderNotes(prev => [noteObj, ...prev]);
+
+      showToast(`ส่งอีเมลแจ้งสถานะไปยัง ${targetEmail} สำเร็จเรียบร้อยแล้ว! 📧`);
+      setIsPreviewingEmail(false);
+    } catch (err) {
+      showToast('เกิดข้อผิดพลาดในการส่งอีเมล');
+    }
   };
 
   // Save All Changes (WooCommerce Update Button)
@@ -1027,10 +1048,10 @@ https://gspeedarena.com/orders/${order.orderNo}
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', fontWeight: 700, color: '#1e40af' }}>
                       <Mail size={14} />
-                      <span>อีเมลยืนยันคำสั่งซื้อ</span>
+                      <span>{status === 'shipping' ? 'อีเมลแจ้งเลขพัสดุ & จัดส่ง' : status === 'delivered' ? 'อีเมลส่งมอบสินค้าสำเร็จ' : 'อีเมลแจ้งสถานะคำสั่งซื้อ'}</span>
                     </div>
-                    <span style={{ fontSize: '0.7rem', color: '#64748b' }}>
-                      Hostinger SMTP
+                    <span style={{ fontSize: '0.7rem', color: '#059669', fontWeight: 600 }}>
+                      ✓ พร้อมส่ง (Auto)
                     </span>
                   </div>
 
@@ -1038,14 +1059,37 @@ https://gspeedarena.com/orders/${order.orderNo}
                     ปลายทาง: <strong>{email || order.shipping?.email || 'ยังไม่ได้ระบุ'}</strong>
                   </div>
 
-                  <button 
-                    type="button" 
-                    className="btn-dispatch-email"
-                    onClick={handleSendCustomerEmail}
-                  >
-                    <Mail size={13} />
-                    <span>ส่งอีเมลใบเสร็จให้ลูกค้า</span>
-                  </button>
+                  {status === 'shipping' && (
+                    <div style={{ fontSize: '0.72rem', color: '#2563eb', background: '#eff6ff', padding: '5px 8px', borderRadius: '4px', marginBottom: '8px', border: '1px solid #bfdbfe' }}>
+                      🚚 {shippingCarrier}: <strong>{trackingNumber || 'ยังไม่ได้ระบุเลขพัสดุ'}</strong>
+                    </div>
+                  )}
+
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <button 
+                      type="button" 
+                      className="btn-dispatch-email"
+                      style={{ flex: 1 }}
+                      onClick={() => handleSendCustomerEmail()}
+                    >
+                      <Mail size={13} />
+                      <span>ส่งอีเมล{status === 'shipping' ? 'แจ้งจัดส่ง' : 'ให้ลูกค้า'}</span>
+                    </button>
+
+                    <button 
+                      type="button" 
+                      className="button-woo-secondary"
+                      style={{ padding: '6px 10px', fontSize: '0.76rem', display: 'flex', alignItems: 'center', gap: '4px' }}
+                      title="ดูตัวอย่างอีเมลที่จะส่งให้ลูกค้า"
+                      onClick={() => {
+                        setEmailPreviewType(status === 'shipping' ? 'shipping' : status === 'delivered' ? 'delivered' : 'payment_verified');
+                        setIsPreviewingEmail(true);
+                      }}
+                    >
+                      <Eye size={13} />
+                      <span>ตัวอย่าง</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1148,6 +1192,161 @@ https://gspeedarena.com/orders/${order.orderNo}
           </div>
         </div>
       )}
+
+      {/* MODAL: EMAIL NOTIFICATION PREVIEW & DIRECT DISPATCH */}
+      {isPreviewingEmail && (() => {
+        const previewOrderData = {
+          ...order,
+          items,
+          status,
+          shippingCarrier,
+          trackingNumber,
+          customerEmail: email || order.shipping?.email,
+          shipping: { receiverName, phone, email: email || order.shipping?.email, address, notes },
+          pricing: { grandTotal }
+        };
+        const emailTemplate = buildOrderStatusEmailTemplate(previewOrderData, emailPreviewType, {
+          carrier: shippingCarrier,
+          trackingNo: trackingNumber
+        });
+
+        return (
+          <div 
+            className="woo-lightbox-backdrop" 
+            onClick={() => setIsPreviewingEmail(false)}
+            style={{ zIndex: 100025, background: 'rgba(15, 23, 42, 0.75)' }}
+          >
+            <div 
+              onClick={e => e.stopPropagation()} 
+              style={{ 
+                maxWidth: '820px', 
+                width: '94%', 
+                background: '#ffffff', 
+                borderRadius: '16px', 
+                overflow: 'hidden', 
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)',
+                display: 'flex',
+                flexDirection: 'column',
+                maxHeight: '90vh'
+              }}
+            >
+              {/* Header */}
+              <div style={{ padding: '16px 22px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb' }}>
+                    <Mail size={18} />
+                  </div>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>
+                      ตัวอย่างอีเมลแจ้งเตือนลูกค้า (Email Notification Preview)
+                    </h3>
+                    <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px' }}>
+                      ออเดอร์: <strong>{order.orderNo}</strong> | ลูกค้า: <strong>{receiverName || 'ลูกค้าคนสำคัญ'}</strong>
+                    </div>
+                  </div>
+                </div>
+                <button 
+                  type="button" 
+                  onClick={() => setIsPreviewingEmail(false)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Body */}
+              <div style={{ padding: '16px 22px', overflowY: 'auto', flex: 1, background: '#f1f5f9' }}>
+                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px 16px', marginBottom: '14px' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem' }}>
+                      <span style={{ fontWeight: 700, color: '#475569' }}>แบบอีเมล:</span>
+                      <select 
+                        value={emailPreviewType} 
+                        onChange={(e) => setEmailPreviewType(e.target.value)}
+                        style={{ padding: '5px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.82rem', fontWeight: 600 }}
+                      >
+                        <option value="shipping">🚚 กำลังจัดส่งพัสดุ (Shipping & Tracking)</option>
+                        <option value="payment_verified">✓ ยืนยันยอดชำระเงินแล้ว (Payment Verified)</option>
+                        <option value="preparing_items">📦 กำลังเตรียมพัสดุ & QC (Preparing)</option>
+                        <option value="delivered">🎉 จัดส่งสำเร็จเรียบร้อย (Delivered)</option>
+                        <option value="payment_issue">⚠️ แจ้งสลิปมีปัญหา (Payment Issue)</option>
+                      </select>
+                    </div>
+
+                    <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                      ปลายทาง: <strong style={{ color: '#0f172a' }}>{email || order.shipping?.email || 'ยังไม่ได้ระบุอีเมล'}</strong>
+                    </div>
+                  </div>
+
+                  <div style={{ fontSize: '0.8rem', color: '#334155' }}>
+                    <strong>Subject:</strong> {emailTemplate.subject}
+                  </div>
+                </div>
+
+                <div style={{ border: '1px solid #cbd5e1', borderRadius: '12px', overflow: 'hidden', background: '#ffffff' }}>
+                  <iframe 
+                    title="Order Email Preview"
+                    srcDoc={emailTemplate.html}
+                    style={{ width: '100%', height: '420px', border: 'none', display: 'block' }}
+                  />
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div style={{ padding: '12px 22px', borderTop: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#ffffff' }}>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button 
+                    type="button" 
+                    className="button-woo-secondary"
+                    onClick={() => {
+                      navigator.clipboard?.writeText(emailTemplate.html);
+                      showToast('คัดลอกโค้ด HTML ของอีเมลเรียบร้อยแล้ว');
+                    }}
+                    style={{ fontSize: '0.8rem', padding: '6px 12px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                  >
+                    <Copy size={13} />
+                    <span>คัดลอก HTML</span>
+                  </button>
+
+                  <button 
+                    type="button" 
+                    className="button-woo-secondary"
+                    onClick={() => {
+                      const blob = new Blob([emailTemplate.html], { type: 'text/html' });
+                      const url = URL.createObjectURL(blob);
+                      window.open(url, '_blank');
+                    }}
+                    style={{ fontSize: '0.8rem', padding: '6px 12px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                  >
+                    <ExternalLink size={13} />
+                    <span>เปิดดูเต็มจอ ↗</span>
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button 
+                    type="button" 
+                    className="button-woo-secondary" 
+                    onClick={() => setIsPreviewingEmail(false)}
+                  >
+                    ปิด
+                  </button>
+
+                  <button 
+                    type="button" 
+                    className="button-woo-primary"
+                    style={{ background: '#2563eb', borderColor: '#2563eb', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                    onClick={() => handleSendCustomerEmail(emailPreviewType)}
+                  >
+                    <Send size={14} />
+                    <span>ส่งอีเมลจริงหาลูกค้าทันที 🚀</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

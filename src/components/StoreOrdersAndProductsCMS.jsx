@@ -11,6 +11,7 @@ import { useCart } from '../context/CartContext';
 import { useSiteData } from '../context/SiteDataContext';
 import { EQUIPMENT_PRODUCTS, PRODUCT_CATEGORIES } from '../data/equipmentProducts';
 import { compressAndConvertToWebP } from '../utils/imageOptimizer';
+import { dispatchOrderStatusEmail, buildOrderStatusEmailTemplate } from '../utils/orderEmailService';
 import WooCommerceOrderEditor from './WooCommerceOrderEditor';
 import './StoreOrdersAndProductsCMS.css';
 
@@ -94,6 +95,8 @@ export default function StoreOrdersAndProductsCMS() {
   const [orderToShip, setOrderToShip] = useState(null);
   const [shippingCarrierInput, setShippingCarrierInput] = useState('Kerry Express');
   const [trackingNumberInput, setTrackingNumberInput] = useState('');
+  const [previewEmailOrder, setPreviewEmailOrder] = useState(null);
+  const [previewEmailType, setPreviewEmailType] = useState('shipping');
   const [toastMessage, setToastMessage] = useState(null);
 
   const showToast = (msg) => {
@@ -153,15 +156,33 @@ export default function StoreOrdersAndProductsCMS() {
     setIsShippingPromptOpen(true);
   };
 
-  const handleConfirmShipment = () => {
+  const handleConfirmShipment = async () => {
     if (!orderToShip) return;
+    const note = `พัสดุถูกส่งมอบให้ ${shippingCarrierInput} แล้ว เลขพัสดุ: ${trackingNumberInput}`;
     updateOrderStatus(
       orderToShip.orderNo, 
       'shipping', 
-      `พัสดุถูกส่งมอบให้ ${shippingCarrierInput} แล้ว เลขพัสดุ: ${trackingNumberInput}`,
+      note,
       { shippingCarrier: shippingCarrierInput, trackingNumber: trackingNumberInput }
     );
-    showToast(`บันทึกการจัดส่ง ${orderToShip.orderNo} สำเร็จ`);
+
+    // Automated Shipping Status Email Dispatch
+    try {
+      await dispatchOrderStatusEmail(orderToShip, 'shipping', {
+        carrier: shippingCarrierInput,
+        trackingNo: trackingNumberInput
+      });
+    } catch (err) {
+      console.warn('Shipping email dispatch error:', err);
+    }
+
+    const emailRecipient = orderToShip.customerEmail || orderToShip.shipping?.email;
+    if (emailRecipient) {
+      showToast(`บันทึกการจัดส่งและส่งอีเมลแจ้งเลขพัสดุ ${trackingNumberInput} ไปยัง ${emailRecipient} เรียบร้อยแล้ว 📧`);
+    } else {
+      showToast(`บันทึกการจัดส่ง ${orderToShip.orderNo} สำเร็จ`);
+    }
+
     setIsShippingPromptOpen(false);
     if (selectedOrderForDetail && selectedOrderForDetail.orderNo === orderToShip.orderNo) {
       setSelectedOrderForDetail(prev => prev ? {
@@ -169,7 +190,7 @@ export default function StoreOrdersAndProductsCMS() {
         status: 'shipping', 
         shippingCarrier: shippingCarrierInput, 
         trackingNumber: trackingNumberInput,
-        statusNote: `พัสดุถูกส่งมอบให้ ${shippingCarrierInput} แล้ว เลขพัสดุ: ${trackingNumberInput}`
+        statusNote: note
       } : null);
     }
     setOrderToShip(null);
@@ -945,17 +966,31 @@ export default function StoreOrdersAndProductsCMS() {
                                 </button>
                               )}
 
-                              {/* Edit Order (WooCommerce Style) */}
-                              <button
-                                type="button"
-                                className="btn-secondary"
-                                onClick={() => setSelectedOrderForDetail(order)}
-                                title="จัดการและแก้ไขคำสั่งซื้อแบบ WooCommerce"
-                                style={{ padding: '6px 10px', fontSize: '0.78rem', background: '#f8fafc', borderColor: '#cbd5e1', color: '#1e293b' }}
-                              >
-                                <Edit3 size={13} style={{ color: '#2563eb' }} />
-                                <span>แก้ไขออเดอร์</span>
-                              </button>
+                               {/* Edit Order (WooCommerce Style) */}
+                               <button
+                                 type="button"
+                                 className="btn-secondary"
+                                 onClick={() => setSelectedOrderForDetail(order)}
+                                 title="จัดการและแก้ไขคำสั่งซื้อแบบ WooCommerce"
+                                 style={{ padding: '6px 10px', fontSize: '0.78rem', background: '#f8fafc', borderColor: '#cbd5e1', color: '#1e293b' }}
+                               >
+                                 <Edit3 size={13} style={{ color: '#2563eb' }} />
+                                 <span>แก้ไขออเดอร์</span>
+                               </button>
+
+                               {/* Email Preview & Dispatch Button */}
+                               <button
+                                 type="button"
+                                 className="btn-secondary"
+                                 onClick={() => {
+                                   setPreviewEmailOrder(order);
+                                   setPreviewEmailType(order.status === 'shipping' ? 'shipping' : order.status === 'delivered' ? 'delivered' : 'payment_verified');
+                                 }}
+                                 title="ดูตัวอย่าง / ส่งอีเมลแจ้งเตือนลูกค้า"
+                                 style={{ padding: '6px 8px', fontSize: '0.78rem', color: '#1d4ed8', background: '#eff6ff', borderColor: '#bfdbfe' }}
+                               >
+                                 <Mail size={13} />
+                               </button>
 
                               {/* Delete Order Button */}
                               <button
@@ -1233,27 +1268,193 @@ export default function StoreOrdersAndProductsCMS() {
               <div style={{ fontSize: '0.8rem', color: '#64748b', background: '#f8fafc', padding: '10px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                 💡 เมื่อบันทึกแล้ว สถานะจะถูกเปลี่ยนเป็น "กำลังจัดส่งพัสดุ" และลูกค้าสามารถนำเลข Tracking ไปตรวจเช็กในหน้าระบบได้ทันที
               </div>
+
+              <div style={{ fontSize: '0.8rem', color: '#1e40af', background: '#eff6ff', padding: '10px 12px', borderRadius: '8px', border: '1px solid #bfdbfe', marginTop: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Mail size={16} style={{ color: '#2563eb', flexShrink: 0 }} />
+                <span>
+                  📧 ระบบจะส่งอีเมลแจ้งเลขพัสดุและลิงก์ติดตาม {shippingCarrierInput} ไปยัง <strong>{orderToShip.customerEmail || orderToShip.shipping?.email || 'อีเมลลูกค้า'}</strong> โดยอัตโนมัติ
+                </span>
+              </div>
             </div>
 
-            <div className="store-modal-footer">
+            <div className="store-modal-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <button 
                 type="button" 
-                className="btn-secondary" 
-                onClick={() => setIsShippingPromptOpen(false)}
+                className="btn-secondary"
+                onClick={() => {
+                  setPreviewEmailOrder({
+                    ...orderToShip,
+                    shippingCarrier: shippingCarrierInput,
+                    trackingNumber: trackingNumberInput
+                  });
+                  setPreviewEmailType('shipping');
+                }}
+                style={{ fontSize: '0.82rem', padding: '8px 12px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                ยกเลิก
+                <Eye size={14} />
+                <span>ดูตัวอย่างอีเมล</span>
               </button>
-              <button 
-                type="button" 
-                className="btn-primary" 
-                onClick={handleConfirmShipment}
-              >
-                บันทึกการจัดส่ง
-              </button>
+
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button 
+                  type="button" 
+                  className="btn-secondary" 
+                  onClick={() => setIsShippingPromptOpen(false)}
+                >
+                  ยกเลิก
+                </button>
+                <button 
+                  type="button" 
+                  className="btn-primary" 
+                  onClick={handleConfirmShipment}
+                >
+                  บันทึกการจัดส่ง
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
+
+      {/* =========================================================
+          MODAL: EMAIL PREVIEW & DISPATCHER
+          ========================================================= */}
+      {previewEmailOrder && (() => {
+        const emailTemplate = buildOrderStatusEmailTemplate(previewEmailOrder, previewEmailType, {
+          carrier: previewEmailOrder.shippingCarrier || shippingCarrierInput || 'Kerry Express',
+          trackingNo: previewEmailOrder.trackingNumber || trackingNumberInput || ''
+        });
+
+        return (
+          <div className="store-modal-backdrop" onClick={() => setPreviewEmailOrder(null)}>
+            <div className="store-modal-container" onClick={e => e.stopPropagation()} style={{ maxWidth: '820px', width: '94%' }}>
+              <div className="store-modal-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '14px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb' }}>
+                    <Mail size={20} />
+                  </div>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
+                      ตัวอย่างอีเมลแจ้งเตือนลูกค้า (Email Notification Preview)
+                    </h3>
+                    <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '2px' }}>
+                      คำสั่งซื้อ: <strong>{previewEmailOrder.orderNo}</strong> | ผู้รับ: <strong>{previewEmailOrder.shipping?.receiverName || '-'}</strong>
+                    </div>
+                  </div>
+                </div>
+                <button 
+                  type="button" 
+                  onClick={() => setPreviewEmailOrder(null)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="store-modal-body" style={{ maxHeight: '70vh', overflowY: 'auto', padding: '16px 20px' }}>
+                {/* Meta Controls & Status Selector */}
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px 16px', marginBottom: '14px' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
+                      <span style={{ fontWeight: 700, color: '#475569' }}>เลือกแบบอีเมล:</span>
+                      <select 
+                        value={previewEmailType} 
+                        onChange={(e) => setPreviewEmailType(e.target.value)}
+                        style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem', fontWeight: 600, background: '#ffffff' }}
+                      >
+                        <option value="shipping">🚚 กำลังจัดส่งพัสดุ (Shipping & Tracking)</option>
+                        <option value="payment_verified">✓ ตรวจสอบการชำระเงินแล้ว (Payment Verified)</option>
+                        <option value="preparing_items">📦 กำลังเตรียมพัสดุ & QC (Preparing)</option>
+                        <option value="delivered">🎉 จัดส่งสำเร็จเรียบร้อย (Delivered)</option>
+                        <option value="payment_issue">⚠️ แจ้งสลิปมีปัญหา (Payment Issue)</option>
+                      </select>
+                    </div>
+
+                    <div style={{ fontSize: '0.82rem', color: '#64748b' }}>
+                      ส่งถึง: <strong style={{ color: '#0f172a' }}>{previewEmailOrder.customerEmail || previewEmailOrder.shipping?.email || 'ยังไม่ได้ระบุอีเมล'}</strong>
+                    </div>
+                  </div>
+
+                  <div style={{ fontSize: '0.82rem', color: '#334155', background: '#ffffff', padding: '8px 12px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                    <strong>หัวข้ออีเมล (Subject):</strong> {emailTemplate.subject}
+                  </div>
+                </div>
+
+                {/* Live Responsive Email Iframe Preview */}
+                <div style={{ border: '1px solid #cbd5e1', borderRadius: '12px', overflow: 'hidden', background: '#f1f5f9' }}>
+                  <iframe 
+                    title="Email Preview"
+                    srcDoc={emailTemplate.html}
+                    style={{ width: '100%', height: '460px', border: 'none', display: 'block', background: '#f1f5f9' }}
+                  />
+                </div>
+              </div>
+
+              <div className="store-modal-footer" style={{ borderTop: '1px solid #e2e8f0', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button 
+                    type="button" 
+                    className="btn-secondary"
+                    onClick={() => {
+                      navigator.clipboard?.writeText(emailTemplate.html);
+                      showToast('คัดลอกโค้ด HTML ของอีเมลเรียบร้อยแล้ว');
+                    }}
+                    style={{ fontSize: '0.82rem', padding: '8px 12px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <Copy size={14} />
+                    <span>คัดลอก HTML</span>
+                  </button>
+
+                  <button 
+                    type="button" 
+                    className="btn-secondary"
+                    onClick={() => {
+                      const blob = new Blob([emailTemplate.html], { type: 'text/html' });
+                      const url = URL.createObjectURL(blob);
+                      window.open(url, '_blank');
+                    }}
+                    style={{ fontSize: '0.82rem', padding: '8px 12px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <ExternalLink size={14} />
+                    <span>เปิดดูเต็มจอ ↗</span>
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button 
+                    type="button" 
+                    className="btn-secondary" 
+                    onClick={() => setPreviewEmailOrder(null)}
+                  >
+                    ปิด
+                  </button>
+
+                  <button 
+                    type="button" 
+                    className="btn-primary"
+                    style={{ background: '#2563eb', borderColor: '#2563eb', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                    onClick={async () => {
+                      const res = await dispatchOrderStatusEmail(previewEmailOrder, previewEmailType, {
+                        carrier: previewEmailOrder.shippingCarrier || shippingCarrierInput,
+                        trackingNo: previewEmailOrder.trackingNumber || trackingNumberInput
+                      });
+                      if (res.success) {
+                        showToast(`ส่งอีเมลสถานะไปยัง ${previewEmailOrder.customerEmail || previewEmailOrder.shipping?.email} เรียบร้อยแล้ว! 📧`);
+                        setPreviewEmailOrder(null);
+                      } else {
+                        showToast(`ไม่สามารถส่งได้: ${res.message || 'ลูกค้าไม่ได้ระบุอีเมล'}`);
+                      }
+                    }}
+                  >
+                    <Send size={14} />
+                    <span>ส่งอีเมลจริงให้ลูกค้าทันที 🚀</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* =========================================================
           MODAL: PRODUCT EDIT & CREATE FORM
