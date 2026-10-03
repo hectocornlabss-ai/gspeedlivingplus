@@ -185,7 +185,7 @@ export const buildOrderStatusEmailTemplate = (order, statusType = 'shipping', cu
 
                 ${carrierTrackUrl ? `
                 <div style="text-align: center; margin-top: 10px;">
-                  <a href="${carrierTrackUrl}" target="_blank" style="display: inline-block; background-color: #2563eb; color: #ffffff; text-decoration: none; font-size: 13.5px; font-weight: 800; padding: 10px 22px; border-radius: 8px; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);">
+                  <a href="${carrierTrackUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; background-color: #2563eb; color: #ffffff; text-decoration: none; font-size: 13.5px; font-weight: 800; padding: 10px 22px; border-radius: 8px; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);">
                     เช็คพัสดุกับ ${carrier} ➔
                   </a>
                 </div>
@@ -229,7 +229,7 @@ export const buildOrderStatusEmailTemplate = (order, statusType = 'shipping', cu
 
               <!-- Main Action CTA: View Order / Download Document -->
               <div style="text-align: center; margin: 30px 0 10px;">
-                <a href="${orderViewUrl}" target="_blank" style="display: inline-block; background-color: #0f172a; color: #ffffff; text-decoration: none; font-size: 14.5px; font-weight: 800; padding: 14px 28px; border-radius: 10px; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.3);">
+                <a href="${orderViewUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; background-color: #0f172a; color: #ffffff; text-decoration: none; font-size: 14.5px; font-weight: 800; padding: 14px 28px; border-radius: 10px; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.3);">
                   เปิดดูคำสั่งซื้อ & ดาวน์โหลดใบสั่งซื้อ ➔
                 </a>
               </div>

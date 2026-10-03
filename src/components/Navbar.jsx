@@ -205,11 +205,13 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
               id="btn-navbar-cart"
               className="btn-navbar-cart"
               onClick={openCart}
-              title="ตะกร้าสินค้า & ขอใบเสนอราคา"
-              aria-label="ตะกร้าสินค้า"
+              title={language === 'zh' ? '购物车 & 官方报价单' : language === 'en' ? 'Cart & Quotation' : 'ตะกร้าสินค้า & ขอใบเสนอราคา'}
+              aria-label={language === 'zh' ? '购物车' : language === 'en' ? 'Cart' : 'ตะกร้าสินค้า'}
             >
               <ShoppingCart size={18} />
-              <span className="cart-btn-label">ตะกร้า</span>
+              <span className="cart-btn-label">
+                {language === 'zh' ? '购物车' : language === 'en' ? 'Cart' : 'ตะกร้า'}
+              </span>
               {totalCartItems > 0 && (
                 <span className="cart-badge-count">{totalCartItems}</span>
               )}
@@ -332,7 +334,9 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
             }}
           >
             <ShoppingCart size={16} />
-            <span>ตะกร้าสินค้า ({totalCartItems})</span>
+            <span>
+              {language === 'zh' ? `购物车 (${totalCartItems})` : language === 'en' ? `Cart (${totalCartItems})` : `ตะกร้าสินค้า (${totalCartItems})`}
+            </span>
           </button>
 
           {headerCta.visible !== false && (
