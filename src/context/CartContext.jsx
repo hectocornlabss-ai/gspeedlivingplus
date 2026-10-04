@@ -65,8 +65,8 @@ export function CartProvider({ children }) {
     }
   }, [savedOrders]);
 
-  // Add Item to Cart
-  const addToCart = (product, options = {}, quantity = 1) => {
+  // Add Item to Cart (Default: does NOT open cart, only adds item so customer can select multiple items)
+  const addToCart = (product, options = {}, quantity = 1, shouldOpenCart = false) => {
     const selectedColor = options.color || product.colors?.[0] || null;
     const selectedSize = options.size || product.sizes?.[0] || null;
     const extraPrice = selectedSize?.extraPrice || 0;
@@ -100,7 +100,9 @@ export function CartProvider({ children }) {
       }
     });
 
-    setIsCartOpen(true);
+    if (shouldOpenCart) {
+      setIsCartOpen(true);
+    }
   };
 
   // Update item quantity (delta: +1, -1, etc.)
