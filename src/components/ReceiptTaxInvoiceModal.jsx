@@ -1,12 +1,21 @@
 import React from 'react';
 import { X, Printer, FileText, CheckCircle2, ShieldCheck, Download } from 'lucide-react';
 import { thaiBahtText } from '../data/equipmentProducts';
+import { downloadDocumentAsHtml } from '../utils/ecommerceAdminUtils';
 
 export default function ReceiptTaxInvoiceModal({ order, onClose }) {
   if (!order) return null;
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleDownload = () => {
+    const container = document.getElementById('printable-receipt-tax');
+    if (!container) return;
+    const filename = `GLP_ใบเสร็จรับเงิน_ใบกำกับภาษี_${order.orderNo}.html`;
+    const title = `ใบเสร็จรับเงิน / ใบกำกับภาษี - ${order.orderNo}`;
+    downloadDocumentAsHtml(filename, container.outerHTML, title);
   };
 
   const grandTotal = Number(order.pricing?.grandTotal || 0);
@@ -37,23 +46,33 @@ export default function ReceiptTaxInvoiceModal({ order, onClose }) {
             </span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <button 
               type="button" 
               className="btn-primary" 
               onClick={handlePrint}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 18px', fontSize: '0.88rem' }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '7px 14px', fontSize: '0.84rem' }}
             >
-              <Printer size={16} />
+              <Printer size={15} />
               <span>พิมพ์ใบเสร็จ (Print)</span>
             </button>
             <button 
               type="button" 
               className="btn-secondary" 
-              onClick={onClose}
-              style={{ padding: '8px 14px', fontSize: '0.88rem' }}
+              onClick={handleDownload}
+              title="ดาวน์โหลดไฟล์ HTML ใบเสร็จ/ใบกำกับภาษี"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '7px 14px', fontSize: '0.84rem', background: '#0284c7', color: '#ffffff', borderColor: '#0284c7' }}
             >
-              <X size={16} />
+              <Download size={15} />
+              <span>ดาวน์โหลดไฟล์</span>
+            </button>
+            <button 
+              type="button" 
+              className="btn-secondary" 
+              onClick={onClose}
+              style={{ padding: '7px 12px', fontSize: '0.84rem' }}
+            >
+              <X size={15} />
             </button>
           </div>
         </div>

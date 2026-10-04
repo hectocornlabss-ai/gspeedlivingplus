@@ -1323,16 +1323,16 @@ export default function StoreOrdersAndProductsCMS() {
                                 </button>
                               )}
 
-                              {/* Print Shipping Label */}
+                              {/* Print Shipping Delivery Note & Label (Duplicate) */}
                               <button
                                 type="button"
                                 className="btn-secondary"
                                 onClick={() => setSelectedOrderForShippingLabel(order)}
-                                title="พิมพ์ใบปะหน้ากล่องพัสดุ (Shipping Label)"
+                                title="พิมพ์หรือดาวน์โหลดใบส่งสินค้า & ใบปะหน้ากล่อง (คู่ฉบับมีลายเซ็นรับของ)"
                                 style={{ padding: '5px 8px', fontSize: '0.75rem' }}
                               >
                                 <Truck size={12} />
-                                <span>ใบปะหน้า</span>
+                                <span>ใบส่งของ/คู่ฉบับ</span>
                               </button>
 
                               {/* Print Receipt / Tax Invoice */}
@@ -2162,6 +2162,8 @@ export default function StoreOrdersAndProductsCMS() {
           onApproveSlip={handleApproveSlip}
           onFlagSlipIssue={handleFlagSlipIssue}
           onDeleteOrder={handleDeleteOrderConfirm}
+          onPrintShippingLabel={(ord) => setSelectedOrderForShippingLabel(ord)}
+          onPrintReceipt={(ord) => setSelectedOrderForReceipt(ord)}
           productsList={productsList}
           siteData={siteData}
           showToast={showToast}

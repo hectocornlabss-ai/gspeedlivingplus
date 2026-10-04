@@ -17,6 +17,8 @@ export default function WooCommerceOrderEditor({
   onApproveSlip,
   onFlagSlipIssue,
   onDeleteOrder,
+  onPrintShippingLabel,
+  onPrintReceipt,
   productsList = [],
   siteData = {},
   showToast = () => {}
@@ -956,13 +958,36 @@ https://gspeedarena.com/orders/${order.orderNo}
                     <span>บันทึกคำสั่งซื้อ (Update Order)</span>
                   </button>
 
+                  {/* Print / Download Shipping Label & Delivery Note (Duplicate) */}
                   <button 
                     type="button" 
                     className="button-woo-secondary"
-                    onClick={() => window.print()}
+                    onClick={() => {
+                      if (typeof onPrintShippingLabel === 'function') {
+                        onPrintShippingLabel(order);
+                      }
+                    }}
+                    title="พิมพ์หรือดาวน์โหลดใบส่งสินค้า & ใบปะหน้ากล่องพัสดุ (คู่ฉบับมีลายเซ็นรับของ)"
+                  >
+                    <Truck size={14} />
+                    <span>ใบส่งสินค้า/ปะหน้า (คู่ฉบับ)</span>
+                  </button>
+
+                  {/* Print / Download Receipt & Tax Invoice */}
+                  <button 
+                    type="button" 
+                    className="button-woo-secondary"
+                    onClick={() => {
+                      if (typeof onPrintReceipt === 'function') {
+                        onPrintReceipt(order);
+                      } else {
+                        window.print();
+                      }
+                    }}
+                    title="พิมพ์หรือดาวน์โหลดใบเสร็จรับเงิน/ใบกำกับภาษี"
                   >
                     <Printer size={14} />
-                    <span>พิมพ์ใบแจ้งหนี้ / ใบเสร็จรับเงิน</span>
+                    <span>ใบเสร็จรับเงิน / ใบกำกับภาษี</span>
                   </button>
 
                   <button 
