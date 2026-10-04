@@ -103,18 +103,20 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
       if (t === 'arena' || t === 'home' || t === '') destPath = '/';
       else if (t === 'events' || t === 'tournaments') destPath = '/tournaments';
       else if (t === 'activities' || t === 'gallery') destPath = '/activities';
-      else if (t === 'franchise' || t === 'planner') destPath = '/franchise';
+      else if (t === 'franchise' || t === 'planner' || t === 'shop' || t === 'products' || t === 'equipment' || t === 'store') destPath = '/shop';
       else if (t === 'company' || t === 'about') destPath = '/company';
       else if (t === 'contact' || t === 'location' || t === 'map') destPath = '/contact';
       else if (t === 'admin' || t === 'cms') destPath = '/admin';
       else destPath = `/${t}`;
     }
 
+    if (destPath === '/franchise') destPath = '/shop';
+
     if (onNavigate) {
       onNavigate(destPath);
     } else {
       if (setActiveTab) {
-        if (destPath === '/franchise') setActiveTab('franchise');
+        if (destPath === '/shop' || destPath === '/franchise') setActiveTab('franchise');
         else if (destPath === '/company') setActiveTab('company');
         else if (destPath === '/tournaments' || destPath === '/events') setActiveTab('tournaments');
         else if (destPath === '/activities' || destPath === '/gallery') setActiveTab('activities');
@@ -122,6 +124,7 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
         else setActiveTab('arena');
       }
       window.history.pushState(null, '', destPath);
+      window.dispatchEvent(new PopStateEvent('popstate'));
       window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
       if (document.documentElement) document.documentElement.scrollTop = 0;
       if (document.body) document.body.scrollTop = 0;
@@ -139,7 +142,7 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
 
   const headerCta = {
     text: ctaLabel,
-    target: siteData?.headerCta?.target || 'franchise',
+    target: siteData?.headerCta?.target === 'franchise' ? 'shop' : (siteData?.headerCta?.target || 'shop'),
     visible: siteData?.headerCta?.visible !== false
   };
 
@@ -219,9 +222,9 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
 
             {headerCta.visible !== false && (
               <button 
-                id="btn-quick-franchise-cta"
+                id="btn-quick-shop-cta"
                 className="btn-primary header-cta-btn"
-                onClick={() => handleNavClick(headerCta.target || 'franchise')}
+                onClick={() => handleNavClick(headerCta.target || 'shop', '/shop')}
               >
                 <ShoppingBag size={16} />
                 <span>{headerCta.text}</span>
@@ -342,7 +345,7 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
           {headerCta.visible !== false && (
             <button 
               className="btn-primary full-width" 
-              onClick={() => handleNavClick(headerCta.target || 'franchise')}
+              onClick={() => handleNavClick(headerCta.target || 'shop', '/shop')}
             >
               <ShoppingBag size={16} />
               <span>{headerCta.text}</span>
@@ -377,10 +380,10 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
         </button>
 
         <button 
-          id="btn-bottom-nav-franchise"
+          id="btn-bottom-nav-shop"
           type="button"
-          className={`bottom-nav-item bottom-nav-featured ${activeTab === 'franchise' ? 'active' : ''}`}
-          onClick={() => handleNavClick('franchise', '/franchise')}
+          className={`bottom-nav-item bottom-nav-featured ${activeTab === 'franchise' || activeTab === 'shop' ? 'active' : ''}`}
+          onClick={() => handleNavClick('shop', '/shop')}
         >
           <div className="bottom-nav-feature-pill">
             <ShoppingBag size={20} className="bottom-nav-icon" />

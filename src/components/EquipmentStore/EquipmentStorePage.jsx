@@ -5,16 +5,38 @@ import { EQUIPMENT_PRODUCTS } from '../../data/equipmentProducts';
 import { useSiteData } from '../../context/SiteDataContext';
 import './EquipmentStore.css';
 
-export default function EquipmentStorePage({ onNavigateHome, initialProductId = null }) {
+export default function EquipmentStorePage({ 
+  onNavigateHome, 
+  initialProductId = null,
+  currentPath = null,
+  onNavigate = null
+}) {
   const { siteData } = useSiteData();
   const products = siteData?.equipmentProducts || EQUIPMENT_PRODUCTS;
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [activeProductId, setActiveProductId] = useState(initialProductId);
 
+  // Sync activeProductId with props whenever initialProductId or currentPath changes
+  useEffect(() => {
+    if (initialProductId) {
+      setActiveProductId(initialProductId);
+    } else {
+      const path = currentPath || window.location.pathname;
+      const match = path.match(/^\/(?:products|product|equipment|shop)\/([^/?#]+)/i);
+      const urlId = match ? decodeURIComponent(match[1]) : new URLSearchParams(window.location.search).get('product');
+      setActiveProductId(urlId || null);
+    }
+  }, [initialProductId, currentPath]);
+
   // Sync with URL popstate and query params
   useEffect(() => {
     const handleUrlChange = () => {
-      const match = window.location.pathname.match(/^\/(?:products|product|equipment|shop)\/([^/?#]+)/i);
+      const path = window.location.pathname;
+      if (path === '/shop' || path === '/franchise' || path === '/products' || path === '/equipment') {
+        setActiveProductId(null);
+        return;
+      }
+      const match = path.match(/^\/(?:products|product|equipment|shop)\/([^/?#]+)/i);
       const urlId = match ? decodeURIComponent(match[1]) : new URLSearchParams(window.location.search).get('product');
       setActiveProductId(urlId || null);
     };
@@ -30,13 +52,23 @@ export default function EquipmentStorePage({ onNavigateHome, initialProductId = 
 
   const handleOpenProduct = (product) => {
     setActiveProductId(product.id);
-    window.history.pushState(null, '', `/products/${product.id}`);
+    if (onNavigate) {
+      onNavigate(`/products/${product.id}`);
+    } else {
+      window.history.pushState(null, '', `/products/${product.id}`);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    }
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   };
 
   const handleBackToCatalog = () => {
     setActiveProductId(null);
-    window.history.pushState(null, '', '/franchise');
+    if (onNavigate) {
+      onNavigate('/shop');
+    } else {
+      window.history.pushState(null, '', '/shop');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    }
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   };
 

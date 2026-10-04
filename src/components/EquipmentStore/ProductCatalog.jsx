@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { 
   Search, SlidersHorizontal, ShoppingCart, Eye, 
   FileText, Check, Star, ShieldCheck, 
-  Box, RotateCw, ArrowRight, Tag, Percent, ChevronRight,
+  Box, ArrowRight, Tag, ChevronRight,
   Flame, Heart, Plus
 } from 'lucide-react';
 import { EQUIPMENT_PRODUCTS, PRODUCT_CATEGORIES } from '../../data/equipmentProducts';
@@ -123,17 +123,6 @@ export default function ProductCatalog({
               <span className="meta-vat-text">ราคาสินค้ารวมภาษีมูลค่าเพิ่ม 7% (ออกใบกำกับภาษีได้)</span>
             </div>
           </div>
-
-          {/* B2B Volume Promotion Strip */}
-          <div className="b2b-tier-strip">
-            <div className="b2b-strip-badge">
-              <Percent size={14} />
-              <span>ราคาส่ง B2B</span>
-            </div>
-            <div className="b2b-strip-desc">
-              สั่งซื้อ 5+ ชิ้น <strong>ลด 5%</strong> | 10+ ชิ้น <strong>ลด 10%</strong> | 20+ ชิ้น <strong>ลด 15%</strong> (ออกใบเสนอราคาและใบกำกับภาษีได้ทันทีเมื่อสั่งซื้อ)
-            </div>
-          </div>
         </div>
 
         {/* 3. Category Filter Tabs */}
@@ -222,11 +211,6 @@ export default function ProductCatalog({
                     <span className="tag-in-stock">
                       <Check size={11} /> มีสินค้าพร้อมส่ง
                     </span>
-                    {product.threeDConfig && (
-                      <span className="tag-3d-feature" title="สามารถหมุนดู 3D ได้ 360 องศา">
-                        <RotateCw size={11} /> 360° 3D
-                      </span>
-                    )}
                   </div>
 
                   {/* Product Image Box */}

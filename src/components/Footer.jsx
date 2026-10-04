@@ -31,7 +31,7 @@ export default function Footer({ setActiveTab, onNavigate }) {
     } else {
       window.history.pushState(null, '', path);
       if (setActiveTab) {
-        if (path === '/franchise') setActiveTab('franchise');
+        if (path === '/franchise' || path === '/shop') setActiveTab('franchise');
         else if (path === '/company') setActiveTab('company');
         else if (path === '/tournaments' || path === '/events') setActiveTab('tournaments');
         else if (path === '/activities' || path === '/gallery') setActiveTab('activities');
@@ -220,7 +220,7 @@ export default function Footer({ setActiveTab, onNavigate }) {
                 </button>
               </li>
               <li>
-                <button onClick={() => handleLink('/franchise')} className="text-blue">
+                <button onClick={() => handleLink('/shop')} className="text-blue">
                   {t('nav.cta')}
                 </button>
               </li>

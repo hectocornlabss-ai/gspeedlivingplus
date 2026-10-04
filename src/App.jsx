@@ -114,8 +114,8 @@ function normalizeLegacyHash() {
     cleanPath = '/admin';
   } else if (hash.includes('tournament') || hash.includes('event')) {
     cleanPath = '/tournaments';
-  } else if (hash.includes('franchise') || hash.includes('planner')) {
-    cleanPath = '/franchise';
+  } else if (hash.includes('franchise') || hash.includes('planner') || hash.includes('shop') || hash.includes('store')) {
+    cleanPath = '/shop';
   } else if (hash.includes('company') || hash.includes('about')) {
     cleanPath = '/company';
   } else if (hash.includes('activity') || hash.includes('gallery') || hash.includes('news')) {
@@ -138,7 +138,13 @@ function AppContent() {
     // 1. Auto cleanup hash if present
     normalizeLegacyHash();
 
-    const path = window.location.pathname || '/';
+    let path = window.location.pathname || '/';
+
+    // Normalize legacy /franchise or /planner to /shop
+    if (path === '/franchise' || path === '/planner') {
+      path = '/shop';
+      window.history.replaceState(null, '', '/shop');
+    }
 
     // 1. Admin route
     const isAdmin = path === '/admin' || path.startsWith('/admin/');
@@ -275,6 +281,7 @@ function AppContent() {
   const navigateTo = (path) => {
     window.history.pushState(null, '', path);
     setRouteState(parseCurrentLocation());
+    window.dispatchEvent(new PopStateEvent('popstate'));
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     if (document.documentElement) document.documentElement.scrollTop = 0;
     if (document.body) document.body.scrollTop = 0;
@@ -324,7 +331,7 @@ function AppContent() {
                 const slug = tour.slug || tour.seo?.slug || tour.id;
                 navigateTo(`/tournaments/${slug}`);
               }}
-              onNavigateFranchise={() => navigateTo('/franchise')}
+              onNavigateFranchise={() => navigateTo('/shop')}
             />
           ) : routeState.actSlug ? (
             <SingleActivityView 
@@ -375,7 +382,7 @@ function AppContent() {
                     navigateTo('/activities');
                   }}
                   onNavigateFranchise={() => {
-                    navigateTo('/franchise');
+                    navigateTo('/shop');
                   }} 
                 />
               )}
@@ -391,7 +398,7 @@ function AppContent() {
                     }
                   }}
                   onNavigateHome={() => navigateTo('/')}
-                  onNavigateFranchise={() => navigateTo('/franchise')}
+                  onNavigateFranchise={() => navigateTo('/shop')}
                 />
               )}
 
@@ -403,14 +410,14 @@ function AppContent() {
                     navigateTo(`/activities/${slug}`);
                   }}
                   onNavigateHome={() => navigateTo('/')}
-                  onNavigateFranchise={() => navigateTo('/franchise')}
+                  onNavigateFranchise={() => navigateTo('/shop')}
                 />
               )}
 
               {routeState.tab === 'company' && (
                 <CompanyProfile 
                   onNavigateFranchise={() => {
-                    navigateTo('/franchise');
+                    navigateTo('/shop');
                   }} 
                 />
               )}
@@ -419,13 +426,15 @@ function AppContent() {
                 <EquipmentStorePage 
                   onNavigateHome={() => navigateTo('/')} 
                   initialProductId={routeState.productId}
+                  currentPath={routeState.pathname}
+                  onNavigate={navigateTo}
                 />
               )}
 
               {routeState.tab === 'checkout' && (
                 <CheckoutPage 
                   onNavigateHome={() => navigateTo('/')}
-                  onNavigateStore={() => navigateTo('/franchise')}
+                  onNavigateStore={() => navigateTo('/shop')}
                   initialOrderNo={routeState.orderNo}
                   initialStep={routeState.orderNo ? 'tracking' : 'shipping'}
                 />
@@ -434,7 +443,7 @@ function AppContent() {
               {routeState.tab === 'contact' && (
                 <ContactPage 
                   onNavigateHome={() => navigateTo('/')}
-                  onNavigateFranchise={() => navigateTo('/franchise')}
+                  onNavigateFranchise={() => navigateTo('/shop')}
                 />
               )}
             </>

@@ -54,8 +54,8 @@ export const ROUTES_CONFIG = {
 
   // 4. สั่งซื้อสินค้า โต๊ะ เก้าอี้ และอุปกรณ์อื่นๆ
   franchise: {
-    path: '/franchise',
-    aliasPaths: ['/planner', '/3d-studio', '/shop', '/products', '/equipment'],
+    path: '/shop',
+    aliasPaths: ['/franchise', '/planner', '/3d-studio', '/products', '/equipment'],
     name: 'สั่งซื้อสินค้า & ขอใบเสนอราคา',
     sectionTitle: 'โต๊ะ เก้าอี้เกมมิ่ง และอุปกรณ์อื่นๆ | Gspeed Living Plus',
     badge: 'GSPEED STORE',
@@ -65,7 +65,7 @@ export const ROUTES_CONFIG = {
     ogImage: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
     breadcrumbs: [
       { label: 'หน้าหลัก', path: '/' },
-      { label: 'สั่งซื้อสินค้า', path: '/franchise' }
+      { label: 'สั่งซื้อสินค้า', path: '/shop' }
     ]
   },
 
@@ -286,7 +286,7 @@ export function getRouteMetadata(pathname = '/', extraData = {}) {
     return { ...ROUTES_CONFIG.checkout, type: 'checkout', canonical: `${SITE_BASE_URL}/checkout` };
   }
   if (cleanPath === '/franchise' || cleanPath === '/planner' || cleanPath === '/3d-studio' || cleanPath === '/shop' || cleanPath === '/products' || cleanPath === '/equipment') {
-    return { ...ROUTES_CONFIG.franchise, type: 'franchise', canonical: `${SITE_BASE_URL}/franchise` };
+    return { ...ROUTES_CONFIG.franchise, type: 'franchise', canonical: `${SITE_BASE_URL}/shop` };
   }
   if (cleanPath === '/company' || cleanPath === '/about' || cleanPath === '/about-us') {
     return { ...ROUTES_CONFIG.company, type: 'company', canonical: `${SITE_BASE_URL}/company` };

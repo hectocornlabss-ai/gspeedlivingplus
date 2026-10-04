@@ -72,8 +72,8 @@ export default function AnnouncementTicker({ onNavigate = () => {} }) {
     }
 
     // Normal internal navigation (clean URLs or tabs)
-    if (target === 'franchise' || target === '/franchise') {
-      onNavigate('/franchise');
+    if (target === 'franchise' || target === '/franchise' || target === 'shop' || target === '/shop') {
+      onNavigate('/shop');
     } else if (target === 'tournaments' || target === '/tournaments') {
       onNavigate('/tournaments');
     } else if (target === 'activities' || target === '/activities') {

@@ -582,16 +582,16 @@ export default function ArenaHub({
                   </button>
 
                   <button 
-                    id="btn-hero-navigate-franchise"
+                    id="btn-hero-navigate-shop"
                     onClick={() => {
                       handleHeroAction(
-                        heroData.btn4Link !== undefined ? heroData.btn4Link : '/franchise',
+                        heroData.btn4Link !== undefined ? heroData.btn4Link : '/shop',
                         heroData.btn4Target || '_self',
                         () => {
                           if (onNavigateFranchise) {
                             onNavigateFranchise();
                           } else {
-                            window.history.pushState(null, '', '/franchise');
+                            window.history.pushState(null, '', '/shop');
                             window.dispatchEvent(new PopStateEvent('popstate'));
                           }
                         }
