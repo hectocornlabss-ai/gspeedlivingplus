@@ -979,13 +979,13 @@
   flex-wrap: wrap;
 }
 
-/* Add To Cart: Vibrant Yellow / Esports Gold */
+/* Add To Cart: Vibrant Amber / Esports Gold with Crisp White Text */
 .shopee-btn-add-to-cart {
   height: 50px;
   padding: 0 24px;
-  background: #f59e0b;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
   border: 1.5px solid #d97706;
-  color: #0f172a;
+  color: #ffffff;
   border-radius: 8px;
   font-size: 15px;
   font-weight: 800;
@@ -998,8 +998,17 @@
   box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25);
 }
 
+.shopee-btn-add-to-cart svg {
+  color: #ffffff;
+  stroke: #ffffff;
+}
+
+.shopee-btn-add-to-cart span {
+  color: #ffffff;
+}
+
 .shopee-btn-add-to-cart:hover {
-  background: #d97706;
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
   border-color: #b45309;
   color: #ffffff;
   transform: translateY(-1px);
@@ -1674,11 +1683,11 @@
     color: var(--glp-text);
   }
 
-  /* Add to Cart button (Esports Yellow) */
+  /* Add to Cart button (Esports Amber with Crisp White Text & Icon) */
   .shopee-mobile-bar-cart-btn {
     flex: 1.15;
-    background: #f59e0b;
-    color: #0f172a;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: #ffffff;
     border: none;
     display: flex;
     align-items: center;
@@ -1691,8 +1700,13 @@
     transition: all 0.15s ease;
   }
 
+  .shopee-mobile-bar-cart-btn span {
+    color: #ffffff;
+  }
+
   .shopee-mobile-bar-cart-btn svg {
-    color: #0f172a;
+    color: #ffffff;
+    stroke: #ffffff;
     stroke-width: 2.2;
   }
 
@@ -1705,7 +1719,8 @@
     color: #ffffff;
   }
 
-  .shopee-mobile-bar-cart-btn.success svg {
+  .shopee-mobile-bar-cart-btn.success svg,
+  .shopee-mobile-bar-cart-btn.success span {
     color: #ffffff;
   }
 
@@ -1798,10 +1813,5 @@
 
   .shopee-btn-buy-now {
     min-width: 140px;
-  }
-
-  .shopee-products-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
   }
 }
