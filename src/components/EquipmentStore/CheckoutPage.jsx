@@ -533,37 +533,7 @@ export default function CheckoutPage({
           </div>
         </div>
 
-        {/* RESUME ORDER SEARCH BAR (PAY LATER ACCESS) */}
-        <div className="resume-order-bar">
-          <div className="resume-order-info">
-            <Clock size={16} />
-            <span><strong>มีเลขออเดอร์ที่สั่งไว้แล้ว?</strong> สามารถค้นหาเพื่อกลับมาชำระเงินหรือแนบสลิปภายหลังได้ตลอดเวลา:</span>
-          </div>
-          <form onSubmit={handleResumeSearch} className="resume-search-form">
-            <input 
-              type="text" 
-              className="resume-input"
-              placeholder="Order No. หรือเบอร์โทร"
-              value={resumeSearchQuery}
-              onChange={(e) => setResumeSearchQuery(e.target.value)}
-            />
-            <button type="submit" className="btn-resume-search">
-              <Search size={14} />
-              <span>ค้นหาออเดอร์</span>
-            </button>
-          </form>
-        </div>
 
-        {resumeSearchMsg && (
-          <div className={`status-feedback-banner ${resumeSearchMsg.type === 'success' ? 'verified' : 'issue'}`} style={{ marginBottom: '20px' }}>
-            <div className="banner-icon-badge">
-              {resumeSearchMsg.type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
-            </div>
-            <div className="banner-content-box">
-              <p style={{ margin: 0, fontWeight: 700 }}>{resumeSearchMsg.text}</p>
-            </div>
-          </div>
-        )}
 
         {/* PAY LATER SUCCESS NOTICE */}
         {payLaterNotice && (
