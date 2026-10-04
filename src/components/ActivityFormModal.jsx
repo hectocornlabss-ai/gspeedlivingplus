@@ -662,29 +662,40 @@ export default function ActivityFormModal({
           </div>
 
           {/* Row 5: Cover Image & SEO ALT */}
-          <div className="image-manager-row" style={{ display: 'flex', gap: '12px', alignItems: 'flex-end', marginBottom: '12px' }}>
+          <div className="image-manager-row" style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', marginBottom: '12px' }}>
+            {draft.image && (
+              <div style={{ position: 'relative', width: '100px', height: '70px', borderRadius: '8px', overflow: 'hidden', border: '2px solid #2563eb', background: '#0f172a', flexShrink: 0, boxShadow: '0 2px 6px rgba(0,0,0,0.15)' }}>
+                <img 
+                  src={draft.image} 
+                  alt="ภาพหน้าปก" 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                />
+              </div>
+            )}
+
             <div className="form-group" style={{ flex: 1, margin: 0 }}>
               <label><strong>URL รูปภาพหน้าปก (Cover Image URL)</strong></label>
-              <input 
-                type="url" 
-                className="form-input"
-                placeholder="https://... หรือ /uploads/gallery/..."
-                value={draft.image || ''}
-                onChange={e => updateField('image', e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label className="btn-upload-file" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 14px', background: '#2563eb', color: '#fff', borderRadius: '6px' }}>
-                {coverCompressing ? <RefreshCw size={14} className="spin-icon" /> : <Upload size={14} />}
-                <span>{coverCompressing ? 'กำลังแปลง WebP...' : 'อัปโหลดภาพหน้าปก (WebP)'}</span>
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                 <input 
-                  type="file" 
-                  accept="image/*" 
-                  style={{ display: 'none' }}
-                  onChange={handleCoverUpload}
+                  type="url" 
+                  className="form-input"
+                  placeholder="https://... หรือ /uploads/gallery/..."
+                  value={draft.image || ''}
+                  onChange={e => updateField('image', e.target.value)}
+                  style={{ flex: 1 }}
                 />
-              </label>
+                <label className="btn-upload-file" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 14px', background: '#2563eb', color: '#fff', borderRadius: '6px', whiteSpace: 'nowrap' }}>
+                  {coverCompressing ? <RefreshCw size={14} className="spin-icon" /> : <Upload size={14} />}
+                  <span>{coverCompressing ? 'กำลังแปลง WebP...' : 'อัปโหลดภาพหน้าปก'}</span>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    style={{ display: 'none' }}
+                    onChange={handleCoverUpload}
+                  />
+                </label>
+              </div>
             </div>
           </div>
 

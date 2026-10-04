@@ -1745,7 +1745,28 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
     setCompressingItemId(fieldKey);
     try {
       const res = await compressAndConvertToWebP(file, { maxWidth: 1600, maxHeight: 1600, quality: 0.82 });
-      onComplete(res.dataUrl, res);
+      let finalUrl = res.dataUrl;
+
+      // Persist to server disk via /api/upload-media
+      try {
+        const uploadRes = await fetch('/api/upload-media', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            dataUrl: res.dataUrl,
+            filename: file.name,
+            category: fieldKey.includes('hero') ? 'hero' : (fieldKey.includes('banner') ? 'banners' : (fieldKey.includes('tourn') ? 'tournaments' : 'uploads'))
+          })
+        });
+        const uploadData = await uploadRes.json();
+        if (uploadData?.success && uploadData.url) {
+          finalUrl = uploadData.url;
+        }
+      } catch (uploadErr) {
+        console.warn('Backend disk upload failed, falling back to WebP dataUrl:', uploadErr);
+      }
+
+      onComplete(finalUrl, res);
 
       // Automatically register to media library for future reuse
       if (addMediaItem) {
@@ -1753,7 +1774,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
           name: file.name.replace(/\.[^/.]+$/, "") || 'รูปภาพอัปโหลดใหม่',
           alt: file.name.replace(/\.[^/.]+$/, "") || 'รูปภาพอัปโหลด GLP',
           category: fieldKey.includes('hero') ? 'hero' : (fieldKey.includes('banner') ? 'banners' : (fieldKey.includes('tourn') ? 'tournaments' : 'uploads')),
-          url: res.dataUrl,
+          url: finalUrl,
           dimensions: `${res.width || 1200}x${res.height || 600} (${res.format || 'WebP'})`
         });
       }
@@ -2845,12 +2866,12 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
               >
                 <ShoppingBag size={18} />
                 <div>
-                  <strong>03. คำสั่งซื้อ & สินค้าในร้าน {pendingSlipsCount > 0 && (
+                  <strong>03. สินค้าหน้าร้าน & ออเดอร์ (โต๊ะ, เก้าอี้, อุปกรณ์) {pendingSlipsCount > 0 && (
                     <span style={{ marginLeft: '6px', background: '#ef4444', color: '#fff', fontSize: '0.72rem', padding: '1px 6px', borderRadius: '10px' }}>
                       {pendingSlipsCount}
                     </span>
                   )}</strong>
-                  <span>เช็กออเดอร์, ตรวจสลิปโอน, แก้ไขสินค้า & สต็อก</span>
+                  <span>จัดการสินค้าที่แสดงในเว็บ (/shop) โต๊ะ, เก้าอี้, สต็อก & ออเดอร์</span>
                 </div>
               </button>
             )}
@@ -2861,10 +2882,10 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                 className={`admin-nav-item ${activeTab === 'catalog' ? 'active' : ''}`}
                 onClick={() => handleSwitchTab('catalog')}
               >
-                <Monitor size={18} />
+                <Box size={18} />
                 <div>
-                  <strong>04. อุปกรณ์ & แคตตาล็อก 3D</strong>
-                  <span>โต๊ะ, เก้าอี้, เคาน์เตอร์, หลายเกรด</span>
+                  <strong>04. โมดูลผังร้าน 3D แฟรนไชส์ (Floor Planner)</strong>
+                  <span>โมดูลสถานีจำลองผังร้าน (2 ที่นั่ง, 4 ที่นั่ง, ห้อง VIP, เวที 3D)</span>
                 </div>
               </button>
             )}
@@ -3104,14 +3125,59 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
               ========================================================================= */}
           {activeTab === 'catalog' && (
             <div className="cms-panel-block">
+              {/* Guidance Notice Banner for clarity between 3D Planner and Retail Store */}
+              <div style={{
+                background: 'linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%)',
+                border: '1px solid #bfdbfe',
+                borderRadius: '12px',
+                padding: '16px 20px',
+                marginBottom: '20px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '14px'
+              }}>
+                <div style={{ flex: 1, minWidth: '280px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#1e40af', fontWeight: 800, fontSize: '0.98rem' }}>
+                    <Info size={18} />
+                    <span>เมนูนี้คือ: "โมดูลสถานีจำลองผังร้าน 3D" สำหรับระบบวางผังเปิดสาขาแฟรนไชส์ (/franchise-planner)</span>
+                  </div>
+                  <div style={{ fontSize: '0.84rem', color: '#334155', marginTop: '4px', lineHeight: 1.5 }}>
+                    หากท่านต้องการแก้ไขหรือเพิ่ม <strong>โต๊ะเกมมิ่ง, เก้าอี้, แผ่นรองเมาส์ และสินค้าขายปลีกที่แสดงในหน้าร้านออนไลน์ (/shop)</strong> กรุณาไปที่เมนู <strong>"03. สินค้าหน้าร้าน & ออเดอร์ (โต๊ะ, เก้าอี้, อุปกรณ์)"</strong>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleSwitchTab('store-orders')}
+                  style={{
+                    background: '#2563eb',
+                    color: '#ffffff',
+                    border: 'none',
+                    padding: '9px 18px',
+                    borderRadius: '8px',
+                    fontWeight: 700,
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 2px 6px rgba(37,99,235,0.25)'
+                  }}
+                >
+                  <ShoppingBag size={15} />
+                  <span>👉 สลับไปจัดการสินค้าหน้าร้าน (03)</span>
+                </button>
+              </div>
+
               <div className="panel-header-row">
                 <div>
                   <h3 className="panel-title">
-                    <Monitor size={20} className="text-blue" />
-                    <span>จัดการอุปกรณ์ โต๊ะ เก้าอี้ และเคาน์เตอร์ 3D (หลายเกรด)</span>
+                    <Box size={20} className="text-blue" />
+                    <span>โมดูลสถานีจำลองผังร้าน 3D แฟรนไชส์ (3D Floor Planner Modules)</span>
                   </h3>
                   <p className="panel-desc">
-                    กำหนดชื่อ, ราคา, ขนาดมิติ 3 มิติ, สีท็อปโต๊ะ, สีไฟ LED RGB, สีเก้าอี้, เพิ่ม/อัปโหลดภาพ และส่งออกเป็นเอกสารสเปกหรือภาพ 3D PNG ได้ทันที
+                    กำหนดขนาดและราคาโมดูลสถานี (เช่น แถว 2 ที่นั่ง, 4 ที่นั่ง, ห้อง VIP, เวที 5v5) เพื่อใช้ในโปรแกรมจำลองผังสาขาแฟรนไชส์ (/franchise-planner)
                   </p>
                 </div>
                 <button 

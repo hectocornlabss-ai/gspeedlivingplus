@@ -1785,6 +1785,15 @@ export function SiteDataProvider({ children }) {
               if (Array.isArray(result.siteData.venueZones)) merged.venueZones = result.siteData.venueZones;
               if (Array.isArray(result.siteData.catalogItems)) merged.catalogItems = result.siteData.catalogItems;
               if (Array.isArray(result.siteData.interiorThemes)) merged.interiorThemes = result.siteData.interiorThemes;
+              if (Array.isArray(result.siteData.equipmentProducts) && result.siteData.equipmentProducts.length > 0) {
+                merged.equipmentProducts = result.siteData.equipmentProducts;
+              }
+              if (Array.isArray(result.siteData.storeOrders)) {
+                merged.storeOrders = result.siteData.storeOrders;
+              }
+              if (result.siteData.ecommerceConfig && typeof result.siteData.ecommerceConfig === 'object') {
+                merged.ecommerceConfig = { ...merged.ecommerceConfig, ...result.siteData.ecommerceConfig };
+              }
 
               // Cache fresh server data to localStorage and ref
               try {

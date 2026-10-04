@@ -558,16 +558,82 @@ export default function StoreOrdersAndProductsCMS() {
     if (!file) return;
     try {
       setIsCompressingImage(true);
-      const webpDataUrl = await compressAndConvertToWebP(file, 900, 900, 0.82);
+      const webpResult = await compressAndConvertToWebP(file, { maxWidth: 1200, maxHeight: 1200, quality: 0.84 });
+      let finalUrl = webpResult.dataUrl;
+
+      // Attempt server disk upload to persist as /uploads/products/...
+      try {
+        const uploadRes = await fetch('/api/upload-media', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            dataUrl: webpResult.dataUrl,
+            filename: file.name,
+            category: 'products'
+          })
+        });
+        const uploadData = await uploadRes.json();
+        if (uploadData?.success && uploadData.url) {
+          finalUrl = uploadData.url;
+        }
+      } catch (uploadErr) {
+        console.warn('Server disk upload failed, falling back to WebP dataUrl:', uploadErr);
+      }
+
       setProductForm(prev => ({
         ...prev,
-        image: webpDataUrl,
-        gallery: prev.gallery.length === 0 ? [webpDataUrl] : prev.gallery
+        image: finalUrl,
+        gallery: prev.gallery.length === 0 ? [finalUrl] : prev.gallery
       }));
-      showToast('อัปโหลดและบีบอัดรูปภาพ WebP สำเร็จ');
+      showToast('อัปโหลดและประมวลผลรูปภาพสินค้า WebP สำเร็จ');
     } catch (err) {
       console.error(err);
-      alert('เกิดข้อผิดพลาดในการประมวลผลรูปภาพ');
+      alert('เกิดข้อผิดพลาดในการประมวลผลรูปภาพ: ' + (err.message || ''));
+    } finally {
+      setIsCompressingImage(false);
+    }
+  };
+
+  // Multi-image upload for Product Auto-Slide Gallery
+  const handleProductGalleryUpload = async (files) => {
+    if (!files || files.length === 0) return;
+    try {
+      setIsCompressingImage(true);
+      const addedUrls = [];
+      for (const file of Array.from(files)) {
+        try {
+          const webpResult = await compressAndConvertToWebP(file, { maxWidth: 1200, maxHeight: 1200, quality: 0.84 });
+          let finalUrl = webpResult.dataUrl;
+          try {
+            const uploadRes = await fetch('/api/upload-media', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                dataUrl: webpResult.dataUrl,
+                filename: file.name,
+                category: 'products'
+              })
+            });
+            const uploadData = await uploadRes.json();
+            if (uploadData?.success && uploadData.url) {
+              finalUrl = uploadData.url;
+            }
+          } catch (uploadErr) {}
+          addedUrls.push(finalUrl);
+        } catch (itemErr) {
+          console.error('Failed to compress gallery image:', itemErr);
+        }
+      }
+      if (addedUrls.length > 0) {
+        setProductForm(prev => ({
+          ...prev,
+          gallery: [...prev.gallery, ...addedUrls]
+        }));
+        showToast(`เพิ่มรูปภาพสไลเดอร์สินค้า ${addedUrls.length} รูปเรียบร้อย`);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('เกิดข้อผิดพลาดในการอัปโหลดรูปภาพสไลเดอร์');
     } finally {
       setIsCompressingImage(false);
     }
@@ -2598,13 +2664,13 @@ export default function StoreOrdersAndProductsCMS() {
                       ))}
                     </div>
 
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                       <input 
                         type="text" 
-                        placeholder="เพิ่ม URL รูปภาพสำหรับออโต้สไลด์..."
+                        placeholder="เพิ่ม URL รูปภาพสำหรับออโต้สไลด์ หรือกดปุ่มอัปโหลดจากเครื่อง..."
                         value={newGalleryInput}
                         onChange={e => setNewGalleryInput(e.target.value)}
-                        style={{ flex: 1, padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}
+                        style={{ flex: 1, minWidth: '220px', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}
                       />
                       <button 
                         type="button" 
@@ -2612,8 +2678,21 @@ export default function StoreOrdersAndProductsCMS() {
                         onClick={handleAddGalleryImage}
                         style={{ padding: '8px 14px', fontSize: '0.85rem' }}
                       >
-                        + เพิ่มรูปสไลด์
+                        + เพิ่มจาก URL
                       </button>
+                      <label className="btn-secondary" style={{ cursor: 'pointer', margin: 0, padding: '8px 14px', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        <span>📁 อัปโหลดรูปสไลด์จากเครื่อง</span>
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          multiple
+                          style={{ display: 'none' }} 
+                          onChange={e => {
+                            if (e.target.files && e.target.files.length > 0) handleProductGalleryUpload(e.target.files);
+                            e.target.value = '';
+                          }} 
+                        />
+                      </label>
                     </div>
                   </div>
                 </div>
