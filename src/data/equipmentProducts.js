@@ -45,9 +45,9 @@ export const EQUIPMENT_PRODUCTS = [
       'ช่องร้อยสายไฟคู่ซ้าย-ขวา พร้อมฝาครอบเก็บสายเรียบร้อย'
     ],
     colors: [
-      { id: 'c-black', name: 'Stealth Black (ดำคาร์บอน)', hex: '#0f172a' },
-      { id: 'c-blue', name: 'GLP Royal Blue (น้ำเงินรอยัล)', hex: '#1d4ed8' },
-      { id: 'c-white', name: 'Pure White (ขาวมินิมอล)', hex: '#ffffff' }
+      { id: 'c-black', name: 'Stealth Black (ดำคาร์บอน)', hex: '#0f172a', image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80' },
+      { id: 'c-blue', name: 'GLP Royal Blue (น้ำเงินรอยัล)', hex: '#1d4ed8', image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80' },
+      { id: 'c-white', name: 'Pure White (ขาวมินิมอล)', hex: '#ffffff', image: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80' }
     ],
     sizes: [
       { id: 's-120', name: '120 x 60 ซม.', extraPrice: 0 },

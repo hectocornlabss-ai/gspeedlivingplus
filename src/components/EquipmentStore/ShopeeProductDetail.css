@@ -27,7 +27,7 @@
 .shopee-pdp-root {
   background-color: var(--glp-bg);
   min-height: 100vh;
-  padding-bottom: 60px;
+  padding-bottom: 20px;
   color: var(--glp-text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -1250,14 +1250,23 @@
     z-index: 9998 !important;
   }
 
-  /* Float AI chat bubble safely above both bottom bars */
+  /* Float AI chat bubble safely above both bottom bars on PDP */
   body.in-shopee-pdp .btn-ai-chat-trigger {
     bottom: calc(118px + env(safe-area-inset-bottom, 0px)) !important;
   }
 
+  /* Eliminate excessive bottom gap on PDP: remove duplicate app-layout padding */
+  body.in-shopee-pdp .app-layout {
+    padding-bottom: 0 !important;
+  }
+
+  body.in-shopee-pdp footer {
+    padding-bottom: calc(118px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
   .shopee-pdp-root {
     background: #f8fafc;
-    padding-bottom: calc(124px + env(safe-area-inset-bottom, 0px)); /* Space for both bottom bars */
+    padding-bottom: 16px;
   }
 
   .shopee-pdp-container {

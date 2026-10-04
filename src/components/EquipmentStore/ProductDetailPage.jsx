@@ -199,14 +199,19 @@ export default function ProductDetailPage({
   const [copyToast, setCopyToast] = useState(false);
   const [cartToast, setCartToast] = useState(false);
 
-  // Gallery images with guaranteed rich variations (matching carousel)
+  // Gallery images: use ONLY actual product images (real count, no fake fallback padding)
   const galleryImages = useMemo(() => {
-    const list = (product?.gallery && product.gallery.length > 0) 
-      ? [...product.gallery] 
-      : (product?.image ? [product.image] : []);
-    
-    // Supplement with color previews if fewer than 5 images
-    if (list.length < 5 && product?.colors) {
+    const list = [];
+    if (product?.gallery && product.gallery.length > 0) {
+      product.gallery.forEach(img => {
+        if (img && !list.includes(img)) list.push(img);
+      });
+    } else if (product?.image) {
+      list.push(product.image);
+    }
+
+    // Also include any unique variant images from colors
+    if (product?.colors) {
       product.colors.forEach(c => {
         if (c.image && !list.includes(c.image)) {
           list.push(c.image);
@@ -214,23 +219,40 @@ export default function ProductDetailPage({
       });
     }
 
-    // Default fallbacks if still fewer than 5 images
-    const fallbacks = [
-      'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1598550476439-6847785fcea6?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&w=800&q=80'
-    ];
-
-    while (list.length < 5) {
-      const fb = fallbacks[list.length % fallbacks.length];
-      if (!list.includes(fb)) list.push(fb);
-      else list.push(list[0]);
+    if (list.length === 0) {
+      list.push('https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80');
     }
 
     return list;
   }, [product]);
+
+  // Handle color selection and switch hero image to match color
+  const handleSelectColor = (col, idx) => {
+    setSelectedColor(col);
+    const targetImg = col.image || product.gallery?.[idx] || product.image;
+    if (targetImg) {
+      const foundIdx = galleryImages.indexOf(targetImg);
+      if (foundIdx !== -1) {
+        setActivePhotoIdx(foundIdx);
+      } else if (idx < galleryImages.length) {
+        setActivePhotoIdx(idx);
+      }
+    }
+  };
+
+  // Handle size selection and switch hero image if size has an image or maps to a gallery photo
+  const handleSelectSize = (sz, idx) => {
+    setSelectedSize(sz);
+    const targetImg = sz.image || (product.gallery && product.gallery[idx % product.gallery.length]);
+    if (targetImg) {
+      const foundIdx = galleryImages.indexOf(targetImg);
+      if (foundIdx !== -1) {
+        setActivePhotoIdx(foundIdx);
+      } else if (idx < galleryImages.length) {
+        setActivePhotoIdx(idx);
+      }
+    }
+  };
 
   // Reset when product changes & manage body class for isolated mobile header/footer
   useEffect(() => {
@@ -392,73 +414,38 @@ export default function ProductDetailPage({
           <div className="shopee-media-column">
             {/* Main Photo Box */}
             <div className="shopee-main-photo-wrapper">
-              {/* Optional 3D View Switcher Badge */}
-              {product.threeDConfig && (
-                <button
-                  type="button"
-                  className={`shopee-3d-toggle-btn ${activeMediaTab === '3d' ? 'active' : ''}`}
-                  onClick={() => setActiveMediaTab(prev => prev === '3d' ? 'gallery' : '3d')}
-                  title={activeMediaTab === '3d' ? text.viewPhotos : text.view3D}
-                >
-                  {activeMediaTab === '3d' ? (
-                    <>
-                      <Eye size={14} />
-                      <span>{text.viewPhotos}</span>
-                    </>
-                  ) : (
-                    <>
-                      <RotateCw size={14} className="spin-slow" />
-                      <span>{text.view3D}</span>
-                    </>
-                  )}
-                </button>
-              )}
+              {/* Media Content: Photo */}
+              <img 
+                src={galleryImages[activePhotoIdx] || product.image} 
+                alt={product.name} 
+                className="shopee-main-photo-img"
+              />
 
-              {/* Media Content: 3D or Photo */}
-              {activeMediaTab === '3d' && product.threeDConfig ? (
-                <div style={{ width: '100%', height: '100%' }}>
-                  <ThreeProductViewer 
-                    item={threeDItem}
-                    autoRotateDefault={true}
-                    height="100%"
-                    showControls={true}
-                  />
-                </div>
-              ) : (
+              {/* Left & Right Nav Arrows */}
+              {galleryImages.length > 1 && (
                 <>
-                  <img 
-                    src={galleryImages[activePhotoIdx] || product.image} 
-                    alt={product.name} 
-                    className="shopee-main-photo-img"
-                  />
-
-                  {/* Left & Right Nav Arrows */}
-                  {galleryImages.length > 1 && (
-                    <>
-                      <button 
-                        type="button" 
-                        className="shopee-photo-nav-arrow prev"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setActivePhotoIdx(prev => (prev - 1 + galleryImages.length) % galleryImages.length);
-                        }}
-                        aria-label="รูปก่อนหน้า"
-                      >
-                        <ChevronLeft size={22} />
-                      </button>
-                      <button 
-                        type="button" 
-                        className="shopee-photo-nav-arrow next"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setActivePhotoIdx(prev => (prev + 1) % galleryImages.length);
-                        }}
-                        aria-label="รูปถัดไป"
-                      >
-                        <ChevronRight size={22} />
-                      </button>
-                    </>
-                  )}
+                  <button 
+                    type="button" 
+                    className="shopee-photo-nav-arrow prev"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActivePhotoIdx(prev => (prev - 1 + galleryImages.length) % galleryImages.length);
+                    }}
+                    aria-label="รูปก่อนหน้า"
+                  >
+                    <ChevronLeft size={22} />
+                  </button>
+                  <button 
+                    type="button" 
+                    className="shopee-photo-nav-arrow next"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActivePhotoIdx(prev => (prev + 1) % galleryImages.length);
+                    }}
+                    aria-label="รูปถัดไป"
+                  >
+                    <ChevronRight size={22} />
+                  </button>
                 </>
               )}
 
@@ -598,15 +585,15 @@ export default function ProductDetailPage({
                 {product.colors?.length || 3} {text.selectColor}
               </div>
               <div className="shopee-mobile-vars-scroll">
-                {product.colors && product.colors.map(col => (
+                {product.colors && product.colors.map((col, idx) => (
                   <div 
                     key={col.id}
                     className={`shopee-mobile-var-item ${selectedColor?.id === col.id ? 'active' : ''}`}
-                    onClick={() => setSelectedColor(col)}
+                    onClick={() => handleSelectColor(col, idx)}
                     title={col.name}
                   >
                     <img 
-                      src={col.image || product.image} 
+                      src={col.image || product.gallery?.[idx] || product.image} 
                       alt={col.name} 
                     />
                   </div>
@@ -705,17 +692,18 @@ export default function ProductDetailPage({
                 <div className="shopee-form-label">{text.selectColor}</div>
                 <div className="shopee-form-content">
                   <div className="shopee-variations-grid">
-                    {product.colors.map(col => {
+                    {product.colors.map((col, idx) => {
                       const isSelected = selectedColor?.id === col.id;
+                      const thumbImg = col.image || product.gallery?.[idx] || product.image;
                       return (
                         <button
                           key={col.id}
                           type="button"
                           className={`shopee-variation-btn ${isSelected ? 'active' : ''}`}
-                          onClick={() => setSelectedColor(col)}
+                          onClick={() => handleSelectColor(col, idx)}
                         >
-                          {col.image ? (
-                            <img src={col.image} alt={col.name} className="shopee-var-thumb" />
+                          {thumbImg ? (
+                            <img src={thumbImg} alt={col.name} className="shopee-var-thumb" />
                           ) : (
                             <span 
                               className="shopee-var-color-dot" 
@@ -738,14 +726,14 @@ export default function ProductDetailPage({
                 <div className="shopee-form-label">{text.selectSize}</div>
                 <div className="shopee-form-content">
                   <div className="shopee-sizes-row">
-                    {product.sizes.map(sz => {
+                    {product.sizes.map((sz, idx) => {
                       const isSelected = selectedSize?.id === sz.id;
                       return (
                         <button
                           key={sz.id}
                           type="button"
                           className={`shopee-size-btn ${isSelected ? 'active' : ''}`}
-                          onClick={() => setSelectedSize(sz)}
+                          onClick={() => handleSelectSize(sz, idx)}
                         >
                           <span>{sz.name}</span>
                           {sz.extraPrice > 0 && (

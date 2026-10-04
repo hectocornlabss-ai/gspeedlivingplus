@@ -1313,6 +1313,10 @@ export default function ArenaHub({
                 : prod.category === 'accessories' ? (isThai ? 'อุปกรณ์เสริม' : 'Accessories')
                 : (isThai ? 'เซ็ตสุดคุ้ม' : 'Bundle');
 
+              const discountPercent = prod.originalPrice && prod.price && prod.originalPrice > prod.price
+                ? Math.round(((prod.originalPrice - prod.price) / prod.originalPrice) * 100)
+                : null;
+
               return (
                 <div 
                   key={prod.id} 
@@ -1333,6 +1337,11 @@ export default function ArenaHub({
                     {prod.badge && (
                       <span className={`home-product-badge ${prod.badgeType || ''}`}>
                         {prod.badge}
+                      </span>
+                    )}
+                    {discountPercent && (
+                      <span className="home-product-discount-tag">
+                        -{discountPercent}%
                       </span>
                     )}
                   </div>
