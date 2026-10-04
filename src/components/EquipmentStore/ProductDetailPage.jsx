@@ -981,15 +981,6 @@ export default function ProductDetailPage({
       <div className="shopee-mobile-bottom-bar">
         <button 
           type="button" 
-          className="shopee-mobile-bar-icon-btn chat"
-          onClick={handleOpenLiveChat}
-        >
-          <MessageCircle size={18} />
-          <span>{text.chatNow}</span>
-        </button>
-
-        <button 
-          type="button" 
           className="shopee-mobile-bar-icon-btn quote"
           onClick={handleInstantQuotation}
         >
