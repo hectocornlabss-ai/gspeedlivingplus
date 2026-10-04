@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   ChevronRight, ChevronLeft, ArrowLeft, ShoppingCart, Check, 
   Star, ShieldCheck, Truck, RotateCw, Eye, 
@@ -254,6 +254,81 @@ export default function ProductDetailPage({
     }
   };
 
+  // Touch & Pointer gesture handling for mobile image swiping
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isSwiping, setIsSwiping] = useState(false);
+  const touchStartXRef = useRef(0);
+  const touchStartYRef = useRef(0);
+  const isDraggingRef = useRef(false);
+  const currentDragOffsetRef = useRef(0);
+
+  const handleTouchStart = (e) => {
+    if (galleryImages.length <= 1) return;
+    touchStartXRef.current = e.touches[0].clientX;
+    touchStartYRef.current = e.touches[0].clientY;
+    isDraggingRef.current = true;
+    currentDragOffsetRef.current = 0;
+    setIsSwiping(true);
+    setDragOffset(0);
+  };
+
+  const handleTouchMove = (e) => {
+    if (!isDraggingRef.current || galleryImages.length <= 1) return;
+    const currentX = e.touches[0].clientX;
+    const currentY = e.touches[0].clientY;
+    const diffX = currentX - touchStartXRef.current;
+    const diffY = currentY - touchStartYRef.current;
+
+    // Track horizontal swipe if horizontal movement is dominant
+    if (Math.abs(diffX) > Math.abs(diffY)) {
+      currentDragOffsetRef.current = diffX;
+      setDragOffset(diffX);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (!isDraggingRef.current) return;
+    isDraggingRef.current = false;
+    setIsSwiping(false);
+
+    const diffX = currentDragOffsetRef.current;
+    const swipeThreshold = 45; // pixels to trigger image slide
+
+    if (diffX < -swipeThreshold) {
+      // Swiped LEFT -> Next Image
+      setActivePhotoIdx(prev => (prev + 1) % galleryImages.length);
+    } else if (diffX > swipeThreshold) {
+      // Swiped RIGHT -> Previous Image
+      setActivePhotoIdx(prev => (prev - 1 + galleryImages.length) % galleryImages.length);
+    }
+
+    currentDragOffsetRef.current = 0;
+    setDragOffset(0);
+  };
+
+  // Mouse Drag support for testing on desktop browser
+  const handleMouseDown = (e) => {
+    if (galleryImages.length <= 1) return;
+    touchStartXRef.current = e.clientX;
+    touchStartYRef.current = e.clientY;
+    isDraggingRef.current = true;
+    currentDragOffsetRef.current = 0;
+    setIsSwiping(true);
+    setDragOffset(0);
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDraggingRef.current || galleryImages.length <= 1) return;
+    const diffX = e.clientX - touchStartXRef.current;
+    currentDragOffsetRef.current = diffX;
+    setDragOffset(diffX);
+  };
+
+  const handleMouseUp = () => {
+    if (!isDraggingRef.current) return;
+    handleTouchEnd();
+  };
+
   // Reset when product changes & manage body class for isolated mobile header/footer
   useEffect(() => {
     document.body.classList.add('in-shopee-pdp');
@@ -412,14 +487,39 @@ export default function ProductDetailPage({
         <div className="shopee-showcase-card">
           {/* ==================== LEFT COLUMN: MEDIA ==================== */}
           <div className="shopee-media-column">
-            {/* Main Photo Box */}
-            <div className="shopee-main-photo-wrapper">
-              {/* Media Content: Photo */}
-              <img 
-                src={galleryImages[activePhotoIdx] || product.image} 
-                alt={product.name} 
-                className="shopee-main-photo-img"
-              />
+            {/* Main Photo Box with Touch & Mouse Swipe Gestures */}
+            <div 
+              className="shopee-main-photo-wrapper"
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              onTouchCancel={handleTouchEnd}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+            >
+              {/* Slide Track for all Gallery Photos */}
+              <div 
+                className="shopee-photo-slide-track"
+                style={{
+                  transform: isSwiping && dragOffset !== 0
+                    ? `translateX(calc(-${activePhotoIdx * 100}% + ${dragOffset}px))`
+                    : `translateX(-${activePhotoIdx * 100}%)`,
+                  transition: isSwiping ? 'none' : 'transform 0.32s cubic-bezier(0.25, 1, 0.5, 1)'
+                }}
+              >
+                {galleryImages.map((img, idx) => (
+                  <div key={idx} className="shopee-photo-slide-item">
+                    <img 
+                      src={img} 
+                      alt={`${product.name} - รูปที่ ${idx + 1}`} 
+                      className="shopee-main-photo-img"
+                      draggable="false"
+                    />
+                  </div>
+                ))}
+              </div>
 
               {/* Left & Right Nav Arrows */}
               {galleryImages.length > 1 && (
