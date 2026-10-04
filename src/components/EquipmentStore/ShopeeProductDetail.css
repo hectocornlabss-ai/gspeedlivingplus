@@ -1244,15 +1244,20 @@
 }
 
 @media (max-width: 768px) {
-  /* Keep GLP official header & footer! Only hide duplicate bottom tab bar and floating AI chat bubble */
-  body.in-shopee-pdp .mobile-bottom-nav,
+  /* Keep GLP official header & mobile bottom nav ("button menu") */
+  body.in-shopee-pdp .mobile-bottom-nav {
+    display: flex !important;
+    z-index: 9998 !important;
+  }
+
+  /* Float AI chat bubble safely above both bottom bars */
   body.in-shopee-pdp .btn-ai-chat-trigger {
-    display: none !important;
+    bottom: calc(118px + env(safe-area-inset-bottom, 0px)) !important;
   }
 
   .shopee-pdp-root {
     background: #f8fafc;
-    padding-bottom: 74px; /* Space for fixed bottom action bar */
+    padding-bottom: calc(124px + env(safe-area-inset-bottom, 0px)); /* Space for both bottom bars */
   }
 
   .shopee-pdp-container {
@@ -1499,14 +1504,15 @@
     display: flex;
     align-items: stretch;
     position: fixed;
-    bottom: 0;
+    bottom: calc(58px + env(safe-area-inset-bottom, 0px));
     left: 0;
     right: 0;
     height: 52px;
     background: #ffffff;
-    box-shadow: 0 -3px 12px rgba(15, 23, 42, 0.08);
-    z-index: 1000;
+    box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.09);
+    z-index: 9990;
     border-top: 1px solid var(--glp-border);
+    border-bottom: 1px solid #e2e8f0;
   }
 
   .shopee-mobile-bar-icon-btn {
