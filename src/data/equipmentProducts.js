@@ -268,9 +268,9 @@ export const EQUIPMENT_PRODUCTS = [
     stock: 30,
     rating: 5.0,
     reviewsCount: 142,
-    image: 'https://images.unsplash.com/photo-1589384267710-7a170981ca78?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1505797149-43b0069ec26b?auto=format&fit=crop&w=800&q=80',
     gallery: [
-      'https://images.unsplash.com/photo-1589384267710-7a170981ca78?auto=format&fit=crop&w=800&q=80'
+      'https://images.unsplash.com/photo-1505797149-43b0069ec26b?auto=format&fit=crop&w=800&q=80'
     ],
     dimensions: 'กว้าง 65 x ลึก 65 x สูง 115 - 128 ซม.',
     weight: '19 กก. (รองรับน้ำหนักสูงสุด 150 กก.)',

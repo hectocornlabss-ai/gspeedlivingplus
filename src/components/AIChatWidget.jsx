@@ -289,7 +289,7 @@ const CORE_KNOWLEDGE = {
 • ระบบจะสร้างเอกสารใบเสนอราคาทางการ (QT-xxxx) พร้อมหัวกระดาษบริษัท, รายละเอียดสินค้า, ส่วนลด B2B และภาษีมูลค่าเพิ่ม (VAT 7%) ดาวน์โหลดหรือพิมพ์ได้ทันทีใน 1 วินาที!
 • ออกใบกำกับภาษีเต็มรูปแบบ (Full Tax Invoice) ได้ทุกคำสั่งซื้อ
 
-👉 [**คลิกที่นี่เพื่อไปที่ตะกร้าสินค้า / ออกใบเสนอราคา**](/franchise)
+👉 [**คลิกที่นี่เพื่อไปที่ตะกร้าสินค้า / ออกใบเสนอราคา**](/products)
 📞 ปรึกษาโครงการหรือขอใบเสนอราคาด่วน โทร [063 793 7704](tel:0637937704) หรือแจ้งรายการในแชทนี้ได้เลยครับ`,
     en: `🏢 **B2B Bulk Orders, Corporate Projects & Official Quotations:**
 
@@ -305,7 +305,7 @@ Exclusive volume discounts for cyber cafes, esports academies, studios, and corp
 • Instantly generates an official quotation document (QT-xxxx) with company header, volume discounts, and 7% VAT breakdown.
 • Official Full Tax Invoices issued for all purchases.
 
-👉 [**Click here to view Cart & Generate Quotation**](/franchise)
+👉 [**Click here to view Cart & Generate Quotation**](/products)
 📞 Corporate inquiries & large tenders: Call [063 793 7704](tel:0637937704)!`,
     zh: `🏢 **B2B 网咖、电竞馆与企事业单位大宗采购批发方案：**
 
@@ -321,7 +321,7 @@ Exclusive volume discounts for cyber cafes, esports academies, studios, and corp
 • 系统即刻自动生成带 Gspeed 公司正规抬头的正式报价单 (QT-xxxx)，包含阶梯折扣与 7% 增值税计算，可直接打印或下载 PDF 报销请款！
 • 所有采购均可开具正规全额增值税专用发票 (Full Tax Invoice)。
 
-👉 [**点击前往购物车 / 申请正规报价单**](/franchise)
+👉 [**点击前往购物车 / 申请正规报价单**](/products)
 📞 大宗项目咨询专线：[063 793 7704](tel:0637937704)！`
   },
 
@@ -870,7 +870,7 @@ export default function AIChatWidget() {
     { label: '📦 Track My Order', query: 'Track order status' },
     { label: '🪑 Ergonomic & Gaming Chairs', query: 'Recommend ergonomic chairs and gaming chairs' },
     { label: '🖥️ Battle Desks & Standing Desks', query: 'Specs for gaming desks and electric standing desks' },
-    { label: '🏢 B2B Wholesale Discounts', query: 'B2B wholesale pricing and volume discount tiers' },
+    { label: '🎧 Setup Accessories & Arms', query: 'Recommend monitor arms and setup accessories' },
     { label: '📄 Official Quotation (PDF)', query: 'How to request an official quotation PDF' },
     { label: '🚚 Delivery & On-Site Assembly', query: 'Delivery timeframe and on-site assembly service' },
     { label: '🛡️ 3-5 Year Warranty', query: 'Product warranty details and after-sales support' },
@@ -879,7 +879,7 @@ export default function AIChatWidget() {
     { label: '📦 查询订单物流', query: '查询订单状态' },
     { label: '🪑 人体工学椅与电竞椅', query: '推荐热销电竞椅与人体工学网椅' },
     { label: '🖥️ 电竞桌与升降桌', query: '电竞桌与智能双电机升降桌规格及尺寸' },
-    { label: '🏢 B2B 批发与批量采购', query: '网咖与企业大宗采购批发折扣方案' },
+    { label: '🎧 外设配件与显示器支架', query: '推荐桌面外设配件与显示器支架' },
     { label: '📄 获取官方报价单 PDF', query: '如何申请正规官方报价单' },
     { label: '🚚 配送与上门安装', query: '配送方式与上门安装服务说明' },
     { label: '🛡️ 3-5年原厂质保', query: '产品质保几年？售后如何保障？' },
@@ -888,7 +888,7 @@ export default function AIChatWidget() {
     { label: '📦 ติดตามเลขออเดอร์', query: 'ติดตามสถานะคำสั่งซื้อ' },
     { label: '🪑 เก้าอี้เกมมิ่ง & สุขภาพ', query: 'แนะนำเก้าอี้เกมมิ่งและเก้าอี้สุขภาพหน่อย' },
     { label: '🖥️ โต๊ะเกมมิ่ง & โต๊ะไฟฟ้า', query: 'สเปกโต๊ะเกมมิ่งและโต๊ะปรับระดับไฟฟ้า' },
-    { label: '🏢 สั่งซื้อราคาส่ง B2B / ร้านเกม', query: 'สั่งซื้อจำนวนมากราคาส่ง B2B มีส่วนลดยังไง' },
+    { label: '🎧 อุปกรณ์เสริม & แขนจับจอ', query: 'แนะนำอุปกรณ์เสริมจัดโต๊ะคอมและแขนจับจอ' },
     { label: '📄 ขอใบเสนอราคา (Quotation)', query: 'วิธีขอใบเสนอราคาทางการ' },
     { label: '🚚 การจัดส่ง & บริการติดตั้ง', query: 'การจัดส่งและบริการประกอบติดตั้ง' },
     { label: '🛡️ การรับประกันสินค้า 3-5 ปี', query: 'การรับประกันสินค้ากี่ปี มีอะไรบ้าง' },

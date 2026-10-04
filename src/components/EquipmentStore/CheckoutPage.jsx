@@ -65,7 +65,7 @@ export default function CheckoutPage({
   const [email, setEmail] = useState('');
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [deliveryNotes, setDeliveryNotes] = useState('');
-  const [needTaxInvoice, setNeedTaxInvoice] = useState(true);
+  const [needTaxInvoice, setNeedTaxInvoice] = useState(false);
   const [taxCompanyName, setTaxCompanyName] = useState('');
   const [taxId, setTaxId] = useState('');
   const [taxBranch, setTaxBranch] = useState('สำนักงานใหญ่');
@@ -155,7 +155,7 @@ export default function CheckoutPage({
       setDeliveryAddress(c.address || '');
       setTaxCompanyName(c.companyName || '');
       setTaxId(c.taxId || '');
-      setNeedTaxInvoice(true);
+      setNeedTaxInvoice(!!(c.companyName || c.taxId));
     }
   }, [initialOrderNo, initialStep, checkoutInitialData, getOrder, savedOrders]);
 
@@ -1375,12 +1375,8 @@ export default function CheckoutPage({
                   </div>
                 </div>
 
-                {/* Important Notice: Membership Optional / Order No is Crucial */}
+                {/* Important Notice: Order No is Crucial */}
                 <div className="guest-order-notice-box">
-                  <div className="guest-notice-badge">
-                    <ShieldCheck size={16} className="text-emerald" />
-                    <span>สมาชิก: <strong>ไม่จำเป็นต้องสมัครสมาชิก</strong></span>
-                  </div>
                   <p className="guest-notice-desc">
                     💡 <strong>สำคัญมาก:</strong> โปรดบันทึกหรือคัดลอก <strong>หมายเลขคำสั่งซื้อ ({activeOrder.orderNo})</strong> นี้ไว้ เพื่อใช้ตรวจสอบสถานะการจัดส่ง หรือแจ้งชำระเงินภายหลังได้ตลอด 24 ชม.
                   </p>

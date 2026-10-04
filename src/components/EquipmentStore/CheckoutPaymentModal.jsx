@@ -28,7 +28,7 @@ export default function CheckoutPaymentModal() {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [deliveryAddress, setDeliveryAddress] = useState('');
-  const [needTaxInvoice, setNeedTaxInvoice] = useState(true);
+  const [needTaxInvoice, setNeedTaxInvoice] = useState(false);
   const [taxCompanyName, setTaxCompanyName] = useState('');
   const [taxId, setTaxId] = useState('');
 
@@ -63,7 +63,7 @@ export default function CheckoutPaymentModal() {
         setDeliveryAddress(c.address || '');
         setTaxCompanyName(c.companyName || '');
         setTaxId(c.taxId || '');
-        setNeedTaxInvoice(true);
+        setNeedTaxInvoice(!!(c.companyName || c.taxId));
       }
     }
   }, [isCheckoutModalOpen, checkoutInitialData]);

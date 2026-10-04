@@ -1299,7 +1299,7 @@ export default function ArenaHub({
             </h2>
             <p className="section-subtitle" style={{ maxWidth: '640px', margin: '0 auto', color: '#64748b', fontSize: '15px' }}>
               {isThai 
-                ? 'โต๊ะเกมมิ่งโครงเหล็กคาร์บอน เก้าอี้ Ergonomic และอุปกรณ์จัดโต๊ะคอมพิวเตอร์ระดับโปร มาตรฐานสนามแข่งอีสปอร์ต สั่งซื้อได้ทันที พร้อมออกใบเสนอราคาทางการ' 
+                ? 'โต๊ะเกมมิ่งโครงเหล็กคาร์บอน เก้าอี้ Ergonomic และอุปกรณ์จัดโต๊ะคอมพิวเตอร์ระดับโปร สั่งซื้อได้ทันที พร้อมออกใบเสนอราคาทางการ' 
                 : (language === 'zh' 
                     ? '专业电竞对战桌椅、人体工学椅与电竞外设硬件，官方原厂质保，现货直发' 
                     : 'Esports-grade battle desks, ergonomic chairs, and professional equipment. Order online with instant official quotation.')}

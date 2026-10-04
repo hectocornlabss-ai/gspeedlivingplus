@@ -8,6 +8,95 @@ import {
 import { EQUIPMENT_PRODUCTS, PRODUCT_CATEGORIES } from '../../data/equipmentProducts';
 import { useCart } from '../../context/CartContext';
 import { useSiteData } from '../../context/SiteDataContext';
+import { useTranslation } from '../../context/LanguageContext';
+
+// Multilingual Dictionary (Thai, English, Chinese)
+const I18N = {
+  th: {
+    home: 'หน้าแรก',
+    allProducts: 'สินค้าทั้งหมด',
+    allCategoryTitle: 'โต๊ะ เก้าอี้เกมมิ่ง และอุปกรณ์อื่นๆ',
+    totalItems: 'ทั้งหมด',
+    itemsUnit: 'รายการ',
+    vatIncluded: 'ราคาสินค้ารวมภาษีมูลค่าเพิ่ม 7% (ออกใบกำกับภาษีได้)',
+    searchPlaceholder: 'ค้นหาชื่อสินค้า, สเปก, รหัสรุ่น...',
+    sortByLabel: 'การเรียงลำดับ:',
+    sortPopular: 'สินค้าแนะนำ / ยอดนิยม',
+    sortPriceAsc: 'ราคา: ต่ำ ➔ สูง',
+    sortPriceDesc: 'ราคา: สูง ➔ ต่ำ',
+    sortRating: 'คะแนนรีวิวสูงสุด',
+    emptyTitle: 'ไม่พบสินค้าที่ตรงกับการค้นหา',
+    emptyDesc: 'ลองค้นหาด้วยคำอื่น หรือกดดูสินค้าทั้งหมด',
+    btnShowAll: 'แสดงสินค้าทั้งหมด',
+    inStock: 'มีสินค้าพร้อมส่ง',
+    onlinePromo: 'โปรโมชั่นเฉพาะสั่งซื้อออนไลน์ • ส่งฟรีทั่วประเทศ',
+    addToCart: 'ใส่ตะกร้า',
+    addedToCart: 'ใส่ลงตะกร้าแล้ว ✓',
+    categories: {
+      all: 'สินค้าทั้งหมด',
+      desks: 'โต๊ะเกมมิ่ง & โต๊ะทำงาน',
+      chairs: 'เก้าอี้เกมมิ่ง & Ergonomic',
+      accessories: 'อุปกรณ์เสริม & รางสายไฟ',
+      bundles: 'เซ็ตสุดคุ้ม (Bundle)'
+    }
+  },
+  en: {
+    home: 'Home',
+    allProducts: 'All Products',
+    allCategoryTitle: 'Gaming Desks, Ergonomic Chairs & Accessories',
+    totalItems: 'Total',
+    itemsUnit: 'items',
+    vatIncluded: 'Includes 7% VAT (Full Tax Invoice Available)',
+    searchPlaceholder: 'Search by product name, specs, or SKU...',
+    sortByLabel: 'Sort by:',
+    sortPopular: 'Recommended / Popular',
+    sortPriceAsc: 'Price: Low to High',
+    sortPriceDesc: 'Price: High to Low',
+    sortRating: 'Highest Customer Rating',
+    emptyTitle: 'No products match your search',
+    emptyDesc: 'Try adjusting your keywords or browse all categories',
+    btnShowAll: 'Show All Products',
+    inStock: 'In Stock & Ready to Ship',
+    onlinePromo: 'Online Exclusive Promo • Free Nationwide Delivery',
+    addToCart: 'Add to Cart',
+    addedToCart: 'Added ✓',
+    categories: {
+      all: 'All Products',
+      desks: 'Desks & Workstations',
+      chairs: 'Gaming & Ergonomic Chairs',
+      accessories: 'Accessories & Mounts',
+      bundles: 'Value Bundles'
+    }
+  },
+  zh: {
+    home: '首页',
+    allProducts: '全部商品',
+    allCategoryTitle: '专业电竞桌椅与人体工学装备专区',
+    totalItems: '共计',
+    itemsUnit: '件商品',
+    vatIncluded: '价格已含 7% 增值税（可开具正规发票）',
+    searchPlaceholder: '搜索商品名称、型号或规格参数...',
+    sortByLabel: '商品排序:',
+    sortPopular: '推荐 / 热销优先',
+    sortPriceAsc: '价格: 从低到高',
+    sortPriceDesc: '价格: 从高到低',
+    sortRating: '用户好评最高',
+    emptyTitle: '未找到符合条件的商品',
+    emptyDesc: '建议您更换关键词搜索，或点击查看全部分类',
+    btnShowAll: '浏览全部商品',
+    inStock: '现货直发',
+    onlinePromo: '线上订购特惠 • 全泰国境内包邮',
+    addToCart: '加入购物车',
+    addedToCart: '已加入购物车 ✓',
+    categories: {
+      all: '全部商品',
+      desks: '电竞桌与升降桌',
+      chairs: '电竞椅与工学椅',
+      accessories: '外设配件与收纳',
+      bundles: '超值套装 (Bundle)'
+    }
+  }
+};
 
 export default function ProductCatalog({ 
   selectedCategory, 
@@ -18,6 +107,9 @@ export default function ProductCatalog({
   const { siteData } = useSiteData();
   const rawProducts = siteData?.equipmentProducts || EQUIPMENT_PRODUCTS;
   const { addToCart, setIsQuotationModalOpen } = useCart();
+  const { language = 'th' } = useTranslation();
+  const text = I18N[language] || I18N.th;
+
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('popular'); // 'popular' | 'price-asc' | 'price-desc' | 'rating'
   const [addedFeedbackId, setAddedFeedbackId] = useState(null);
@@ -36,6 +128,7 @@ export default function ProductCatalog({
       const q = searchQuery.toLowerCase().trim();
       list = list.filter(p => 
         p.name.toLowerCase().includes(q) ||
+        (p.nameEn && p.nameEn.toLowerCase().includes(q)) ||
         p.subtitle.toLowerCase().includes(q) ||
         p.sku.toLowerCase().includes(q) ||
         p.materials?.toLowerCase().includes(q)
@@ -55,7 +148,7 @@ export default function ProductCatalog({
     }
 
     return list;
-  }, [selectedCategory, searchQuery, sortBy]);
+  }, [rawProducts, selectedCategory, searchQuery, sortBy]);
 
   const handleQuickAdd = (product, e) => {
     e.stopPropagation();
@@ -77,9 +170,18 @@ export default function ProductCatalog({
     setIsQuotationModalOpen(true);
   };
 
+  const getCategoryName = (catId) => {
+    if (text.categories && text.categories[catId]) {
+      return text.categories[catId];
+    }
+    const cat = PRODUCT_CATEGORIES.find(c => c.id === catId);
+    if (!cat) return text.allProducts;
+    return language === 'en' ? (cat.nameEn || cat.name) : cat.name;
+  };
+
   const currentCategoryName = selectedCategory === 'all' 
-    ? 'โต๊ะ เก้าอี้เกมมิ่ง และอุปกรณ์อื่นๆ' 
-    : (PRODUCT_CATEGORIES.find(c => c.id === selectedCategory)?.name || 'สินค้าทั้งหมด');
+    ? text.allCategoryTitle 
+    : getCategoryName(selectedCategory);
 
   return (
     <div className="equipment-catalog-page-wrapper">
@@ -91,14 +193,14 @@ export default function ProductCatalog({
               className="breadcrumb-link-btn"
               onClick={onNavigateHome}
             >
-              หน้าแรก
+              {text.home}
             </button>
             <ChevronRight size={14} className="breadcrumb-sep-icon" />
             <button 
               className="breadcrumb-link-btn"
               onClick={() => onSelectCategory('all')}
             >
-              สินค้าทั้งหมด
+              {text.allProducts}
             </button>
             {selectedCategory !== 'all' && (
               <>
@@ -111,16 +213,16 @@ export default function ProductCatalog({
       </div>
 
       <div className="container catalog-main-container">
-        {/* 2. Top Title & B2B Strip */}
+        {/* 2. Top Title & Meta Strip */}
         <div className="catalog-top-header">
           <div className="header-title-col">
             <h1 className="catalog-main-title">{currentCategoryName}</h1>
             <div className="catalog-meta-strip">
               <span className="meta-count-tag">
-                ทั้งหมด <strong>{filteredProducts.length}</strong> รายการ
+                {text.totalItems} <strong>{filteredProducts.length}</strong> {text.itemsUnit}
               </span>
               <span className="meta-divider">|</span>
-              <span className="meta-vat-text">ราคาสินค้ารวมภาษีมูลค่าเพิ่ม 7% (ออกใบกำกับภาษีได้)</span>
+              <span className="meta-vat-text">{text.vatIncluded}</span>
             </div>
           </div>
         </div>
@@ -134,7 +236,7 @@ export default function ProductCatalog({
                 className={`category-tab-btn ${selectedCategory === cat.id ? 'active' : ''}`}
                 onClick={() => onSelectCategory(cat.id)}
               >
-                {cat.name}
+                {getCategoryName(cat.id)}
               </button>
             ))}
           </div>
@@ -146,7 +248,7 @@ export default function ProductCatalog({
             <Search size={16} className="search-box-icon" />
             <input
               type="text"
-              placeholder="ค้นหาชื่อสินค้า, สเปก, รหัสรุ่น..."
+              placeholder={text.searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="search-box-input"
@@ -163,26 +265,26 @@ export default function ProductCatalog({
 
           <div className="sort-controls-box">
             <SlidersHorizontal size={14} className="sort-box-icon" />
-            <span className="sort-label">การเรียงลำดับ:</span>
+            <span className="sort-label">{text.sortByLabel}</span>
             <select 
               value={sortBy} 
               onChange={(e) => setSortBy(e.target.value)}
               className="sort-box-select"
             >
-              <option value="popular">สินค้าแนะนำ / ยอดนิยม</option>
-              <option value="price-asc">ราคา: ต่ำ ➔ สูง</option>
-              <option value="price-desc">ราคา: สูง ➔ ต่ำ</option>
-              <option value="rating">คะแนนรีวิวสูงสุด</option>
+              <option value="popular">{text.sortPopular}</option>
+              <option value="price-asc">{text.sortPriceAsc}</option>
+              <option value="price-desc">{text.sortPriceDesc}</option>
+              <option value="rating">{text.sortRating}</option>
             </select>
           </div>
         </div>
 
-        {/* 5. Products Grid (Clean White Cards matching Image 2) */}
+        {/* 5. Products Grid (Clean White Cards) */}
         {filteredProducts.length === 0 ? (
           <div className="catalog-empty-state">
             <Box size={44} className="empty-icon text-slate-400" />
-            <h3>ไม่พบสินค้าที่ตรงกับการค้นหา</h3>
-            <p>ลองค้นหาด้วยคำอื่น หรือกดดูสินค้าทั้งหมด</p>
+            <h3>{text.emptyTitle}</h3>
+            <p>{text.emptyDesc}</p>
             <button 
               className="btn-show-all-products"
               onClick={() => {
@@ -190,7 +292,7 @@ export default function ProductCatalog({
                 onSelectCategory('all');
               }}
             >
-              แสดงสินค้าทั้งหมด
+              {text.btnShowAll}
             </button>
           </div>
         ) : (
@@ -199,6 +301,8 @@ export default function ProductCatalog({
               const discountPercent = product.originalPrice 
                 ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
                 : 0;
+
+              const displayName = (language === 'en' && product.nameEn) ? product.nameEn : product.name;
 
               return (
                 <div 
@@ -209,7 +313,7 @@ export default function ProductCatalog({
                   {/* Top Header Tags */}
                   <div className="card-top-tags">
                     <span className="tag-in-stock">
-                      <Check size={11} /> มีสินค้าพร้อมส่ง
+                      <Check size={11} /> {text.inStock}
                     </span>
                   </div>
 
@@ -217,7 +321,7 @@ export default function ProductCatalog({
                   <div className="card-img-wrap">
                     <img 
                       src={product.image} 
-                      alt={product.name}
+                      alt={displayName}
                       className="product-clean-photo" 
                       loading="lazy"
                       onError={(e) => {
@@ -234,8 +338,8 @@ export default function ProductCatalog({
                   </div>
 
                   {/* Product Title */}
-                  <h3 className="card-product-name" title={product.name}>
-                    {product.name}
+                  <h3 className="card-product-name" title={displayName}>
+                    {displayName}
                   </h3>
 
                   {/* Specs Summary (1-2 lines) */}
@@ -245,7 +349,7 @@ export default function ProductCatalog({
 
                   {/* Online Promo Label */}
                   <div className="card-promo-label">
-                    <span>โปรโมชั่นเฉพาะสั่งซื้อออนไลน์ • ส่งฟรีทั่วประเทศ</span>
+                    <span>{text.onlinePromo}</span>
                   </div>
 
                   {/* Pricing Display (GSPEED Royal Blue) */}
@@ -266,10 +370,10 @@ export default function ProductCatalog({
                       id={`btn-quick-add-${product.id}`}
                       className={`btn-card-quick-add ${addedFeedbackId === product.id ? 'is-added' : ''}`}
                       onClick={(e) => handleQuickAdd(product, e)}
-                      title="ใส่ตะกร้าทันที 1 ชิ้น"
+                      title={text.addToCart}
                     >
                       <Plus size={15} />
-                      <span>{addedFeedbackId === product.id ? 'ใส่ลงตะกร้าแล้ว ✓' : 'ใส่ตะกร้า'}</span>
+                      <span>{addedFeedbackId === product.id ? text.addedToCart : text.addToCart}</span>
                     </button>
                   </div>
                 </div>

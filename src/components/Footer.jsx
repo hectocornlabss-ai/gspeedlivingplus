@@ -79,9 +79,6 @@ export default function Footer({ setActiveTab, onNavigate }) {
             <div className="footer-track-texts">
               <div className="footer-track-title-row">
                 <h4>{language === 'th' ? 'ติดตามสถานะคำสั่งซื้อ' : language === 'zh' ? '订单实时追踪' : 'Track Order Status'}</h4>
-                <span className="footer-guest-pill">
-                  {language === 'th' ? '✨ สมาชิก: ไม่จำเป็นต้องสมัครสมาชิก' : language === 'zh' ? '无需注册会员' : 'No Membership Required'}
-                </span>
               </div>
               <p>
                 {language === 'th' 

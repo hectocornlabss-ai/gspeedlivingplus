@@ -17,7 +17,7 @@
   --store-emerald: #16a34a;
   --store-text: #0f172a;
   --store-text-muted: #64748b;
-  --store-font: 'Outfit', 'Kanit', sans-serif;
+  --store-font: 'Noto Sans Thai', 'Outfit', 'Kanit', sans-serif;
 }
 
 /* ==========================================================================
@@ -4148,8 +4148,26 @@
   padding-bottom: 24px;
   border-bottom: 2px solid #0f172a;
   margin-bottom: 24px;
-  gap: 20px;
-  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.invoice-company-brand {
+  flex: 1 1 auto;
+}
+
+.invoice-doc-type-box {
+  flex: 0 0 auto;
+  text-align: right;
+}
+
+@media screen and (max-width: 640px) {
+  .invoice-header-strip {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .invoice-doc-type-box {
+    text-align: left;
+  }
 }
 
 .invoice-company-brand h2 {
@@ -4209,7 +4227,7 @@
   border: 1px solid #e2e8f0;
 }
 
-@media (max-width: 768px) {
+@media screen and (max-width: 768px) {
   .invoice-meta-grid {
     grid-template-columns: 1fr;
   }
@@ -4291,7 +4309,7 @@
   margin-bottom: 24px;
 }
 
-@media (max-width: 768px) {
+@media screen and (max-width: 768px) {
   .invoice-calc-row {
     grid-template-columns: 1fr;
   }
@@ -5251,32 +5269,315 @@
   background: #fef2f2;
 }
 
-/* Print Media Query for Official Invoice */
+/* =========================================================================
+   PRINT MEDIA QUERY FOR OFFICIAL INVOICE (A4 PROFORMA INVOICE / PDF EXPORT)
+   Guarantees 1:1 identical appearance between on-screen preview and PDF print
+   ========================================================================= */
 @media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm 12mm 10mm 12mm;
+  }
+
+  html, body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 11pt !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide everything outside official-invoice-sheet */
   body * {
     visibility: hidden;
   }
+
   .official-invoice-sheet,
   .official-invoice-sheet * {
-    visibility: visible;
+    visibility: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
+
+  /* Sheet container positioning at top of print page */
   .official-invoice-sheet {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    margin: 0;
-    padding: 20px;
-    border: none;
-    box-shadow: none;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    z-index: 999999 !important;
   }
+
+  /* Top Header Strip: NEVER wrap, Keep company on left & invoice title on right */
+  .official-invoice-sheet .invoice-header-strip {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    flex-wrap: nowrap !important;
+    gap: 20px !important;
+    padding-bottom: 14px !important;
+    margin-bottom: 18px !important;
+    border-bottom: 2.5px solid #0f172a !important;
+    width: 100% !important;
+  }
+
+  .official-invoice-sheet .invoice-company-brand {
+    flex: 1 1 auto !important;
+    max-width: 58% !important;
+    text-align: left !important;
+  }
+
+  .official-invoice-sheet .invoice-company-brand h2 {
+    font-size: 17px !important;
+    font-weight: 900 !important;
+    color: #0f172a !important;
+    margin: 0 0 4px 0 !important;
+    line-height: 1.25 !important;
+  }
+
+  .official-invoice-sheet .invoice-company-brand p {
+    font-size: 10px !important;
+    color: #334155 !important;
+    margin: 2px 0 !important;
+    line-height: 1.4 !important;
+  }
+
+  .official-invoice-sheet .invoice-doc-type-box {
+    flex: 0 0 auto !important;
+    text-align: right !important;
+    min-width: 230px !important;
+  }
+
+  .official-invoice-sheet .invoice-doc-title {
+    font-size: 24px !important;
+    font-weight: 900 !important;
+    color: #1d4ed8 !important;
+    margin: 0 0 2px 0 !important;
+    line-height: 1.2 !important;
+    text-align: right !important;
+  }
+
+  .official-invoice-sheet .invoice-doc-subtitle {
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    color: #64748b !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    margin: 0 0 6px 0 !important;
+    text-align: right !important;
+  }
+
+  .official-invoice-sheet .invoice-order-no-pill {
+    display: inline-block !important;
+    padding: 3px 10px !important;
+    background: #eff6ff !important;
+    border: 1.5px solid #bfdbfe !important;
+    border-radius: 6px !important;
+    font-size: 11.5px !important;
+    font-weight: 800 !important;
+    color: #1d4ed8 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Two-column Customer & Tax info grid */
+  .official-invoice-sheet .invoice-meta-grid {
+    display: grid !important;
+    grid-template-columns: 1.15fr 1fr !important;
+    gap: 16px !important;
+    padding: 12px 14px !important;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    margin-bottom: 16px !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    page-break-inside: avoid !important;
+  }
+
+  .official-invoice-sheet .invoice-meta-col h4 {
+    font-size: 11.5px !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    margin: 0 0 5px 0 !important;
+  }
+
+  .official-invoice-sheet .invoice-meta-col p {
+    font-size: 10px !important;
+    color: #334155 !important;
+    margin: 2px 0 !important;
+    line-height: 1.4 !important;
+  }
+
+  /* Items Table: Solid Navy Header & Crisp Borders */
+  .official-invoice-sheet .invoice-table-wrap {
+    overflow: visible !important;
+    margin-bottom: 16px !important;
+  }
+
+  .official-invoice-sheet .invoice-items-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 10.5px !important;
+    table-layout: auto !important;
+  }
+
+  .official-invoice-sheet .invoice-items-table th {
+    background: #0f172a !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    padding: 7px 9px !important;
+    font-size: 10.5px !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    border: 1px solid #0f172a !important;
+  }
+
+  .official-invoice-sheet .invoice-items-table td {
+    padding: 7px 9px !important;
+    border-bottom: 1px solid #cbd5e1 !important;
+    color: #0f172a !important;
+    font-size: 10.5px !important;
+    background: #ffffff !important;
+  }
+
+  .official-invoice-sheet .invoice-items-table tr {
+    page-break-inside: avoid !important;
+  }
+
+  .official-invoice-sheet .invoice-sku-code,
+  .official-invoice-sheet .invoice-variant-text {
+    color: #64748b !important;
+  }
+
+  /* 2-Column Calculations & Terms Row */
+  .official-invoice-sheet .invoice-calc-row {
+    display: grid !important;
+    grid-template-columns: 1.15fr 1fr !important;
+    gap: 16px !important;
+    align-items: start !important;
+    margin-bottom: 16px !important;
+    page-break-inside: avoid !important;
+  }
+
+  .official-invoice-sheet .invoice-terms-box {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    padding: 10px 12px !important;
+    font-size: 9.5px !important;
+    color: #475569 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .official-invoice-sheet .invoice-terms-box ul {
+    padding-left: 14px !important;
+    margin: 4px 0 0 0 !important;
+    line-height: 1.5 !important;
+  }
+
+  .official-invoice-sheet .invoice-totals-box {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .official-invoice-sheet .inv-total-line {
+    display: flex !important;
+    justify-content: space-between !important;
+    padding: 5px 10px !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    font-size: 10.5px !important;
+    color: #334155 !important;
+  }
+
+  .official-invoice-sheet .inv-total-line.grand {
+    background: #eff6ff !important;
+    font-weight: 800 !important;
+    font-size: 12px !important;
+    color: #1d4ed8 !important;
+    border-bottom: 2px solid #bfdbfe !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .official-invoice-sheet .inv-total-line.amount-due {
+    background: #f0fdf4 !important;
+    font-weight: 900 !important;
+    font-size: 13px !important;
+    color: #15803d !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .official-invoice-sheet .inv-baht-text-banner {
+    background: #f8fafc !important;
+    padding: 5px 10px !important;
+    font-size: 10px !important;
+    color: #1e3a8a !important;
+    font-weight: 700 !important;
+    border-top: 1px dashed #cbd5e1 !important;
+    text-align: right !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Signatures Row */
+  .official-invoice-sheet .invoice-signatures-row {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 32px !important;
+    margin-top: 14px !important;
+    padding-top: 12px !important;
+    border-top: 1px dashed #cbd5e1 !important;
+    page-break-inside: avoid !important;
+  }
+
+  .official-invoice-sheet .inv-sign-box {
+    text-align: center !important;
+  }
+
+  .official-invoice-sheet .inv-sign-line {
+    border-bottom: 1px solid #94a3b8 !important;
+    height: 32px !important;
+    margin-bottom: 5px !important;
+  }
+
+  .official-invoice-sheet .inv-sign-box span {
+    font-size: 9.5px !important;
+    color: #64748b !important;
+  }
+
+  /* Hide app chrome, toolbars, buttons, navigation on print */
   .invoice-actions-strip,
   .checkout-stepper-container,
   .checkout-steps-nav,
   .resume-order-bar,
   .btn-inv-print,
   .btn-inv-pay-now,
-  .btn-inv-pay-later {
+  .btn-inv-pay-later,
+  .navbar-wrapper,
+  .mobile-bottom-nav,
+  .app-footer,
+  .announcement-bar,
+  .ai-chat-fab-wrap,
+  .ai-chat-window,
+  #btn-quick-shop-cta,
+  #btn-mobile-menu-toggle {
     display: none !important;
   }
 }

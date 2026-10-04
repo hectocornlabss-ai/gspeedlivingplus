@@ -18876,8 +18876,12 @@
   .spec-sheet-modal-overlay,
   .spec-sheet-modal-card,
   .spec-sheet-print-container,
-  .spec-sheet-print-container * {
-    visibility: visible;
+  .spec-sheet-print-container *,
+  .official-invoice-sheet,
+  .official-invoice-sheet * {
+    visibility: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   .spec-sheet-modal-overlay {

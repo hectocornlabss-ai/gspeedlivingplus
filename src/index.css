@@ -29,8 +29,8 @@
   --shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.12);
   --shadow-blue: 0 4px 20px rgba(29, 78, 216, 0.25);
 
-  --font-base: 'Kanit', sans-serif;
-  --font-heading: 'Outfit', 'Kanit', sans-serif;
+  --font-base: 'Noto Sans Thai', 'Outfit', 'Kanit', sans-serif;
+  --font-heading: 'Outfit', 'Noto Sans Thai', 'Kanit', sans-serif;
 
   --radius-sm: 8px;
   --radius-md: 14px;

@@ -28,7 +28,7 @@ const I18N = {
     stockPieces: 'ชิ้น',
     shipping: 'การจัดส่ง',
     freeShipping: 'จัดส่งด่วนฟรีทั่วประเทศ',
-    shippingTime: 'ส่งถึงภายใน 1-2 วันทำการ (มาตรฐานสนามแข่งอีสปอร์ต)',
+    shippingTime: 'ส่งถึงภายใน 1-2 วันทำการ',
     guarantee: 'การรับประกัน',
     guaranteeText: 'รับประกันศูนย์ On-site Service 3 ปีเต็ม',
     selectColor: 'ตัวเลือกสี',
@@ -434,9 +434,76 @@ export default function ProductDetailPage({
   };
 
   const categoryObj = PRODUCT_CATEGORIES.find(c => c.id === product.category);
-  const relatedProducts = allProducts
-    .filter(p => p.id !== product.id)
-    .slice(0, 6);
+  const relatedProducts = useMemo(() => {
+    return allProducts
+      .filter(p => p.id !== product.id)
+      .slice(0, 5);
+  }, [allProducts, product.id]);
+
+  // Tablet & Mobile Auto-Slider Controls for Related Products
+  const relatedSliderRef = useRef(null);
+  const [relatedActiveIdx, setRelatedActiveIdx] = useState(0);
+  const [isSliderHovered, setIsSliderHovered] = useState(false);
+
+  useEffect(() => {
+    if (relatedProducts.length <= 1 || isSliderHovered) return;
+
+    const timer = setInterval(() => {
+      if (typeof window !== 'undefined' && window.innerWidth <= 992 && relatedSliderRef.current) {
+        setRelatedActiveIdx(prev => {
+          const next = (prev + 1) % relatedProducts.length;
+          const container = relatedSliderRef.current;
+          if (container && container.children && container.children[next]) {
+            const card = container.children[next];
+            container.scrollTo({
+              left: card.offsetLeft - 16,
+              behavior: 'smooth'
+            });
+          }
+          return next;
+        });
+      }
+    }, 3500);
+
+    return () => clearInterval(timer);
+  }, [relatedProducts.length, isSliderHovered]);
+
+  const handleGoToRelatedSlide = (idx) => {
+    setRelatedActiveIdx(idx);
+    if (relatedSliderRef.current && relatedSliderRef.current.children && relatedSliderRef.current.children[idx]) {
+      const card = relatedSliderRef.current.children[idx];
+      relatedSliderRef.current.scrollTo({
+        left: card.offsetLeft - 16,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const handlePrevRelatedSlide = () => {
+    const nextIdx = (relatedActiveIdx - 1 + relatedProducts.length) % relatedProducts.length;
+    handleGoToRelatedSlide(nextIdx);
+  };
+
+  const handleNextRelatedSlide = () => {
+    const nextIdx = (relatedActiveIdx + 1) % relatedProducts.length;
+    handleGoToRelatedSlide(nextIdx);
+  };
+
+  const handleRelatedScroll = () => {
+    if (!relatedSliderRef.current) return;
+    const container = relatedSliderRef.current;
+    const scrollLeft = container.scrollLeft;
+    let closestIdx = 0;
+    let minDiff = Infinity;
+    Array.from(container.children).forEach((child, i) => {
+      const diff = Math.abs(child.offsetLeft - 16 - scrollLeft);
+      if (diff < minDiff) {
+        minDiff = diff;
+        closestIdx = i;
+      }
+    });
+    setRelatedActiveIdx(closestIdx);
+  };
 
   return (
     <div className="shopee-pdp-root">
@@ -1034,20 +1101,63 @@ export default function ProductDetailPage({
         </div>
 
         {/* ------------------------------------------------------------------
-            RELATED PRODUCTS
+            RELATED PRODUCTS (5 items for desktop, Auto-slider for tablet/mobile)
             ------------------------------------------------------------------ */}
         {relatedProducts.length > 0 && (
-          <div className="shopee-related-section">
-            <h2 className="shopee-related-heading">{text.relatedTitle}</h2>
-            <div className="shopee-products-grid">
-              {relatedProducts.map(rel => (
+          <div 
+            className="shopee-related-section"
+            onMouseEnter={() => setIsSliderHovered(true)}
+            onMouseLeave={() => setIsSliderHovered(false)}
+            onTouchStart={() => setIsSliderHovered(true)}
+            onTouchEnd={() => {
+              setTimeout(() => setIsSliderHovered(false), 3000);
+            }}
+          >
+            <div className="shopee-related-header-row">
+              <h2 className="shopee-related-heading">{text.relatedTitle}</h2>
+              <div className="shopee-related-nav-arrows">
+                <button 
+                  type="button" 
+                  className="related-arrow-btn prev"
+                  onClick={handlePrevRelatedSlide}
+                  aria-label="Previous slide"
+                  title="ก่อนหน้า"
+                >
+                  <ChevronLeft size={18} />
+                </button>
+                <button 
+                  type="button" 
+                  className="related-arrow-btn next"
+                  onClick={handleNextRelatedSlide}
+                  aria-label="Next slide"
+                  title="ถัดไป"
+                >
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+            </div>
+
+            <div 
+              ref={relatedSliderRef}
+              className="shopee-products-grid"
+              onScroll={handleRelatedScroll}
+            >
+              {relatedProducts.map((rel, rIdx) => (
                 <div 
                   key={rel.id} 
-                  className="shopee-product-card"
+                  className={`shopee-product-card ${rIdx === relatedActiveIdx ? 'is-slide-active' : ''}`}
                   onClick={() => onSelectProduct(rel)}
                 >
                   <div className="shopee-card-img-wrap">
-                    <img src={rel.image} alt={rel.name} />
+                    <img 
+                      src={rel.image} 
+                      alt={rel.name} 
+                      loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80';
+                      }}
+                    />
                   </div>
                   <div className="shopee-card-body">
                     <h3 className="shopee-card-title">{rel.name}</h3>
@@ -1057,6 +1167,19 @@ export default function ProductDetailPage({
                     </div>
                   </div>
                 </div>
+              ))}
+            </div>
+
+            {/* Slider Dots (visible on Tablet / Mobile) */}
+            <div className="shopee-related-dots">
+              {relatedProducts.map((_, dotIdx) => (
+                <button
+                  key={dotIdx}
+                  type="button"
+                  className={`related-dot ${dotIdx === relatedActiveIdx ? 'active' : ''}`}
+                  onClick={() => handleGoToRelatedSlide(dotIdx)}
+                  aria-label={`Go to slide ${dotIdx + 1}`}
+                />
               ))}
             </div>
           </div>
