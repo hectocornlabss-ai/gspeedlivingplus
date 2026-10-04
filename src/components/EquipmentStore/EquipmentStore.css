@@ -313,7 +313,47 @@
 
 @media (max-width: 560px) {
   .products-ecommerce-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .ecommerce-product-card {
+    padding: 10px;
+    border-radius: 8px;
+  }
+
+  .card-img-wrap {
+    height: 130px;
+    margin-bottom: 8px;
+  }
+
+  .card-product-name {
+    font-size: 12px;
+    line-height: 1.35;
+    margin-bottom: 4px;
+    -webkit-line-clamp: 2;
+  }
+
+  .card-product-subtitle {
+    font-size: 10.5px;
+    margin-bottom: 6px;
+    -webkit-line-clamp: 1;
+  }
+
+  .card-price-primary {
+    font-size: 14px;
+  }
+
+  .card-price-original {
+    font-size: 10.5px;
+  }
+
+  .btn-ecommerce-card-primary,
+  .btn-ecommerce-buy-red {
+    padding: 6px 8px;
+    font-size: 11px;
+    border-radius: 6px;
   }
 }
 
