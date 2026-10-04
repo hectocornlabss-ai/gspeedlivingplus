@@ -55,5 +55,5 @@ ENV BACKEND_PORT=3001
 # เปิดพอร์ต 80 และ 3000 (รองรับทั้ง Nginx มาตรฐานและ Coolify default)
 EXPOSE 80 3000
 
-# เริ่มการทำงานของ Node.js Backend พร้อม Supervisor Auto-Restart และ Nginx อย่างปลอดภัย
-CMD ["/bin/sh", "-c", "mkdir -p /app/server/data/backups /app/server/data/uploads && (while true; do node /app/server/email-service.js; echo '[Supervisor] Node.js exited, restarting in 2s...'; sleep 2; done) & exec nginx -g 'daemon off;'"]
+# เริ่มการทำงานของ Node.js Backend พร้อม Supervisor Auto-Restart, Sync uploads & Nginx อย่างปลอดภัย
+CMD ["/bin/sh", "-c", "mkdir -p /app/server/data/backups /app/server/data/uploads && cp -rn /usr/share/nginx/html/uploads/* /app/server/data/uploads/ 2>/dev/null || true && ([ ! -f /app/server/data/site-data.json ] && [ -f /app/server/default-site-data.json ] && cp /app/server/default-site-data.json /app/server/data/site-data.json || true) && (while true; do node /app/server/email-service.js; echo '[Supervisor] Node.js exited, restarting in 2s...'; sleep 2; done) & exec nginx -g 'daemon off;'"]

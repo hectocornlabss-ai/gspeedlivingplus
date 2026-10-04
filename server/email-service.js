@@ -37,10 +37,17 @@ try {
 
 // Ensure database and uploads directories exist
 const UPLOADS_DIR = path.join(DATA_DIR, 'uploads');
+const SEED_SITE_DATA_FILE = path.join(__dirname, 'default-site-data.json');
 try {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
   if (!fs.existsSync(BACKUP_DIR)) fs.mkdirSync(BACKUP_DIR, { recursive: true });
   if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+
+  // Auto-seed database from default-site-data.json if site-data.json is missing on fresh deploy
+  if (!fs.existsSync(SITE_DATA_FILE) && fs.existsSync(SEED_SITE_DATA_FILE)) {
+    fs.copyFileSync(SEED_SITE_DATA_FILE, SITE_DATA_FILE);
+    console.log('[Database] Auto-seeded persistent site-data.json from default-site-data.json');
+  }
 } catch (dirErr) {
   console.warn('[Database] Directory init warning:', dirErr.message);
 }
@@ -830,6 +837,12 @@ function pruneOldBackups(maxKeep = 10) {
 // GET /api/site-data - Fetch current live persisted site data
 app.get('/api/site-data', (req, res) => {
   try {
+    if (!fs.existsSync(SITE_DATA_FILE) && fs.existsSync(SEED_SITE_DATA_FILE)) {
+      try {
+        fs.copyFileSync(SEED_SITE_DATA_FILE, SITE_DATA_FILE);
+      } catch (e) {}
+    }
+
     if (!fs.existsSync(SITE_DATA_FILE)) {
       return res.json({
         success: true,

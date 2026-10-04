@@ -1237,7 +1237,6 @@ ${contextText}
             <Headphones size={20} className="trigger-icon" />
           </div>
           <div className="trigger-text-badge">
-            <span className="badge-subtitle">{t('chat.triggerSubtitle')}</span>
             <span className="trigger-label">{t('chat.triggerLabel')}</span>
           </div>
         </button>

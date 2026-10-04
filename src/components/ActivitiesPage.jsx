@@ -225,6 +225,13 @@ export default function ActivitiesPage({
                       alt={item.imageAlt || item.title} 
                       className="gallery-thumb-img" 
                       loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        const fallback = item.galleryPhotos?.[0]?.url && item.galleryPhotos[0].url !== item.image
+                          ? item.galleryPhotos[0].url
+                          : 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80';
+                        e.currentTarget.src = fallback;
+                      }}
                     />
                     <span className="gallery-tag-pill">{translateDynamic(item.tag || item.category)}</span>
                   </div>

@@ -862,6 +862,11 @@ export default function ProductDetailPage({
                     {product.colors.map((col, idx) => {
                       const isSelected = selectedColor?.id === col.id;
                       const thumbImg = col.image || product.gallery?.[idx] || product.image;
+                      const colName = (language === 'en' && col.nameEn) 
+                        ? col.nameEn 
+                        : (language === 'zh' && col.nameZh) 
+                          ? col.nameZh 
+                          : (language === 'en' ? col.name.replace(/\s*\([^)]*[\u0E00-\u0E7F]+[^)]*\)/g, '').trim() : col.name);
                       return (
                         <button
                           key={col.id}
@@ -870,14 +875,14 @@ export default function ProductDetailPage({
                           onClick={() => handleSelectColor(col, idx)}
                         >
                           {thumbImg ? (
-                            <img src={thumbImg} alt={col.name} className="shopee-var-thumb" />
+                            <img src={thumbImg} alt={colName} className="shopee-var-thumb" />
                           ) : (
                             <span 
                               className="shopee-var-color-dot" 
                               style={{ backgroundColor: col.hex }} 
                             />
                           )}
-                          <span>{col.name}</span>
+                          <span>{colName}</span>
                           {isSelected && <span className="shopee-var-corner-tick" />}
                         </button>
                       );
@@ -895,6 +900,11 @@ export default function ProductDetailPage({
                   <div className="shopee-sizes-row">
                     {product.sizes.map((sz, idx) => {
                       const isSelected = selectedSize?.id === sz.id;
+                      const szName = (language === 'en' && sz.nameEn) 
+                        ? sz.nameEn 
+                        : (language === 'zh' && sz.nameZh) 
+                          ? sz.nameZh 
+                          : sz.name;
                       return (
                         <button
                           key={sz.id}
@@ -902,7 +912,7 @@ export default function ProductDetailPage({
                           className={`shopee-size-btn ${isSelected ? 'active' : ''}`}
                           onClick={() => handleSelectSize(sz, idx)}
                         >
-                          <span>{sz.name}</span>
+                          <span>{szName}</span>
                           {sz.extraPrice > 0 && (
                             <span className="shopee-extra-price-tag">+฿{sz.extraPrice.toLocaleString()}</span>
                           )}
@@ -1023,7 +1033,11 @@ export default function ProductDetailPage({
             <div className="shopee-spec-row">
               <span className="shopee-spec-label">{text.category}</span>
               <span className="shopee-spec-val" style={{ color: '#1d4ed8', fontWeight: 600 }}>
-                {categoryObj?.name || (language === 'zh' ? '电竞桌与人体工学椅' : language === 'en' ? 'Gaming Desks & Chairs' : 'โต๊ะและเก้าอี้เกมมิ่ง')}
+                {language === 'en' 
+                  ? (categoryObj?.nameEn || 'Gaming Equipment') 
+                  : (language === 'zh' 
+                    ? (categoryObj?.nameZh || '电竞桌与人体工学椅') 
+                    : (categoryObj?.name || 'โต๊ะและเก้าอี้เกมมิ่ง'))}
               </span>
             </div>
             <div className="shopee-spec-row">
@@ -1037,25 +1051,33 @@ export default function ProductDetailPage({
             {product.dimensions && (
               <div className="shopee-spec-row">
                 <span className="shopee-spec-label">{text.dimensions}</span>
-                <span className="shopee-spec-val">{product.dimensions}</span>
+                <span className="shopee-spec-val">
+                  {language === 'en' ? (product.dimensionsEn || product.dimensions) : language === 'zh' ? (product.dimensionsZh || product.dimensions) : product.dimensions}
+                </span>
               </div>
             )}
             {product.weight && (
               <div className="shopee-spec-row">
                 <span className="shopee-spec-label">{text.weight}</span>
-                <span className="shopee-spec-val">{product.weight}</span>
+                <span className="shopee-spec-val">
+                  {language === 'en' ? (product.weightEn || product.weight) : language === 'zh' ? (product.weightZh || product.weight) : product.weight}
+                </span>
               </div>
             )}
             {product.materials && (
               <div className="shopee-spec-row">
                 <span className="shopee-spec-label">{text.materials}</span>
-                <span className="shopee-spec-val">{product.materials}</span>
+                <span className="shopee-spec-val">
+                  {language === 'en' ? (product.materialsEn || product.materials) : language === 'zh' ? (product.materialsZh || product.materials) : product.materials}
+                </span>
               </div>
             )}
             {product.warranty && (
               <div className="shopee-spec-row">
                 <span className="shopee-spec-label">{text.warranty}</span>
-                <span className="shopee-spec-val">{product.warranty} (On-site Service)</span>
+                <span className="shopee-spec-val">
+                  {language === 'en' ? (product.warrantyEn || `${product.warranty} (On-site Service)`) : language === 'zh' ? (product.warrantyZh || `${product.warranty} (上门质保服务)`) : `${product.warranty} (On-site Service)`}
+                </span>
               </div>
             )}
             <div className="shopee-spec-row">
@@ -1069,7 +1091,7 @@ export default function ProductDetailPage({
           </h2>
           <div className="shopee-description-prose">
             <p>
-              <strong>{product.name}</strong> - {product.subtitle}
+              <strong>{language === 'en' && product.nameEn ? product.nameEn : (language === 'zh' && product.nameZh ? product.nameZh : product.name)}</strong> - {language === 'en' && product.subtitleEn ? product.subtitleEn : (language === 'zh' && product.subtitleZh ? product.subtitleZh : product.subtitle)}
             </p>
             <p>
               {language === 'zh'
@@ -1083,7 +1105,7 @@ export default function ProductDetailPage({
               <>
                 <h4 style={{ margin: '14px 0 8px 0', fontSize: '15px' }}>{text.featuresTitle}</h4>
                 <ul className="shopee-features-bullets">
-                  {product.features.map((feat, i) => (
+                  {((language === 'en' && product.featuresEn) ? product.featuresEn : (language === 'zh' && product.featuresZh) ? product.featuresZh : product.features).map((feat, i) => (
                     <li key={i}>
                       <Check size={16} className="check-icon" />
                       <span>{feat}</span>
@@ -1160,7 +1182,9 @@ export default function ProductDetailPage({
                     />
                   </div>
                   <div className="shopee-card-body">
-                    <h3 className="shopee-card-title">{rel.name}</h3>
+                    <h3 className="shopee-card-title">
+                      {language === 'en' && rel.nameEn ? rel.nameEn : (language === 'zh' && rel.nameZh ? rel.nameZh : rel.name)}
+                    </h3>
                     <div className="shopee-card-price-row">
                       <span className="shopee-card-price">฿{rel.price.toLocaleString()}</span>
                       <span className="shopee-card-sold">{text.sold} {rel.reviewsCount || 42} {text.stockPieces}</span>

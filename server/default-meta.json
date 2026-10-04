@@ -2,63 +2,468 @@
   "gallery": [
     {
       "id": "gal-1",
-      "slug": "icafe-attack-lan-tournament",
-      "title": "ICAFE ATTACK LAN TOURNAMENT",
-      "desc": "การแข่งขัน LAN สุดมันส์ในโซน Battleground พร้อมจอแสดงผลแบบเรียลไทม์ ผู้เข้าแข่งขันแน่นร้านตลอด 24 ชม.",
-      "date": "สิงหาคม 2026",
-      "image": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80",
+      "slug": "panpacificwarfare2026",
+      "title": "Pan-Pacific Warfare Cup 2026",
       "category": "tournament",
-      "tag": "LAN TOURNAMENT"
+      "date": "เมษายน 2026",
+      "readTime": "4 นาทีในการอ่าน",
+      "desc": "ภาพบรรยากาศการแข่งขัน Pan-Pacific Warfare Cup 2026 จัดขึ้นที่ ร้าน Gspeed Living Plus ดูภาพบรรกาศได้ที่นี่",
+      "image": "/uploads/gallery/pan-pacific_warfare_cup_2026-01-1790952963276-oxp0.webp",
+      "tag": "Delta Force",
+      "tags": [
+        "#EsportsThailand",
+        "#GLP2026",
+        "#Tournament",
+        "#GamingArena",
+        "#Delta Force"
+      ],
+      "partner": "Gspeed Living Plus",
+      "location": "G-Speed Esport Arena รามคำแหง 53 กรุงเทพฯ",
+      "organizer": "G-Speed ร่วมกับ ASUS ROG และ NVIDIA Thailand",
+      "prizePool": "฿50,000 พร้อมอุปกรณ์เกมมิ่งเกียร์ ROG",
+      "attendees": "320+ คน (32 ทีมทั่วประเทศ)",
+      "quote": "การได้ลงแข่งในสภาพแวดล้อมที่เครื่องสเปกแรง จอ 360Hz และเน็ตไม่กระตุกเลย ทำให้ผู้เล่นสามารถปลดปล่อยศักยภาพได้ 100% สมกับเป็นสนามแข่งระดับเวิลด์คลาส",
+      "contentParagraphs": [
+        "ภาพบรรยากาศการแข่งขัน Pan-Pacific Warfare Cup 2026 จัดขึ้นที่ ร้าน Gspeed Living Plus ดูภาพบรรกาศได้ที่นี่"
+      ],
+      "galleryPhotos": [
+        {
+          "url": "/uploads/gallery/pan-pacific_warfare_cup_2026-10-1790952752461-ak64.webp",
+          "caption": "Pan Pacific Warfare Cup 2026 10",
+          "alt": "Pan-Pacific Warfare Cup 2026 - Pan Pacific Warfare Cup 2026 10"
+        },
+        {
+          "url": "/uploads/gallery/pan-pacific_warfare_cup_2026-09-1790952752880-ojnb.webp",
+          "caption": "Pan Pacific Warfare Cup 2026 09",
+          "alt": "Pan-Pacific Warfare Cup 2026 - Pan Pacific Warfare Cup 2026 09"
+        },
+        {
+          "url": "/uploads/gallery/pan-pacific_warfare_cup_2026-08-1790952753373-vlo3.webp",
+          "caption": "Pan Pacific Warfare Cup 2026 08",
+          "alt": "Pan-Pacific Warfare Cup 2026 - Pan Pacific Warfare Cup 2026 08"
+        },
+        {
+          "url": "/uploads/gallery/pan-pacific_warfare_cup_2026-07-1790952753740-j4ee.webp",
+          "caption": "Pan Pacific Warfare Cup 2026 07",
+          "alt": "Pan-Pacific Warfare Cup 2026 - Pan Pacific Warfare Cup 2026 07"
+        },
+        {
+          "url": "/uploads/gallery/pan-pacific_warfare_cup_2026-06-1790952754255-zr7e.webp",
+          "caption": "Pan Pacific Warfare Cup 2026 06",
+          "alt": "Pan-Pacific Warfare Cup 2026 - Pan Pacific Warfare Cup 2026 06"
+        },
+        {
+          "url": "/uploads/gallery/pan-pacific_warfare_cup_2026-05-1790952754705-orrt.webp",
+          "caption": "Pan Pacific Warfare Cup 2026 05",
+          "alt": "Pan-Pacific Warfare Cup 2026 - Pan Pacific Warfare Cup 2026 05"
+        },
+        {
+          "url": "/uploads/gallery/pan-pacific_warfare_cup_2026-04-1790952755164-bty8.webp",
+          "caption": "Pan Pacific Warfare Cup 2026 04",
+          "alt": "Pan-Pacific Warfare Cup 2026 - Pan Pacific Warfare Cup 2026 04"
+        },
+        {
+          "url": "/uploads/gallery/pan-pacific_warfare_cup_2026-03-1790952755645-52fz.webp",
+          "caption": "Pan Pacific Warfare Cup 2026 03",
+          "alt": "Pan-Pacific Warfare Cup 2026 - Pan Pacific Warfare Cup 2026 03"
+        },
+        {
+          "url": "/uploads/gallery/pan-pacific_warfare_cup_2026-02-1790952756036-lv1o.webp",
+          "caption": "Pan Pacific Warfare Cup 2026 02",
+          "alt": "Pan-Pacific Warfare Cup 2026 - Pan Pacific Warfare Cup 2026 02"
+        },
+        {
+          "url": "/uploads/gallery/pan-pacific_warfare_cup_2026-01-1790952756493-4mzz.webp",
+          "caption": "Pan Pacific Warfare Cup 2026 01",
+          "alt": "Pan-Pacific Warfare Cup 2026 - Pan Pacific Warfare Cup 2026 01"
+        }
+      ],
+      "imageAlt": "บรรยากาศการแข่งขัน Pan-Pacific Warfare Cup 2026",
+      "contentBlocks": [
+        {
+          "id": "block_conv_0_1790952957098",
+          "type": "paragraph",
+          "align": "left",
+          "text": "ภาพบรรยากาศการแข่งขัน Pan-Pacific Warfare Cup 2026 จัดขึ้นที่ ร้าน Gspeed Living Plus ดูภาพบรรกาศได้ที่นี่"
+        }
+      ],
+      "status": "published",
+      "contentParagraphsText": "ภาพบรรยากาศการแข่งขัน Pan-Pacific Warfare Cup 2026 จัดขึ้นที่ ร้าน Gspeed Living Plus ดูภาพบรรกาศได้ที่นี่",
+      "enableAISearch": true,
+      "desc_en": "Pictures of the atmosphere of the Pan-Pacific Warfare Cup 2026 competition held at Gspeed Living Plus shop. See pictures of the atmosphere here.",
+      "desc_zh": "2026年泛太平洋战争杯比赛在Gspeed Living Plus店举行的气氛照片。看这里的气氛照片。",
+      "prizePool_en": "฿50,000 including ROG gaming gear",
+      "prizePool_zh": "50,000 泰铢，包括 ROG 游戏装备",
+      "quote_en": "Competing in an environment with powerful specs, a 360Hz screen, and no glitchy internet at all. Allowing players to unleash their potential 100%, worthy of being a world-class racetrack.",
+      "quote_zh": "在具有强大规格、360Hz 屏幕且完全没有故障网络的环境中竞争。让选手百分百释放自己的潜力，不愧是世界级的赛道。",
+      "location_en": "G-Speed ​​Esport Arena Ramkhamhaeng 53 Bangkok",
+      "location_zh": "G-Speed 电子竞技馆 Ramkhamhaeng 53 曼谷",
+      "attendees_en": "320+ people (32 teams nationwide)",
+      "attendees_zh": "320+人（全国32支队伍）",
+      "date_en": "April 2026",
+      "date_zh": "2026 年 4 月",
+      "readTime_en": "4 min read",
+      "readTime_zh": "4 分钟阅读",
+      "galleryPhotos_en": [
+        {
+          "url": "/uploads/gallery/pan-pacific_warfare_cup_2026-10-1790952752461-ak64.webp",
+          "caption": "Pan Pacific Warfare Cup 2026 10",
+          "alt": "Pan-Pacific Warfare Cup 2026 - Pan Pacific Warfare Cup 2026 10"
+        },
+        {
+          "url": "/uploads/gallery/pan-pacific_warfare_cup_2026-09-1790952752880-ojnb.webp",
+          "caption": "Pan Pacific Warfare Cup 2026 09",
+          "alt": "Pan-Pacific Warfare Cup 2026 - Pan Pacific Warfare Cup 2026 09"
+        },
+        {
+          "url": "/uploads/gallery/pan-pacific_warfare_cup_2026-08-1790952753373-vlo3.webp",
+          "caption": "Pan Pacific Warfare Cup 2026 08",
+          "alt": "Pan-Pacific Warfare Cup 2026 - Pan Pacific Warfare Cup 2026 08"
+        },
+        {
+          "url": "/uploads/gallery/pan-pacific_warfare_cup_2026-07-1790952753740-j4ee.webp",
+          "caption": "Pan Pacific Warfare Cup 2026 07",
+          "alt": "Pan-Pacific Warfare Cup 2026 - Pan Pacific Warfare Cup 2026 07"
+        },
+        {
+          "url": "/uploads/gallery/pan-pacific_warfare_cup_2026-06-1790952754255-zr7e.webp",
+          "caption": "Pan Pacific Warfare Cup 2026 06",
+          "alt": "Pan-Pacific Warfare Cup 2026 - Pan Pacific Warfare Cup 2026 06"
+        },
+        {
+          "url": "/uploads/gallery/pan-pacific_warfare_cup_2026-05-1790952754705-orrt.webp",
+          "caption": "Pan Pacific Warfare Cup 2026 05",
+          "alt": "Pan-Pacific Warfare Cup 2026 - Pan Pacific Warfare Cup 2026 05"
+        },
+        {
+          "url": "/uploads/gallery/pan-pacific_warfare_cup_2026-04-1790952755164-bty8.webp",
+          "caption": "Pan Pacific Warfare Cup 2026 04",
+          "alt": "Pan-Pacific Warfare Cup 2026 - Pan Pacific Warfare Cup 2026 04"
+        },
+        {
+          "url": "/uploads/gallery/pan-pacific_warfare_cup_2026-03-1790952755645-52fz.webp",
+          "caption": "Pan Pacific Warfare Cup 2026 03",
+          "alt": "Pan-Pacific Warfare Cup 2026 - Pan Pacific Warfare Cup 2026 03"
+        },
+        {
+          "url": "/uploads/gallery/pan-pacific_warfare_cup_2026-02-1790952756036-lv1o.webp",
+          "caption": "Pan Pacific Warfare Cup 2026 02",
+          "alt": "Pan-Pacific Warfare Cup 2026 - Pan Pacific Warfare Cup 2026 02"
+        },
+        {
+          "url": "/uploads/gallery/pan-pacific_warfare_cup_2026-01-1790952756493-4mzz.webp",
+          "caption": "Pan Pacific Warfare Cup 2026 01",
+          "alt": "Pan-Pacific Warfare Cup 2026 - Pan Pacific Warfare Cup 2026 01"
+        }
+      ],
+      "galleryPhotos_zh": [
+        {
+          "url": "/uploads/gallery/pan-pacific_warfare_cup_2026-10-1790952752461-ak64.webp",
+          "caption": "Pan Pacific Warfare Cup 2026 10",
+          "alt": "Pan-Pacific Warfare Cup 2026 - Pan Pacific Warfare Cup 2026 10"
+        },
+        {
+          "url": "/uploads/gallery/pan-pacific_warfare_cup_2026-09-1790952752880-ojnb.webp",
+          "caption": "Pan Pacific Warfare Cup 2026 09",
+          "alt": "Pan-Pacific Warfare Cup 2026 - Pan Pacific Warfare Cup 2026 09"
+        },
+        {
+          "url": "/uploads/gallery/pan-pacific_warfare_cup_2026-08-1790952753373-vlo3.webp",
+          "caption": "Pan Pacific Warfare Cup 2026 08",
+          "alt": "Pan-Pacific Warfare Cup 2026 - Pan Pacific Warfare Cup 2026 08"
+        },
+        {
+          "url": "/uploads/gallery/pan-pacific_warfare_cup_2026-07-1790952753740-j4ee.webp",
+          "caption": "Pan Pacific Warfare Cup 2026 07",
+          "alt": "Pan-Pacific Warfare Cup 2026 - Pan Pacific Warfare Cup 2026 07"
+        },
+        {
+          "url": "/uploads/gallery/pan-pacific_warfare_cup_2026-06-1790952754255-zr7e.webp",
+          "caption": "Pan Pacific Warfare Cup 2026 06",
+          "alt": "Pan-Pacific Warfare Cup 2026 - Pan Pacific Warfare Cup 2026 06"
+        },
+        {
+          "url": "/uploads/gallery/pan-pacific_warfare_cup_2026-05-1790952754705-orrt.webp",
+          "caption": "Pan Pacific Warfare Cup 2026 05",
+          "alt": "Pan-Pacific Warfare Cup 2026 - Pan Pacific Warfare Cup 2026 05"
+        },
+        {
+          "url": "/uploads/gallery/pan-pacific_warfare_cup_2026-04-1790952755164-bty8.webp",
+          "caption": "Pan Pacific Warfare Cup 2026 04",
+          "alt": "Pan-Pacific Warfare Cup 2026 - Pan Pacific Warfare Cup 2026 04"
+        },
+        {
+          "url": "/uploads/gallery/pan-pacific_warfare_cup_2026-03-1790952755645-52fz.webp",
+          "caption": "Pan Pacific Warfare Cup 2026 03",
+          "alt": "Pan-Pacific Warfare Cup 2026 - Pan Pacific Warfare Cup 2026 03"
+        },
+        {
+          "url": "/uploads/gallery/pan-pacific_warfare_cup_2026-02-1790952756036-lv1o.webp",
+          "caption": "Pan Pacific Warfare Cup 2026 02",
+          "alt": "Pan-Pacific Warfare Cup 2026 - Pan Pacific Warfare Cup 2026 02"
+        },
+        {
+          "url": "/uploads/gallery/pan-pacific_warfare_cup_2026-01-1790952756493-4mzz.webp",
+          "caption": "Pan Pacific Warfare Cup 2026 01",
+          "alt": "Pan-Pacific Warfare Cup 2026 - Pan Pacific Warfare Cup 2026 01"
+        }
+      ]
     },
     {
       "id": "gal-2",
       "slug": "thailand-predator-league-pubg",
       "title": "THAILAND PREDATOR LEAGUE 2022 - PUBG BATTLEGROUNDS",
-      "desc": "งานเปิดตัวและแข่งขัน PUBG BATTLEGROUNDS อย่างเป็นทางการ พร้อมคอสเพลย์เยอร์และถ่ายทอดสด Live Stream",
-      "date": "กรกฎาคม 2026",
-      "image": "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80",
       "category": "publisher",
-      "tag": "OFFICIAL PUBG EVENT"
+      "date": "กรกฎาคม 2026",
+      "readTime": "3 นาทีในการอ่าน",
+      "desc": "งานเปิดตัวและแข่งขัน PUBG BATTLEGROUNDS อย่างเป็นทางการ พร้อมคอสเพลย์เยอร์และถ่ายทอดสด Live Stream",
+      "image": "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80",
+      "tag": "OFFICIAL PUBG EVENT",
+      "tags": [
+        "#PUBG",
+        "#Tournament",
+        "#EsportsThailand",
+        "#GLP2026",
+        "#GamingArena"
+      ],
+      "partner": "Predator & Krafton",
+      "location": "G-Speed Esport Arena (เวทีกลางและบูทกิจกรรมค่ายเกม)",
+      "organizer": "Predator Gaming Thailand ร่วมกับ Krafton Inc.",
+      "prizePool": "฿80,000 พร้อมสิทธิ์แข่งรอบเอเชียแปซิฟิก",
+      "attendees": "450+ คน (แฟนเกมและทีมสตรีมเมอร์)",
+      "quote": "G-Speed เป็นพาร์ตเนอ���์ร้านเกมที่มีความพร้อมด้านระบบและสถานที่สูงมาก สามารถรองรับการบรอดแคสต์ระดับออฟฟิเชียลได้อย่างไร้ที่ติ",
+      "contentParagraphs": [
+        "ค่ายเกมยักษ์ใหญ่ Krafton จับมือกับ Acer Predator Gaming เลือกใช้ศูนย์ G-Speed Esport Arena เป็นสถานที่จัดศึกใหญ่ THAILAND PREDATOR LEAGUE - PUBG BATTLEGROUNDS ประจำปี โดยมีนักล่าไก่ทั่วฟ้าเมืองไทยลงทะเบียนเข้าร่วมกว่า 64 สควอด",
+        "บรรยากาศในงานคึกคักตั้งแต่ช่วงเช้าด้วยกิจกรรม Fan Meeting พบปะคอสเพลย์เยอร์ในชุดตัวละครแอร์ดรอปสุดเท่ พร้อมจุดถ่าย���ูปโฟโต้บูธสามมิติ และแจกไอเทมโค้ดลิขสิทธิ์แท้ให้กับผู้เข้าร่วมงานทุกคน",
+        "การแข่งขันรอบออฟไลน์ไฟนอลดำเนินไปอย่างตื่นเต้นเร้าใจ มีการใช้ระบบ Observer บรอดแคสต์มืออาชีพพร้อมแคสเตอร์ชื่อดังมาพากย์สดในสตูดิโอบาร์ของร้าน ผู้ชนะเลิศได้รับสิทธิ์เป็นตัวแทนประเทศไทยไปลุยต่อในเวทีระดับนานาชาติ"
+      ],
+      "galleryPhotos": [
+        {
+          "url": "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1600&q=85",
+          "caption": "เวทีหลักกับการแข่งขันรอบตัดสินชิงตั๋วสู่เอเชีย"
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1600&q=85",
+          "caption": "ผู้เข้าแข่งขันสวมหูฟังตัดเสียงรบกวน วางแผนเอาตัวรอด"
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=1600&q=85",
+          "caption": "พิธีมอบถ้วยแชมป์และเงินรางวัลสนับสนุนจาก Predator"
+        }
+      ]
     },
     {
       "id": "gal-3",
       "slug": "electronics-extreme-zone4-fan-meeting",
       "title": "ELECTRONICS EXTREME - ZONE4 FAN MEETING",
-      "desc": "ค่ายเกม Electronics Extreme จัดงานแถลงข่าวและพบปะแฟนเกม Zone4 บน Main Stage ของ GLP",
-      "date": "มิถุนายน 2026",
-      "image": "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80",
       "category": "publisher",
-      "tag": "GAME LAUNCH"
+      "date": "มิถุนายน 2026",
+      "readTime": "3 นาทีในการอ่าน",
+      "desc": "ค่ายเกม Electronics Extreme จัดงานแถลงข่าวและพบปะแฟนเกม Zone4 บน Main Stage ของ GLP",
+      "image": "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80",
+      "tag": "GAME LAUNCH",
+      "tags": [
+        "#Zone4",
+        "#GamingArena",
+        "#Community",
+        "#GLP2026"
+      ],
+      "partner": "Electronics Extreme",
+      "location": "G-Speed Esport Arena (โซนคาเฟ่และเวท��กลาง)",
+      "organizer": "Electronics Extreme Co., Ltd.",
+      "prizePool": "ไอเทมแรร์มูลค่ารวมกว่า ฿120,000",
+      "attendees": "280+ คน",
+      "quote": "ความอบอุ่นของแฟนเกม Zone4 ที่มารวมตัวกันที่นี่ ทำให้เรารู้ว่าคอมมูนิตี้เกมไทยยังเหนียวแน่นและพร้อมสนับสนุนกันเสมอ",
+      "contentParagraphs": [
+        "งานรวมพลสาวกเกมต่อสู้ในตำนาน Zone4 โดยค่าย Electronics Extreme เนรมิตพื้นที่ G-Speed ให้กลายเป็นสถานที่จัดแฟนมีตติ้งสุดเอ็กซ์คลูซีฟ มีการเปิดเผยแผนการอัปเดตเซิร์ฟเวอร์และระบบคลาสใหม่อย่างเป็นทางการ",
+        "ผู้ร่วมงานได้ร่วมประลองฝีมือในมินิทัวร์นาเมนต์ 1v1 และ 3v3 แบบกระชับมิตร พร้อมลุ้นรับแรร์ไอเทมและฟิกเกอร์ลิมิเต็ดที่มีเฉพาะในงานนี้เท่านั้น"
+      ],
+      "galleryPhotos": [
+        {
+          "url": "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1600&q=85",
+          "caption": "แฟนเกม Zone4 ร่วมทดลองเล่นแพตช์ใหม่ในโซนเครื่อง VIP"
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1600&q=85",
+          "caption": "การแจกของรางวัลสุดพิเศษและของที่ระลึกจากผู้บริหารค่าย"
+        }
+      ]
     },
     {
       "id": "gal-4",
       "slug": "audition-lady-tournament-cup",
       "title": "AUDITION LADY TOURNAMENT CUP #7",
-      "desc": "การแข่งขัน Audition เกมเต้นอันดับ 1 ของไทย มอบเงินรางวัลชนะเลิศและไอเทมพิเศษ บรรยากาศอบอุ่นและสนุกสนาน",
-      "date": "สิงหาคม 2024",
-      "image": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80",
       "category": "community",
-      "tag": "COMMUNITY CUP"
+      "date": "พฤษภาคม 2026",
+      "readTime": "3 นาทีในการอ่าน",
+      "desc": "การแข่งขัน Audition เกมเต้นอันดับ 1 ของไทย มอบเงินรางวัลชนะเลิศและไอเทมพิเศษ บรรยากาศอบอุ่นและสนุกสนาน",
+      "image": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80",
+      "tag": "COMMUNITY CUP",
+      "tags": [
+        "#Audition",
+        "#Community",
+        "#Tournament",
+        "#EsportsThailand",
+        "#GLP2026"
+      ],
+      "partner": "PlayPark Audition",
+      "location": "G-Speed Esport Arena (โซน Standard Gaming Arena)",
+      "organizer": "PlayPark & Audition Community Thailand",
+      "prizePool": "฿25,000 พร้อมมงกุฎและไอเทมปีกถาวร",
+      "attendees": "200+ คน",
+      "quote": "งานแข่งขันที่เต็มไปด้วยรอยยิ้ม เสียงเพลง และมิตรภาพของเหล่านักเต้นทั่วประเทศที่มารวมตัวกัน",
+      "contentParagraphs": [
+        "ศึกประชันความเร็วของนิ้วมือและจังหวะดนตรีกับ AUDITION LADY TOURNAMENT ครั้งที่ 7 รายการแข่งขันที่เปิดโอกาสให้นักเต้นสาวสวยทั่วประเทศมาชิงตำแหน่งราชินีฟลอร์เต้น",
+        "ร้านเกม G-Speed ได้จัดเตรียมคีย์บอร์ดกลไกสวิตช์ความเร็วสูงและหูฟังตัดเสียง เพื่อให้นักกีฬาได้ยินบีตดนตรีและกดปุ่ม Perfect ได้อย่างแม่นยำที่สุด"
+      ],
+      "galleryPhotos": [
+        {
+          "url": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1600&q=85",
+          "caption": "ความเร็วในการรัวปุ่มคีย์บอร์ดระดับเสี้ยววินาที"
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=1600&q=85",
+          "caption": "ผู้ได้รับรางวัลชนะเลิศรับมอบมงกุฎและเงินรางวัล"
+        }
+      ]
     },
     {
       "id": "gal-5",
       "slug": "audition-all-mode-tournament",
-      "title": "AUDITION ALL MODE TOURNAMENT ชิง 5,000 บาท",
-      "desc": "การประลองฝีมือกดปุ่มตามจังหวะเพลงสุดเร้าใจ กองเชียร์ส่งเสียงเชียร์กึกก้องทั่วร้านตลอดวันแข่งขัน",
-      "date": "เมษายน 2026",
-      "image": "https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=800&q=80",
-      "category": "community",
-      "tag": "AWARD CEREMONY"
+      "title": "กิจกรรม เปิดตัวเกม ZONE4",
+      "category": "publisher",
+      "date": "เมษายน 2013",
+      "readTime": "2 นาทีในการอ่าน",
+      "desc": "บรรยากาศงานเปิดตัวเกม ZONE4 ที่ร้าน GSpeed Living Plus 2013",
+      "image": "/uploads/gallery/gallery_bbbdac8f2e07.webp",
+      "tag": "ZONE4",
+      "tags": [
+        "#EsportsThailand",
+        "#GLP2026",
+        "#Tournament",
+        "#GamingArena",
+        "#Community",
+        "#Zone4"
+      ],
+      "partner": "ZONE4",
+      "location": "G-Speed Esport Arena",
+      "organizer": "GLP Community Management Team",
+      "prizePool": "",
+      "attendees": "150+ คน",
+      "quote": "กิจกรรมคอมมูนิตี้รายเดือนที่เปิดให้ลูกค้าประจำและแฟนคลับได้มาพบปะและประลองฝีมือกันอย่างเป็นกันเอง",
+      "contentParagraphs": [
+        "การแข่งขันกระชับมิตรประจำเดือนของชุมชนร้านเกม G-Speed ชิงเงินรางวัลและชั่วโมงเล่นเกมฟรี บรรยากาศสนุกสนานและเป็นกันเองตลอดวันหยุดสุดสัปดาห์"
+      ],
+      "galleryPhotos": [
+        {
+          "url": "/uploads/gallery/gallery_5a16352a1075.webp",
+          "caption": "zone4 06",
+          "alt": "กิจกรรม เปิดตัวเกม ZONE4"
+        },
+        {
+          "url": "/uploads/gallery/gallery_fd14b0e60c73.webp",
+          "caption": "zone4 013 1024x683",
+          "alt": "กิจกรรม เปิดตัวเกม ZONE4"
+        },
+        {
+          "url": "/uploads/gallery/gallery_40370ee51e10.webp",
+          "caption": "zone4",
+          "alt": "กิจกรรม เปิดตัวเกม ZONE4 - zone4 08"
+        },
+        {
+          "url": "/uploads/gallery/gallery_3ca4a2288f60.webp",
+          "caption": "zone4",
+          "alt": "กิจกรรม เปิดตัวเกม ZONE4"
+        },
+        {
+          "url": "/uploads/gallery/gallery_61d56e5703fc.webp",
+          "caption": "zone4",
+          "alt": "กิจกรรม เปิดตัวเกม ZONE4"
+        },
+        {
+          "url": "/uploads/gallery/gallery_b7c279d35039.webp",
+          "caption": "zone4",
+          "alt": "กิจกรรม เปิดตัวเกม ZONE4"
+        },
+        {
+          "url": "/uploads/gallery/gallery_981296bcd987.webp",
+          "caption": "zone4",
+          "alt": "กิจกรรม เปิดตัวเกม ZONE4"
+        }
+      ],
+      "contentBlocks": [],
+      "contentParagraphsText": "การแข่งขันกระชับมิตรประจำเดือนของชุมชนร้านเกม G-Speed ชิงเงินรางวัลและชั่วโมงเล่นเกมฟรี บรรยากาศสนุกสนานและเป็นกันเองตลอดวันหยุดสุดสัปดาห์",
+      "enableAISearch": true,
+      "imageAlt": "กิจกรรม เปิดตัวเกม ZONE4"
     },
     {
       "id": "gal-6",
       "slug": "glp-esport-stadium-night-24hrs",
-      "title": "GLP ESPORT STADIUM NIGHT 24 HRS.",
-      "desc": "บรรยากาศผู้ใช้บริการแน่นร้านช่วงสุดสัปดาห์ เล่นเกมพร้อมแก๊งเพื่อน เครื่องสเปกแรง แอร์เย็นฉ่ำ สั่งอาหารได้ถึงโต๊ะ",
-      "date": "มีนาคม 2026",
-      "image": "https://images.unsplash.com/photo-1526738549149-8e07eca6c147?auto=format&fit=crop&w=800&q=80",
-      "category": "venue",
-      "tag": "ATMOSPHERE 24/7"
+      "title": "Chicken Dinner by zowie",
+      "category": "tournament",
+      "date": "มีนาคม 2013",
+      "readTime": "3 นาทีในการอ่าน",
+      "desc": "บรรยากาศ งานแข่ง Pubg Chicken Dinner by zowie",
+      "image": "/uploads/gallery/gallery_e881b4e56ad2.webp",
+      "tag": "PUBG",
+      "tags": [
+        "#GamingArena",
+        "#GLP2026",
+        "#Community",
+        "#PUBG"
+      ],
+      "partner": "ZOWIE",
+      "location": "G-Speed Esport Arena ทุกโซนบริการ",
+      "organizer": "G-Speed Operations & Customer Care",
+      "prizePool": "",
+      "attendees": "ลูกค้าหมุนเวียน 800+ คน/วัน",
+      "quote": "เราใส่ใจในทุกรายละเอียด ทั้งเก้าอี้ที่นั่งสบายตลอดคืน ระบบแอร์ฟอกอากาศ PM2.5 และเมนูอาหารปรุงสดที่ส่งตรงถึงโต๊ะ",
+      "contentParagraphs": [
+        "เก็บบรรยากาศยามค่ำคืนของ G-Speed Esport Arena ศูนย์รวมเกมเมอร์ที่เปิดให้บริการตลอด 24 ชั่วโมง ไฮไลต์คือช่วงส��ดสัปดาห์ที่มีปาร์ตี้เล่นเกมกับกลุ่มเพื่อน เครื่องเต็ม 100% พร้อมบริการสั่งอาหาร เครื่องดื่มร้อน-เย็นจากบาร์เสิร์ฟถึงโต๊ะอย่างรวดเร็ว"
+      ],
+      "galleryPhotos": [
+        {
+          "url": "/uploads/gallery/gallery_58a43c271825.webp",
+          "caption": "Chicken Dinner by Zowie",
+          "alt": "Chicken Dinner by zowie"
+        },
+        {
+          "url": "/uploads/gallery/gallery_592edb3af02b.webp",
+          "caption": "Chicken Dinner by Zowie",
+          "alt": "งานแข่ง Pubg Chicken Dinner by zowie"
+        },
+        {
+          "url": "/uploads/gallery/gallery_ec662c5ee7cd.webp",
+          "caption": "Chicken Dinner by Zowie",
+          "alt": "งานแข่ง Pubg Chicken Dinner by zowie"
+        },
+        {
+          "url": "/uploads/gallery/gallery_c924cc43ea49.webp",
+          "caption": "Chicken Dinner by Zowie",
+          "alt": "งานแข่ง Pubg Chicken Dinner by zowie"
+        },
+        {
+          "url": "/uploads/gallery/gallery_0824a2fc0d4d.webp",
+          "caption": "Chicken Dinner by Zowie",
+          "alt": "งานแข่ง Pubg Chicken Dinner by zowie"
+        },
+        {
+          "url": "/uploads/gallery/gallery_b4f60b3cbead.webp",
+          "caption": "Chicken Dinner by Zowie",
+          "alt": "งานแข่ง Pubg Chicken Dinner by zowie"
+        }
+      ],
+      "contentBlocks": [
+        {
+          "id": "block_conv_0_1790861297305",
+          "type": "paragraph",
+          "align": "left",
+          "text": "เก็บบรรยากาศยามค่ำคืนของ G-Speed Esport Arena ศูนย์รวมเกมเมอร์ที่เปิดให้บริการตลอด 24 ชั่วโมง ไฮไลต์คือช่วงสุดสัปดาห์ที่มีปาร์ตี้เล่นเกมกับกลุ่มเพื่อน เครื่องเต็ม 100% พร้อมบริการสั่งอาหาร เครื่องดื่มร้อน-เย็นจากบาร์เสิร์ฟถึงโต๊ะอย่างรวดเร็ว"
+        }
+      ],
+      "contentParagraphsText": "เก็บบรรยากาศยามค่ำคืนของ G-Speed Esport Arena ศูนย์รวมเกมเมอร์ที่เปิดให้บริการตลอด 24 ชั่วโมง ไฮไลต์คือช่วงสุดสัปดาห์ที่มีปาร์ตี้เล่นเกมกับกลุ่มเพื่อน เครื่องเต็ม 100% พร้อมบริการสั่งอาหาร เครื่องดื่มร้อน-เย็นจากบาร์เสิร์ฟถึงโต๊ะอย่างรวดเร็ว",
+      "enableAISearch": true,
+      "imageAlt": "งานแข่ง Pubg Chicken Dinner by zowie"
     }
   ],
   "tournaments": [
@@ -66,31 +471,2424 @@
       "id": "tour-1",
       "slug": "gspeed-valorant-championship-2026",
       "title": "G-SPEED VALORANT CHAMPIONSHIP 2026",
-      "desc": "การแข่งขัน VALORANT LAN Tournament สุดยิ่งใหญ่ ณ G-Speed Arena รามคำแหง 53 เงินรางวัลรวม 100,000 บาท แข่งขันบนเวที Main Stage จอ 360Hz",
-      "date": "28-30 กันยายน 2026",
-      "image": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80",
       "game": "VALORANT",
-      "prizePool": "100,000 บาท"
-    },
-    {
-      "id": "tour-2",
-      "slug": "rov-university-battle-league-2026",
-      "title": "ROV UNIVERSITY BATTLE LEAGUE",
-      "desc": "การแข่งขัน RoV ระดับมหาวิทยาลัย 64 สถาบันทั่วประเทศ จัด ณ G-Speed Arena รามคำแหง 53 ชิงทุนการศึกษาและถ้วยเกียรติยศ",
-      "date": "10-12 ตุลาคม 2026",
-      "image": "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200&q=80",
-      "game": "Arena of Valor (RoV)",
-      "prizePool": "50,000 บาท + ถ้วยรางวัลเกียรติยศ"
+      "gameCategory": "Tactical 5v5 FPS",
+      "gameIcon": "Crosshair",
+      "bannerImage": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80",
+      "date": "28-30 กันยายน 2026",
+      "time": "11:00 - 20:00 น.",
+      "regStartDate": "1 กันยายน 2026",
+      "regEndDate": "25 กันยายน 2026",
+      "tourneyStartDate": "2026-09-28",
+      "tourneyEndDate": "2026-09-30",
+      "prizePool": "100,000 บาท",
+      "slots": "32 ทีม (เหลือ 6 ทีมสุดท้าย)",
+      "format": "LAN Final @ Main Stage & Double Elimination",
+      "badge": "เร็วๆนี้",
+      "badgeType": "magenta",
+      "status": "Closed",
+      "tags": [
+        "#VALORANT",
+        "#LANFinal",
+        "#EsportsThailand",
+        "#PrizePool100K"
+      ],
+      "venue": "G-Speed Esport Arena รามคำแหง 53 (Main Stage & Battleground Zone)",
+      "streamChannel": "Twitch.tv/gspeed_esport & YouTube Gaming Live",
+      "desc": "ทัวร์นาเมนต์อีสปอร์ตสุดยิ่งใหญ่แห่งปี 2026 ชิงเงินรางวัลรวมกว่า ฿100,000 รวบรวม 32 ยอดทีมทั่วประเทศมาดวลความแม่นยำบนเวที LAN Final ณ G-Speed Arena รามคำแหง 53 พร้อมระบบคอมพิวเตอร์สเปกทัวร์นาเมนต์ Intel Core i9 + RTX 4080 และหน้าจอ BenQ ZOWIE 360Hz ถ่ายทอดสดด้วยทีมงานแคสเตอร์ระดับมืออาชีพ",
+      "prizeDistribution": [
+        {
+          "rank": "แชมป์อันดับ 1",
+          "reward": "฿50,000 + ถ้วยเกียรติยศ + เหรียญทอง + ROG Gaming Gear Set"
+        },
+        {
+          "rank": "รองชนะเลิศอันดับ 1",
+          "reward": "฿25,000 + เหรียญเงิน"
+        },
+        {
+          "rank": "รองชนะเลิศอันดับ 2 ร่วม (2 ทีม)",
+          "reward": "฿10,000 ต่อทีม + เหรียญทองแดง"
+        },
+        {
+          "rank": "MVP of Tournament",
+          "reward": "฿5,000 + หูฟัง ROG Delta S Wireless"
+        }
+      ],
+      "rules": [
+        "ผู้เข้าแข่งขันทุกท่านต้องนำบัตรประชาชนหรือบัตรนักเรียน/นักศึกษามาแสดงตน ณ จุดลงทะเบียน",
+        "อนุญาตให้นำเมาส์ คีย์บอร์ด และหูฟังส่วนตัวมาใช้ได้ โดยต้องผ่านการตรวจจากเจ้าหน้าที่เทคนิคก่อนเริ่มแข่ง",
+        "เครื่องคอมพิวเตอร์ที่ใช้แข่งขับเคลื่อนด้วย Intel Core i9 + NVIDIA GeForce RTX 4080 และจอ BenQ ZOWIE 360Hz",
+        "ห้ามใช้โปรแกรมโกง สคริปต์ช่วยเล่น หรือฉวยโอกาสจากข้อผิดพลาดของเกม (Bug Exploitation) หากตรวจพบปรับแพ้ทันที",
+        "คำตัดสินของหัวหน้าผู้ตัดสิน (Head Referee) ถือเป็นที่สิ้นสุดในทุกกรณี"
+      ],
+      "scheduleTimetable": [
+        {
+          "time": "10:00 - 11:00 น.",
+          "stage": "ลงทะเบียนหน้างาน & ตรวจสอบอุปกรณ์นักกีฬา (Player Check-in & Gear Check)"
+        },
+        {
+          "time": "11:15 - 14:00 น.",
+          "stage": "รอบคัดเลือกแบ่งกลุ่ม Group Stage (Best of 1 - LAN Setup)"
+        },
+        {
+          "time": "14:30 - 17:30 น.",
+          "stage": "รอบ 8 ทีม และ 4 ทีมสุดท้าย (Quarter & Semi-Finals - Best of 3)"
+        },
+        {
+          "time": "18:00 - 20:30 น.",
+          "stage": "รอบชิงชนะเลิศ Grand Final บนเวที Main Stage (Best of 5 ถ่ายทอดสด)"
+        }
+      ],
+      "teams": [
+        {
+          "id": "team-1",
+          "name": "Talon Academy",
+          "tag": "TLN",
+          "logo": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80",
+          "seed": 1,
+          "status": "Confirmed",
+          "captain": "SScary (กัปตันทีม)",
+          "captainPhone": "081-234-5678",
+          "captainDiscord": "sscary#0001",
+          "players": [
+            "SScary01",
+            "Crws",
+            "JitboyS",
+            "foxz",
+            "garnetS"
+          ],
+          "substitutes": [
+            "Governor"
+          ],
+          "wins": 0,
+          "losses": 0
+        },
+        {
+          "id": "team-2",
+          "name": "Full Sense Elite",
+          "tag": "FS",
+          "logo": "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=150&q=80",
+          "seed": 2,
+          "status": "Confirmed",
+          "captain": "JohnOlsen (กัปตันทีม)",
+          "captainPhone": "089-876-5432",
+          "captainDiscord": "johnolsen#1122",
+          "players": [
+            "JohnOlsen",
+            "PTC",
+            "Leviathan",
+            "ApeX",
+            "ChAlalala"
+          ],
+          "substitutes": [
+            "LAMMYSNAX"
+          ],
+          "wins": 0,
+          "losses": 0
+        },
+        {
+          "id": "team-3",
+          "name": "XERXIA NextGen",
+          "tag": "XIA",
+          "logo": "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=150&q=80",
+          "seed": 3,
+          "status": "Confirmed",
+          "captain": "Surf (กัปตันทีม)",
+          "captainPhone": "086-555-1234",
+          "captainDiscord": "surf#4321",
+          "players": [
+            "Surf",
+            "aRoche",
+            "b3ta",
+            "Siraphop",
+            "PPOverdose"
+          ],
+          "substitutes": [
+            "xNova"
+          ],
+          "wins": 0,
+          "losses": 0
+        },
+        {
+          "id": "team-4",
+          "name": "Made in Thailand (MiTH)",
+          "tag": "MiTH",
+          "logo": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=150&q=80",
+          "seed": 4,
+          "status": "Confirmed",
+          "captain": "Kadoom (กัปตันทีม)",
+          "captainPhone": "084-333-8899",
+          "captainDiscord": "kadoom#9999",
+          "players": [
+            "Kadoom",
+            "Delph1x",
+            "Kongared",
+            "Wannafly",
+            "CigaretteS"
+          ],
+          "substitutes": [
+            "ViperX"
+          ],
+          "wins": 0,
+          "losses": 0
+        },
+        {
+          "id": "team-5",
+          "name": "G-Speed Slayer Squad",
+          "tag": "GLP",
+          "logo": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=150&q=80",
+          "seed": 5,
+          "status": "Confirmed",
+          "captain": "SpeedyKnight (กัปตันทีม)",
+          "captainPhone": "063-793-7704",
+          "captainDiscord": "speedy#2026",
+          "players": [
+            "SpeedyKnight",
+            "CyberViper",
+            "NeonPulse",
+            "PhantomShot",
+            "Valkyrie99"
+          ],
+          "substitutes": [
+            "GhostAim"
+          ],
+          "wins": 0,
+          "losses": 0
+        },
+        {
+          "id": "team-6",
+          "name": "Ramkhamhaeng Titans",
+          "tag": "RKH",
+          "logo": "https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=150&q=80",
+          "seed": 6,
+          "status": "Confirmed",
+          "captain": "BangkokBlade (กัปตันทีม)",
+          "captainPhone": "082-111-2233",
+          "captainDiscord": "titan_cap#5555",
+          "players": [
+            "BangkokBlade",
+            "ShadowStrike",
+            "IronShield",
+            "FrostBite",
+            "ThunderBolt"
+          ],
+          "substitutes": [
+            "SolarFlare"
+          ],
+          "wins": 0,
+          "losses": 0
+        },
+        {
+          "id": "team-7",
+          "name": "HyperX Predators",
+          "tag": "HX",
+          "logo": "https://images.unsplash.com/photo-1511882150382-421056c89033?auto=format&fit=crop&w=150&q=80",
+          "seed": 7,
+          "status": "Confirmed",
+          "captain": "PredatorAim (กัปตันทีม)",
+          "captainPhone": "083-456-7890",
+          "captainDiscord": "hx_aim#7788",
+          "players": [
+            "PredatorAim",
+            "SwiftShot",
+            "Vortex",
+            "Blitzkrieg",
+            "NightHawk"
+          ],
+          "substitutes": [
+            "ShadowX"
+          ],
+          "wins": 0,
+          "losses": 0
+        },
+        {
+          "id": "team-8",
+          "name": "Bangkok Ronin",
+          "tag": "RON",
+          "logo": "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=150&q=80",
+          "seed": 8,
+          "status": "Confirmed",
+          "captain": "RoninZero (กัปตันทีม)",
+          "captainPhone": "085-123-9988",
+          "captainDiscord": "ronin_zero#0088",
+          "players": [
+            "RoninZero",
+            "Katana",
+            "Bushido",
+            "SilentCut",
+            "MistWalker"
+          ],
+          "substitutes": [
+            "ShadowRonin"
+          ],
+          "wins": 0,
+          "losses": 0
+        }
+      ],
+      "bracketMatches": [
+        {
+          "id": "m-qf1",
+          "round": "Quarter-Finals",
+          "roundLabel": "รอบ 8 ทีมสุดท้าย (QF 1)",
+          "roundIndex": 1,
+          "matchOrder": 1,
+          "nextMatchId": "m-sf1",
+          "nextMatchSlot": "teamA",
+          "time": "28 ก.ย. 2026 • 11:00 น.",
+          "status": "Upcoming",
+          "stage": "Main Stage LAN (Booth A vs B)",
+          "streamUrl": "https://twitch.tv/gspeed_esport",
+          "format": "Best of 3 (BO3)",
+          "teamA": {
+            "id": "team-1",
+            "name": "Talon Academy",
+            "tag": "TLN",
+            "logo": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80",
+            "seed": 1,
+            "score": 0,
+            "isWinner": false
+          },
+          "teamB": {
+            "id": "team-8",
+            "name": "Bangkok Ronin",
+            "tag": "RON",
+            "logo": "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=150&q=80",
+            "seed": 8,
+            "score": 0,
+            "isWinner": false
+          },
+          "maps": [],
+          "mvp": null
+        },
+        {
+          "id": "m-qf2",
+          "round": "Quarter-Finals",
+          "roundLabel": "รอบ 8 ทีมสุดท้าย (QF 2)",
+          "roundIndex": 1,
+          "matchOrder": 2,
+          "nextMatchId": "m-sf1",
+          "nextMatchSlot": "teamB",
+          "time": "28 ก.ย. 2026 • 13:30 น.",
+          "status": "Upcoming",
+          "stage": "Main Stage LAN (Booth A vs B)",
+          "streamUrl": "https://twitch.tv/gspeed_esport",
+          "format": "Best of 3 (BO3)",
+          "teamA": {
+            "id": "team-4",
+            "name": "Made in Thailand (MiTH)",
+            "tag": "MiTH",
+            "logo": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=150&q=80",
+            "seed": 4,
+            "score": 0,
+            "isWinner": false
+          },
+          "teamB": {
+            "id": "team-5",
+            "name": "G-Speed Slayer Squad",
+            "tag": "GLP",
+            "logo": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=150&q=80",
+            "seed": 5,
+            "score": 0,
+            "isWinner": false
+          },
+          "maps": [],
+          "mvp": null
+        },
+        {
+          "id": "m-qf3",
+          "round": "Quarter-Finals",
+          "roundLabel": "รอบ 8 ทีมสุดท้าย (QF 3)",
+          "roundIndex": 1,
+          "matchOrder": 3,
+          "nextMatchId": "m-sf2",
+          "nextMatchSlot": "teamA",
+          "time": "28 ก.ย. 2026 • 16:00 น.",
+          "status": "Upcoming",
+          "stage": "Main Stage LAN (Booth A vs B)",
+          "streamUrl": "https://twitch.tv/gspeed_esport",
+          "format": "Best of 3 (BO3)",
+          "teamA": {
+            "id": "team-2",
+            "name": "Full Sense Elite",
+            "tag": "FS",
+            "logo": "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=150&q=80",
+            "seed": 2,
+            "score": 0,
+            "isWinner": false
+          },
+          "teamB": {
+            "id": "team-7",
+            "name": "HyperX Predators",
+            "tag": "HX",
+            "logo": "https://images.unsplash.com/photo-1511882150382-421056c89033?auto=format&fit=crop&w=150&q=80",
+            "seed": 7,
+            "score": 0,
+            "isWinner": false
+          },
+          "maps": [],
+          "mvp": null
+        },
+        {
+          "id": "m-qf4",
+          "round": "Quarter-Finals",
+          "roundLabel": "รอบ 8 ทีมสุดท้าย (QF 4)",
+          "roundIndex": 1,
+          "matchOrder": 4,
+          "nextMatchId": "m-sf2",
+          "nextMatchSlot": "teamB",
+          "time": "28 ก.ย. 2026 • 18:30 น.",
+          "status": "Upcoming",
+          "stage": "Main Stage LAN (Booth A vs B)",
+          "streamUrl": "https://twitch.tv/gspeed_esport",
+          "format": "Best of 3 (BO3)",
+          "teamA": {
+            "id": "team-3",
+            "name": "XERXIA NextGen",
+            "tag": "XIA",
+            "logo": "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=150&q=80",
+            "seed": 3,
+            "score": 0,
+            "isWinner": false
+          },
+          "teamB": {
+            "id": "team-6",
+            "name": "Ramkhamhaeng Titans",
+            "tag": "RKH",
+            "logo": "https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=150&q=80",
+            "seed": 6,
+            "score": 0,
+            "isWinner": false
+          },
+          "maps": [],
+          "mvp": null
+        },
+        {
+          "id": "m-sf1",
+          "round": "Semi-Finals",
+          "roundLabel": "รอบ 4 ทีมสุดท้าย (Semi-Final 1)",
+          "roundIndex": 2,
+          "matchOrder": 1,
+          "nextMatchId": "m-gf",
+          "nextMatchSlot": "teamA",
+          "time": "29 ก.ย. 2026 • 14:00 น.",
+          "status": "Upcoming",
+          "stage": "Main Stage LAN (Booth A vs B)",
+          "streamUrl": "https://twitch.tv/gspeed_esport",
+          "format": "Best of 3 (BO3)",
+          "teamA": {
+            "id": null,
+            "name": "ผู้ชนะ QF 1",
+            "tag": "TBD",
+            "logo": "",
+            "seed": null,
+            "score": 0,
+            "isWinner": false
+          },
+          "teamB": {
+            "id": null,
+            "name": "ผู้ชนะ QF 2",
+            "tag": "TBD",
+            "logo": "",
+            "seed": null,
+            "score": 0,
+            "isWinner": false
+          },
+          "maps": [],
+          "mvp": null
+        },
+        {
+          "id": "m-sf2",
+          "round": "Semi-Finals",
+          "roundLabel": "รอบ 4 ทีมสุดท้าย (Semi-Final 2)",
+          "roundIndex": 2,
+          "matchOrder": 2,
+          "nextMatchId": "m-gf",
+          "nextMatchSlot": "teamB",
+          "time": "29 ก.ย. 2026 • 17:00 น.",
+          "status": "Upcoming",
+          "stage": "Main Stage LAN (Booth A vs B)",
+          "streamUrl": "https://twitch.tv/gspeed_esport",
+          "format": "Best of 3 (BO3)",
+          "teamA": {
+            "id": null,
+            "name": "ผู้ชนะ QF 3",
+            "tag": "TBD",
+            "logo": "",
+            "seed": null,
+            "score": 0,
+            "isWinner": false
+          },
+          "teamB": {
+            "id": null,
+            "name": "ผู้ชนะ QF 4",
+            "tag": "TBD",
+            "logo": "",
+            "seed": null,
+            "score": 0,
+            "isWinner": false
+          },
+          "maps": [],
+          "mvp": null
+        },
+        {
+          "id": "m-gf",
+          "round": "Grand Final",
+          "roundLabel": "รอบชิงชนะเลิศ (Grand Final ชิงแชมป์ ฿50,000)",
+          "roundIndex": 3,
+          "matchOrder": 1,
+          "nextMatchId": null,
+          "time": "30 ก.ย. 2026 • 18:00 น.",
+          "status": "Upcoming",
+          "stage": "Main Stage LAN Live Broadcast",
+          "streamUrl": "https://twitch.tv/gspeed_esport",
+          "format": "Best of 5 (BO5)",
+          "teamA": {
+            "id": null,
+            "name": "ผู้ชนะ Semi-Final 1",
+            "tag": "TBD",
+            "logo": "",
+            "seed": null,
+            "score": 0,
+            "isWinner": false
+          },
+          "teamB": {
+            "id": null,
+            "name": "ผู้ชนะ Semi-Final 2",
+            "tag": "TBD",
+            "logo": "",
+            "seed": null,
+            "score": 0,
+            "isWinner": false
+          },
+          "maps": [],
+          "mvp": null
+        }
+      ],
+      "galleryPhotos": [
+        {
+          "id": "p-1",
+          "url": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80",
+          "caption": "เวทีแข่งขัน Main Stage ระบบแสงสีเสียงและจอ LED Wall 4K ขนาดยักษ์",
+          "category": "stage"
+        },
+        {
+          "id": "p-2",
+          "url": "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80",
+          "caption": "บรรยากาศนักกีฬาประจำที่นั่ง Battle Stations ซ้อมมือก่อนเริ่มแข่ง",
+          "category": "players"
+        },
+        {
+          "id": "p-3",
+          "url": "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80",
+          "caption": "เครื่องคอมพิวเตอร์สเปก Intel i9 + RTX 4080 SUPER พร้อมจอ 360Hz",
+          "category": "gear"
+        },
+        {
+          "id": "p-4",
+          "url": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80",
+          "caption": "การแข่งขันรอบ 16 ทีมสุดท้าย แข่งพร้อมกันแบบ Full LAN Setup",
+          "category": "players"
+        },
+        {
+          "id": "p-5",
+          "url": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80",
+          "caption": "มุมมองกว้างของอารีน่า แสงไฟธีมน้ำเงิน-ส้ม สื่อถึงการปะทะสุดเข้มข้น",
+          "category": "stage"
+        },
+        {
+          "id": "p-6",
+          "url": "https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=800&q=80",
+          "caption": "หูฟังตัดเสียงรบกวนเกรดการแข่งขัน Pro Studio Noise-Cancelling",
+          "category": "gear"
+        },
+        {
+          "id": "p-7",
+          "url": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80",
+          "caption": "ระบบเน็ตเวิร์กแลนแบบแยกวง 10Gbps Latency ต่ำกว่า 1ms",
+          "category": "gear"
+        },
+        {
+          "id": "p-8",
+          "url": "https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?auto=format&fit=crop&w=800&q=80",
+          "caption": "การอุ่นเครื่องทดสอบความพร้อมปุ่มกดและอัตราตอบสนองอุปกรณ์",
+          "category": "players"
+        },
+        {
+          "id": "p-9",
+          "url": "https://images.unsplash.com/photo-1542751110-97427bbecf20?auto=format&fit=crop&w=800&q=80",
+          "caption": "กองเชียร์แน่นขนัดส่งเสียงเชียร์จังหวะ Clutch 1v3 สุดระทึก",
+          "category": "crowd"
+        },
+        {
+          "id": "p-10",
+          "url": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80",
+          "caption": "เอฟเฟกต์ไฟสเตจเปลี่ยนสีอัตโนมัติตามสถานะการวาง Spike ในเกม",
+          "category": "stage"
+        },
+        {
+          "id": "p-11",
+          "url": "https://images.unsplash.com/photo-1598550476439-6847785fcea6?auto=format&fit=crop&w=800&q=80",
+          "caption": "โต๊ะแข่งขันแบบ Ergonomic ปรับระดับความสูงและพื้นที่ลากเมาส์พิเศษ",
+          "category": "gear"
+        },
+        {
+          "id": "p-12",
+          "url": "https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=800&q=80",
+          "caption": "สมาธิและความมุ่งมั่นของกัปตันทีมระหว่างสั่งการแผนการบุก",
+          "category": "players"
+        },
+        {
+          "id": "p-13",
+          "url": "https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?auto=format&fit=crop&w=800&q=80",
+          "caption": "คีย์บอร์ดกลไกสวิตช์ Hall Effect Rapid Trigger แม่นยำทุกเสี้ยววินาที",
+          "category": "gear"
+        },
+        {
+          "id": "p-14",
+          "url": "https://images.unsplash.com/photo-1580234811497-9df7fd2f357e?auto=format&fit=crop&w=800&q=80",
+          "caption": "โซนวอร์มอัพห้องกระจกกันเสียงส่วนตัวสำหรับทีมที่รอขึ้นเวที",
+          "category": "players"
+        },
+        {
+          "id": "p-15",
+          "url": "https://images.unsplash.com/photo-1593305841991-05c297ba4575?auto=format&fit=crop&w=800&q=80",
+          "caption": "โต๊ะนักพากย์ (Caster Desk) พร้อมจอวิเคราะห์สถิติสดแบบเร��������ไทม์",
+          "category": "caster"
+        },
+        {
+          "id": "p-16",
+          "url": "https://images.unsplash.com/photo-1547394765-185e1e68f34e?auto=format&fit=crop&w=800&q=80",
+          "caption": "เคสคอมพิวเตอร์ชุดน้ำเปิด Custom RGB โลโก้ G-SPEED ประจำเวที",
+          "category": "gear"
+        },
+        {
+          "id": "p-17",
+          "url": "https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=800&q=80",
+          "caption": "ทางเดินเปิดตัวน����กกีฬา (Player Tunnel) พร้อมไฟสปอตไลต์อลังการ",
+          "category": "stage"
+        },
+        {
+          "id": "p-18",
+          "url": "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=800&q=80",
+          "caption": "ถ้วยรางวัลเกียรติยศและเหรียญรางวัลชนะเลิศบนโพเดียม",
+          "category": "trophy"
+        },
+        {
+          "id": "p-19",
+          "url": "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?auto=format&fit=crop&w=800&q=80",
+          "caption": "เมาส์เกมมิ่งน้ำหนักเบา���ิเศษ 49g สำหรับการเล็งเป้าหมายที่เฉียบคม",
+          "category": "gear"
+        },
+        {
+          "id": "p-20",
+          "url": "https://images.unsplash.com/photo-1511882150382-421056c89033?auto=format&fit=crop&w=800&q=80",
+          "caption": "ทัศนียภาพมุมสูงของอารีน่าระหว่างเปิดการแข่งขันอย่างเป็นทางการ",
+          "category": "stage"
+        },
+        {
+          "id": "p-21",
+          "url": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80",
+          "caption": "ทีมงานบรอดแคสต์และสวิตเชอร์ควบคุมการถ่ายทอดสดแบบ Multi-View",
+          "category": "caster"
+        },
+        {
+          "id": "p-22",
+          "url": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80",
+          "caption": "หน้าจอ Replay Slow Motion จังหวะช็อตเด็ด Headshot มหัศจรรย์",
+          "category": "stage"
+        },
+        {
+          "id": "p-23",
+          "url": "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=800&q=80",
+          "caption": "อุปกรณ์ควบคุมเสียงและไมโครโฟนสำหรับการบรรยายภาษาไทยและอังกฤษ",
+          "category": "caster"
+        },
+        {
+          "id": "p-24",
+          "url": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80",
+          "caption": "โค้ชและผู้เล่นร่วมวิเคราะห์แผนที่และตัวละครระหว่างช่วงพักครึ่ง",
+          "category": "players"
+        },
+        {
+          "id": "p-25",
+          "url": "https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=800&q=80",
+          "caption": "การจับมือแสดงสปิริตนักกีฬาระหว่างสองทีมหลังจบการแข่งขัน",
+          "category": "players"
+        },
+        {
+          "id": "p-26",
+          "url": "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=800&q=80",
+          "caption": "พิธีมอบเช็คเงินรางวัล ฿100,000 แก่ทีมแชมป์เปียนประจำทัวร์นาเมนต์",
+          "category": "trophy"
+        },
+        {
+          "id": "p-27",
+          "url": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80",
+          "caption": "แฟนคลับถ่ายรูปเซลฟี่ร่วมกับนักแข่งคนโปรดหลังจบงาน",
+          "category": "crowd"
+        },
+        {
+          "id": "p-28",
+          "url": "https://images.unsplash.com/photo-1534423861386-85a16f5d13fd?auto=format&fit=crop&w=800&q=80",
+          "caption": "ช่วงเวลาดีใจสุดขีดเมื่อยิงปิดเกมคว้า Match Point สุดระทึก",
+          "category": "players"
+        },
+        {
+          "id": "p-29",
+          "url": "https://images.unsplash.com/photo-1486572788966-cfd3dfdd4a42?auto=format&fit=crop&w=800&q=80",
+          "caption": "จุดลงทะเบียนนักกีฬาและการแจกไอดีการ์ดประจำตัวการแข่งขัน",
+          "category": "players"
+        },
+        {
+          "id": "p-30",
+          "url": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80",
+          "caption": "บรรยากาศผู้ร่วมงานเข้าคิวลุ้นรับของรางวัล Lucky Draw เกมมิ่งเกียร์",
+          "category": "crowd"
+        },
+        {
+          "id": "p-31",
+          "url": "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=800&q=80",
+          "caption": "แสงเลเซอร์และไพโรเทคนิคเปิดตัวคู่ชิงชนะเลิศ Grand Final",
+          "category": "stage"
+        },
+        {
+          "id": "p-32",
+          "url": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80",
+          "caption": "การแสดงดนตรีสดเปิดงานทัวร์นาเมนต์สร้างความตื่นเต้นให้แฟนๆ",
+          "category": "crowd"
+        },
+        {
+          "id": "p-33",
+          "url": "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80",
+          "caption": "ป้ายไฟเชียร์และแบนเนอร์ของเหล่าแฟนคลับที่มาร่วมให้กำลังใจ",
+          "category": "crowd"
+        },
+        {
+          "id": "p-34",
+          "url": "https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=800&q=80",
+          "caption": "สัมภาษณ์สดผู้เล่นยอดเยี่ยม MVP บนเวทีพร้อมล่ามแปลภาษา",
+          "category": "caster"
+        },
+        {
+          "id": "p-35",
+          "url": "https://images.unsplash.com/photo-1558742569-fe6d39d0583a?auto=format&fit=crop&w=800&q=80",
+          "caption": "ทีมช่างเทคนิคดูแลความสมบูรณ์ของระบบไฟฟ้าสำรอง UPS ตลอด 24 ชม.",
+          "category": "gear"
+        },
+        {
+          "id": "p-36",
+          "url": "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&q=80",
+          "caption": "การตรวจสอบความสมบูรณ์ของสายสัญญาณ Fiber Optic ก่อนเริ่มแข่ง",
+          "category": "gear"
+        },
+        {
+          "id": "p-37",
+          "url": "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&q=80",
+          "caption": "ห้องประชุมลับสำหรับกรรมการผู้ตัดสินเพื่อพิจารณาเทปย้อนหลัง",
+          "category": "caster"
+        },
+        {
+          "id": "p-38",
+          "url": "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=800&q=80",
+          "caption": "คณะผู้จัดงานและตัวแทนสปอนเซอร์ร่วมถ่ายภาพเปิดทัวร์นาเมนต์",
+          "category": "trophy"
+        },
+        {
+          "id": "p-39",
+          "url": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+          "caption": "เหรียญรางวัลเกียรติยศเคลือบทองคำแท้สำหรับแชมป์รายการนี้",
+          "category": "trophy"
+        },
+        {
+          "id": "p-40",
+          "url": "https://images.unsplash.com/photo-1576267423445-b2e0074d68a4?auto=format&fit=crop&w=800&q=80",
+          "caption": "มุมอาหารว่างและเครื่องดื่มเกลือแร่ฟรีสำหรับนักกีฬาทุกทีม",
+          "category": "crowd"
+        },
+        {
+          "id": "p-41",
+          "url": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80",
+          "caption": "บรรยากาศบาร์ Cyber Cafe บริการเมนูสดใหม่ตลอดคืนแข่งขัน",
+          "category": "crowd"
+        },
+        {
+          "id": "p-42",
+          "url": "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=800&q=80",
+          "caption": "ช่วงเวลาชูถ้วยรางวัลฉลองชัยชนะท่ามกลางสายฝนริบบิ้นทอง",
+          "category": "trophy"
+        },
+        {
+          "id": "p-43",
+          "url": "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=80",
+          "caption": "ภาพความประทับใจรวมเหล่านักแข่งทั้ง 32 ทีมบนเวทีใหญ่",
+          "category": "players"
+        },
+        {
+          "id": "p-44",
+          "url": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80",
+          "caption": "ระบบคอมพิวเตอร์เซิร์ฟเวอร์ควบคุมผลคะแนนการแข่งขันแบบอัตโนมัติ",
+          "category": "gear"
+        },
+        {
+          "id": "p-45",
+          "url": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80",
+          "caption": "กราฟิก 3D Hologram แสดงสายการแข่งขันและผลคะแนนสด",
+          "category": "stage"
+        },
+        {
+          "id": "p-46",
+          "url": "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80",
+          "caption": "การจับสลากแบ่งสายการแข่งขัน Group Draw ถ่ายทอดสดทั่วประเทศ",
+          "category": "stage"
+        },
+        {
+          "id": "p-47",
+          "url": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80",
+          "caption": "โค้ชให้คำแนะนำด้านจิตวิทยาและสมาธิระหว่างเวลานอก (Tactical Timeout)",
+          "category": "players"
+        },
+        {
+          "id": "p-48",
+          "url": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80",
+          "caption": "รอยยิ้มและมิตรภาพระหว่างผู้เล่นหลังจบแมตช์สุดดุเดือด",
+          "category": "players"
+        },
+        {
+          "id": "p-49",
+          "url": "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=800&q=80",
+          "caption": "แฟนเกมร่วมสนุกกับมินิเกมและตอบคำถามแจกของรางวัลช็อปปิ้งมอลล์",
+          "category": "crowd"
+        },
+        {
+          "id": "p-50",
+          "url": "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=800&q=80",
+          "caption": "โน้ตบุ๊กเกมมิ่งระดับท็อปสำหรับการสตรีมมุมมองบุคคลที่หนึ่ง (POV)",
+          "category": "gear"
+        },
+        {
+          "id": "p-51",
+          "url": "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80",
+          "caption": "ผู้บริหาร G-Speed ขึ้นกล่าวปิดงานและประกาศทัวร์นาเมนต์ซีซันถัดไป",
+          "category": "stage"
+        },
+        {
+          "id": "p-52",
+          "url": "https://images.unsplash.com/photo-1568992687947-868a62a9f521?auto=format&fit=crop&w=800&q=80",
+          "caption": "ภาพความทรงจำส่งท้ายงาน แฟนคลับและนักกีฬาร่วมบันทึกประวัติศาสตร์",
+          "category": "crowd"
+        }
+      ],
+      "seo": {
+        "metaTitle": "G-SPEED VALORANT CHAMPIONSHIP 2026 | ทัวร์นาเมนต์ชิงเงินรางวัล ฿100,000",
+        "metaDesc": "การแข่งขัน VALORANT LAN Tournament สุดยิ่งใหญ่ ณ G-Speed Arena รามคำแหง 53 เงินรางวัลรวม 100,000 บาท แข่งขันบนเวที Main Stage จอ 360Hz",
+        "keywords": "VALORANT, GSpeed, ทัวร์นาเมนต์, แข่งเกม, อีสปอร์ต, รามคำแหง 53, LAN Final, 360Hz, ร้านเกม",
+        "ogImage": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80",
+        "slug": "gspeed-valorant-championship-2026"
+      },
+      "desc_en": "The biggest esports tournament of 2026, competing for a total prize money of over ฿100,000, gathering 32 top teams across the country to duel with precision on the LAN Final stage at G-Speed ​​Arena, Ramkhamhaeng 53, with a tournament spec computer system Intel Core i9 + RTX 4080 and a BenQ ZOWIE 360Hz screen, broadcast live by a professional caster team.",
+      "desc_zh": "2026 年最大的电子竞技锦标赛，总奖金超过 10 万泰铢，聚集了全国 32 支顶级队伍，在位于 Ramkhamhaeng 53 的 G-Speed Arena 的 LAN 决赛舞台上进行精准对决，比赛规格计算机系统为 Intel Core i9 + RTX 4080 和 BenQ ZOWIE 360Hz 屏幕，由专业解说团队现场直播。",
+      "venue_en": "G-Speed ​​Esport Arena Ramkhamhaeng 53 (Main Stage & Battleground Zone)",
+      "venue_zh": "G-Speed Esport Arena Ramkhamhaeng 53（主舞台和战场区）",
+      "prizePool_en": "100,000 baht",
+      "prizePool_zh": "100,000 泰铢",
+      "badge_en": "recently",
+      "badge_zh": "最近",
+      "slots_en": "32 Teams (Final 6 remaining)",
+      "slots_zh": "32 支战队 (剩余最后6支)",
+      "date_en": "28-30 September 2026",
+      "date_zh": "2026年9月28-30日",
+      "time_en": "11:00 - 20:00",
+      "time_zh": "11:00 - 20:00",
+      "regStartDate_en": "September 1, 2026",
+      "regStartDate_zh": "2026 年 9 月 1 日",
+      "regEndDate_en": "September 25, 2026",
+      "regEndDate_zh": "2026 年 9 月 25 日",
+      "rules_en": [
+        "All competitors must bring their ID card or student ID card to present at the registration point.",
+        "Personal mice, keyboards, and headphones are allowed. which must be inspected by technical staff before the start of the race",
+        "The racing computer is powered by Intel Core i9 + NVIDIA GeForce RTX 4080 and a BenQ ZOWIE 360Hz monitor.",
+        "Do not use cheat programs. Help script Or take advantage of game errors (Bug Exploitation). If detected, you will lose immediately.",
+        "The decision of the Head Referee is final in all cases."
+      ],
+      "rules_zh": [
+        "所有参赛者须携带身份证或学生证到报到点出示。",
+        "允许使用个人鼠标、键盘和耳机。比赛开始前必须经过技术人员的检查",
+        "该赛车计算机由 Intel Core i9 + NVIDIA GeForce RTX 4080 和 BenQ ZOWIE 360Hz 显示器提供动力。",
+        "不要使用作弊程序。帮助脚本或者利用游戏错误（Bug Exploitation）。如果被发现，您将立即失败。",
+        "在所有情况下，主裁判的决定均为最终决定。"
+      ],
+      "prizeDistribution_en": [
+        {
+          "rank": "Number 1 champion",
+          "reward": "฿50,000 + Trophy + Gold Medal + ROG Gaming Gear Set"
+        },
+        {
+          "rank": "1st runner-up",
+          "reward": "฿25,000 + silver coins"
+        },
+        {
+          "rank": "Joint 2nd runner-up (2 teams)",
+          "reward": "฿10,000 per team + bronze medal"
+        },
+        {
+          "rank": "MVP of Tournament",
+          "reward": "฿5,000 + ROG Delta S Wireless headphones"
+        }
+      ],
+      "prizeDistribution_zh": [
+        {
+          "rank": "1号冠军",
+          "reward": "฿50,000 + 奖杯 + 金牌 + ROG 游戏装备套装"
+        },
+        {
+          "rank": "第一名亚军",
+          "reward": "฿25,000 + 银币"
+        },
+        {
+          "rank": "并列季军（2队）",
+          "reward": "每队 10,000 泰铢 + 铜牌"
+        },
+        {
+          "rank": "锦标赛MVP",
+          "reward": "฿5,000 + ROG Delta S 无线耳机"
+        }
+      ],
+      "scheduleTimetable_en": [
+        {
+          "time": "10:00 - 11:00 a.m.",
+          "stage": "Register at the event & check athletes' equipment (Player Check-in & Gear Check)"
+        },
+        {
+          "time": "11:15 - 14:00 hrs.",
+          "stage": "Group Stage Qualifying Round (Best of 1 - LAN Setup)"
+        },
+        {
+          "time": "2:30 p.m. - 5:30 p.m.",
+          "stage": "Round of 8 teams and final 4 teams (Quarter & Semi-Finals - Best of 3)"
+        },
+        {
+          "time": "6:00 p.m. - 8:30 p.m.",
+          "stage": "Grand Final on the Main Stage (Best of 5 live broadcast)"
+        }
+      ],
+      "scheduleTimetable_zh": [
+        {
+          "time": "上午 10:00 - 11:00",
+          "stage": "在活动中登记并检查运动员的装备（运动员报到和装备检查）"
+        },
+        {
+          "time": "11:15 - 14:00 小时",
+          "stage": "小组赛资格赛（1 胜 1 胜 - 局域网设置）"
+        },
+        {
+          "time": "下午 2:30 - 下午 5:30",
+          "stage": "8 支球队和决赛 4 支球队（四分之一决赛和半决赛 - 3 胜制）"
+        },
+        {
+          "time": "下午 6:00 - 晚上 8:30",
+          "stage": "主舞台总决赛（五局三胜直播）"
+        }
+      ],
+      "galleryPhotos_en": [
+        {
+          "id": "p-1",
+          "url": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80",
+          "caption": "Main Stage, light and sound system and giant 4K LED Wall screen",
+          "category": "stage"
+        },
+        {
+          "id": "p-2",
+          "url": "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80",
+          "caption": "The atmosphere of athletes seated at Battle Stations practicing before the competition begins.",
+          "category": "players"
+        },
+        {
+          "id": "p-3",
+          "url": "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80",
+          "caption": "Intel i9 + RTX 4080 SUPER spec computer with 360Hz screen",
+          "category": "gear"
+        },
+        {
+          "id": "p-4",
+          "url": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80",
+          "caption": "The round of 16 teams compete simultaneously in Full LAN Setup.",
+          "category": "players"
+        },
+        {
+          "id": "p-5",
+          "url": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80",
+          "caption": "Wide view of the arena Blue-orange themed lighting Referring to the most intense clash",
+          "category": "stage"
+        },
+        {
+          "id": "p-6",
+          "url": "https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=800&q=80",
+          "caption": "Pro Studio Noise-Canceling Competition Grade Noise-Canceling Headphones",
+          "category": "gear"
+        },
+        {
+          "id": "p-7",
+          "url": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80",
+          "caption": "10Gbps split network LAN system, Latency less than 1ms",
+          "category": "gear"
+        },
+        {
+          "id": "p-8",
+          "url": "https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?auto=format&fit=crop&w=800&q=80",
+          "caption": "Warm-up test for keypad readiness and device response rate",
+          "category": "players"
+        },
+        {
+          "id": "p-9",
+          "url": "https://images.unsplash.com/photo-1542751110-97427bbecf20?auto=format&fit=crop&w=800&q=80",
+          "caption": "Crowds of supporters cheering for the thrilling Clutch 1v3 match.",
+          "category": "crowd"
+        },
+        {
+          "id": "p-10",
+          "url": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80",
+          "caption": "Stage lighting effects automatically change color based on Spike placement status in the game.",
+          "category": "stage"
+        },
+        {
+          "id": "p-11",
+          "url": "https://images.unsplash.com/photo-1598550476439-6847785fcea6?auto=format&fit=crop&w=800&q=80",
+          "caption": "Ergonomic competition desk with adjustable height and extra mouse drag area.",
+          "category": "gear"
+        },
+        {
+          "id": "p-12",
+          "url": "https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=800&q=80",
+          "caption": "The captain's concentration and determination while commanding the attacking plan",
+          "category": "players"
+        },
+        {
+          "id": "p-13",
+          "url": "https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?auto=format&fit=crop&w=800&q=80",
+          "caption": "Hall Effect Rapid Trigger mechanical keyboard switches for millisecond precision.",
+          "category": "gear"
+        },
+        {
+          "id": "p-14",
+          "url": "https://images.unsplash.com/photo-1580234811497-9df7fd2f357e?auto=format&fit=crop&w=800&q=80",
+          "caption": "Warm-up zone, private soundproof glass room for teams waiting to go on stage",
+          "category": "players"
+        },
+        {
+          "id": "p-15",
+          "url": "https://images.unsplash.com/photo-1593305841991-05c297ba4575?auto=format&fit=crop&w=800&q=80",
+          "caption": "Caster Desk with real-time statistics analysis screen",
+          "category": "caster"
+        },
+        {
+          "id": "p-16",
+          "url": "https://images.unsplash.com/photo-1547394765-185e1e68f34e?auto=format&fit=crop&w=800&q=80",
+          "caption": "Custom RGB open water computer case with G-SPEED logo for the stage.",
+          "category": "gear"
+        },
+        {
+          "id": "p-17",
+          "url": "https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=800&q=80",
+          "caption": "The walkway opening the sports stadium (Player Tunnel) with spectacular spotlights.",
+          "category": "stage"
+        },
+        {
+          "id": "p-18",
+          "url": "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=800&q=80",
+          "caption": "Trophies and championship medals on the podium",
+          "category": "trophy"
+        },
+        {
+          "id": "p-19",
+          "url": "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?auto=format&fit=crop&w=800&q=80",
+          "caption": "Ultra-lightweight 49g gaming mouse for precise aiming.",
+          "category": "gear"
+        },
+        {
+          "id": "p-20",
+          "url": "https://images.unsplash.com/photo-1511882150382-421056c89033?auto=format&fit=crop&w=800&q=80",
+          "caption": "Aerial view of the arena during the official opening of the competition.",
+          "category": "stage"
+        },
+        {
+          "id": "p-21",
+          "url": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80",
+          "caption": "Broadcast team and switchers control live Multi-View broadcasts",
+          "category": "caster"
+        },
+        {
+          "id": "p-22",
+          "url": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80",
+          "caption": "Slow Motion Replay Screen, Great Shot, Amazing Headshot",
+          "category": "stage"
+        },
+        {
+          "id": "p-23",
+          "url": "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=800&q=80",
+          "caption": "Audio and microphone control equipment for Thai and English lectures",
+          "category": "caster"
+        },
+        {
+          "id": "p-24",
+          "url": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80",
+          "caption": "Coaches and players analyze maps and characters during halftime.",
+          "category": "players"
+        },
+        {
+          "id": "p-25",
+          "url": "https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=800&q=80",
+          "caption": "The handshake shows the sporting spirit between the two teams after the match.",
+          "category": "players"
+        },
+        {
+          "id": "p-26",
+          "url": "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=800&q=80",
+          "caption": "Ceremony to present prize money checks of ฿100,000 to the tournament champion teams.",
+          "category": "trophy"
+        },
+        {
+          "id": "p-27",
+          "url": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80",
+          "caption": "Fans took selfies with their favorite racers after the event.",
+          "category": "crowd"
+        },
+        {
+          "id": "p-28",
+          "url": "https://images.unsplash.com/photo-1534423861386-85a16f5d13fd?auto=format&fit=crop&w=800&q=80",
+          "caption": "The moment of extreme joy when the shot ended the game and grabbed the most exciting Match Point.",
+          "category": "players"
+        },
+        {
+          "id": "p-29",
+          "url": "https://images.unsplash.com/photo-1486572788966-cfd3dfdd4a42?auto=format&fit=crop&w=800&q=80",
+          "caption": "Athlete registration points and competition ID card distribution",
+          "category": "players"
+        },
+        {
+          "id": "p-30",
+          "url": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80",
+          "caption": "The atmosphere of attendees queuing up to win Lucky Draw gaming gear prizes.",
+          "category": "crowd"
+        },
+        {
+          "id": "p-31",
+          "url": "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=800&q=80",
+          "caption": "Laser light and pyrotechnics launch the Grand Final match",
+          "category": "stage"
+        },
+        {
+          "id": "p-32",
+          "url": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80",
+          "caption": "The live music performance that opened the tournament excited fans.",
+          "category": "crowd"
+        },
+        {
+          "id": "p-33",
+          "url": "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80",
+          "caption": "Cheering lights and banners from fans who came to cheer.",
+          "category": "crowd"
+        },
+        {
+          "id": "p-34",
+          "url": "https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=800&q=80",
+          "caption": "Live interviews of MVP players on stage with language interpreters.",
+          "category": "caster"
+        },
+        {
+          "id": "p-35",
+          "url": "https://images.unsplash.com/photo-1558742569-fe6d39d0583a?auto=format&fit=crop&w=800&q=80",
+          "caption": "A team of technicians maintains the integrity of the UPS backup power system 24 hours a day.",
+          "category": "gear"
+        },
+        {
+          "id": "p-36",
+          "url": "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&q=80",
+          "caption": "Checking the integrity of the Fiber Optic cable before starting the race.",
+          "category": "gear"
+        },
+        {
+          "id": "p-37",
+          "url": "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&q=80",
+          "caption": "A secret meeting room for the judges to review past tapes.",
+          "category": "caster"
+        },
+        {
+          "id": "p-38",
+          "url": "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=800&q=80",
+          "caption": "The organizing committee and sponsor representatives took the opening photo of the tournament.",
+          "category": "trophy"
+        },
+        {
+          "id": "p-39",
+          "url": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+          "caption": "A genuine gold-plated medal of honor for the champion of this event.",
+          "category": "trophy"
+        },
+        {
+          "id": "p-40",
+          "url": "https://images.unsplash.com/photo-1576267423445-b2e0074d68a4?auto=format&fit=crop&w=800&q=80",
+          "caption": "Free snack corner and sports drinks for all athletes.",
+          "category": "crowd"
+        },
+        {
+          "id": "p-41",
+          "url": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80",
+          "caption": "Cyber ​​Cafe bar atmosphere, serving fresh menus throughout competition night.",
+          "category": "crowd"
+        },
+        {
+          "id": "p-42",
+          "url": "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=800&q=80",
+          "caption": "The moment of lifting the trophy and celebrating victory in the rain of gold ribbons.",
+          "category": "trophy"
+        },
+        {
+          "id": "p-43",
+          "url": "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=80",
+          "caption": "Impressive pictures of all 32 racing teams on the big stage.",
+          "category": "players"
+        },
+        {
+          "id": "p-44",
+          "url": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80",
+          "caption": "The computer server system controls the competition scores automatically.",
+          "category": "gear"
+        },
+        {
+          "id": "p-45",
+          "url": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80",
+          "caption": "3D Hologram graphics show match lines and live scores.",
+          "category": "stage"
+        },
+        {
+          "id": "p-46",
+          "url": "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80",
+          "caption": "The Group Draw competition draws are broadcast live nationwide.",
+          "category": "stage"
+        },
+        {
+          "id": "p-47",
+          "url": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80",
+          "caption": "The coach gives advice on psychology and concentration during Tactical Timeout.",
+          "category": "players"
+        },
+        {
+          "id": "p-48",
+          "url": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80",
+          "caption": "The smiles and friendship between the players after a fierce match.",
+          "category": "players"
+        },
+        {
+          "id": "p-49",
+          "url": "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=800&q=80",
+          "caption": "Fans join in the fun with mini games and quizzes for shopping mall giveaways.",
+          "category": "crowd"
+        },
+        {
+          "id": "p-50",
+          "url": "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=800&q=80",
+          "caption": "Top gaming laptop for first-person (POV) streaming",
+          "category": "gear"
+        },
+        {
+          "id": "p-51",
+          "url": "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80",
+          "caption": "G-Speed ​​executives gave closing remarks and announced the next season of tournaments.",
+          "category": "stage"
+        },
+        {
+          "id": "p-52",
+          "url": "https://images.unsplash.com/photo-1568992687947-868a62a9f521?auto=format&fit=crop&w=800&q=80",
+          "caption": "Memories at the end of the event Fans and athletes join in recording history.",
+          "category": "crowd"
+        }
+      ],
+      "galleryPhotos_zh": [
+        {
+          "id": "p-1",
+          "url": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80",
+          "caption": "主舞台、灯光音响系统和巨型 4K LED 墙屏",
+          "category": "stage"
+        },
+        {
+          "id": "p-2",
+          "url": "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80",
+          "caption": "比赛开始前，运动员们坐在战斗站上练习的气氛。",
+          "category": "players"
+        },
+        {
+          "id": "p-3",
+          "url": "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80",
+          "caption": "Intel i9 + RTX 4080 SUPER规格电脑，配备360Hz屏幕",
+          "category": "gear"
+        },
+        {
+          "id": "p-4",
+          "url": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80",
+          "caption": "16 支队伍同时进行全线局域网比赛。",
+          "category": "players"
+        },
+        {
+          "id": "p-5",
+          "url": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80",
+          "caption": "广阔的赛场视野 蓝橙主题灯光 演绎最激烈的对决",
+          "category": "stage"
+        },
+        {
+          "id": "p-6",
+          "url": "https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=800&q=80",
+          "caption": "Pro Studio 降噪竞赛级降噪耳机",
+          "category": "gear"
+        },
+        {
+          "id": "p-7",
+          "url": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80",
+          "caption": "10Gbps分体网络LAN系统，延迟小于1ms",
+          "category": "gear"
+        },
+        {
+          "id": "p-8",
+          "url": "https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?auto=format&fit=crop&w=800&q=80",
+          "caption": "键盘准备情况和设备响应率的预热测试",
+          "category": "players"
+        },
+        {
+          "id": "p-9",
+          "url": "https://images.unsplash.com/photo-1542751110-97427bbecf20?auto=format&fit=crop&w=800&q=80",
+          "caption": "成群结队的支持者为激动人心的 Clutch 1v3 比赛欢呼。",
+          "category": "crowd"
+        },
+        {
+          "id": "p-10",
+          "url": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80",
+          "caption": "舞台灯光效果会根据游戏中 Spike 的放置状态自动改变颜色。",
+          "category": "stage"
+        },
+        {
+          "id": "p-11",
+          "url": "https://images.unsplash.com/photo-1598550476439-6847785fcea6?auto=format&fit=crop&w=800&q=80",
+          "caption": "符合人体工程学的比赛桌，高度可调节，并配有额外的鼠标拖动区域。",
+          "category": "gear"
+        },
+        {
+          "id": "p-12",
+          "url": "https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=800&q=80",
+          "caption": "队长指挥进攻计划时的专注和决心",
+          "category": "players"
+        },
+        {
+          "id": "p-13",
+          "url": "https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?auto=format&fit=crop&w=800&q=80",
+          "caption": "霍尔效应快速触发机械键盘开关可实现瞬间精度。",
+          "category": "gear"
+        },
+        {
+          "id": "p-14",
+          "url": "https://images.unsplash.com/photo-1580234811497-9df7fd2f357e?auto=format&fit=crop&w=800&q=80",
+          "caption": "热身区，为等待上台的队伍提供私人隔音玻璃室",
+          "category": "players"
+        },
+        {
+          "id": "p-15",
+          "url": "https://images.unsplash.com/photo-1593305841991-05c297ba4575?auto=format&fit=crop&w=800&q=80",
+          "caption": "带实时统计分析屏幕的 Caster Desk",
+          "category": "caster"
+        },
+        {
+          "id": "p-16",
+          "url": "https://images.unsplash.com/photo-1547394765-185e1e68f34e?auto=format&fit=crop&w=800&q=80",
+          "caption": "定制 RGB 开放式水电脑机箱，带有 G-SPEED 徽标，适用于舞台。",
+          "category": "gear"
+        },
+        {
+          "id": "p-17",
+          "url": "https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=800&q=80",
+          "caption": "通往体育场（球员通道）的走道带有壮观的聚光灯。",
+          "category": "stage"
+        },
+        {
+          "id": "p-18",
+          "url": "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=800&q=80",
+          "caption": "领奖台上的奖杯和冠军奖牌",
+          "category": "trophy"
+        },
+        {
+          "id": "p-19",
+          "url": "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?auto=format&fit=crop&w=800&q=80",
+          "caption": "超轻 49 克游戏鼠标，可实现精确瞄准。",
+          "category": "gear"
+        },
+        {
+          "id": "p-20",
+          "url": "https://images.unsplash.com/photo-1511882150382-421056c89033?auto=format&fit=crop&w=800&q=80",
+          "caption": "比赛正式开幕时赛场鸟瞰图。",
+          "category": "stage"
+        },
+        {
+          "id": "p-21",
+          "url": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80",
+          "caption": "广播团队和切换台控制实时多视图广播",
+          "category": "caster"
+        },
+        {
+          "id": "p-22",
+          "url": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80",
+          "caption": "慢动作回放画面，精彩镜头，精彩爆头",
+          "category": "stage"
+        },
+        {
+          "id": "p-23",
+          "url": "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=800&q=80",
+          "caption": "泰语和英语讲座的音频和麦克风控制设备",
+          "category": "caster"
+        },
+        {
+          "id": "p-24",
+          "url": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80",
+          "caption": "教练和球员在中场休息时分析地图和人物。",
+          "category": "players"
+        },
+        {
+          "id": "p-25",
+          "url": "https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=800&q=80",
+          "caption": "赛后的握手展现了两队之间的体育精神。",
+          "category": "players"
+        },
+        {
+          "id": "p-26",
+          "url": "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=800&q=80",
+          "caption": "向锦标赛冠军队伍颁发10万泰铢奖金支票的仪式。",
+          "category": "trophy"
+        },
+        {
+          "id": "p-27",
+          "url": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80",
+          "caption": "活动结束后，粉丝们与他们最喜欢的赛车手合影留念。",
+          "category": "crowd"
+        },
+        {
+          "id": "p-28",
+          "url": "https://images.unsplash.com/photo-1534423861386-85a16f5d13fd?auto=format&fit=crop&w=800&q=80",
+          "caption": "当射门结束比赛并抢下最激动人心的赛点时，无比喜悦的时刻。",
+          "category": "players"
+        },
+        {
+          "id": "p-29",
+          "url": "https://images.unsplash.com/photo-1486572788966-cfd3dfdd4a42?auto=format&fit=crop&w=800&q=80",
+          "caption": "运动员报名点及比赛身份证发放",
+          "category": "players"
+        },
+        {
+          "id": "p-30",
+          "url": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80",
+          "caption": "现场气氛热烈，现场观众排队等待抽奖游戏装备奖品。",
+          "category": "crowd"
+        },
+        {
+          "id": "p-31",
+          "url": "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=800&q=80",
+          "caption": "激光与烟火开启总决赛",
+          "category": "stage"
+        },
+        {
+          "id": "p-32",
+          "url": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80",
+          "caption": "拉开比赛序幕的现场音乐表演让球迷兴奋不已。",
+          "category": "crowd"
+        },
+        {
+          "id": "p-33",
+          "url": "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80",
+          "caption": "前来助威的球迷们点亮了欢呼灯和横幅。",
+          "category": "crowd"
+        },
+        {
+          "id": "p-34",
+          "url": "https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=800&q=80",
+          "caption": "在台上通过语言翻译对 MVP 球员进行现场采访。",
+          "category": "caster"
+        },
+        {
+          "id": "p-35",
+          "url": "https://images.unsplash.com/photo-1558742569-fe6d39d0583a?auto=format&fit=crop&w=800&q=80",
+          "caption": "技术人员团队每天 24 小时维护 UPS 备用电源系统的完整性。",
+          "category": "gear"
+        },
+        {
+          "id": "p-36",
+          "url": "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&q=80",
+          "caption": "比赛开始前检查光纤电缆的完整性。",
+          "category": "gear"
+        },
+        {
+          "id": "p-37",
+          "url": "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&q=80",
+          "caption": "供评委审阅过去录音带的秘密会议室。",
+          "category": "caster"
+        },
+        {
+          "id": "p-38",
+          "url": "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=800&q=80",
+          "caption": "组委会及赞助商代表为赛事开场合影。",
+          "category": "trophy"
+        },
+        {
+          "id": "p-39",
+          "url": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+          "caption": "本次赛事冠军获得一枚真正的镀金荣誉奖章。",
+          "category": "trophy"
+        },
+        {
+          "id": "p-40",
+          "url": "https://images.unsplash.com/photo-1576267423445-b2e0074d68a4?auto=format&fit=crop&w=800&q=80",
+          "caption": "为所有运动员提供免费小吃角和运动饮料。",
+          "category": "crowd"
+        },
+        {
+          "id": "p-41",
+          "url": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80",
+          "caption": "网吧酒吧氛围浓厚，整个比赛之夜提供新鲜菜单。",
+          "category": "crowd"
+        },
+        {
+          "id": "p-42",
+          "url": "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=800&q=80",
+          "caption": "在金丝带雨中举起奖杯、庆祝胜利的时刻。",
+          "category": "trophy"
+        },
+        {
+          "id": "p-43",
+          "url": "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=80",
+          "caption": "32支车队在大舞台上的精彩合影。",
+          "category": "players"
+        },
+        {
+          "id": "p-44",
+          "url": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80",
+          "caption": "计算机服务器系统自动控制比赛成绩。",
+          "category": "gear"
+        },
+        {
+          "id": "p-45",
+          "url": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80",
+          "caption": "3D 全息图显示比赛线和实时比分。",
+          "category": "stage"
+        },
+        {
+          "id": "p-46",
+          "url": "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80",
+          "caption": "小组抽签比赛抽签在全国进行现场直播。",
+          "category": "stage"
+        },
+        {
+          "id": "p-47",
+          "url": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80",
+          "caption": "教练在战术暂停期间提供心理和注意力方面的建议。",
+          "category": "players"
+        },
+        {
+          "id": "p-48",
+          "url": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80",
+          "caption": "激烈的比赛结束后，球员们之间的笑容和友谊。",
+          "category": "players"
+        },
+        {
+          "id": "p-49",
+          "url": "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=800&q=80",
+          "caption": "粉丝们可以通过迷你游戏和测验来获得商场赠品的乐趣。",
+          "category": "crowd"
+        },
+        {
+          "id": "p-50",
+          "url": "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=800&q=80",
+          "caption": "用于第一人称 (POV) 流媒体的顶级游戏笔记本电脑",
+          "category": "gear"
+        },
+        {
+          "id": "p-51",
+          "url": "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80",
+          "caption": "G-Speed 高管致闭幕词并宣布下一赛季的赛事。",
+          "category": "stage"
+        },
+        {
+          "id": "p-52",
+          "url": "https://images.unsplash.com/photo-1568992687947-868a62a9f521?auto=format&fit=crop&w=800&q=80",
+          "caption": "赛事结束时的回忆 球迷和运动员一起记录历史。",
+          "category": "crowd"
+        }
+      ],
+      "seo_en": {
+        "metaTitle": "G-SPEED VALORANT CHAMPIONSHIP 2026 | Tournament for prize money ฿100,000",
+        "metaDesc": "The biggest VALORANT LAN Tournament at G-Speed ​​Arena, Ramkhamhaeng 53, total prize money 100,000 baht, competing on the Main Stage, 360Hz screen.",
+        "keywords": "VALORANT, GSpeed, ทัวร์นาเมนต์, แข่งเกม, อีสปอร์ต, รามคำแหง 53, LAN Final, 360Hz, ร้านเกม",
+        "ogImage": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80",
+        "slug": "gspeed-valorant-championship-2026",
+        "metaDescription": "The biggest VALORANT LAN Tournament at G-Speed ​​Arena, Ramkhamhaeng 53, total prize money 100,000 baht, competing on the Main Stage, 360Hz screen."
+      },
+      "seo_zh": {
+        "metaTitle": "2026 年 G-SPEED VALORANT 锦标赛 |锦标赛奖金 ฿100,000",
+        "metaDesc": "最大的VALORANT LAN锦标赛在G-Speed Arena，Ramkhamhaeng 53举行，总奖金100,000泰铢，在主舞台上进行比赛，360Hz屏幕。",
+        "keywords": "VALORANT, GSpeed, ทัวร์นาเมนต์, แข่งเกม, อีสปอร์ต, รามคำแหง 53, LAN Final, 360Hz, ร้านเกม",
+        "ogImage": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80",
+        "slug": "gspeed-valorant-championship-2026",
+        "metaDescription": "最大的VALORANT LAN锦标赛在G-Speed Arena，Ramkhamhaeng 53举行，总奖金100,000泰铢，在主舞台上进行比赛，360Hz屏幕。"
+      }
     },
     {
       "id": "tour-3",
       "slug": "cs2-bangkok-showdown-invitational-2026",
       "title": "CS2 BANGKOK SHOWDOWN INVITATIONAL",
-      "desc": "การแข่งขัน Counter-Strike 2 ระดับนานาชาติ ชิงเงินรางวัล 150,000 บาท ณ G-Speed Arena รามคำแหง 53 Dedicated LAN Server",
-      "date": "24-25 ตุลาคม 2026",
-      "image": "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1200&q=80",
       "game": "Counter-Strike 2",
-      "prizePool": "150,000 บาท"
+      "gameCategory": "Tactical 5v5 FPS",
+      "gameIcon": "Target",
+      "bannerImage": "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1200&q=80",
+      "date": "24-25 ตุลาคม 2026",
+      "time": "10:00 - 22:00 น.",
+      "regStartDate": "1 ตุลาคม 2026",
+      "regEndDate": "20 ตุลาคม 2026",
+      "tourneyStartDate": "2026-10-24",
+      "tourneyEndDate": "2026-10-25",
+      "prizePool": "150,000 บาท",
+      "slots": "16 ทีมระดับ Pro Circuit",
+      "format": "128-Tick Dedicated Server on LAN",
+      "badge": "เร็วๆ นี้",
+      "badgeType": "cyan",
+      "status": "Upcoming",
+      "tags": [
+        "#CS2",
+        "#LANFinal",
+        "#AsiaPacific",
+        "#360Hz"
+      ],
+      "venue": "G-Speed Esport Arena รามคำแหง 53 (Main Stage Soundproof Booths)",
+      "streamChannel": "Twitch.tv/cs2_gspeed & HLTV Live Score",
+      "desc": "แมตช์เชิญชวน 16 สุดยอดทีม CS2 ชั้นนำของภูมิภาคเอเชียตะวันออกเฉียงใต้ ดวลกันด้วยระบบ Dedicated LAN Server ซับทิกแม่นยำพิเศษ จอ 540Hz OLED และห้องกระจกกันเสียงระดับ World Championship",
+      "prizeDistribution": [
+        {
+          "rank": "แชมป์อันดับ 1",
+          "reward": "฿80,000 + โควตาทัวร์ระดับนานาชาติ"
+        },
+        {
+          "rank": "รองชนะเลิศอันดับ 1",
+          "reward": "฿40,000"
+        },
+        {
+          "rank": "อันดับ 3-4",
+          "reward": "฿15,000 ต่อทีม"
+        }
+      ],
+      "rules": [
+        "ใช้การตั้งค่า Official Valve CS2 Tournament Ruleset (MR12 + Overtime MR3)",
+        "ห้ามใช้คำสั่ง Console ที่ไม่ได้รับอนุญาตหรือ Custom Aliases",
+        "การแข่งขันรันบนเซิร์ฟเวอร์ LAN ในเครื่องแม่ข่ายของ G-Speed ความหน่วงต่ำกว่า 1ms"
+      ],
+      "scheduleTimetable": [
+        {
+          "time": "10:00 น.",
+          "stage": "พิธีเปิดและการคัดเลือกแผนที่ Map Veto"
+        },
+        {
+          "time": "11:00 - 15:00 น.",
+          "stage": "รอบ Quarter-Finals (Bo3)"
+        },
+        {
+          "time": "16:00 - 19:00 น.",
+          "stage": "รอบ Semi-Finals (Bo3)"
+        },
+        {
+          "time": "19:30 - 22:00 น.",
+          "stage": "รอบชิงชนะเลิศ Grand Final (Bo5)"
+        }
+      ],
+      "teams": [
+        {
+          "id": "cs-1",
+          "name": "NKT Global",
+          "tag": "NKT",
+          "logo": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80",
+          "seed": 1,
+          "status": "Confirmed",
+          "captain": "BnTeT (กัปตันทีม)",
+          "captainPhone": "081-111-2222",
+          "captainDiscord": "bntet#1111",
+          "players": [
+            "BnTeT",
+            "Katsu",
+            "erkaSt",
+            "XigN",
+            "MachineGun"
+          ],
+          "substitutes": [
+            "senzu"
+          ],
+          "wins": 4,
+          "losses": 0
+        },
+        {
+          "id": "cs-2",
+          "name": "The MongolZ TH Wing",
+          "tag": "TMZ",
+          "logo": "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=150&q=80",
+          "seed": 2,
+          "status": "Confirmed",
+          "captain": "bLitz (กัปตันทีม)",
+          "captainPhone": "082-222-3333",
+          "captainDiscord": "blitz#2222",
+          "players": [
+            "bLitz",
+            "Techno",
+            "mzinho",
+            "Senzu",
+            "910"
+          ],
+          "substitutes": [
+            "MaaRaa"
+          ],
+          "wins": 3,
+          "losses": 1
+        }
+      ],
+      "galleryPhotos": [
+        {
+          "id": "p-1",
+          "url": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80",
+          "caption": "เวทีแข่งขัน Main Stage ระบบแสงสีเสียงและจอ LED Wall 4K ขนาดยักษ์",
+          "category": "stage"
+        },
+        {
+          "id": "p-2",
+          "url": "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80",
+          "caption": "บรรยากาศนักกีฬาประจำที่นั่ง Battle Stations ซ้อมมือก่อนเริ่มแข่ง",
+          "category": "players"
+        },
+        {
+          "id": "p-3",
+          "url": "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80",
+          "caption": "เครื่องคอมพิวเตอร์สเปก Intel i9 + RTX 4080 SUPER พร้อมจอ 360Hz",
+          "category": "gear"
+        },
+        {
+          "id": "p-4",
+          "url": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80",
+          "caption": "การแข่งขันรอบ 16 ทีมสุดท้าย แข่งพร้อมกันแบบ Full LAN Setup",
+          "category": "players"
+        },
+        {
+          "id": "p-5",
+          "url": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80",
+          "caption": "มุมมองกว้างของอารีน่า แสงไฟธีมน้ำเงิน-ส้ม สื่อถึงการปะทะสุดเข้มข้น",
+          "category": "stage"
+        },
+        {
+          "id": "p-6",
+          "url": "https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=800&q=80",
+          "caption": "หูฟังตัดเสียงรบกวนเกรดการแข่งขัน Pro Studio Noise-Cancelling",
+          "category": "gear"
+        },
+        {
+          "id": "p-7",
+          "url": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80",
+          "caption": "ระบบเน็ตเวิร์กแลนแบบแยกวง 10Gbps Latency ต่ำกว่า 1ms",
+          "category": "gear"
+        },
+        {
+          "id": "p-8",
+          "url": "https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?auto=format&fit=crop&w=800&q=80",
+          "caption": "การอุ่นเครื่องทดสอบความพร้อมปุ่มกดและอัตราตอบสนองอุปกรณ์",
+          "category": "players"
+        },
+        {
+          "id": "p-9",
+          "url": "https://images.unsplash.com/photo-1542751110-97427bbecf20?auto=format&fit=crop&w=800&q=80",
+          "caption": "กองเชียร์แน่นขนัดส่งเสียงเชียร์จังหวะ Clutch 1v3 สุดระทึก",
+          "category": "crowd"
+        },
+        {
+          "id": "p-10",
+          "url": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80",
+          "caption": "เอฟเฟกต์ไฟสเตจเปลี่ยนสีอัตโนมัติตามสถานะการวาง Spike ในเกม",
+          "category": "stage"
+        },
+        {
+          "id": "p-11",
+          "url": "https://images.unsplash.com/photo-1598550476439-6847785fcea6?auto=format&fit=crop&w=800&q=80",
+          "caption": "โต๊ะแข่งขันแบบ Ergonomic ปรับระดับความสูงและพื้นที่ลากเมาส์พิเศษ",
+          "category": "gear"
+        },
+        {
+          "id": "p-12",
+          "url": "https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=800&q=80",
+          "caption": "สมาธิและความมุ่งมั่นของกัปตันทีมระหว่างสั่งการแผนการบุก",
+          "category": "players"
+        },
+        {
+          "id": "p-13",
+          "url": "https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?auto=format&fit=crop&w=800&q=80",
+          "caption": "คีย์บอร์ดกลไกสวิตช์ Hall Effect Rapid Trigger แม่นยำทุกเสี้ยววินาที",
+          "category": "gear"
+        },
+        {
+          "id": "p-14",
+          "url": "https://images.unsplash.com/photo-1580234811497-9df7fd2f357e?auto=format&fit=crop&w=800&q=80",
+          "caption": "โซนวอร์มอัพห้องกระจกกันเสียงส่วนตัวสำหรับทีมที่รอขึ้นเวที",
+          "category": "players"
+        },
+        {
+          "id": "p-15",
+          "url": "https://images.unsplash.com/photo-1593305841991-05c297ba4575?auto=format&fit=crop&w=800&q=80",
+          "caption": "โต๊ะนักพากย์ (Caster Desk) พร้อมจอวิเคราะห์สถิติสดแบบเรียลไทม์",
+          "category": "caster"
+        },
+        {
+          "id": "p-16",
+          "url": "https://images.unsplash.com/photo-1547394765-185e1e68f34e?auto=format&fit=crop&w=800&q=80",
+          "caption": "เคสคอมพิวเตอร์ชุดน้ำเปิด Custom RGB โลโก้ G-SPEED ประจำเวที",
+          "category": "gear"
+        },
+        {
+          "id": "p-17",
+          "url": "https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=800&q=80",
+          "caption": "ทางเดินเปิดตัวนักกีฬา (Player Tunnel) พร้อมไฟสปอตไลต์อลังการ",
+          "category": "stage"
+        },
+        {
+          "id": "p-18",
+          "url": "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=800&q=80",
+          "caption": "ถ้วยรางวัลเกียรติยศและเหรียญรางวัลชนะเลิศบนโพเดียม",
+          "category": "trophy"
+        },
+        {
+          "id": "p-19",
+          "url": "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?auto=format&fit=crop&w=800&q=80",
+          "caption": "เมาส์เกมมิ่งน้ำหนักเบาพิเศษ 49g สำหรับการเล็งเป้าหมายที่เฉียบคม",
+          "category": "gear"
+        },
+        {
+          "id": "p-20",
+          "url": "https://images.unsplash.com/photo-1511882150382-421056c89033?auto=format&fit=crop&w=800&q=80",
+          "caption": "ทัศนียภาพมุมสูงของอารีน่าระหว่างเปิดการแข่งขันอย่างเป็นทางการ",
+          "category": "stage"
+        },
+        {
+          "id": "p-21",
+          "url": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80",
+          "caption": "ทีมงานบรอดแคสต์และสวิตเชอร์ควบคุมการถ่ายทอดสดแบบ Multi-View",
+          "category": "caster"
+        },
+        {
+          "id": "p-22",
+          "url": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80",
+          "caption": "หน้าจอ Replay Slow Motion จังหวะช็อตเด็ด Headshot มหัศจรรย์",
+          "category": "stage"
+        },
+        {
+          "id": "p-23",
+          "url": "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=800&q=80",
+          "caption": "อุปกรณ์ควบคุมเสียงและไมโครโฟนสำหรับการบรรยายภาษาไทยและอังกฤษ",
+          "category": "caster"
+        },
+        {
+          "id": "p-24",
+          "url": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80",
+          "caption": "โค้ชและผู้เล่นร่วมวิเคราะห์แผนที่และตัวละครระหว่างช่วงพักครึ่ง",
+          "category": "players"
+        },
+        {
+          "id": "p-25",
+          "url": "https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=800&q=80",
+          "caption": "การจับมือแสดงสปิริตนักกีฬาระหว่างสองทีมหลังจบการแข่งขัน",
+          "category": "players"
+        },
+        {
+          "id": "p-26",
+          "url": "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=800&q=80",
+          "caption": "พิธีมอบเช็คเงินรางวัล ฿100,000 แก่ทีมแชมป์เปียนประจำทัวร์นาเมนต์",
+          "category": "trophy"
+        },
+        {
+          "id": "p-27",
+          "url": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80",
+          "caption": "แฟนคลับถ่ายรูปเซลฟี่ร่วมกับนักแข่งคนโปรดหลังจบงาน",
+          "category": "crowd"
+        },
+        {
+          "id": "p-28",
+          "url": "https://images.unsplash.com/photo-1534423861386-85a16f5d13fd?auto=format&fit=crop&w=800&q=80",
+          "caption": "ช่วงเวลาดีใจสุดขีดเมื่อยิงปิดเกมคว้า Match Point สุดระทึก",
+          "category": "players"
+        },
+        {
+          "id": "p-29",
+          "url": "https://images.unsplash.com/photo-1486572788966-cfd3dfdd4a42?auto=format&fit=crop&w=800&q=80",
+          "caption": "จุดลงทะเบียนนักกีฬาและการแจกไอดีการ์ดประจำตัวการแข่งขัน",
+          "category": "players"
+        },
+        {
+          "id": "p-30",
+          "url": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80",
+          "caption": "บรรยากาศผู้ร่วมงานเข้าคิวลุ้นรับของรางวัล Lucky Draw เกมมิ่งเกียร์",
+          "category": "crowd"
+        },
+        {
+          "id": "p-31",
+          "url": "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=800&q=80",
+          "caption": "แสงเลเซอร์และไพโรเทคนิคเปิดตัวคู่ชิงชนะเลิศ Grand Final",
+          "category": "stage"
+        },
+        {
+          "id": "p-32",
+          "url": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80",
+          "caption": "การแสดงดนตรีสดเปิดงานทัวร์นาเมนต์สร้างความตื่นเต้นให้แฟนๆ",
+          "category": "crowd"
+        },
+        {
+          "id": "p-33",
+          "url": "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80",
+          "caption": "ป้ายไฟเชียร์และแบนเนอร์ของเหล่าแฟนคลับที่มาร่วมให้กำลังใจ",
+          "category": "crowd"
+        },
+        {
+          "id": "p-34",
+          "url": "https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=800&q=80",
+          "caption": "สัมภาษณ์สดผู้เล่นยอดเยี่ยม MVP บนเวทีพร้อมล่ามแปลภาษา",
+          "category": "caster"
+        },
+        {
+          "id": "p-35",
+          "url": "https://images.unsplash.com/photo-1558742569-fe6d39d0583a?auto=format&fit=crop&w=800&q=80",
+          "caption": "ทีมช่างเทคนิคดูแลความสมบูรณ์ของระบบไฟฟ้าสำรอง UPS ตลอด 24 ชม.",
+          "category": "gear"
+        },
+        {
+          "id": "p-36",
+          "url": "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&q=80",
+          "caption": "การตรวจสอบความสมบูรณ์ของสายสัญญาณ Fiber Optic ก่อนเริ่มแข่ง",
+          "category": "gear"
+        },
+        {
+          "id": "p-37",
+          "url": "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&q=80",
+          "caption": "ห้องประชุมลับสำหรับกรรมการผู้ตัดสินเพื่อพิจารณาเทปย้อนหลัง",
+          "category": "caster"
+        },
+        {
+          "id": "p-38",
+          "url": "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=800&q=80",
+          "caption": "คณะผู้จัดงานและตัวแทนสปอนเซอร์ร่วมถ่ายภาพเปิดทัวร์นาเมนต์",
+          "category": "trophy"
+        },
+        {
+          "id": "p-39",
+          "url": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+          "caption": "เหรียญรางวัลเกียรติยศเคลือบทองคำแท้สำหรับแชมป์รายการนี้",
+          "category": "trophy"
+        },
+        {
+          "id": "p-40",
+          "url": "https://images.unsplash.com/photo-1576267423445-b2e0074d68a4?auto=format&fit=crop&w=800&q=80",
+          "caption": "มุมอาหารว่างและเครื่องดื่มเกลือแร่ฟรีสำหรับนักกีฬาทุกทีม",
+          "category": "crowd"
+        },
+        {
+          "id": "p-41",
+          "url": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80",
+          "caption": "บรรยากาศบาร์ Cyber Cafe บริการเมนูสดใหม่ตลอดคืนแข่งขัน",
+          "category": "crowd"
+        },
+        {
+          "id": "p-42",
+          "url": "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=800&q=80",
+          "caption": "ช่วงเวลาชูถ้วยรางวัลฉลองชัยชนะท่ามกลางสายฝนริบบิ้นทอง",
+          "category": "trophy"
+        },
+        {
+          "id": "p-43",
+          "url": "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=80",
+          "caption": "ภาพความประทับใจรวมเหล่านักแข่งทั้ง 32 ทีมบนเวทีใหญ่",
+          "category": "players"
+        },
+        {
+          "id": "p-44",
+          "url": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80",
+          "caption": "ระบบคอมพิวเตอร์เซิร์ฟเวอร์ควบคุมผลคะแนนการแข่งขันแบบอัตโนมัติ",
+          "category": "gear"
+        },
+        {
+          "id": "p-45",
+          "url": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80",
+          "caption": "กราฟิก 3D Hologram แสดงสายการแข่งขันและผลคะแนนสด",
+          "category": "stage"
+        },
+        {
+          "id": "p-46",
+          "url": "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80",
+          "caption": "การจับสลากแบ่งสายการแข่งขัน Group Draw ถ่ายทอดสดทั่วประเทศ",
+          "category": "stage"
+        },
+        {
+          "id": "p-47",
+          "url": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80",
+          "caption": "โค้ชให้คำแนะนำด้านจิตวิทยาและสมาธิระหว่างเวลานอก (Tactical Timeout)",
+          "category": "players"
+        },
+        {
+          "id": "p-48",
+          "url": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80",
+          "caption": "รอยยิ้มและมิตรภาพระหว่างผู้เล่นหลังจบแมตช์สุดดุเดือด",
+          "category": "players"
+        },
+        {
+          "id": "p-49",
+          "url": "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=800&q=80",
+          "caption": "แฟนเกมร่วมสนุกกับมินิเกมและตอบคำถามแจกของรางวัลช็อปปิ้งมอลล์",
+          "category": "crowd"
+        },
+        {
+          "id": "p-50",
+          "url": "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=800&q=80",
+          "caption": "โน้ตบุ๊กเกมมิ่งระดับท็อปสำหรับการสตรีมมุมมองบุคคลที่หนึ่ง (POV)",
+          "category": "gear"
+        },
+        {
+          "id": "p-51",
+          "url": "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80",
+          "caption": "ผู้บริหาร G-Speed ขึ้นกล่าวปิดงานและประกาศทัวร์นาเมนต์ซีซันถัดไป",
+          "category": "stage"
+        },
+        {
+          "id": "p-52",
+          "url": "https://images.unsplash.com/photo-1568992687947-868a62a9f521?auto=format&fit=crop&w=800&q=80",
+          "caption": "ภาพความทรงจำส่งท้ายงาน แฟนคลับและนักกีฬาร่วมบันทึกประวัติศาสตร์",
+          "category": "crowd"
+        }
+      ],
+      "seo": {
+        "metaTitle": "CS2 BANGKOK SHOWDOWN INVITATIONAL 2026 | ชิง ฿150,000",
+        "metaDesc": "การแข่งขัน Counter-Strike 2 ระดับนานาชาติ ชิงเงินรางวัล 150,000 บาท ณ G-Speed Arena รามคำแหง 53 Dedicated LAN Server",
+        "keywords": "CS2, Counter-Strike 2, G-Speed, ทัวร์นาเมนต์, แข่ง LAN, รามคำแหง 53, HLTV, Bangkok Showdown",
+        "ogImage": "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1200&q=80",
+        "slug": "cs2-bangkok-showdown-invitational-2026"
+      },
+      "bracketMatches": []
+    },
+    {
+      "id": "tour-1790856981512",
+      "title": "G-SPEED TEST CUP 2026",
+      "game": "VALORANT",
+      "gameCategory": "Tactical 5v5 FPS",
+      "gameIcon": "Crosshair",
+      "bannerImage": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80",
+      "date": "28-30 กันยายน 2026",
+      "time": "11:00 - 20:00 น.",
+      "regStartDate": "1 กันยายน 2026",
+      "regEndDate": "25 กันยายน 2026",
+      "tourneyStartDate": "2026-09-28",
+      "tourneyEndDate": "2026-09-30",
+      "prizePool": "100,000 บาท",
+      "slots": "32 ทีม",
+      "format": "LAN Final @ Main Stage & Double Elimination",
+      "badge": "เปิดรับสมัคร",
+      "badgeType": "magenta",
+      "status": "Open",
+      "tags": [
+        "#VALORANT",
+        "#LANFinal",
+        "#EsportsThailand"
+      ],
+      "venue": "G-Speed Esport Arena รามคำแหง 53 (Main Stage & Battleground Zone)",
+      "streamChannel": "Twitch.tv/gspeed_esport & YouTube Live",
+      "desc": "การแข่งขันอีสปอร์ตระดับประเทศ ชิงเงินรางวัลรวมกว่า ฿100,000 รวบรวมยอดฝีมือทั่วประเทศมาดวลความแม่นยำบนเวที LAN Final ณ G-Speed Arena รามคำแหง 53",
+      "rules": [
+        "ผู้เข้าแข่งขันทุกท่านต้องนำบัตรประชาชนหรือบัตรนักเรียน/นักศึกษามาแสดงตน ณ จุดลงทะเบียน",
+        "อนุญาตให้นำเมาส์ คีย์บอร์ด และหูฟังส่วนตัวมาใช้ได้ โดยต้องผ่านการตรวจจากเจ้าหน้าที่เทคนิคก่อนเริ่มแข่ง",
+        "เครื่องคอมพิวเตอร์ที่ใช้แข่งขับเคลื่อนด้วย Intel Core i9 + NVIDIA GeForce RTX 4080 และจอ BenQ ZOWIE 360Hz",
+        "ห้ามใช้โปรแกรมโกง สคริปต์ช่วยเล่น หรือฉวยโอกาสจากข้อผิดพลาดของเกม หากตรวจพบปรับแพ้ทันที",
+        "คำตัดสินของหัวหน้าผู้ตัดสิน (Head Referee) ถือเป็นที่สิ้นสุดในทุกกรณี"
+      ],
+      "prizeDistribution": [
+        {
+          "rank": "แชมป์อันดับ 1",
+          "reward": "฿50,000 + ถ้วยเกียรติยศ + เหรียญทอง + ROG Gaming Gear Set"
+        },
+        {
+          "rank": "รองชนะเลิศอันดับ 1",
+          "reward": "฿25,000 + เหรียญเงิน"
+        },
+        {
+          "rank": "รองชนะเลิศอันดับ 2 ร่วม",
+          "reward": "฿10,000 ต่อทีม + เหรียญทองแดง"
+        },
+        {
+          "rank": "MVP of Tournament",
+          "reward": "฿5,000 + หูฟังเกมมิ่ง ROG Delta S"
+        }
+      ],
+      "scheduleTimetable": [
+        {
+          "time": "10:00 - 11:00 น.",
+          "stage": "ลงทะเบียนหน้างาน & ตรวจสอบอุปกรณ์นักกีฬา (Player Check-in)"
+        },
+        {
+          "time": "11:15 - 14:00 น.",
+          "stage": "รอบคัดเลือกแบ่งกลุ่ม Group Stage (Best of 1)"
+        },
+        {
+          "time": "14:30 - 17:30 น.",
+          "stage": "รอบ 8 ทีม และ 4 ทีมสุดท้าย (Quarter & Semi-Finals)"
+        },
+        {
+          "time": "18:00 - 20:30 น.",
+          "stage": "รอบชิงชนะเลิศ Grand Final บนเวที Main Stage (Best of 5)"
+        }
+      ],
+      "teams": [
+        {
+          "id": "team-demo-1",
+          "name": "G-Speed Slayer Squad",
+          "tag": "GLP",
+          "logo": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=150&q=80",
+          "seed": 1,
+          "status": "Confirmed",
+          "captain": "SpeedyKnight (กัปตันทีม)",
+          "captainPhone": "063-793-7704",
+          "captainDiscord": "speedy#2026",
+          "players": [
+            "SpeedyKnight",
+            "CyberViper",
+            "NeonPulse",
+            "PhantomShot",
+            "Valkyrie99"
+          ],
+          "substitutes": [
+            "GhostAim"
+          ],
+          "wins": 0,
+          "losses": 0
+        }
+      ],
+      "galleryPhotos": [
+        {
+          "id": "p-1",
+          "url": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80",
+          "caption": "เวทีแข่งขัน Main Stage ระบบแสงสีเสียงและจอ LED Wall 4K ขนาดยักษ์",
+          "category": "stage"
+        },
+        {
+          "id": "p-2",
+          "url": "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80",
+          "caption": "บรรยากาศนักกีฬาประจำที่นั่ง Battle Stations ซ้อมมือก่อนเริ่มแข่ง",
+          "category": "players"
+        },
+        {
+          "id": "p-3",
+          "url": "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80",
+          "caption": "เครื่องคอมพิวเตอร์สเปก Intel i9 + RTX 4080 SUPER พร้อมจอ 360Hz",
+          "category": "gear"
+        },
+        {
+          "id": "p-4",
+          "url": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80",
+          "caption": "การแข่งขันรอบ 16 ทีมสุดท้าย แข่งพร้อมกันแบบ Full LAN Setup",
+          "category": "players"
+        },
+        {
+          "id": "p-5",
+          "url": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80",
+          "caption": "มุมมองกว้างของอารีน่า แสงไฟธีมน้ำเงิน-ส้ม สื่อถึงการปะทะสุดเข้มข้น",
+          "category": "stage"
+        },
+        {
+          "id": "p-6",
+          "url": "https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=800&q=80",
+          "caption": "หูฟังตัดเสียงรบกวนเกรดการแข่งขัน Pro Studio Noise-Cancelling",
+          "category": "gear"
+        },
+        {
+          "id": "p-7",
+          "url": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80",
+          "caption": "ระบบเน็ตเวิร์กแลนแบบแยกวง 10Gbps Latency ต่ำกว่า 1ms",
+          "category": "gear"
+        },
+        {
+          "id": "p-8",
+          "url": "https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?auto=format&fit=crop&w=800&q=80",
+          "caption": "การอุ่นเครื่องทดสอบความพร้อมปุ่มกดและอัตราตอบสนองอุปกรณ์",
+          "category": "players"
+        },
+        {
+          "id": "p-9",
+          "url": "https://images.unsplash.com/photo-1542751110-97427bbecf20?auto=format&fit=crop&w=800&q=80",
+          "caption": "กองเชียร์แน่นขนัดส่งเสียงเชียร์จังหวะ Clutch 1v3 สุดระทึก",
+          "category": "crowd"
+        },
+        {
+          "id": "p-10",
+          "url": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80",
+          "caption": "เอฟเฟกต์ไฟสเตจเปลี่ยนสีอัตโนมัติตามสถานะการวาง Spike ในเกม",
+          "category": "stage"
+        },
+        {
+          "id": "p-11",
+          "url": "https://images.unsplash.com/photo-1598550476439-6847785fcea6?auto=format&fit=crop&w=800&q=80",
+          "caption": "โต๊ะแข่งขันแบบ Ergonomic ปรับระดับความสูงและพื้นที่ลากเมาส์พิเศษ",
+          "category": "gear"
+        },
+        {
+          "id": "p-12",
+          "url": "https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=800&q=80",
+          "caption": "สมาธิและความมุ่งมั่นของกัปตันทีมระหว่างสั่งการแผนการบุก",
+          "category": "players"
+        },
+        {
+          "id": "p-13",
+          "url": "https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?auto=format&fit=crop&w=800&q=80",
+          "caption": "คีย์บอร์ดกลไกสวิตช์ Hall Effect Rapid Trigger แม่นยำทุกเสี้ยววินาที",
+          "category": "gear"
+        },
+        {
+          "id": "p-14",
+          "url": "https://images.unsplash.com/photo-1580234811497-9df7fd2f357e?auto=format&fit=crop&w=800&q=80",
+          "caption": "โซนวอร์มอัพห้องกระจกกันเสียงส่วนตัวสำหรับทีมที่รอขึ้นเวที",
+          "category": "players"
+        },
+        {
+          "id": "p-15",
+          "url": "https://images.unsplash.com/photo-1593305841991-05c297ba4575?auto=format&fit=crop&w=800&q=80",
+          "caption": "โต๊ะนักพากย์ (Caster Desk) พร้อมจอวิเคราะห์สถิติสดแบบเรียลไทม์",
+          "category": "caster"
+        },
+        {
+          "id": "p-16",
+          "url": "https://images.unsplash.com/photo-1547394765-185e1e68f34e?auto=format&fit=crop&w=800&q=80",
+          "caption": "เคสคอมพิวเตอร์ชุดน้ำเปิด Custom RGB โลโก้ G-SPEED ประจำเวที",
+          "category": "gear"
+        },
+        {
+          "id": "p-17",
+          "url": "https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=800&q=80",
+          "caption": "ทางเดินเปิดตัวนักกีฬา (Player Tunnel) พร้อมไฟสปอตไลต์อลังการ",
+          "category": "stage"
+        },
+        {
+          "id": "p-18",
+          "url": "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=800&q=80",
+          "caption": "ถ้วยรางวัลเกียรติยศและเหรียญรางวัลชนะเลิศบนโพเดียม",
+          "category": "trophy"
+        },
+        {
+          "id": "p-19",
+          "url": "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?auto=format&fit=crop&w=800&q=80",
+          "caption": "เมาส์เกมมิ่งน้ำหนักเบาพิเศษ 49g สำหรับการเล็งเป้าหมายที่เฉียบคม",
+          "category": "gear"
+        },
+        {
+          "id": "p-20",
+          "url": "https://images.unsplash.com/photo-1511882150382-421056c89033?auto=format&fit=crop&w=800&q=80",
+          "caption": "ทัศนียภาพมุมสูงของอารีน่าระหว่างเปิดการแข่งขันอย่างเป็นทางการ",
+          "category": "stage"
+        },
+        {
+          "id": "p-21",
+          "url": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80",
+          "caption": "ทีมงานบรอดแคสต์และสวิตเชอร์ควบคุมการถ่ายทอดสดแบบ Multi-View",
+          "category": "caster"
+        },
+        {
+          "id": "p-22",
+          "url": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80",
+          "caption": "หน้าจอ Replay Slow Motion จังหวะช็อตเด็ด Headshot มหัศจรรย์",
+          "category": "stage"
+        },
+        {
+          "id": "p-23",
+          "url": "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=800&q=80",
+          "caption": "อุปกรณ์ควบคุมเสียงและไมโครโฟนสำหรับการบรรยายภาษาไทยและอังกฤษ",
+          "category": "caster"
+        },
+        {
+          "id": "p-24",
+          "url": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80",
+          "caption": "โค้ชและผู้เล่นร่วมวิเคราะห์แผนที่และตัวละครระหว่างช่วงพักครึ่ง",
+          "category": "players"
+        },
+        {
+          "id": "p-25",
+          "url": "https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=800&q=80",
+          "caption": "การจับมือแสดงสปิริตนักกีฬาระหว่างสองทีมหลังจบการแข่งขัน",
+          "category": "players"
+        },
+        {
+          "id": "p-26",
+          "url": "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=800&q=80",
+          "caption": "พิธีมอบเช็คเงินรางวัล ฿100,000 แก่ทีมแชมป์เปียนประจำทัวร์นาเมนต์",
+          "category": "trophy"
+        },
+        {
+          "id": "p-27",
+          "url": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80",
+          "caption": "แฟนคลับถ่ายรูปเซลฟี่ร่วมกับนักแข่งคนโปรดหลังจบงาน",
+          "category": "crowd"
+        },
+        {
+          "id": "p-28",
+          "url": "https://images.unsplash.com/photo-1534423861386-85a16f5d13fd?auto=format&fit=crop&w=800&q=80",
+          "caption": "ช่วงเวลาดีใจสุดขีดเมื่อยิงปิดเกมคว้า Match Point สุดระทึก",
+          "category": "players"
+        },
+        {
+          "id": "p-29",
+          "url": "https://images.unsplash.com/photo-1486572788966-cfd3dfdd4a42?auto=format&fit=crop&w=800&q=80",
+          "caption": "จุดลงทะเบียนนักกีฬาและการแจกไอดีการ์ดประจำตัวการแข่งขัน",
+          "category": "players"
+        },
+        {
+          "id": "p-30",
+          "url": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80",
+          "caption": "บรรยากาศผู้ร่วมงานเข้าคิวลุ้นรับของรางวัล Lucky Draw เกมมิ่งเกียร์",
+          "category": "crowd"
+        },
+        {
+          "id": "p-31",
+          "url": "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=800&q=80",
+          "caption": "แสงเลเซอร์และไพโรเทคนิคเปิดตัวคู่ชิงชนะเลิศ Grand Final",
+          "category": "stage"
+        },
+        {
+          "id": "p-32",
+          "url": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80",
+          "caption": "การแสดงดนตรีสดเปิดงานทัวร์นาเมนต์สร้างความตื่นเต้นให้แฟนๆ",
+          "category": "crowd"
+        },
+        {
+          "id": "p-33",
+          "url": "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80",
+          "caption": "ป้ายไฟเชียร์และแบนเนอร์ของเหล่าแฟนคลับที่มาร่วมให้กำลังใจ",
+          "category": "crowd"
+        },
+        {
+          "id": "p-34",
+          "url": "https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=800&q=80",
+          "caption": "สัมภาษณ์สดผู้เล่นยอดเยี่ยม MVP บนเวทีพร้อมล่ามแปลภาษา",
+          "category": "caster"
+        },
+        {
+          "id": "p-35",
+          "url": "https://images.unsplash.com/photo-1558742569-fe6d39d0583a?auto=format&fit=crop&w=800&q=80",
+          "caption": "ทีมช่างเทคนิคดูแลความสมบูรณ์ของระบบไฟฟ้าสำรอง UPS ตลอด 24 ชม.",
+          "category": "gear"
+        },
+        {
+          "id": "p-36",
+          "url": "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&q=80",
+          "caption": "การตรวจสอบความสมบูรณ์ของสายสัญญาณ Fiber Optic ก่อนเริ่มแข่ง",
+          "category": "gear"
+        },
+        {
+          "id": "p-37",
+          "url": "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&q=80",
+          "caption": "ห้องประชุมลับสำหรับกรรมการผู้ตัดสินเพื่อพิจารณาเทปย้อนหลัง",
+          "category": "caster"
+        },
+        {
+          "id": "p-38",
+          "url": "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=800&q=80",
+          "caption": "คณะผู้จัดงานและตัวแทนสปอนเซอร์ร่วมถ่ายภาพเปิดทัวร์นาเมนต์",
+          "category": "trophy"
+        },
+        {
+          "id": "p-39",
+          "url": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+          "caption": "เหรียญรางวัลเกียรติยศเคลือบทองคำแท้สำหรับแชมป์รายการนี้",
+          "category": "trophy"
+        },
+        {
+          "id": "p-40",
+          "url": "https://images.unsplash.com/photo-1576267423445-b2e0074d68a4?auto=format&fit=crop&w=800&q=80",
+          "caption": "มุมอาหารว่างและเครื่องดื่มเกลือแร่ฟรีสำหรับนักกีฬาทุกทีม",
+          "category": "crowd"
+        },
+        {
+          "id": "p-41",
+          "url": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80",
+          "caption": "บรรยากาศบาร์ Cyber Cafe บริการเมนูสดใหม่ตลอดคืนแข่งขัน",
+          "category": "crowd"
+        },
+        {
+          "id": "p-42",
+          "url": "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=800&q=80",
+          "caption": "ช่วงเวลาชูถ้วยรางวัลฉลองชัยชนะท่ามกลางสายฝนริบบิ้นทอง",
+          "category": "trophy"
+        },
+        {
+          "id": "p-43",
+          "url": "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=80",
+          "caption": "ภาพความประทับใจรวมเหล่านักแข่งทั้ง 32 ทีมบนเวทีใหญ่",
+          "category": "players"
+        },
+        {
+          "id": "p-44",
+          "url": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80",
+          "caption": "ระบบคอมพิวเตอร์เซิร์ฟเวอร์ควบคุมผลคะแนนการแข่งขันแบบอัตโนมัติ",
+          "category": "gear"
+        },
+        {
+          "id": "p-45",
+          "url": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80",
+          "caption": "กราฟิก 3D Hologram แสดงสายการแข่งขันและผลคะแนนสด",
+          "category": "stage"
+        },
+        {
+          "id": "p-46",
+          "url": "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80",
+          "caption": "การจับสลากแบ่งสายการแข่งขัน Group Draw ถ่ายทอดสดทั่วประเทศ",
+          "category": "stage"
+        },
+        {
+          "id": "p-47",
+          "url": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80",
+          "caption": "โค้ชให้คำแนะนำด้านจิตวิทยาและสมาธิระหว่างเวลานอก (Tactical Timeout)",
+          "category": "players"
+        },
+        {
+          "id": "p-48",
+          "url": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80",
+          "caption": "รอยยิ้มและมิตรภาพระหว่างผู้เล่นหลังจบแมตช์สุดดุเดือด",
+          "category": "players"
+        },
+        {
+          "id": "p-49",
+          "url": "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=800&q=80",
+          "caption": "แฟนเกมร่วมสนุกกับมินิเกมและตอบคำถามแจกของรางวัลช็อปปิ้งมอลล์",
+          "category": "crowd"
+        },
+        {
+          "id": "p-50",
+          "url": "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=800&q=80",
+          "caption": "โน้ตบุ๊กเกมมิ่งระดับท็อปสำหรับการสตรีมมุมมองบุคคลที่หนึ่ง (POV)",
+          "category": "gear"
+        },
+        {
+          "id": "p-51",
+          "url": "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80",
+          "caption": "ผู้บริหาร G-Speed ขึ้นกล่าวปิดงานและประกาศทัวร์นาเมนต์ซีซันถัดไป",
+          "category": "stage"
+        },
+        {
+          "id": "p-52",
+          "url": "https://images.unsplash.com/photo-1568992687947-868a62a9f521?auto=format&fit=crop&w=800&q=80",
+          "caption": "ภาพความทรงจำส่งท้ายงาน แฟนคลับและนักกีฬาร่วมบันทึกประวัติศาสตร์",
+          "category": "crowd"
+        }
+      ],
+      "seo": {
+        "metaTitle": "G-SPEED VALORANT TOURNAMENT 2026 | ชิงเงินรางวัล ฿100,000",
+        "metaDesc": "การแข่งขัน VALORANT LAN Tournament สุดยิ่งใหญ่ ณ G-Speed Arena รามคำแหง 53 เงินรางวัลรวม 100,000 บาท สมัครด่วน 32 ทีมเท่านั้น",
+        "keywords": "VALORANT, GSpeed, ทัวร์นาเมนต์, แข่งเกม, อีสปอร์ต, รามคำแหง 53, LAN Final, 360Hz",
+        "ogImage": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80",
+        "slug": "gspeed-valorant-tournament-2026"
+      },
+      "slug": "gspeed-valorant-tournament-2026",
+      "bracketMatches": []
     }
   ],
   "news": [
@@ -98,25 +2896,140 @@
       "id": "news-1",
       "slug": "thailand-predator-league-recap",
       "title": "รวมภาพความมันส์งานแข่ง PUBG Predator League @ GLP Esports Arena",
-      "desc": "ภาพบรรยากาศการแข่งขันศึกชิงแชมป์ระดับประเทศ ทีมผู้เข้าแข่งขันกว่า 32 ทีม ดวลปืนสุดเดือดบนเวที 5v5 Stage พร้อมผู้ร่วมงานแน่นร้าน",
+      "category": "tournament",
+      "tag": "ESPORTS TOURNAMENT",
+      "tags": [
+        "#PUBG",
+        "#LAN",
+        "#PredatorLeague",
+        "#EsportsThailand",
+        "#Battlegrounds"
+      ],
+      "author": "ทีมข่าวกิจกรรม G-Speed",
       "date": "12 กันยายน 2026",
-      "image": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80"
+      "readTime": "3 นาทีในการอ่าน",
+      "excerpt": "ภาพบรรยากาศการแข่งขันศึกชิงแชมป์ระดับประเทศ ทีมผู้เข้าแข่งขันกว่า 32 ทีม ดวลปืนสุดเดือดบนเวที 5v5 Stage พร้อมผู้ร่วมงานแน่นร้าน",
+      "desc": "ภาพบรรยากาศการแข่งขันศึกชิงแชมป์ระดับประเทศ ทีมผู้เข้าแข่งขันกว่า 32 ทีม ดวลปืนสุดเดือดบนเวที 5v5 Stage พร้อมผู้ร่วมงานแน่นร้าน",
+      "image": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80",
+      "partner": "Acer Predator & Krafton",
+      "location": "G-Speed Esport Arena (Main Arena Stage)",
+      "prizePool": "฿80,000 พร้อมตั๋วตัวแทนเอเชีย",
+      "attendees": "450+ คน",
+      "quote": "การจัดแข่งบนฮาร์ดแวร์มาตรฐาน Pro Circuit ช่วยดึงศักยภาพนักกีฬาอีสปอร์ตไทยได้อย่างเต็มที่",
+      "seo": {
+        "metaTitle": "รวมภาพความมันส์งานแข่ง PUBG Predator League 2026 | G-Speed Arena",
+        "metaDescription": "เกาะติดภาพบรรยากาศการแข่งขัน PUBG Predator League ศึกชิงแชมป์เงินรางวัล 80,000 บาท ณ ศูนย์ G-Speed Esport Arena",
+        "keywords": "PUBG, Predator League, แข่งเกม, G-Speed, Esports Arena, ทัวร์นาเมนต์"
+      },
+      "contentParagraphs": [
+        "สิ้นสุดลงอย่างยิ่งใหญ่สำหรับศึกใหญ่แห่งปี THAILAND PREDATOR LEAGUE 2026 ณ ศูนย์ G-Speed Esport Arena โดยมีทีมระดับหัวแถวของประเทศกว่า 32 ทีมตบเท้าประลองฝีมือชิงเงินรางวัลรวมกว่า ฿80,000 บาท",
+        "ตลอดการขับเคี่ยว 2 วันเต็ม โซนเวที Main Stage เต็มไปด้วยเสียงเชียร์ดังกึกก้อง แฟนคลับมาร่วมชมทั้งติดขอบเวทีและผ่านจอถ่ายทอดสด LED 4K ขนาดยักษ์ใจกลางร้าน",
+        "การแข่งขันรอบสุดท้ายเป็นไปอย่างระทึกใจ โดยทีมแชมป์สามารถเอาชีวิตรอดและเก็บคะแนนคิลสูงสุดในวงสุดท้าย คว้าถ้วยแชมป์และสิทธิ์เข้าร่วมแข่งขันระดับภูมิภาคเอเชียแปซิฟิกต่อไป"
+      ],
+      "galleryPhotos": [
+        {
+          "url": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80",
+          "caption": "บรรยากาศผู้เข้าแข่งขันและหน้าจอคอม 360Hz บนเวที"
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80",
+          "caption": "แฟนคลับส่งเสียงเชียร์รอบชิงชนะเลิศ"
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=800&q=80",
+          "caption": "พิธีมอบเงินรางวัลและของที่ระลึกจาก Predator"
+        }
+      ]
     },
     {
       "id": "news-2",
       "slug": "glp-electronics-extreme-zone4",
       "title": "GLP จับมือ Electronics Extreme จัดงาน Zone4 และแจกไอเทมลิขสิทธิ์แท้",
-      "desc": "ค่ายเกมชั้นนำเนรมิตร้าน GLP เป็นสมรภูมิประลองยุทธ์ พร้อมมอบของรางวัลและถ้วยเกียรติยศแก่ผู้ชนะการแข่งขัน",
+      "category": "publisher",
+      "tag": "PARTNER EVENT",
+      "tags": [
+        "#Zone4",
+        "#ElectronicsExtreme",
+        "#FanMeeting",
+        "#ItemCode",
+        "#GLPCommunity"
+      ],
+      "author": "กองบรรณาธิการ GLP",
       "date": "5 กันยายน 2026",
-      "image": "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80"
+      "readTime": "2 นาทีในการอ่าน",
+      "excerpt": "ค่ายเกมชั้นนำเนรมิตร้าน GLP เป็นสมรภูมิประลองยุทธ์ พร้อมมอบของรางวัลและถ้วยเกียรติยศแก่ผู้ชนะการแข่งขัน",
+      "desc": "ค่ายเกมชั้นนำเนรมิตร้าน GLP เป็นสมรภูมิประลองยุทธ์ พร้อมมอบของรางวัลและถ้วยเกียรติยศแก่ผู้ชนะการแข่งขัน",
+      "image": "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80",
+      "partner": "Electronics Extreme",
+      "location": "G-Speed Esport Arena (Lounge & Event Zone)",
+      "prizePool": "ไอเทมแรร์มูลค่า ฿50,000",
+      "attendees": "280+ คน",
+      "quote": "ความอบอุ่นของแฟนเกม Zone4 ยังคงเหนียวแน่น และพื้นที่ของ G-Speed ตอบโจทย์งานมีตติ้งได้อย่างสมบูรณ์แบบ",
+      "seo": {
+        "metaTitle": "GLP จับมือ Electronics Extreme จัดงาน Zone4 แจกไอเทมแท้ | G-Speed",
+        "metaDescription": "ภาพบรรยากาศงาน Electronics Extreme - Zone4 Fan Meeting กิจกรรมแจกไอเทมโค้ดและการแข่งขันมินิแมตช์ ณ G-Speed",
+        "keywords": "Zone4, Electronics Extreme, แฟนมีตติ้ง, แจกไอเทม, ร้านเกม, G-Speed"
+      },
+      "contentParagraphs": [
+        "Electronics Extreme ร่วมกับ G-Speed Arena จัดกิจกรรมสุดพิเศษเพื่อเอาใจแฟนเกมไฟท์ติ้งระดับตำนาน Zone4 ภายในงานมีการประกวดคอมมูนิตี้และมินิทัวร์นาเมนต์กระชับมิตร",
+        "ผู้เข้าร่วมงานทุกคนได้รับแพ็กเกจไอเทมโค้ดระดับ Exclusive พร้อมลุ้นรับเสื้อแจ็กเก็ตและของสะสมลิขสิทธิ์แท้จากเกาหลี",
+        "งานนี้นับเป็นอีกหนึ่งเครื่องยืนยันว่า G-Speed ไม่ได้เป็นเพียงร้านเกม แต่เป็นฮับจัดอีเวนต์และศูนย์รวมคอมมูนิตี้เกมเมอร์ที่พร้อมที่สุดของกรุงเทพฯ"
+      ],
+      "galleryPhotos": [
+        {
+          "url": "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80",
+          "caption": "ผู้ร่วมงานลงทะเบียนรับถุงของขวัญและไอเทมโค้ด"
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80",
+          "caption": "การประลองฝีมือแมตช์พิเศษบนเวที"
+        }
+      ]
     },
     {
       "id": "news-3",
       "slug": "rtx-40-series-360hz-upgrade",
       "title": "อัปเกรดขุมพลังใหม่! สเปก RTX 40 Series พร้อมจอ 360Hz ทุกล็อตที่ GLP",
-      "desc": "ยกระดับประสบการณ์เล่นเกมให้ลื่นไหลไร้รอยต่อ เฟรมเรตนิ่ง ปิงต่ำกว่า 3ms ด้วยระบบเน็ตเวิร์กและ Diskless Server ใหม่ล่าสุด",
+      "category": "hardware",
+      "tag": "HARDWARE UPGRADE",
+      "tags": [
+        "#RTX40Series",
+        "#BenQ360Hz",
+        "#HardwareUpgrade",
+        "#IntelCorei9",
+        "#PCMasterRace"
+      ],
+      "author": "ทีมเทคนิคและวิศวกรรมไอที",
       "date": "28 สิงหาคม 2026",
-      "image": "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80"
+      "readTime": "4 นาทีในการอ่าน",
+      "excerpt": "ยกระดับประสบการณ์เล่นเกมให้ลื่นไหลไร้รอยต่อ เฟรมเรตนิ่ง ปิงต่ำกว่า 3ms ด้วยระบบเน็ตเวิร์กและ Diskless Server ใหม่ล่าสุด",
+      "desc": "ยกระดับประสบการณ์เล่นเกมให้ลื่นไหลไร้รอยต่อ เฟรมเรตนิ่ง ปิงต่ำกว่า 3ms ด้วยระบบเน็ตเวิร์กและ Diskless Server ใหม่ล่าสุด",
+      "image": "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80",
+      "partner": "NVIDIA Thailand & ASUS ROG",
+      "location": "G-Speed Esport Arena ทุกโซนบริการ",
+      "prizePool": "อัปเกรดมูลค่ากว่า 5 ล้านบาท",
+      "attendees": "เปิดบริการแล้วทุกที่นั่ง",
+      "quote": "เราไม่เคยหยุดพัฒนามาตรฐาน เพื่อมอบประสบการณ์เกมมิ่งที่ดีที่สุดและลื่นที่สุดให้แก่ลูกค้าทุกคน",
+      "seo": {
+        "metaTitle": "อัปเกรดสเปกใหม่ RTX 40 Series จอ 360Hz ทุกล็อต | G-Speed Esport",
+        "metaDescription": "G-Speed Arena ยกเครื่องสเปกคอมใหม่ยกแผง ขุมพลัง GeForce RTX 40 Series พร้อมจอ BenQ 360Hz Fast-IPS เน็ต 10Gbps",
+        "keywords": "สเปกคอมร้านเกม, RTX 4080, จอ 360Hz, ร้านเกมสเปกแรง, G-Speed Arena"
+      },
+      "contentParagraphs": [
+        "เพื่อตอกย้ำความเป็นผู้นำศูนย์กีฬาอีสปอร์ตระด��บเวิลด์คลาส G-Speed Esport Arena ทุ่มงบประมาณกว่า 5 ล้านบาท ปรับปรุงเครื่องคอมพิวเตอร์ทุกล็อตให้เป็นขุมพลังล่าสุด NVIDIA GeForce RTX 40 Series",
+        "จับคู่กับซีพียู Intel Core i7 / i9 เจนเนอเรชันใหม่ แรม 32GB DDR5 ความเร็วสูง 6000MHz และหน้าจออีสปอร์ต BenQ ZOWIE 360Hz Fast-IPS ที่ให้การตอบสนอง 0.5ms คมชัดทุกการเคลื่อนไหว",
+        "นอกจากนี้ ระบบ Diskless Server ยังได้รับการอัปเกรดเป็น NVMe Gen5 Multi-tier Caching ร่วมกับระบบเน็ตเวิร์ก Dual 10Gbps Fiber Optic ช่วยให้การโหลดเกมและการเปิดเครื่องเร็วขึ้นกว่าเดิม 300%"
+      ],
+      "galleryPhotos": [
+        {
+          "url": "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80",
+          "caption": "เคสคอมพิวเตอร์และระบบระบายความร้อนด้วยน้ำสุดเท่"
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80",
+          "caption": "หน้าจอ 360Hz ที่ผ่านการปรับแต่งค่าสีสำหรับโปรเพลเยอร์"
+        }
+      ]
     }
   ]
 }

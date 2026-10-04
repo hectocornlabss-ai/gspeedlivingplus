@@ -843,7 +843,19 @@ export default function ArenaHub({
                   }}
                 >
                   <div className="gallery-thumb-wrapper">
-                    <img src={item.image} alt={item.imageAlt || item.title} className="gallery-thumb-img" />
+                    <img 
+                      src={item.image} 
+                      alt={item.imageAlt || item.title} 
+                      className="gallery-thumb-img" 
+                      loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        const fallback = item.galleryPhotos?.[0]?.url && item.galleryPhotos[0].url !== item.image
+                          ? item.galleryPhotos[0].url
+                          : 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80';
+                        e.currentTarget.src = fallback;
+                      }}
+                    />
                     <span className="gallery-tag-pill">{translateDynamic(item.tag || item.category)}</span>
                   </div>
 
@@ -1427,7 +1439,18 @@ export default function ArenaHub({
 
             <div className="gallery-modal-body">
               <div className="modal-img-frame">
-                <img src={selectedGalleryItem.image} alt={selectedGalleryItem.imageAlt || selectedGalleryItem.title} className="modal-feature-img" />
+                <img 
+                  src={selectedGalleryItem.image} 
+                  alt={selectedGalleryItem.imageAlt || selectedGalleryItem.title} 
+                  className="modal-feature-img" 
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    const fallback = selectedGalleryItem.galleryPhotos?.[0]?.url && selectedGalleryItem.galleryPhotos[0].url !== selectedGalleryItem.image
+                      ? selectedGalleryItem.galleryPhotos[0].url
+                      : 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80';
+                    e.currentTarget.src = fallback;
+                  }}
+                />
               </div>
               <div className="modal-details-box">
                 <div className="meta-row">

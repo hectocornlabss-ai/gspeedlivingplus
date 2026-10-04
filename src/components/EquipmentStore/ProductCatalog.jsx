@@ -302,7 +302,8 @@ export default function ProductCatalog({
                 ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
                 : 0;
 
-              const displayName = (language === 'en' && product.nameEn) ? product.nameEn : product.name;
+              const displayName = (language === 'en' && product.nameEn) ? product.nameEn : (language === 'zh' && product.nameZh ? product.nameZh : product.name);
+              const displaySubtitle = (language === 'en' && product.subtitleEn) ? product.subtitleEn : (language === 'zh' && product.subtitleZh ? product.subtitleZh : product.subtitle);
 
               return (
                 <div 
@@ -344,7 +345,7 @@ export default function ProductCatalog({
 
                   {/* Specs Summary (1-2 lines) */}
                   <p className="card-product-specs">
-                    {product.subtitle}
+                    {displaySubtitle}
                   </p>
 
                   {/* Online Promo Label */}

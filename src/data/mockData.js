@@ -1028,32 +1028,29 @@ export const DEFAULT_ARTICLE_TAGS = [
 export const GALLERY_ACTIVITIES = [
   {
     id: 'gal-1',
-    slug: 'icafe-attack-lan-tournament',
-    title: 'ICAFE ATTACK LAN TOURNAMENT',
+    slug: 'pan-pacific-warfare-cup-2026',
+    title: 'Pan-Pacific Warfare Cup 2026',
     category: 'tournament',
-    date: 'สิงหาคม 2026',
+    date: 'เมษายน 2026',
     readTime: '4 นาทีในการอ่าน',
-    desc: 'การแข่งขัน LAN สุดมันส์ในโซน Battleground พร้อมจอแสดงผลแบบเรียลไทม์ ผู้เข้าแข่งขันแน่นร้านตลอด 24 ชม.',
-    image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80',
-    tag: 'LAN TOURNAMENT',
-    tags: ['#EsportsThailand', '#GLP2026', '#Tournament', '#GamingArena', '#LANParty'],
-    partner: 'ASUS ROG & NVIDIA',
+    desc: 'รวมภาพบรรยากาศการแข่งขัน Pan-Pacific Warfare Cup 2026 ณ ร้าน Gspeed Living Plus',
+    image: '/uploads/gallery/pan-pacific_warfare_cup_2026-01-1790952963276-oxp0.webp',
+    tag: 'Delta Force Warfare',
+    tags: ['#DeltaForce', '#WarfareCup', '#GLP2026', '#Tournament', '#GamingArena'],
+    partner: 'GLP',
     location: 'G-Speed Esport Arena รามคำแหง 53 กรุงเทพฯ',
-    organizer: 'G-Speed ร่วมกับ ASUS ROG และ NVIDIA Thailand',
+    organizer: 'G-Speed Living Plus',
     prizePool: '฿50,000 พร้อมอุปกรณ์เกมมิ่งเกียร์ ROG',
     attendees: '320+ คน (32 ทีมทั่วประเทศ)',
     quote: 'การได้ลงแข่งในสภาพแวดล้อมที่เครื่องสเปกแรง จอ 360Hz และเน็ตไม่กระตุกเลย ทำให้ผู้เล่นสามารถปลดปล่อยศักยภาพได้ 100% สมกับเป็นสนามแข่งระดับเวิลด์คลาส',
     contentParagraphs: [
-      'การแข่งขัน ICAFE ATTACK LAN TOURNAMENT ถือเป็นหนึ่งในทัวร์นาเมนต์ออฟไลน์ที่ได้รับความสนใจสูงสุดของปี 2026 โดยมีทีมแข่งอีสปอร์ตระดับแนวหน้าและผู้เล่นดาวรุ่งกว่า 32 ทีมจากทั่วประเทศ ตบเท้าเข้าร่วมประลองฝีมือในเกมยิงเชิงกลยุทธ์ยอดนิยม ณ ศูนย์ G-Speed Esport Arena สาขารามคำแหง',
-      'ตลอดการแข่งขันทั้ง 2 วันเต็ม โซน Battleground และเวที Main Stage ถูกเนรมิตให้เป็นสมรภูมิสุดเดือด ทั้ง 32 ทีมต่อสู้กันอย่างดุเดือดท่ามกลางเสียงเชียร์ของแฟนคลับที่มาร่วมชมอย่างหนาแน่น พร้อมการถ่ายทอดสดแบบ Multi-camera ผ่านจอ LED 4K ขนาดยักษ์ใจกลางร้าน',
-      'ความพิเศษของงานนี้คือการใช้เครื่องคอมพิวเตอร์สเปกทัวร์นาเมนต์ ขับเคลื่อนด้วยขุมพลัง NVIDIA GeForce RTX 4080 SUPER และหน้าจอ BenQ ZOWIE 360Hz Fast-IPS ตอบสนอง 0.5ms พร้อมระบบเราเตอร์ไฟเบอร์ 10Gbps คู่ ทำให้ค่าความหน่วง (Ping) นิ่งสนิทต่ำกว่า 2ms ตลอดการแข่งขัน',
-      'ทีมชนะเลิศอันดับหนึ่งคว้าเงินรางวัล ฿30,000 พร้อมถ้วยเกียรติยศและเซ็ตเกมมิ่งเกียร์ไร้สายจาก ASUS ROG ไปครอง ทางทีมงานขอแสดงความยินดีกับผู้ชนะทุกทีม และขอบคุณผู้สนับสนุนที่ร่วมสร้างปรากฏการณ์สุดมันส์ในครั้งนี้'
+      'ภาพบรรยากาศการแข่งขัน Pan-Pacific Warfare Cup 2026 จัดขึ้นที่ ร้าน Gspeed Living Plus ดูภาพบรรกาศได้ที่นี่'
     ],
     galleryPhotos: [
-      { url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1600&q=85', caption: 'นักกีฬาอีสปอร์ตกำลังขับเคี่ยวอย่างดุเดือดในรอบชิงชนะเลิศ' },
-      { url: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1600&q=85', caption: 'จอ LED 4K ขนาดยักษ์ถ่ายทอดสดมุมมองผู้เล่นแบบเรียลไทม์' },
-      { url: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1600&q=85', caption: 'เครื่องคอมพิวเตอร์สเปกแข่งขัน RTX 4080 และจอ 360Hz' },
-      { url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1600&q=85', caption: 'บรรยากาศกองเชียร์และผู้ร่วมงานแน่นขนัดทั่วทั้งร้าน' }
+      { url: '/uploads/gallery/pan-pacific_warfare_cup_2026-01-1790952963276-oxp0.webp', caption: 'ภาพบรรยากาศการแข่งขัน Pan-Pacific Warfare Cup 2026' },
+      { url: '/uploads/gallery/pan-pacific_warfare_cup_2026-02-1790952756036-lv1o.webp', caption: 'เวทีหลักกับการแข่งขันรอบตัดสิน Pan-Pacific Warfare Cup' },
+      { url: '/uploads/gallery/pan-pacific_warfare_cup_2026-03-1790952755645-52fz.webp', caption: 'ผู้เข้าแข่งขันขับเคี่ยวอย่างดุเดือดในโซน Battleground' },
+      { url: '/uploads/gallery/pan-pacific_warfare_cup_2026-04-1790952755164-bty8.webp', caption: 'จอ LED 4K ขนาดยักษ์ถ่ายทอดสดแบบเรียลไทม์' }
     ]
   },
   {

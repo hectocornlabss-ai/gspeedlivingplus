@@ -111,8 +111,8 @@ export const translations = {
       }
     },
     chat: {
-      triggerSubtitle: 'G-SPEED STORE',
-      triggerLabel: 'สอบถามสเปกสินค้า / แชทกับเจ้าหน้าที่',
+      triggerSubtitle: '',
+      triggerLabel: 'แชทกับเจ้าหน้าที่',
       cardTitle: 'ฝ่ายบริการลูกค้า & ปรึกษาอุปกรณ์ • G-SPEED',
       statusOnline: 'Online • สอบถามสเปกสินค้า & ใบเสนอราคา 24 ชม.',
       inputPlaceholder: 'สอบถามสเปกโต๊ะ, เก้าอี้, ใบเสนอราคา, สั่งซื้อราคาส่ง B2B...',
@@ -1132,8 +1132,8 @@ export const translations = {
       }
     },
     chat: {
-      triggerSubtitle: 'G-SPEED STORE',
-      triggerLabel: 'Product Inquiries / Live Chat',
+      triggerSubtitle: '',
+      triggerLabel: 'Live Chat',
       cardTitle: 'Equipment & Product Concierge • G-SPEED',
       statusOnline: 'Online • 24/7 Product Specs & Quotations',
       inputPlaceholder: 'Ask about desks, chairs, quotations, B2B wholesale...',
@@ -2153,8 +2153,8 @@ export const translations = {
       }
     },
     chat: {
-      triggerSubtitle: 'G-SPEED 装备专营',
-      triggerLabel: '产品咨询 / 在线客服',
+      triggerSubtitle: '',
+      triggerLabel: 'Live Chat / 在线客服',
       cardTitle: '电竞装备与家具咨询 • G-SPEED',
       statusOnline: '在线 • 24小时产品规格与报价咨询',
       inputPlaceholder: '咨询电竞桌、人体工学椅、官方报价单或B2B批量采购...',

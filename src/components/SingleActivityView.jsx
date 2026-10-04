@@ -697,6 +697,10 @@ export default function SingleActivityView({
                       src={photo.url || photo} 
                       alt={photo.alt || photo.caption || `${activity.title} - ภาพแกลเลอรีที่ ${pIdx + 1}`} 
                       loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80';
+                      }}
                     />
                     <div className="photo-overlay">
                       <ZoomIn size={24} className="zoom-icon" />
