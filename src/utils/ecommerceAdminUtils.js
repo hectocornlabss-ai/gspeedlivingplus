@@ -242,12 +242,14 @@ export function calculateSalesAnalytics(orders = [], products = []) {
  * Self-contains all typography, layout, CSS variables, and offline print button.
  */
 export function downloadDocumentAsHtml(filename, htmlContent, title = 'เอกสาร GLP') {
+  const safeTitle = String(title || 'เอกสาร GLP').replace(/[<>&"']/g, '');
+  const safeFilename = String(filename || 'document.html').replace(/[\\/:*?"<>|]/g, '_');
   const fullHtml = `<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title}</title>
+  <title>${safeTitle}</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap');
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -420,7 +422,7 @@ export function downloadDocumentAsHtml(filename, htmlContent, title = 'เอก
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = filename;
+  a.download = safeFilename;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
