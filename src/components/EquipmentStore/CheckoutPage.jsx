@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   ArrowLeft, Check, QrCode, Building2, 
   Upload, Copy, CheckCircle2, ShieldCheck, Truck, 

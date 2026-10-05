@@ -873,7 +873,17 @@ function recordDeletedOrderNo(orderNo) {
   } catch (e) {}
 }
 
+let memoryOrdersCache = null;
+
 function getStoredOrders() {
+  if (memoryOrdersCache) {
+    const deletedNos = getDeletedOrderNos();
+    if (deletedNos.length > 0 && Array.isArray(memoryOrdersCache)) {
+      return memoryOrdersCache.filter(o => o.orderNo && !deletedNos.includes(o.orderNo.toLowerCase().trim()));
+    }
+    return memoryOrdersCache;
+  }
+
   try {
     if (!fs.existsSync(ORDERS_FILE) && fs.existsSync(SEED_ORDERS_FILE)) {
       try { fs.copyFileSync(SEED_ORDERS_FILE, ORDERS_FILE); } catch (e) {}
@@ -881,6 +891,7 @@ function getStoredOrders() {
     if (fs.existsSync(ORDERS_FILE)) {
       const content = fs.readFileSync(ORDERS_FILE, 'utf8');
       const list = JSON.parse(content);
+      memoryOrdersCache = list;
       const deletedNos = getDeletedOrderNos();
       if (deletedNos.length > 0 && Array.isArray(list)) {
         return list.filter(o => o.orderNo && !deletedNos.includes(o.orderNo.toLowerCase().trim()));
@@ -894,6 +905,7 @@ function getStoredOrders() {
 }
 
 function saveStoredOrders(orders) {
+  memoryOrdersCache = orders;
   try {
     const tmp = `${ORDERS_FILE}.tmp.${Date.now()}`;
     fs.writeFileSync(tmp, JSON.stringify(orders, null, 2), 'utf8');

@@ -175,9 +175,41 @@ export function CartProvider({ children }) {
 
   useEffect(() => {
     syncOrdersWithServer();
-    // Poll every 8 seconds so newly placed orders from phones appear in real time on PC/desktop
-    const interval = setInterval(syncOrdersWithServer, 8000);
-    return () => clearInterval(interval);
+
+    // Sync immediately when user switches back to this tab
+    const handleVisibilityOrFocus = () => {
+      if (!document.hidden) {
+        syncOrdersWithServer();
+      }
+    };
+    window.addEventListener('focus', handleVisibilityOrFocus);
+    window.addEventListener('visibilitychange', handleVisibilityOrFocus);
+
+    // Adaptive polling: 12s on admin/checkout/orders, 30s on public store, 0s when tab is hidden
+    const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && document.hidden) return; // Do not poll when user is not viewing tab
+      const path = (window.location?.pathname || '').toLowerCase();
+      const isManagement = path.includes('admin') || path.includes('checkout') || path.includes('order');
+      if (isManagement) {
+        syncOrdersWithServer();
+      }
+    }, 12000);
+
+    const publicInterval = setInterval(() => {
+      if (typeof document !== 'undefined' && document.hidden) return;
+      const path = (window.location?.pathname || '').toLowerCase();
+      const isManagement = path.includes('admin') || path.includes('checkout') || path.includes('order');
+      if (!isManagement) {
+        syncOrdersWithServer();
+      }
+    }, 35000);
+
+    return () => {
+      clearInterval(interval);
+      clearInterval(publicInterval);
+      window.removeEventListener('focus', handleVisibilityOrFocus);
+      window.removeEventListener('visibilitychange', handleVisibilityOrFocus);
+    };
   }, []);
 
   // Add Item to Cart (Default: does NOT open cart, only adds item so customer can select multiple items)

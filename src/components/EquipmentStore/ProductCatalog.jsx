@@ -311,11 +311,16 @@ export default function ProductCatalog({
                   className="ecommerce-product-card"
                   onClick={() => onOpenProductDetail(product)}
                 >
-                  {/* Top Header Tags */}
+                  {/* Top Header Tags - Aligned on the exact same row */}
                   <div className="card-top-tags">
                     <span className="tag-in-stock">
                       <Check size={11} /> {text.inStock}
                     </span>
+                    {discountPercent > 0 && (
+                      <span className="discount-top-badge">
+                        -{discountPercent}%
+                      </span>
+                    )}
                   </div>
 
                   {/* Product Image Box */}
@@ -330,12 +335,6 @@ export default function ProductCatalog({
                         e.currentTarget.src = 'https://images.unsplash.com/photo-1598550476439-6847785fcea6?auto=format&fit=crop&w=800&q=80';
                       }}
                     />
-
-                    {discountPercent > 0 && (
-                      <span className="discount-corner-badge">
-                        -{discountPercent}%
-                      </span>
-                    )}
                   </div>
 
                   {/* Product Title */}
