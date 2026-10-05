@@ -6548,16 +6548,16 @@
     "host": "smtp.hostinger.com",
     "port": "465",
     "encryption": "SSL/TLS",
-    "user": "no-reply@gspeed-esport.com",
+    "user": "order@cyber-wp.com",
     "pass": "••••••••••••••••",
-    "senderName": "GLP : G-Speed Living Plus",
-    "senderEmail": "gspeedlivingplus35@gmail.com",
-    "adminCcEmail": "gspeedlivingplus35@gmail.com",
+    "senderName": "GLP : G Speed Living Plus",
+    "senderEmail": "order@cyber-wp.com",
+    "adminCcEmail": "order@cyber-wp.com",
     "autoReplyEnabled": true,
     "staffAlertEmails": [
       {
         "id": 1,
-        "email": "gspeedlivingplus35@gmail.com",
+        "email": "order@cyber-wp.com",
         "role": "ผู้บริหาร / เจ้าของร้าน (Owner/Executive)",
         "active": true
       },

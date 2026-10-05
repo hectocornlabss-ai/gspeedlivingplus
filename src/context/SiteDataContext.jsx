@@ -1016,20 +1016,20 @@ export const DEFAULT_SITE_DATA = {
     host: 'smtp.hostinger.com',
     port: '465',
     encryption: 'SSL/TLS',
-    user: 'gspeedlivingplus35@gmail.com',
+    user: 'order@cyber-wp.com',
     pass: '••••••••••••••••',
-    senderName: 'GLP : G-Speed Living Plus',
-    senderEmail: 'gspeedlivingplus35@gmail.com',
-    adminCcEmail: 'gspeedlivingplus35@gmail.com',
+    senderName: 'GLP : G Speed Living Plus',
+    senderEmail: 'order@cyber-wp.com',
+    adminCcEmail: 'order@cyber-wp.com',
     autoReplyEnabled: true,
     staffAlertEmails: [
-      { id: 1, email: 'gspeedlivingplus35@gmail.com', role: 'ผู้บริหาร / เจ้าของร้าน (Owner/Executive)', active: true },
+      { id: 1, email: 'order@cyber-wp.com', role: 'ผู้บริหาร / เจ้าของร้าน (Owner/Executive)', active: true },
       { id: 2, email: '', role: 'ฝ่ายขาย & ที่ปรึกษาแฟรนไชส์ (Sales & Franchise)', active: false },
       { id: 3, email: '', role: 'ทีมวิศวกร & เทคนิค 3D (Engineering)', active: false },
       { id: 4, email: '', role: 'ฝ่ายบริการลูกค้า & นัดหมาย (Customer Support)', active: false },
       { id: 5, email: '', role: 'ผู้จัดการสาขารามคำแหง (Store Manager)', active: false }
     ],
-    lastTestedAt: '28/09/2026 23:05',
+    lastTestedAt: '05/10/2026 16:00',
     lastTestStatus: 'Connected (Hostinger SMTP 250 OK)'
   },
   emailTemplates: {
@@ -1242,19 +1242,19 @@ export function SiteDataProvider({ children }) {
         }
 
         if (merged.smtpConfig) {
-          if (!merged.smtpConfig.senderEmail || merged.smtpConfig.senderEmail.includes('@gspeedlivingplus.com') || merged.smtpConfig.senderEmail.includes('@gspeed-esport.com') || merged.smtpConfig.senderEmail.includes('contact@')) {
-            merged.smtpConfig.senderEmail = 'gspeedlivingplus35@gmail.com';
+          if (!merged.smtpConfig.senderEmail || merged.smtpConfig.senderEmail.includes('@gspeedlivingplus.com') || merged.smtpConfig.senderEmail.includes('@gspeed-esport.com') || merged.smtpConfig.senderEmail.includes('contact@') || merged.smtpConfig.senderEmail === 'gspeedlivingplus35@gmail.com') {
+            merged.smtpConfig.senderEmail = 'order@cyber-wp.com';
           }
-          if (!merged.smtpConfig.user || merged.smtpConfig.user.includes('@gspeedlivingplus.com') || merged.smtpConfig.user.includes('contact@')) {
-            merged.smtpConfig.user = 'gspeedlivingplus35@gmail.com';
+          if (!merged.smtpConfig.user || merged.smtpConfig.user.includes('@gspeedlivingplus.com') || merged.smtpConfig.user.includes('contact@') || merged.smtpConfig.user === 'gspeedlivingplus35@gmail.com') {
+            merged.smtpConfig.user = 'order@cyber-wp.com';
           }
-          if (!merged.smtpConfig.adminCcEmail || merged.smtpConfig.adminCcEmail.includes('@gspeedlivingplus.com') || merged.smtpConfig.adminCcEmail.includes('@gspeed-esport.com')) {
-            merged.smtpConfig.adminCcEmail = 'gspeedlivingplus35@gmail.com';
+          if (!merged.smtpConfig.adminCcEmail || merged.smtpConfig.adminCcEmail.includes('@gspeedlivingplus.com') || merged.smtpConfig.adminCcEmail.includes('@gspeed-esport.com') || merged.smtpConfig.adminCcEmail === 'gspeedlivingplus35@gmail.com') {
+            merged.smtpConfig.adminCcEmail = 'order@cyber-wp.com';
           }
           if (Array.isArray(merged.smtpConfig.staffAlertEmails)) {
             merged.smtpConfig.staffAlertEmails = merged.smtpConfig.staffAlertEmails.map(st => {
-              if (st.email && (st.email.includes('@gspeedlivingplus.com') || st.email.includes('@gspeed-esport.com'))) {
-                return { ...st, email: st.id === 1 ? 'gspeedlivingplus35@gmail.com' : '' };
+              if (st.email && (st.email.includes('@gspeedlivingplus.com') || st.email.includes('@gspeed-esport.com') || st.email === 'gspeedlivingplus35@gmail.com')) {
+                return { ...st, email: st.id === 1 ? 'order@cyber-wp.com' : '' };
               }
               return st;
             });
@@ -1821,14 +1821,14 @@ export function SiteDataProvider({ children }) {
                 }
               }
               if (merged.smtpConfig) {
-                if (!merged.smtpConfig.senderEmail || merged.smtpConfig.senderEmail.includes('@gspeedlivingplus.com') || merged.smtpConfig.senderEmail.includes('@gspeed-esport.com') || merged.smtpConfig.senderEmail.includes('contact@')) {
-                  merged.smtpConfig.senderEmail = 'gspeedlivingplus35@gmail.com';
+                if (!merged.smtpConfig.senderEmail || merged.smtpConfig.senderEmail.includes('@gspeedlivingplus.com') || merged.smtpConfig.senderEmail.includes('@gspeed-esport.com') || merged.smtpConfig.senderEmail.includes('contact@') || merged.smtpConfig.senderEmail === 'gspeedlivingplus35@gmail.com') {
+                  merged.smtpConfig.senderEmail = 'order@cyber-wp.com';
                 }
-                if (!merged.smtpConfig.user || merged.smtpConfig.user.includes('@gspeedlivingplus.com') || merged.smtpConfig.user.includes('contact@')) {
-                  merged.smtpConfig.user = 'gspeedlivingplus35@gmail.com';
+                if (!merged.smtpConfig.user || merged.smtpConfig.user.includes('@gspeedlivingplus.com') || merged.smtpConfig.user.includes('contact@') || merged.smtpConfig.user === 'gspeedlivingplus35@gmail.com') {
+                  merged.smtpConfig.user = 'order@cyber-wp.com';
                 }
-                if (!merged.smtpConfig.adminCcEmail || merged.smtpConfig.adminCcEmail.includes('@gspeedlivingplus.com') || merged.smtpConfig.adminCcEmail.includes('@gspeed-esport.com')) {
-                  merged.smtpConfig.adminCcEmail = 'gspeedlivingplus35@gmail.com';
+                if (!merged.smtpConfig.adminCcEmail || merged.smtpConfig.adminCcEmail.includes('@gspeedlivingplus.com') || merged.smtpConfig.adminCcEmail.includes('@gspeed-esport.com') || merged.smtpConfig.adminCcEmail === 'gspeedlivingplus35@gmail.com') {
+                  merged.smtpConfig.adminCcEmail = 'order@cyber-wp.com';
                 }
               }
               try {

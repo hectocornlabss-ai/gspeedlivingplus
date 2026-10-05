@@ -113,8 +113,19 @@ function createTransporter(customConfig = {}) {
   const secure = customConfig.secure !== undefined 
     ? Boolean(customConfig.secure) 
     : (customConfig.encryption === 'SSL/TLS' || port === 465 || process.env.SMTP_SECURE === 'true');
-  const user = customConfig.user || customConfig.senderEmail || process.env.SMTP_USER || '';
-  const pass = customConfig.pass || customConfig.password || process.env.SMTP_PASS || '';
+
+  // Intelligent fallback for user
+  let user = customConfig.user || customConfig.senderEmail || '';
+  if (!user || user.includes('example.com') || user.includes('@gspeedlivingplus.com') || user.includes('@gspeed-esport.com')) {
+    user = process.env.SMTP_USER || 'order@cyber-wp.com';
+  }
+
+  // Intelligent fallback for password
+  let pass = customConfig.pass || customConfig.password || '';
+  // If pass is masked (contains bullet '•') or empty, fallback to process.env.SMTP_PASS
+  if (!pass || pass.includes('•') || pass.trim() === '') {
+    pass = process.env.SMTP_PASS || '';
+  }
 
   if (!user || !pass) {
     return {
@@ -275,8 +286,8 @@ app.post('/api/send-email', async (req, res) => {
 
     const { transporter, isConfigured, configInfo } = createTransporter(smtpConfig);
 
-    const senderName = smtpConfig?.senderName || process.env.SMTP_FROM_NAME || 'GLP Support';
-    const senderEmail = smtpConfig?.senderEmail || configInfo.user || process.env.SMTP_FROM_EMAIL || 'gspeedlivingplus35@gmail.com';
+    const senderName = process.env.SMTP_FROM_NAME || smtpConfig?.senderName || 'GLP Support';
+    const senderEmail = process.env.SMTP_FROM_EMAIL || configInfo.user || (smtpConfig?.senderEmail && !smtpConfig.senderEmail.includes('gspeedlivingplus35') ? smtpConfig.senderEmail : 'order@cyber-wp.com');
     const fromAddress = `"${senderName}" <${senderEmail}>`;
 
     // Simulation fallback if no credentials configured yet
@@ -346,8 +357,8 @@ app.post('/api/contact-inquiry', async (req, res) => {
     }
 
     const { transporter, isConfigured, configInfo } = createTransporter(smtpConfig);
-    const senderName = smtpConfig?.senderName || 'GLP Support Team';
-    const senderEmail = smtpConfig?.senderEmail || configInfo.user || 'gspeedlivingplus35@gmail.com';
+    const senderName = process.env.SMTP_FROM_NAME || smtpConfig?.senderName || 'GLP Support Team';
+    const senderEmail = process.env.SMTP_FROM_EMAIL || configInfo.user || (smtpConfig?.senderEmail && !smtpConfig.senderEmail.includes('gspeedlivingplus35') ? smtpConfig.senderEmail : 'order@cyber-wp.com');
     const fromAddress = `"${senderName}" <${senderEmail}>`;
 
     let customerSent = false;
@@ -520,8 +531,8 @@ app.post('/api/franchise-quote', async (req, res) => {
     }
 
     const { transporter, isConfigured, configInfo } = createTransporter(smtpConfig);
-    const senderName = smtpConfig?.senderName || 'GLP Franchise Business Team';
-    const senderEmail = smtpConfig?.senderEmail || configInfo.user || 'gspeedlivingplus35@gmail.com';
+    const senderName = process.env.SMTP_FROM_NAME || smtpConfig?.senderName || 'GLP Franchise Business Team';
+    const senderEmail = process.env.SMTP_FROM_EMAIL || configInfo.user || (smtpConfig?.senderEmail && !smtpConfig.senderEmail.includes('gspeedlivingplus35') ? smtpConfig.senderEmail : 'order@cyber-wp.com');
     const fromAddress = `"${senderName}" <${senderEmail}>`;
 
     let customerSent = false;
