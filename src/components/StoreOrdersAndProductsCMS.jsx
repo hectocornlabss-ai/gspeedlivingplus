@@ -174,16 +174,28 @@ export default function StoreOrdersAndProductsCMS() {
 
   // Order Quick Actions
   const handleApproveSlip = (orderNo) => {
+    const targetOrder = savedOrders.find(o => o.orderNo === orderNo);
     updateOrderStatus(orderNo, 'payment_verified', 'ตรวจสอบยอดเงินและสลิปโอนเงินถูกต้องเรียบร้อยแล้ว');
     showToast(`อนุมัติสลิปคำสั่งซื้อ ${orderNo} สำเร็จ 🟢`);
+    if (targetOrder) {
+      dispatchOrderStatusEmail({ ...targetOrder, status: 'payment_verified' }, 'payment_verified').catch(err => {
+        console.warn('Approve slip email error:', err);
+      });
+    }
     if (selectedOrderForDetail && selectedOrderForDetail.orderNo === orderNo) {
       setSelectedOrderForDetail(prev => prev ? { ...prev, status: 'payment_verified', statusNote: 'ตรวจสอบยอดเงินและสลิปโอนเงินถูกต้องเรียบร้อยแล้ว' } : null);
     }
   };
 
   const handlePrepareItems = (orderNo) => {
+    const targetOrder = savedOrders.find(o => o.orderNo === orderNo);
     updateOrderStatus(orderNo, 'preparing_items', 'คลังสินค้ากำลังจัดเตรียมอุปกรณ์และตรวจสอบความเรียบร้อย');
     showToast(`อัปเดตสถานะคำสั่งซื้อ ${orderNo} เป็น "กำลังเตรียมพัสดุ" 📦`);
+    if (targetOrder) {
+      dispatchOrderStatusEmail({ ...targetOrder, status: 'preparing_items' }, 'preparing_items').catch(err => {
+        console.warn('Prepare items email error:', err);
+      });
+    }
     if (selectedOrderForDetail && selectedOrderForDetail.orderNo === orderNo) {
       setSelectedOrderForDetail(prev => prev ? { ...prev, status: 'preparing_items', statusNote: 'คลังสินค้ากำลังจัดเตรียมอุปกรณ์และตรวจสอบความเรียบร้อย' } : null);
     }
@@ -237,8 +249,14 @@ export default function StoreOrdersAndProductsCMS() {
   };
 
   const handleMarkDelivered = (orderNo) => {
+    const targetOrder = savedOrders.find(o => o.orderNo === orderNo);
     updateOrderStatus(orderNo, 'delivered', 'พัสดุได้รับการจัดส่งและส่งมอบถึงผู้รับเรียบร้อยแล้ว');
     showToast(`คำสั่งซื้อ ${orderNo} จัดส่งสำเร็จ 🎉`);
+    if (targetOrder) {
+      dispatchOrderStatusEmail({ ...targetOrder, status: 'delivered' }, 'delivered').catch(err => {
+        console.warn('Delivered email error:', err);
+      });
+    }
     if (selectedOrderForDetail && selectedOrderForDetail.orderNo === orderNo) {
       setSelectedOrderForDetail(prev => prev ? { ...prev, status: 'delivered', statusNote: 'พัสดุได้รับการจัดส่งและส่งมอบถึงผู้รับเรียบร้อยแล้ว' } : null);
     }
@@ -247,8 +265,14 @@ export default function StoreOrdersAndProductsCMS() {
   const handleFlagSlipIssue = (orderNo) => {
     const reason = prompt('กรุณาระบุปัญหาของสลิป (เช่น "ยอดเงินไม่ตรง", "ภาพสลิปไม่ชัดเจน", "สลิปซ้ำ"):', 'ยอดเงินไม่ตรงกับยอดคำสั่งซื้อ กรุณาตรวจสอบและแนบใหม่อีกครั้ง');
     if (reason !== null) {
+      const targetOrder = savedOrders.find(o => o.orderNo === orderNo);
       updateOrderStatus(orderNo, 'payment_issue', reason);
       showToast(`แจ้งสลิปมีปัญหาในออเดอร์ ${orderNo} แล้ว`);
+      if (targetOrder) {
+        dispatchOrderStatusEmail({ ...targetOrder, status: 'payment_issue', statusNote: reason }, 'payment_issue', { issueNote: reason }).catch(err => {
+          console.warn('Slip issue email error:', err);
+        });
+      }
       if (selectedOrderForDetail && selectedOrderForDetail.orderNo === orderNo) {
         setSelectedOrderForDetail(prev => prev ? { ...prev, status: 'payment_issue', statusNote: reason } : null);
       }

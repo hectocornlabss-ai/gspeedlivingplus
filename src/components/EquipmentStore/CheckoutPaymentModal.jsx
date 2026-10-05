@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { thaiBahtText } from '../../data/equipmentProducts';
+import { dispatchOrderStatusEmail } from '../../utils/orderEmailService';
 
 export default function CheckoutPaymentModal() {
   const { 
@@ -145,6 +146,11 @@ export default function CheckoutPaymentModal() {
 
     setTimeout(() => {
       const order = createOrder(orderPayload);
+      if (order?.orderNo) {
+        dispatchOrderStatusEmail(order, order.hasSlipUploaded ? 'verifying_payment' : 'order_received').catch(err => {
+          console.warn('[CheckoutModal] Failed to dispatch order email:', err);
+        });
+      }
       setIsProcessing(false);
       setCompletedOrder(order);
     }, 1500);

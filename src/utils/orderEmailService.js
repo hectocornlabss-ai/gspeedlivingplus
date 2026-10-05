@@ -72,7 +72,17 @@ export const buildOrderStatusEmailTemplate = (order, statusType = 'shipping', cu
   let statusSub = 'ทีมงานได้ส่งมอบพัสดุให้กับบริษัทขนส่งเรียบร้อยแล้ว ตรวจสอบสถานะการจัดส่งได้ด้านล่าง';
   let emailSubject = `🚚 อัปเดตสถานะจัดส่ง: คำสั่งซื้อเลขที่ ${orderNo} อยู่ระหว่างการจัดส่งแล้ว | G-Speed Living Plus`;
 
-  if (statusType === 'payment_verified') {
+  if (statusType === 'order_received') {
+    statusBannerBg = '#2563eb';
+    statusHeadline = '🎉 ได้รับคำสั่งซื้อของคุณเรียบร้อยแล้ว!';
+    statusSub = 'ขอบพระคุณสำหรับการสั่งซื้อ ระบบได้บันทึกคำสั่งซื้อของคุณแล้ว กรุณาดำเนินการชำระเงินตามยอดด้านล่าง';
+    emailSubject = `🎉 ได้รับคำสั่งซื้อแล้ว: หมายเลขคำสั่งซื้อ ${orderNo} | G-Speed Living Plus`;
+  } else if (statusType === 'verifying_payment') {
+    statusBannerBg = '#0284c7';
+    statusHeadline = '📋 ได้รับหลักฐานการชำระเงินแล้ว (กำลังตรวจสอบสลิป)';
+    statusSub = 'ระบบได้รับสลิปหลักฐานการโอนเงินของท่านเรียบร้อยแล้ว เจ้าหน้าที่ฝ่ายการเงินกำลังดำเนินการตรวจสอบยอดเงินในบัญชี (ใช้เวลาประมาณ 5 - 15 นาที)';
+    emailSubject = `📋 ยืนยันรับสลิปโอนเงิน: คำสั่งซื้อเลขที่ ${orderNo} อยู่ระหว่างตรวจสอบ | G-Speed Living Plus`;
+  } else if (statusType === 'payment_verified') {
     statusBannerBg = '#10b981';
     statusHeadline = '✓ ยืนยันยอดชำระเงินเรียบร้อยแล้ว!';
     statusSub = 'ฝ่ายการเงินตรวจสอบหลักฐานการโอนเงินสมบูรณ์ กำลังส่งต่อให้ฝ่ายคลังจัดเตรียมอุปกรณ์';
@@ -311,39 +321,41 @@ export const dispatchOrderStatusEmail = async (order, statusType = 'shipping', c
   }
 
   try {
-    // 1. Check if external email webhook relay is configured
-    let relayEndpoint = null;
-    if (typeof window !== 'undefined' && window.GSPEED_EMAIL_RELAY_URL) {
-      relayEndpoint = window.GSPEED_EMAIL_RELAY_URL;
-    }
+    // 1. Send email to customer via /api/send-email
+    const response = await fetch('/api/send-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: recipientEmail,
+        subject: emailPayload.subject,
+        html: emailPayload.html,
+        text: emailPayload.plainText
+      })
+    });
+    const resData = await response.json().catch(() => ({}));
 
-    if (relayEndpoint) {
-      const response = await fetch(relayEndpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(emailPayload)
-      });
-      if (response.ok) {
-        return { success: true, method: 'relay_api', emailPayload };
+    // 2. Also send alert copy to store admin if this is a new order or payment slip
+    if (statusType === 'order_received' || statusType === 'verifying_payment') {
+      try {
+        const adminSubject = `⚡ [คำสั่งซื้อใหม่] ${order.orderNo} ยอด ฿${(order.pricing?.grandTotal || 0).toLocaleString()} จาก คุณ${order.shipping?.receiverName || 'ลูกค้า'}`;
+        await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: 'order@cyber-wp.com',
+            subject: adminSubject,
+            html: emailPayload.html,
+            text: emailPayload.plainText
+          })
+        });
+      } catch (adminErr) {
+        console.warn('[OrderEmail] Admin alert failed:', adminErr);
       }
     }
 
-    // 2. Client-side logging and audit record
-    const emailAuditLog = {
-      id: `mail-${Date.now()}`,
-      sentAt: new Date().toISOString(),
-      type: statusType,
-      to: recipientEmail,
-      subject: emailPayload.subject,
-      carrier: customOptions.carrier || order.shippingCarrier || null,
-      trackingNo: customOptions.trackingNo || order.trackingNumber || null,
-      status: 'dispatched'
-    };
-
     return {
-      success: true,
-      method: 'client_dispatched',
-      auditLog: emailAuditLog,
+      success: resData.success ?? true,
+      deliveredTo: recipientEmail,
       emailPayload
     };
   } catch (error) {

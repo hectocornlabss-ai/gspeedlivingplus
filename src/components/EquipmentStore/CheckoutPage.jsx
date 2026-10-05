@@ -10,6 +10,7 @@ import {
 import { useCart } from '../../context/CartContext';
 import { useCustomerAuth } from '../../context/CustomerAuthContext';
 import { thaiBahtText } from '../../data/equipmentProducts';
+import { dispatchOrderStatusEmail } from '../../utils/orderEmailService';
 import './EquipmentStore.css';
 
 export default function CheckoutPage({ 
@@ -339,6 +340,9 @@ export default function CheckoutPage({
       if (order?.orderNo) {
         registerSessionOrder(order.orderNo);
         window.history.pushState(null, '', `/orders/${order.orderNo}`);
+        dispatchOrderStatusEmail(order, 'order_received').catch(err => {
+          console.warn('[Checkout] Failed to dispatch order email:', err);
+        });
       }
       setIsProcessing(false);
       setActiveOrder(order);
@@ -370,6 +374,14 @@ export default function CheckoutPage({
       if (activeOrder?.orderNo) {
         registerSessionOrder(activeOrder.orderNo);
         window.history.pushState(null, '', `/orders/${activeOrder.orderNo}`);
+        const updatedOrder = {
+          ...activeOrder,
+          hasSlipUploaded: true,
+          status: 'verifying_payment'
+        };
+        dispatchOrderStatusEmail(updatedOrder, 'verifying_payment').catch(err => {
+          console.warn('[Checkout] Failed to dispatch slip verification email:', err);
+        });
       }
       window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     }, 600);
