@@ -127,15 +127,24 @@ export default function CheckoutPage({
     return `https://www.google.com/search?q=${encodeURIComponent(`${carrier || 'พัสดุ'} ${trackingNo}`)}`;
   };
 
-  // Check URL query param, initial props, or quotation data on mount
+  // 1. Instant scroll to top STRICTLY on initial page mount only (never when typing or when polling syncs)
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, []);
 
-    // 1. Check initialOrderNo or URL ?order=
+  // 2. Check URL query param, initial props, or quotation data on mount
+  const hasInitializedRef = useRef(false);
+  useEffect(() => {
+    if (hasInitializedRef.current && !initialOrderNo) return;
+    hasInitializedRef.current = true;
+
+    // Check initialOrderNo or URL ?order=
     const urlParams = new URLSearchParams(window.location.search);
     const orderParam = initialOrderNo || urlParams.get('order');
-    if (orderParam && getOrder) {
-      const found = getOrder(orderParam) || savedOrders.find(o => o.orderNo.toLowerCase() === orderParam.toLowerCase().trim());
+    if (orderParam) {
+      const allOrders = savedOrders || [];
+      const found = (typeof getOrder === 'function' ? getOrder(orderParam) : null) || 
+        allOrders.find(o => o.orderNo && o.orderNo.toLowerCase() === orderParam.toLowerCase().trim());
       if (found) {
         setActiveOrder(found);
         if (initialStep === 'tracking' || found.hasSlipUploaded || found.status !== 'order_received') {
@@ -147,7 +156,7 @@ export default function CheckoutPage({
       }
     }
 
-    // 2. Pre-fill from quotation if passed
+    // Pre-fill from quotation if passed
     if (checkoutInitialData?.clientInfo) {
       const c = checkoutInitialData.clientInfo;
       setReceiverName(c.contactName || c.companyName || '');
@@ -158,7 +167,7 @@ export default function CheckoutPage({
       setTaxId(c.taxId || '');
       setNeedTaxInvoice(!!(c.companyName || c.taxId));
     }
-  }, [initialOrderNo, initialStep, checkoutInitialData, getOrder, savedOrders]);
+  }, [initialOrderNo, initialStep]);
 
   // Sync Clean URL to /orders/:orderNo when viewing tracking
   useEffect(() => {
@@ -168,17 +177,22 @@ export default function CheckoutPage({
         window.history.replaceState(null, '', expectedPath);
       }
     }
-  }, [activeOrder, checkoutStep]);
+  }, [activeOrder?.orderNo, checkoutStep]);
 
-  // Keep activeOrder synced with savedOrders from context
+  // Keep activeOrder synced with savedOrders from context only when actual attributes change
   useEffect(() => {
-    if (activeOrder) {
-      const updated = savedOrders.find(o => o.orderNo === activeOrder.orderNo);
-      if (updated) {
+    if (activeOrder?.orderNo) {
+      const updated = (savedOrders || []).find(o => o.orderNo === activeOrder.orderNo);
+      if (updated && (
+        updated.status !== activeOrder.status || 
+        updated.updatedAt !== activeOrder.updatedAt || 
+        updated.hasSlipUploaded !== activeOrder.hasSlipUploaded ||
+        updated.trackingNumber !== activeOrder.trackingNumber
+      )) {
         setActiveOrder(updated);
       }
     }
-  }, [savedOrders]);
+  }, [savedOrders, activeOrder?.orderNo, activeOrder?.status, activeOrder?.updatedAt, activeOrder?.hasSlipUploaded, activeOrder?.trackingNumber]);
 
   // QR Timer effect
   useEffect(() => {

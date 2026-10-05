@@ -172,18 +172,26 @@ export default function StoreOrdersAndProductsCMS() {
     return list.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
   }, [savedOrders, orderFilterStatus, orderSearchQuery]);
 
+  const [processingOrderNo, setProcessingOrderNo] = useState(null);
+
   // Order Quick Actions
   const handleApproveSlip = async (orderNo) => {
-    const targetOrder = savedOrders.find(o => o.orderNo === orderNo);
-    await updateOrderStatus(orderNo, 'payment_verified', 'ตรวจสอบยอดเงินและสลิปโอนเงินถูกต้องเรียบร้อยแล้ว');
-    showToast(`อนุมัติสลิปคำสั่งซื้อ ${orderNo} สำเร็จ 🟢`);
-    if (targetOrder) {
-      dispatchOrderStatusEmail({ ...targetOrder, status: 'payment_verified' }, 'payment_verified').catch(err => {
-        console.warn('Approve slip email error:', err);
-      });
-    }
-    if (selectedOrderForDetail && selectedOrderForDetail.orderNo === orderNo) {
-      setSelectedOrderForDetail(prev => prev ? { ...prev, status: 'payment_verified', statusNote: 'ตรวจสอบยอดเงินและสลิปโอนเงินถูกต้องเรียบร้อยแล้ว' } : null);
+    if (processingOrderNo === orderNo) return;
+    setProcessingOrderNo(orderNo);
+    try {
+      const targetOrder = savedOrders.find(o => o.orderNo === orderNo);
+      await updateOrderStatus(orderNo, 'payment_verified', 'ตรวจสอบยอดเงินและสลิปโอนเงินถูกต้องเรียบร้อยแล้ว');
+      showToast(`อนุมัติสลิปคำสั่งซื้อ ${orderNo} สำเร็จ 🟢`);
+      if (targetOrder) {
+        dispatchOrderStatusEmail({ ...targetOrder, status: 'payment_verified' }, 'payment_verified').catch(err => {
+          console.warn('Approve slip email error:', err);
+        });
+      }
+      if (selectedOrderForDetail && selectedOrderForDetail.orderNo === orderNo) {
+        setSelectedOrderForDetail(prev => prev ? { ...prev, status: 'payment_verified', statusNote: 'ตรวจสอบยอดเงินและสลิปโอนเงินถูกต้องเรียบร้อยแล้ว' } : null);
+      }
+    } finally {
+      setProcessingOrderNo(null);
     }
   };
 
@@ -1074,7 +1082,26 @@ export default function StoreOrdersAndProductsCMS() {
                         <td style={{ fontWeight: 800, color: idx === 0 ? '#ea580c' : '#64748b' }}>{idx + 1}</td>
                         <td>
                           <div className="top-seller-prod-info">
-                            {item.image && <img src={item.image} alt="" className="top-seller-thumb" />}
+                            {(() => {
+                              const thumb = item.image && !item.image.includes('chair-promaster.webp')
+                                ? item.image
+                                : (productsList.find(p => p.id === item.id || p.sku === item.sku || p.name === item.name)?.image || 'https://images.unsplash.com/photo-1598550476439-6847785fcea6?auto=format&fit=crop&w=800&q=80');
+                              return (
+                                <img 
+                                  src={thumb} 
+                                  alt="" 
+                                  className="top-seller-thumb" 
+                                  onError={(e) => {
+                                    const fallback = productsList.find(p => p.id === item.id || p.sku === item.sku || p.name === item.name);
+                                    if (fallback?.image && e.currentTarget.src !== fallback.image) {
+                                      e.currentTarget.src = fallback.image;
+                                    } else {
+                                      e.currentTarget.style.display = 'none';
+                                    }
+                                  }}
+                                />
+                              );
+                            })()}
                             <div>
                               <strong style={{ display: 'block', fontSize: '0.85rem', color: '#0f172a' }}>{item.name}</strong>
                               <span style={{ fontSize: '0.72rem', color: '#64748b' }}>SKU: {item.sku || '-'}</span>
@@ -1279,19 +1306,34 @@ export default function StoreOrdersAndProductsCMS() {
                           {/* Items Summary */}
                           <td>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', fontSize: '0.78rem' }}>
-                              {(order.items || []).slice(0, 2).map((item, idx) => (
-                                <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                  {item.image && (
-                                    <img src={item.image} alt="" style={{ width: '22px', height: '22px', borderRadius: '4px', objectFit: 'cover' }} />
-                                  )}
-                                  <span style={{ fontWeight: 600, color: '#1e293b' }}>
-                                    {item.name}
-                                  </span>
-                                  <span style={{ color: '#64748b' }}>
-                                    x{item.quantity}
-                                  </span>
-                                </div>
-                              ))}
+                              {(order.items || []).slice(0, 2).map((item, idx) => {
+                                const itemImg = item.image && !item.image.includes('chair-promaster.webp')
+                                  ? item.image
+                                  : (productsList.find(p => p.id === item.id || p.sku === item.sku || p.name === item.name)?.image || 'https://images.unsplash.com/photo-1598550476439-6847785fcea6?auto=format&fit=crop&w=800&q=80');
+                                return (
+                                  <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <img 
+                                      src={itemImg} 
+                                      alt="" 
+                                      style={{ width: '22px', height: '22px', borderRadius: '4px', objectFit: 'cover' }} 
+                                      onError={(e) => {
+                                        const fallback = productsList.find(p => p.id === item.id || p.sku === item.sku || p.name === item.name);
+                                        if (fallback?.image && e.currentTarget.src !== fallback.image) {
+                                          e.currentTarget.src = fallback.image;
+                                        } else {
+                                          e.currentTarget.style.display = 'none';
+                                        }
+                                      }}
+                                    />
+                                    <span style={{ fontWeight: 600, color: '#1e293b' }}>
+                                      {item.name}
+                                    </span>
+                                    <span style={{ color: '#64748b' }}>
+                                      x{item.quantity}
+                                    </span>
+                                  </div>
+                                );
+                              })}
                               {(order.items || []).length > 2 && (
                                 <span style={{ fontSize: '0.72rem', color: '#2563eb', fontWeight: 600 }}>
                                   + อีก {order.items.length - 2} รายการ
@@ -1378,12 +1420,13 @@ export default function StoreOrdersAndProductsCMS() {
                                 <button
                                   type="button"
                                   className="btn-primary"
+                                  disabled={processingOrderNo === order.orderNo}
                                   onClick={() => handleApproveSlip(order.orderNo)}
                                   title="อนุมัติสลิป"
-                                  style={{ padding: '5px 8px', fontSize: '0.75rem', background: '#16a34a', borderColor: '#16a34a' }}
+                                  style={{ padding: '5px 8px', fontSize: '0.75rem', background: '#16a34a', borderColor: '#16a34a', opacity: processingOrderNo === order.orderNo ? 0.7 : 1 }}
                                 >
                                   <Check size={12} />
-                                  <span>อนุมัติ</span>
+                                  <span>{processingOrderNo === order.orderNo ? 'กำลังอนุมัติ...' : 'อนุมัติ'}</span>
                                 </button>
                               )}
 

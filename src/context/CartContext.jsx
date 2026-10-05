@@ -67,13 +67,28 @@ export function CartProvider({ children }) {
     }
   }, [savedOrders]);
 
+  // Status progression ranking (higher rank can NEVER be downgraded to a lower rank by stale poll)
+  const STATUS_RANK = {
+    order_received: 1,
+    verifying_payment: 2,
+    payment_issue: 2.5,
+    payment_verified: 3,
+    preparing_items: 4,
+    shipping: 5,
+    delivered: 6,
+    cancelled: 10
+  };
+
   // Sync orders with central server database (cross-device real-time sync with timestamp conflict resolution)
   const isSyncingRef = useRef(false);
   const syncOrdersWithServer = async () => {
     if (isSyncingRef.current) return;
     isSyncingRef.current = true;
     try {
-      const res = await fetch('/api/orders');
+      const res = await fetch(`/api/orders?_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+      });
       if (res.ok) {
         const data = await res.json();
         if (data.success && Array.isArray(data.orders)) {
@@ -93,7 +108,7 @@ export function CartProvider({ children }) {
               }
             });
 
-            // 2. Resolve conflict with local orders based on timestamp
+            // 2. Resolve conflict with local orders based on status progression and timestamp
             prevLocal.forEach(loc => {
               if (!loc.orderNo) return;
               const key = loc.orderNo.toLowerCase().trim();
@@ -110,11 +125,15 @@ export function CartProvider({ children }) {
                   body: JSON.stringify(loc)
                 }).catch(() => {});
               } else {
+                const locRank = STATUS_RANK[loc.status] || 0;
+                const srvRank = STATUS_RANK[srv.status] || 0;
+
                 const locTime = new Date(loc.updatedAt || loc.createdAt || 0).getTime();
                 const srvTime = new Date(srv.updatedAt || srv.createdAt || 0).getTime();
 
-                // If local status changed more recently than server, keep local & push to server
-                if (locTime > srvTime) {
+                // If local status is more advanced in lifecycle (e.g. payment_verified vs verifying_payment),
+                // or if ranks are equal and local was updated more recently, NEVER allow downgrade!
+                if (locRank > srvRank || (locRank === srvRank && locTime > srvTime)) {
                   map.set(key, loc);
                   fetch('/api/orders', {
                     method: 'POST',
@@ -128,6 +147,17 @@ export function CartProvider({ children }) {
             const merged = Array.from(map.values()).sort(
               (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
             );
+
+            // Avoid triggering React re-renders across the app if order data is identical
+            const isIdentical = prevLocal.length === merged.length && prevLocal.every((p, i) => {
+              const m = merged[i];
+              return m && p.orderNo === m.orderNo && p.status === m.status && p.updatedAt === m.updatedAt;
+            });
+
+            if (isIdentical) {
+              return prevLocal; // Keeps same object reference so React does NOT re-render consumers!
+            }
+
             savedOrdersRef.current = merged;
             try {
               localStorage.setItem('gspeed_saved_orders', JSON.stringify(merged));
@@ -423,9 +453,19 @@ export function CartProvider({ children }) {
       if (res.ok) {
         const data = await res.json();
         if (data.success && Array.isArray(data.orders)) {
-          setSavedOrders(data.orders);
-          savedOrdersRef.current = data.orders;
-          try { localStorage.setItem('gspeed_saved_orders', JSON.stringify(data.orders)); } catch (e) {}
+          setSavedOrders(prev => {
+            const list = data.orders.map(o => {
+              if ((o.orderNo || '').toLowerCase().trim() === cleanNo) {
+                const srvRank = STATUS_RANK[o.status] || 0;
+                const locRank = STATUS_RANK[updatedOrder.status] || 0;
+                return locRank >= srvRank ? updatedOrder : o;
+              }
+              return o;
+            });
+            savedOrdersRef.current = list;
+            try { localStorage.setItem('gspeed_saved_orders', JSON.stringify(list)); } catch (e) {}
+            return list;
+          });
         }
       }
     } catch (err) {

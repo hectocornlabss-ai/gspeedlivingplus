@@ -917,6 +917,9 @@ function saveStoredOrders(orders) {
 
 // GET /api/orders - Fetch all persisted orders across all devices
 app.get('/api/orders', (req, res) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
   const orders = getStoredOrders();
   const deletedOrderNos = getDeletedOrderNos();
   res.json({ success: true, orders, deletedOrderNos, totalCount: orders.length });

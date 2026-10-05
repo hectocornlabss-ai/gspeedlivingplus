@@ -652,9 +652,26 @@ https://gspeedarena.com/orders/${order.orderNo}
                       <tr key={idx}>
                         <td>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            {item.image && (
-                              <img src={item.image} alt={item.name} className="woo-item-thumb" />
-                            )}
+                            {(() => {
+                              const itemImg = item.image && !item.image.includes('chair-promaster.webp')
+                                ? item.image
+                                : (productsList.find(p => p.id === item.id || p.sku === item.sku || p.name === item.name)?.image || 'https://images.unsplash.com/photo-1598550476439-6847785fcea6?auto=format&fit=crop&w=800&q=80');
+                              return (
+                                <img 
+                                  src={itemImg} 
+                                  alt={item.name} 
+                                  className="woo-item-thumb" 
+                                  onError={(e) => {
+                                    const fallback = productsList.find(p => p.id === item.id || p.sku === item.sku || p.name === item.name);
+                                    if (fallback?.image && e.currentTarget.src !== fallback.image) {
+                                      e.currentTarget.src = fallback.image;
+                                    } else {
+                                      e.currentTarget.style.display = 'none';
+                                    }
+                                  }}
+                                />
+                              );
+                            })()}
                             <div>
                               <div className="woo-item-name">{item.name}</div>
                               <div className="woo-item-sku">SKU: {item.sku || '-'}</div>
