@@ -78,8 +78,8 @@ export default function AnnouncementTicker({ onNavigate = () => {} }) {
       onNavigate('/tournaments');
     } else if (target === 'activities' || target === '/activities') {
       onNavigate('/activities');
-    } else if (target === 'company' || target === '/company') {
-      onNavigate('/company');
+    } else if (target === 'company' || target === '/company' || target === 'about-us' || target === '/about-us') {
+      onNavigate('/about-us');
     } else if (target === 'arena' || target === '/') {
       onNavigate('/');
     } else {

@@ -764,13 +764,13 @@ export const DEFAULT_SITE_DATA = {
     badge: 'THE NEXT-GEN ESPORT & FRANCHISE HUB',
     title: 'ศูนย์รวมอีสปอร์ตครบวงจร & พื้นที่ประลองเกมมาตรฐานสากล',
     subtitle: 'สัมผัสประสบการณ์เกมมิ่งระดับเวิลด์คลาสด้วยเครื่องสเปกไฮเอนด์ RTX 40 Series จอ 360Hz และเวทีแข่งขันมาตรฐาน Pro Circuit พร้อมระบบคำนวณและจำลองผังร้านแฟรนไชส์อัจฉริยะ',
-    primaryCta: 'สำรวจกิจกรรม & ทัวร์นาเมนต์',
+    primaryCta: 'ดูภาพกิจกรรม',
     primaryCtaLink: '#activities',
     secondaryCta: 'ร้านค้า',
     btn1Text: 'สนใจจัดงาน',
     btn1Link: '',
     btn1Target: '_self',
-    btn2Text: 'สำรวจกิจกรรม & ทัวร์นาเมนต์',
+    btn2Text: 'ดูภาพกิจกรรม',
     btn2Link: '/activities',
     btn2Target: '_self',
     btn3Text: 'ทัวร์นาเมนต์',
@@ -866,6 +866,9 @@ export const DEFAULT_SITE_DATA = {
   organizerGames: DEFAULT_ORGANIZER_GAMES,
   founder: {
     ...INITIAL_FOUNDER,
+    ctaButtonText: 'ปรึกษาเรื่องการเปิดร้าน',
+    ctaButtonLink: '/franchise',
+    showCtaButton: true,
     bgColor: '#ffffff',
     titleColor: '#0f172a',
     textColor: '#475569'
@@ -1266,6 +1269,12 @@ export function SiteDataProvider({ children }) {
           if (!merged.hero.secondaryCta || merged.hero.secondaryCta.includes('จำลองผังร้าน') || merged.hero.secondaryCta.includes('ติดต่อเปิดร้าน') || merged.hero.secondaryCta.includes('เปิดร้าน')) {
             merged.hero.secondaryCta = 'ร้านค้า';
           }
+          if (!merged.hero.btn2Text || merged.hero.btn2Text === 'สำรวจกิจกรรม & ทัวร์นาเมนต์' || merged.hero.btn2Text.includes('ทัวร์นาเมนต์') || merged.hero.btn2Text === 'ดูกิจกรรม') {
+            merged.hero.btn2Text = 'ดูภาพกิจกรรม';
+          }
+          if (!merged.hero.primaryCta || merged.hero.primaryCta === 'สำรวจกิจกรรม & ทัวร์นาเมนต์' || merged.hero.primaryCta.includes('ทัวร์นาเมนต์') || merged.hero.primaryCta === 'ดูกิจกรรม') {
+            merged.hero.primaryCta = 'ดูภาพกิจกรรม';
+          }
           if (!merged.hero.btn4Text || merged.hero.btn4Text.includes('ติดต่อเปิดร้าน') || merged.hero.btn4Text.includes('จำลองผังร้าน') || merged.hero.btn4Text.includes('เปิดร้าน')) {
             merged.hero.btn4Text = 'ร้านค้า';
           }
@@ -1296,18 +1305,30 @@ export function SiteDataProvider({ children }) {
           merged.founder = {
             ...INITIAL_FOUNDER,
             ...merged.founder,
+            ctaButtonText: merged.founder.ctaButtonText || INITIAL_FOUNDER.ctaButtonText || 'ปรึกษาเรื่องการเปิดร้าน',
+            ctaButtonLink: merged.founder.ctaButtonLink || INITIAL_FOUNDER.ctaButtonLink || '/franchise',
+            showCtaButton: merged.founder.showCtaButton !== undefined ? merged.founder.showCtaButton : true,
             hero: { ...INITIAL_FOUNDER.hero, ...(merged.founder.hero || {}) },
             philosophies: Array.isArray(merged.founder.philosophies) && merged.founder.philosophies.length > 0
               ? merged.founder.philosophies
               : INITIAL_FOUNDER.philosophies,
             standards: { ...INITIAL_FOUNDER.standards, ...(merged.founder.standards || {}) },
             franchiseCta: { ...INITIAL_FOUNDER.franchiseCta, ...(merged.founder.franchiseCta || {}) },
-            history: Array.isArray(merged.founder.history) && merged.founder.history.length > 0
+            history: (Array.isArray(merged.founder.history) && merged.founder.history.length > 0
               ? merged.founder.history
-              : INITIAL_FOUNDER.history,
-            stats: Array.isArray(merged.founder.stats) && merged.founder.stats.length > 0
+              : INITIAL_FOUNDER.history
+            ).map(h => ({
+              ...h,
+              event: (h.event || '').replace(/8\s*[\uFFFD?]+าขา/g, '8 สาขา').replace(/ค่ายเกมใ[\uFFFD?]+ญ่/g, 'ค่ายเกมใหญ่')
+            })),
+            stats: (Array.isArray(merged.founder.stats) && merged.founder.stats.length > 0
               ? merged.founder.stats
-              : INITIAL_FOUNDER.stats,
+              : INITIAL_FOUNDER.stats
+            ).map(s => ({
+              ...s,
+              label: (s.label || '').replace(/8\s*[\uFFFD?]+าขา/g, '8 สาขา'),
+              value: (s.value || '').replace(/8\s*[\uFFFD?]+าขา/g, '8 สาขา').replace(/8\s+าขา/g, '8 สาขา')
+            })),
             milestonesGallery: Array.isArray(merged.founder.milestonesGallery) && merged.founder.milestonesGallery.length > 0
               ? merged.founder.milestonesGallery
               : INITIAL_FOUNDER.milestonesGallery,

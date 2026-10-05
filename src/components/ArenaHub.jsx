@@ -4,7 +4,7 @@ import {
   ArrowRight, Compass, Layers, Calculator, CheckCircle2, ChevronRight, Play, Check, Flame, X, Send,
   Search, PhoneCall, Image as ImageIcon, Newspaper, ExternalLink, Filter,
   Gamepad2, Gift, LayoutGrid, Award, Camera, Sparkles, Target, ChevronLeft, Maximize2, Crown, MapPin, Eye, Clock, Globe, Plus,
-  Share2, Copy, Link as LinkIcon, ShoppingBag, Star, ShoppingCart
+  Share2, Copy, Link as LinkIcon, ShoppingBag, Star, ShoppingCart, CalendarPlus
 } from 'lucide-react';
 import { 
   VENUE_ZONES, TOURNAMENTS, GALLERY_ACTIVITIES, 
@@ -70,7 +70,9 @@ export default function ArenaHub({
     title: isThai ? (rawHeroData.title || 'GLP ESPORT STADIUM MEETING\nศูนย์รวมกิจกรรม & ทัวร์นาเมนต์ระดับประเทศ') : t('hero.title'),
     subtitle: isThai ? (rawHeroData.subtitle || 'สมรภูมิประลองเกมอันดับ 1 ของเกมเมอร์ชาวไทย เวทีแข่งขันมาตรฐานสากล รองรับทัวร์นาเมนต์ LAN ทุกเกม พร้อมโซนซ้อมสตรีมเมอร์ และบริการจัดกิจกรรมสำหรับค่ายเกมชั้นนำ') : t('hero.subtitle'),
     btn1Text: isThai ? (rawHeroData.btn1Text || 'สนใจจัดงาน') : t('hero.btn1'),
-    btn2Text: isThai ? (rawHeroData.btn2Text || 'ดูกิจกรรม') : t('hero.btn2'),
+    btn2Text: isThai 
+      ? ((rawHeroData.btn2Text && rawHeroData.btn2Text !== 'สำรวจกิจกรรม & ทัวร์นาเมนต์' && !rawHeroData.btn2Text.includes('ทัวร์นาเมนต์') && rawHeroData.btn2Text !== 'ดูกิจกรรม') ? rawHeroData.btn2Text : 'ดูภาพกิจกรรม') 
+      : t('hero.btn2'),
     btn3Text: isThai ? (rawHeroData.btn3Text || 'ทัวร์นาเมนต์') : t('hero.btn3'),
     btn4Text: isThai 
       ? ((rawHeroData.btn4Text && !rawHeroData.btn4Text.includes('เปิดร้าน') && !rawHeroData.btn4Text.includes('ติดต่อ')) ? rawHeroData.btn4Text : 'ร้านค้า') 
@@ -513,7 +515,7 @@ export default function ArenaHub({
                       boxShadow: '0 8px 24px rgba(2, 132, 199, 0.35)'
                     }}
                   >
-                    <Trophy size={18} />
+                    <CalendarPlus size={18} />
                     <span>{language === 'th' ? (heroData.btn1Text || t('hero.btn1')) : t('hero.btn1')}</span>
                   </button>
 

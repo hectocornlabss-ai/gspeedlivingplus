@@ -2065,7 +2065,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
               <span>จัดการโลโก้พันธมิตร & สไลเดอร์แบรนด์ (Official Partner Logos)</span>
             </div>
             <p style={{ margin: '4px 0 0 0', fontSize: '0.86rem', color: '#64748b' }}>
-              แสดงผลแบบมินิมอลโมโนโครมสีดำ (Monochrome Black) ไร้พื้นหลังการ์ด พร้อมชื่อแบรนด์สีดำตามแบบสากล บนหน้าเกี่ยวกับเรา (/company)
+              แสดงผลแบบมินิมอลโมโนโครมสีดำ (Monochrome Black) ไร้พื้นหลังการ์ด พร้อมชื่อแบรนด์สีดำตามแบบสากล บนหน้าเกี่ยวกับเรา (/about-us)
             </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -2074,7 +2074,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
             </span>
             <button
               type="button"
-              onClick={() => window.open('/company', '_blank')}
+              onClick={() => window.open('/about-us', '_blank')}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -2090,7 +2090,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
               }}
             >
               <ExternalLink size={14} />
-              <span>ดูหน้าจริง (/company)</span>
+              <span>ดูหน้าจริง (/about-us)</span>
             </button>
           </div>
         </div>
@@ -6467,7 +6467,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                     { id: 'zones', label: '5. โซนบรรยากาศร้าน' },
                     { id: 'franchise-cta', label: '6. แบนเนอร์แฟรนไชส์' },
                     { id: 'news-sec', label: '7. บทความ & ข่าวสาร' },
-                    { id: 'founder', label: '8. พันธมิตร & องค์กร (/company)' },
+                    { id: 'founder', label: '8. พันธมิตร & องค์กร (/about-us)' },
                     { id: 'seo', label: '9. Global SEO & โซเชียล' },
                   ].map(tab => (
                     <button
@@ -6663,8 +6663,8 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                           <label style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 600, marginBottom: '4px', display: 'block' }}>ข้อความบนปุ่ม:</label>
                           <input 
                             type="text" className="form-input"
-                            placeholder="สำรวจกิจกรรม & ทัวร์นาเมนต์"
-                            value={siteData.hero?.btn2Text !== undefined ? siteData.hero.btn2Text : (siteData.hero?.primaryCta || 'สำรวจกิจกรรม & ทัวร์นาเมนต์')}
+                            placeholder="ดูภาพกิจกรรม"
+                            value={siteData.hero?.btn2Text !== undefined ? siteData.hero.btn2Text : (siteData.hero?.primaryCta || 'ดูภาพกิจกรรม')}
                             onChange={e => updateHero({ btn2Text: e.target.value, primaryCta: e.target.value })}
                           />
                         </div>
@@ -8073,14 +8073,14 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
               )}
 
               {/* -------------------------------------------------------------
-                  SUBTAB 8: COMPANY PROFILE & ALL SECTIONS (/company)
+                  SUBTAB 8: COMPANY PROFILE & ALL SECTIONS (/about-us)
                   ------------------------------------------------------------- */}
               {activeSectionSubTab === 'founder' && (
                 <div className="admin-subcard glass-panel">
                   <div className="subcard-title" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <Users size={18} className="text-blue" />
-                      <strong>8. หน้าเกี่ยวกับเราและประวัติองค์กร (/company ทุก Section)</strong>
+                      <strong>8. หน้าเกี่ยวกับเราและประวัติองค์กร (/about-us ทุก Section)</strong>
                     </div>
                     <span style={{ fontSize: '0.78rem', padding: '3px 10px', background: '#eff6ff', color: '#1d4ed8', borderRadius: '999px', fontWeight: 700 }}>
                       6 ส่วนพร้อมระบบจัดการครบวงจร
@@ -8088,7 +8088,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                   </div>
 
                   <p style={{ margin: '0 0 16px 0', fontSize: '0.86rem', color: '#64748b' }}>
-                    จัดการเนื้อหา ข้อความ รูปภาพ โลโก้พาร์ทเนอร์ และสถิติของหน้าเกี่ยวกับเรา (/company) ได้ครบทุกหัวข้อ
+                    จัดการเนื้อหา ข้อความ รูปภาพ โลโก้พาร์ทเนอร์ และสถิติของหน้าเกี่ยวกับเรา (/about-us) ได้ครบทุกหัวข้อ
                   </p>
 
                   {/* Section Selector Sub-Tabs */}
@@ -8135,7 +8135,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                   )}
 
                   {/* =========================================================
-                      SECTION 1: HERO HEADER (/company)
+                      SECTION 1: HERO HEADER (/about-us)
                       ========================================================= */}
                   {activeCompanySectionTab === 'hero' && (
                     <div style={{ animation: 'fadeIn 0.2s ease-in-out' }}>
@@ -8433,6 +8433,116 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                         previewWidth={120}
                         previewHeight={120}
                       />
+
+                      <div className="form-group" style={{ marginTop: '10px' }}>
+                        <label style={{ fontSize: '0.84rem', color: '#64748b' }}>หรือใส่ URL รูปภาพผู้บริหารโดยตรง (Direct Image URL)</label>
+                        <input 
+                          type="text" 
+                          className="form-input"
+                          placeholder="https://images.unsplash.com/..."
+                          value={siteData.founder?.image || ''}
+                          onChange={e => updateSectionConfig('founder', {
+                            ...siteData.founder,
+                            image: e.target.value
+                          })}
+                        />
+                      </div>
+
+                      {/* CEO Call-To-Action Button Editor (ปรึกษาเรื่องการเปิดร้าน) */}
+                      <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '12px', padding: '16px 18px', marginTop: '22px', marginBottom: '14px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <Sparkles size={18} style={{ color: '#059669' }} />
+                            <strong style={{ fontSize: '0.94rem', color: '#065f46' }}>ปุ่มปรึกษา/ติดต่อ ใต้ข้อมูล CEO (CTA Button)</strong>
+                          </div>
+                          <label style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.84rem', fontWeight: 700, color: '#047857' }}>
+                            <input 
+                              type="checkbox" 
+                              checked={siteData.founder?.showCtaButton !== false}
+                              onChange={e => updateSectionConfig('founder', {
+                                ...siteData.founder,
+                                showCtaButton: e.target.checked
+                              })}
+                            />
+                            <span>เปิดใช้งานปุ่มใต้ CEO</span>
+                          </label>
+                        </div>
+
+                        {siteData.founder?.showCtaButton !== false && (
+                          <>
+                            <div className="form-row-2">
+                              <div className="form-group">
+                                <label style={{ color: '#065f46', fontWeight: 600 }}>ข้อความบนปุ่ม (Button Text)</label>
+                                <input 
+                                  type="text" 
+                                  className="form-input"
+                                  placeholder="เช่น ปรึกษาเรื่องการเปิดร้าน"
+                                  value={siteData.founder?.ctaButtonText || 'ปรึกษาเรื่องการเปิดร้าน'}
+                                  onChange={e => updateSectionConfig('founder', {
+                                    ...siteData.founder,
+                                    ctaButtonText: e.target.value
+                                  })}
+                                />
+                              </div>
+                              <div className="form-group">
+                                <label style={{ color: '#065f46', fontWeight: 600 }}>ลิงก์ปลายทาง (Target Link / URL)</label>
+                                <input 
+                                  type="text" 
+                                  className="form-input"
+                                  placeholder="เช่น /franchise หรือ https://lin.ee/..."
+                                  value={siteData.founder?.ctaButtonLink || '/franchise'}
+                                  onChange={e => updateSectionConfig('founder', {
+                                    ...siteData.founder,
+                                    ctaButtonLink: e.target.value
+                                  })}
+                                />
+                              </div>
+                            </div>
+
+                            {/* Quick Presets for link */}
+                            <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap', marginTop: '6px', marginBottom: '14px' }}>
+                              <span style={{ fontSize: '0.78rem', color: '#047857', fontWeight: 600 }}>คีย์ลัดปลายทาง:</span>
+                              {[
+                                { label: '🏢 แฟรนไชส์ (/franchise)', url: '/franchise' },
+                                { label: '🛍️ สโตร์สินค้า (/shop)', url: '/shop' },
+                                { label: '📍 ติดต่อเรา (/contact)', url: '/contact' },
+                                { label: '💬 LINE Official (@gspeed)', url: 'https://line.me/R/ti/p/@gspeed' }
+                              ].map((preset, pIdx) => (
+                                <button
+                                  key={pIdx}
+                                  type="button"
+                                  onClick={() => updateSectionConfig('founder', {
+                                    ...siteData.founder,
+                                    ctaButtonLink: preset.url
+                                  })}
+                                  style={{
+                                    fontSize: '0.74rem',
+                                    padding: '3px 8px',
+                                    borderRadius: '6px',
+                                    border: '1px solid #86efac',
+                                    background: siteData.founder?.ctaButtonLink === preset.url ? '#059669' : '#ffffff',
+                                    color: siteData.founder?.ctaButtonLink === preset.url ? '#ffffff' : '#047857',
+                                    cursor: 'pointer',
+                                    fontWeight: 600
+                                  }}
+                                >
+                                  {preset.label}
+                                </button>
+                              ))}
+                            </div>
+
+                            {/* Button Live Preview */}
+                            <div style={{ padding: '12px 16px', background: '#ffffff', borderRadius: '10px', border: '1px dashed #86efac', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
+                              <span style={{ fontSize: '0.8rem', color: '#64748b' }}>ตัวอย่างปุ่มที่จะแสดงบนหน้าเว็บ (/about-us):</span>
+                              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 18px', background: 'linear-gradient(135deg, #1d4ed8 0%, #0284c7 100%)', color: '#ffffff', borderRadius: '12px', fontSize: '0.88rem', fontWeight: 700, boxShadow: '0 4px 12px rgba(29, 78, 216, 0.28)' }}>
+                                <Sparkles size={15} style={{ color: '#fde047' }} />
+                                <span>{siteData.founder?.ctaButtonText || 'ปรึกษาเรื่องการเปิดร้าน'}</span>
+                                <ArrowRight size={15} />
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
                     </div>
                   )}
 
@@ -8682,7 +8792,7 @@ export default function AdminCMS({ onExitAdmin = () => {}, currentAdmin = null }
                         <div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
                             <Camera size={18} className="text-blue" />
-                            <span>จัดการคลังภาพแกลลอรีหน้าองค์กร (/company)</span>
+                            <span>จัดการคลังภาพแกลลอรีหน้าองค์กร (/about-us)</span>
                           </div>
                           <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#64748b' }}>
                             เพิ่ม แก้ไข ลบ รูปภาพที่จัดแสดงใน 2 หัวข้อหลักของหน้าเกี่ยวกับเรา (เส้นทางการเติบโต และมาตรฐานความปลอดภัย)

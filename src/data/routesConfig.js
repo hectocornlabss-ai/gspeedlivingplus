@@ -71,8 +71,8 @@ export const ROUTES_CONFIG = {
 
   // 5. ข้อมูลองค์กร & ผู้บริหาร (Company & Leadership Profile)
   company: {
-    path: '/company',
-    aliasPaths: ['/about', '/about-us'],
+    path: '/about-us',
+    aliasPaths: ['/company', '/about'],
     name: 'เกี่ยวกับเรา & ผู้บริหาร',
     sectionTitle: 'วิสัยทัศน์ผู้นำกีฬาอีสปอร์ต & มาตรฐานสากลแห่งแรกในไทย',
     badge: 'ABOUT & LEADERSHIP',
@@ -82,7 +82,7 @@ export const ROUTES_CONFIG = {
     ogImage: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200&q=80',
     breadcrumbs: [
       { label: 'หน้าหลัก', path: '/' },
-      { label: 'เกี่ยวกับองค์กร & ผู้บริหาร', path: '/company' }
+      { label: 'เกี่ยวกับองค์กร & ผู้บริหาร', path: '/about-us' }
     ]
   },
 
@@ -288,8 +288,8 @@ export function getRouteMetadata(pathname = '/', extraData = {}) {
   if (cleanPath === '/franchise' || cleanPath === '/planner' || cleanPath === '/3d-studio' || cleanPath === '/shop' || cleanPath === '/products' || cleanPath === '/equipment') {
     return { ...ROUTES_CONFIG.franchise, type: 'franchise', canonical: `${SITE_BASE_URL}/shop` };
   }
-  if (cleanPath === '/company' || cleanPath === '/about' || cleanPath === '/about-us') {
-    return { ...ROUTES_CONFIG.company, type: 'company', canonical: `${SITE_BASE_URL}/company` };
+  if (cleanPath === '/about-us' || cleanPath === '/company' || cleanPath === '/about') {
+    return { ...ROUTES_CONFIG.company, type: 'company', canonical: `${SITE_BASE_URL}/about-us` };
   }
   if (cleanPath === '/events' || cleanPath === '/tournaments') {
     return { ...ROUTES_CONFIG.events, type: 'events', canonical: `${SITE_BASE_URL}/events` };

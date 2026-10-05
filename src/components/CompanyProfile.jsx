@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   Users, Award, Cpu, Zap, Armchair, Monitor, 
   Wifi, ShieldCheck, CheckCircle2, TrendingUp, Mail, Phone, MapPin, Quote, Calculator, ArrowRight,
-  Camera, ZoomIn, ChevronLeft, ChevronRight, X, Layers, Building2, Target
+  Camera, ZoomIn, ChevronLeft, ChevronRight, X, Layers, Building2, Target, Sparkles, MessageSquareQuote
 } from 'lucide-react';
 import { FOUNDER_INFO } from '../data/mockData';
 import { useSiteData } from '../context/SiteDataContext';
@@ -82,8 +82,23 @@ export default function CompanyProfile({ onNavigateFranchise }) {
       const match = raw.match(/^(\d+\+?\s*(?:สาขา|แห่ง)?)/);
       return match ? match[1] : '8 สาขา';
     }
-    return raw;
+    return raw.replace(/8\s*[\uFFFD?]+าขา/g, '8 สาขา').replace(/8\s+าขา/g, '8 สาขา');
   })();
+
+  const cleanEventText = (val) => {
+    if (!val) return '';
+    return String(val)
+      .replace(/8\s*[\uFFFD?]+าขา/g, '8 สาขา')
+      .replace(/8\s+าขา/g, '8 สาขา')
+      .replace(/ค่ายเกมใ[\uFFFD?]+ญ่/g, 'ค่ายเกมใหญ่');
+  };
+
+  const cleanStatText = (val) => {
+    if (!val) return '';
+    return String(val)
+      .replace(/8\s*[\uFFFD?]+าขา/g, '8 สาขา')
+      .replace(/8\s+าขา/g, '8 สาขา');
+  };
 
   // Gallery datasets with fallback to mock data
   const milestonesList = (Array.isArray(founder.milestonesGallery) && founder.milestonesGallery.length > 0)
@@ -258,6 +273,31 @@ export default function CompanyProfile({ onNavigateFranchise }) {
                     <span className="m-lbl">{t('companyPage.branchesLabel')}</span>
                   </div>
                 </div>
+
+                {/* Button Under CEO Info (ปรึกษาเรื่องการเปิดร้าน) */}
+                {founder.showCtaButton !== false && (
+                  <div className="founder-consult-cta-wrap">
+                    <a
+                      href={founder.ctaButtonLink || '/franchise'}
+                      onClick={(e) => {
+                        const link = founder.ctaButtonLink || '/franchise';
+                        if (!link.startsWith('http://') && !link.startsWith('https://')) {
+                          e.preventDefault();
+                          if (onNavigateFranchise) onNavigateFranchise(link);
+                          else window.location.href = link;
+                        }
+                      }}
+                      target={isSafeExternalUrl(founder.ctaButtonLink) ? '_blank' : '_self'}
+                      rel={isSafeExternalUrl(founder.ctaButtonLink) ? 'noopener noreferrer' : undefined}
+                      className="btn-founder-consult-cta"
+                      id="btn-ceo-consult"
+                    >
+                      <Sparkles size={18} className="cta-icon-sparkle" />
+                      <span>{language === 'th' ? (founder.ctaButtonText || 'ปรึกษาเรื่องการเปิดร้าน') : translateDynamic(founder.ctaButtonText || 'ปรึกษาเรื่องการเปิดร้าน', language)}</span>
+                      <ArrowRight size={17} className="cta-icon-arrow" />
+                    </a>
+                  </div>
+                )}
               </div>
 
               {/* Founder Bio & Vision */}
@@ -371,7 +411,7 @@ export default function CompanyProfile({ onNavigateFranchise }) {
               <div key={idx} className="journey-card glass-panel">
                 <div className="journey-year">{translateDynamic(h.year, language)}</div>
                 <div className="journey-line"></div>
-                <p className="journey-event">{translateDynamic(h.event, language)}</p>
+                <p className="journey-event">{translateDynamic(cleanEventText(h.event), language)}</p>
               </div>
             ))}
           </div>
@@ -381,8 +421,8 @@ export default function CompanyProfile({ onNavigateFranchise }) {
             <div className="stats-grid">
               {(founder.stats || FOUNDER_INFO.stats).map((s, idx) => (
                 <div key={idx} className="stat-box">
-                  <div className="stat-value text-blue">{translateDynamic(s.value, language)}</div>
-                  <div className="stat-label">{translateDynamic(s.label, language)}</div>
+                  <div className="stat-value text-blue">{translateDynamic(cleanStatText(s.value), language)}</div>
+                  <div className="stat-label">{translateDynamic(cleanStatText(s.label), language)}</div>
                 </div>
               ))}
             </div>

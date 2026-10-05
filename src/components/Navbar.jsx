@@ -61,7 +61,7 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
     { id: 'nav-arena', label: t('nav.home'), target: 'arena', cleanPath: '/', visible: true },
     { id: 'nav-tournaments', label: t('nav.tournaments'), target: 'tournaments', cleanPath: '/tournaments', visible: true },
     { id: 'nav-activities', label: t('nav.activities'), target: 'activities', cleanPath: '/activities', visible: true },
-    { id: 'nav-company', label: t('nav.company'), target: 'company', cleanPath: '/company', visible: true },
+    { id: 'nav-company', label: t('nav.company'), target: 'company', cleanPath: '/about-us', visible: true },
     { id: 'nav-contact', label: t('nav.contact'), target: 'contact', cleanPath: '/contact', visible: true }
   ];
 
@@ -71,7 +71,7 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
         .map(item => {
           let cleanPath = '/';
           const targetStr = (item.target || '').toLowerCase();
-          if (targetStr === 'company' || targetStr === 'about') cleanPath = '/company';
+          if (targetStr === 'company' || targetStr === 'about' || targetStr === 'about-us') cleanPath = '/about-us';
           else if (targetStr === 'events' || targetStr === 'tournaments' || targetStr.includes('tournament')) cleanPath = '/tournaments';
           else if (targetStr === 'activities' || targetStr === 'gallery' || targetStr.includes('activit')) cleanPath = '/activities';
           else if (targetStr === 'contact' || targetStr.includes('contact') || targetStr === 'location' || targetStr === 'map') cleanPath = '/contact';
@@ -104,7 +104,7 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
       else if (t === 'events' || t === 'tournaments') destPath = '/tournaments';
       else if (t === 'activities' || t === 'gallery') destPath = '/activities';
       else if (t === 'franchise' || t === 'planner' || t === 'shop' || t === 'products' || t === 'equipment' || t === 'store') destPath = '/shop';
-      else if (t === 'company' || t === 'about') destPath = '/company';
+      else if (t === 'company' || t === 'about' || t === 'about-us') destPath = '/about-us';
       else if (t === 'contact' || t === 'location' || t === 'map') destPath = '/contact';
       else if (t === 'admin' || t === 'cms') destPath = '/admin';
       else destPath = `/${t}`;
@@ -117,7 +117,7 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
     } else {
       if (setActiveTab) {
         if (destPath === '/shop' || destPath === '/franchise') setActiveTab('franchise');
-        else if (destPath === '/company') setActiveTab('company');
+        else if (destPath === '/about-us' || destPath === '/company') setActiveTab('company');
         else if (destPath === '/tournaments' || destPath === '/events') setActiveTab('tournaments');
         else if (destPath === '/activities' || destPath === '/gallery') setActiveTab('activities');
         else if (destPath === '/contact' || destPath === '/contact-us') setActiveTab('contact');
@@ -179,6 +179,7 @@ export default function Navbar({ activeTab, setActiveTab, currentPath = '/', onN
                 (item.cleanPath && item.cleanPath !== '/' && (
                   currentPath === item.cleanPath ||
                   currentPath.startsWith(item.cleanPath + '/') ||
+                  (item.cleanPath === '/about-us' && (currentPath === '/company' || currentPath === '/about')) ||
                   (item.cleanPath === '/tournaments' && (currentPath === '/events' || currentPath.startsWith('/events/'))) ||
                   (item.cleanPath === '/activities' && (currentPath === '/gallery' || currentPath.startsWith('/gallery/') || currentPath.startsWith('/news/') || currentPath.startsWith('/article/')))
                 ));

@@ -1165,11 +1165,11 @@ export const BUILT_IN_DICTIONARY = {
     en: "Crowded cheerleaders cheered at the thrilling Clutch 1v3.",
     zh: "拥挤的啦啦队员在惊心动魄的离合器1V3中欢呼雀跃。"
   },
-  "ทางเดินเปิดตัวน����กกีฬา (Player Tunnel) พร้อมไฟสปอตไลต์อลังการ": {
+  "ทางเดินเปิดตัวนักกีฬา (Player Tunnel) พร้อมไฟสปอตไลต์อลังการ": {
     en: "Player Tunnel launch corridor with spectacular spotlights",
     zh: "带有壮观聚光灯的玩家隧道发射走廊"
   },
-  "โต๊ะนักพากย์ (Caster Desk) พร้อมจอวิเคราะห์สถิติสดแบบเร��������ไทม์": {
+  "โต๊ะนักพากย์ (Caster Desk) พร้อมจอวิเคราะห์สถิติสดแบบเรียลไทม์": {
     en: "Caster Desk with live statistical analysis screen",
     zh: "带实时统计分析屏幕的脚轮桌"
   },
@@ -1189,7 +1189,7 @@ export const BUILT_IN_DICTIONARY = {
     en: "The Broadcast and Switcher teams control the Multi-View live broadcast.",
     zh: "广播和切换器团队控制多视图直播。"
   },
-  "เมาส์เกมมิ่งน้ำหนักเบา���ิเศษ 49g สำหรับการเล็งเป้าหมายที่เฉียบคม": {
+  "เมาส์เกมมิ่งน้ำหนักเบาพิเศษ 49g สำหรับการเล็งเป้าหมายที่เฉียบคม": {
     en: "Lightweight gaming mouse 49g for sharp aiming",
     zh: "轻巧的游戏鼠标49克，瞄准清晰"
   },
@@ -1589,7 +1589,7 @@ export const BUILT_IN_DICTIONARY = {
     en: "450 + people (game fans and team streamers)",
     zh: "450多人（游戏粉丝和团队主播）"
   },
-  "บรรยากาศในงานคึกคักตั้งแต่ช่วงเช้าด้วยกิจกรรม Fan Meeting พบปะคอสเพลย์เยอร์ในชุดตัวละครแอร์ดรอปสุดเท่ พร้อมจุดถ่าย���ูปโฟโต้บูธสามมิติ และแจกไอเทมโค้ดลิขสิทธิ์แท้ให้กับผู้เข้าร่วมงานทุกคน": {
+  "บรรยากาศในงานคึกคักตั้งแต่ช่วงเช้าด้วยกิจกรรม Fan Meeting พบปะคอสเพลย์เยอร์ในชุดตัวละครแอร์ดรอปสุดเท่ พร้อมจุดถ่ายรูปโฟโต้บูธสามมิติ และแจกไอเทมโค้ดลิขสิทธิ์แท้ให้กับผู้เข้าร่วมงานทุกคน": {
     en: "The atmosphere at the event is lively from the morning with Fan Meeting activities, cosplayers in cool airdrop character costumes with three-dimensional photobooth photo spots, and give out authentic code items to all attendees.",
     zh: "活动的气氛从早上开始就充满活力，有粉丝会活动，穿着凉爽的空投人物服装和三维照相亭拍照点的角色扮演者，并向所有与会者分发正宗的代码项目。"
   },
@@ -1597,7 +1597,7 @@ export const BUILT_IN_DICTIONARY = {
     en: "The Offline Finals went on excitedly, using the professional Broadcast Observer system with the famous caster to be dubbed live in the shop's studio bar. The winner was entitled to represent Thailand on the international stage.",
     zh: "线下总决赛兴奋地继续进行，使用专业的广播观察者系统与著名的脚轮在商店的工作室酒吧现场配音。获胜者有权在国际舞台上代表泰国。"
   },
-  "G-Speed เป็นพาร์ตเนอ���์ร้านเกมที่มีความพร้อมด้านระบบและสถานที่สูงมาก สามารถรองรับการบรอดแคสต์ระดับออฟฟิเชียลได้อย่างไร้ที่ติ": {
+  "G-Speed เป็นพาร์ตเนอร์ร้านเกมที่มีความพร้อมด้านระบบและสถานที่สูงมาก สามารถรองรับการบรอดแคสต์ระดับออฟฟิเชียลได้อย่างไร้ที่ติ": {
     en: "G-Speed is a game shop partner with very high system and location availability that can support office-level broadcasting flawlessly.",
     zh: "G-Speed是一家游戏商店合作伙伴，拥有非常高的系统和位置可用性，可以完美支持办公室级广播。"
   },
@@ -1609,7 +1609,7 @@ export const BUILT_IN_DICTIONARY = {
     en: "The main stage and the finals of the ticket to Asia",
     zh: "亚洲之旅门票的主舞台和决赛"
   },
-  "G-Speed Esport Arena (โซนคาเฟ่และเวท��กลาง)": {
+  "G-Speed Esport Arena (โซนคาเฟ่และเวทีกลาง)": {
     en: "G-Speed Esport Arena (Cafe & Magic Zone)",
     zh: "G-Speed电子竞技场（咖啡馆和魔术区）"
   },
@@ -1881,7 +1881,7 @@ export const BUILT_IN_DICTIONARY = {
     en: "Paired with a new generation Intel Core i7/i9 CPU, high-speed 32GB DDR5 6000MHz RAM, and a BenQ ZOWIE 360Hz Fast-IPS e-sports screen that delivers a crisp 0.5ms response every move.",
     zh: "搭配新一代英特尔酷睿i7/i9处理器、高速32GB DDR5 6000MHz RAM和明基ZOWIE 360Hz Fast-IPS电子竞技屏幕，每次移动都能提供清晰的0.5毫秒响应。"
   },
-  "เพื่อตอกย้ำความเป็นผู้นำศูนย์กีฬาอีสปอร์ตระด��บเวิลด์คลาส G-Speed Esport Arena ทุ่มงบประมาณกว่า 5 ล้านบาท ปรับปรุงเครื่องคอมพิวเตอร์ทุกล็อตให้เป็นขุมพลังล่าสุด NVIDIA GeForce RTX 40 Series": {
+  "เพื่อตอกย้ำความเป็นผู้นำศูนย์กีฬาอีสปอร์ตระดับเวิลด์คลาส G-Speed Esport Arena ทุ่มงบประมาณกว่า 5 ล้านบาท ปรับปรุงเครื่องคอมพิวเตอร์ทุกล็อตให้เป็นขุมพลังล่าสุด NVIDIA GeForce RTX 40 Series": {
     en: "To reinforce its leadership, Esports Center World Class G-Speed Esport Arena has invested more than 5 million baht, improving all PC lots to be the latest powerhouse, the NVIDIA GeForce RTX 40 Series.",
     zh: "为了巩固其领导地位， Esports Center World Class G-Speed Esport Arena已投资超过500万泰铢，改进了所有PC批次，使其成为NVIDIA GeForce RTX 40系列的最新动力源泉。"
   },
@@ -1905,7 +1905,7 @@ export const BUILT_IN_DICTIONARY = {
     en: "The Diskless Server system has also been upgraded to NVMe Gen5 Multi-tier Caching in conjunction with the Dual 10Gbps Fiber Optic network, enabling 300% faster game loading and power-on times.",
     zh: "无盘服务器系统还与双10Gbps光纤网络一起升级到NVMe Gen5多层缓存，使游戏加载和开机时间加快300%。"
   },
-  "มาตรฐานความถูกต้อง โปร่งใ�� และปลอดภัย": {
+  "มาตรฐานความถูกต้อง โปร่งใส และปลอดภัย": {
     en: "Standards for accuracy, transparency and safety",
     zh: "准确性、透明度和安全性标准"
   },
@@ -1949,7 +1949,7 @@ export const BUILT_IN_DICTIONARY = {
     en: "Become a Franchise Partner",
     zh: "成为特许经营合作伙伴"
   },
-  "ขยายธุรกิจสู่ Esport Arena เต็มรูปแบบ รองรับการจัดแข่งขันระดับประเทศร่วมกับค่ายเกมใ����ญ่": {
+  "ขยายธุรกิจสู่ Esport Arena เต็มรูปแบบ รองรับการจัดแข่งขันระดับประเทศร่วมกับค่ายเกมใหญ่": {
     en: "Expand into a full-fledged Esport Arena, supporting national tournaments in conjunction with gaming camps.",
     zh: "扩展成为一个成熟的电子竞技场，与游戏营地一起支持全国锦标赛。"
   },
@@ -1957,7 +1957,7 @@ export const BUILT_IN_DICTIONARY = {
     en: "Launch Ceremony of GLP Flagship Arena Ramkhamhaeng 53",
     zh: "GLP旗舰竞技场Ramkhamhaeng 53启动仪式"
   },
-  "8 ���าขา": {
+  "8 สาขา": {
     en: "8. Legs",
     zh: "8.腿"
   },

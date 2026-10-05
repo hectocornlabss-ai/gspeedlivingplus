@@ -23,7 +23,7 @@ const LINK_PRESETS = [
   { label: 'ตารางทัวร์นาเมนต์', target: '/tournaments', defaultBtn: 'ดูตารางแข่ง' },
   { label: 'จำลองผังร้าน 3D', target: '/franchise', defaultBtn: 'ลองจัดผัง 3D' },
   { label: 'กิจกรรม & บทความ', target: '/activities', defaultBtn: 'อ่านข่าวทั้งหมด' },
-  { label: 'ข้อมูลบริษัท GLP', target: '/company', defaultBtn: 'ดูข้อมูลบริษัท' },
+  { label: 'ข้อมูลบริษัท GLP', target: '/about-us', defaultBtn: 'ดูข้อมูลบริษัท' },
   { label: 'โซนงานแข่ง (#activities)', target: '#activities', defaultBtn: 'ดูภาพงานแข่ง' },
   { label: 'หน้าแรก (/)', target: '/', defaultBtn: 'กลับหน้าแรก' }
 ];

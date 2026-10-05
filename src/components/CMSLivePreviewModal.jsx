@@ -4,7 +4,7 @@ import {
   FileText, Layers, ShieldCheck, Palette, Globe, ExternalLink, ArrowRight, 
   Compass, Sparkles, MapPin, Calendar, Clock, Tag, Award, Quote, TrendingUp,
   Share2, Check, Shield, Coffee, ChevronRight, Zap, Info, RefreshCw,
-  Camera, Menu
+  Camera, Menu, CalendarPlus
 } from 'lucide-react';
 import SingleActivityView from './SingleActivityView';
 
@@ -239,12 +239,12 @@ export default function CMSLivePreviewModal({
 
                     <div style={{ display: 'grid', gridTemplateColumns: viewport === 'mobile' ? '1fr' : 'repeat(2, 1fr)', gap: '10px', maxWidth: '640px', margin: '0 auto' }}>
                       <button className="btn-primary" style={{ padding: '12px 18px', fontSize: '0.86rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                        <Trophy size={16} />
+                        <CalendarPlus size={16} />
                         <span>{siteData?.hero?.btn1Text || 'สนใจจัดงาน'}</span>
                       </button>
                       <button className="btn-secondary" style={{ padding: '12px 18px', fontSize: '0.86rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: isDarkHero ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.9)', color: isDarkHero ? '#fff' : '#1e293b', border: isDarkHero ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(203,213,225,0.9)' }}>
                         <Camera size={16} />
-                        <span>{siteData?.hero?.btn2Text || siteData?.hero?.primaryCta || 'ดูกิจกรรม'}</span>
+                        <span>{siteData?.hero?.btn2Text || siteData?.hero?.primaryCta || 'ดูภาพกิจกรรม'}</span>
                       </button>
                       <button className="btn-secondary" style={{ padding: '12px 18px', fontSize: '0.86rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: isDarkHero ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.9)', color: isDarkHero ? '#fff' : '#1e293b', border: isDarkHero ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(203,213,225,0.9)' }}>
                         <Trophy size={16} />

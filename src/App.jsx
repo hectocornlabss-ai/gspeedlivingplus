@@ -117,7 +117,7 @@ function normalizeLegacyHash() {
   } else if (hash.includes('franchise') || hash.includes('planner') || hash.includes('shop') || hash.includes('store')) {
     cleanPath = '/shop';
   } else if (hash.includes('company') || hash.includes('about')) {
-    cleanPath = '/company';
+    cleanPath = '/about-us';
   } else if (hash.includes('activity') || hash.includes('gallery') || hash.includes('news')) {
     const m = hash.match(/#(?:activity|activities|news)\/([^/?#]+)/i);
     cleanPath = m ? `/activities/${m[1]}` : '/activities';
@@ -144,6 +144,12 @@ function AppContent() {
     if (path === '/franchise' || path === '/planner') {
       path = '/shop';
       window.history.replaceState(null, '', '/shop');
+    }
+
+    // Normalize legacy /company or /about to /about-us
+    if (path === '/company' || path === '/about') {
+      path = '/about-us';
+      window.history.replaceState(null, '', '/about-us');
     }
 
     // 1. Admin route
@@ -176,7 +182,7 @@ function AppContent() {
       tab = 'checkout';
     } else if (path === '/franchise' || path === '/planner' || path === '/shop' || path === '/products' || path === '/equipment' || path.startsWith('/products/') || path.startsWith('/franchise/') || path.startsWith('/shop/')) {
       tab = 'franchise';
-    } else if (path === '/company' || path === '/about') {
+    } else if (path === '/about-us' || path === '/company' || path === '/about') {
       tab = 'company';
     } else if (path === '/events' || path === '/tournaments' || path.startsWith('/events/') || path.startsWith('/tournaments/')) {
       tab = 'tournaments';
