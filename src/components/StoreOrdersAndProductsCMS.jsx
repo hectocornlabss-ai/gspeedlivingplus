@@ -1413,6 +1413,20 @@ export default function StoreOrdersAndProductsCMS() {
                                 </button>
                               )}
 
+                              {/* Mark Delivered */}
+                              {order.status === 'shipping' && (
+                                <button
+                                  type="button"
+                                  className="btn-primary"
+                                  onClick={() => handleMarkDelivered(order.orderNo)}
+                                  title="เปลี่ยนสถานะเป็นจัดส่งสำเร็จและส่งอีเมลแจ้งลูกค้า"
+                                  style={{ padding: '5px 8px', fontSize: '0.75rem', background: '#059669', borderColor: '#059669' }}
+                                >
+                                  <ShieldCheck size={12} />
+                                  <span>จัดส่งสำเร็จ</span>
+                                </button>
+                              )}
+
                               {/* Print Shipping Delivery Note & Label (Duplicate) */}
                               <button
                                 type="button"

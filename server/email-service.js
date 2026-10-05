@@ -845,6 +845,105 @@ function pruneOldBackups(maxKeep = 10) {
   }
 }
 
+// ==============================================================================
+// 5. Persistent Orders Database Endpoints (Cross-Device Real-Time Sync)
+// ==============================================================================
+const ORDERS_FILE = path.join(DATA_DIR, 'orders.json');
+const SEED_ORDERS_FILE = path.join(__dirname, 'default-orders.json');
+
+function getStoredOrders() {
+  try {
+    if (!fs.existsSync(ORDERS_FILE) && fs.existsSync(SEED_ORDERS_FILE)) {
+      try { fs.copyFileSync(SEED_ORDERS_FILE, ORDERS_FILE); } catch (e) {}
+    }
+    if (fs.existsSync(ORDERS_FILE)) {
+      const content = fs.readFileSync(ORDERS_FILE, 'utf8');
+      return JSON.parse(content);
+    }
+  } catch (err) {
+    console.warn('[Orders] Read error:', err.message);
+  }
+  return [];
+}
+
+function saveStoredOrders(orders) {
+  try {
+    const tmp = `${ORDERS_FILE}.tmp.${Date.now()}`;
+    fs.writeFileSync(tmp, JSON.stringify(orders, null, 2), 'utf8');
+    try {
+      fs.renameSync(tmp, ORDERS_FILE);
+    } catch (rErr) {
+      fs.copyFileSync(tmp, ORDERS_FILE);
+      try { fs.unlinkSync(tmp); } catch (u) {}
+    }
+    return true;
+  } catch (err) {
+    console.warn('[Orders] Save error:', err.message);
+    try {
+      fs.writeFileSync(ORDERS_FILE, JSON.stringify(orders, null, 2), 'utf8');
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+}
+
+// GET /api/orders - Fetch all persisted orders across all devices
+app.get('/api/orders', (req, res) => {
+  const orders = getStoredOrders();
+  res.json({ success: true, orders, totalCount: orders.length });
+});
+
+// POST /api/orders - Save or update an order
+app.post('/api/orders', (req, res) => {
+  try {
+    const incoming = req.body?.order || req.body;
+    if (!incoming || !incoming.orderNo) {
+      return res.status(400).json({ success: false, error: 'Order data with orderNo is required' });
+    }
+
+    const currentOrders = getStoredOrders();
+    const existingIndex = currentOrders.findIndex(
+      o => o.orderNo && o.orderNo.toLowerCase() === incoming.orderNo.toLowerCase()
+    );
+
+    if (existingIndex > -1) {
+      currentOrders[existingIndex] = {
+        ...currentOrders[existingIndex],
+        ...incoming,
+        updatedAt: new Date().toISOString()
+      };
+    } else {
+      currentOrders.unshift({
+        ...incoming,
+        createdAt: incoming.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+    }
+
+    saveStoredOrders(currentOrders);
+    console.log(`[Orders] Saved/Updated order: ${incoming.orderNo} (Total: ${currentOrders.length})`);
+    return res.json({ success: true, orders: currentOrders });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// DELETE /api/orders/:orderNo - Delete an order
+app.delete('/api/orders/:orderNo', (req, res) => {
+  try {
+    const { orderNo } = req.params;
+    const currentOrders = getStoredOrders();
+    const filtered = currentOrders.filter(
+      o => o.orderNo && o.orderNo.toLowerCase() !== orderNo.toLowerCase()
+    );
+    saveStoredOrders(filtered);
+    return res.json({ success: true, orders: filtered });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // GET /api/site-data - Fetch current live persisted site data
 app.get('/api/site-data', (req, res) => {
   try {

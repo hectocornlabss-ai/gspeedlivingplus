@@ -1347,11 +1347,11 @@ export default function CheckoutPage({
                 {/* Header */}
                 <div className="track-header-row">
                   <div className="track-order-ident">
-                    <h2>คำสั่งซื้อเลขที่: <span style={{ color: '#2563eb' }}>{activeOrder.orderNo}</span></h2>
+                    <h2>คำสั่งซื้อเลขที่: <span className="track-order-no">{activeOrder.orderNo}</span></h2>
                     <p>สั่งซื้อเมื่อ: {new Date(activeOrder.createdAt).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })} น.</p>
                   </div>
 
-                  <div className="track-header-buttons" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <div className="track-header-buttons">
                     <button 
                       type="button" 
                       className="btn-quick-copy-num"
@@ -1396,70 +1396,72 @@ export default function CheckoutPage({
 
                 {/* 5-STEP HORIZONTAL VISUAL TIMELINE */}
                 {/* Stages: 1.รับคำสั่งซื้อ > 2.ตรวจสอบสลิป > 3.กำลังเตรียมของ > 4.กำลังจัดส่ง > 5.จัดส่งสำเร็จ */}
-                <div className="order-five-steps-timeline">
-                  <div className="timeline-connecting-line">
-                    <div 
-                      className="timeline-connecting-progress"
-                      style={{ 
-                        width: activeTimelineIndex === 0 ? '10%' :
-                               activeTimelineIndex === 1 ? '30%' :
-                               activeTimelineIndex === 2 ? '55%' :
-                               activeTimelineIndex === 3 ? '80%' : '100%' 
-                      }}
-                    />
-                  </div>
+                <div className="order-timeline-scroll-wrapper">
+                  <div className="order-five-steps-timeline">
+                    <div className="timeline-connecting-line">
+                      <div 
+                        className="timeline-connecting-progress"
+                        style={{ 
+                          width: activeTimelineIndex === 0 ? '10%' :
+                                 activeTimelineIndex === 1 ? '30%' :
+                                 activeTimelineIndex === 2 ? '55%' :
+                                 activeTimelineIndex === 3 ? '80%' : '100%' 
+                        }}
+                      />
+                    </div>
 
-                  {/* Node 1: รับคำสั่งซื้อ */}
-                  <div className={`timeline-step-node ${activeTimelineIndex > 0 ? 'done' : activeTimelineIndex === 0 ? 'active' : ''}`}>
-                    <div className="step-circle-icon">
-                      {activeTimelineIndex > 0 ? <Check size={20} /> : <FileCheck size={20} />}
+                    {/* Node 1: รับคำสั่งซื้อ */}
+                    <div className={`timeline-step-node ${activeTimelineIndex > 0 ? 'done' : activeTimelineIndex === 0 ? 'active' : ''}`}>
+                      <div className="step-circle-icon">
+                        {activeTimelineIndex > 0 ? <Check size={20} /> : <FileCheck size={20} />}
+                      </div>
+                      <div className="step-label-title">1. รับคำสั่งซื้อ</div>
+                      <div className="step-label-desc">บันทึกในระบบ</div>
                     </div>
-                    <div className="step-label-title">1. รับคำสั่งซื้อ</div>
-                    <div className="step-label-desc">บันทึกในระบบ</div>
-                  </div>
 
-                  {/* Node 2: ตรวจสอบสลิป */}
-                  <div className={`timeline-step-node ${
-                    currentOrderStatus === 'payment_issue' ? 'issue' :
-                    activeTimelineIndex > 1 ? 'done' : 
-                    activeTimelineIndex === 1 ? 'active' : ''
-                  }`}>
-                    <div className="step-circle-icon">
-                      {currentOrderStatus === 'payment_issue' ? <XCircle size={20} /> :
-                       activeTimelineIndex > 1 ? <Check size={20} /> : <Search size={20} />}
+                    {/* Node 2: ตรวจสอบสลิป */}
+                    <div className={`timeline-step-node ${
+                      currentOrderStatus === 'payment_issue' ? 'issue' :
+                      activeTimelineIndex > 1 ? 'done' : 
+                      activeTimelineIndex === 1 ? 'active' : ''
+                    }`}>
+                      <div className="step-circle-icon">
+                        {currentOrderStatus === 'payment_issue' ? <XCircle size={20} /> :
+                         activeTimelineIndex > 1 ? <Check size={20} /> : <Search size={20} />}
+                      </div>
+                      <div className="step-label-title">2. ตรวจสอบสลิป</div>
+                      <div className="step-label-desc">
+                        {currentOrderStatus === 'payment_issue' ? 'สลิปไม่ถูกต้อง' : 
+                         activeTimelineIndex > 1 ? 'ยอดเงินถูกต้อง' : 'ตรวจยอดเงิน'}
+                      </div>
                     </div>
-                    <div className="step-label-title">2. ตรวจสอบสลิป</div>
-                    <div className="step-label-desc">
-                      {currentOrderStatus === 'payment_issue' ? 'สลิปไม่ถูกต้อง' : 
-                       activeTimelineIndex > 1 ? 'ยอดเงินถูกต้อง' : 'ตรวจยอดเงิน'}
-                    </div>
-                  </div>
 
-                  {/* Node 3: กำลังเตรียมของ */}
-                  <div className={`timeline-step-node ${activeTimelineIndex > 2 ? 'done' : activeTimelineIndex === 2 ? 'active' : ''}`}>
-                    <div className="step-circle-icon">
-                      {activeTimelineIndex > 2 ? <Check size={20} /> : <PackageCheck size={20} />}
+                    {/* Node 3: กำลังเตรียมของ */}
+                    <div className={`timeline-step-node ${activeTimelineIndex > 2 ? 'done' : activeTimelineIndex === 2 ? 'active' : ''}`}>
+                      <div className="step-circle-icon">
+                        {activeTimelineIndex > 2 ? <Check size={20} /> : <PackageCheck size={20} />}
+                      </div>
+                      <div className="step-label-title">3. กำลังเตรียมของ</div>
+                      <div className="step-label-desc">จัดสินค้า & QC</div>
                     </div>
-                    <div className="step-label-title">3. กำลังเตรียมของ</div>
-                    <div className="step-label-desc">จัดสินค้า & QC</div>
-                  </div>
 
-                  {/* Node 4: กำลังจัดส่ง */}
-                  <div className={`timeline-step-node ${activeTimelineIndex > 3 ? 'done' : activeTimelineIndex === 3 ? 'active' : ''}`}>
-                    <div className="step-circle-icon">
-                      {activeTimelineIndex > 3 ? <Check size={20} /> : <Truck size={20} />}
+                    {/* Node 4: กำลังจัดส่ง */}
+                    <div className={`timeline-step-node ${activeTimelineIndex > 3 ? 'done' : activeTimelineIndex === 3 ? 'active' : ''}`}>
+                      <div className="step-circle-icon">
+                        {activeTimelineIndex > 3 ? <Check size={20} /> : <Truck size={20} />}
+                      </div>
+                      <div className="step-label-title">4. กำลังจัดส่ง</div>
+                      <div className="step-label-desc">ทีมนัดหมายส่ง/ติดตั้ง</div>
                     </div>
-                    <div className="step-label-title">4. กำลังจัดส่ง</div>
-                    <div className="step-label-desc">ทีมนัดหมายส่ง/ติดตั้ง</div>
-                  </div>
 
-                  {/* Node 5: จัดส่งสำเร็จ */}
-                  <div className={`timeline-step-node ${activeTimelineIndex === 4 ? 'done' : ''}`}>
-                    <div className="step-circle-icon">
-                      <CheckCheck size={20} />
+                    {/* Node 5: จัดส่งสำเร็จ */}
+                    <div className={`timeline-step-node ${activeTimelineIndex === 4 ? 'done' : ''}`}>
+                      <div className="step-circle-icon">
+                        <CheckCheck size={20} />
+                      </div>
+                      <div className="step-label-title">5. จัดส่งสำเร็จ</div>
+                      <div className="step-label-desc">ตรวจรับมอบงาน</div>
                     </div>
-                    <div className="step-label-title">5. จัดส่งสำเร็จ</div>
-                    <div className="step-label-desc">ตรวจรับมอบงาน</div>
                   </div>
                 </div>
 

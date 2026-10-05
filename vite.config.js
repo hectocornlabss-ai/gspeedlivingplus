@@ -247,6 +247,64 @@ const downloadServerPlugin = () => {
 
         next();
       });
+
+      // Persistent Local Orders Middleware for development
+      server.middlewares.use('/api/orders', (req, res, next) => {
+        const localDataDir = path.resolve(process.cwd(), 'server', 'data');
+        const ordersFile = path.join(localDataDir, 'orders.json');
+        const seedOrdersFile = path.resolve(process.cwd(), 'server', 'default-orders.json');
+
+        if (!fs.existsSync(localDataDir)) fs.mkdirSync(localDataDir, { recursive: true });
+        if (!fs.existsSync(ordersFile) && fs.existsSync(seedOrdersFile)) {
+          try { fs.copyFileSync(seedOrdersFile, ordersFile); } catch (e) {}
+        }
+
+        if (req.method === 'GET') {
+          try {
+            const content = fs.existsSync(ordersFile) ? fs.readFileSync(ordersFile, 'utf8') : '[]';
+            const orders = JSON.parse(content || '[]');
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ success: true, orders, totalCount: orders.length }));
+          } catch (e) {
+            res.statusCode = 500;
+            res.end(JSON.stringify({ success: false, error: e.message }));
+          }
+          return;
+        }
+
+        if (req.method === 'POST') {
+          let body = '';
+          req.on('data', chunk => { body += chunk; });
+          req.on('end', () => {
+            try {
+              const incoming = JSON.parse(body || '{}');
+              const item = incoming.order || incoming;
+              if (!item || !item.orderNo) {
+                res.statusCode = 400;
+                res.end(JSON.stringify({ success: false, error: 'orderNo is required' }));
+                return;
+              }
+              const content = fs.existsSync(ordersFile) ? fs.readFileSync(ordersFile, 'utf8') : '[]';
+              const orders = JSON.parse(content || '[]');
+              const idx = orders.findIndex(o => o.orderNo && o.orderNo.toLowerCase() === item.orderNo.toLowerCase());
+              if (idx > -1) {
+                orders[idx] = { ...orders[idx], ...item, updatedAt: new Date().toISOString() };
+              } else {
+                orders.unshift({ ...item, createdAt: item.createdAt || new Date().toISOString() });
+              }
+              fs.writeFileSync(ordersFile, JSON.stringify(orders, null, 2), 'utf8');
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({ success: true, orders }));
+            } catch (err) {
+              res.statusCode = 500;
+              res.end(JSON.stringify({ success: false, error: err.message }));
+            }
+          });
+          return;
+        }
+
+        next();
+      });
     }
   };
 };
@@ -267,6 +325,7 @@ export default defineConfig({
       ]
     },
     proxy: {
+      '/api/orders': 'http://localhost:3001',
       '/api/send-email': 'http://localhost:3001',
       '/api/test-smtp': 'http://localhost:3001',
       '/api/contact-inquiry': 'http://localhost:3001',

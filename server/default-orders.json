@@ -1,0 +1,86 @@
+[
+  {
+    "orderNo": "GS-ORD-20261005-3987",
+    "createdAt": "2026-10-05T16:38:00.000Z",
+    "updatedAt": "2026-10-05T16:38:00.000Z",
+    "status": "verifying_payment",
+    "statusNote": "ระบบได้รับหลักฐานการชำระเงินของท่านเรียบร้อยแล้ว เจ้าหน้าที่ฝ่ายการเงินกำลังดำเนินการตรวจสอบยอดเงินในบัญชี (ใช้เวลาประมาณ 5 - 15 นาที)",
+    "customerEmail": "thainthongza@gmail.com",
+    "hasSlipUploaded": true,
+    "paymentMethod": "promptpay_qr",
+    "items": [
+      {
+        "id": "prod-1",
+        "name": "Gspeed Pro Master Ergonomic Gaming Chair",
+        "sku": "GSP-CHR-PROMAX",
+        "color": "Black & GLP Blue (ดำ-น้ำเงิน)",
+        "size": "Standard (ความสูง 155-185 ซม.)",
+        "unitPrice": 5990,
+        "quantity": 3,
+        "totalPrice": 17970,
+        "image": "/uploads/chair-promaster.webp"
+      }
+    ],
+    "pricing": {
+      "subtotal": 17970,
+      "discount": 0,
+      "vat": 1258,
+      "grandTotal": 19228,
+      "amountPaid": 19228,
+      "remainingAmount": 0,
+      "paymentPlan": "full"
+    },
+    "shipping": {
+      "receiverName": "วีระยุทธ เทียนทอง",
+      "phone": "0909762587",
+      "email": "thainthongza@gmail.com",
+      "address": "159/03",
+      "notes": ""
+    },
+    "paymentSlip": {
+      "fileName": "GSPEED-Contractor-Blueprint-12x10m-8121.png",
+      "fileType": "image/png"
+    }
+  },
+  {
+    "orderNo": "GS-ORD-20261005-3093",
+    "createdAt": "2026-10-05T16:07:00.000Z",
+    "updatedAt": "2026-10-05T16:15:00.000Z",
+    "status": "shipping",
+    "statusNote": "พัสดุถูกส่งมอบให้ Kerry Express แล้ว เลขพัสดุ: KEX39260552TH",
+    "customerEmail": "thainthongza@gmail.com",
+    "hasSlipUploaded": true,
+    "shippingCarrier": "Kerry Express",
+    "trackingNumber": "KEX39260552TH",
+    "paymentMethod": "promptpay_qr",
+    "items": [
+      {
+        "id": "prod-1",
+        "name": "Gspeed Pro Master Ergonomic Gaming Chair",
+        "sku": "GSP-CHR-PROMAX",
+        "color": "Black & GLP Blue (ดำ-น้ำเงิน)",
+        "size": "Standard (ความสูง 155-185 ซม.)",
+        "unitPrice": 5990,
+        "quantity": 1,
+        "totalPrice": 5990,
+        "image": "/uploads/chair-promaster.webp"
+      }
+    ],
+    "pricing": {
+      "subtotal": 5990,
+      "discount": 0,
+      "vat": 419,
+      "grandTotal": 6409,
+      "amountPaid": 6409,
+      "remainingAmount": 0,
+      "paymentPlan": "full"
+    },
+    "shipping": {
+      "receiverName": "วีระยุทธ เทียนทอง",
+      "phone": "0909762587",
+      "email": "thainthongza@gmail.com",
+      "address": "159/03",
+      "notes": ""
+    }
+  }
+]

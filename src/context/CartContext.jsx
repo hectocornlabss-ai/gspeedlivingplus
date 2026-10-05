@@ -65,6 +65,50 @@ export function CartProvider({ children }) {
     }
   }, [savedOrders]);
 
+  // Sync orders with central server database (cross-device real-time sync)
+  const syncOrdersWithServer = async () => {
+    try {
+      const res = await fetch('/api/orders');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.orders)) {
+          setSavedOrders(prevLocal => {
+            const map = new Map();
+            // Server orders are ground truth
+            data.orders.forEach(o => o.orderNo && map.set(o.orderNo.toLowerCase(), o));
+            // Keep any local order not yet uploaded and push it to server
+            prevLocal.forEach(o => {
+              if (o.orderNo && !map.has(o.orderNo.toLowerCase())) {
+                map.set(o.orderNo.toLowerCase(), o);
+                fetch('/api/orders', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(o)
+                }).catch(() => {});
+              }
+            });
+            const merged = Array.from(map.values()).sort(
+              (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+            );
+            try {
+              localStorage.setItem('gspeed_saved_orders', JSON.stringify(merged));
+            } catch (e) {}
+            return merged;
+          });
+        }
+      }
+    } catch (err) {
+      console.warn('Orders server sync fallback:', err);
+    }
+  };
+
+  useEffect(() => {
+    syncOrdersWithServer();
+    // Poll every 8 seconds so newly placed orders from phones appear in real time on PC/desktop
+    const interval = setInterval(syncOrdersWithServer, 8000);
+    return () => clearInterval(interval);
+  }, []);
+
   // Add Item to Cart (Default: does NOT open cart, only adds item so customer can select multiple items)
   const addToCart = (product, options = {}, quantity = 1, shouldOpenCart = false) => {
     const selectedColor = options.color || product.colors?.[0] || null;
@@ -234,9 +278,10 @@ export function CartProvider({ children }) {
 
   // Update payment slip for an existing order (Pay Later flow)
   const updateOrderPaymentSlip = (orderNo, slipData) => {
+    let updatedTarget = null;
     setSavedOrders(prev => prev.map(o => {
       if (o.orderNo.toLowerCase() === orderNo.toLowerCase().trim()) {
-        return {
+        updatedTarget = {
           ...o,
           hasSlipUploaded: true,
           slipPreview: slipData.preview || o.slipPreview,
@@ -246,44 +291,76 @@ export function CartProvider({ children }) {
           status: 'verifying_payment',
           statusNote: 'อัปโหลดหลักฐานการชำระเงินแล้ว รอเจ้าหน้าที่ตรวจสอบยอดเงิน'
         };
+        return updatedTarget;
       }
       return o;
     }));
+
+    if (updatedTarget) {
+      fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedTarget)
+      }).catch(err => console.warn('Failed to sync slip to server:', err));
+    }
   };
 
   // Update Order Status (for testing simulation or admin workflow)
   const updateOrderStatus = (orderNo, newStatus, statusNote = '', extraUpdates = {}) => {
+    let updatedTarget = null;
     setSavedOrders(prev => prev.map(o => {
       if (o.orderNo.toLowerCase() === orderNo.toLowerCase().trim()) {
-        return {
+        updatedTarget = {
           ...o,
           status: newStatus,
           statusNote: statusNote !== undefined ? statusNote : o.statusNote || '',
           ...extraUpdates,
           updatedAt: new Date().toISOString()
         };
+        return updatedTarget;
       }
       return o;
     }));
+
+    if (updatedTarget) {
+      fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedTarget)
+      }).catch(err => console.warn('Failed to sync updated order to server:', err));
+    }
   };
 
   // Delete Order (for admin management)
   const deleteOrder = (orderNo) => {
     setSavedOrders(prev => prev.filter(o => o.orderNo.toLowerCase() !== orderNo.toLowerCase().trim()));
+    fetch(`/api/orders/${encodeURIComponent(orderNo)}`, {
+      method: 'DELETE'
+    }).catch(err => console.warn('Failed to delete order from server:', err));
   };
 
   // Update Entire Order Details (WooCommerce-style full order edit)
   const updateOrder = (orderNo, updatedFields) => {
+    let updatedTarget = null;
     setSavedOrders(prev => prev.map(o => {
       if (o.orderNo.toLowerCase() === orderNo.toLowerCase().trim()) {
-        return {
+        updatedTarget = {
           ...o,
           ...updatedFields,
           updatedAt: new Date().toISOString()
         };
+        return updatedTarget;
       }
       return o;
     }));
+
+    if (updatedTarget) {
+      fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedTarget)
+      }).catch(err => console.warn('Failed to sync updated order to server:', err));
+    }
   };
 
   // Create Order
@@ -304,6 +381,13 @@ export function CartProvider({ children }) {
     };
 
     setSavedOrders(prev => [newOrder, ...prev]);
+
+    // Push new order to central server database immediately
+    fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newOrder)
+    }).catch(err => console.warn('Failed to persist order to server:', err));
 
     // If order was generated from cart, clear cart
     clearCart();
