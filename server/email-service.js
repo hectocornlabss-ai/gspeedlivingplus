@@ -850,6 +850,28 @@ function pruneOldBackups(maxKeep = 10) {
 // ==============================================================================
 const ORDERS_FILE = path.join(DATA_DIR, 'orders.json');
 const SEED_ORDERS_FILE = path.join(__dirname, 'default-orders.json');
+const DELETED_ORDERS_FILE = path.join(DATA_DIR, 'deleted-orders.json');
+
+function getDeletedOrderNos() {
+  try {
+    if (fs.existsSync(DELETED_ORDERS_FILE)) {
+      const data = JSON.parse(fs.readFileSync(DELETED_ORDERS_FILE, 'utf8'));
+      if (Array.isArray(data)) return data;
+    }
+  } catch (e) {}
+  return [];
+}
+
+function recordDeletedOrderNo(orderNo) {
+  try {
+    const list = getDeletedOrderNos();
+    const clean = (orderNo || '').toLowerCase().trim();
+    if (clean && !list.includes(clean)) {
+      list.push(clean);
+      fs.writeFileSync(DELETED_ORDERS_FILE, JSON.stringify(list, null, 2), 'utf8');
+    }
+  } catch (e) {}
+}
 
 function getStoredOrders() {
   try {
@@ -858,7 +880,12 @@ function getStoredOrders() {
     }
     if (fs.existsSync(ORDERS_FILE)) {
       const content = fs.readFileSync(ORDERS_FILE, 'utf8');
-      return JSON.parse(content);
+      const list = JSON.parse(content);
+      const deletedNos = getDeletedOrderNos();
+      if (deletedNos.length > 0 && Array.isArray(list)) {
+        return list.filter(o => o.orderNo && !deletedNos.includes(o.orderNo.toLowerCase().trim()));
+      }
+      return list;
     }
   } catch (err) {
     console.warn('[Orders] Read error:', err.message);
@@ -891,7 +918,8 @@ function saveStoredOrders(orders) {
 // GET /api/orders - Fetch all persisted orders across all devices
 app.get('/api/orders', (req, res) => {
   const orders = getStoredOrders();
-  res.json({ success: true, orders, totalCount: orders.length });
+  const deletedOrderNos = getDeletedOrderNos();
+  res.json({ success: true, orders, deletedOrderNos, totalCount: orders.length });
 });
 
 // POST /api/orders - Save or update an order
@@ -902,28 +930,36 @@ app.post('/api/orders', (req, res) => {
       return res.status(400).json({ success: false, error: 'Order data with orderNo is required' });
     }
 
+    const cleanNo = (incoming.orderNo || '').toLowerCase().trim();
+    const deletedNos = getDeletedOrderNos();
     const currentOrders = getStoredOrders();
+
+    // If order was explicitly deleted, reject resurrecting it
+    if (deletedNos.includes(cleanNo)) {
+      return res.json({ success: true, ignored: true, orders: currentOrders });
+    }
+
     const existingIndex = currentOrders.findIndex(
-      o => o.orderNo && o.orderNo.toLowerCase() === incoming.orderNo.toLowerCase()
+      o => o.orderNo && o.orderNo.toLowerCase().trim() === cleanNo
     );
 
     if (existingIndex > -1) {
       currentOrders[existingIndex] = {
         ...currentOrders[existingIndex],
         ...incoming,
-        updatedAt: new Date().toISOString()
+        updatedAt: incoming.updatedAt || new Date().toISOString()
       };
     } else {
       currentOrders.unshift({
         ...incoming,
         createdAt: incoming.createdAt || new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: incoming.updatedAt || new Date().toISOString()
       });
     }
 
     saveStoredOrders(currentOrders);
     console.log(`[Orders] Saved/Updated order: ${incoming.orderNo} (Total: ${currentOrders.length})`);
-    return res.json({ success: true, orders: currentOrders });
+    return res.json({ success: true, orders: currentOrders, deletedOrderNos: deletedNos });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });
   }
@@ -933,12 +969,16 @@ app.post('/api/orders', (req, res) => {
 app.delete('/api/orders/:orderNo', (req, res) => {
   try {
     const { orderNo } = req.params;
+    const cleanNo = (orderNo || '').toLowerCase().trim();
+    recordDeletedOrderNo(cleanNo);
+
     const currentOrders = getStoredOrders();
     const filtered = currentOrders.filter(
-      o => o.orderNo && o.orderNo.toLowerCase() !== orderNo.toLowerCase()
+      o => o.orderNo && o.orderNo.toLowerCase().trim() !== cleanNo
     );
     saveStoredOrders(filtered);
-    return res.json({ success: true, orders: filtered });
+    console.log(`[Orders] Deleted order: ${orderNo} (Remaining: ${filtered.length})`);
+    return res.json({ success: true, orders: filtered, deletedOrderNos: getDeletedOrderNos() });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });
   }

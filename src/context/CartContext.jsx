@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { thaiBahtText } from '../data/equipmentProducts';
 
 const CartContext = createContext(null);
@@ -56,8 +56,10 @@ export function CartProvider({ children }) {
     }
   }, [savedQuotations]);
 
-  // Save orders to localStorage
+  // Save orders to localStorage & maintain live ref for immediate sync
+  const savedOrdersRef = useRef(savedOrders);
   useEffect(() => {
+    savedOrdersRef.current = savedOrders;
     try {
       localStorage.setItem('gspeed_saved_orders', JSON.stringify(savedOrders));
     } catch (e) {
@@ -65,8 +67,11 @@ export function CartProvider({ children }) {
     }
   }, [savedOrders]);
 
-  // Sync orders with central server database (cross-device real-time sync)
+  // Sync orders with central server database (cross-device real-time sync with timestamp conflict resolution)
+  const isSyncingRef = useRef(false);
   const syncOrdersWithServer = async () => {
+    if (isSyncingRef.current) return;
+    isSyncingRef.current = true;
     try {
       const res = await fetch('/api/orders');
       if (res.ok) {
@@ -74,22 +79,56 @@ export function CartProvider({ children }) {
         if (data.success && Array.isArray(data.orders)) {
           setSavedOrders(prevLocal => {
             const map = new Map();
-            // Server orders are ground truth
-            data.orders.forEach(o => o.orderNo && map.set(o.orderNo.toLowerCase(), o));
-            // Keep any local order not yet uploaded and push it to server
-            prevLocal.forEach(o => {
-              if (o.orderNo && !map.has(o.orderNo.toLowerCase())) {
-                map.set(o.orderNo.toLowerCase(), o);
+            const deletedSet = new Set(
+              (Array.isArray(data.deletedOrderNos) ? data.deletedOrderNos : []).map(n => (n || '').toLowerCase().trim())
+            );
+
+            // 1. Populate map with server orders (excluding deleted)
+            data.orders.forEach(srv => {
+              if (srv.orderNo) {
+                const key = srv.orderNo.toLowerCase().trim();
+                if (!deletedSet.has(key)) {
+                  map.set(key, srv);
+                }
+              }
+            });
+
+            // 2. Resolve conflict with local orders based on timestamp
+            prevLocal.forEach(loc => {
+              if (!loc.orderNo) return;
+              const key = loc.orderNo.toLowerCase().trim();
+              if (deletedSet.has(key)) return; // Never resurrect deleted orders
+
+              const srv = map.get(key);
+
+              if (!srv) {
+                // Order exists locally but not on server -> keep local & upload to server
+                map.set(key, loc);
                 fetch('/api/orders', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(o)
+                  body: JSON.stringify(loc)
                 }).catch(() => {});
+              } else {
+                const locTime = new Date(loc.updatedAt || loc.createdAt || 0).getTime();
+                const srvTime = new Date(srv.updatedAt || srv.createdAt || 0).getTime();
+
+                // If local status changed more recently than server, keep local & push to server
+                if (locTime > srvTime) {
+                  map.set(key, loc);
+                  fetch('/api/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(loc)
+                  }).catch(() => {});
+                }
               }
             });
+
             const merged = Array.from(map.values()).sort(
               (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
             );
+            savedOrdersRef.current = merged;
             try {
               localStorage.setItem('gspeed_saved_orders', JSON.stringify(merged));
             } catch (e) {}
@@ -99,6 +138,8 @@ export function CartProvider({ children }) {
       }
     } catch (err) {
       console.warn('Orders server sync fallback:', err);
+    } finally {
+      isSyncingRef.current = false;
     }
   };
 
@@ -277,89 +318,190 @@ export function CartProvider({ children }) {
   };
 
   // Update payment slip for an existing order (Pay Later flow)
-  const updateOrderPaymentSlip = (orderNo, slipData) => {
-    let updatedTarget = null;
-    setSavedOrders(prev => prev.map(o => {
-      if (o.orderNo.toLowerCase() === orderNo.toLowerCase().trim()) {
-        updatedTarget = {
-          ...o,
-          hasSlipUploaded: true,
-          slipPreview: slipData.preview || o.slipPreview,
-          slipFileName: slipData.fileName || o.slipFileName || 'payment_slip',
-          slipFileType: slipData.fileType || o.slipFileType || 'image',
-          slipUploadedAt: new Date().toISOString(),
-          status: 'verifying_payment',
-          statusNote: 'อัปโหลดหลักฐานการชำระเงินแล้ว รอเจ้าหน้าที่ตรวจสอบยอดเงิน'
-        };
-        return updatedTarget;
-      }
-      return o;
-    }));
+  const updateOrderPaymentSlip = async (orderNo, slipData) => {
+    const cleanNo = (orderNo || '').toLowerCase().trim();
+    if (!cleanNo) return;
+    const now = new Date().toISOString();
 
-    if (updatedTarget) {
-      fetch('/api/orders', {
+    let target = (savedOrdersRef.current || []).find(o => (o.orderNo || '').toLowerCase().trim() === cleanNo);
+    const updatedOrder = target ? {
+      ...target,
+      hasSlipUploaded: true,
+      slipPreview: slipData.preview || target.slipPreview,
+      slipFileName: slipData.fileName || target.slipFileName || 'payment_slip',
+      slipFileType: slipData.fileType || target.slipFileType || 'image',
+      slipUploadedAt: now,
+      status: 'verifying_payment',
+      statusNote: 'อัปโหลดหลักฐานการชำระเงินแล้ว รอเจ้าหน้าที่ตรวจสอบยอดเงิน',
+      updatedAt: now
+    } : {
+      orderNo,
+      hasSlipUploaded: true,
+      slipPreview: slipData.preview,
+      slipFileName: slipData.fileName || 'payment_slip',
+      slipFileType: slipData.fileType || 'image',
+      slipUploadedAt: now,
+      status: 'verifying_payment',
+      statusNote: 'อัปโหลดหลักฐานการชำระเงินแล้ว รอเจ้าหน้าที่ตรวจสอบยอดเงิน',
+      updatedAt: now
+    };
+
+    setSavedOrders(prev => {
+      const idx = prev.findIndex(o => (o.orderNo || '').toLowerCase().trim() === cleanNo);
+      const next = idx > -1 ? [...prev] : [updatedOrder, ...prev];
+      if (idx > -1) next[idx] = updatedOrder;
+      savedOrdersRef.current = next;
+      try { localStorage.setItem('gspeed_saved_orders', JSON.stringify(next)); } catch (e) {}
+      return next;
+    });
+
+    try {
+      const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedTarget)
-      }).catch(err => console.warn('Failed to sync slip to server:', err));
+        body: JSON.stringify(updatedOrder)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.orders)) {
+          setSavedOrders(data.orders);
+          savedOrdersRef.current = data.orders;
+          try { localStorage.setItem('gspeed_saved_orders', JSON.stringify(data.orders)); } catch (e) {}
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to sync slip to server:', err);
     }
   };
 
   // Update Order Status (for testing simulation or admin workflow)
-  const updateOrderStatus = (orderNo, newStatus, statusNote = '', extraUpdates = {}) => {
-    let updatedTarget = null;
-    setSavedOrders(prev => prev.map(o => {
-      if (o.orderNo.toLowerCase() === orderNo.toLowerCase().trim()) {
-        updatedTarget = {
-          ...o,
-          status: newStatus,
-          statusNote: statusNote !== undefined ? statusNote : o.statusNote || '',
-          ...extraUpdates,
-          updatedAt: new Date().toISOString()
-        };
-        return updatedTarget;
-      }
-      return o;
-    }));
+  const updateOrderStatus = async (orderNo, newStatus, statusNote = '', extraUpdates = {}) => {
+    const cleanNo = (orderNo || '').toLowerCase().trim();
+    if (!cleanNo) return;
+    const now = new Date().toISOString();
 
-    if (updatedTarget) {
-      fetch('/api/orders', {
+    let target = (savedOrdersRef.current || []).find(o => (o.orderNo || '').toLowerCase().trim() === cleanNo);
+    if (!target) {
+      try {
+        const raw = localStorage.getItem('gspeed_saved_orders');
+        const parsed = raw ? JSON.parse(raw) : [];
+        target = parsed.find(o => (o.orderNo || '').toLowerCase().trim() === cleanNo);
+      } catch (e) {}
+    }
+
+    const updatedOrder = target ? {
+      ...target,
+      status: newStatus,
+      statusNote: statusNote !== undefined ? statusNote : target.statusNote || '',
+      ...extraUpdates,
+      updatedAt: now
+    } : {
+      orderNo,
+      status: newStatus,
+      statusNote,
+      ...extraUpdates,
+      updatedAt: now
+    };
+
+    // 1. Immediately update state, ref, and localStorage synchronously
+    setSavedOrders(prev => {
+      const idx = prev.findIndex(o => (o.orderNo || '').toLowerCase().trim() === cleanNo);
+      const next = idx > -1 ? [...prev] : [updatedOrder, ...prev];
+      if (idx > -1) next[idx] = updatedOrder;
+      savedOrdersRef.current = next;
+      try { localStorage.setItem('gspeed_saved_orders', JSON.stringify(next)); } catch (e) {}
+      return next;
+    });
+
+    // 2. Guaranteed immediate POST to server
+    try {
+      const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedTarget)
-      }).catch(err => console.warn('Failed to sync updated order to server:', err));
+        body: JSON.stringify(updatedOrder)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.orders)) {
+          setSavedOrders(data.orders);
+          savedOrdersRef.current = data.orders;
+          try { localStorage.setItem('gspeed_saved_orders', JSON.stringify(data.orders)); } catch (e) {}
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to sync updated order to server:', err);
     }
   };
 
   // Delete Order (for admin management)
-  const deleteOrder = (orderNo) => {
-    setSavedOrders(prev => prev.filter(o => o.orderNo.toLowerCase() !== orderNo.toLowerCase().trim()));
-    fetch(`/api/orders/${encodeURIComponent(orderNo)}`, {
-      method: 'DELETE'
-    }).catch(err => console.warn('Failed to delete order from server:', err));
+  const deleteOrder = async (orderNo) => {
+    const cleanNo = (orderNo || '').toLowerCase().trim();
+    setSavedOrders(prev => {
+      const next = prev.filter(o => (o.orderNo || '').toLowerCase().trim() !== cleanNo);
+      savedOrdersRef.current = next;
+      try { localStorage.setItem('gspeed_saved_orders', JSON.stringify(next)); } catch (e) {}
+      return next;
+    });
+
+    try {
+      const res = await fetch(`/api/orders/${encodeURIComponent(orderNo)}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.orders)) {
+          setSavedOrders(data.orders);
+          savedOrdersRef.current = data.orders;
+          try { localStorage.setItem('gspeed_saved_orders', JSON.stringify(data.orders)); } catch (e) {}
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to delete order from server:', err);
+    }
   };
 
   // Update Entire Order Details (WooCommerce-style full order edit)
-  const updateOrder = (orderNo, updatedFields) => {
-    let updatedTarget = null;
-    setSavedOrders(prev => prev.map(o => {
-      if (o.orderNo.toLowerCase() === orderNo.toLowerCase().trim()) {
-        updatedTarget = {
-          ...o,
-          ...updatedFields,
-          updatedAt: new Date().toISOString()
-        };
-        return updatedTarget;
-      }
-      return o;
-    }));
+  const updateOrder = async (orderNo, updatedFields) => {
+    const cleanNo = (orderNo || '').toLowerCase().trim();
+    if (!cleanNo) return;
+    const now = new Date().toISOString();
 
-    if (updatedTarget) {
-      fetch('/api/orders', {
+    let target = (savedOrdersRef.current || []).find(o => (o.orderNo || '').toLowerCase().trim() === cleanNo);
+    const updatedOrder = target ? {
+      ...target,
+      ...updatedFields,
+      updatedAt: now
+    } : {
+      orderNo,
+      ...updatedFields,
+      updatedAt: now
+    };
+
+    setSavedOrders(prev => {
+      const idx = prev.findIndex(o => (o.orderNo || '').toLowerCase().trim() === cleanNo);
+      const next = idx > -1 ? [...prev] : [updatedOrder, ...prev];
+      if (idx > -1) next[idx] = updatedOrder;
+      savedOrdersRef.current = next;
+      try { localStorage.setItem('gspeed_saved_orders', JSON.stringify(next)); } catch (e) {}
+      return next;
+    });
+
+    try {
+      const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedTarget)
-      }).catch(err => console.warn('Failed to sync updated order to server:', err));
+        body: JSON.stringify(updatedOrder)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.orders)) {
+          setSavedOrders(data.orders);
+          savedOrdersRef.current = data.orders;
+          try { localStorage.setItem('gspeed_saved_orders', JSON.stringify(data.orders)); } catch (e) {}
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to sync updated order to server:', err);
     }
   };
 
@@ -374,13 +516,19 @@ export function CartProvider({ children }) {
       ...orderPayload,
       orderNo,
       createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       status: orderPayload.hasSlipUploaded ? 'verifying_payment' : 'order_received',
       statusNote: orderPayload.hasSlipUploaded 
         ? 'อัปโหลดสลิปแล้ว กำลังรอเจ้าหน้าที่ตรวจสอบยอดเงิน'
         : 'รับคำสั่งซื้อแล้ว รอชำระเงินและแนบสลิปหลักฐาน'
     };
 
-    setSavedOrders(prev => [newOrder, ...prev]);
+    setSavedOrders(prev => {
+      const next = [newOrder, ...prev];
+      savedOrdersRef.current = next;
+      try { localStorage.setItem('gspeed_saved_orders', JSON.stringify(next)); } catch (e) {}
+      return next;
+    });
 
     // Push new order to central server database immediately
     fetch('/api/orders', {
